@@ -1,0 +1,1 @@
+// sever component only detach clinet side logic -- add suspese here 
