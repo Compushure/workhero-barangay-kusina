@@ -12,10 +12,8 @@ import {
   addUserAction,
   editUserAction,
   deleteUserAction,
-  type User,
-  type AddUserInput,
-  type EditUserInput,
 } from '@/actions/manage'
+import { type User, type AddUserInput, type EditUserInput } from '@/types'
 import { toast } from 'sonner'
 
 /**
