@@ -8,15 +8,10 @@
 'use client'
 
 import { useAuth } from '@/lib/auth-context'
-import { LoginPage } from '@/components/auth/login-page'
+
 import { ManagerPage } from '@/components/admin/manager-page'
+import { protectRoute } from '@/actions/auth'
 
 export function ManageClient() {
-  const { isAuthenticated } = useAuth()
-
-  if (!isAuthenticated) {
-    return <LoginPage />
-  }
-
   return <ManagerPage />
 }

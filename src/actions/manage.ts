@@ -9,70 +9,32 @@
 
 'use server'
 
+import { createClient } from '@/lib/supabase/server'
 import type { ServerActionResponse } from '@/lib/utils/safe-action'
 import { type User, type AddUserInput, type EditUserInput } from '@/types'
 import { addUserSchema, editUserSchema } from '@/zod/schemas'
-// TODO: Uncomment when Supabase is configured
-// import { createSupabaseClient } from '@/lib/supabase/server'
 
-// ============================================
-// User Management Actions
-// ============================================
-
-/**
- * Fetches all users from the database
- * @returns Array of User objects
- *
- * TODO: Replace with Supabase query
- */
 export async function fetchUsersAction(): Promise<User[]> {
-  // ============================================
-  // TODO: Supabase Query
-  // ============================================
-  // const supabase = await createSupabaseClient()
-  // const { data, error } = await supabase
-  //   .from('users')
-  //   .select('*')
-  //   .order('created_at', { ascending: false })
-  //
-  // if (error) throw new Error('Error fetching users: ' + error.message)
-  // return data.map(u => ({
-  //   id: u.id,
-  //   name: u.name,
-  //   email: u.email,
-  //   password: u.password,
-  //   employeeType: u.employee_type,
-  //   createdAt: new Date(u.created_at),
-  // }))
-  // ============================================
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('user_role_attribute')
+    .select('user_id, user_name, user_email, role_type, user_date_added')
+    .order('user_date_added', { ascending: false })
 
-  // PLACEHOLDER: Return demo data
-  return [
-    {
-      id: '1',
-      name: 'John Manager',
-      email: 'john@company.com',
-      password: 'hashed_password',
-      employeeType: 'manager',
-      createdAt: new Date('2024-01-15'),
-    },
-    {
-      id: '2',
-      name: 'Sarah HR',
-      email: 'sarah@company.com',
-      password: 'hashed_password',
-      employeeType: 'hr',
-      createdAt: new Date('2024-02-20'),
-    },
-    {
-      id: '3',
-      name: 'Mike Regular',
-      email: 'mike@company.com',
-      password: 'hashed_password',
-      employeeType: 'regular',
-      createdAt: new Date('2024-03-10'),
-    },
-  ]
+  if (error || !data) {
+    throw new Error('Error fetching users: ' + error.message)
+  } else {
+    const users = data.map((u) => {
+      return {
+        id: u.user_id,
+        name: u.user_name,
+        email: u.user_email,
+        employeeType: u.role_type,
+        createdAt: new Date(u.user_date_added),
+      }
+    })
+    return users
+  }
 }
 
 /**
@@ -155,6 +117,7 @@ export async function editUserAction(
   input: EditUserInput
 ): Promise<ServerActionResponse<User>> {
   // Validate input
+  const supabase = await createClient()
   const parsed = editUserSchema.safeParse(input)
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message || 'Invalid input' }
@@ -162,6 +125,22 @@ export async function editUserAction(
 
   const { name, password, employeeType } = parsed.data
 
+  const { data, error } = await supabase.rpc(
+    'rrpc_update_user_name_and_assign_role',
+    {
+      p_user_id: userId,
+
+      p_new_name: input.name,
+
+      p_new_role_type: input.employeeType,
+    }
+  )
+
+  if (error) {
+    return { error: 'Failed to update user: ' + error.message }
+  }
+  return { error: null, data: data as User }
+  // com
   // ============================================
   // TODO: Supabase User Update
   // ============================================
@@ -189,16 +168,16 @@ export async function editUserAction(
   // ============================================
 
   // PLACEHOLDER: Return updated demo user
-  const updatedUser: User = {
-    id: userId,
-    name,
-    email: 'user@company.com', // Would come from DB
-    password: password ? 'hashed_' + password : 'hashed_existing',
-    employeeType,
-    createdAt: new Date(),
-  }
+  // const updatedUser: User = {
+  //   id: userId,
+  //   name,
+  //   email: 'user@company.com', // Would come from DB
+  //   password: password ? 'hashed_' + password : 'hashed_existing',
+  //   employeeType,
+  //   createdAt: new Date(),
+  // }
 
-  return { error: null, data: updatedUser }
+  // return { error: null, data: updatedUser }
 }
 
 /**

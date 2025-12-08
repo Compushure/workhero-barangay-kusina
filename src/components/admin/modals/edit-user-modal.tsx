@@ -10,8 +10,8 @@
 import { useTransition, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import type { User, EditUserInput, EmployeeTypeValue } from '@/types'
+import { editUserSchema } from '@/zod/schemas'
 import {
   Dialog,
   DialogContent,
@@ -30,19 +30,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { UserIcon, Lock, Briefcase, Mail } from 'lucide-react'
-
-const EditUserSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  password: z
-    .string()
-    .optional()
-    .refine(
-      (val) =>
-        !val || (val.length >= 8 && /[A-Z]/.test(val) && /[0-9]/.test(val)),
-      'Password must be 8+ chars with 1 uppercase and 1 number'
-    ),
-  employeeType: z.enum(['manager', 'hr', 'regular']),
-})
 
 interface EditUserModalProps {
   open: boolean
@@ -73,7 +60,7 @@ export function EditUserModal({
     reset,
     formState: { errors },
   } = useForm<EditUserInput>({
-    resolver: zodResolver(EditUserSchema),
+    resolver: zodResolver(editUserSchema),
     defaultValues: {
       name: user.name,
       password: '',
