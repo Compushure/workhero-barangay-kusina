@@ -9,21 +9,11 @@
 
 'use server'
 
-import { z } from 'zod'
 import type { ServerActionResponse } from '@/lib/utils/safe-action'
+import { type LoginInput } from '@/types'
+import { loginSchema } from '@/zod/schemas'
 // TODO: Uncomment when Supabase is configured
 // import { createSupabaseClient } from '@/lib/supabase/server'
-
-// ============================================
-// Schema Definitions
-// ============================================
-
-const loginSchema = z.object({
-  email: z.email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-})
-
-export type LoginInput = z.infer<typeof loginSchema>
 
 // ============================================
 // Auth Actions
