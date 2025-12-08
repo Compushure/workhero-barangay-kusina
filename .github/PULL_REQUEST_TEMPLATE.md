@@ -17,11 +17,5 @@ Part of [Linear Issue ID](INSERT_ISSUE_LINK_HERE)
 | ------ | ----- |
 | [Image] | [Image] |
 
-## 🧪 How to Test
-1. Log in as a [Kusinero / Manager / HR]
-2. Navigate to ...
-3. Click on ...
-4. Verify that ...
-
 
 ## 💬 Additional Notes
