@@ -41,7 +41,7 @@ const EMPLOYEE_TYPES = [
   { value: 'manager', label: 'Manager' },
   { value: 'hr', label: 'HR' },
   { value: 'regular', label: 'Regular' },
-] as const
+] as const 
 
 export function AddUserModal({
   open,

@@ -108,8 +108,8 @@ export function AdminLoginPage() {
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
-              Demo: tonilegayada@gmail.com / admin (change to compushure email
-              soon)
+              Demo: tonilegayada@gmail.com / pass:admin123 (change to compushure
+              email soon)
             </p>
           </form>
         </CardContent>

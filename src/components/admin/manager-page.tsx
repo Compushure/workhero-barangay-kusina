@@ -77,7 +77,7 @@ export function ManagerPage() {
                   data.employeeType && data.employeeType !== 'no-change'
                     ? data.employeeType
                     : u.employeeType,
-                password: data.password || u.password,
+                password: '',
               }
             : u
         )

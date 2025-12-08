@@ -35,10 +35,8 @@ export const editUserSchema = z.object({
   password: z
     .string()
     .optional()
-    .refine(
-      (val) =>
-        !val || (val.length >= 8 && /[A-Z]/.test(val) && /[0-9]/.test(val)),
-      'Password must be 8+ chars with 1 uppercase and 1 number'
-    ),
-  employeeType: z.enum(['manager', 'hr', 'regular', 'no-change']).optional(),
+    .refine((val) => !val || val.length >= 6, 'Password must be 6+ chars '),
+  employeeType: z
+    .enum(['manager', 'hr', 'regular', 'no-change', ''])
+    .optional(),
 })
