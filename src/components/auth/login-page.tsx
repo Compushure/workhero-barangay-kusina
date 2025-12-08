@@ -9,10 +9,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useAuth } from '@/lib/auth-context'
 import { toast } from 'sonner'
 import {
   Card,
@@ -25,36 +21,23 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Lock, Mail, Shield } from 'lucide-react'
+import { handleLoginSubmit } from '@/action-handlers/auth'
+import { useRouter } from 'next/navigation'
 
-const LoginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-})
-
-type LoginInput = z.infer<typeof LoginSchema>
-
-export function LoginPage() {
-  const { login } = useAuth()
+export function AdminLoginPage() {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(LoginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  })
-
-  const onSubmit = (data: LoginInput) => {
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     setError(null)
+
+    const formData = new FormData(e.currentTarget)
+
     startTransition(async () => {
-      const success = await login(data.email, data.password)
-      if (!success) {
+      const { error } = await handleLoginSubmit(formData)
+      if (error) {
         setError('Invalid email or password')
         toast.error('Login Failed', {
           description: 'Invalid email or password. Please try again.',
@@ -63,6 +46,7 @@ export function LoginPage() {
         toast.success('Welcome!', {
           description: 'You have successfully logged in.',
         })
+        router.push('/admin/manage')
       }
     })
   }
@@ -80,25 +64,21 @@ export function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={onSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="admin@company.com"
                   className="pl-10"
                   disabled={isPending}
-                  {...register('email')}
+                  required
                 />
               </div>
-              {errors.email && (
-                <p className="text-sm text-destructive">
-                  {errors.email.message}
-                </p>
-              )}
             </div>
 
             <div className="space-y-2">
@@ -107,18 +87,14 @@ export function LoginPage() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="Enter your password"
                   className="pl-10"
                   disabled={isPending}
-                  {...register('password')}
+                  required
                 />
               </div>
-              {errors.password && (
-                <p className="text-sm text-destructive">
-                  {errors.password.message}
-                </p>
-              )}
             </div>
 
             {error && (
@@ -132,7 +108,8 @@ export function LoginPage() {
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
-              Demo: admin@company.com / Admin123!
+              Demo: tonilegayada@gmail.com / admin (change to compushure email
+              soon)
             </p>
           </form>
         </CardContent>

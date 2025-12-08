@@ -1,19 +1,6 @@
-/**
- * Auth Action Handlers (Client-side)
- * ====================================
- * Client-side wrappers for auth server actions.
- * Provides a clean interface between UI components and server actions.
- * Uses safeAction wrapper for consistent error handling.
- */
-
 import { safeAction } from '@/lib/utils/safe-action'
-import { signinAction, signOutAction, fetchUserSession } from '@/actions/auth'
+import { signinAction, signOutAction } from '@/actions/auth'
 
-/**
- * Handles login form submission
- * @param formData - Form data with email and password
- * @returns Object with error message if failed, null if successful
- */
 export async function handleLoginSubmit(
   formData: FormData
 ): Promise<{ error: string | null }> {
@@ -23,7 +10,6 @@ export async function handleLoginSubmit(
     return { error: result.error }
   }
 
-  // Server action returns its own error format
   if (result.data?.error) {
     return { error: result.data.error }
   }
@@ -31,11 +17,7 @@ export async function handleLoginSubmit(
   return { error: null }
 }
 
-/**
- * Handles user logout
- * @returns Object with error message if failed, null if successful
- */
-export async function handleLogout(): Promise<{ error: string | null }> {
+export async function handleSignOut(): Promise<{ error: string | null }> {
   const result = await safeAction(() => signOutAction())
 
   if (!result.success) {
@@ -47,13 +29,4 @@ export async function handleLogout(): Promise<{ error: string | null }> {
   }
 
   return { error: null }
-}
-
-/**
- * Checks if user has an active session
- * @returns Session object or null
- */
-export async function checkSession() {
-  const result = await safeAction(() => fetchUserSession())
-  return result.success ? result.data : null
 }

@@ -25,9 +25,12 @@ import { EditUserModal } from './modals/edit-user-modal'
 import { DeleteUserModal } from './modals/delete-user-modal'
 import { UserPlus, LogOut, ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { handleSignOut } from '@/action-handlers/auth'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 export function ManagerPage() {
-  const { logout } = useAuth()
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
   const [users, setUsers] = useState<User[]>([])
@@ -69,8 +72,11 @@ export function ManagerPage() {
           u.id === userId
             ? {
                 ...u,
-                name: data.name,
-                employeeType: data.employeeType,
+                name: data.name || u.name,
+                employeeType:
+                  data.employeeType && data.employeeType !== 'no-change'
+                    ? data.employeeType
+                    : u.employeeType,
                 password: data.password || u.password,
               }
             : u
@@ -105,7 +111,14 @@ export function ManagerPage() {
 
   const handleLogout = () => {
     startTransition(async () => {
-      await logout()
+      const { error } = await handleSignOut()
+      if (!error) {
+        router.push('/admin')
+
+        toast.success('Logged out', {
+          description: 'You have successfully logged out.',
+        })
+      }
     })
   }
 

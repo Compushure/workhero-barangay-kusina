@@ -7,6 +7,7 @@
 
 import { Suspense } from 'react'
 import { ManageClient } from '@/components/admin/manage-client'
+import { protectRoute } from '@/actions/auth'
 
 function LoadingFallback() {
   return (
@@ -21,7 +22,8 @@ function LoadingFallback() {
   )
 }
 
-export default function Manage() {
+export default async function Manage() {
+    await protectRoute()
   return (
     <Suspense fallback={<LoadingFallback />}>
       <ManageClient />

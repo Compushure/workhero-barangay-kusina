@@ -10,8 +10,8 @@
 import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import type { AddUserInput, EmployeeTypeValue } from '@/types'
+import { addUserSchema } from '@/zod/schemas'
 import {
   Dialog,
   DialogContent,
@@ -30,17 +30,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { User, Mail, Lock, Briefcase } from 'lucide-react'
-
-const AddUserSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  email: z.string().email('Invalid email address').max(255),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
-    .regex(/[0-9]/, 'Must contain at least one number'),
-  employeeType: z.enum(['manager', 'hr', 'regular']),
-})
 
 interface AddUserModalProps {
   open: boolean
@@ -69,7 +58,7 @@ export function AddUserModal({
     reset,
     formState: { errors },
   } = useForm<AddUserInput>({
-    resolver: zodResolver(AddUserSchema),
+    resolver: zodResolver(addUserSchema),
     defaultValues: {
       name: '',
       email: '',

@@ -18,7 +18,7 @@ import {
 } from 'react'
 import {
   handleLoginSubmit,
-  handleLogout as handleLogoutAction,
+  // handleLogout as handleLogoutAction,
 } from '@/action-handlers/auth'
 // TODO: Import Supabase client when ready
 // import { createClient } from "@/lib/supabase/client"
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async (): Promise<void> => {
     setIsLoading(true)
-    await handleLogoutAction()
+    // await handleLogoutAction()
     setUser(null)
     setIsAuthenticated(false)
     setIsLoading(false)
