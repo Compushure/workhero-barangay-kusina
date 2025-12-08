@@ -72,8 +72,11 @@ export function ManagerPage() {
           u.id === userId
             ? {
                 ...u,
-                name: data.name,
-                employeeType: data.employeeType,
+                name: data.name || u.name,
+                employeeType:
+                  data.employeeType && data.employeeType !== 'no-change'
+                    ? data.employeeType
+                    : u.employeeType,
                 password: data.password || u.password,
               }
             : u

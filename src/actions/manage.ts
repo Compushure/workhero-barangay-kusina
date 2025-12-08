@@ -11,8 +11,12 @@
 
 import { createClient } from '@/lib/supabase/server'
 import type { ServerActionResponse } from '@/lib/utils/safe-action'
-import { type User, type AddUserInput, type EditUserInput } from '@/types'
+import type { User, AddUserInput, EditUserInput } from '@/types'
 import { addUserSchema, editUserSchema } from '@/zod/schemas'
+
+// ============================================
+// User Management Actions
+// ============================================
 
 export async function fetchUsersAction(): Promise<User[]> {
   const supabase = await createClient()
@@ -126,7 +130,7 @@ export async function editUserAction(
   const { name, password, employeeType } = parsed.data
 
   const { data, error } = await supabase.rpc(
-    'rrpc_update_user_name_and_assign_role',
+    'rpc_update_user_name_and_assign_role',
     {
       p_user_id: userId,
 

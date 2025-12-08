@@ -3,6 +3,7 @@
  * ==========================
  * Dialog modal for editing existing users.
  * Email is read-only; allows updating name, password, and employee type.
+ * All fields are optional - blank fields will not be updated.
  */
 
 'use client'
@@ -62,19 +63,19 @@ export function EditUserModal({
   } = useForm<EditUserInput>({
     resolver: zodResolver(editUserSchema),
     defaultValues: {
-      name: user.name,
+      name: '',
       password: '',
-      employeeType: user.employeeType,
+      employeeType: 'no-change',
     },
   })
 
-  // Reset form when user changes
+  // Reset form when modal opens/user changes
   useEffect(() => {
     if (open) {
       reset({
-        name: user.name,
+        name: '',
         password: '',
-        employeeType: user.employeeType,
+        employeeType: 'no-change',
       })
     }
   }, [user, open, reset])
@@ -86,13 +87,16 @@ export function EditUserModal({
     })
   }
 
+  const selectedType = watch('employeeType')
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-md mx-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>
-            Update user information (email cannot be changed)
+            Leave fields blank to keep current values. Only filled fields will
+            be updated.
           </DialogDescription>
         </DialogHeader>
 
@@ -100,19 +104,34 @@ export function EditUserModal({
         <div className="p-3 bg-muted rounded-lg flex items-center gap-3">
           <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
           <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">Email (read-only)</p>
+            <p className="text-xs text-muted-foreground">
+              Email (cannot be changed)
+            </p>
             <p className="text-sm font-medium truncate">{user.email}</p>
           </div>
         </div>
 
+        <div className="p-3 bg-muted/50 rounded-lg text-sm space-y-1">
+          <p className="text-xs text-muted-foreground font-medium">
+            Current Values:
+          </p>
+          <p>
+            <span className="text-muted-foreground">Name:</span> {user.name}
+          </p>
+          <p>
+            <span className="text-muted-foreground">Role:</span>{' '}
+            {user.employeeType}
+          </p>
+        </div>
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="edit-name">Name</Label>
+            <Label htmlFor="edit-name">New Name (optional)</Label>
             <div className="relative">
               <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="edit-name"
-                placeholder="Enter user name"
+                placeholder={`Current: ${user.name}`}
                 className="pl-10"
                 disabled={isPending}
                 {...register('name')}
@@ -144,21 +163,27 @@ export function EditUserModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-type">Employee Type</Label>
+            <Label htmlFor="edit-type">New Role (optional)</Label>
             <Select
-              value={watch('employeeType')}
-              onValueChange={(value: EmployeeTypeValue) =>
-                setValue('employeeType', value)
+              value={selectedType || 'no-change'}
+              onValueChange={(value) =>
+                setValue(
+                  'employeeType',
+                  value as EmployeeTypeValue | 'no-change'
+                )
               }
               disabled={isPending}
             >
               <SelectTrigger id="edit-type">
                 <div className="flex items-center gap-2">
                   <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Select employee type" />
+                  <SelectValue placeholder={`Current: ${user.employeeType}`} />
                 </div>
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="no-change">
+                  No change (keep current)
+                </SelectItem>
                 {EMPLOYEE_TYPES.map((type) => (
                   <SelectItem key={type.value} value={type.value}>
                     {type.label}

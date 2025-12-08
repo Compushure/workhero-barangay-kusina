@@ -25,7 +25,13 @@ export const addUserSchema = z.object({
  * Schema for editing an existing user
  */
 export const editUserSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
+  name: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || val.length >= 2,
+      'Name must be at least 2 characters if provided'
+    ),
   password: z
     .string()
     .optional()
@@ -34,5 +40,5 @@ export const editUserSchema = z.object({
         !val || (val.length >= 8 && /[A-Z]/.test(val) && /[0-9]/.test(val)),
       'Password must be 8+ chars with 1 uppercase and 1 number'
     ),
-  employeeType: EmployeeType,
+  employeeType: z.enum(['manager', 'hr', 'regular', 'no-change']).optional(),
 })
