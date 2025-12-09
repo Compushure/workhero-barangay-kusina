@@ -116,7 +116,10 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground">Date Created</p>
                   <p className="text-sm font-medium">
-                    {format(new Date(user.createdAt), 'PPP')}
+                    {user.date_added &&
+                    !Number.isNaN(user.date_added.getTime?.())
+                      ? format(user.date_added, 'PPP')
+                      : Date.now().toString()}
                   </p>
                 </div>
               </div>

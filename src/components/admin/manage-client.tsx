@@ -7,10 +7,7 @@
 
 'use client'
 
-import { useAuth } from '@/lib/auth-context'
-
 import { ManagerPage } from '@/components/admin/manager-page'
-import { protectRoute } from '@/actions/auth'
 
 export function ManageClient() {
   return <ManagerPage />

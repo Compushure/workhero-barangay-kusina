@@ -3,19 +3,19 @@
  * =================================
  * Main user management interface with CRUD operations.
  * Displays user list with add/edit/delete capabilities via modals.
- * Uses action handlers for all data operations and useTransition for smooth UX.
+ * Uses TanStack Query for server state management and optimistic updates.
  */
 
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition } from 'react'
 import { useAuth } from '@/lib/auth-context'
+import { useGetUsers } from '@/hooks/tanstack/queries/userQueries'
 import {
-  handleFetchUsers,
-  handleAddUser,
-  handleEditUser,
-  handleDeleteUser,
-} from '@/action-handlers/manage'
+  useAddUser,
+  useEditUser,
+  useDeleteUser,
+} from '@/hooks/tanstack/mutations/userMutations'
 import type { User, AddUserInput, EditUserInput } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -33,29 +33,25 @@ export function ManagerPage() {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
-  const [users, setUsers] = useState<User[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  // TanStack Query hooks for server state
+  const { data: users = [], isLoading, error } = useGetUsers()
+  const addUserMutation = useAddUser()
+  const editUserMutation = useEditUser()
+  const deleteUserMutation = useDeleteUser()
 
+  // Local UI state
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
-  useEffect(() => {
-    const loadUsers = async () => {
-      setIsLoading(true)
-      const fetchedUsers = await handleFetchUsers()
-      setUsers(fetchedUsers)
-      setIsLoading(false)
-    }
-    loadUsers()
-  }, [])
-
+  // CRUD handlers using TanStack Query mutations
   const onAddUser = async (data: AddUserInput): Promise<void> => {
-    const newUser = await handleAddUser(data)
-    if (newUser) {
-      setUsers((prev) => [newUser, ...prev])
-    }
+    addUserMutation.mutate(data, {
+      onSuccess: () => {
+        setAddModalOpen(false)
+      },
+    })
   }
 
   const onEditUser = async (
@@ -65,38 +61,40 @@ export function ManagerPage() {
     const currentUser = users.find((u) => u.id === userId)
     if (!currentUser) return false
 
-    const updatedUser = await handleEditUser(userId, data, currentUser.name)
-    if (updatedUser) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === userId
-            ? {
-                ...u,
-                name: data.name || u.name,
-                employeeType:
-                  data.employeeType && data.employeeType !== 'no-change'
-                    ? data.employeeType
-                    : u.employeeType,
-                password: '',
-              }
-            : u
-        )
+    return new Promise((resolve) => {
+      editUserMutation.mutate(
+        { userId, data, userName: currentUser.name },
+        {
+          onSuccess: () => {
+            setEditModalOpen(false)
+            resolve(true)
+          },
+          onError: () => {
+            resolve(false)
+          },
+        }
       )
-      return true
-    }
-    return false
+    })
   }
 
   const onDeleteUser = async (): Promise<boolean> => {
     if (!selectedUser) return false
 
-    const success = await handleDeleteUser(selectedUser.id, selectedUser.name)
-    if (success) {
-      setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id))
-      setSelectedUser(null)
-      return true
-    }
-    return false
+    return new Promise((resolve) => {
+      deleteUserMutation.mutate(
+        { userId: selectedUser.id, userName: selectedUser.name },
+        {
+          onSuccess: () => {
+            setDeleteModalOpen(false)
+            setSelectedUser(null)
+            resolve(true)
+          },
+          onError: () => {
+            resolve(false)
+          },
+        }
+      )
+    })
   }
 
   const handleEditClick = (user: User) => {
@@ -165,6 +163,11 @@ export function ManagerPage() {
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
+        ) : error ? (
+          <Card className="p-8 sm:p-12 text-center">
+            <p className="text-destructive mb-4">Failed to load users</p>
+            <p className="text-sm text-muted-foreground">{error.message}</p>
+          </Card>
         ) : users.length === 0 ? (
           <Card className="p-8 sm:p-12 text-center">
             <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">

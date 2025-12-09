@@ -15,7 +15,7 @@ export async function getUserRole() {
   }
 }
 
-export async function protectRoute() {
+export async function protectAdminRoute() {
   const supabase = await createClient()
   const { data: claimsData, error: claimsError } =
     await supabase.auth.getClaims()
@@ -31,6 +31,12 @@ export async function protectRoute() {
         console.log('No active session found.')
       }
       redirect('/admin')
+    } else {
+      const role = claimsData?.claims?.app_metadata?.user_role
+      if (role.trim() != 'superadmin') {
+        console.log('Unauthorized access attempt by user with role:', role)
+        redirect('/admin')
+      }
     }
     // custom claim is usually under app_metadata
     const role = claimsData?.claims?.app_metadata?.user_role

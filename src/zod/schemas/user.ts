@@ -15,9 +15,9 @@ export const addUserSchema = z.object({
   email: z.string().email('Invalid email address').max(255),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
-    .regex(/[0-9]/, 'Must contain at least one number'),
+    .min(6, 'Password must be at least 6 characters')
+    .max(100),
+
   employeeType: EmployeeType,
 })
 
