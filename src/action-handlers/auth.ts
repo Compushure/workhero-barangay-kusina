@@ -1,6 +1,5 @@
 import { safeAction } from '@/lib/utils/safe-action'
 import { signinAction, signOutAction, checkAdminAccess } from '@/actions/auth'
-import { toast } from 'sonner'
 
 /**
  * Handles login form submission with validation
@@ -43,7 +42,7 @@ export async function handleSignOut(): Promise<{ error: string | null }> {
 
 /**
  * Checks if user has admin access (superadmin only)
- * Shows toast notification if access is denied
+ * Note: Toast is shown by ProtectedRoute component, not here
  * @returns Object with { authorized: boolean, role: string | null, error: string | null }
  */
 export async function handleCheckAdminAccess(): Promise<{
@@ -55,7 +54,6 @@ export async function handleCheckAdminAccess(): Promise<{
 
   if (!result.success) {
     const errorMsg = 'Failed to verify admin access'
-    toast.error(errorMsg)
     return {
       authorized: false,
       role: null,
@@ -64,11 +62,6 @@ export async function handleCheckAdminAccess(): Promise<{
   }
 
   const { authorized, role, error } = result.data
-
-  // Show toast if access denied
-  if (!authorized && error) {
-    toast.error(error)
-  }
 
   return {
     authorized,
