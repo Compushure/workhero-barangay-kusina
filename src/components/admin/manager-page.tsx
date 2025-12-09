@@ -54,7 +54,13 @@ export function ManagerPage() {
   const onAddUser = async (data: AddUserInput): Promise<void> => {
     const newUser = await handleAddUser(data)
     if (newUser) {
-      setUsers((prev) => [newUser, ...prev])
+      setAddModalOpen(false)
+      // Reload users from server
+      const fetchedUsers = await handleFetchUsers()
+      setUsers(fetchedUsers)
+      toast.success('User added', {
+        description: `${newUser.name} has been added successfully.`,
+      })
     }
   }
 
@@ -67,21 +73,13 @@ export function ManagerPage() {
 
     const updatedUser = await handleEditUser(userId, data, currentUser.name)
     if (updatedUser) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === userId
-            ? {
-                ...u,
-                name: data.name || u.name,
-                employeeType:
-                  data.employeeType && data.employeeType !== 'no-change'
-                    ? data.employeeType
-                    : u.employeeType,
-                password: '',
-              }
-            : u
-        )
-      )
+      setEditModalOpen(false)
+      // Reload users from server
+      const fetchedUsers = await handleFetchUsers()
+      setUsers(fetchedUsers)
+      toast.success('User updated', {
+        description: `${currentUser.name} has been updated successfully.`,
+      })
       return true
     }
     return false
@@ -92,8 +90,14 @@ export function ManagerPage() {
 
     const success = await handleDeleteUser(selectedUser.id, selectedUser.name)
     if (success) {
-      setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id))
+      setDeleteModalOpen(false)
+      // Reload users from server
+      const fetchedUsers = await handleFetchUsers()
+      setUsers(fetchedUsers)
       setSelectedUser(null)
+      toast.success('User deleted', {
+        description: `${selectedUser.name} has been deleted successfully.`,
+      })
       return true
     }
     return false

@@ -74,7 +74,7 @@ export async function POST(req: Request) {
       id: newUser.id,
       email: newUser.email,
       name: name ?? newUser.email ?? null,
-      date_added: new Date().toISOString(),
+      date_added: new Date().toISOString() ,
     }
     if (roleId) insertPayload.role_id = roleId
 

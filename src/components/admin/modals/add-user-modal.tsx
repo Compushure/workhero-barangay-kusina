@@ -41,7 +41,7 @@ const EMPLOYEE_TYPES = [
   { value: 'manager', label: 'Manager' },
   { value: 'hr', label: 'HR' },
   { value: 'regular', label: 'Regular' },
-] as const 
+] as const
 
 export function AddUserModal({
   open,
@@ -135,7 +135,7 @@ export function AddUserModal({
               <Input
                 id="add-password"
                 type="password"
-                placeholder="Min 8 chars, 1 uppercase, 1 number"
+                placeholder="Minimum 6 characters"
                 className="pl-10"
                 disabled={isPending}
                 {...register('password')}
