@@ -34,28 +34,28 @@ export async function protectAdminRoute() {
     await supabase.auth.getSession()
 
   if (!sessionData.session || sessionError) {
-    console.warn(' Admin access denied: No active session')
+    console.warn('⚠️ Admin access denied: No active session')
     redirect('/admin')
   }
 
   if (claimsError || !claimsData?.claims) {
-    console.warn(' Admin access denied: Failed to retrieve claims')
+    console.warn('⚠️ Admin access denied: Failed to retrieve claims')
     redirect('/admin')
   }
 
   const role = claimsData?.claims?.app_metadata?.user_role
   console.log(
-    `Admin route check - Raw role value: "${role}" (type: ${typeof role})`
+    `🔍 Admin route check - Raw role value: "${role}" (type: ${typeof role})`
   )
 
   if (!hasRole(role, 'superadmin')) {
     console.warn(
-      ` Admin access DENIED for non-superadmin user. Role: "${role}" (trimmed: "${role?.trim()}")`
+      `⚠️ Admin access DENIED for non-superadmin user. Role: "${role}" (trimmed: "${role?.trim()}")`
     )
     redirect('/admin')
   }
 
-  console.log(' Admin access GRANTED for superadmin user')
+  console.log('✅ Admin access GRANTED for superadmin user')
   return JSON.stringify(claimsData.claims, null, 2)
 }
 
@@ -72,7 +72,7 @@ export async function checkAdminAccess() {
     await supabase.auth.getSession()
 
   if (!sessionData.session || sessionError) {
-    console.warn(' Admin check failed: No active session')
+    console.warn('⚠️ Admin check failed: No active session')
     return {
       authorized: false,
       role: null,
@@ -81,7 +81,7 @@ export async function checkAdminAccess() {
   }
 
   if (claimsError || !claimsData?.claims) {
-    console.warn(' Admin check failed: Could not retrieve claims')
+    console.warn('⚠️ Admin check failed: Could not retrieve claims')
     return {
       authorized: false,
       role: null,
@@ -91,12 +91,12 @@ export async function checkAdminAccess() {
 
   const role = claimsData?.claims?.app_metadata?.user_role
   console.log(
-    ` Admin access check - Raw role value: "${role}" (type: ${typeof role})`
+    `🔍 Admin access check - Raw role value: "${role}" (type: ${typeof role})`
   )
 
   if (!hasRole(role, 'superadmin')) {
     console.warn(
-      ` Admin access DENIED for non-superadmin. Role: "${role}" (trimmed: "${role?.trim()}")`
+      `⚠️ Admin access DENIED for non-superadmin. Role: "${role}" (trimmed: "${role?.trim()}")`
     )
     return {
       authorized: false,
@@ -105,7 +105,7 @@ export async function checkAdminAccess() {
     }
   }
 
-  console.log(' Admin access GRANTED for superadmin user')
+  console.log('✅ Admin access GRANTED for superadmin user')
   return {
     authorized: true,
     role: role || null,
