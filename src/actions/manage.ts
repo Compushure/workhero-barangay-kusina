@@ -13,6 +13,48 @@ import { createClient } from '@/lib/supabase/server'
 import type { ServerActionResponse } from '@/lib/utils/safe-action'
 import type { User, AddUserInput, EditUserInput } from '@/types'
 import { addUserSchema, editUserSchema } from '@/zod/schemas'
+<<<<<<< Updated upstream
+=======
+import { getUserRole } from './auth'
+
+// ============================================
+// Route helpers
+// ============================================
+const baseUrl = 'http://localhost:3008'
+
+async function changeuserPassword(userId: string, newPassword: string) {
+  const { role } = await getUserRole()
+  if (!role) {
+    return {
+      error: 'Failed to change password: No user role found',
+    }
+  }
+  if (role.trim() != 'superadmin') {
+    return {
+      error: `Failed to change password: Unauthorized User Role (${role.trim()})`,
+    }
+  }
+
+  // add this to env variables soon
+  const res = await fetch(`${baseUrl}/admin/tools/changepw`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      new_password: newPassword,
+    }),
+  })
+
+  const { error } = await res.json()
+
+  if (error) {
+    return { error: 'Failed to change password: ' + error }
+  }
+  return { error: null }
+}
+>>>>>>> Stashed changes
 
 // ============================================
 // User Management Actions
@@ -34,20 +76,13 @@ export async function fetchUsersAction(): Promise<User[]> {
         name: u.user_name,
         email: u.user_email,
         employeeType: u.role_type,
-        createdAt: new Date(u.user_date_added),
+        date_added: new Date(u.user_date_added),
       }
     })
     return users
   }
 }
 
-/**
- * Adds a new user to the database
- * @param input - User data to create
- * @returns ServerActionResponse with new user data or error
- *
- * TODO: Replace with Supabase insert + auth.admin.createUser
- */
 export async function addUserAction(
   input: AddUserInput
 ): Promise<ServerActionResponse<User>> {
@@ -58,54 +93,25 @@ export async function addUserAction(
   }
 
   const { name, email, password, employeeType } = parsed.data
+  const res = await fetch(`${baseUrl}/admin/tools/adduser`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email: email,
+      password: password,
+      name: name,
+      requested_role: employeeType,
+    }),
+  })
 
-  // ============================================
-  // TODO: Supabase User Creation
-  // ============================================
-  // const supabase = await createSupabaseClient()
-  //
-  // // Check if email already exists
-  // const { data: exists } = await supabase.rpc('check_email_exists', { p_email: email })
-  // if (exists) {
-  //   return { error: 'A user with this email already exists' }
-  // }
-  //
-  // // Create auth user
-  // const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-  //   email,
-  //   password,
-  //   email_confirm: true,
-  // })
-  // if (authError) return { error: 'Failed to create user: ' + authError.message }
-  //
-  // // Insert into users table
-  // const { data, error } = await supabase
-  //   .from('users')
-  //   .insert({
-  //     id: authData.user.id,
-  //     name,
-  //     email,
-  //     password: 'hashed', // Store hashed or reference only
-  //     employee_type: employeeType,
-  //   })
-  //   .select()
-  //   .single()
-  //
-  // if (error) return { error: 'Failed to save user data: ' + error.message }
-  // return { error: null, data: { ...data, createdAt: new Date(data.created_at) } }
-  // ============================================
+  const { error, user } = await res.json()
 
-  // PLACEHOLDER: Create demo user
-  const newUser: User = {
-    id: crypto.randomUUID(),
-    name,
-    email,
-    password: 'hashed_' + password,
-    employeeType,
-    createdAt: new Date(),
+  if (error) {
+    return { error: 'Failed to add user ' + error }
   }
-
-  return { error: null, data: newUser }
+  return { error: null, data: user || null }
 }
 
 /**

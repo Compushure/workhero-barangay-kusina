@@ -26,7 +26,7 @@ export interface User {
   email: string
   password?: string
   employeeType: EmployeeTypeValue
-  createdAt: Date
+  date_added: Date
 }
 
 // ============================================
