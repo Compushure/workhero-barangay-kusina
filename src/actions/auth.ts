@@ -15,7 +15,7 @@ export async function getUserRole() {
   }
 }
 
-export async function protectRoute() {
+export async function protectAdminRoute() {
   const supabase = await createClient()
   const { data: claimsData, error: claimsError } =
     await supabase.auth.getClaims()
