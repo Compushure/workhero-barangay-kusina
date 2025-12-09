@@ -3,11 +3,13 @@
  * =================================
  * Server component wrapper for user management page.
  * Uses Suspense boundary with ManageClient nested inside.
+ * Checks authorization and shows toast if user cannot access.
  */
 
 import { Suspense } from 'react'
 import { ManageClient } from '@/components/admin/manage-client'
-import { protectAdminRoute } from '@/actions/auth'
+import { ProtectedRoute } from '@/components/admin/protected-route'
+import { getAdminAccessInfo } from '@/actions/auth'
 
 function LoadingFallback() {
   return (
@@ -23,10 +25,17 @@ function LoadingFallback() {
 }
 
 export default async function Manage() {
-  await protectAdminRoute()
+  const accessInfo = await getAdminAccessInfo()
+
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <ManageClient />
-    </Suspense>
+    <ProtectedRoute
+      isAuthorized={accessInfo.isAuthorized}
+      userRole={accessInfo.role}
+      message={accessInfo.message}
+    >
+      <Suspense fallback={<LoadingFallback />}>
+        <ManageClient />
+      </Suspense>
+    </ProtectedRoute>
   )
 }
