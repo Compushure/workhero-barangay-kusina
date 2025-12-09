@@ -5,7 +5,6 @@ import type { ServerActionResponse } from '@/lib/utils/safe-action'
 import type { User, AddUserInput, EditUserInput } from '@/types'
 import { addUserSchema, editUserSchema } from '@/zod/schemas'
 import { getUserRole } from './auth'
-import { hasMinimumRole, hasRole, ROLE_ERROR_MESSAGES } from '@/lib/rbac/roles'
 
 // ============================================
 // Route helpers
@@ -53,17 +52,7 @@ async function changeuserPassword(userId: string, newPassword: string) {
 // User Management Actions
 // ============================================
 
-/**
- * Fetch all users - requires manager role or higher
- * Manager can see all users, HR can see regular employees, etc.
- */
 export async function fetchUsersAction(): Promise<User[]> {
-  // Check role: manager+ required
-  const { role } = await getUserRole()
-  if (!role || !hasMinimumRole(role, 'manager')) {
-    throw new Error(ROLE_ERROR_MESSAGES.MANAGER_OR_ABOVE)
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('user_role_attribute')
@@ -97,12 +86,6 @@ export async function fetchUsersAction(): Promise<User[]> {
 export async function addUserAction(
   input: AddUserInput
 ): Promise<ServerActionResponse<User>> {
-  // Check role: HR+ required to add users
-  const { role } = await getUserRole()
-  if (!role || !hasMinimumRole(role, 'hr')) {
-    return { error: ROLE_ERROR_MESSAGES.HR_OR_ABOVE }
-  }
-
   // Validate input
   const parsed = addUserSchema.safeParse(input)
 
@@ -138,12 +121,6 @@ export async function editUserAction(
   userId: string,
   input: EditUserInput
 ): Promise<ServerActionResponse<User>> {
-  // Check role: HR+ required to edit users
-  const { role } = await getUserRole()
-  if (!role || !hasMinimumRole(role, 'hr')) {
-    return { error: ROLE_ERROR_MESSAGES.HR_OR_ABOVE }
-  }
-
   // Validate input
   const supabase = await createClient()
 
@@ -191,12 +168,6 @@ export async function editUserAction(
 export async function deleteUserAction(
   userId: string
 ): Promise<ServerActionResponse> {
-  // Check role: SUPERADMIN ONLY - most restrictive
-  const { role } = await getUserRole()
-  if (!role || !hasRole(role, 'superadmin')) {
-    return { error: ROLE_ERROR_MESSAGES.SUPERADMIN_ONLY }
-  }
-
   const res = await fetch(`${baseUrl}/admin/tools/deluser`, {
     method: 'DELETE',
     headers: {
