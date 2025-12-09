@@ -107,7 +107,7 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground">Password</p>
                   <p className="text-sm text-muted-foreground">
-                    {'•'.repeat(8)}
+                    You can only change password not view it.
                   </p>
                 </div>
               </div>

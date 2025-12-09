@@ -96,7 +96,8 @@ export function EditUserModal({
           <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>
             Leave fields blank to keep current values. Only filled fields will
-            be updated.
+            be updated. Remember Supabase has a minimum 6 character password
+            length.
           </DialogDescription>
         </DialogHeader>
 
@@ -188,6 +189,7 @@ export function EditUserModal({
                   <SelectItem key={type.value} value={type.value}>
                     {type.label}
                   </SelectItem>
+                  //test webhook
                 ))}
               </SelectContent>
             </Select>

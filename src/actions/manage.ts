@@ -1,12 +1,3 @@
-/**
- * User Management Server Actions
- * ================================
- * Server-side actions for CRUD operations on users.
- * Handles adding, editing, and deleting users in the system.
- *
- * TODO: Replace in-memory storage with Supabase database operations.
- */
-
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
@@ -55,6 +46,44 @@ async function changeuserPassword(userId: string, newPassword: string) {
   return { error: null }
 }
 >>>>>>> Stashed changes
+import { getUserRole } from './auth'
+
+// ============================================
+// Route helpers
+// ============================================
+
+async function changeuserPassword(userId: string, newPassword: string) {
+  const { role } = await getUserRole()
+  if (!role) {
+    return {
+      error: 'Failed to change password: No user role found',
+    }
+  }
+  if (role.trim() != 'superadmin') {
+    return {
+      error: `Failed to change password: Unauthorized User Role (${role.trim()})`,
+    }
+  }
+  const baseUrl = 'http://localhost:3008'
+  // add this to env variables soon
+  const res = await fetch(`${baseUrl}/admin/tools/changepw`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      new_password: newPassword,
+    }),
+  })
+
+  const { error } = await res.json()
+
+  if (error) {
+    return { error: 'Failed to change password: ' + error }
+  }
+  return { error: null }
+}
 
 // ============================================
 // User Management Actions
@@ -76,13 +105,20 @@ export async function fetchUsersAction(): Promise<User[]> {
         name: u.user_name,
         email: u.user_email,
         employeeType: u.role_type,
-        date_added: new Date(u.user_date_added),
+        createdAt: new Date(u.user_date_added),
       }
     })
     return users
   }
 }
 
+/**
+ * Adds a new user to the database
+ * @param input - User data to create
+ * @returns ServerActionResponse with new user data or error
+ *
+ * TODO: Replace with Supabase insert + auth.admin.createUser
+ */
 export async function addUserAction(
   input: AddUserInput
 ): Promise<ServerActionResponse<User>> {
@@ -93,101 +129,102 @@ export async function addUserAction(
   }
 
   const { name, email, password, employeeType } = parsed.data
-  const res = await fetch(`${baseUrl}/admin/tools/adduser`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email: email,
-      password: password,
-      name: name,
-      requested_role: employeeType,
-    }),
-  })
 
-  const { error, user } = await res.json()
+  // ============================================
+  // TODO: Supabase User Creation
+  // ============================================
+  // const supabase = await createSupabaseClient()
+  //
+  // // Check if email already exists
+  // const { data: exists } = await supabase.rpc('check_email_exists', { p_email: email })
+  // if (exists) {
+  //   return { error: 'A user with this email already exists' }
+  // }
+  //
+  // // Create auth user
+  // const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+  //   email,
+  //   password,
+  //   email_confirm: true,
+  // })
+  // if (authError) return { error: 'Failed to create user: ' + authError.message }
+  //
+  // // Insert into users table
+  // const { data, error } = await supabase
+  //   .from('users')
+  //   .insert({
+  //     id: authData.user.id,
+  //     name,
+  //     email,
+  //     password: 'hashed', // Store hashed or reference only
+  //     employee_type: employeeType,
+  //   })
+  //   .select()
+  //   .single()
+  //
+  // if (error) return { error: 'Failed to save user data: ' + error.message }
+  // return { error: null, data: { ...data, createdAt: new Date(data.created_at) } }
+  // ============================================
 
-  if (error) {
-    return { error: 'Failed to add user ' + error }
+  // PLACEHOLDER: Create demo user
+  const newUser: User = {
+    id: crypto.randomUUID(),
+    name,
+    email,
+    password: 'hashed_' + password,
+    employeeType,
+    createdAt: new Date(),
   }
-  return { error: null, data: user || null }
+
+  return { error: null, data: newUser }
 }
 
-/**
- * Updates an existing user
- * @param userId - ID of user to update
- * @param input - Updated user data
- * @returns ServerActionResponse with updated user or error
- *
- * TODO: Replace with Supabase update
- */
 export async function editUserAction(
   userId: string,
   input: EditUserInput
 ): Promise<ServerActionResponse<User>> {
   // Validate input
   const supabase = await createClient()
+
   const parsed = editUserSchema.safeParse(input)
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message || 'Invalid input' }
   }
 
-  const { name, password, employeeType } = parsed.data
+  if (input.employeeType === 'no-change') {
+    parsed.data.employeeType = ''
+  }
+  if (input.name === '') {
+    parsed.data.name = ''
+  }
 
+  const { name, employeeType, password } = parsed.data
+
+  // change password if provided
+  if (password) {
+    const { error: pwError } = await changeuserPassword(userId, password)
+    if (pwError) {
+      return { error: 'Failed to update user: ' + pwError }
+    }
+  }
+
+  // only call to rpc if there's no password error or change
   const { data, error } = await supabase.rpc(
     'rpc_update_user_name_and_assign_role',
     {
       p_user_id: userId,
 
-      p_new_name: input.name,
+      p_new_name: name,
 
-      p_new_role_type: input.employeeType,
+      p_new_role_type: employeeType,
     }
   )
 
   if (error) {
     return { error: 'Failed to update user: ' + error.message }
   }
+
   return { error: null, data: data as User }
-  // com
-  // ============================================
-  // TODO: Supabase User Update
-  // ============================================
-  // const supabase = await createSupabaseClient()
-  //
-  // // Update user record
-  // const updateData: Record<string, unknown> = { name, employee_type: employeeType }
-  //
-  // const { data, error } = await supabase
-  //   .from('users')
-  //   .update(updateData)
-  //   .eq('id', userId)
-  //   .select()
-  //   .single()
-  //
-  // if (error) return { error: 'Failed to update user: ' + error.message }
-  //
-  // // Update password if provided
-  // if (password) {
-  //   const { error: pwError } = await supabase.auth.admin.updateUserById(userId, { password })
-  //   if (pwError) return { error: 'User updated but password change failed: ' + pwError.message }
-  // }
-  //
-  // return { error: null, data: { ...data, createdAt: new Date(data.created_at) } }
-  // ============================================
-
-  // PLACEHOLDER: Return updated demo user
-  // const updatedUser: User = {
-  //   id: userId,
-  //   name,
-  //   email: 'user@company.com', // Would come from DB
-  //   password: password ? 'hashed_' + password : 'hashed_existing',
-  //   employeeType,
-  //   createdAt: new Date(),
-  // }
-
-  // return { error: null, data: updatedUser }
 }
 
 /**
