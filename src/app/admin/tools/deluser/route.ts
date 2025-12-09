@@ -11,94 +11,31 @@ export async function GET(req: NextRequest) {
   })
 }
 
-export async function POST(req: Request) {
+export async function DELETE(req: Request) {
   try {
     const body = await req.json()
-    const { email, password, name, requested_role } = body
+    const { userid } = body
 
-    if (!email || !password) {
+    if (!userid) {
       return NextResponse.json(
-        { error: 'email and password required' },
+        { error: 'userid is required' },
         { status: 400 }
       )
     }
 
-    // Create auth user
-    const { data: createData, error: createError } =
-      await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { name: name ?? null },
-      })
+    // Delete auth user
+    const { data: deleteData, error: deleteError } =
+      await supabaseAdmin.auth.admin.deleteUser(userid)
 
-    if (createError || !createData?.user) {
+    if (deleteError || !deleteData?.user) {
       return NextResponse.json(
-        { error: createError?.message ?? 'Failed to create auth user' },
-        { status: 500 }
-      )
-    }
-
-    const newUser = createData.user
-
-    // Resolve role_id from Role.type (string). Use case-insensitive match if desired.
-    let roleId: string | null = null
-    if (requested_role && typeof requested_role === 'string') {
-      const roleQuery = await supabaseAdmin
-        .from('Role')
-        .select('id')
-        .eq('type', requested_role)
-        .limit(1)
-        .maybeSingle()
-
-      if (roleQuery.error) {
-        // If role lookup fails, clean up created auth user to avoid orphaned auth entry
-        await supabaseAdmin.auth.admin.deleteUser(newUser.id).catch(() => {})
-        return NextResponse.json(
-          { error: 'Failed to lookup role: ' + roleQuery.error.message },
-          { status: 500 }
-        )
-      }
-
-      if (roleQuery.data) roleId = roleQuery.data.id
-      else {
-        return NextResponse.json(
-          { error: 'Failed to lookup role: ' + requested_role },
-          { status: 500 }
-        )
-      }
-    }
-
-    // Insert into public."User"
-    const insertPayload: any = {
-      id: newUser.id,
-      email: newUser.email,
-      name: name ?? newUser.email ?? null,
-      date_added: new Date().toISOString(),
-    }
-    if (roleId) insertPayload.role_id = roleId
-
-    const { data: userRow, error: insertError } = await supabaseAdmin
-      .from('User')
-      .insert([insertPayload])
-      .select()
-      .limit(1)
-      .maybeSingle()
-
-    if (insertError) {
-      // Attempt to rollback auth user creation to avoid orphaned auth entries
-      await supabaseAdmin.auth.admin.deleteUser(newUser.id).catch(() => {})
-      return NextResponse.json(
-        { error: 'Failed to insert user row: ' + insertError.message },
+        { error: deleteError?.message ?? 'Failed to delete auth user' },
         { status: 500 }
       )
     }
 
     // Success
-    return NextResponse.json(
-      { user: newUser, userRow, ok: true },
-      { status: 201 }
-    )
+    return NextResponse.json({ ok: true }, { status: 200 })
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message ?? String(err) },

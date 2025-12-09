@@ -168,29 +168,23 @@ export async function editUserAction(
 export async function deleteUserAction(
   userId: string
 ): Promise<ServerActionResponse> {
-  // ============================================
-  // TODO: Supabase User Deletion
-  // ============================================
-  // const supabase = await createSupabaseClient()
-  //
-  // // Delete from users table first
-  // const { error: dbError } = await supabase
-  //   .from('users')
-  //   .delete()
-  //   .eq('id', userId)
-  //
-  // if (dbError) return { error: 'Failed to delete user: ' + dbError.message }
-  //
-  // // Delete auth user
-  // const { error: authError } = await supabase.auth.admin.deleteUser(userId)
-  // if (authError) {
-  //   console.error('Warning: User data deleted but auth record remains:', authError)
-  // }
-  //
-  // return { error: null }
-  // ============================================
+  const res = await fetch(`${baseUrl}/admin/tools/deluser`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      userid: userId,
+    }),
+  })
 
-  // PLACEHOLDER: Always succeed for demo
-  console.log('[Demo] Would delete user:', userId)
+  const { error } = await res.json()
+
+  if (error) {
+    return { error: 'Failed to create user' + error }
+  }
   return { error: null }
+  // // PLACEHOLDER: Always succeed for demo
+  // console.log('[Demo] Would delete user:', userId)
+  // return { error: null }
 }
