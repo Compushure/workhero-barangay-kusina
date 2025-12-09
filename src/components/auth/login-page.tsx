@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label'
 import { Lock, Mail, Shield } from 'lucide-react'
 import { handleLoginSubmit } from '@/action-handlers/auth'
 import { useRouter } from 'next/navigation'
+import { getUserRole } from '@/actions/auth'
 
 export function AdminLoginPage() {
   const router = useRouter()
@@ -37,10 +38,16 @@ export function AdminLoginPage() {
 
     startTransition(async () => {
       const { error } = await handleLoginSubmit(formData)
+      const { role } = await getUserRole()
       if (error) {
         setError('Invalid email or password')
         toast.error('Login Failed', {
           description: 'Invalid email or password. Please try again.',
+        })
+      } else if (role.trim() !== 'superadmin') {
+        setError('You are not authorized to access this page.')
+        toast.error('Not Authorized', {
+          description: `Your role (${role}) does not have access to the admin dashboard.`,
         })
       } else {
         toast.success('Welcome!', {
@@ -58,7 +65,10 @@ export function AdminLoginPage() {
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
             <Shield className="w-6 h-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            <h3 className="text-blue-500">COMPUSHURE</h3>
+            <p>Admin Login</p>
+          </CardTitle>
           <CardDescription>
             Enter your credentials to access the admin dashboard
           </CardDescription>
@@ -108,8 +118,9 @@ export function AdminLoginPage() {
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
-              Demo: tonilegayada@gmail.com / pass:Admin123 (change to compushure
-              email soon)
+              Demo: Superadmin: tonilegayada@gmail.com / pass:Admin123 (change
+              to compushure email soon) Dummy user: gpuser@gpmail.com /
+              pass:Admin123
             </p>
           </form>
         </CardContent>
