@@ -6,52 +6,47 @@
  * All fields are optional - blank fields will not be updated.
  */
 
-'use client'
+'use client';
 
-import { useTransition, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import type { User, EditUserInput, EmployeeTypeValue } from '@/types'
-import { editUserSchema } from '@/zod/schemas'
+import { useTransition, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { User, EditUserInput, EmployeeTypeValue } from '@/types';
+import { editUserSchema } from '@/zod/schemas';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { UserIcon, Lock, Briefcase, Mail } from 'lucide-react'
+} from '@/components/ui/select';
+import { UserIcon, Lock, Briefcase, Mail } from 'lucide-react';
 
 interface EditUserModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  user: User
-  onEditUser: (userId: string, data: EditUserInput) => Promise<boolean>
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  user: User;
+  onEditUser: (userId: string, data: EditUserInput) => Promise<boolean>;
 }
 
 const EMPLOYEE_TYPES = [
   { value: 'manager', label: 'Manager' },
   { value: 'hr', label: 'HR' },
   { value: 'regular', label: 'Regular' },
-] as const
+] as const;
 
-export function EditUserModal({
-  open,
-  onOpenChange,
-  user,
-  onEditUser,
-}: EditUserModalProps) {
-  const [isPending, startTransition] = useTransition()
+export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUserModalProps) {
+  const [isPending, startTransition] = useTransition();
 
   const {
     register,
@@ -67,7 +62,7 @@ export function EditUserModal({
       password: '',
       employeeType: 'no-change',
     },
-  })
+  });
 
   // Reset form when modal opens/user changes
   useEffect(() => {
@@ -76,18 +71,18 @@ export function EditUserModal({
         name: '',
         password: '',
         employeeType: 'no-change',
-      })
+      });
     }
-  }, [user, open, reset])
+  }, [user, open, reset]);
 
   const onSubmit = (data: EditUserInput) => {
     startTransition(async () => {
-      await onEditUser(user.id, data)
-      onOpenChange(false)
-    })
-  }
+      await onEditUser(user.id, data);
+      onOpenChange(false);
+    });
+  };
 
-  const selectedType = watch('employeeType')
+  const selectedType = watch('employeeType');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -95,9 +90,8 @@ export function EditUserModal({
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>
-            Leave fields blank to keep current values. Only filled fields will
-            be updated. Remember Supabase has a minimum 6 character password
-            length.
+            Leave fields blank to keep current values. Only filled fields will be updated. Remember
+            Supabase has a minimum 6 character password length.
           </DialogDescription>
         </DialogHeader>
 
@@ -105,23 +99,18 @@ export function EditUserModal({
         <div className="p-3 bg-muted rounded-lg flex items-center gap-3">
           <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
           <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">
-              Email (cannot be changed)
-            </p>
+            <p className="text-xs text-muted-foreground">Email (cannot be changed)</p>
             <p className="text-sm font-medium truncate">{user.email}</p>
           </div>
         </div>
 
         <div className="p-3 bg-muted/50 rounded-lg text-sm space-y-1">
-          <p className="text-xs text-muted-foreground font-medium">
-            Current Values:
-          </p>
+          <p className="text-xs text-muted-foreground font-medium">Current Values:</p>
           <p>
             <span className="text-muted-foreground">Name:</span> {user.name}
           </p>
           <p>
-            <span className="text-muted-foreground">Role:</span>{' '}
-            {user.employeeType}
+            <span className="text-muted-foreground">Role:</span> {user.employeeType}
           </p>
         </div>
 
@@ -138,9 +127,7 @@ export function EditUserModal({
                 {...register('name')}
               />
             </div>
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
-            )}
+            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -157,9 +144,7 @@ export function EditUserModal({
               />
             </div>
             {errors.password && (
-              <p className="text-sm text-destructive">
-                {errors.password.message}
-              </p>
+              <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
           </div>
 
@@ -168,10 +153,7 @@ export function EditUserModal({
             <Select
               value={selectedType || 'no-change'}
               onValueChange={(value) =>
-                setValue(
-                  'employeeType',
-                  value as EmployeeTypeValue | 'no-change'
-                )
+                setValue('employeeType', value as EmployeeTypeValue | 'no-change')
               }
               disabled={isPending}
             >
@@ -182,9 +164,7 @@ export function EditUserModal({
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="no-change">
-                  No change (keep current)
-                </SelectItem>
+                <SelectItem value="no-change">No change (keep current)</SelectItem>
                 {EMPLOYEE_TYPES.map((type) => (
                   <SelectItem key={type.value} value={type.value}>
                     {type.label}
@@ -194,9 +174,7 @@ export function EditUserModal({
               </SelectContent>
             </Select>
             {errors.employeeType && (
-              <p className="text-sm text-destructive">
-                {errors.employeeType.message}
-              </p>
+              <p className="text-sm text-destructive">{errors.employeeType.message}</p>
             )}
           </div>
 
@@ -217,5 +195,5 @@ export function EditUserModal({
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -5,8 +5,8 @@
  * Uses Suspense boundary with AdminClient nested inside.
  */
 
-import { Suspense } from 'react'
-import { AdminClient } from '@/components/admin/admin-client'
+import { Suspense } from 'react';
+import { AdminClient } from '@/components/admin/admin-client';
 
 function LoadingFallback() {
   return (
@@ -16,7 +16,7 @@ function LoadingFallback() {
         <span className="text-muted-foreground">Loading...</span>
       </div>
     </div>
-  )
+  );
 }
 
 export default function Admin() {
@@ -24,5 +24,5 @@ export default function Admin() {
     <Suspense fallback={<LoadingFallback />}>
       <AdminClient />
     </Suspense>
-  )
+  );
 }

@@ -6,7 +6,7 @@
  */
 
 // Query hooks
-export * from './queries/userQueries'
+export * from './queries/userQueries';
 
 // Mutation hooks
-export * from './mutations/userMutations'
+export * from './mutations/userMutations';

@@ -5,10 +5,10 @@
  * Shows LoginPage if not authenticated, otherwise shows ManagerPage.
  */
 
-'use client'
+'use client';
 
-import { ManagerPage } from '@/components/admin/manager-page'
+import { ManagerPage } from '@/components/admin/manager-page';
 
 export function ManageClient() {
-  return <ManagerPage />
+  return <ManagerPage />;
 }

@@ -1,5 +1,4 @@
-
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 export const supabaseAdmin = createClient(
   // never provide these env on production for security reasons
   process.env.SUPABASE_URL!,
@@ -11,4 +10,4 @@ export const supabaseAdmin = createClient(
       detectSessionInUrl: false,
     },
   }
-)
+);

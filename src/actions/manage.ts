@@ -1,15 +1,15 @@
-'use server'
+'use server';
 
-import { createClient } from '@/lib/supabase/server'
-import type { ServerActionResponse } from '@/lib/utils/safe-action'
-import type { User, AddUserInput, EditUserInput } from '@/types'
-import { addUserSchema, editUserSchema } from '@/zod/schemas'
-import { getUserRole } from './auth'
+import { createClient } from '@/lib/supabase/server';
+import type { ServerActionResponse } from '@/lib/utils/safe-action';
+import type { User, AddUserInput, EditUserInput } from '@/types';
+import { addUserSchema, editUserSchema } from '@/zod/schemas';
+import { getUserRole } from './auth';
 
 // ============================================
 // Route helpers
 // ============================================
-const baseUrl = 'http://localhost:3008'
+const baseUrl = 'http://localhost:3008';
 
 // ============================================
 // Route helpers
@@ -38,14 +38,14 @@ async function changeuserPassword(userId: string, newPassword: string) {
       user_id: userId,
       new_password: newPassword,
     }),
-  })
+  });
 
-  const { error } = await res.json()
+  const { error } = await res.json();
 
   if (error) {
-    return { error: 'Failed to change password: ' + error }
+    return { error: 'Failed to change password: ' + error };
   }
-  return { error: null }
+  return { error: null };
 }
 
 // ============================================
@@ -53,24 +53,22 @@ async function changeuserPassword(userId: string, newPassword: string) {
 // ============================================
 
 export async function fetchUsersAction(): Promise<User[]> {
-  const supabase = await createClient()
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('user_role_attribute')
     .select('user_id, user_name, user_email, role_type, user_date_added')
-    .order('user_date_added', { ascending: false })
+    .order('user_date_added', { ascending: false });
 
   if (error || !data) {
-    throw new Error(
-      'Error fetching users: ' + error?.message || 'Unknown error'
-    )
+    throw new Error('Error fetching users: ' + error?.message || 'Unknown error');
   }
 
   const users = data.map((u) => {
-    let date_added = new Date()
+    let date_added = new Date();
     if (u.user_date_added) {
-      const parsed = new Date(u.user_date_added)
+      const parsed = new Date(u.user_date_added);
       if (!Number.isNaN(parsed.getTime())) {
-        date_added = parsed
+        date_added = parsed;
       }
     }
     return {
@@ -79,22 +77,20 @@ export async function fetchUsersAction(): Promise<User[]> {
       email: u.user_email,
       employeeType: u.role_type,
       date_added,
-    }
-  })
-  return users
+    };
+  });
+  return users;
 }
-export async function addUserAction(
-  input: AddUserInput
-): Promise<ServerActionResponse<User>> {
+export async function addUserAction(input: AddUserInput): Promise<ServerActionResponse<User>> {
   // Validate input
-  const parsed = addUserSchema.safeParse(input)
+  const parsed = addUserSchema.safeParse(input);
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message || 'Invalid input' }
+    return { error: parsed.error.issues[0]?.message || 'Invalid input' };
   }
 
-  const { name, email, password, employeeType } = parsed.data
-  console.log('Adding user:', name, email, employeeType, password)
+  const { name, email, password, employeeType } = parsed.data;
+  console.log('Adding user:', name, email, employeeType, password);
 
   const res = await fetch(`${baseUrl}/admin/tools/adduser`, {
     method: 'POST',
@@ -107,14 +103,14 @@ export async function addUserAction(
       name: name,
       requested_role: employeeType,
     }),
-  })
+  });
 
-  const { error, user } = await res.json()
+  const { error, user } = await res.json();
 
   if (error) {
-    return { error: 'Failed to create user' + error }
+    return { error: 'Failed to create user' + error };
   }
-  return { error: null, data: user }
+  return { error: null, data: user };
 }
 
 export async function editUserAction(
@@ -122,52 +118,47 @@ export async function editUserAction(
   input: EditUserInput
 ): Promise<ServerActionResponse<User>> {
   // Validate input
-  const supabase = await createClient()
+  const supabase = await createClient();
 
-  const parsed = editUserSchema.safeParse(input)
+  const parsed = editUserSchema.safeParse(input);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message || 'Invalid input' }
+    return { error: parsed.error.issues[0]?.message || 'Invalid input' };
   }
 
   if (input.employeeType === 'no-change') {
-    parsed.data.employeeType = ''
+    parsed.data.employeeType = '';
   }
   if (input.name === '') {
-    parsed.data.name = ''
+    parsed.data.name = '';
   }
 
-  const { name, employeeType, password } = parsed.data
+  const { name, employeeType, password } = parsed.data;
 
   // change password if provided
   if (password) {
-    const { error: pwError } = await changeuserPassword(userId, password)
+    const { error: pwError } = await changeuserPassword(userId, password);
     if (pwError) {
-      return { error: 'Failed to update user: ' + pwError }
+      return { error: 'Failed to update user: ' + pwError };
     }
   }
 
   // only call to rpc if there's no password error or change
-  const { data, error } = await supabase.rpc(
-    'rpc_update_user_name_and_assign_role',
-    {
-      p_user_id: userId,
+  const { data, error } = await supabase.rpc('rpc_update_user_name_and_assign_role', {
+    p_user_id: userId,
 
-      p_new_name: name,
+    p_new_name: name,
 
-      p_new_role_type: employeeType,
-    }
-  )
+    p_new_role_type: employeeType,
+  });
 
   if (error) {
-    return { error: 'Failed to update user: ' + error.message }
+    return { error: 'Failed to update user: ' + error.message };
   }
 
-  return { error: null, data: data as User }
+  return { error: null, data: data as User };
 }
 
-export async function deleteUserAction(
-  userId: string
-): Promise<ServerActionResponse> {
+export async function deleteUserAction(userId: string): Promise<ServerActionResponse> {
   const res = await fetch(`${baseUrl}/admin/tools/deluser`, {
     method: 'DELETE',
     headers: {
@@ -176,14 +167,14 @@ export async function deleteUserAction(
     body: JSON.stringify({
       userid: userId,
     }),
-  })
+  });
 
-  const { error } = await res.json()
+  const { error } = await res.json();
 
   if (error) {
-    return { error: 'Failed to create user' + error }
+    return { error: 'Failed to create user' + error };
   }
-  return { error: null }
+  return { error: null };
   // // PLACEHOLDER: Always succeed for demo
   // console.log('[Demo] Would delete user:', userId)
   // return { error: null }

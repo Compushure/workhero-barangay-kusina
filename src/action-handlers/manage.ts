@@ -6,29 +6,29 @@
  * Uses safeAction wrapper for consistent error handling.
  */
 
-import { safeAction } from '@/lib/utils/safe-action'
+import { safeAction } from '@/lib/utils/safe-action';
 import {
   fetchUsersAction,
   addUserAction,
   editUserAction,
   deleteUserAction,
-} from '@/actions/manage'
-import { type User, type AddUserInput, type EditUserInput } from '@/types'
-import { toast } from 'sonner'
+} from '@/actions/manage';
+import { type User, type AddUserInput, type EditUserInput } from '@/types';
+import { toast } from 'sonner';
 
 /**
  * Fetches all users with error handling and toast feedback
  * @returns Array of users or empty array on error
  */
 export async function handleFetchUsers(): Promise<User[]> {
-  const result = await safeAction(() => fetchUsersAction())
+  const result = await safeAction(() => fetchUsersAction());
 
   if (!result.success) {
-    toast.error('Failed to load users: ' + result.error)
-    return []
+    toast.error('Failed to load users: ' + result.error);
+    return [];
   }
 
-  return result.data
+  return result.data;
 }
 
 /**
@@ -37,20 +37,20 @@ export async function handleFetchUsers(): Promise<User[]> {
  * @returns Created user or null on error
  */
 export async function handleAddUser(input: AddUserInput): Promise<User | null> {
-  const result = await safeAction(() => addUserAction(input))
+  const result = await safeAction(() => addUserAction(input));
 
   if (!result.success) {
-    toast.error('Failed to add user: ' + result.error)
-    return null
+    toast.error('Failed to add user: ' + result.error);
+    return null;
   }
 
   if (result.data?.error) {
-    toast.error(result.data.error)
-    return null
+    toast.error(result.data.error);
+    return null;
   }
 
-  toast.success(`Successfully added ${input.name}`)
-  return result.data?.data ?? null
+  toast.success(`Successfully added ${input.name}`);
+  return result.data?.data ?? null;
 }
 
 /**
@@ -65,20 +65,20 @@ export async function handleEditUser(
   input: EditUserInput,
   userName: string
 ): Promise<User | null> {
-  const result = await safeAction(() => editUserAction(userId, input))
+  const result = await safeAction(() => editUserAction(userId, input));
 
   if (!result.success) {
-    toast.error('Failed to update user: ' + result.error)
-    return null
+    toast.error('Failed to update user: ' + result.error);
+    return null;
   }
 
   if (result.data?.error) {
-    toast.error(result.data.error)
-    return null
+    toast.error(result.data.error);
+    return null;
   }
 
-  toast.success(`Successfully updated ${userName}`)
-  return result.data?.data ?? null
+  toast.success(`Successfully updated ${userName}`);
+  return result.data?.data ?? null;
 }
 
 /**
@@ -87,22 +87,19 @@ export async function handleEditUser(
  * @param userName - User's name for toast message
  * @returns Boolean indicating success
  */
-export async function handleDeleteUser(
-  userId: string,
-  userName: string
-): Promise<boolean> {
-  const result = await safeAction(() => deleteUserAction(userId))
+export async function handleDeleteUser(userId: string, userName: string): Promise<boolean> {
+  const result = await safeAction(() => deleteUserAction(userId));
 
   if (!result.success) {
-    toast.error('Failed to delete user: ' + result.error)
-    return false
+    toast.error('Failed to delete user: ' + result.error);
+    return false;
   }
 
   if (result.data?.error) {
-    toast.error(result.data.error)
-    return false
+    toast.error(result.data.error);
+    return false;
   }
 
-  toast.success(`Successfully deleted ${userName}`)
-  return true
+  toast.success(`Successfully deleted ${userName}`);
+  return true;
 }

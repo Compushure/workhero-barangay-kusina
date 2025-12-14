@@ -6,119 +6,112 @@
  * Uses TanStack Query for server state management and optimistic updates.
  */
 
-'use client'
+'use client';
 
-import { useState, useTransition } from 'react'
-import { useAuth } from '@/lib/auth-context'
-import { useGetUsers } from '@/hooks/tanstack/queries/userQueries'
-import {
-  useAddUser,
-  useEditUser,
-  useDeleteUser,
-} from '@/hooks/tanstack/mutations/userMutations'
-import type { User, AddUserInput, EditUserInput } from '@/types'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { UserCard } from './user-card'
-import { AddUserModal } from './modals/add-user-modal'
-import { EditUserModal } from './modals/edit-user-modal'
-import { DeleteUserModal } from './modals/delete-user-modal'
-import { UserPlus, LogOut, ArrowLeft, Loader2 } from 'lucide-react'
-import Link from 'next/link'
-import { handleSignOut } from '@/action-handlers/auth'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+import { useState, useTransition } from 'react';
+import { useAuth } from '@/lib/auth-context';
+import { useGetUsers } from '@/hooks/tanstack/queries/userQueries';
+import { useAddUser, useEditUser, useDeleteUser } from '@/hooks/tanstack/mutations/userMutations';
+import type { User, AddUserInput, EditUserInput } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { UserCard } from './user-card';
+import { AddUserModal } from './modals/add-user-modal';
+import { EditUserModal } from './modals/edit-user-modal';
+import { DeleteUserModal } from './modals/delete-user-modal';
+import { UserPlus, LogOut, ArrowLeft, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { handleSignOut } from '@/action-handlers/auth';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export function ManagerPage() {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   // TanStack Query hooks for server state
-  const { data: users = [], isLoading, error } = useGetUsers()
-  const addUserMutation = useAddUser()
-  const editUserMutation = useEditUser()
-  const deleteUserMutation = useDeleteUser()
+  const { data: users = [], isLoading, error } = useGetUsers();
+  const addUserMutation = useAddUser();
+  const editUserMutation = useEditUser();
+  const deleteUserMutation = useDeleteUser();
 
   // Local UI state
-  const [addModalOpen, setAddModalOpen] = useState(false)
-  const [editModalOpen, setEditModalOpen] = useState(false)
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // CRUD handlers using TanStack Query mutations
   const onAddUser = async (data: AddUserInput): Promise<void> => {
     addUserMutation.mutate(data, {
       onSuccess: () => {
-        setAddModalOpen(false)
+        setAddModalOpen(false);
       },
-    })
-  }
+    });
+  };
 
-  const onEditUser = async (
-    userId: string,
-    data: EditUserInput
-  ): Promise<boolean> => {
-    const currentUser = users.find((u) => u.id === userId)
-    if (!currentUser) return false
+  const onEditUser = async (userId: string, data: EditUserInput): Promise<boolean> => {
+    const currentUser = users.find((u) => u.id === userId);
+    if (!currentUser) return false;
 
     return new Promise((resolve) => {
       editUserMutation.mutate(
         { userId, data, userName: currentUser.name },
         {
           onSuccess: () => {
-            setEditModalOpen(false)
-            resolve(true)
+            setEditModalOpen(false);
+            resolve(true);
           },
           onError: () => {
-            resolve(false)
+            resolve(false);
           },
         }
-      )
-    })
-  }
+      );
+    });
+  };
 
   const onDeleteUser = async (): Promise<boolean> => {
-    if (!selectedUser) return false
+    if (!selectedUser) return false;
 
     return new Promise((resolve) => {
       deleteUserMutation.mutate(
         { userId: selectedUser.id, userName: selectedUser.name },
         {
           onSuccess: () => {
-            setDeleteModalOpen(false)
-            setSelectedUser(null)
-            resolve(true)
+            setDeleteModalOpen(false);
+            setSelectedUser(null);
+            resolve(true);
           },
           onError: () => {
-            resolve(false)
+            resolve(false);
           },
         }
-      )
-    })
-  }
+      );
+    });
+  };
 
   const handleEditClick = (user: User) => {
-    setSelectedUser(user)
-    setEditModalOpen(true)
-  }
+    setSelectedUser(user);
+    setEditModalOpen(true);
+  };
 
   const handleDeleteClick = (user: User) => {
-    setSelectedUser(user)
-    setDeleteModalOpen(true)
-  }
+    setSelectedUser(user);
+    setDeleteModalOpen(true);
+  };
 
   const handleLogout = () => {
     startTransition(async () => {
-      const { error } = await handleSignOut()
+      const { error } = await handleSignOut();
       if (!error) {
-        router.push('/admin')
+        router.push('/admin');
 
         toast.success('Logged out', {
           description: 'You have successfully logged out.',
-        })
+        });
       }
-    })
-  }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -136,10 +129,7 @@ export function ManagerPage() {
               <h1 className="text-xl sm:text-2xl font-bold">User Management</h1>
             </div>
             <div className="flex items-center gap-3">
-              <Button
-                onClick={() => setAddModalOpen(true)}
-                className="gap-2 flex-1 sm:flex-none"
-              >
+              <Button onClick={() => setAddModalOpen(true)} className="gap-2 flex-1 sm:flex-none">
                 <UserPlus className="h-4 w-4" />
                 <span>Add User</span>
               </Button>
@@ -174,9 +164,7 @@ export function ManagerPage() {
               <UserPlus className="h-6 w-6 text-muted-foreground" />
             </div>
             <p className="text-muted-foreground mb-4">No users found</p>
-            <Button onClick={() => setAddModalOpen(true)}>
-              Add your first user
-            </Button>
+            <Button onClick={() => setAddModalOpen(true)}>Add your first user</Button>
           </Card>
         ) : (
           <div className="grid gap-4">
@@ -193,11 +181,7 @@ export function ManagerPage() {
       </main>
 
       {/* Modals */}
-      <AddUserModal
-        open={addModalOpen}
-        onOpenChange={setAddModalOpen}
-        onAddUser={onAddUser}
-      />
+      <AddUserModal open={addModalOpen} onOpenChange={setAddModalOpen} onAddUser={onAddUser} />
 
       {selectedUser && (
         <>
@@ -217,5 +201,5 @@ export function ManagerPage() {
         </>
       )}
     </div>
-  )
+  );
 }

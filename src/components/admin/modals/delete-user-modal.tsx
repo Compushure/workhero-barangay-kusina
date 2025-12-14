@@ -5,40 +5,35 @@
  * Displays warning and requires explicit confirmation before proceeding.
  */
 
-'use client'
+'use client';
 
-import { useTransition } from 'react'
+import { useTransition } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { AlertTriangle } from 'lucide-react'
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
 
 interface DeleteUserModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  userName: string
-  onConfirm: () => Promise<boolean>
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  userName: string;
+  onConfirm: () => Promise<boolean>;
 }
 
-export function DeleteUserModal({
-  open,
-  onOpenChange,
-  userName,
-  onConfirm,
-}: DeleteUserModalProps) {
-  const [isPending, startTransition] = useTransition()
+export function DeleteUserModal({ open, onOpenChange, userName, onConfirm }: DeleteUserModalProps) {
+  const [isPending, startTransition] = useTransition();
 
   const handleConfirm = () => {
     startTransition(async () => {
-      await onConfirm()
-      onOpenChange(false)
-    })
-  }
+      await onConfirm();
+      onOpenChange(false);
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -50,17 +45,14 @@ export function DeleteUserModal({
             </div>
             <div>
               <DialogTitle>Delete User</DialogTitle>
-              <DialogDescription>
-                This action cannot be undone
-              </DialogDescription>
+              <DialogDescription>This action cannot be undone</DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
         <div className="py-4 px-4 bg-destructive/5 rounded-lg border border-destructive/20">
           <p className="text-sm">
-            Are you sure you want to delete{' '}
-            <strong className="text-foreground">{userName}</strong>?
+            Are you sure you want to delete <strong className="text-foreground">{userName}</strong>?
           </p>
           <p className="text-sm text-muted-foreground mt-2">
             All associated data will be permanently removed from the system.
@@ -87,5 +79,5 @@ export function DeleteUserModal({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

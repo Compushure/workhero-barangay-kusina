@@ -9,24 +9,21 @@
 
 export type ActionResult<T> =
   | { success: true; data: T; error: null }
-  | { success: false; data: null; error: string }
+  | { success: false; data: null; error: string };
 
 /**
  * Wraps an async server action with standardized error handling
  * @param action - The async function to execute
  * @returns ActionResult with either success data or error message
  */
-export async function safeAction<T>(
-  action: () => Promise<T>
-): Promise<ActionResult<T>> {
+export async function safeAction<T>(action: () => Promise<T>): Promise<ActionResult<T>> {
   try {
-    const data = await action()
-    return { success: true, data, error: null }
+    const data = await action();
+    return { success: true, data, error: null };
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'An unexpected error occurred'
-    console.error('[SafeAction Error]:', message)
-    return { success: false, data: null, error: message }
+    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+    console.error('[SafeAction Error]:', message);
+    return { success: false, data: null, error: message };
   }
 }
 
@@ -35,4 +32,4 @@ export async function safeAction<T>(
  */
 export type ServerActionResponse<T = void> =
   | { error: null; data?: T }
-  | { error: string; data?: never }
+  | { error: string; data?: never };

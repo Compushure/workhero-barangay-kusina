@@ -1,0 +1,14 @@
+.next
+out
+dist
+coverage
+.turbo
+.vercel
+node_modules
+
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+next-env.d.ts
+
