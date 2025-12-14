@@ -5,11 +5,11 @@
  * Configures default options for queries and mutations.
  */
 
-'use client'
+'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { useState, type ReactNode } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { useState, type ReactNode } from 'react';
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   // Create a client instance per component mount to avoid sharing state between requests
@@ -30,15 +30,13 @@ export function QueryProvider({ children }: { children: ReactNode }) {
           },
         },
       })
-  )
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
       {children}
       {/* Enable React Query Devtools in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )}
+      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
-  )
+  );
 }

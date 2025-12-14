@@ -6,57 +6,51 @@
  * Integrates with auth context which uses action handlers for auth operations.
  */
 
-'use client'
+'use client';
 
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Lock, Mail, Shield } from 'lucide-react'
-import { handleLoginSubmit } from '@/action-handlers/auth'
-import { useRouter } from 'next/navigation'
-import { getUserRole } from '@/actions/auth'
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Lock, Mail, Shield } from 'lucide-react';
+import { handleLoginSubmit } from '@/action-handlers/auth';
+import { useRouter } from 'next/navigation';
+import { getUserRole } from '@/actions/auth';
 
 export function AdminLoginPage() {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError(null)
+    e.preventDefault();
+    setError(null);
 
-    const formData = new FormData(e.currentTarget)
+    const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
-      const { error } = await handleLoginSubmit(formData)
-      const { role } = await getUserRole()
+      const { error } = await handleLoginSubmit(formData);
+      const { role } = await getUserRole();
       if (error) {
-        setError('Invalid email or password')
+        setError('Invalid email or password');
         toast.error('Login Failed', {
           description: 'Invalid email or password. Please try again.',
-        })
+        });
       } else if (role.trim() !== 'superadmin') {
-        setError('You are not authorized to access this page.')
+        setError('You are not authorized to access this page.');
         toast.error('Not Authorized', {
           description: `Your role (${role}) does not have access to the admin dashboard.`,
-        })
+        });
       } else {
         toast.success('Welcome!', {
           description: 'You have successfully logged in.',
-        })
-        router.push('/admin/manage')
+        });
+        router.push('/admin/manage');
       }
-    })
-  }
+    });
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -69,9 +63,7 @@ export function AdminLoginPage() {
             <h3 className="text-blue-500">COMPUSHURE</h3>
             <p>Admin Login</p>
           </CardTitle>
-          <CardDescription>
-            Enter your credentials to access the admin dashboard
-          </CardDescription>
+          <CardDescription>Enter your credentials to access the admin dashboard</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-6">
@@ -118,13 +110,12 @@ export function AdminLoginPage() {
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
-              Demo: Superadmin: tonilegayada@gmail.com / pass:Admin123 (change
-              to compushure email soon) Dummy user: gpuser@gpmail.com /
-              pass:Admin123
+              Demo: Superadmin: tonilegayada@gmail.com / pass:Admin123 (change to compushure email
+              soon) Dummy user: gpuser@gpmail.com / pass:Admin123
             </p>
           </form>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

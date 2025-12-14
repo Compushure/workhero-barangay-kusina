@@ -6,42 +6,30 @@
  * Provides edit/delete action buttons in expanded state.
  */
 
-'use client'
+'use client';
 
-import { useState } from 'react'
-import type { User, EmployeeTypeValue } from '@/types'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible'
-import {
-  Edit2,
-  Trash2,
-  ChevronDown,
-  UserIcon,
-  Mail,
-  Calendar,
-  Lock,
-} from 'lucide-react'
-import { format } from 'date-fns'
+import { useState } from 'react';
+import type { User, EmployeeTypeValue } from '@/types';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Edit2, Trash2, ChevronDown, UserIcon, Mail, Calendar, Lock } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface UserCardProps {
-  user: User
-  onEdit: (user: User) => void
-  onDelete: (user: User) => void
+  user: User;
+  onEdit: (user: User) => void;
+  onDelete: (user: User) => void;
 }
 
 const EMPLOYEE_TYPE_STYLES: Record<EmployeeTypeValue, string> = {
   manager: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   hr: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
   regular: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-}
+};
 
 export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -54,9 +42,7 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-semibold truncate">{user.name}</p>
-                <p className="text-sm text-muted-foreground truncate">
-                  {user.email}
-                </p>
+                <p className="text-sm text-muted-foreground truncate">{user.email}</p>
               </div>
               <span
                 className={`hidden sm:inline-block px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
@@ -116,8 +102,7 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground">Date Created</p>
                   <p className="text-sm font-medium">
-                    {user.date_added &&
-                    !Number.isNaN(user.date_added.getTime?.())
+                    {user.date_added && !Number.isNaN(user.date_added.getTime?.())
                       ? format(user.date_added, 'PPP')
                       : Date.now().toString()}
                   </p>
@@ -149,5 +134,5 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
         </CollapsibleContent>
       </Card>
     </Collapsible>
-  )
+  );
 }

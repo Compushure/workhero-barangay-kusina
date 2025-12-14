@@ -5,30 +5,24 @@
  * Shows welcome message and available admin actions.
  */
 
-'use client'
+'use client';
 
-import { useTransition } from 'react'
-import { useAuth } from '@/lib/auth-context'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Users, Shield, LogOut, ArrowRight } from 'lucide-react'
-import Link from 'next/link'
+import { useTransition } from 'react';
+import { useAuth } from '@/lib/auth-context';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, Shield, LogOut, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export function DashboardPage() {
-  const { logout, user } = useAuth()
-  const [isPending, startTransition] = useTransition()
+  const { logout, user } = useAuth();
+  const [isPending, startTransition] = useTransition();
 
   const handleLogout = () => {
     startTransition(async () => {
-      await logout()
-    })
-  }
+      await logout();
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -58,9 +52,7 @@ export function DashboardPage() {
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2">
-            Welcome{user?.name ? `, ${user.name}` : ''}
-          </h2>
+          <h2 className="text-2xl font-bold mb-2">Welcome{user?.name ? `, ${user.name}` : ''}</h2>
           <p className="text-muted-foreground">
             Manage your organization&apos;s users and roles from here.
           </p>
@@ -74,8 +66,7 @@ export function DashboardPage() {
               </div>
               <CardTitle>User Management</CardTitle>
               <CardDescription>
-                Add, edit, and delete users. Manage employee types and
-                permissions.
+                Add, edit, and delete users. Manage employee types and permissions.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -99,11 +90,7 @@ export function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button
-                variant="outline"
-                className="w-full bg-transparent"
-                disabled
-              >
+              <Button variant="outline" className="w-full bg-transparent" disabled>
                 Coming Soon
               </Button>
             </CardContent>
@@ -111,5 +98,5 @@ export function DashboardPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

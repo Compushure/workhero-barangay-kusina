@@ -6,8 +6,8 @@
 - [File Naming](#file-naming)
 - [Additional Guidelines](#additional-guidelines)
 
+## Commit Message
 
-## Commit Message 
 When creating a commit, use the following format for the message:
 
 `category: message`
@@ -48,6 +48,7 @@ Use one of the following categories for your commits:
 
 > [!NOTE]
 > Check first if the issue you are assigned to has an existing branch before creating one.
+
 - Use the format: `category/issue-id-description`.
 - Use lowercase with hyphens (`-`) to separate words.
 - Use `category` from the [commit categories](#categories) (e.g., `feat/dev-123-feature`, `fix`, etc.).
@@ -66,15 +67,15 @@ To submit a pull request (PR), follow these steps:
 
 1. **Create a new branch** from `main` or `develop` for your changes (see [Branch Naming](#branch-naming))
 
-    or
+   or
 
-    **Switch to an existing branch**
+   **Switch to an existing branch**
 
-    ```bash
-    # Given an existing branch `feature/dev-2-auth` on the remote repository
-    git fetch
-    git checkout -b feature/dev-2-auth origin/feature/dev-2-auth
-    ```
+   ```bash
+   # Given an existing branch `feature/dev-2-auth` on the remote repository
+   git fetch
+   git checkout -b feature/dev-2-auth origin/feature/dev-2-auth
+   ```
 
 2. **Make your changes** and ensure they follow the project's standards.
 3. **Test your changes**
@@ -82,18 +83,16 @@ To submit a pull request (PR), follow these steps:
 5. **Push your branch** to the repository
 
 6. **Open a pull request**:
-
-    - Navigate to the repository on GitHub and click the "Pull Requests" tab.
-    - Click "New Pull Request" and select your branch.
-    - Fill out the [pull request template](PULL_REQUEST_TEMPLATE.md)
+   - Navigate to the repository on GitHub and click the "Pull Requests" tab.
+   - Click "New Pull Request" and select your branch.
+   - Fill out the [pull request template](PULL_REQUEST_TEMPLATE.md)
 
 7. **Code Review**:
-
-    - Assigned reviewers (if any) will review your pull request. Be prepared to address feedback and make necessary changes.
-    - Ensure all CI checks (e.g., linting, testing, building) pass. If they fail, fix the issues and update your branch.
+   - Assigned reviewers (if any) will review your pull request. Be prepared to address feedback and make necessary changes.
+   - Ensure all CI checks (e.g., linting, testing, building) pass. If they fail, fix the issues and update your branch.
 
 8. **Merge**:
-    - Once approved, your pull request will be merged into the develop branch.
+   - Once approved, your pull request will be merged into the develop branch.
 
 ---
 
@@ -104,7 +103,6 @@ To maintain consistency across the project, follow this file naming convention:
 - `kebab-case` - **Use lowercase** for file and directory names, with hyphens (`-`) to separate words (e.g., `add-item`).
 
 ---
-
 
 ## Additional Guidelines
 
