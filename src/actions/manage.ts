@@ -56,7 +56,7 @@ export async function fetchUsersAction(): Promise<User[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('user_role_attribute')
-    .select('user_id, user_name, user_email, role_type, user_date_added')
+    .select('user_id, user_name, user_email, role_type, user_date_added, employee_id, contact_details, home_address, tin_id, sss_id,employment_status, pagibig_id')
     .order('user_date_added', { ascending: false });
 
   if (error || !data) {
@@ -77,6 +77,15 @@ export async function fetchUsersAction(): Promise<User[]> {
       email: u.user_email,
       employeeType: u.role_type,
       date_added,
+      employeeId: u.employee_id,
+      contactNumber: u.contact_details,
+      address: u.home_address,
+      tin: u.tin_id,
+      sss: u.sss_id,
+      employmentStatus: u.employment_status,
+      createdAt: u.user_date_added,
+      companyId: undefined,
+      pagibig: u.pagibig_id,
     };
   });
   return users;
@@ -178,4 +187,104 @@ export async function deleteUserAction(userId: string): Promise<ServerActionResp
   // // PLACEHOLDER: Always succeed for demo
   // console.log('[Demo] Would delete user:', userId)
   // return { error: null }
+}
+
+// ============================================
+// Search, Filter & Sort Actions (Placeholder)
+// ============================================
+
+/**
+ * Placeholder server action for advanced user search with filters and sorting
+ * 
+ * IMPLEMENTATION STEPS:
+ * 1. Build dynamic Supabase query based on filters:
+ *    - Base query: supabase.from('user_role_attribute').select(...)
+ *    
+ * 2. Apply search filter:
+ *    - If searchType === 'name': Use .ilike('user_name', `%${search}%`) for fuzzy name matching
+ *    - If searchType === 'employee_id': Use .eq('employee_id', search) for exact ID match
+ *    - Chain with .or() for multiple conditions if needed
+ *    
+ * 3. Apply employee type filter:
+ *    - If employeeType !== 'all': Chain .eq('role_type', employeeType)
+ *    
+ * 4. Apply employment status filter:
+ *    - If employmentStatus !== 'all': Chain .eq('employment_status', employmentStatus)
+ *    
+ * 5. Apply sorting:
+ *    - 'name-asc': .order('user_name', { ascending: true })
+ *    - 'name-desc': .order('user_name', { ascending: false })
+ *    - 'date-asc': .order('user_date_added', { ascending: true })
+ *    - 'date-desc': .order('user_date_added', { ascending: false })
+ *    
+ * 6. Handle pagination (optional):
+ *    - Use .range(offset, offset + limit - 1) for limit/offset pagination
+ *    - Use .count() with { count: 'exact' } option for total count
+ *    
+ * 7. Map and return results same as fetchUsersAction
+ */
+export async function searchAndFilterUsersAction(
+  // search: string,
+  // searchType: 'name' | 'employee_id',
+  // employeeType?: string,
+  // employmentStatus?: string,
+  // sortBy?: 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc',
+  // limit?: number,
+  // offset?: number,
+): Promise<ServerActionResponse<User[]>> {
+  // TODO: Implement search and filter logic
+  // const supabase = await createClient()
+
+  // Step 1: Initialize base query
+  // let query = supabase
+  //   .from('user_role_attribute')
+  //   .select('user_id, user_name, user_email, role_type, user_date_added, employee_id, contact_details, home_address, tin_id, sss_id, employment_status, pagibig_id', { count: 'exact' })
+
+  // Step 2: Apply search filter
+  // if (search.trim()) {
+  //   if (searchType === 'name') {
+  //     query = query.ilike('user_name', `%${search}%`)
+  //   } else if (searchType === 'employee_id') {
+  //     query = query.eq('employee_id', search)
+  //   }
+  // }
+
+  // Step 3: Apply employee type filter
+  // if (employeeType && employeeType !== 'all') {
+  //   query = query.eq('role_type', employeeType)
+  // }
+
+  // Step 4: Apply employment status filter
+  // if (employmentStatus && employmentStatus !== 'all') {
+  //   query = query.eq('employment_status', employmentStatus)
+  // }
+
+  // Step 5: Apply sorting
+  // if (sortBy) {
+  //   const [field, direction] = sortBy.split('-')
+  //   const ascending = direction === 'asc'
+  //   if (field === 'name') {
+  //     query = query.order('user_name', { ascending })
+  //   } else if (field === 'date') {
+  //     query = query.order('user_date_added', { ascending })
+  //   }
+  // }
+
+  // Step 6: Apply pagination
+  // if (limit && offset !== undefined) {
+  //   query = query.range(offset, offset + limit - 1)
+  // }
+
+  // Step 7: Execute query
+  // const { data, error, count } = await query
+
+  // if (error) {
+  //   return { error: `Failed to search users: ${error.message}` }
+  // }
+
+  // Step 8: Map results
+  // const users = (data || []).map(/* same mapping as fetchUsersAction */)
+  // return { error: null, data: users }
+
+  return { error: 'Not implemented yet',  };
 }
