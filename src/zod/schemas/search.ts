@@ -17,35 +17,15 @@ export const userSearchFilterSchema = z.object({
     .max(100, 'Search query cannot exceed 100 characters')
     .optional()
     .default(''),
-  searchType: z
-    .enum(['name', 'employee_id'])
-    .optional()
-    .default('name'),
-  employeeTypeFilter: z
-    .enum(['all', 'manager', 'hr', 'regular'])
-    .optional()
-    .default('all'),
-  employmentStatusFilter: z
-    .enum(['all', 'probationary', 'regular'])
-    .optional()
-    .default('all'),
+  searchType: z.enum(['name', 'employee_id']).optional().default('name'),
+  employeeTypeFilter: z.enum(['all', 'manager', 'hr', 'regular']).optional().default('all'),
+  employmentStatusFilter: z.enum(['all', 'probationary', 'regular']).optional().default('all'),
   sortBy: z
     .enum(['name-asc', 'name-desc', 'date-asc', 'date-desc'])
     .optional()
     .default('date-desc'),
-  page: z
-    .number()
-    .int()
-    .positive()
-    .optional()
-    .default(1),
-  pageSize: z
-    .number()
-    .int()
-    .positive()
-    .max(100)
-    .optional()
-    .default(25),
+  page: z.number().int().positive().optional().default(1),
+  pageSize: z.number().int().positive().max(100).optional().default(25),
 });
 
 export type UserSearchFilterInput = z.infer<typeof userSearchFilterSchema>;

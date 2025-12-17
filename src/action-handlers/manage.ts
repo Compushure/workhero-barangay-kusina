@@ -32,7 +32,6 @@ export async function handleFetchUsers(params: UserQueryParams): Promise<User[]>
   return result.data;
 }
 
-
 /**
  * Adds a new user with toast feedback
  * @param input - New user data

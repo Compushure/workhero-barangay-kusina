@@ -1,14 +1,3 @@
-/**
- * Manager Page Component (Client)
- * =================================
- * Main user management interface with comprehensive features:
- * - Search by name or employee ID
- * - Filter by employee type and employment status
- * - Sort by name or date (ascending/descending)
- * - Load more pagination
- * - CRUD operations via modals
- * Uses TanStack Query for server state management and optimistic updates.
- */
 
 'use client';
 
@@ -17,12 +6,24 @@ import { useAuth } from '@/lib/auth-context';
 import { useGetUsers } from '@/hooks/tanstack/queries/userQueries';
 import { useAddUser, useEditUser, useDeleteUser } from '@/hooks/tanstack/mutations/userMutations';
 import { useDebounce } from '@/hooks/useDebounce';
-import type { User, AddUserInput, EditUserInput, EmployeeTypeValue, EmploymentStatusValue } from '@/types';
+import type {
+  User,
+  AddUserInput,
+  EditUserInput,
+  EmployeeTypeValue,
+  EmploymentStatusValue,
+} from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { UserCard } from './user-card';
 import { AddUserModal } from './modals/add-user-modal';
 import { EditUserModal } from './modals/edit-user-modal';
@@ -41,16 +42,24 @@ export function ManagerPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<'name' | 'employee_id'>('name');
   const [employeeTypeFilter, setEmployeeTypeFilter] = useState<'all' | EmployeeTypeValue>('all');
-  const [employmentStatusFilter, setEmploymentStatusFilter] = useState<'all' | EmploymentStatusValue>('all');
-  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'date-asc' | 'date-desc'>('date-desc');
+  const [employmentStatusFilter, setEmploymentStatusFilter] = useState<
+    'all' | EmploymentStatusValue
+  >('all');
+  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'date-asc' | 'date-desc'>(
+    'date-desc'
+  );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  // Debounce search query to prevent excessive API calls (300ms delay)
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  // Debounce search query to prevent excessive API calls (1500ms delay)
+  const debouncedSearchQuery = useDebounce(searchQuery, 1500);
 
   // TanStack Query hook with debounced parameters
-  const { data: users = [], isLoading, error } = useGetUsers({
+  const {
+    data: users = [],
+    isLoading,
+    error,
+  } = useGetUsers({
     searchQuery: debouncedSearchQuery,
     searchType,
     employeeTypeFilter,
@@ -212,7 +221,9 @@ export function ManagerPage() {
             {/* Search */}
             <div className="space-y-2 lg:col-span-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="search">Search {searchType === 'name' ? 'by Name' : 'by Employee ID'}</Label>
+                <Label htmlFor="search">
+                  Search {searchType === 'name' ? 'by Name' : 'by Employee ID'}
+                </Label>
                 <div className="flex items-center gap-2 text-xs">
                   <button
                     onClick={() => setSearchType('name')}
@@ -240,7 +251,9 @@ export function ManagerPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder={searchType === 'name' ? 'Search by name...' : 'Search by employee ID...'}
+                  placeholder={
+                    searchType === 'name' ? 'Search by name...' : 'Search by employee ID...'
+                  }
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
@@ -267,7 +280,10 @@ export function ManagerPage() {
             {/* Employment Status Filter */}
             <div className="space-y-2">
               <Label htmlFor="filter-status">Employment Status</Label>
-              <Select value={employmentStatusFilter} onValueChange={handleEmploymentStatusFilterChange}>
+              <Select
+                value={employmentStatusFilter}
+                onValueChange={handleEmploymentStatusFilterChange}
+              >
                 <SelectTrigger id="filter-status">
                   <SelectValue />
                 </SelectTrigger>

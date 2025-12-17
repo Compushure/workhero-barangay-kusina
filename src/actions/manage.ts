@@ -1,7 +1,13 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import type { ServerActionResponse, User, AddUserInput, EditUserInput, UserQueryParams } from '@/types';
+import type {
+  ServerActionResponse,
+  User,
+  AddUserInput,
+  EditUserInput,
+  UserQueryParams,
+} from '@/types';
 import { addUserSchema, editUserSchema } from '@/zod/schemas';
 import { getUserRole } from './auth';
 
@@ -91,7 +97,6 @@ function buildQueryParams(params: UserQueryParams): string {
   return searchParams.toString();
 }
 
-
 // ============================================
 // User Management Actions
 // ============================================
@@ -107,8 +112,6 @@ export async function fetchUsersAction(params: UserQueryParams = {}): Promise<Us
   const data = await res.json();
   return data.users as User[];
 }
-
-
 
 export async function addUserAction(input: AddUserInput): Promise<ServerActionResponse<User>> {
   // Validate input
