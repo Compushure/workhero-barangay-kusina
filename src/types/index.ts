@@ -17,7 +17,7 @@ export type EmployeeTypeValue = z.infer<typeof EmployeeType>;
 // Employment Status Enum
 // ============================================
 
-export const EmploymentStatus = z.enum(['probationary', 'regular']);
+export const EmploymentStatus = z.enum(['', 'probational', 'regular']);
 export type EmploymentStatusValue = z.infer<typeof EmploymentStatus>;
 
 // ============================================

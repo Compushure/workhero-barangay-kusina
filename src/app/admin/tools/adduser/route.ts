@@ -14,7 +14,19 @@ export async function GET(req: NextRequest) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, password, name, requested_role } = body;
+    const {
+      email,
+      password,
+      name,
+      requested_role,
+      employee_id,
+      employment_status,
+      contact_details,
+      home_address,
+      tin_id,
+      sss_id,
+      pagibig_id,
+    } = body;
 
     if (!email || !password) {
       return NextResponse.json({ error: 'email and password required' }, { status: 400 });
@@ -58,9 +70,10 @@ export async function POST(req: Request) {
 
       if (roleQuery.data) roleId = roleQuery.data.id;
       else {
+        await supabaseAdmin.auth.admin.deleteUser(newUser.id).catch(() => {});
         return NextResponse.json(
-          { error: 'Failed to lookup role: ' + requested_role },
-          { status: 500 }
+          { error: 'Role not found: ' + requested_role },
+          { status: 400 }
         );
       }
     }
@@ -71,6 +84,13 @@ export async function POST(req: Request) {
       email: newUser.email,
       name: name ?? newUser.email ?? null,
       date_added: new Date().toISOString(),
+      employee_id: employee_id || null,
+      contact_details: contact_details || null,
+      home_address: home_address || null,
+      tin_id: tin_id || null,
+      sss_id: sss_id || null,
+      pagibig_id: pagibig_id || null,
+      employment_status: employment_status || '',
     };
     if (roleId) insertPayload.role_id = roleId;
 

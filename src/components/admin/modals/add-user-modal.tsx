@@ -45,16 +45,7 @@ import {
   BadgeCheck,
 } from 'lucide-react';
 
-type AddUserFormValues = AddUserInput & {
-  companyId?: string;
-  employeeId?: string;
-  contactNumber?: string;
-  employmentStatus?: string;
-  address?: string;
-  tin?: string;
-  sss?: string;
-  pagibig?: string;
-};
+type AddUserFormValues = AddUserInput;
 
 interface AddUserModalProps {
   open: boolean;
@@ -69,7 +60,8 @@ const EMPLOYEE_TYPES = [
 ] as const;
 
 const EMPLOYMENT_STATUS_OPTIONS = [
-  { value: 'probationary', label: 'Probationary' },
+  { value: 'not-set', label: 'Not Set' },
+  { value: 'probational', label: 'Probationary' },
   { value: 'regular', label: 'Regular' },
 ] as const;
 
@@ -90,7 +82,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
       email: '',
       password: '',
       employeeType: 'regular',
-      employmentStatus: 'probationary',
+      employmentStatus: '',
       companyId: '',
       employeeId: '',
       contactNumber: '',
@@ -101,9 +93,9 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
     },
   });
 
-  const onSubmit = (data: AddUserInput) => {
+  const onSubmit = (data: AddUserFormValues) => {
     startTransition(async () => {
-      await onAddUser(data);
+      await onAddUser(data as AddUserInput);
       reset();
       onOpenChange(false);
     });
@@ -243,7 +235,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                 <div className="space-y-2">
                   <Label htmlFor="add-type">Employee Type *</Label>
                   <Select
-                    value={watch('employeeType')}
+                    value={watch('employeeType') || 'regular'}
                     onValueChange={(value: EmployeeTypeValue) => setValue('employeeType', value)}
                     disabled={isPending}
                   >
@@ -269,8 +261,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                 <div className="space-y-2">
                   <Label htmlFor="add-status">Employment Status *</Label>
                   <Select
-                    value={watch('employmentStatus')}
-                    onValueChange={(value) => setValue('employmentStatus', value)}
+                    value={watch('employmentStatus') || 'not-set'}
+                    onValueChange={(value) =>
+                      setValue('employmentStatus', value === 'not-set' ? '' : (value as any))
+                    }
                     disabled={isPending}
                   >
                     <SelectTrigger id="add-status">

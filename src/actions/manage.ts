@@ -121,8 +121,20 @@ export async function addUserAction(input: AddUserInput): Promise<ServerActionRe
     return { error: parsed.error.issues[0]?.message || 'Invalid input' };
   }
 
-  const { name, email, password, employeeType } = parsed.data;
-  console.log('Adding user:', name, email, employeeType, password);
+  const {
+    name,
+    email,
+    password,
+    employeeType,
+    employmentStatus,
+    contactNumber,
+    address,
+    tin,
+    sss,
+    pagibig,
+    employeeId,
+  } = parsed.data;
+  console.log('Adding user:', name, email, employeeType, employmentStatus);
 
   const res = await fetch(`${baseUrl}/admin/tools/adduser`, {
     method: 'POST',
@@ -134,6 +146,13 @@ export async function addUserAction(input: AddUserInput): Promise<ServerActionRe
       password: password,
       name: name,
       requested_role: employeeType,
+      employee_id: employeeId || '',
+      employment_status: employmentStatus || '',
+      contact_details: contactNumber || '',
+      home_address: address || '',
+      tin_id: tin || '',
+      sss_id: sss || '',
+      pagibig_id: pagibig || '',
     }),
   });
 
@@ -224,12 +243,9 @@ export async function deleteUserAction(userId: string): Promise<ServerActionResp
   const { error } = await res.json();
 
   if (error) {
-    return { error: 'Failed to create user' + error };
+    return { error: 'Failed to delete user: ' + error };
   }
   return { error: null };
-  // // PLACEHOLDER: Always succeed for demo
-  // console.log('[Demo] Would delete user:', userId)
-  // return { error: null }
 }
 
 // ============================================
