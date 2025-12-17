@@ -71,10 +71,7 @@ export async function POST(req: Request) {
       if (roleQuery.data) roleId = roleQuery.data.id;
       else {
         await supabaseAdmin.auth.admin.deleteUser(newUser.id).catch(() => {});
-        return NextResponse.json(
-          { error: 'Role not found: ' + requested_role },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Role not found: ' + requested_role }, { status: 400 });
       }
     }
 
