@@ -16,7 +16,8 @@ import { useState, useTransition } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useGetUsers } from '@/hooks/tanstack/queries/userQueries';
 import { useAddUser, useEditUser, useDeleteUser } from '@/hooks/tanstack/mutations/userMutations';
-import type { User, AddUserInput, EditUserInput } from '@/types';
+import { useDebounce } from '@/hooks/useDebounce';
+import type { User, AddUserInput, EditUserInput, EmployeeTypeValue, EmploymentStatusValue } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -36,36 +37,39 @@ export function ManagerPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  // TanStack Query hooks for server state
-  const { data: users = [], isLoading, error } = useGetUsers();
+  // Local UI state - search and filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState<'name' | 'employee_id'>('name');
+  const [employeeTypeFilter, setEmployeeTypeFilter] = useState<'all' | EmployeeTypeValue>('all');
+  const [employmentStatusFilter, setEmploymentStatusFilter] = useState<'all' | EmploymentStatusValue>('all');
+  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'date-asc' | 'date-desc'>('date-desc');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+
+  // Debounce search query to prevent excessive API calls (300ms delay)
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // TanStack Query hook with debounced parameters
+  const { data: users = [], isLoading, error } = useGetUsers({
+    searchQuery: debouncedSearchQuery,
+    searchType,
+    employeeTypeFilter,
+    employmentStatusFilter,
+    sortBy,
+    page,
+    pageSize,
+  });
+
+  // TanStack Query mutation hooks
   const addUserMutation = useAddUser();
   const editUserMutation = useEditUser();
   const deleteUserMutation = useDeleteUser();
 
-  // Local UI state
+  // Modal state
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
-  // Search and filter state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState<'name' | 'employee_id'>('name');
-  const [employeeTypeFilter, setEmployeeTypeFilter] = useState<'all' | 'manager' | 'hr' | 'regular'>('all');
-  const [employmentStatusFilter, setEmploymentStatusFilter] = useState<'all' | 'probationary' | 'regular'>('all');
-  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'date-asc' | 'date-desc'>('date-desc');
-
-  // Handle search and filter logic
-  const handleSearchAndFilter = () => {
-    // TODO: Implement search and filter logic
-    // const options = {
-    //   search: searchQuery.trim() || undefined,
-    //   employeeType: employeeTypeFilter === 'all' ? undefined : employeeTypeFilter,
-    //   employmentStatus: employmentStatusFilter === 'all' ? undefined : employmentStatusFilter,
-    //   sortBy,
-    // }
-    // Apply filters to users list
-  };
 
   // CRUD handlers using TanStack Query mutations
   const onAddUser = async (data: AddUserInput): Promise<void> => {
@@ -124,6 +128,27 @@ export function ManagerPage() {
   const handleDeleteClick = (user: User) => {
     setSelectedUser(user);
     setDeleteModalOpen(true);
+  };
+
+  // Reset to page 1 when filters change
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setPage(1); // Reset pagination when searching
+  };
+
+  const handleEmployeeTypeFilterChange = (value: string) => {
+    setEmployeeTypeFilter(value as any);
+    setPage(1);
+  };
+
+  const handleEmploymentStatusFilterChange = (value: string) => {
+    setEmploymentStatusFilter(value as any);
+    setPage(1);
+  };
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value as any);
+    setPage(1);
   };
 
   const handleLogout = () => {
@@ -218,7 +243,7 @@ export function ManagerPage() {
                   placeholder={searchType === 'name' ? 'Search by name...' : 'Search by employee ID...'}
                   className="pl-10"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                 />
               </div>
             </div>
@@ -226,7 +251,7 @@ export function ManagerPage() {
             {/* Employee Type Filter */}
             <div className="space-y-2">
               <Label htmlFor="filter-type">Employee Type</Label>
-              <Select value={employeeTypeFilter} onValueChange={(v: any) => setEmployeeTypeFilter(v)}>
+              <Select value={employeeTypeFilter} onValueChange={handleEmployeeTypeFilterChange}>
                 <SelectTrigger id="filter-type">
                   <SelectValue />
                 </SelectTrigger>
@@ -242,13 +267,13 @@ export function ManagerPage() {
             {/* Employment Status Filter */}
             <div className="space-y-2">
               <Label htmlFor="filter-status">Employment Status</Label>
-              <Select value={employmentStatusFilter} onValueChange={(v: any) => setEmploymentStatusFilter(v)}>
+              <Select value={employmentStatusFilter} onValueChange={handleEmploymentStatusFilterChange}>
                 <SelectTrigger id="filter-status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="probationary">Probationary</SelectItem>
+                  <SelectItem value="probational">Probational</SelectItem>
                   <SelectItem value="regular">Regular</SelectItem>
                 </SelectContent>
               </Select>
@@ -257,7 +282,7 @@ export function ManagerPage() {
             {/* Sort */}
             <div className="space-y-2 lg:col-span-2">
               <Label htmlFor="sort">Sort By</Label>
-              <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+              <Select value={sortBy} onValueChange={handleSortChange}>
                 <SelectTrigger id="sort">
                   <SelectValue />
                 </SelectTrigger>

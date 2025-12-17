@@ -1,8 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import type { ServerActionResponse } from '@/lib/utils/safe-action';
-import type { User, AddUserInput, EditUserInput } from '@/types';
+import type { ServerActionResponse, User, AddUserInput, EditUserInput, UserQueryParams } from '@/types';
 import { addUserSchema, editUserSchema } from '@/zod/schemas';
 import { getUserRole } from './auth';
 
@@ -48,50 +47,69 @@ async function changeuserPassword(userId: string, newPassword: string) {
   return { error: null };
 }
 
+function buildQueryParams(params: UserQueryParams): string {
+  const searchParams = new URLSearchParams();
+
+  // sort mapping
+  let type = 'dateadded';
+  let order = 'desc';
+  switch (params.sortBy) {
+    case 'name-asc':
+      type = 'name';
+      order = 'asc';
+      break;
+    case 'name-desc':
+      type = 'name';
+      order = 'desc';
+      break;
+    case 'date-asc':
+      type = 'dateadded';
+      order = 'asc';
+      break;
+    case 'date-desc':
+      type = 'dateadded';
+      order = 'desc';
+      break;
+  }
+  searchParams.set('type', type);
+  searchParams.set('order', order);
+
+  // search
+  if (params.searchQuery) {
+    searchParams.set('query', params.searchQuery.trim());
+    searchParams.set('queryby', params.searchType ?? 'name');
+  }
+
+  // filters
+  searchParams.set('employeeType', params.employeeTypeFilter?.toLowerCase() ?? 'all');
+  searchParams.set('employmentStatus', params.employmentStatusFilter?.toLowerCase() ?? 'all');
+
+  // pagination
+  searchParams.set('page', String(params.page ?? 1));
+  searchParams.set('pageSize', String(params.pageSize ?? 10));
+
+  return searchParams.toString();
+}
+
+
 // ============================================
 // User Management Actions
 // ============================================
 
-export async function fetchUsersAction(): Promise<User[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('user_role_attribute')
-    .select(
-      'user_id, user_name, user_email, role_type, user_date_added, employee_id, contact_details, home_address, tin_id, sss_id,employment_status, pagibig_id'
-    )
-    .order('user_date_added', { ascending: false });
+export async function fetchUsersAction(params: UserQueryParams = {}): Promise<User[]> {
+  const qs = buildQueryParams(params);
+  const res = await fetch(`${baseUrl}/admin/tools/filter?${qs}`, { method: 'GET' });
 
-  if (error || !data) {
-    throw new Error('Error fetching users: ' + error?.message || 'Unknown error');
+  if (!res.ok) {
+    throw new Error(`Error fetching users: ${res.statusText}`);
   }
 
-  const users = data.map((u) => {
-    let date_added = new Date();
-    if (u.user_date_added) {
-      const parsed = new Date(u.user_date_added);
-      if (!Number.isNaN(parsed.getTime())) {
-        date_added = parsed;
-      }
-    }
-    return {
-      id: u.user_id,
-      name: u.user_name,
-      email: u.user_email,
-      employeeType: u.role_type,
-      date_added,
-      employeeId: u.employee_id,
-      contactNumber: u.contact_details,
-      address: u.home_address,
-      tin: u.tin_id,
-      sss: u.sss_id,
-      employmentStatus: u.employment_status,
-      createdAt: u.user_date_added,
-      companyId: 'feature not implemented',
-      pagibig: u.pagibig_id,
-    };
-  });
-  return users;
+  const data = await res.json();
+  return data.users as User[];
 }
+
+
+
 export async function addUserAction(input: AddUserInput): Promise<ServerActionResponse<User>> {
   // Validate input
   const parsed = addUserSchema.safeParse(input);

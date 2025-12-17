@@ -6,3 +6,4 @@
 
 export { addUserSchema, editUserSchema } from './user';
 export { loginSchema } from './auth';
+export { userSearchFilterSchema, type UserSearchFilterInput } from './search';
