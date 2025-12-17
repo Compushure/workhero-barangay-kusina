@@ -56,7 +56,9 @@ export async function fetchUsersAction(): Promise<User[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('user_role_attribute')
-    .select('user_id, user_name, user_email, role_type, user_date_added, employee_id, contact_details, home_address, tin_id, sss_id,employment_status, pagibig_id')
+    .select(
+      'user_id, user_name, user_email, role_type, user_date_added, employee_id, contact_details, home_address, tin_id, sss_id,employment_status, pagibig_id'
+    )
     .order('user_date_added', { ascending: false });
 
   if (error || !data) {
@@ -84,7 +86,7 @@ export async function fetchUsersAction(): Promise<User[]> {
       sss: u.sss_id,
       employmentStatus: u.employment_status,
       createdAt: u.user_date_added,
-      companyId: undefined,
+      companyId: 'feature not implemented',
       pagibig: u.pagibig_id,
     };
   });
@@ -137,11 +139,24 @@ export async function editUserAction(
   if (input.employeeType === 'no-change') {
     parsed.data.employeeType = '';
   }
+  if (input.employmentStatus === 'no-change') {
+    parsed.data.employmentStatus = '';
+  }
   if (input.name === '') {
     parsed.data.name = '';
   }
 
-  const { name, employeeType, password } = parsed.data;
+  const {
+    name,
+    employeeType,
+    password,
+    employmentStatus,
+    contactNumber,
+    address,
+    tin,
+    sss,
+    pagibig,
+  } = parsed.data;
 
   // change password if provided
   if (password) {
@@ -151,13 +166,20 @@ export async function editUserAction(
     }
   }
 
+  const params = {
+    p_user_id: userId,
+    p_new_name: name || '',
+    p_role_type: employeeType || '',
+    p_employment_status: employmentStatus || '',
+    p_contact_details: contactNumber || '',
+    p_home_address: address || '',
+    p_tin_id: tin || '',
+    p_sss_id: sss || '',
+    p_pagibig_id: pagibig || '',
+  };
   // only call to rpc if there's no password error or change
   const { data, error } = await supabase.rpc('rpc_update_user_name_and_assign_role', {
-    p_user_id: userId,
-
-    p_new_name: name,
-
-    p_new_role_type: employeeType,
+    ...params,
   });
 
   if (error) {
@@ -195,35 +217,35 @@ export async function deleteUserAction(userId: string): Promise<ServerActionResp
 
 /**
  * Placeholder server action for advanced user search with filters and sorting
- * 
+ *
  * IMPLEMENTATION STEPS:
  * 1. Build dynamic Supabase query based on filters:
  *    - Base query: supabase.from('user_role_attribute').select(...)
- *    
+ *
  * 2. Apply search filter:
  *    - If searchType === 'name': Use .ilike('user_name', `%${search}%`) for fuzzy name matching
  *    - If searchType === 'employee_id': Use .eq('employee_id', search) for exact ID match
  *    - Chain with .or() for multiple conditions if needed
- *    
+ *
  * 3. Apply employee type filter:
  *    - If employeeType !== 'all': Chain .eq('role_type', employeeType)
- *    
+ *
  * 4. Apply employment status filter:
  *    - If employmentStatus !== 'all': Chain .eq('employment_status', employmentStatus)
- *    
+ *
  * 5. Apply sorting:
  *    - 'name-asc': .order('user_name', { ascending: true })
  *    - 'name-desc': .order('user_name', { ascending: false })
  *    - 'date-asc': .order('user_date_added', { ascending: true })
  *    - 'date-desc': .order('user_date_added', { ascending: false })
- *    
+ *
  * 6. Handle pagination (optional):
  *    - Use .range(offset, offset + limit - 1) for limit/offset pagination
  *    - Use .count() with { count: 'exact' } option for total count
- *    
+ *
  * 7. Map and return results same as fetchUsersAction
  */
-export async function searchAndFilterUsersAction(
+export async function searchAndFilterUsersAction(): Promise<ServerActionResponse<User[]>> {
   // search: string,
   // searchType: 'name' | 'employee_id',
   // employeeType?: string,
@@ -231,7 +253,6 @@ export async function searchAndFilterUsersAction(
   // sortBy?: 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc',
   // limit?: number,
   // offset?: number,
-): Promise<ServerActionResponse<User[]>> {
   // TODO: Implement search and filter logic
   // const supabase = await createClient()
 
@@ -286,5 +307,5 @@ export async function searchAndFilterUsersAction(
   // const users = (data || []).map(/* same mapping as fetchUsersAction */)
   // return { error: null, data: users }
 
-  return { error: 'Not implemented yet',  };
+  return { error: 'Not implemented yet' };
 }

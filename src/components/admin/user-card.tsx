@@ -1,13 +1,11 @@
+'use client';
 
-
-'use client'
-
-import { useState } from 'react'
-import type { EmployeeTypeValue, User } from '@/types'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { useState } from 'react';
+import type { EmployeeTypeValue, User } from '@/types';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Award as IdCard,
   BadgeCheck,
@@ -21,51 +19,51 @@ import {
   Trash2,
   Edit2,
   UserIcon,
-} from 'lucide-react'
-import { format } from 'date-fns'
+} from 'lucide-react';
+import { format } from 'date-fns';
 
 type UserWithExtras = User & {
-  employeeId?: string
-  companyId?: string
-  employmentStatus?: 'probationary' | 'regular' | string
-  contactNumber?: string
-  address?: string
-  tin?: string
-  sss?: string
-  pagibig?: string
-  createdAt?: string | Date
-}
+  employeeId?: string;
+  companyId?: string;
+  employmentStatus?: 'probationary' | 'regular' | string;
+  contactNumber?: string;
+  address?: string;
+  tin?: string;
+  sss?: string;
+  pagibig?: string;
+  createdAt?: string | Date;
+};
 
 interface UserCardProps {
-  user: UserWithExtras
-  onEdit: (user: User) => void
-  onDelete: (user: User) => void
+  user: UserWithExtras;
+  onEdit: (user: User) => void;
+  onDelete: (user: User) => void;
 }
 
 const EMPLOYEE_TYPE_STYLES: Record<EmployeeTypeValue, string> = {
   manager: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   hr: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
   regular: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-}
+};
 
 const EMPLOYMENT_STATUS_STYLES: Record<string, string> = {
   probationary: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
   regular: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-}
+};
 
 function formatDate(value?: Date | string) {
-  if (!value) return 'N/A'
-  const parsed = typeof value === 'string' ? new Date(value) : value
-  return Number.isNaN(parsed.getTime()) ? 'N/A' : format(parsed, 'PPP')
+  if (!value) return 'N/A';
+  const parsed = typeof value === 'string' ? new Date(value) : value;
+  return Number.isNaN(parsed.getTime()) ? 'N/A' : format(parsed, 'PPP');
 }
 
 export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
-  const employmentStatus = user.employmentStatus || 'unknown'
+  const employmentStatus = user.employmentStatus || 'unknown';
   const employmentStatusClass =
-    EMPLOYMENT_STATUS_STYLES[employmentStatus] || 'bg-muted text-foreground'
-  const dateCreated = formatDate(user.createdAt || user.date_added)
+    EMPLOYMENT_STATUS_STYLES[employmentStatus] || 'bg-muted text-foreground';
+  const dateCreated = formatDate(user.createdAt || user.date_added);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -127,7 +125,9 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
         <CollapsibleContent>
           <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-border pt-4 space-y-6">
             <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Basic Information</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">
+                Basic Information
+              </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="flex items-start gap-3">
                   <UserIcon className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
@@ -154,13 +154,15 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Employment Details</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">
+                Employment Details
+              </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="flex items-start gap-3">
                   <Building2 className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs text-muted-foreground">Company ID</p>
-                    <p className="text-sm font-medium">{user.companyId || 'N/A'}</p>
+                    <p className="text-sm font-medium text-gray-400">{user.companyId || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -196,7 +198,9 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Philippine Government IDs</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">
+                Philippine Government IDs
+              </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="flex items-start gap-3">
                   <CreditCard className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
@@ -246,5 +250,5 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
         </CollapsibleContent>
       </Card>
     </Collapsible>
-  )
+  );
 }

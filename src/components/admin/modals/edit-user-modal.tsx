@@ -45,6 +45,15 @@ import {
   BadgeCheck,
 } from 'lucide-react';
 
+type EditUserFormValues = EditUserInput & {
+  contactNumber?: string;
+  employmentStatus?: string;
+  address?: string;
+  tin?: string;
+  sss?: string;
+  pagibig?: string;
+};
+
 interface EditUserModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -73,12 +82,18 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
     setValue,
     reset,
     formState: { errors },
-  } = useForm<EditUserInput>({
-    resolver: zodResolver(editUserSchema),
+  } = useForm<EditUserFormValues>({
+    resolver: zodResolver(editUserSchema) as any,
     defaultValues: {
       name: '',
       password: '',
       employeeType: 'no-change',
+      employmentStatus: 'no-change',
+      contactNumber: '',
+      address: '',
+      tin: '',
+      sss: '',
+      pagibig: '',
     },
   });
 
@@ -116,7 +131,9 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
           <div className="space-y-6 pb-6">
             {/* Read-only information section */}
             <div className="space-y-3 p-4 bg-muted rounded-lg">
-              <p className="text-xs font-semibold text-muted-foreground uppercase">Read-Only Information</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase">
+                Read-Only Information
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -129,14 +146,18 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                   <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs text-muted-foreground">Company ID</p>
-                    <p className="text-sm font-medium truncate">{(user as any).companyId || 'N/A'}</p>
+                    <p className="text-sm font-medium truncate">
+                      {(user as any).companyId || 'N/A'}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <IdCard className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs text-muted-foreground">Employee ID</p>
-                    <p className="text-sm font-medium truncate">{(user as any).employeeId || 'N/A'}</p>
+                    <p className="text-sm font-medium truncate">
+                      {(user as any).employeeId || 'N/A'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -154,7 +175,9 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-foreground">Basic Information (Optional)</h3>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Basic Information (Optional)
+                </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -169,7 +192,9 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                         {...register('name')}
                       />
                     </div>
-                    {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+                    {errors.name && (
+                      <p className="text-sm text-destructive">{errors.name.message}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -199,16 +224,20 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                         placeholder={`Current: ${(user as any).contactNumber || 'Not set'}`}
                         className="pl-10"
                         disabled={isPending}
-                        {...register('contactNumber' as any)}
+                        {...register('contactNumber')}
                       />
                     </div>
-                    {errors.contactNumber && <p className="text-sm text-destructive">{errors.contactNumber.message}</p>}
+                    {errors.contactNumber && (
+                      <p className="text-sm text-destructive">{errors.contactNumber.message}</p>
+                    )}
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-foreground">Employment Details (Optional)</h3>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Employment Details (Optional)
+                </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -227,7 +256,9 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                         </div>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="no-change">No change (keep {user.employeeType})</SelectItem>
+                        <SelectItem value="no-change">
+                          No change (keep {user.employeeType})
+                        </SelectItem>
                         {EMPLOYEE_TYPES.map((type) => (
                           <SelectItem key={type.value} value={type.value}>
                             {type.label}
@@ -243,18 +274,27 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                   <div className="space-y-2">
                     <Label htmlFor="edit-status">New Employment Status</Label>
                     <Select
-                      value={watch('employmentStatus' as any) || 'no-change'}
-                      onValueChange={(value) => setValue('employmentStatus' as any, value)}
+                      value={watch('employmentStatus') || 'no-change'}
+                      onValueChange={(value) =>
+                        setValue(
+                          'employmentStatus',
+                          value as '' | 'regular' | 'no-change' | 'probationary' | undefined
+                        )
+                      }
                       disabled={isPending}
                     >
                       <SelectTrigger id="edit-status">
                         <div className="flex items-center gap-2">
                           <BadgeCheck className="h-4 w-4 text-muted-foreground" />
-                          <SelectValue placeholder={`Current: ${(user as any).employmentStatus || 'Not set'}`} />
+                          <SelectValue
+                            placeholder={`Current: ${(user as any).employmentStatus || 'Not set'}`}
+                          />
                         </div>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="no-change">No change (keep {(user as any).employmentStatus || 'current'})</SelectItem>
+                        <SelectItem value="no-change">
+                          No change (keep {(user as any).employmentStatus || 'current'})
+                        </SelectItem>
                         {EMPLOYMENT_STATUS_OPTIONS.map((status) => (
                           <SelectItem key={status.value} value={status.value}>
                             {status.label}
@@ -276,12 +316,14 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                   <Textarea
                     id="edit-address"
                     placeholder={`Current: ${(user as any).address || 'Not set'}`}
-                    className="pl-10 min-h-[80px] resize-none"
+                    className="pl-10 min-h-20 resize-none"
                     disabled={isPending}
-                    {...register('address' as any)}
+                    {...register('address')}
                   />
                 </div>
-                {errors.address && <p className="text-sm text-destructive">{errors.address.message}</p>}
+                {errors.address && (
+                  <p className="text-sm text-destructive">{errors.address.message}</p>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -297,7 +339,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                         placeholder={`Current: ${(user as any).tin || 'Not set'}`}
                         className="pl-10"
                         disabled={isPending}
-                        {...register('tin' as any)}
+                        {...register('tin')}
                       />
                     </div>
                     {errors.tin && <p className="text-sm text-destructive">{errors.tin.message}</p>}
@@ -312,7 +354,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                         placeholder={`Current: ${(user as any).sss || 'Not set'}`}
                         className="pl-10"
                         disabled={isPending}
-                        {...register('sss' as any)}
+                        {...register('sss')}
                       />
                     </div>
                     {errors.sss && <p className="text-sm text-destructive">{errors.sss.message}</p>}
@@ -327,10 +369,12 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                         placeholder={`Current: ${(user as any).pagibig || 'Not set'}`}
                         className="pl-10"
                         disabled={isPending}
-                        {...register('pagibig' as any)}
+                        {...register('pagibig')}
                       />
                     </div>
-                    {errors.pagibig && <p className="text-sm text-destructive">{errors.pagibig.message}</p>}
+                    {errors.pagibig && (
+                      <p className="text-sm text-destructive">{errors.pagibig.message}</p>
+                    )}
                   </div>
                 </div>
               </div>

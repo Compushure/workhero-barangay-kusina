@@ -45,6 +45,17 @@ import {
   BadgeCheck,
 } from 'lucide-react';
 
+type AddUserFormValues = AddUserInput & {
+  companyId?: string;
+  employeeId?: string;
+  contactNumber?: string;
+  employmentStatus?: string;
+  address?: string;
+  tin?: string;
+  sss?: string;
+  pagibig?: string;
+};
+
 interface AddUserModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -72,13 +83,21 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
     setValue,
     reset,
     formState: { errors },
-  } = useForm<AddUserInput>({
-    resolver: zodResolver(addUserSchema),
+  } = useForm<AddUserFormValues>({
+    resolver: zodResolver(addUserSchema) as any,
     defaultValues: {
       name: '',
       email: '',
       password: '',
       employeeType: 'regular',
+      employmentStatus: 'probationary',
+      companyId: '',
+      employeeId: '',
+      contactNumber: '',
+      address: '',
+      tin: '',
+      sss: '',
+      pagibig: '',
     },
   });
 
@@ -141,7 +160,9 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       {...register('email')}
                     />
                   </div>
-                  {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+                  {errors.email && (
+                    <p className="text-sm text-destructive">{errors.email.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -153,10 +174,12 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       placeholder="COMP-001"
                       className="pl-10"
                       disabled={isPending}
-                      {...register('companyId' as any)}
+                      {...register('companyId')}
                     />
                   </div>
-                  {errors.companyId && <p className="text-sm text-destructive">{errors.companyId.message}</p>}
+                  {errors.companyId && (
+                    <p className="text-sm text-destructive">{errors.companyId.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -168,10 +191,12 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       placeholder="EMP-2024-001"
                       className="pl-10"
                       disabled={isPending}
-                      {...register('employeeId' as any)}
+                      {...register('employeeId')}
                     />
                   </div>
-                  {errors.employeeId && <p className="text-sm text-destructive">{errors.employeeId.message}</p>}
+                  {errors.employeeId && (
+                    <p className="text-sm text-destructive">{errors.employeeId.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -201,10 +226,12 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       placeholder="+639171234567 or 09171234567"
                       className="pl-10"
                       disabled={isPending}
-                      {...register('contactNumber' as any)}
+                      {...register('contactNumber')}
                     />
                   </div>
-                  {errors.contactNumber && <p className="text-sm text-destructive">{errors.contactNumber.message}</p>}
+                  {errors.contactNumber && (
+                    <p className="text-sm text-destructive">{errors.contactNumber.message}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -242,8 +269,8 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                 <div className="space-y-2">
                   <Label htmlFor="add-status">Employment Status *</Label>
                   <Select
-                    value={watch('employmentStatus' as any)}
-                    onValueChange={(value) => setValue('employmentStatus' as any, value)}
+                    value={watch('employmentStatus')}
+                    onValueChange={(value) => setValue('employmentStatus', value)}
                     disabled={isPending}
                   >
                     <SelectTrigger id="add-status">
@@ -274,12 +301,14 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                 <Textarea
                   id="add-address"
                   placeholder="Complete address (Street, Barangay, City, Province)"
-                  className="pl-10 min-h-[80px] resize-none"
+                  className="pl-10 min-h-20 resize-none"
                   disabled={isPending}
-                  {...register('address' as any)}
+                  {...register('address')}
                 />
               </div>
-              {errors.address && <p className="text-sm text-destructive">{errors.address.message}</p>}
+              {errors.address && (
+                <p className="text-sm text-destructive">{errors.address.message}</p>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -295,7 +324,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       placeholder="123-456-789-000"
                       className="pl-10"
                       disabled={isPending}
-                      {...register('tin' as any)}
+                      {...register('tin')}
                     />
                   </div>
                   {errors.tin && <p className="text-sm text-destructive">{errors.tin.message}</p>}
@@ -310,7 +339,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       placeholder="12-3456789-0"
                       className="pl-10"
                       disabled={isPending}
-                      {...register('sss' as any)}
+                      {...register('sss')}
                     />
                   </div>
                   {errors.sss && <p className="text-sm text-destructive">{errors.sss.message}</p>}
@@ -325,10 +354,12 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       placeholder="1234-5678-9012"
                       className="pl-10"
                       disabled={isPending}
-                      {...register('pagibig' as any)}
+                      {...register('pagibig')}
                     />
                   </div>
-                  {errors.pagibig && <p className="text-sm text-destructive">{errors.pagibig.message}</p>}
+                  {errors.pagibig && (
+                    <p className="text-sm text-destructive">{errors.pagibig.message}</p>
+                  )}
                 </div>
               </div>
             </div>
