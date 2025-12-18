@@ -219,7 +219,7 @@ export async function editUserAction(
   // only call to rpc if there's no password error or change
   const { data, error } = await supabase.rpc('rpc_update_user_name_and_assign_role', {
     ...params,
-  })
+  });
 
   if (error) {
     return { error: 'Failed to update user: ' + error.message };
@@ -251,22 +251,24 @@ export async function deleteUserAction(userId: string): Promise<ServerActionResp
 // Optionals
 // ============================================
 
-export async function uploadProfilePicture(userId: string, file: File): Promise<ServerActionResponse> {
+export async function uploadProfilePicture(
+  userId: string,
+  file: File
+): Promise<ServerActionResponse> {
   const supabase = await createClient();
   const { data, error } = await supabase.storage
     .from('employees')
     .upload(`${userId}/profile.png`, file, {
-      cacheControl: '0',
+      cacheControl: '3600',
       upsert: true,
       contentType: (file as any)?.type || 'image/png',
     });
 
   if (error) {
     return { error: 'Failed to upload profile picture: ' + error.message };
-  };
-  return {error: null, data: data}
+  }
+  return { error: null, data: data };
 }
-
 
 async function uploadDocument(userId: string, file: File) {
   const supabase = await createClient();

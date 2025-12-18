@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect as React_useEffect } from 'react';
+import * as React from 'react';
 import type { EmployeeTypeValue, User } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -62,18 +63,28 @@ function formatDate(value?: Date | string) {
   return Number.isNaN(parsed.getTime()) ? 'N/A' : format(parsed, 'PPP');
 }
 
+// Global version store that survives component unmounts
+const globalImageVersions = new Map<string, number>();
+
 export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload }: UserCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isHoveringAvatar, setIsHoveringAvatar] = useState(false);
   const [hasImage, setHasImage] = useState(true);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [imgBust, setImgBust] = useState<number>(0);
+  const [imageKey, setImageKey] = useState<number>(() => globalImageVersions.get(user.id) || 0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleAvatarClick(e: React.MouseEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
-    fileInputRef.current?.click(); // programmatically open file picker
+    fileInputRef.current?.click();
+  }
+
+  function getProfileUrl(userId: string) {
+    const supabase = createClient();
+    const { data } = supabase.storage.from('employees').getPublicUrl(`${userId}/profile.png`);
+    if (!data) return '';
+    return data.publicUrl;
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -87,30 +98,23 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
     if (onHandleProfilePictureUpload) {
       const success = await onHandleProfilePictureUpload(user.id, file, user.name);
       if (success) {
-
+        // Update global version and local state immediately
+        const newKey = Date.now();
+        globalImageVersions.set(user.id, newKey);
+        setImageKey(newKey);
         setHasImage(true);
-        setImgBust(Date.now());
+
+        // Clear preview after brief delay for new image to load
         setTimeout(() => {
           if (objectUrl) URL.revokeObjectURL(objectUrl);
           setPreviewUrl(null);
-        }, 3000);
+        }, 1500);
       } else {
-
         if (objectUrl) URL.revokeObjectURL(objectUrl);
         setPreviewUrl(null);
         setHasImage(false);
       }
     }
-  }
-
-  function getProfileUrl(userId: string) {
-    const supabase = createClient();
-    const { data } = supabase.storage.from('employees').getPublicUrl(`${userId}/profile.png`);
-    if (!data) {
-      return '';
-    }
-  
-    return data.publicUrl;
   }
 
   const employmentStatus = user.employmentStatus || 'unknown';
@@ -145,7 +149,8 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   ) : hasImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={`${getProfileUrl(user.id)}${imgBust ? `?v=${imgBust}` : ''}`}
+                      key={`${user.id}-${imageKey}`}
+                      src={`${getProfileUrl(user.id)}?t=${imageKey}`}
                       alt={`${user.name}'s profile`}
                       className="w-10 h-10 rounded-full object-cover"
                       onError={() => setHasImage(false)}

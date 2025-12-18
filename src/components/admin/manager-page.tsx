@@ -96,12 +96,15 @@ export function ManagerPage() {
         { file, userid, username },
         {
           onSuccess: () => {
+            // toast.success('Profile picture updated', {
+            //   description: `${username}'s profile picture has been uploaded successfully.`,
+            // });
             resolve(true);
           },
           onError: () => {
-            toast.error('Failed to upload profile picture', {
-              description: 'Please try again. If the issue persists, contact support.',
-            });
+            // toast.error('Failed to upload profile picture', {
+            //   description: 'Please try again. If the issue persists, contact support.',
+            // });
             resolve(false);
           },
         }
