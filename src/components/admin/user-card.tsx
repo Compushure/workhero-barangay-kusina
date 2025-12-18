@@ -67,6 +67,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
   const [isHoveringAvatar, setIsHoveringAvatar] = useState(false);
   const [hasImage, setHasImage] = useState(true);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imgBust, setImgBust] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleAvatarClick(e: React.MouseEvent<HTMLDivElement>) {
@@ -88,6 +89,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
       if (success) {
 
         setHasImage(true);
+        setImgBust(Date.now());
         setTimeout(() => {
           if (objectUrl) URL.revokeObjectURL(objectUrl);
           setPreviewUrl(null);
@@ -143,7 +145,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   ) : hasImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={getProfileUrl(user.id)}
+                      src={`${getProfileUrl(user.id)}${imgBust ? `?v=${imgBust}` : ''}`}
                       alt={`${user.name}'s profile`}
                       className="w-10 h-10 rounded-full object-cover"
                       onError={() => setHasImage(false)}

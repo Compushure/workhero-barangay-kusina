@@ -256,8 +256,9 @@ export async function uploadProfilePicture(userId: string, file: File): Promise<
   const { data, error } = await supabase.storage
     .from('employees')
     .upload(`${userId}/profile.png`, file, {
-      cacheControl: '3600',
-      upsert: true, 
+      cacheControl: '0',
+      upsert: true,
+      contentType: (file as any)?.type || 'image/png',
     });
 
   if (error) {
