@@ -10,7 +10,7 @@ import { z } from 'zod';
 // Employee Type Enum
 // ============================================
 
-export const EmployeeType = z.enum(['manager', 'hr', 'regular']);
+export const EmployeeType = z.enum(['superadmin', 'manager', 'hr', 'regular']);
 export type EmployeeTypeValue = z.infer<typeof EmployeeType>;
 
 // ============================================

@@ -28,6 +28,7 @@ function mapSortKey(input?: string) {
   return SORT_MAP[input.toLowerCase()] ?? SORT_MAP.dateadded;
 }
 
+
 function mapSearchKey(input?: string) {
   if (!input) return null;
   return SEARCH_MAP[input.toLowerCase()] ?? null;
@@ -63,6 +64,7 @@ export async function GET(req: Request) {
     const supabase = await createClient();
 
     // Start building the query
+    
     let sb = supabase
       .from('user_role_attribute')
       .select(

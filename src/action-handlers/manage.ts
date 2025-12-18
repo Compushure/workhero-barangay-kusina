@@ -12,6 +12,7 @@ import {
   addUserAction,
   editUserAction,
   deleteUserAction,
+  uploadProfilePicture,
 } from '@/actions/manage';
 import { type User, type AddUserInput, type EditUserInput, type UserQueryParams } from '@/types';
 import { toast } from 'sonner';
@@ -37,6 +38,24 @@ export async function handleFetchUsers(params: UserQueryParams): Promise<User[]>
  * @param input - New user data
  * @returns Created user or null on error
  */
+export async function handleUploadProfilePicture(username: string, userId: string, file: File) {
+  const result = await safeAction(() => uploadProfilePicture(userId, file));
+  
+  if (!result.success) {
+    toast.error(`Failed to update ${username}'s profile picture: ` + result.error);
+    return null;
+  }
+
+  if (result.data?.error) {
+    toast.error(result.data.error);
+    return null;
+  }
+
+  toast.success(`Successfully updated ${username}'s profile picture`);
+  return result.data?.data ?? null;
+}
+
+
 export async function handleAddUser(input: AddUserInput): Promise<User | null> {
   const result = await safeAction(() => addUserAction(input));
 

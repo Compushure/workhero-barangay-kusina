@@ -48,6 +48,7 @@ export async function POST(req: Request) {
     }
 
     const newUser = createData.user;
+    
 
     // Resolve role_id from Role.type (string). Use case-insensitive match if desired.
     let roleId: string | null = null;
