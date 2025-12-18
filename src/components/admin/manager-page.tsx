@@ -1,10 +1,13 @@
-
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useAuth } from '@/lib/auth-context';
 import { useGetUsers } from '@/hooks/tanstack/queries/userQueries';
-import { useAddUser, useEditUser, useDeleteUser } from '@/hooks/tanstack/mutations/userMutations';
+import {
+  useAddUser,
+  useEditUser,
+  useDeleteUser,
+  useUploadProfilePicture,
+} from '@/hooks/tanstack/mutations/userMutations';
 import { useDebounce } from '@/hooks/useDebounce';
 import type {
   User,
@@ -73,12 +76,41 @@ export function ManagerPage() {
   const addUserMutation = useAddUser();
   const editUserMutation = useEditUser();
   const deleteUserMutation = useDeleteUser();
+  const uploadProfilePictureMutation = useUploadProfilePicture();
 
   // Modal state
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  const onHandleProfilePictureUpload = async (
+    userid: string,
+    file: File,
+    username: string
+  ): Promise<boolean> => {
+    const currentUser = users.find((u) => u.id === userid);
+    if (!currentUser) return false;
+    return new Promise((resolve) => {
+      uploadProfilePictureMutation.mutate(
+        { file, userid, username },
+        {
+          onSuccess: () => {
+            // toast.success('Profile picture updated', {
+            //   description: `${username}'s profile picture has been uploaded successfully.`,
+            // });
+            resolve(true);
+          },
+          onError: () => {
+            // toast.error('Failed to upload profile picture', {
+            //   description: 'Please try again. If the issue persists, contact support.',
+            // });
+            resolve(false);
+          },
+        }
+      );
+    });
+  };
 
   // CRUD handlers using TanStack Query mutations
   const onAddUser = async (data: AddUserInput): Promise<void> => {
@@ -348,6 +380,7 @@ export function ManagerPage() {
                 user={user}
                 onEdit={handleEditClick}
                 onDelete={handleDeleteClick}
+                onHandleProfilePictureUpload={onHandleProfilePictureUpload}
               />
             ))}
           </div>

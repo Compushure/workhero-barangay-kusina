@@ -6,7 +6,12 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { handleAddUser, handleEditUser, handleDeleteUser } from '@/action-handlers/manage';
+import {
+  handleAddUser,
+  handleEditUser,
+  handleDeleteUser,
+  handleUploadProfilePicture,
+} from '@/action-handlers/manage';
 import type { User, AddUserInput, EditUserInput } from '@/types';
 import { userKeys } from '../queries/userQueries';
 
@@ -32,6 +37,25 @@ import { userKeys } from '../queries/userQueries';
  * }
  * ```
  */
+export function useUploadProfilePicture() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, { file: File; userid: string; username: string }>({
+    mutationFn: async ({ file, userid, username }): Promise<void> => {
+      // Use action-handler which includes safeAction wrapper and toast handling
+      await handleUploadProfilePicture(username, userid, file);
+    },
+    onSuccess: () => {
+      // Invalidate to ensure server state is reflected
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      // Toast is handled by action-handler
+    },
+    onError: (_error) => {
+      // Rollback optimistic update on error
+      // Error toast is handled by action-handler
+    },
+  });
+}
+
 export function useAddUser(): UseMutationResult<User, Error, AddUserInput, unknown> {
   const queryClient = useQueryClient();
 

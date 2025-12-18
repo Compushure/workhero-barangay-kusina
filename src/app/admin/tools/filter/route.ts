@@ -63,6 +63,7 @@ export async function GET(req: Request) {
     const supabase = await createClient();
 
     // Start building the query
+    
     let sb = supabase
       .from('user_role_attribute')
       .select(

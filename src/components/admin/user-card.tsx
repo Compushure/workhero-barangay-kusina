@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState, useEffect as React_useEffect } from 'react';
+import * as React from 'react';
 import type { EmployeeTypeValue, User } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,8 +20,10 @@ import {
   Trash2,
   Edit2,
   UserIcon,
+  Upload,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { createClient } from '@/lib/supabase/client';
 
 type UserWithExtras = User & {
   employeeId?: string;
@@ -34,20 +37,24 @@ type UserWithExtras = User & {
   createdAt?: string | Date;
 };
 
+
+
 interface UserCardProps {
   user: UserWithExtras;
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
+  onHandleProfilePictureUpload?: (userid: string, file: File, username: string) => Promise<boolean>;
 }
 
 const EMPLOYEE_TYPE_STYLES: Record<EmployeeTypeValue, string> = {
   manager: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   hr: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
   regular: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+  superadmin: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
 };
 
 const EMPLOYMENT_STATUS_STYLES: Record<string, string> = {
-  probationary: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+  probational: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
   regular: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
 };
 
@@ -57,23 +64,116 @@ function formatDate(value?: Date | string) {
   return Number.isNaN(parsed.getTime()) ? 'N/A' : format(parsed, 'PPP');
 }
 
-export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
+// Global version store that survives component unmounts
+const globalImageVersions = new Map<string, number>();
+
+export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload }: UserCardProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHoveringAvatar, setIsHoveringAvatar] = useState(false);
+  const [hasImage, setHasImage] = useState(true);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imageKey, setImageKey] = useState<number>(() => globalImageVersions.get(user.id) || 0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleAvatarClick(e: React.MouseEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    fileInputRef.current?.click();
+  }
+
+  function getProfileUrl(userId: string) {
+    const supabase = createClient();
+    const { data } = supabase.storage.from('employees').getPublicUrl(`${userId}/profile.png`);
+    if (!data) return '';
+    return data.publicUrl;
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    console.log('Selected file:', file?.name);
+    if (!file) return;
+    // Optimistic preview
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+    setHasImage(true);
+    if (onHandleProfilePictureUpload) {
+      const success = await onHandleProfilePictureUpload(user.id, file, user.name);
+      if (success) {
+        // Update global version and local state immediately
+        const newKey = Date.now();
+        globalImageVersions.set(user.id, newKey);
+        setImageKey(newKey);
+        setHasImage(true);
+
+        // Clear preview after brief delay for new image to load
+        setTimeout(() => {
+          if (objectUrl) URL.revokeObjectURL(objectUrl);
+          setPreviewUrl(null);
+        }, 1500);
+      } else {
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        setPreviewUrl(null);
+        setHasImage(false);
+      }
+    }
+  }
 
   const employmentStatus = user.employmentStatus || 'unknown';
   const employmentStatusClass =
     EMPLOYMENT_STATUS_STYLES[employmentStatus] || 'bg-muted text-foreground';
   const dateCreated = formatDate(user.createdAt || user.date_added);
 
+
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <Card className="overflow-hidden border border-border hover:shadow-md transition-shadow">
         <CollapsibleTrigger asChild>
-          <button className="w-full p-4 sm:p-6 flex items-center justify-between text-left hover:bg-muted/50 transition-colors gap-3">
+          <button className="w-full p-4 sm:p-6 flex items-center justify-between text-left hover:bg-muted/50 transition-colors gap-3 ">
             <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <UserIcon className="h-5 w-5 text-primary" />
+              <div
+                className="relative group cursor-pointer"
+                onClick={(e) => handleAvatarClick(e)}
+                onMouseEnter={() => setIsHoveringAvatar(true)}
+                onMouseLeave={() => setIsHoveringAvatar(false)}
+              >
+                <div
+                  className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 transition-colors ${
+                    isHoveringAvatar ? 'bg-primary/20' : ''
+                  }`}
+                >
+                  {previewUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={previewUrl}
+                      alt={`${user.name}'s profile (preview)`}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : hasImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={`${user.id}-${imageKey}`}
+                      src={`${getProfileUrl(user.id)}?t=${imageKey}`}
+                      alt={`${user.name}'s profile`}
+                      className="w-10 h-10 rounded-full object-cover"
+                      onError={() => setHasImage(false)}
+                    />
+                  ) : (
+                    <UserIcon className="h-5 w-5 text-primary" />
+                  )}
+                </div>
+                {isHoveringAvatar && (
+                  <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center ">
+                    <Upload className="h-4 w-4 text-white" />
+                  </div>
+                )}
               </div>
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                hidden
+                onChange={handleFileChange}
+              />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <p className="font-semibold truncate">{user.name}</p>

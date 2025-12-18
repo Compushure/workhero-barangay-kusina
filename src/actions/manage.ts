@@ -104,7 +104,6 @@ function buildQueryParams(params: UserQueryParams): string {
 export async function fetchUsersAction(params: UserQueryParams = {}): Promise<User[]> {
   const qs = buildQueryParams(params);
   const res = await fetch(`${baseUrl}/admin/tools/filter?${qs}`, { method: 'GET' });
-
   if (!res.ok) {
     throw new Error(`Error fetching users: ${res.statusText}`);
   }
@@ -252,19 +251,24 @@ export async function deleteUserAction(userId: string): Promise<ServerActionResp
 // Optionals
 // ============================================
 
-export async function uploadProfilePicture(userId: string, file: File) {
+export async function uploadProfilePicture(
+  userId: string,
+  file: File
+): Promise<ServerActionResponse> {
   const supabase = await createClient();
   const { data, error } = await supabase.storage
-    .from('user-files')
+    .from('employees')
     .upload(`${userId}/profile.png`, file, {
       cacheControl: '3600',
-      upsert: true, // overwrite if exists
+      upsert: true,
+      contentType: (file as any)?.type || 'image/png',
     });
 
-  if (error) throw error;
-  return data;
+  if (error) {
+    return { error: 'Failed to upload profile picture: ' + error.message };
+  }
+  return { error: null, data: data };
 }
-
 
 async function uploadDocument(userId: string, file: File) {
   const supabase = await createClient();
