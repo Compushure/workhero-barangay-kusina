@@ -1,8 +1,13 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import type { ServerActionResponse } from '@/lib/utils/safe-action';
-import type { User, AddUserInput, EditUserInput } from '@/types';
+import type {
+  ServerActionResponse,
+  User,
+  AddUserInput,
+  EditUserInput,
+  UserQueryParams,
+} from '@/types';
 import { addUserSchema, editUserSchema } from '@/zod/schemas';
 import { getUserRole } from './auth';
 
@@ -48,39 +53,65 @@ async function changeuserPassword(userId: string, newPassword: string) {
   return { error: null };
 }
 
+function buildQueryParams(params: UserQueryParams): string {
+  const searchParams = new URLSearchParams();
+
+  // sort mapping
+  let type = 'dateadded';
+  let order = 'desc';
+  switch (params.sortBy) {
+    case 'name-asc':
+      type = 'name';
+      order = 'asc';
+      break;
+    case 'name-desc':
+      type = 'name';
+      order = 'desc';
+      break;
+    case 'date-asc':
+      type = 'dateadded';
+      order = 'asc';
+      break;
+    case 'date-desc':
+      type = 'dateadded';
+      order = 'desc';
+      break;
+  }
+  searchParams.set('type', type);
+  searchParams.set('order', order);
+
+  // search
+  if (params.searchQuery) {
+    searchParams.set('query', params.searchQuery.trim());
+    searchParams.set('queryby', params.searchType ?? 'name');
+  }
+
+  // filters
+  searchParams.set('employeeType', params.employeeTypeFilter?.toLowerCase() ?? 'all');
+  searchParams.set('employmentStatus', params.employmentStatusFilter?.toLowerCase() ?? 'all');
+
+  // pagination
+  searchParams.set('page', String(params.page ?? 1));
+  searchParams.set('pageSize', String(params.pageSize ?? 10));
+
+  return searchParams.toString();
+}
+
 // ============================================
 // User Management Actions
 // ============================================
 
-export async function fetchUsersAction(): Promise<User[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('user_role_attribute')
-    .select('user_id, user_name, user_email, role_type, user_date_added')
-    .order('user_date_added', { ascending: false });
-
-  if (error || !data) {
-    throw new Error('Error fetching users: ' + error?.message || 'Unknown error');
+export async function fetchUsersAction(params: UserQueryParams = {}): Promise<User[]> {
+  const qs = buildQueryParams(params);
+  const res = await fetch(`${baseUrl}/admin/tools/filter?${qs}`, { method: 'GET' });
+  if (!res.ok) {
+    throw new Error(`Error fetching users: ${res.statusText}`);
   }
 
-  const users = data.map((u) => {
-    let date_added = new Date();
-    if (u.user_date_added) {
-      const parsed = new Date(u.user_date_added);
-      if (!Number.isNaN(parsed.getTime())) {
-        date_added = parsed;
-      }
-    }
-    return {
-      id: u.user_id,
-      name: u.user_name,
-      email: u.user_email,
-      employeeType: u.role_type,
-      date_added,
-    };
-  });
-  return users;
+  const data = await res.json();
+  return data.users as User[];
 }
+
 export async function addUserAction(input: AddUserInput): Promise<ServerActionResponse<User>> {
   // Validate input
   const parsed = addUserSchema.safeParse(input);
@@ -89,8 +120,20 @@ export async function addUserAction(input: AddUserInput): Promise<ServerActionRe
     return { error: parsed.error.issues[0]?.message || 'Invalid input' };
   }
 
-  const { name, email, password, employeeType } = parsed.data;
-  console.log('Adding user:', name, email, employeeType, password);
+  const {
+    name,
+    email,
+    password,
+    employeeType,
+    employmentStatus,
+    contactNumber,
+    address,
+    tin,
+    sss,
+    pagibig,
+    employeeId,
+  } = parsed.data;
+  console.log('Adding user:', name, email, employeeType, employmentStatus);
 
   const res = await fetch(`${baseUrl}/admin/tools/adduser`, {
     method: 'POST',
@@ -102,6 +145,13 @@ export async function addUserAction(input: AddUserInput): Promise<ServerActionRe
       password: password,
       name: name,
       requested_role: employeeType,
+      employee_id: employeeId || '',
+      employment_status: employmentStatus || '',
+      contact_details: contactNumber || '',
+      home_address: address || '',
+      tin_id: tin || '',
+      sss_id: sss || '',
+      pagibig_id: pagibig || '',
     }),
   });
 
@@ -128,11 +178,24 @@ export async function editUserAction(
   if (input.employeeType === 'no-change') {
     parsed.data.employeeType = '';
   }
+  if (input.employmentStatus === 'no-change') {
+    parsed.data.employmentStatus = '';
+  }
   if (input.name === '') {
     parsed.data.name = '';
   }
 
-  const { name, employeeType, password } = parsed.data;
+  const {
+    name,
+    employeeType,
+    password,
+    employmentStatus,
+    contactNumber,
+    address,
+    tin,
+    sss,
+    pagibig,
+  } = parsed.data;
 
   // change password if provided
   if (password) {
@@ -142,13 +205,20 @@ export async function editUserAction(
     }
   }
 
+  const params = {
+    p_user_id: userId,
+    p_new_name: name || '',
+    p_role_type: employeeType || '',
+    p_employment_status: employmentStatus || '',
+    p_contact_details: contactNumber || '',
+    p_home_address: address || '',
+    p_tin_id: tin || '',
+    p_sss_id: sss || '',
+    p_pagibig_id: pagibig || '',
+  };
   // only call to rpc if there's no password error or change
   const { data, error } = await supabase.rpc('rpc_update_user_name_and_assign_role', {
-    p_user_id: userId,
-
-    p_new_name: name,
-
-    p_new_role_type: employeeType,
+    ...params,
   });
 
   if (error) {
@@ -172,10 +242,43 @@ export async function deleteUserAction(userId: string): Promise<ServerActionResp
   const { error } = await res.json();
 
   if (error) {
-    return { error: 'Failed to create user' + error };
+    return { error: 'Failed to delete user: ' + error };
   }
   return { error: null };
-  // // PLACEHOLDER: Always succeed for demo
-  // console.log('[Demo] Would delete user:', userId)
-  // return { error: null }
+}
+
+// ============================================
+// Optionals
+// ============================================
+
+export async function uploadProfilePicture(
+  userId: string,
+  file: File
+): Promise<ServerActionResponse> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.storage
+    .from('employees')
+    .upload(`${userId}/profile.png`, file, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: (file as any)?.type || 'image/png',
+    });
+
+  if (error) {
+    return { error: 'Failed to upload profile picture: ' + error.message };
+  }
+  return { error: null, data: data };
+}
+
+async function uploadDocument(userId: string, file: File) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.storage
+    .from('user-files')
+    .upload(`${userId}/${file.name}`, file, {
+      cacheControl: '3600',
+      upsert: true,
+    });
+
+  if (error) throw error;
+  return data;
 }
