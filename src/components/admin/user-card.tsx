@@ -6,7 +6,6 @@ import type { EmployeeTypeValue, User } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Award as IdCard,
@@ -37,6 +36,8 @@ type UserWithExtras = User & {
   pagibig?: string;
   createdAt?: string | Date;
 };
+
+
 
 interface UserCardProps {
   user: UserWithExtras;
@@ -121,6 +122,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
   const employmentStatusClass =
     EMPLOYMENT_STATUS_STYLES[employmentStatus] || 'bg-muted text-foreground';
   const dateCreated = formatDate(user.createdAt || user.date_added);
+
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
