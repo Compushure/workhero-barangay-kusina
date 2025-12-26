@@ -63,9 +63,9 @@ export async function GET(req: Request) {
     const supabase = await createClient();
 
     // Start building the query
-    
+
     let sb = supabase
-      .from('user_role_attribute')
+      .from('user_role_with_attributes')
       .select(
         'user_id, user_name, user_email, role_type, user_date_added, employee_id, contact_details, home_address, tin_id, sss_id, employment_status, pagibig_id',
         { count: 'estimated' } // optional: returns count in meta (client support)
