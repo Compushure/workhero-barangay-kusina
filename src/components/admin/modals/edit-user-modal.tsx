@@ -68,7 +68,7 @@ const EMPLOYEE_TYPES = [
 ] as const;
 
 const EMPLOYMENT_STATUS_OPTIONS = [
-  { value: 'probationary', label: 'Probationary' },
+  { value: 'probational', label: 'Probationary' },
   { value: 'regular', label: 'Regular' },
 ] as const;
 
@@ -278,7 +278,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       onValueChange={(value) =>
                         setValue(
                           'employmentStatus',
-                          value as '' | 'regular' | 'no-change' | 'probationary' | undefined
+                          value as '' | 'regular' | 'no-change' | 'probational' | undefined
                         )
                       }
                       disabled={isPending}
