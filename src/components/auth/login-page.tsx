@@ -32,22 +32,61 @@ export function AdminLoginPage() {
 
     startTransition(async () => {
       const { error } = await handleLoginSubmit(formData);
-      const { role } = await getUserRole();
+
       if (error) {
         setError('Invalid email or password');
         toast.error('Login Failed', {
           description: 'Invalid email or password. Please try again.',
         });
-      } else if (role.trim() !== 'superadmin') {
-        setError('You are not authorized to access this page.');
-        toast.error('Not Authorized', {
-          description: `Your role (${role}) does not have access to the admin dashboard.`,
+        return;
+      }
+
+      // Get user role after successful login
+      const { role, error: roleError } = await getUserRole();
+
+      if (roleError || !role) {
+        setError('Unable to verify user role');
+        toast.error('Authorization Error', {
+          description: 'Unable to verify your permissions.',
         });
-      } else {
-        toast.success('Welcome!', {
-          description: 'You have successfully logged in.',
-        });
-        router.push('/admin/manage');
+        return;
+      }
+
+      const normalizedRole = role.trim().toLowerCase();
+
+      // Route based on role
+      switch (normalizedRole) {
+        case 'superadmin':
+          toast.success('Welcome Admin!', {
+            description: 'You have successfully logged in.',
+          });
+          router.push('/admin/manage');
+          break;
+        case 'manager':
+          toast.success('Welcome Manager!', {
+            description: 'You have successfully logged in.',
+          });
+          router.push('/manager/dashboard');
+          break;
+        case 'hr':
+          toast.success('Welcome HR!', {
+            description: 'You have successfully logged in.',
+          });
+          router.push('/hr/dashboard');
+          break;
+        case 'regular':
+        case 'employee':
+          toast.success('Welcome!', {
+            description: 'You have successfully logged in.',
+          });
+          router.push('/employee/dashboard');
+          break;
+        default:
+          setError('You are not authorized to access this system.');
+          toast.error('Not Authorized', {
+            description: `Your role (${role}) does not have access to any dashboard.`,
+          });
+          break;
       }
     });
   };

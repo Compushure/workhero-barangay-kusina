@@ -4,44 +4,77 @@ import type { ServerActionResponse } from '@/lib/utils/safe-action';
 import { loginSchema } from '@/zod/schemas';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { de } from 'zod/v4/locales';
 
 export async function getUserRole() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
   if (error || !data?.claims) {
-    return { role: null };
+    return { role: null, error };
   } else {
-    return { role: data.claims.app_metadata?.user_role || null };
+    return { role: data.claims.app_metadata?.user_role || null, error: null };
+  }
+}
+
+export async function redirectToCorrectDashboardServer() {
+  const { role, error } = await getUserRole();
+  if (error || !role) {
+    console.log('No role found, redirecting to login');
+    redirect('/admin');
+    return;
+  }
+
+  const normalizedRole = role.trim().toLowerCase();
+
+  switch (normalizedRole) {
+    case 'superadmin':
+      redirect('/admin/manage');
+      return;
+    case 'manager':
+      redirect('/manager/dashboard');
+      return;
+    case 'hr':
+      redirect('/hr/dashboard');
+      return;
+    case 'regular':
+    case 'employee':
+      redirect('/employee/dashboard');
+      return;
+    default:
+      console.log('Unknown role:', role);
+      redirect('/admin');
+      return;
   }
 }
 
 export async function protectAdminRoute() {
   const supabase = await createClient();
-  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
   if (!sessionData.session || sessionError) {
+    console.log('No session found, redirecting to login');
     redirect('/admin');
-  } else {
-    if (claimsError || !claimsData?.claims) {
-      // change to login ilater
-      if (!claimsData?.claims) {
-        console.log('No active session found.');
-      }
-      redirect('/admin');
-    } else {
-      const role = claimsData?.claims?.app_metadata?.user_role;
-      if (role.trim() != 'superadmin') {
-        console.log('Unauthorized access attempt by user with role:', role);
-        redirect('/admin');
-      }
-    }
-    // custom claim is usually under app_metadata
-    const role = claimsData?.claims?.app_metadata?.user_role;
-    console.log('role', role);
-    console.log(claimsData.claims);
-    return JSON.stringify(claimsData.claims, null, 2);
+    return;
   }
+
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+
+  if (claimsError || !claimsData?.claims) {
+    console.log('No claims found, redirecting to login');
+    redirect('/admin');
+    return;
+  }
+
+  const role = claimsData.claims.app_metadata?.user_role;
+  const normalizedRole = role?.trim().toLowerCase();
+
+  if (normalizedRole !== 'superadmin') {
+    console.log('Access denied: User has role', role, 'but superadmin is required');
+    redirect('/admin');
+    return;
+  }
+
+  console.log('✓ Superadmin access granted');
 }
 
 export async function signinAction(formData: FormData): Promise<ServerActionResponse> {
@@ -69,6 +102,96 @@ export async function signinAction(formData: FormData): Promise<ServerActionResp
   }
 }
 
+export async function protectManagerRoute() {
+  const supabase = await createClient();
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+  if (!sessionData.session || sessionError) {
+    console.log('No session found, redirecting to login');
+    redirect('/admin');
+    return;
+  }
+
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+
+  if (claimsError || !claimsData?.claims) {
+    console.log('No claims found, redirecting to login');
+    redirect('/admin');
+    return;
+  }
+
+  const role = claimsData.claims.app_metadata?.user_role;
+  const normalizedRole = role?.trim().toLowerCase();
+
+  if (normalizedRole !== 'manager') {
+    console.log('Access denied: User has role', role, 'but manager is required');
+    redirect('/admin');
+    return;
+  }
+
+  console.log('✓ Manager access granted');
+}
+
+export async function protectHRRoute() {
+  const supabase = await createClient();
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+  if (!sessionData.session || sessionError) {
+    console.log('No session found, redirecting to login');
+    redirect('/admin');
+    return;
+  }
+
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+
+  if (claimsError || !claimsData?.claims) {
+    console.log('No claims found, redirecting to login');
+    redirect('/admin');
+    return;
+  }
+
+  const role = claimsData.claims.app_metadata?.user_role;
+  const normalizedRole = role?.trim().toLowerCase();
+
+  if (normalizedRole !== 'hr') {
+    console.log('Access denied: User has role', role, 'but hr is required');
+    redirect('/admin');
+    return;
+  }
+
+  console.log('✓ HR access granted');
+}
+
+export async function protectEmployeeRoute() {
+  const supabase = await createClient();
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+  if (!sessionData.session || sessionError) {
+    console.log('No session found, redirecting to login');
+    redirect('/admin');
+    return;
+  }
+
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+
+  if (claimsError || !claimsData?.claims) {
+    console.log('No claims found, redirecting to login');
+    redirect('/admin');
+    return;
+  }
+
+  const role = claimsData.claims.app_metadata?.user_role;
+  const normalizedRole = role?.trim().toLowerCase();
+
+  if (normalizedRole !== 'regular' && normalizedRole !== 'employee') {
+    console.log('Access denied: User has role', role, 'but employee/regular is required');
+    redirect('/admin');
+    return;
+  }
+
+  console.log('✓ Employee access granted');
+}
+
 export async function signOutAction(): Promise<ServerActionResponse> {
   const supabase = await createClient();
   const {
@@ -83,4 +206,3 @@ export async function signOutAction(): Promise<ServerActionResponse> {
   }
   return { error: null };
 }
-
