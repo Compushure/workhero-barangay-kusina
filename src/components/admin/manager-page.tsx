@@ -252,40 +252,12 @@ export function ManagerPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div className="space-y-2 lg:col-span-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="search">
-                  Search {searchType === 'name' ? 'by Name' : 'by Employee ID'}
-                </Label>
-                <div className="flex items-center gap-2 text-xs">
-                  <button
-                    onClick={() => setSearchType('name')}
-                    className={`px-2 py-1 rounded transition-colors ${
-                      searchType === 'name'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    }`}
-                  >
-                    Name
-                  </button>
-                  <button
-                    onClick={() => setSearchType('employee_id')}
-                    className={`px-2 py-1 rounded transition-colors ${
-                      searchType === 'employee_id'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    }`}
-                  >
-                    Employee ID
-                  </button>
-                </div>
-              </div>
+              <Label htmlFor="search">Search by Name</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder={
-                    searchType === 'name' ? 'Search by name...' : 'Search by employee ID...'
-                  }
+                  placeholder="Search by name..."
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
