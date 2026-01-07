@@ -43,7 +43,6 @@ export function ManagerPage() {
 
   // Local UI state - search and filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState<'name' | 'employee_id'>('name');
   const [employeeTypeFilter, setEmployeeTypeFilter] = useState<'all' | EmployeeTypeValue>('all');
   const [employmentStatusFilter, setEmploymentStatusFilter] = useState<
     'all' | EmploymentStatusValue
@@ -64,7 +63,6 @@ export function ManagerPage() {
     error,
   } = useGetUsers({
     searchQuery: debouncedSearchQuery,
-    searchType,
     employeeTypeFilter,
     employmentStatusFilter,
     sortBy,
