@@ -22,7 +22,7 @@ export function Sidebar() {
           </div>
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1 hover:bg-red-900 rounded transition-colors"
+            className="p-1 hover:bg-red-900 cursor-pointer rounded transition-colors"
             aria-label="Toggle sidebar"
           >
             {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
@@ -36,7 +36,7 @@ export function Sidebar() {
         {/* Task Assignment */}
         <button
           onClick={() => setActiveNav('assignment')}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-all justify-center ${
+          className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all justify-center ${
             isCollapsed ? 'px-2' : ''
           } ${activeNav === 'assignment' ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
           title={isCollapsed ? 'Task Assignment' : ''}
@@ -48,7 +48,7 @@ export function Sidebar() {
         {/* Task Verification */}
         <button
           onClick={() => setActiveNav('verification')}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-all justify-center ${
+          className={`w-full flex items-center cursor-pointer gap-3 px-4 py-3 rounded-full font-medium transition-all justify-center ${
             isCollapsed ? 'px-2' : ''
           } ${activeNav === 'verification' ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
           title={isCollapsed ? 'Task Verification' : ''}
@@ -80,7 +80,7 @@ export function Sidebar() {
 
         {/* Logout Button */}
         {!isCollapsed && (
-          <button className="w-full bg-white text-[#690003] py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors text-sm">
+          <button className="w-full cursor-pointer bg-white text-[#690003] py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors text-sm">
             Logout
           </button>
         )}

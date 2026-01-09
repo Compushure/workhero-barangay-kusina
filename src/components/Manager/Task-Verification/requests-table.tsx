@@ -47,17 +47,17 @@ export function RequestsTable({
     <div className="overflow-x-auto rounded-lg border border-border">
       <Table>
         <TableHeader className="bg-[#690003]">
-          <TableRow className="border-b border-border hover:bg-[#690003">
-            <TableHead className="text-white font-semibold px-15">REQUEST DATE</TableHead>
-            <TableHead className="text-white font-semibold px-10">EMPLOYEE</TableHead>
-            <TableHead className="text-white font-semibold px-30">TASK</TableHead>
-            <TableHead className="text-white font-semibold text-center px-6">REPEAT</TableHead>
-            <TableHead className="text-white font-semibold text-center min-w-80 px-6">
+          <TableRow className="border-b border-border hover:bg-[#690003]">
+            <TableHead className="text-white font-semibold pl-6 pr-25 w-32">REQUEST DATE</TableHead>
+            <TableHead className="text-white font-semibold pl-6 pr-30 w-40">EMPLOYEE</TableHead>
+            <TableHead className="text-white font-semibold pl-15 w-56">TASK</TableHead>
+            <TableHead className="text-white font-semibold text-center pl-10 pr-25 w-10">
+              REPEAT
+            </TableHead>
+            <TableHead className="text-white font-semibold text-center pr-25 w-24">
               TOTAL POINTS
             </TableHead>
-            <TableHead className="text-white font-semibold text-center w-auto px-6">
-              ACTION
-            </TableHead>
+            <TableHead className="text-white font-semibold text-center px-2 w-28">ACTION</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -66,19 +66,20 @@ export function RequestsTable({
               key={request.id}
               className="bg-[#FBF4E8] hover:bg-[#ffefd8] transition-colors border-b border-border"
             >
-              <TableCell className="text-sm font-medium px-10">
+              <TableCell className="text-sm font-medium pl-6 pr-20">
                 {formatDate(request.date)}
               </TableCell>
               <TableCell className="px-6">
                 <div className="text-sm font-medium">{request.employeeName}</div>
                 <div className="text-xs text-muted-foreground">{request.employeeId}</div>
               </TableCell>
-              <TableCell className="text-sm px-20">{request.task}</TableCell>
-              <TableCell className="text-sm text-center px-6">{request.repeat}</TableCell>
-              <TableCell className="text-sm text-center font-medium px-6">
-                {request.totalPoints} Pts
+              <TableCell className="text-sm px-4">{request.task}</TableCell>
+              <TableCell className="text-sm text-center pl-10 pr-25">{request.repeat}</TableCell>
+              <TableCell className="text-sm text-center font-medium pr-25">
+                {' '}
+                {request.totalPoints} Pts{' '}
               </TableCell>
-              <TableCell className="text-center">
+              <TableCell className="text-center px-2">
                 <div className="flex items-center justify-center gap-2">
                   {isShowingActions ? (
                     <>
@@ -91,7 +92,6 @@ export function RequestsTable({
                       >
                         <X size={20} />
                       </Button>
-
                       <Button
                         variant="ghost"
                         size="sm"
