@@ -110,7 +110,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0">
+      <DialogContent className="admin-theme bg-card w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0">
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>Add New User</DialogTitle>
           <DialogDescription>
@@ -131,7 +131,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     <Input
                       id="add-name"
                       placeholder="Juan Dela Cruz"
-                      className="pl-10"
+                      className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                       disabled={isPending}
                       {...register('name')}
                     />
@@ -147,7 +147,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       id="add-email"
                       type="email"
                       placeholder="juan@company.com"
-                      className="pl-10"
+                      className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                       disabled={isPending}
                       {...register('email')}
                     />
@@ -164,7 +164,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     <Input
                       id="add-company-id"
                       placeholder="COMP-001"
-                      className="pl-10"
+                      className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                       disabled={isPending}
                       {...register('companyId')}
                     />
@@ -181,7 +181,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     <Input
                       id="add-employee-id"
                       placeholder="EMP-2024-001"
-                      className="pl-10"
+                      className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                       disabled={isPending}
                       {...register('employeeId')}
                     />
@@ -199,7 +199,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       id="add-password"
                       type="password"
                       placeholder="Min 8 chars, 1 uppercase, 1 number"
-                      className="pl-10"
+                      className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                       disabled={isPending}
                       {...register('password')}
                     />
@@ -216,7 +216,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     <Input
                       id="add-contact"
                       placeholder="+639171234567 or 09171234567"
-                      className="pl-10"
+                      className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                       disabled={isPending}
                       {...register('contactNumber')}
                     />
@@ -239,7 +239,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     onValueChange={(value: EmployeeTypeValue) => setValue('employeeType', value)}
                     disabled={isPending}
                   >
-                    <SelectTrigger id="add-type">
+                    <SelectTrigger id="add-type" className="focus:ring-0 focus:border-primary">
                       <div className="flex items-center gap-2">
                         <Briefcase className="h-4 w-4 text-muted-foreground" />
                         <SelectValue />
@@ -267,7 +267,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     }
                     disabled={isPending}
                   >
-                    <SelectTrigger id="add-status">
+                    <SelectTrigger id="add-status" className="focus:ring-0 focus:border-primary">
                       <div className="flex items-center gap-2">
                         <BadgeCheck className="h-4 w-4 text-muted-foreground" />
                         <SelectValue />
@@ -295,7 +295,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                 <Textarea
                   id="add-address"
                   placeholder="Complete address (Street, Barangay, City, Province)"
-                  className="pl-10 min-h-20 resize-none"
+                  className="pl-10 min-h-20 resize-none focus-visible:ring-0 focus-visible:border-primary"
                   disabled={isPending}
                   {...register('address')}
                 />
@@ -316,7 +316,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     <Input
                       id="add-tin"
                       placeholder="123-456-789-000"
-                      className="pl-10"
+                      className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                       disabled={isPending}
                       {...register('tin')}
                     />
@@ -331,7 +331,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     <Input
                       id="add-sss"
                       placeholder="12-3456789-0"
-                      className="pl-10"
+                      className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                       disabled={isPending}
                       {...register('sss')}
                     />
@@ -346,7 +346,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     <Input
                       id="add-pagibig"
                       placeholder="1234-5678-9012"
-                      className="pl-10"
+                      className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                       disabled={isPending}
                       {...register('pagibig')}
                     />

@@ -112,6 +112,36 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.admin-theme {
+  --background: #FAFAFA;
+  --foreground: #690003;
+  --card: #FBF4E8;
+  --card-foreground: #690003;
+  --popover: #FBF4E8;
+  --popover-foreground: #690003;
+  --primary: #690003;
+  --primary-foreground: #FAFAFA;
+  --secondary: #F2F2F2;
+  --secondary-foreground: #690003;
+  --muted: #F2F2F2;
+  --muted-foreground: #690003;
+  --accent: #F2D0A7;
+  --accent-foreground: #690003;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #F2F2F2;
+  --input: #F2F2F2;
+  --ring: #690003;
+  
+  --sidebar: #FAFAFA;
+  --sidebar-foreground: #690003;
+  --sidebar-primary: #690003;
+  --sidebar-primary-foreground: #FAFAFA;
+  --sidebar-accent: #F2D0A7;
+  --sidebar-accent-foreground: #690003;
+  --sidebar-border: #F2F2F2;
+  --sidebar-ring: #690003;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
