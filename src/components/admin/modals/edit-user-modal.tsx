@@ -119,7 +119,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0">
+      <DialogContent className="admin-theme bg-card w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0">
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>
