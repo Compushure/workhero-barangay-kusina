@@ -37,7 +37,7 @@ export function DeleteUserModal({ open, onOpenChange, userName, onConfirm }: Del
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-md mx-auto">
+      <DialogContent className="admin-theme bg-card w-[95vw] max-w-md mx-auto">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
