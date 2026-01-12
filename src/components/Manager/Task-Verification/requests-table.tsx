@@ -44,13 +44,13 @@ export function RequestsTable({
   const isShowingActions = sortBy === 'pending';
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
+    <div className="overflow-x-auto rounded-lg border border-border shadow-md">
       <Table>
         <TableHeader className="bg-[#690003]">
           <TableRow className="border-b border-border hover:bg-[#690003]">
             <TableHead className="text-white font-semibold pl-6 pr-25 w-32">REQUEST DATE</TableHead>
             <TableHead className="text-white font-semibold pl-6 pr-30 w-40">EMPLOYEE</TableHead>
-            <TableHead className="text-white font-semibold pl-15 w-56">TASK</TableHead>
+            <TableHead className="text-white font-semibold pl-10 w-56">TASK</TableHead>
             <TableHead className="text-white font-semibold text-center pl-10 pr-25 w-10">
               REPEAT
             </TableHead>

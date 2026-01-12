@@ -22,7 +22,7 @@ export function SortButton({ sortBy, onSortChange }: SortButtonProps) {
         <Button
           variant="default"
           size="default"
-          className="bg-[#690003] hover:bg-[#690003] cursor-pointer text-white whitespace-nowrap"
+          className="bg-[#690003] hover:bg-[#af3b3f] cursor-pointer text-white whitespace-nowrap shadow-md"
         >
           <ArrowUpDown size={18} />
           Sort
