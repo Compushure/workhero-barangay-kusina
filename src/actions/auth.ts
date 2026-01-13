@@ -61,7 +61,7 @@ export async function protectAdminRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 
@@ -70,7 +70,7 @@ export async function protectAdminRoute() {
 
   if (normalizedRole !== 'superadmin') {
     console.log('Access denied: User has role', role, 'but superadmin is required');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 

@@ -1,91 +1,91 @@
-"use client"
+'use client';
 
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { LoginFormFields } from "../sign-in/sign-in-form-fields"
-import { LoginFormHeader } from "../sign-in/sign-in-form-header"
-import { LoginFormFooter } from "../sign-in/sign-in-form-footer"
-import { SignupFormFields } from "../sign-up/sign-up-form-fields"
-import { SignupFormHeader } from "../sign-up/sign-up-form-header"
-import { SignupFormFooter } from "../sign-up/sign-up-form-footer"
-import { Loader2 } from "lucide-react"
+import type React from 'react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { LoginFormFields } from '../sign-in/sign-in-form-fields';
+import { LoginFormHeader } from '../sign-in/sign-in-form-header';
+import { LoginFormFooter } from '../sign-in/sign-in-form-footer';
+import { SignupFormFields } from '../sign-up/sign-up-form-fields';
+import { SignupFormHeader } from '../sign-up/sign-up-form-header';
+import { SignupFormFooter } from '../sign-up/sign-up-form-footer';
+import { Loader2 } from 'lucide-react';
 
 interface LoginFormProps {
-  onSubmit: (email: string, password: string) => Promise<void>
-  isSubmitting: boolean
+  onSubmit: (email: string, password: string) => Promise<void>;
+  isSubmitting: boolean;
 }
 
 export function LoginForm({ onSubmit, isSubmitting }: LoginFormProps) {
-  const [mode, setMode] = useState<"signin" | "signup">("signin")
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
 
   // Sign In State
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   // Sign Up State
-  const [fullName, setFullName] = useState("")
-  const [signupEmail, setSignupEmail] = useState("")
-  const [signupPassword, setSignupPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [signupError, setSignupError] = useState("")
+  const [fullName, setFullName] = useState('');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [signupError, setSignupError] = useState('');
 
   const handleSignInSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError('');
 
     if (!email || !password) {
-      setError("Please fill in all fields")
-      return
+      setError('Please fill in all fields');
+      return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email")
-      return
+      setError('Please enter a valid email');
+      return;
     }
 
     try {
-      await onSubmit(email, password)
+      await onSubmit(email, password);
     } catch (err) {
-      setError("Login failed. Please try again.")
+      setError('Login failed. Please try again.');
     }
-  }
+  };
 
   const handleSignUpSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setSignupError("")
+    e.preventDefault();
+    setSignupError('');
 
     if (!fullName || !signupEmail || !signupPassword || !confirmPassword) {
-      setSignupError("Please fill in all fields")
-      return
+      setSignupError('Please fill in all fields');
+      return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupEmail)) {
-      setSignupError("Please enter a valid email")
-      return
+      setSignupError('Please enter a valid email');
+      return;
     }
 
     if (signupPassword.length < 8) {
-      setSignupError("Password must be at least 8 characters")
-      return
+      setSignupError('Password must be at least 8 characters');
+      return;
     }
 
     if (signupPassword !== confirmPassword) {
-      setSignupError("Passwords do not match")
-      return
+      setSignupError('Passwords do not match');
+      return;
     }
 
     // TODO: Implement sign-up functionality
-    console.log("Sign up:", { fullName, signupEmail, signupPassword })
-  }
+    console.log('Sign up:', { fullName, signupEmail, signupPassword });
+  };
 
   const toggleMode = () => {
-    setMode(mode === "signin" ? "signup" : "signin")
-    setError("")
-    setSignupError("")
-  }
+    setMode(mode === 'signin' ? 'signup' : 'signin');
+    setError('');
+    setSignupError('');
+  };
 
   return (
     <Card className="w-full bg-card/50 backdrop-blur-sm border-border/50 shadow-2xl animate-scaleIn overflow-hidden">
@@ -94,9 +94,9 @@ export function LoginForm({ onSubmit, isSubmitting }: LoginFormProps) {
           {/* Sign In Form */}
           <div
             className={`transition-all duration-500 ease-out origin-center ${
-              mode === "signin"
-                ? "opacity-100 translate-x-0 pointer-events-auto"
-                : "absolute opacity-0 translate-x-full pointer-events-none"
+              mode === 'signin'
+                ? 'opacity-100 translate-x-0 pointer-events-auto'
+                : 'absolute opacity-0 translate-x-full pointer-events-none'
             }`}
           >
             <LoginFormHeader />
@@ -119,19 +119,18 @@ export function LoginForm({ onSubmit, isSubmitting }: LoginFormProps) {
                     Signing in...
                   </>
                 ) : (
-                  "Sign In"
+                  'Sign In'
                 )}
               </Button>
             </form>
-            <LoginFormFooter onToggle={toggleMode} />
           </div>
 
           {/* Sign Up Form */}
           <div
             className={`transition-all duration-500 ease-out origin-center ${
-              mode === "signup"
-                ? "opacity-100 translate-x-0 pointer-events-auto"
-                : "absolute opacity-0 -translate-x-full pointer-events-none"
+              mode === 'signup'
+                ? 'opacity-100 translate-x-0 pointer-events-auto'
+                : 'absolute opacity-0 -translate-x-full pointer-events-none'
             }`}
           >
             <SignupFormHeader />
@@ -158,7 +157,7 @@ export function LoginForm({ onSubmit, isSubmitting }: LoginFormProps) {
                     Creating account...
                   </>
                 ) : (
-                  "Sign Up"
+                  'Sign Up'
                 )}
               </Button>
             </form>
@@ -167,5 +166,5 @@ export function LoginForm({ onSubmit, isSubmitting }: LoginFormProps) {
         </div>
       </div>
     </Card>
-  )
+  );
 }
