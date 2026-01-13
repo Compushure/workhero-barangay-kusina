@@ -112,6 +112,34 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.admin-theme {
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.321 0.173 27.2);
+  --card: oklch(0.958 0.024 84.3);
+  --card-foreground: oklch(0.321 0.173 27.2);
+  --popover: oklch(0.958 0.024 84.3);
+  --popover-foreground: oklch(0.321 0.173 27.2);
+  --primary: oklch(0.321 0.173 27.2);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.954 0 0);
+  --secondary-foreground: oklch(0.321 0.173 27.2);
+  --muted: oklch(0.954 0 0);
+  --muted-foreground: oklch(0.321 0.173 27.2);
+  --accent: oklch(0.869 0.071 70.3);
+  --accent-foreground: oklch(0.321 0.173 27.2);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.954 0 0);
+  --input: oklch(0.954 0 0);
+  --ring: oklch(0.321 0.173 27.2);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.321 0.173 27.2);
+  --sidebar-primary: oklch(0.321 0.173 27.2);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.869 0.071 70.3);
+  --sidebar-accent-foreground: oklch(0.321 0.173 27.2);
+  --sidebar-border: oklch(0.954 0 0);
+  --sidebar-ring: oklch(0.321 0.173 27.2);
+}
 @layer base {
   * {
     @apply border-border outline-ring/50;
