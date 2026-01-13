@@ -8,7 +8,7 @@
 import { Suspense } from 'react';
 import { AdminClient } from '@/components/admin/admin-client';
 
-function LoadingFallback() {
+export function LoadingFallback() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
       <div className="flex items-center gap-3">
