@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { LoginContainer } from '@/components/login/login-base/login-container';
+import { LoginContainer } from '@/components/login/login-container';
 import { LoadingFallback } from '@/app/admin/page';
 export default function LoginPage() {
   return (
