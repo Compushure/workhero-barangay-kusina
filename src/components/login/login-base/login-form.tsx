@@ -4,8 +4,8 @@ import type React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { LoginFormFields } from '../sign-in/sign-in-form-fields';
-import { LoginFormHeader } from '../sign-in/sign-in-form-header';
+import { LoginFormFields } from './sign-in-form-fields';
+import { LoginFormHeader } from './sign-in-form-header';
 import { Loader2 } from 'lucide-react';
 
 interface LoginFormProps {
@@ -66,7 +66,7 @@ export function LoginForm({ onSubmit, isSubmitting }: LoginFormProps) {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
+                className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-300 transform cursor-pointer hover:scale-95 hover:rounded-md active:scale-95"
               >
                 {isSubmitting ? (
                   <>

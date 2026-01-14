@@ -3,24 +3,6 @@
 import { useState } from "react"
 import { LoginForm } from "./login-form"
 import { LoginHero } from "./login-hero"
-<<<<<<< HEAD
-
-export function LoginContainer() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const handleSubmit = async (email: string, password: string) => {
-    setIsSubmitting(true)
-    try {
-      // TODO: Implement your authentication logic here
-      console.log("Login attempt:", { email, password })
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-    } catch (error) {
-      console.error("Login error:", error)
-    } finally {
-      setIsSubmitting(false)
-    }
-=======
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
 import { handleLoginSubmit } from "@/action-handlers/auth"
@@ -38,7 +20,6 @@ export function LoginContainer() {
     const formData = new FormData()
     formData.append("email", email)
     formData.append("password", password)
-
     
     startTransition(async () => {
       const { error } = await handleLoginSubmit(formData);
@@ -54,7 +35,6 @@ export function LoginContainer() {
       // Get user role after successful login
       await handleUserRole({ router, setError, getUserRole });
     });
->>>>>>> 5a187b421fe3b3bdca769bc77beef05a96abfa19
   }
 
   return (
@@ -66,11 +46,7 @@ export function LoginContainer() {
 
           {/* Form Section */}
           <div className="animate-slideInRight">
-<<<<<<< HEAD
-            <LoginForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
-=======
             <LoginForm onSubmit={handleSubmit} isSubmitting={isPending} />
->>>>>>> 5a187b421fe3b3bdca769bc77beef05a96abfa19
           </div>
         </div>
       </div>
