@@ -119,7 +119,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0">
+      <DialogContent className="admin-theme bg-card w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0">
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>
@@ -187,7 +187,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       <Input
                         id="edit-name"
                         placeholder={`Current: ${user.name}`}
-                        className="pl-10"
+                        className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                         disabled={isPending}
                         {...register('name')}
                       />
@@ -205,7 +205,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                         id="edit-password"
                         type="password"
                         placeholder="Leave blank to keep current"
-                        className="pl-10"
+                        className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                         disabled={isPending}
                         {...register('password')}
                       />
@@ -222,7 +222,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       <Input
                         id="edit-contact"
                         placeholder={`Current: ${(user as any).contactNumber || 'Not set'}`}
-                        className="pl-10"
+                        className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                         disabled={isPending}
                         {...register('contactNumber')}
                       />
@@ -249,7 +249,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       }
                       disabled={isPending}
                     >
-                      <SelectTrigger id="edit-type">
+                      <SelectTrigger id="edit-type" className="focus:ring-0 focus:border-primary">
                         <div className="flex items-center gap-2">
                           <Briefcase className="h-4 w-4 text-muted-foreground" />
                           <SelectValue placeholder={`Current: ${user.employeeType}`} />
@@ -283,7 +283,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       }
                       disabled={isPending}
                     >
-                      <SelectTrigger id="edit-status">
+                      <SelectTrigger id="edit-status" className="focus:ring-0 focus:border-primary">
                         <div className="flex items-center gap-2">
                           <BadgeCheck className="h-4 w-4 text-muted-foreground" />
                           <SelectValue
@@ -316,7 +316,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                   <Textarea
                     id="edit-address"
                     placeholder={`Current: ${(user as any).address || 'Not set'}`}
-                    className="pl-10 min-h-20 resize-none"
+                    className="pl-10 min-h-20 resize-none focus-visible:ring-0 focus-visible:border-primary"
                     disabled={isPending}
                     {...register('address')}
                   />
@@ -337,7 +337,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       <Input
                         id="edit-tin"
                         placeholder={`Current: ${(user as any).tin || 'Not set'}`}
-                        className="pl-10"
+                        className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                         disabled={isPending}
                         {...register('tin')}
                       />
@@ -352,7 +352,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       <Input
                         id="edit-sss"
                         placeholder={`Current: ${(user as any).sss || 'Not set'}`}
-                        className="pl-10"
+                        className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                         disabled={isPending}
                         {...register('sss')}
                       />
@@ -367,7 +367,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       <Input
                         id="edit-pagibig"
                         placeholder={`Current: ${(user as any).pagibig || 'Not set'}`}
-                        className="pl-10"
+                        className="pl-10 focus-visible:ring-0 focus-visible:border-primary"
                         disabled={isPending}
                         {...register('pagibig')}
                       />

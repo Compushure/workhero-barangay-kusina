@@ -1,0 +1,70 @@
+"use client"
+
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Mail, Lock, AlertCircle } from "lucide-react"
+
+interface LoginFormFieldsProps {
+  email: string
+  password: string
+  onEmailChange: (value: string) => void
+  onPasswordChange: (value: string) => void
+  error: string
+}
+
+export function LoginFormFields({ email, password, onEmailChange, onPasswordChange, error }: LoginFormFieldsProps) {
+  return (
+    <div className="space-y-5">
+      {/* Email Field */}
+      <div className="space-y-2">
+        <Label htmlFor="email" className="text-sm font-medium text-foreground">
+          Email Address
+        </Label>
+        <div className="relative">
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => onEmailChange(e.target.value)}
+            className="pl-10 bg-input border-border/50 focus:border-primary focus:ring-primary/50 transition-colors"
+            disabled={false}
+          />
+        </div>
+      </div>
+
+      {/* Password Field */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password" className="text-sm font-medium text-foreground">
+            Password
+          </Label>
+          <a href="#" className="text-xs text-primary hover:underline transition-colors">
+            Forgot password?
+          </a>
+        </div>
+        <div className="relative">
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+          <Input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => onPasswordChange(e.target.value)}
+            className="pl-10 bg-input border-border/50 focus:border-primary focus:ring-primary/50 transition-colors"
+            disabled={false}
+          />
+        </div>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-3 animate-fadeInUp">
+          <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+          <p className="text-sm text-destructive">{error}</p>
+        </div>
+      )}
+    </div>
+  )
+}
