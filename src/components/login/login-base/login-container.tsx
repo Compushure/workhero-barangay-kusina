@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { LoginForm } from "./login-form"
 import { LoginHero } from "./login-hero"
+<<<<<<< HEAD
 
 export function LoginContainer() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -19,6 +20,41 @@ export function LoginContainer() {
     } finally {
       setIsSubmitting(false)
     }
+=======
+import { useRouter } from "next/navigation"
+import { useTransition } from "react"
+import { handleLoginSubmit } from "@/action-handlers/auth"
+import { toast } from "sonner"
+import { handleUserRole } from "@/lib/utils/role-router"
+import { getUserRole } from "@/actions/auth"
+
+export function LoginContainer() {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (email: string, password: string) => {
+    setError(null);
+    const formData = new FormData()
+    formData.append("email", email)
+    formData.append("password", password)
+
+    
+    startTransition(async () => {
+      const { error } = await handleLoginSubmit(formData);
+
+      if (error) {
+        setError('Invalid email or password');
+        toast.error('Login Failed', {
+          description: 'Invalid email or password. Please try again.',
+        });
+        return;
+      }
+
+      // Get user role after successful login
+      await handleUserRole({ router, setError, getUserRole });
+    });
+>>>>>>> 5a187b421fe3b3bdca769bc77beef05a96abfa19
   }
 
   return (
@@ -30,7 +66,11 @@ export function LoginContainer() {
 
           {/* Form Section */}
           <div className="animate-slideInRight">
+<<<<<<< HEAD
             <LoginForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+=======
+            <LoginForm onSubmit={handleSubmit} isSubmitting={isPending} />
+>>>>>>> 5a187b421fe3b3bdca769bc77beef05a96abfa19
           </div>
         </div>
       </div>
