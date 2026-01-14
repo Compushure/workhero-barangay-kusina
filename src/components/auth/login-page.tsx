@@ -18,6 +18,7 @@ import { Lock, Mail, Shield } from 'lucide-react';
 import { handleLoginSubmit } from '@/action-handlers/auth';
 import { useRouter } from 'next/navigation';
 import { getUserRole } from '@/actions/auth';
+import { handleUserRole } from '@/lib/utils/role-router';
 
 export function AdminLoginPage() {
   const router = useRouter();
@@ -42,52 +43,7 @@ export function AdminLoginPage() {
       }
 
       // Get user role after successful login
-      const { role, error: roleError } = await getUserRole();
-
-      if (roleError || !role) {
-        setError('Unable to verify user role');
-        toast.error('Authorization Error', {
-          description: 'Unable to verify your permissions.',
-        });
-        return;
-      }
-
-      const normalizedRole = role.trim().toLowerCase();
-
-      // Route based on role
-      switch (normalizedRole) {
-        case 'superadmin':
-          toast.success('Welcome Admin!', {
-            description: 'You have successfully logged in.',
-          });
-          router.push('/admin/manage');
-          break;
-        case 'manager':
-          toast.success('Welcome Manager!', {
-            description: 'You have successfully logged in.',
-          });
-          router.push('/manager/dashboard');
-          break;
-        case 'hr':
-          toast.success('Welcome HR!', {
-            description: 'You have successfully logged in.',
-          });
-          router.push('/hr/dashboard');
-          break;
-        case 'regular':
-        case 'employee':
-          toast.success('Welcome!', {
-            description: 'You have successfully logged in.',
-          });
-          router.push('/employee/dashboard');
-          break;
-        default:
-          setError('You are not authorized to access this system.');
-          toast.error('Not Authorized', {
-            description: `Your role (${role}) does not have access to any dashboard.`,
-          });
-          break;
-      }
+      await handleUserRole({ router, setError, getUserRole });
     });
   };
 
