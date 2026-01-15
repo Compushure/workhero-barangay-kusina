@@ -20,7 +20,7 @@ export async function redirectToCorrectDashboardServer() {
   const { role, error } = await getUserRole();
   if (error || !role) {
     console.log('No role found, redirecting to login');
-    redirect('/admin]]');
+    redirect('/admin');
     return;
   }
 
