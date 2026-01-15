@@ -30,7 +30,7 @@ export default function LeaderboardList({ players }: LeaderboardListProps) {
           className="flex items-center gap-4 group"
         >
           {/* Rank Number */}
-          <span className="text-lg font-bold text-[#6D1616] w-12">
+          <span className="text-lg font-bold text-primary w-12">
             {getRankSuffix(player.rank)}
           </span>
 
