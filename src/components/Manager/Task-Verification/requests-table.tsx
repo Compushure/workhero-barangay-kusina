@@ -39,9 +39,9 @@ export function RequestsTable({
       <Table>
         <TableHeader className="bg-[#690003]">
           <TableRow className="border-b border-border hover:bg-[#690003]">
-            <TableHead className="text-white font-semibold pl-6 pr-25 w-32">REQUEST DATE</TableHead>
-            <TableHead className="text-white font-semibold px-6 min-w-37.5">EMPLOYEE</TableHead>
-            <TableHead className="text-white font-semibold pl-10 w-56">TASK</TableHead>
+            <TableHead className="text-white font-semibold px-12 w-32">REQUEST DATE</TableHead>
+            <TableHead className="text-white font-semibold w-40 px-2">EMPLOYEE</TableHead>
+            <TableHead className="text-white font-semibold px-10 w-56">TASK</TableHead>
             <TableHead className="text-white font-semibold text-center pl-10 pr-25 w-10">
               REPEAT
             </TableHead>
@@ -62,7 +62,7 @@ export function RequestsTable({
                 <TableCell className="text-sm font-medium pl-6 pr-12">
                   {formatDate(request.date)}
                 </TableCell>
-                <TableCell className="px-6">
+                <TableCell className="px-2">
                   <div className="text-sm font-medium">{request.employeeName}</div>
                   <div className="text-xs text-muted-foreground">{request.employeeId}</div>
                 </TableCell>

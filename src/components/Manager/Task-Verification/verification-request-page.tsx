@@ -62,24 +62,30 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   };
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
+    <div className="p-8 bg-gray-100 min-h-screen flex flex-col">
       <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
 
-      <div className="mt-6 p-6">
-        <div className="flex items-center justify-end gap-4 mb-6">
-          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-          <SortButton sortBy={sortBy} onSortChange={setSortBy} />
+      <div className="mt-6 p-6 flex flex-col grow justify-between">
+        <div>
+          <div className="flex items-center justify-end gap-4 mb-6">
+            <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+            <SortButton sortBy={sortBy} onSortChange={setSortBy} />
+          </div>
+
+          <RequestsTable
+            requests={paginatedRequests}
+            onApprove={(id) => setConfirmAction({ type: 'approve', id })}
+            onDeny={(id) => setConfirmAction({ type: 'deny', id })}
+            statuses={statuses}
+            sortBy={sortBy}
+          />
         </div>
 
-        <RequestsTable
-          requests={paginatedRequests}
-          onApprove={(id) => setConfirmAction({ type: 'approve', id })}
-          onDeny={(id) => setConfirmAction({ type: 'deny', id })}
-          statuses={statuses}
-          sortBy={sortBy}
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
         />
-
-        <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
       </div>
 
       <ConfirmationDialog
