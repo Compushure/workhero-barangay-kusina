@@ -59,24 +59,29 @@ export function Sidebar({
             isMercado ? 'border-[#d94141]' : 'border-sidebar-border'
           )}
         >
-          <div className="flex items-center">
-            <h1 className={cn('text-2xl font-bold leading-none', sidebarTitle)}>W</h1>
-
-            <div
+          <div className="flex flex-col">
+            <div className="flex items-center">
+              <h1 className={cn('text-2xl font-bold leading-none whitespace-nowrap', sidebarTitle)}>
+                W
+                <span
+                  className={cn(
+                    'transition-opacity duration-300',
+                    isExpanded ? 'opacity-100' : 'opacity-0'
+                  )}
+                >
+                  orkHero
+                </span>
+              </h1>
+            </div>
+            <p
               className={cn(
-                'ml-0.5 overflow-hidden transition-opacity duration-300',
+                'text-[10px] whitespace-nowrap mt-1 transition-opacity duration-300',
+                sidebarText,
                 isExpanded ? 'opacity-100' : 'opacity-0'
               )}
             >
-              <div className="flex flex-col">
-                <h1 className={cn('text-2xl font-bold whitespace-nowrap leading-none', sidebarTitle)}>
-                  orkHero
-                </h1>
-                <p className={cn('text-[10px] whitespace-nowrap mt-1', sidebarText)}>
-                  Barangay Kusina
-                </p>
-              </div>
-            </div>
+              Barangay Kusina
+            </p>
           </div>
         </div>
 
@@ -101,7 +106,7 @@ export function Sidebar({
                 <item.icon
                   className={cn(
                     'h-5 w-5 shrink-0',
-                    isActive ? activeIcon : 'group-hover:text-white'
+                    isActive ? activeIcon : 'group-hover:text-white text-sidebar-foreground'
                   )}
                 />
 
@@ -117,8 +122,8 @@ export function Sidebar({
                 {isActive && (
                   <div
                     className={cn(
-                      'absolute left-0 h-6 w-1 rounded-r-full',
-                      isMercado ? 'bg-white' : 'bg-[#fdf5e6]'
+                      'absolute left-0 h-6 w-1 rounded-full bg-[#f2e1c9]',
+                      isMercado ? 'bg-white' : 'bg-white'
                     )}
                   />
                 )}
