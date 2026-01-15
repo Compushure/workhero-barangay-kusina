@@ -1,77 +1,117 @@
-/**
- * HR Dashboard Route (Server Component)
- * =====================================
- * Server component for HR dashboard.
- * Only accessible by users with 'hr' role in claims.
- */
+'use client';
 
-import { Suspense } from 'react';
-import { protectHRRoute } from '@/actions/auth';
-import { Users, FileText, Calendar } from 'lucide-react';
+import { useState } from 'react';
+import { HeaderSection } from '@/components/hr/dashboard/header';
+import {
+  RedemptionTable,
+  type RedemptionRequest,
+} from '@/components/hr/dashboard/redemption-table';
+import { useToast } from '@/hooks/use-toast';
 
-function LoadingFallback() {
+// Mock data for now
+const mockRedemptionRequests: RedemptionRequest[] = [
+  {
+    id: '1',
+    requestDate: 'Oct 24, 2025',
+    requestTime: '10:30 AM',
+    employee: 'Juan Dela Cruz',
+    requestedItems: '1 x Rice Sack(10kg)...',
+    cost: 430,
+    status: 'pending',
+  },
+  {
+    id: '2',
+    requestDate: 'Oct 23, 2025',
+    requestTime: '02:15 PM',
+    employee: 'Maria Santos',
+    requestedItems: '2 x Cooking Oil (1L)...',
+    cost: 320,
+    status: 'pending',
+  },
+  {
+    id: '3',
+    requestDate: 'Oct 23, 2025',
+    requestTime: '09:45 AM',
+    employee: 'Pedro Reyes',
+    requestedItems: '1 x Sugar (2kg), 1 x Salt (1kg)...',
+    cost: 180,
+    status: 'pending',
+  },
+];
+
+export default function HRDashboard() {
+  const [requests, setRequests] = useState<RedemptionRequest[]>(mockRedemptionRequests);
+  const [filteredRequests, setFilteredRequests] =
+    useState<RedemptionRequest[]>(mockRedemptionRequests);
+  const { toast } = useToast();
+
+  const handleSearch = (value: string) => {
+    const filtered = requests.filter(
+      (req) =>
+        req.employee.toLowerCase().includes(value.toLowerCase()) ||
+        req.requestedItems.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredRequests(filtered);
+  };
+
+  const handleSort = (value: string) => {
+    const sorted = [...filteredRequests].sort((a, b) => {
+      switch (value) {
+        case 'date-desc':
+          return new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime();
+        case 'date-asc':
+          return new Date(a.requestDate).getTime() - new Date(b.requestDate).getTime();
+        case 'cost-desc':
+          return b.cost - a.cost;
+        case 'cost-asc':
+          return a.cost - b.cost;
+        case 'employee':
+          return a.employee.localeCompare(b.employee);
+        default:
+          return 0;
+      }
+    });
+    setFilteredRequests(sorted);
+  };
+
+  const handleApprove = (id: string) => {
+    const request = requests.find((req) => req.id === id);
+    toast({
+      title: 'Request Approved',
+      description: `${request?.employee}'s redemption request has been approved.`,
+    });
+    // Database part would go here
+    setRequests(requests.filter((req) => req.id !== id));
+    setFilteredRequests(filteredRequests.filter((req) => req.id !== id));
+  };
+
+  const handleReject = (id: string) => {
+    const request = requests.find((req) => req.id === id);
+    toast({
+      title: 'Request Rejected',
+      description: `${request?.employee}'s redemption request has been rejected.`,
+      variant: 'destructive',
+    });
+    //Database part would go here
+    setRequests(requests.filter((req) => req.id !== id));
+    setFilteredRequests(filteredRequests.filter((req) => req.id !== id));
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <div className="flex items-center gap-3">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <span className="text-muted-foreground">Loading HR dashboard...</span>
+    <div className="p-8 min-h-screen">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <HeaderSection
+          title="Redemption Requests"
+          description="Manage employee's request of redemption"
+          onSearch={handleSearch}
+          onSort={handleSort}
+        />
+        <RedemptionTable
+          data={filteredRequests}
+          onApprove={handleApprove}
+          onReject={handleReject}
+        />
       </div>
     </div>
-  );
-}
-
-function HRDashboardClient() {
-  return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">HR Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome to your HR dashboard. Manage employee records, benefits, and HR operations.
-          </p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <div className="p-6 bg-card rounded-lg border shadow-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Users className="w-5 h-5 text-blue-500" />
-              <h3 className="font-semibold">Employee Management</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Manage employee records, profiles, and employment information.
-            </p>
-          </div>
-
-          <div className="p-6 bg-card rounded-lg border shadow-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <FileText className="w-5 h-5 text-green-500" />
-              <h3 className="font-semibold">Benefits & Payroll</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Manage employee benefits, compensation, and payroll information.
-            </p>
-          </div>
-
-          <div className="p-6 bg-card rounded-lg border shadow-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Calendar className="w-5 h-5 text-orange-500" />
-              <h3 className="font-semibold">Leave Management</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Handle employee leave requests, approvals, and vacation scheduling.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default async function HRDashboard() {
-  await protectHRRoute();
-  return (
-    <Suspense fallback={<LoadingFallback />}>
-      <HRDashboardClient />
-    </Suspense>
   );
 }
