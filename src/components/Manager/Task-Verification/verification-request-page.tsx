@@ -1,14 +1,21 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { PageHeader } from '@/components/Manager/Task-Verification/page-header';
-import { SearchBar } from '@/components/Manager/Task-Verification/search-bar';
-import { SortButton } from '@/components/Manager/Task-Verification/sort-button';
-import { RequestsTable } from '@/components/Manager/Task-Verification/requests-table';
+import { PageHeader } from '@/components/manager/Task-Verification/page-header';
+import { SearchBar } from '@/components/manager/Task-Verification/search-bar';
+import { SortButton } from '@/components/manager/Task-Verification/sort-button';
+import { RequestsTable } from '@/components/manager/Task-Verification/requests-table';
 import type { VerificationRequest, SortOption } from '@/types/manager-verification-req';
 import { filterRequests } from '@/lib/utils/filter-requests';
-import { ConfirmationDialog } from '@/components/Manager/Task-Verification/confirmation-modal';
-import { Pagination } from '@/components/Manager/Task-Verification/pagination';
+import { ConfirmationDialog } from '@/components/manager/Task-Verification/confirmation-modal';
+import { Pagination } from '@/components/manager/Task-Verification/pagination';
+import {
+  useGetTasksToReviewPaginated,
+  useGetApprovedTasksPaginated,
+  useGetDeniedTasksPaginated,
+  useApproveTask,
+  useRejectTask,
+} from '@/hooks/tanstack';
 
 interface VerificationRequestsPageProps {
   initialRequests: VerificationRequest[];
@@ -17,48 +24,124 @@ interface VerificationRequestsPageProps {
 export function VerificationRequestsPage({ initialRequests }: VerificationRequestsPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('pending');
-  const [statuses, setStatuses] = useState<Map<string, 'approved' | 'denied'>>(new Map());
-  const [currentPage, setCurrentPage] = useState(1);
-  const requestsPerPage = 7;
+  const [pendingPage, setPendingPage] = useState(1);
+  const [approvedPage, setApprovedPage] = useState(1);
+  const [deniedPage, setDeniedPage] = useState(1);
+  const pageSize = 10;
 
-  const [confirmAction, setConfirmAction] = useState<{ type: 'approve' | 'deny' | null; id: string | null }>({
-    type: null,
-    id: null,
-  });
+  // Use paginated Tanstack Query hooks with separate pagination for each category
+  const { data: pendingData, isLoading: isLoadingPending } = useGetTasksToReviewPaginated(pendingPage);
+  const { data: approvedData, isLoading: isLoadingApproved } = useGetApprovedTasksPaginated(approvedPage);
+  const { data: deniedData, isLoading: isLoadingDenied } = useGetDeniedTasksPaginated(deniedPage);
+  
+  const approveTask = useApproveTask();
+  const rejectTask = useRejectTask();
 
-  const filteredAndSortedRequests = useMemo(
-    () => filterRequests(initialRequests, searchTerm, sortBy, statuses),
-    [searchTerm, sortBy, statuses, initialRequests]
-  );
+  // Extract tasks based on current sort category
+  const getCurrentTasks = () => {
+    switch (sortBy) {
+      case 'pending':
+        return pendingData?.data ?? initialRequests;
+      case 'approved':
+        return approvedData?.data ?? [];
+      case 'denied':
+        return deniedData?.data ?? [];
+      default:
+        return initialRequests;
+    }
+  };
 
-  const totalPages = Math.ceil(filteredAndSortedRequests.length / requestsPerPage);
+  // Get total pages for current category
+  const getTotalPages = () => {
+    switch (sortBy) {
+      case 'pending':
+        return pendingData?.totalPages ?? 1;
+      case 'approved':
+        return approvedData?.totalPages ?? 1;
+      case 'denied':
+        return deniedData?.totalPages ?? 1;
+      default:
+        return 1;
+    }
+  };
 
-  const paginatedRequests = useMemo(() => {
-    const start = (currentPage - 1) * requestsPerPage;
-    const end = start + requestsPerPage;
-    return filteredAndSortedRequests.slice(start, end);
-  }, [currentPage, filteredAndSortedRequests]);
+  // Get current page based on sort category
+  const getCurrentPage = () => {
+    switch (sortBy) {
+      case 'pending':
+        return pendingPage;
+      case 'approved':
+        return approvedPage;
+      case 'denied':
+        return deniedPage;
+      default:
+        return 1;
+    }
+  };
+
+  const handlePageChange = (page: number) => {
+    switch (sortBy) {
+      case 'pending':
+        setPendingPage(page);
+        break;
+      case 'approved':
+        setApprovedPage(page);
+        break;
+      case 'denied':
+        setDeniedPage(page);
+        break;
+    }
+  };
+
+  const currentTasks = getCurrentTasks();
+  const totalPages = getTotalPages();
+  const currentPage = getCurrentPage();
+
+  // Filter requests based on search term (pagination already done server-side by status)
+  const filteredRequests = useMemo(() => {
+    if (!searchTerm) {
+      return currentTasks;
+    }
+
+    return currentTasks.filter(
+      (req) =>
+        req.assigned_to_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        req.assigned_to_employee_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        req.category_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [currentTasks, searchTerm]);
 
   const handleApprove = (id: string) => {
-    setStatuses((prev) => {
-      const newMap = new Map(prev);
-      newMap.set(id, 'approved');
-      return newMap;
+    approveTask.mutate(id, {
+      onSuccess: () => {
+        setConfirmAction({ type: null, id: null });
+      },
     });
   };
 
   const handleDeny = (id: string) => {
-    setStatuses((prev) => {
-      const newMap = new Map(prev);
-      newMap.set(id, 'denied');
-      return newMap;
+    rejectTask.mutate(id, {
+      onSuccess: () => {
+        setConfirmAction({ type: null, id: null });
+      },
     });
   };
 
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'approve' | 'deny' | null;
+    id: string | null;
+  }>({
+    type: null,
+    id: null,
+  });
+
   const handleConfirm = () => {
-    if (confirmAction.type === 'approve' && confirmAction.id) handleApprove(confirmAction.id);
-    if (confirmAction.type === 'deny' && confirmAction.id) handleDeny(confirmAction.id);
-    setConfirmAction({ type: null, id: null });
+    if (confirmAction.type === 'approve' && confirmAction.id) {
+      handleApprove(confirmAction.id);
+    }
+    if (confirmAction.type === 'deny' && confirmAction.id) {
+      handleDeny(confirmAction.id);
+    }
   };
 
   return (
@@ -71,15 +154,24 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           <SortButton sortBy={sortBy} onSortChange={setSortBy} />
         </div>
 
-        <RequestsTable
-          requests={paginatedRequests}
-          onApprove={(id) => setConfirmAction({ type: 'approve', id })}
-          onDeny={(id) => setConfirmAction({ type: 'deny', id })}
-          statuses={statuses}
-          sortBy={sortBy}
-        />
+        {(isLoadingPending || isLoadingApproved || isLoadingDenied) && filteredRequests.length === 0 ? (
+          <div className="text-center py-12">Loading tasks...</div>
+        ) : (
+          <RequestsTable
+            requests={filteredRequests}
+            onApprove={(id) => setConfirmAction({ type: 'approve', id })}
+            onDeny={(id) => setConfirmAction({ type: 'deny', id })}
+            sortBy={sortBy}
+            isApproving={approveTask.isPending}
+            isRejecting={rejectTask.isPending}
+          />
+        )}
 
-        <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
       </div>
 
       <ConfirmationDialog

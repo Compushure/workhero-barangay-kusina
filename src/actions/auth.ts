@@ -53,7 +53,7 @@ export async function protectAdminRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 
@@ -108,7 +108,7 @@ export async function protectManagerRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 
@@ -116,7 +116,7 @@ export async function protectManagerRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 
@@ -125,7 +125,7 @@ export async function protectManagerRoute() {
 
   if (normalizedRole !== 'manager') {
     console.log('Access denied: User has role', role, 'but manager is required');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 
@@ -138,7 +138,7 @@ export async function protectHRRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 
@@ -146,7 +146,7 @@ export async function protectHRRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 
@@ -155,7 +155,7 @@ export async function protectHRRoute() {
 
   if (normalizedRole !== 'hr') {
     console.log('Access denied: User has role', role, 'but hr is required');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 
@@ -168,7 +168,7 @@ export async function protectEmployeeRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 
@@ -176,7 +176,7 @@ export async function protectEmployeeRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 
@@ -185,7 +185,7 @@ export async function protectEmployeeRoute() {
 
   if (normalizedRole !== 'regular' && normalizedRole !== 'employee') {
     console.log('Access denied: User has role', role, 'but employee/regular is required');
-    redirect('/admin');
+    redirect('/auth/login');
     return;
   }
 
