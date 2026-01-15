@@ -12,7 +12,7 @@ interface Player {
  */
 export default function LeaderboardCard({ player }: { player: Player }) {
   return (
-    <div className="w-full max-w-sm bg-[#F9F3E9] rounded-3xl overflow-hidden shadow-sm border border-orange-100">
+    <div className="w-full max-w-sm bg-card rounded-3xl overflow-hidden shadow-sm border border-accent">
       {/* Rank Badge */}
       <div className="bg-[#E9C496] py-2 text-center font-bold text-[#6D1616] mt-4 mx-auto w-32 rounded-lg">
         1st Rank
