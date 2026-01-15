@@ -7,7 +7,13 @@
  */
 
 import { safeAction } from '@/lib/utils/safe-action';
-import { fetchTasksToReview, approveTaskAction, rejectTaskAction } from '@/actions/manager';
+import {
+  fetchTasksToReview,
+  fetchApprovedTasks,
+  fetchDeniedTasks,
+  approveTaskAction,
+  rejectTaskAction,
+} from '@/actions/manager';
 import type { VerificationRequest } from '@/types/manager-verification-req';
 import { toast } from 'sonner';
 
@@ -20,6 +26,46 @@ export async function handleFetchTasksToReview(): Promise<VerificationRequest[]>
 
   if (!result.success) {
     toast.error('Failed to load tasks: ' + result.error);
+    return [];
+  }
+
+  if (result.data?.error) {
+    toast.error(result.data.error);
+    return [];
+  }
+
+  return result.data?.data ?? [];
+}
+
+/**
+ * Fetches all approved tasks with error handling and toast feedback
+ * @returns Array of approved verification requests or empty array on error
+ */
+export async function handleFetchApprovedTasks(): Promise<VerificationRequest[]> {
+  const result = await safeAction(() => fetchApprovedTasks());
+
+  if (!result.success) {
+    toast.error('Failed to load approved tasks: ' + result.error);
+    return [];
+  }
+
+  if (result.data?.error) {
+    toast.error(result.data.error);
+    return [];
+  }
+
+  return result.data?.data ?? [];
+}
+
+/**
+ * Fetches all denied/rejected tasks with error handling and toast feedback
+ * @returns Array of denied verification requests or empty array on error
+ */
+export async function handleFetchDeniedTasks(): Promise<VerificationRequest[]> {
+  const result = await safeAction(() => fetchDeniedTasks());
+
+  if (!result.success) {
+    toast.error('Failed to load denied tasks: ' + result.error);
     return [];
   }
 

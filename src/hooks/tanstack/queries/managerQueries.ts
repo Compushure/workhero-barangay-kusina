@@ -6,7 +6,11 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { handleFetchTasksToReview } from '@/action-handlers/manager';
+import {
+  handleFetchTasksToReview,
+  handleFetchApprovedTasks,
+  handleFetchDeniedTasks,
+} from '@/action-handlers/manager';
 import type { VerificationRequest } from '@/types/manager-verification-req';
 
 /**
@@ -61,5 +65,51 @@ export function useGetTasksToReview(
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
     refetchOnWindowFocus: true, // Refetch when user returns to tab
+  }) as UseQueryResult<VerificationRequest[], Error>;
+}
+
+/**
+ * Fetches approved tasks
+ *
+ * @param queryOptions - Additional query options (enabled, staleTime, etc.)
+ * @returns Query result with approved tasks array, loading state, and error handling
+ */
+export function useGetApprovedTasks(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<VerificationRequest[], Error> {
+  return useQuery({
+    queryKey: managerTaskKeys.list('approved'),
+    queryFn: async () => {
+      const tasks = await handleFetchApprovedTasks();
+      return tasks;
+    },
+    enabled: queryOptions.enabled !== false,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: 2,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<VerificationRequest[], Error>;
+}
+
+/**
+ * Fetches denied/rejected tasks
+ *
+ * @param queryOptions - Additional query options (enabled, staleTime, etc.)
+ * @returns Query result with denied tasks array, loading state, and error handling
+ */
+export function useGetDeniedTasks(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<VerificationRequest[], Error> {
+  return useQuery({
+    queryKey: managerTaskKeys.list('rejected'),
+    queryFn: async () => {
+      const tasks = await handleFetchDeniedTasks();
+      return tasks;
+    },
+    enabled: queryOptions.enabled !== false,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: 2,
+    refetchOnWindowFocus: true,
   }) as UseQueryResult<VerificationRequest[], Error>;
 }

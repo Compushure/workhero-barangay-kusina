@@ -9,7 +9,13 @@ import type { VerificationRequest, SortOption } from '@/types/manager-verificati
 import { filterRequests } from '@/lib/utils/filter-requests';
 import { ConfirmationDialog } from '@/components/manager/Task-Verification/confirmation-modal';
 import { Pagination } from '@/components/manager/Task-Verification/pagination';
-import { useGetTasksToReview, useApproveTask, useRejectTask } from '@/hooks/tanstack';
+import {
+  useGetTasksToReview,
+  useGetApprovedTasks,
+  useGetDeniedTasks,
+  useApproveTask,
+  useRejectTask,
+} from '@/hooks/tanstack';
 
 interface VerificationRequestsPageProps {
   initialRequests: VerificationRequest[];
@@ -22,12 +28,21 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const requestsPerPage = 7;
 
   // Use Tanstack Query to manage tasks
-  const { data: tasks, isLoading, refetch } = useGetTasksToReview();
+  const { data: tasksPending, isLoading: isLoadingPending } = useGetTasksToReview();
+  const { data: tasksApproved, isLoading: isLoadingApproved } = useGetApprovedTasks();
+  const { data: tasksDenied, isLoading: isLoadingDenied } = useGetDeniedTasks();
   const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
 
-  // Use server data initially, then switch to query data
-  const requests = tasks ?? initialRequests;
+  // Combine all tasks from all categories
+  const allTasks = [
+    ...(tasksPending ?? initialRequests),
+    ...(tasksApproved ?? []),
+    ...(tasksDenied ?? []),
+  ];
+
+  // Use combined data
+  const requests = allTasks;
 
   const [confirmAction, setConfirmAction] = useState<{
     type: 'approve' | 'deny' | null;
@@ -106,7 +121,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           <SortButton sortBy={sortBy} onSortChange={setSortBy} />
         </div>
 
-        {isLoading && !tasks ? (
+        {isLoadingPending && !tasksPending && !tasksApproved && !tasksDenied ? (
           <div className="text-center py-12">Loading tasks...</div>
         ) : (
           <RequestsTable
