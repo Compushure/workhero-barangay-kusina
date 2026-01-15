@@ -2,14 +2,7 @@
 
 import { X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { VerificationRequest, SortOption } from '@/types/manager-verification-req';
 
 interface RequestsTableProps {
@@ -47,7 +40,7 @@ export function RequestsTable({
         <TableHeader className="bg-[#690003]">
           <TableRow className="border-b border-border hover:bg-[#690003]">
             <TableHead className="text-white font-semibold pl-6 pr-25 w-32">REQUEST DATE</TableHead>
-            <TableHead className="text-white font-semibold pl-6 pr-30 w-40">EMPLOYEE</TableHead>
+            <TableHead className="text-white font-semibold px-6 min-w-37.5">EMPLOYEE</TableHead>
             <TableHead className="text-white font-semibold pl-10 w-56">TASK</TableHead>
             <TableHead className="text-white font-semibold text-center pl-10 pr-25 w-10">
               REPEAT
@@ -66,7 +59,7 @@ export function RequestsTable({
                 key={request.id}
                 className="bg-[#FBF4E8] hover:bg-[#ffffff] transition-colors border-b border-border"
               >
-                <TableCell className="text-sm font-medium pl-6 pr-20">
+                <TableCell className="text-sm font-medium pl-6 pr-12">
                   {formatDate(request.date)}
                 </TableCell>
                 <TableCell className="px-6">
