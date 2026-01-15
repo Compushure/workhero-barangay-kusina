@@ -9,12 +9,12 @@ import type {
   UserQueryParams,
 } from '@/types';
 import { addUserSchema, editUserSchema } from '@/zod/schemas';
-import { getUserRole } from './auth';
+
 
 // ============================================
 // Route helpers
 // ============================================
-const baseUrl = 'http://localhost:3008';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3008';
 
 // ============================================
 // Route helpers
