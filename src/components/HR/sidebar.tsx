@@ -122,7 +122,7 @@ export function Sidebar({
                 {isActive && (
                   <div
                     className={cn(
-                      'absolute left-0 h-6 w-1 rounded-full bg-[#f2e1c9]',
+                      'absolute left-0 h-6 w-1 rounded-sm  bg-[#f2e1c9]',
                       isMercado ? 'bg-white' : 'bg-white'
                     )}
                   />
