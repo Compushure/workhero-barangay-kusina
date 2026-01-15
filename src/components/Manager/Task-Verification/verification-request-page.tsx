@@ -10,9 +10,9 @@ import { filterRequests } from '@/lib/utils/filter-requests';
 import { ConfirmationDialog } from '@/components/manager/Task-Verification/confirmation-modal';
 import { Pagination } from '@/components/manager/Task-Verification/pagination';
 import {
-  useGetTasksToReview,
-  useGetApprovedTasks,
-  useGetDeniedTasks,
+  useGetTasksToReviewPaginated,
+  useGetApprovedTasksPaginated,
+  useGetDeniedTasksPaginated,
   useApproveTask,
   useRejectTask,
 } from '@/hooks/tanstack';
@@ -24,67 +24,92 @@ interface VerificationRequestsPageProps {
 export function VerificationRequestsPage({ initialRequests }: VerificationRequestsPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('pending');
-  const [currentPage, setCurrentPage] = useState(1);
-  const requestsPerPage = 7;
+  const [pendingPage, setPendingPage] = useState(1);
+  const [approvedPage, setApprovedPage] = useState(1);
+  const [deniedPage, setDeniedPage] = useState(1);
+  const pageSize = 10;
 
-  // Use Tanstack Query to manage tasks
-  const { data: tasksPending, isLoading: isLoadingPending } = useGetTasksToReview();
-  const { data: tasksApproved, isLoading: isLoadingApproved } = useGetApprovedTasks();
-  const { data: tasksDenied, isLoading: isLoadingDenied } = useGetDeniedTasks();
+  // Use paginated Tanstack Query hooks with separate pagination for each category
+  const { data: pendingData, isLoading: isLoadingPending } = useGetTasksToReviewPaginated(pendingPage);
+  const { data: approvedData, isLoading: isLoadingApproved } = useGetApprovedTasksPaginated(approvedPage);
+  const { data: deniedData, isLoading: isLoadingDenied } = useGetDeniedTasksPaginated(deniedPage);
+  
   const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
 
-  // Combine all tasks from all categories
-  const allTasks = [
-    ...(tasksPending ?? initialRequests),
-    ...(tasksApproved ?? []),
-    ...(tasksDenied ?? []),
-  ];
+  // Extract tasks based on current sort category
+  const getCurrentTasks = () => {
+    switch (sortBy) {
+      case 'pending':
+        return pendingData?.data ?? initialRequests;
+      case 'approved':
+        return approvedData?.data ?? [];
+      case 'denied':
+        return deniedData?.data ?? [];
+      default:
+        return initialRequests;
+    }
+  };
 
-  // Use combined data
-  const requests = allTasks;
+  // Get total pages for current category
+  const getTotalPages = () => {
+    switch (sortBy) {
+      case 'pending':
+        return pendingData?.totalPages ?? 1;
+      case 'approved':
+        return approvedData?.totalPages ?? 1;
+      case 'denied':
+        return deniedData?.totalPages ?? 1;
+      default:
+        return 1;
+    }
+  };
 
-  const [confirmAction, setConfirmAction] = useState<{
-    type: 'approve' | 'deny' | null;
-    id: string | null;
-  }>({
-    type: null,
-    id: null,
-  });
+  // Get current page based on sort category
+  const getCurrentPage = () => {
+    switch (sortBy) {
+      case 'pending':
+        return pendingPage;
+      case 'approved':
+        return approvedPage;
+      case 'denied':
+        return deniedPage;
+      default:
+        return 1;
+    }
+  };
 
-  // Filter requests based on status
+  const handlePageChange = (page: number) => {
+    switch (sortBy) {
+      case 'pending':
+        setPendingPage(page);
+        break;
+      case 'approved':
+        setApprovedPage(page);
+        break;
+      case 'denied':
+        setDeniedPage(page);
+        break;
+    }
+  };
+
+  const currentTasks = getCurrentTasks();
+  const totalPages = getTotalPages();
+  const currentPage = getCurrentPage();
+
+  // Filter requests based on search term (pagination already done server-side by status)
   const filteredRequests = useMemo(() => {
-    let filtered = requests;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (req) =>
-          req.assigned_to_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          req.assigned_to_employee_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          req.category_name?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    if (!searchTerm) {
+      return currentTasks;
     }
 
-    // Filter by status
-    if (sortBy === 'pending') {
-      filtered = filtered.filter((req) => req.status === 'in review');
-    } else if (sortBy === 'approved') {
-      filtered = filtered.filter((req) => req.status === 'approved');
-    } else if (sortBy === 'denied') {
-      filtered = filtered.filter((req) => req.status === 'rejected');
-    }
-
-    return filtered;
-  }, [requests, searchTerm, sortBy]);
-
-  const totalPages = Math.ceil(filteredRequests.length / requestsPerPage);
-
-  const paginatedRequests = useMemo(() => {
-    const start = (currentPage - 1) * requestsPerPage;
-    const end = start + requestsPerPage;
-    return filteredRequests.slice(start, end);
-  }, [currentPage, filteredRequests]);
+    return currentTasks.filter(
+      (req) =>
+        req.assigned_to_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        req.assigned_to_employee_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        req.category_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [currentTasks, searchTerm]);
 
   const handleApprove = (id: string) => {
     approveTask.mutate(id, {
@@ -101,6 +126,14 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       },
     });
   };
+
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'approve' | 'deny' | null;
+    id: string | null;
+  }>({
+    type: null,
+    id: null,
+  });
 
   const handleConfirm = () => {
     if (confirmAction.type === 'approve' && confirmAction.id) {
@@ -121,11 +154,11 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           <SortButton sortBy={sortBy} onSortChange={setSortBy} />
         </div>
 
-        {isLoadingPending && !tasksPending && !tasksApproved && !tasksDenied ? (
+        {(isLoadingPending || isLoadingApproved || isLoadingDenied) && filteredRequests.length === 0 ? (
           <div className="text-center py-12">Loading tasks...</div>
         ) : (
           <RequestsTable
-            requests={paginatedRequests}
+            requests={filteredRequests}
             onApprove={(id) => setConfirmAction({ type: 'approve', id })}
             onDeny={(id) => setConfirmAction({ type: 'deny', id })}
             sortBy={sortBy}
@@ -137,7 +170,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
         <Pagination
           totalPages={totalPages}
           currentPage={currentPage}
-          onPageChange={setCurrentPage}
+          onPageChange={handlePageChange}
         />
       </div>
 

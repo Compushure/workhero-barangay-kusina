@@ -11,8 +11,12 @@ import {
   fetchTasksToReview,
   fetchApprovedTasks,
   fetchDeniedTasks,
+  fetchTasksToReviewPaginated,
+  fetchApprovedTasksPaginated,
+  fetchDeniedTasksPaginated,
   approveTaskAction,
   rejectTaskAction,
+  type PaginatedResponse,
 } from '@/actions/manager';
 import type { VerificationRequest } from '@/types/manager-verification-req';
 import { toast } from 'sonner';
@@ -75,6 +79,75 @@ export async function handleFetchDeniedTasks(): Promise<VerificationRequest[]> {
   }
 
   return result.data?.data ?? [];
+}
+
+/**
+ * Fetches paginated tasks in review with error handling and toast feedback
+ * @param page - Page number (1-indexed)
+ * @returns Paginated response with data array, count, and total pages
+ */
+export async function handleFetchTasksToReviewPaginated(
+  page: number = 1
+): Promise<PaginatedResponse<VerificationRequest>> {
+  const result = await safeAction(() => fetchTasksToReviewPaginated(page));
+
+  if (!result.success) {
+    toast.error('Failed to load tasks: ' + result.error);
+    return { data: [], count: 0, totalPages: 0 };
+  }
+
+  if (result.data?.error) {
+    toast.error(result.data.error);
+    return { data: [], count: 0, totalPages: 0 };
+  }
+
+  return result.data?.data ?? { data: [], count: 0, totalPages: 0 };
+}
+
+/**
+ * Fetches paginated approved tasks with error handling and toast feedback
+ * @param page - Page number (1-indexed)
+ * @returns Paginated response with data array, count, and total pages
+ */
+export async function handleFetchApprovedTasksPaginated(
+  page: number = 1
+): Promise<PaginatedResponse<VerificationRequest>> {
+  const result = await safeAction(() => fetchApprovedTasksPaginated(page));
+
+  if (!result.success) {
+    toast.error('Failed to load approved tasks: ' + result.error);
+    return { data: [], count: 0, totalPages: 0 };
+  }
+
+  if (result.data?.error) {
+    toast.error(result.data.error);
+    return { data: [], count: 0, totalPages: 0 };
+  }
+
+  return result.data?.data ?? { data: [], count: 0, totalPages: 0 };
+}
+
+/**
+ * Fetches paginated denied/rejected tasks with error handling and toast feedback
+ * @param page - Page number (1-indexed)
+ * @returns Paginated response with data array, count, and total pages
+ */
+export async function handleFetchDeniedTasksPaginated(
+  page: number = 1
+): Promise<PaginatedResponse<VerificationRequest>> {
+  const result = await safeAction(() => fetchDeniedTasksPaginated(page));
+
+  if (!result.success) {
+    toast.error('Failed to load denied tasks: ' + result.error);
+    return { data: [], count: 0, totalPages: 0 };
+  }
+
+  if (result.data?.error) {
+    toast.error(result.data.error);
+    return { data: [], count: 0, totalPages: 0 };
+  }
+
+  return result.data?.data ?? { data: [], count: 0, totalPages: 0 };
 }
 
 /**

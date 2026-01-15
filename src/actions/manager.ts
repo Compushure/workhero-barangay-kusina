@@ -10,6 +10,13 @@ import type {
 } from '@/types';
 import type { VerificationRequest } from '@/types/manager-verification-req';
 
+// Paginated response type
+export interface PaginatedResponse<T> {
+  data: T[];
+  count: number;
+  totalPages: number;
+}
+
 export async function fetchTasksToReview(): Promise<ServerActionResponse<VerificationRequest[]>> {
   const supabase = await createClient();
 
@@ -23,6 +30,43 @@ export async function fetchTasksToReview(): Promise<ServerActionResponse<Verific
   }
 
   return { error: null, data: data as VerificationRequest[] };
+}
+
+/**
+ * Fetch paginated tasks in review
+ * @param page - Page number (1-indexed)
+ * @param pageSize - Number of items per page
+ */
+export async function fetchTasksToReviewPaginated(
+  page: number = 1,
+  pageSize: number = 10
+): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
+  const supabase = await createClient();
+
+  // Calculate range for pagination
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize - 1;
+
+  const { data, error, count } = await supabase
+    .from('task_info_view')
+    .select('*', { count: 'exact' })
+    .eq('status', 'in review')
+    .range(start, end);
+
+  if (error) {
+    return { error: 'Failed to fetch tasks in review: ' + error.message, data: undefined };
+  }
+
+  const totalPages = count ? Math.ceil(count / pageSize) : 0;
+
+  return {
+    error: null,
+    data: {
+      data: data as VerificationRequest[],
+      count: count || 0,
+      totalPages,
+    },
+  };
 }
 
 export async function fetchApprovedTasks(): Promise<ServerActionResponse<VerificationRequest[]>> {
@@ -40,6 +84,43 @@ export async function fetchApprovedTasks(): Promise<ServerActionResponse<Verific
   return { error: null, data: data as VerificationRequest[] };
 }
 
+/**
+ * Fetch paginated approved tasks
+ * @param page - Page number (1-indexed)
+ * @param pageSize - Number of items per page
+ */
+export async function fetchApprovedTasksPaginated(
+  page: number = 1,
+  pageSize: number = 10
+): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
+  const supabase = await createClient();
+
+  // Calculate range for pagination
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize - 1;
+
+  const { data, error, count } = await supabase
+    .from('task_info_view')
+    .select('*', { count: 'exact' })
+    .eq('status', 'approved')
+    .range(start, end);
+
+  if (error) {
+    return { error: 'Failed to fetch approved tasks: ' + error.message, data: undefined };
+  }
+
+  const totalPages = count ? Math.ceil(count / pageSize) : 0;
+
+  return {
+    error: null,
+    data: {
+      data: data as VerificationRequest[],
+      count: count || 0,
+      totalPages,
+    },
+  };
+}
+
 export async function fetchDeniedTasks(): Promise<ServerActionResponse<VerificationRequest[]>> {
   const supabase = await createClient();
 
@@ -53,6 +134,43 @@ export async function fetchDeniedTasks(): Promise<ServerActionResponse<Verificat
   }
 
   return { error: null, data: data as VerificationRequest[] };
+}
+
+/**
+ * Fetch paginated denied/rejected tasks
+ * @param page - Page number (1-indexed)
+ * @param pageSize - Number of items per page
+ */
+export async function fetchDeniedTasksPaginated(
+  page: number = 1,
+  pageSize: number = 10
+): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
+  const supabase = await createClient();
+
+  // Calculate range for pagination
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize - 1;
+
+  const { data, error, count } = await supabase
+    .from('task_info_view')
+    .select('*', { count: 'exact' })
+    .eq('status', 'rejected')
+    .range(start, end);
+
+  if (error) {
+    return { error: 'Failed to fetch rejected tasks: ' + error.message, data: undefined };
+  }
+
+  const totalPages = count ? Math.ceil(count / pageSize) : 0;
+
+  return {
+    error: null,
+    data: {
+      data: data as VerificationRequest[],
+      count: count || 0,
+      totalPages,
+    },
+  };
 }
 
 export async function approveTaskAction(id: string) {

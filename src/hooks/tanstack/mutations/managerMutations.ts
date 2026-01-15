@@ -81,7 +81,10 @@ export function useApproveTask(): UseMutationResult<
       }
     },
     onSettled: () => {
-      // Always refetch after mutation (success or error)
+      // Invalidate all paginated queries to refetch updated data
+      // This ensures tasks are refetched from all categories after approve/reject
+      queryClient.invalidateQueries({ queryKey: managerTaskKeys.paginatedLists() });
+      // Also invalidate non-paginated for backward compatibility
       queryClient.invalidateQueries({ queryKey: managerTaskKeys.lists() });
     },
   });
@@ -157,7 +160,10 @@ export function useRejectTask(): UseMutationResult<
       }
     },
     onSettled: () => {
-      // Always refetch after mutation (success or error)
+      // Invalidate all paginated queries to refetch updated data
+      // This ensures tasks are refetched from all categories after approve/reject
+      queryClient.invalidateQueries({ queryKey: managerTaskKeys.paginatedLists() });
+      // Also invalidate non-paginated for backward compatibility
       queryClient.invalidateQueries({ queryKey: managerTaskKeys.lists() });
     },
   });

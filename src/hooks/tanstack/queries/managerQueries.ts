@@ -10,8 +10,12 @@ import {
   handleFetchTasksToReview,
   handleFetchApprovedTasks,
   handleFetchDeniedTasks,
+  handleFetchTasksToReviewPaginated,
+  handleFetchApprovedTasksPaginated,
+  handleFetchDeniedTasksPaginated,
 } from '@/action-handlers/manager';
 import type { VerificationRequest } from '@/types/manager-verification-req';
+import type { PaginatedResponse } from '@/actions/manager';
 
 /**
  * Query key factory for manager task-related queries
@@ -24,7 +28,10 @@ import type { VerificationRequest } from '@/types/manager-verification-req';
 export const managerTaskKeys = {
   all: ['manager-tasks'] as const,
   lists: () => [...managerTaskKeys.all, 'list'] as const,
-  list: (status?: string) => [...managerTaskKeys.lists(), status] as const,
+  list: (status?: string, page?: number) => [...managerTaskKeys.lists(), status, page] as const,
+  paginatedLists: () => [...managerTaskKeys.all, 'paginated'] as const,
+  paginatedList: (status: string, page: number) =>
+    [...managerTaskKeys.paginatedLists(), status, page] as const,
   details: () => [...managerTaskKeys.all, 'detail'] as const,
   detail: (id: string) => [...managerTaskKeys.details(), id] as const,
 };
@@ -69,6 +76,31 @@ export function useGetTasksToReview(
 }
 
 /**
+ * Fetches paginated tasks in review
+ *
+ * @param page - Page number (1-indexed)
+ * @param queryOptions - Additional query options (enabled, staleTime, etc.)
+ * @returns Query result with paginated data, loading state, and error handling
+ */
+export function useGetTasksToReviewPaginated(
+  page: number = 1,
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<PaginatedResponse<VerificationRequest>, Error> {
+  return useQuery({
+    queryKey: managerTaskKeys.paginatedList('in-review', page),
+    queryFn: async () => {
+      const response = await handleFetchTasksToReviewPaginated(page);
+      return response;
+    },
+    enabled: queryOptions.enabled !== false && page >= 1,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: 2,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<PaginatedResponse<VerificationRequest>, Error>;
+}
+
+/**
  * Fetches approved tasks
  *
  * @param queryOptions - Additional query options (enabled, staleTime, etc.)
@@ -92,6 +124,31 @@ export function useGetApprovedTasks(
 }
 
 /**
+ * Fetches paginated approved tasks
+ *
+ * @param page - Page number (1-indexed)
+ * @param queryOptions - Additional query options (enabled, staleTime, etc.)
+ * @returns Query result with paginated data, loading state, and error handling
+ */
+export function useGetApprovedTasksPaginated(
+  page: number = 1,
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<PaginatedResponse<VerificationRequest>, Error> {
+  return useQuery({
+    queryKey: managerTaskKeys.paginatedList('approved', page),
+    queryFn: async () => {
+      const response = await handleFetchApprovedTasksPaginated(page);
+      return response;
+    },
+    enabled: queryOptions.enabled !== false && page >= 1,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: 2,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<PaginatedResponse<VerificationRequest>, Error>;
+}
+
+/**
  * Fetches denied/rejected tasks
  *
  * @param queryOptions - Additional query options (enabled, staleTime, etc.)
@@ -112,4 +169,29 @@ export function useGetDeniedTasks(
     retry: 2,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<VerificationRequest[], Error>;
+}
+
+/**
+ * Fetches paginated denied/rejected tasks
+ *
+ * @param page - Page number (1-indexed)
+ * @param queryOptions - Additional query options (enabled, staleTime, etc.)
+ * @returns Query result with paginated data, loading state, and error handling
+ */
+export function useGetDeniedTasksPaginated(
+  page: number = 1,
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<PaginatedResponse<VerificationRequest>, Error> {
+  return useQuery({
+    queryKey: managerTaskKeys.paginatedList('rejected', page),
+    queryFn: async () => {
+      const response = await handleFetchDeniedTasksPaginated(page);
+      return response;
+    },
+    enabled: queryOptions.enabled !== false && page >= 1,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: 2,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<PaginatedResponse<VerificationRequest>, Error>;
 }

@@ -39,4 +39,5 @@ export interface VerificationRequest {
   category_name: string | null;
   category_description: string | null;
   category_points: number | null;
+  k_deadline_date: Date | null;
 }
