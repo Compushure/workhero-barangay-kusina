@@ -60,7 +60,7 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
           Employee
         </div>
         <div className="text-sm font-semibold uppercase tracking-wide text-foreground">
-          Requested Item/S
+          Requested Item/s
         </div>
         <div className="text-sm font-semibold uppercase tracking-wide text-foreground">Cost</div>
         <div className="text-sm font-semibold uppercase tracking-wide text-foreground">Action</div>
