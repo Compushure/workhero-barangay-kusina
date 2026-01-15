@@ -21,7 +21,7 @@ interface MercadoCardProps {
 
 export function MercadoCard({ item, onEdit, onDelete }: MercadoCardProps) {
   return (
-    <div className="bg-[#fdf8f0] border border-[#e5e0d8] rounded-xl p-4 flex items-center relative shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-card border-border rounded-xl p-4 flex items-center relative shadow-sm hover:shadow-md transition-shadow">
       <div className="h-24 w-24 bg-[#f2e1c9] rounded-lg flex items-center justify-center shrink-0">
         <ImageIcon className="h-8 w-8 text-[#730202]/40" />
       </div>
