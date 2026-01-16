@@ -39,7 +39,7 @@ export async function fetchTasksToReview(): Promise<ServerActionResponse<Verific
  */
 export async function fetchTasksToReviewPaginated(
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 8
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
   const supabase = await createClient();
 
@@ -91,7 +91,7 @@ export async function fetchApprovedTasks(): Promise<ServerActionResponse<Verific
  */
 export async function fetchApprovedTasksPaginated(
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 8
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
   const supabase = await createClient();
 
@@ -143,7 +143,7 @@ export async function fetchDeniedTasks(): Promise<ServerActionResponse<Verificat
  */
 export async function fetchDeniedTasksPaginated(
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 8
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
   const supabase = await createClient();
 
@@ -185,23 +185,20 @@ export async function approveTaskAction(id: string) {
   if (updateError) {
     return { error: 'Failed to approve task: ' + updateError.message, data: undefined };
   }
-
-
 }
 
 export async function rejectTaskAction(id: string) {
   const supabase = await createClient();
 
   // First update the task
-  const {data,  error: updateError } = await supabase
+  const { data, error: updateError } = await supabase
     .from('KPITask')
     .update({ status: 'rejected' })
     .eq('id', id.trim())
-    .select()
+    .select();
 
-    console.log("id: ",id)
+  console.log('id: ', id);
   if (updateError) {
     return { error: 'Failed to reject task: ' + updateError.message, data: undefined };
   }
-
 }

@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { PageHeader } from '@/components/manager/Task-Verification/page-header';
-import { SearchBar } from '@/components/manager/Task-Verification/search-bar';
-import { SortButton } from '@/components/manager/Task-Verification/sort-button';
-import { RequestsTable } from '@/components/manager/Task-Verification/requests-table';
+import { PageHeader } from '@/components/manager/task-verification/page-header';
+import { SearchBar } from '@/components/manager/task-verification/search-bar';
+import { SortButton } from '@/components/manager/task-verification/sort-button';
+import { RequestsTable } from '@/components/manager/task-verification/requests-table';
 import type { VerificationRequest, SortOption } from '@/types/manager-verification-req';
-import { filterRequests } from '@/lib/utils/filter-requests';
-import { ConfirmationDialog } from '@/components/manager/Task-Verification/confirmation-modal';
-import { Pagination } from '@/components/manager/Task-Verification/pagination';
+import { ConfirmationDialog } from '@/components/manager/task-verification/confirmation-modal';
+import { Pagination } from '@/components/manager/task-verification/pagination';
 import {
   useGetTasksToReviewPaginated,
   useGetApprovedTasksPaginated,
@@ -27,7 +26,6 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const [pendingPage, setPendingPage] = useState(1);
   const [approvedPage, setApprovedPage] = useState(1);
   const [deniedPage, setDeniedPage] = useState(1);
-  const pageSize = 10;
 
   // Use paginated Tanstack Query hooks with separate pagination for each category
   const { data: pendingData, isLoading: isLoadingPending } = useGetTasksToReviewPaginated(pendingPage);
@@ -145,15 +143,16 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   };
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
+  <div className="p-8 bg-gray-100 min-h-screen flex flex-col">
+    <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
 
-      <div className="mt-6 p-6">
-        <div className="flex items-center justify-end gap-4 mb-6">
-          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-          <SortButton sortBy={sortBy} onSortChange={setSortBy} />
-        </div>
+    <div className="flex-1 flex flex-col">
+      <div className="flex items-center justify-end gap-4 mb-6">
+        <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+        <SortButton sortBy={sortBy} onSortChange={setSortBy} />
+      </div>
 
+      <div className="flex-1 flex flex-col">
         {(isLoadingPending || isLoadingApproved || isLoadingDenied) && filteredRequests.length === 0 ? (
           <div className="text-center py-12">Loading tasks...</div>
         ) : (
@@ -167,19 +166,23 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           />
         )}
 
-        <Pagination
-          totalPages={totalPages}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
+        {/* Pagination fixed at bottom */}
+        <div className="mt-auto pt-4">
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        </div>
       </div>
-
-      <ConfirmationDialog
-        open={!!confirmAction.type}
-        type={confirmAction.type}
-        onCancel={() => setConfirmAction({ type: null, id: null })}
-        onConfirm={handleConfirm}
-      />
     </div>
-  );
+
+    <ConfirmationDialog
+      open={!!confirmAction.type}
+      type={confirmAction.type}
+      onCancel={() => setConfirmAction({ type: null, id: null })}
+      onConfirm={handleConfirm}
+    />
+  </div>
+);
 }
