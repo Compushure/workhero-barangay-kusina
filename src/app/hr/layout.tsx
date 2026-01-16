@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Sidebar } from '@/components/hr/sidebar';
-import { cn } from '@/lib/utils';
 
 export default function MercadoLayout({
   children,
