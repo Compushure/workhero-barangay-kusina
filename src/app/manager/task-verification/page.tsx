@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
-import { VerificationRequestsPage } from '@/components/manager/Task-Verification/verification-request-page';
-import type { VerificationRequest } from '@/types/manager-verification-req';
-import { Sidebar } from '@/components/manager/Task-Verification/sidebar';
+import { VerificationRequestsPage } from '@/components/manager/task-verification/verification-request-page';
+import { Sidebar } from '@/components/manager/task-verification/sidebar';
 import { fetchTasksToReview } from '@/actions/manager';
 
 export default async function Manager() {
