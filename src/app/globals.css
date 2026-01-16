@@ -3,10 +3,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
-:root {
-  /* Custom WorkHero color palette */
-  /* --background: #f5f5f5;
-  --foreground: #514937; */
+:root {  
+ 
   --background: #fff8f5; /* Soft warm beige */ 
   --foreground: #5a2a2a; /* Deep reddish brown */
   --card: #ffffff;
@@ -15,14 +13,13 @@
   --popover-foreground: #514937;
 
   /* Primary: Dark olive brown */
-  /* --primary: #514937;
-  --primary-foreground: #ffffff; */
-  --primary: #a83232; /* Rich fiesta red */ 
+  --primary-foreground: #ffffff; 
+  --primary: #a83232;
   --primary-foreground: #ffffff;
 
-  /* Secondary: Bright orange */
-  /* --secondary: #f28705;
-  --secondary-foreground: #ffffff; */
+
+  /* Secondary: Bright chili red */
+  --secondary-foreground: #ffffff; 
   --secondary: #d94f4f; /* Bright chili red */ 
   --secondary-foreground: #ffffff;
 
