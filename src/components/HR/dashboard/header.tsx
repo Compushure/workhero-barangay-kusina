@@ -42,8 +42,6 @@ export function HeaderSection({
           options={[
             { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
             { value: 'date-asc' as any, label: 'Date (Oldest)' },
-            { value: 'cost-desc' as any, label: 'Cost (Highest)' },
-            { value: 'cost-asc' as any, label: 'Cost (Lowest)' },
             { value: 'employee' as any, label: 'Employee Name' },
           ]}
         />

@@ -80,10 +80,8 @@ export function AddItemsModal({ open, onOpenChange, onSave }: AddItemsModalProps
             </DialogTitle>
             <button
               onClick={handleClose}
-              className="text-[#5a2a2a] hover:text-[#690003] transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+              className="text-[#5a2a2a] hover:text-[#690003] transition-colors h-5 w-5"
+            ></button>
           </div>
         </DialogHeader>
 

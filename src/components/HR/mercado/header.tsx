@@ -43,8 +43,6 @@ export function HeaderSection({ title, description, onSearch, onSort }: HeaderSe
           <SelectContent>
             <SelectItem value="date-desc">Newest</SelectItem>
             <SelectItem value="date-asc">Oldest</SelectItem>
-            <SelectItem value="cost-desc">Cost (Highest)</SelectItem>
-            <SelectItem value="cost-asc">Cost (Lowest)</SelectItem>
             <SelectItem value="employee">Employee Name</SelectItem>
           </SelectContent>
         </Select>

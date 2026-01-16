@@ -24,7 +24,7 @@ interface SidebarProps {
   navItems?: NavItem[];
   user?: { name: string; email: string };
 }
-
+ 
 export function Sidebar({
   navItems = [
     {
