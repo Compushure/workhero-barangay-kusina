@@ -3,13 +3,40 @@
 import { FileText, CheckCircle, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
-export function Sidebar() {
-  const [activeNav, setActiveNav] = useState<'assignment' | 'verification'>('verification');
+interface NavItem {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+}
+
+interface SidebarProps {
+  navItems?: NavItem[];
+  user?: { name: string; email: string };
+}
+
+export function Sidebar({
+  navItems = [
+    {
+      key: 'assignment',
+      label: 'Task Assignment',
+      icon: <FileText size={20} className="shrink-0" />,
+    },
+    {
+      key: 'verification',
+      label: 'Task Verification',
+      icon: <CheckCircle size={20} className="shrink-0" />,
+    },
+  ],
+  user = { name: 'User Name', email: 'username.email@gmail.com' },
+}: SidebarProps) {
+  const [activeNav, setActiveNav] = useState<string>('verification');
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <aside
-      className={`bg-[#690003] text-white flex flex-col justify-between transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-60'}`}
+      className={`bg-[#690003] text-white flex flex-col justify-between transition-all duration-300 ${
+        isCollapsed ? 'w-20' : 'w-60'
+      }`}
     >
       {/* Logo Section */}
       <div className="p-6 border-b border-red-900">
@@ -33,34 +60,26 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-3">
-        {/* Task Assignment */}
-        <button
-          onClick={() => setActiveNav('assignment')}
-          className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all justify-center ${
-            isCollapsed ? 'px-2' : ''
-          } ${activeNav === 'assignment' ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
-          title={isCollapsed ? 'Task Assignment' : ''}
-        >
-          <FileText size={20} className="shrink-0" />
-          {!isCollapsed && 'Task Assignment'}
-        </button>
-
-        {/* Task Verification */}
-        <button
-          onClick={() => setActiveNav('verification')}
-          className={`w-full flex items-center cursor-pointer gap-3 px-4 py-3 rounded-full font-medium transition-all justify-center ${
-            isCollapsed ? 'px-2' : ''
-          } ${activeNav === 'verification' ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
-          title={isCollapsed ? 'Task Verification' : ''}
-        >
-          <CheckCircle size={20} className="shrink-0" />
-          {!isCollapsed && 'Task Verification'}
-        </button>
+        {navItems.map((item) => (
+          <button
+            key={item.key}
+            onClick={() => setActiveNav(item.key)}
+            className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all justify-center ${
+              isCollapsed ? 'px-2' : ''
+            } ${activeNav === item.key ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
+            title={isCollapsed ? item.label : ''}
+          >
+            {item.icon}
+            {!isCollapsed && item.label}
+          </button>
+        ))}
       </nav>
 
       {/* User Profile Section */}
       <div
-        className={`border-t border-red-900 ${isCollapsed ? 'flex justify-center items-center h-24' : 'p-4'}`}
+        className={`border-t border-red-900 ${
+          isCollapsed ? 'flex justify-center items-center h-24' : 'p-4'
+        }`}
       >
         <div
           className={`bg-white/10 rounded-full flex items-center ${
@@ -72,13 +91,12 @@ export function Sidebar() {
           </div>
           {!isCollapsed && (
             <div className="min-w-0">
-              <p className="font-semibold text-sm">User Name</p>
-              <p className="text-xs text-red-200 truncate">username.email@gmail.com</p>
+              <p className="font-semibold text-sm">{user.name}</p>
+              <p className="text-xs text-red-200 truncate">{user.email}</p>
             </div>
           )}
         </div>
 
-        {/* Logout Button */}
         {!isCollapsed && (
           <button className="w-full cursor-pointer bg-white text-[#690003] py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors text-sm">
             Logout
