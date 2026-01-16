@@ -7,6 +7,8 @@
 
 // Query hooks
 export * from './queries/userQueries';
+export * from './queries/managerQueries';
 
 // Mutation hooks
 export * from './mutations/userMutations';
+export * from './mutations/managerMutations';

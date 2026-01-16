@@ -2,25 +2,38 @@
 
 import { X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import type { VerificationRequest, SortOption } from '@/types/manager-verification-req';
 
 interface RequestsTableProps {
   requests: VerificationRequest[];
   onApprove: (id: string) => void;
   onDeny: (id: string) => void;
-  statuses: Map<string, 'approved' | 'denied'>;
   sortBy: SortOption;
+  isApproving?: boolean;
+  isRejecting?: boolean;
 }
 
 export function RequestsTable({
   requests,
   onApprove,
   onDeny,
-  statuses,
   sortBy,
+  isApproving = false,
+  isRejecting = false,
 }: RequestsTableProps) {
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | null | string) => {
+    if (!date) return 'N/A';
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(dateObj.getTime())) return 'Invalid Date';
+
     const options: Intl.DateTimeFormatOptions = {
       month: 'short',
       day: 'numeric',
@@ -29,7 +42,7 @@ export function RequestsTable({
       minute: '2-digit',
       hour12: true,
     };
-    return date.toLocaleDateString('en-US', options);
+    return dateObj.toLocaleDateString('en-US', options);
   };
 
   const isShowingActions = sortBy === 'pending';
@@ -39,37 +52,42 @@ export function RequestsTable({
       <Table>
         <TableHeader className="bg-[#690003]">
           <TableRow className="border-b border-border hover:bg-[#690003]">
-            <TableHead className="text-white font-semibold px-12 w-32">REQUEST DATE</TableHead>
-            <TableHead className="text-white font-semibold w-40 px-2">EMPLOYEE</TableHead>
-            <TableHead className="text-white font-semibold px-10 w-56">TASK</TableHead>
+            <TableHead className="text-white font-semibold px-6 w-32">REQUEST DATE</TableHead>
+            <TableHead className="text-white font-semibold w-40 px-6">EMPLOYEE</TableHead>
+            <TableHead className="text-white font-semibold px-10 pl-15 w-56">TASK</TableHead>
             <TableHead className="text-white font-semibold text-center pl-10 pr-25 w-10">
-              REPEAT
+              REPETITION
             </TableHead>
-            <TableHead className="text-white font-semibold text-center pr-20 w-24">
-              TOTAL/INSTANCE
+            <TableHead className="text-white font-semibold text-center pr-18 w-24">
+              TOTAL POINTS & XP
             </TableHead>
             <TableHead className="text-white font-semibold text-center px-2 w-28">ACTION</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {requests.map((request) => {
-            const status = statuses.get(request.id);
             return (
               <TableRow
-                key={request.id}
+                key={request.kpitask_id}
                 className="bg-[#FBF4E8] hover:bg-[#ffffff] transition-colors border-b border-border"
               >
                 <TableCell className="text-sm font-medium pl-6 pr-12">
-                  {formatDate(request.date)}
+                  {formatDate(request.kpitask_completed_at || request.kpitask_created_at)}
                 </TableCell>
-                <TableCell className="px-2">
-                  <div className="text-sm font-medium">{request.employeeName}</div>
-                  <div className="text-xs text-muted-foreground">{request.employeeId}</div>
+                <TableCell className="px-6">
+                  <div className="text-sm font-medium">{request.assigned_to_name || 'N/A'}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {request.assigned_to_employee_id || 'N/A'}
+                  </div>
                 </TableCell>
-                <TableCell className="text-sm px-4">{request.task}</TableCell>
-                <TableCell className="text-sm text-center pl-10 pr-25">{request.repeat}</TableCell>
+                <TableCell className="text-sm px-4 pl-15">
+                  {request.category_name || 'N/A'}
+                </TableCell>
+                <TableCell className="text-sm text-center pl-10 pr-25">
+                  {request.repeated_times ?? 0}
+                </TableCell>
                 <TableCell className="text-sm text-center font-medium pr-25">
-                  {request.totalPoints} Pts
+                  {request.category_points ?? 0} Pts
                 </TableCell>
                 <TableCell className="text-center px-2">
                   <div className="flex items-center justify-center gap-2">
@@ -78,8 +96,9 @@ export function RequestsTable({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => onDeny(request.id)}
-                          className="p-2 h-auto text-muted-foreground hover:text-red-600 cursor-pointer hover:bg-red-50"
+                          onClick={() => onDeny(request.kpitask_id)}
+                          disabled={isRejecting || isApproving}
+                          className="p-2 h-auto text-muted-foreground hover:text-red-600 cursor-pointer hover:bg-red-50 disabled:opacity-50"
                           aria-label="Deny request"
                         >
                           <X size={20} />
@@ -87,8 +106,9 @@ export function RequestsTable({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => onApprove(request.id)}
-                          className="p-2 h-auto text-muted-foreground hover:text-green-600 cursor-pointer hover:bg-green-50"
+                          onClick={() => onApprove(request.kpitask_id)}
+                          disabled={isRejecting || isApproving}
+                          className="p-2 h-auto text-muted-foreground hover:text-green-600 cursor-pointer hover:bg-green-50 disabled:opacity-50"
                           aria-label="Approve request"
                         >
                           <Check size={20} />
@@ -96,12 +116,12 @@ export function RequestsTable({
                       </>
                     ) : (
                       <>
-                        {status === 'approved' && (
+                        {request.status === 'approved' && (
                           <span className="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
                             Accepted
                           </span>
                         )}
-                        {status === 'denied' && (
+                        {request.status === 'rejected' && (
                           <span className="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">
                             Denied
                           </span>
