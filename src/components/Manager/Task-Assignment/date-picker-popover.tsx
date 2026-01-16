@@ -10,7 +10,13 @@ interface DatePickerPopoverProps {
 }
 
 export function DatePickerPopover({ deadline, onDeadlineChange }: DatePickerPopoverProps) {
-  const deadlineDisplay = deadline ? deadline.toISOString().split('T')[0] : 'Set Deadline';
+  const deadlineDisplay = deadline ? deadline.toLocaleDateString('en-CA') : 'Set Deadline';
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      onDeadlineChange(date);
+    }
+  };
 
   return (
     <Popover>
@@ -26,11 +32,12 @@ export function DatePickerPopover({ deadline, onDeadlineChange }: DatePickerPopo
           <Calendar
             mode="single"
             selected={deadline || undefined}
-            onSelect={(date) => onDeadlineChange(date || null)}
+            onSelect={handleDateSelect}
             disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-            // classNames={{
-            //   day: "hover:bg-[#690003] hover:text-white aria-selected:bg-[#690003] aria-selected:text-white",
-            // }}
+            classNames={{
+              day: 'hover:bg-[#D4A574] hover:text-gray-900 rounded-md transition-colors',
+              day_selected: 'bg-[#690003] text-white',
+            }}
           />
         </div>
       </PopoverContent>

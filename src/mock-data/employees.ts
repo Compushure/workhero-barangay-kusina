@@ -1,9 +1,5 @@
-export interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  status?: string;
-}
+import { AssignedEmployee } from '@/components/Manager/Task-Assignment/task-assignment-page';
+import { Task } from '@/components/Manager/Task-Assignment/dialogs/select-tasks-dialog';
 
 export interface Employee {
   id: string;
@@ -13,47 +9,84 @@ export interface Employee {
   assignedTasks: Task[];
 }
 
-export const employees: Employee[] = [
+// Mock employee data
+export const MOCK_EMPLOYEES: AssignedEmployee[] = [
   {
     id: '1',
     name: 'Juan Dela Cruz',
-    empId: '09-0347-79',
+    empId: 'EMP001',
     tenure: 'Junior staff',
-    assignedTasks: [],
+    completedAttempts: 0,
   },
   {
     id: '2',
     name: 'Nicholas A. Hoult',
     empId: 'EMP002',
     tenure: 'Senior staff',
-    assignedTasks: [],
+    completedAttempts: 0,
   },
-  {
-    id: '3',
-    name: 'Mariah Carey',
-    empId: 'EMP003',
-    tenure: 'Mid-level',
-    assignedTasks: [],
-  },
+  { id: '3', name: 'Mariah Carey', empId: 'EMP003', tenure: 'Mid-level', completedAttempts: 0 },
   {
     id: '4',
     name: 'Joshua Ullimer A. Demerin',
     empId: 'EMP004',
     tenure: 'Junior staff',
-    assignedTasks: [],
+    completedAttempts: 0,
   },
-  {
-    id: '5',
-    name: 'Damon Albarn',
-    empId: 'EMP005',
-    tenure: 'Senior staff',
-    assignedTasks: [],
-  },
+  { id: '5', name: 'Damon Albarn', empId: 'EMP005', tenure: 'Senior staff', completedAttempts: 0 },
   {
     id: '6',
     name: 'José Protacio Rizal Mercado y Alonso',
     empId: 'EMP006',
     tenure: 'Manager',
-    assignedTasks: [],
+    completedAttempts: 0,
+  },
+];
+
+export const MOCK_TASKS: Task[] = [
+  {
+    id: 'task1',
+    name: '2024 FS Preparation',
+    type: 'Core Deliverables',
+    isRepeatable: true,
+    points: 5,
+    xp: 25,
+    maxAttempts: 5,
+  },
+  {
+    id: 'task2',
+    name: '2024 ITR Preparation Completeness',
+    type: 'Core Deliverables',
+    isRepeatable: false,
+    points: 5,
+    xp: 25,
+    maxAttempts: 1,
+  },
+  {
+    id: 'task3',
+    name: 'Turnaround Completion Time (TAT)',
+    type: 'Compliance & Discipline',
+    isRepeatable: true,
+    points: 3,
+    xp: 25,
+    maxAttempts: 5,
+  },
+  {
+    id: 'task4',
+    name: 'Zero Compliance Violations',
+    type: 'Compliance & Discipline',
+    isRepeatable: false,
+    points: 5,
+    xp: 25,
+    maxAttempts: 1,
+  },
+  {
+    id: 'task5',
+    name: 'Advanced Training',
+    type: 'Growth & Development',
+    isRepeatable: true,
+    points: 5,
+    xp: 25,
+    maxAttempts: 5,
   },
 ];

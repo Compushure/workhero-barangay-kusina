@@ -13,40 +13,101 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { MoreVertical, ChevronDown, X } from 'lucide-react';
 import { DatePickerPopover } from './date-picker-popover';
-import type { AssignedTask } from './task-assignment-page';
+import type { AssignedTask, AssignedEmployee } from './task-assignment-page';
+import { MOCK_EMPLOYEES } from '@/mock-data/employees';
 
 interface TaskViewCardProps {
   task: AssignedTask;
   onRemoveAssignment: (taskId: string, employeeId: string) => void;
   onDeleteTask?: (taskId: string) => void;
+  onEditTask?: (
+    taskId: string,
+    maxAttempts: number,
+    newDueDate: string,
+    newEmployees: AssignedEmployee[]
+  ) => void;
 }
 
-export function TaskViewCard({ task, onRemoveAssignment, onDeleteTask }: TaskViewCardProps) {
+export function TaskViewCard({
+  task,
+  onRemoveAssignment,
+  onDeleteTask,
+  onEditTask,
+}: TaskViewCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editMaxAttempts, setEditMaxAttempts] = useState(task.maxAttempts);
-  const [editDueDate, setEditDueDate] = useState(new Date(task.dateRange.end));
+  const [editDueDate, setEditDueDate] = useState(new Date(task.dateRange.end + 'T00:00:00'));
+  const [editAssignedEmployees, setEditAssignedEmployees] = useState<string[]>(
+    task.assignedEmployees.map((e) => e.id)
+  );
   const [openPopover, setOpenPopover] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const displayedEmployees = expanded ? task.assignedEmployees : task.assignedEmployees.slice(0, 4);
   const hiddenCount = Math.max(0, task.assignedEmployees.length - 4);
 
+  const formatDate = (dateString: string) => {
+    const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+    const localDate = new Date(year, month - 1, day);
+    return localDate.toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
   const handleEditTask = () => {
+    if (onEditTask) {
+      const newEmployees = editAssignedEmployees.map((empId) => {
+        const existingEmp = task.assignedEmployees.find((e) => e.id === empId);
+        if (existingEmp) return existingEmp;
+        const mockEmp = MOCK_EMPLOYEES.find((e) => e.id === empId);
+        return {
+          id: empId,
+          name: mockEmp?.name || '',
+          empId: mockEmp?.empId || '',
+          tenure: mockEmp?.tenure,
+          completedAttempts: 0,
+        };
+      });
+      onEditTask(task.id, editMaxAttempts, editDueDate.toISOString().split('T')[0], newEmployees);
+    }
     setShowEditDialog(false);
+  };
+
+  const handleOpenEditDialog = () => {
+    setEditMaxAttempts(task.maxAttempts);
+    setEditDueDate(new Date(task.dateRange.end + 'T00:00:00'));
+    setEditAssignedEmployees(task.assignedEmployees.map((e) => e.id));
+    setShowEditDialog(true);
+    setOpenPopover(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditMaxAttempts(task.maxAttempts);
+    setEditDueDate(new Date(task.dateRange.end + 'T00:00:00'));
+    setEditAssignedEmployees(task.assignedEmployees.map((e) => e.id));
+    setShowEditDialog(false);
+  };
+
+  const toggleEmployee = (empId: string) => {
+    setEditAssignedEmployees((prev) =>
+      prev.includes(empId) ? prev.filter((id) => id !== empId) : [...prev, empId]
+    );
   };
 
   return (
     <div className="rounded-2xl bg-[#FAFAFA] p-6 shadow-sm/25">
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
-        <div className="flex-1">
+        <div className="flex-1 ">
           <h3 className="text-xl font-bold text-[#690003] mb-1">{task.taskName}</h3>
           <p className="text-sm text-gray-500 mb-3">{task.taskType}</p>
           <div className="flex gap-6 text-sm text-gray-600">
             <span>
-              {task.dateRange.start} - {task.dateRange.end}
+              {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
             </span>
             <span>Max attempts: {task.maxAttempts}</span>
             <span className="flex items-center gap-2">
@@ -65,10 +126,7 @@ export function TaskViewCard({ task, onRemoveAssignment, onDeleteTask }: TaskVie
           <PopoverContent className="w-40 p-2" align="end">
             <div className="flex flex-col gap-2">
               <Button
-                onClick={() => {
-                  setShowEditDialog(true);
-                  setOpenPopover(false);
-                }}
+                onClick={handleOpenEditDialog}
                 variant="ghost"
                 className="justify-start text-[#690003] hover:bg-[#FBF4E8]"
               >
@@ -116,8 +174,8 @@ export function TaskViewCard({ task, onRemoveAssignment, onDeleteTask }: TaskVie
               key={emp.id}
               className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border-2 border-gray-300"
             >
-              <span className="font-medium text-gray-700">{emp.name}</span>
-              <span className="text-gray-500 text-sm">{emp.empId}</span>
+              <span className="font-medium text-sm text-gray-700">{emp.name}</span>
+              <span className="text-gray-500 font-light text-sm">{emp.empId}</span>
               <button
                 onClick={() => setShowRemoveConfirm(emp.id)}
                 className="text-gray-400 hover:text-red-500 ml-2"
@@ -163,6 +221,7 @@ export function TaskViewCard({ task, onRemoveAssignment, onDeleteTask }: TaskVie
           </DialogContent>
         </Dialog>
 
+        {/* Delete Task Dialog */}
         <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
           <DialogContent className="bg-white">
             <DialogHeader>
@@ -196,8 +255,8 @@ export function TaskViewCard({ task, onRemoveAssignment, onDeleteTask }: TaskVie
         </Dialog>
 
         {/* Edit Task Dialog */}
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="bg-[#FBF4E8] max-w-2xl">
+        <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>
+          <DialogContent className="bg-[#FBF4E8] max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl text-[#690003]">Edit Task</DialogTitle>
             </DialogHeader>
@@ -210,24 +269,26 @@ export function TaskViewCard({ task, onRemoveAssignment, onDeleteTask }: TaskVie
               </div>
 
               {/* Max Repeats */}
-              <div className="flex items-center gap-4">
-                <label className="font-bold text-[#690003]">Max Repeats</label>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setEditMaxAttempts(Math.max(1, editMaxAttempts - 1))}
-                    className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
-                  >
-                    −
-                  </button>
-                  <span className="w-8 text-center font-bold">{editMaxAttempts}</span>
-                  <button
-                    onClick={() => setEditMaxAttempts(editMaxAttempts + 1)}
-                    className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
-                  >
-                    +
-                  </button>
+              {task.isRepeatable && (
+                <div className="flex items-center gap-4">
+                  <label className="font-bold text-[#690003]">Max Repeats</label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setEditMaxAttempts(Math.max(1, editMaxAttempts - 1))}
+                      className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
+                    >
+                      −
+                    </button>
+                    <span className="w-8 text-center font-bold">{editMaxAttempts}</span>
+                    <button
+                      onClick={() => setEditMaxAttempts(editMaxAttempts + 1)}
+                      className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Due Date */}
               <div className="flex items-center gap-4">
@@ -237,19 +298,48 @@ export function TaskViewCard({ task, onRemoveAssignment, onDeleteTask }: TaskVie
                   onDeadlineChange={(date) => date && setEditDueDate(date)}
                 />
               </div>
+
+              {/* Assign/Remove Employees */}
+              <div className="space-y-3">
+                <h4 className="font-bold text-[#690003]">Assign/Remove Employees</h4>
+                <div className="bg-white rounded-xl p-4 border-2 border-gray-300 max-h-75 overflow-y-auto">
+                  <div className="space-y-2">
+                    {MOCK_EMPLOYEES.map((emp) => (
+                      <div
+                        key={emp.id}
+                        className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={editAssignedEmployees.includes(emp.id)}
+                          onChange={() => toggleEmployee(emp.id)}
+                          className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-800">{emp.name}</p>
+                          <p className="text-sm text-gray-500">
+                            {emp.empId} - {emp.tenure}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
             <DialogFooter>
               <Button
                 variant="outline"
-                onClick={() => setShowEditDialog(false)}
-                className="border-gray-300"
+                onClick={handleCancelEdit}
+                className="border-gray-300 bg-transparent"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleEditTask}
-                className="bg-[#690003] hover:bg-[#8B0000] text-white"
+                disabled={editAssignedEmployees.length === 0}
+                className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50"
               >
                 Confirm
               </Button>

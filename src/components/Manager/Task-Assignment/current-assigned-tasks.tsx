@@ -1,17 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Search, ListTodo, Users } from 'lucide-react';
 import { TaskViewCard } from './task-view-card';
 import { EmployeeViewCard } from './employee-view-card';
-import type { AssignedTask } from './task-assignment-page';
+import type { AssignedTask, AssignedEmployee } from './task-assignment-page';
 
 interface CurrentAssignedTasksProps {
   tasks: AssignedTask[];
   viewMode: 'task' | 'employee';
   onViewModeChange: (mode: 'task' | 'employee') => void;
   onRemoveAssignment: (taskId: string, employeeId: string) => void;
+  onDeleteTask?: (taskId: string) => void;
+  onClearAllEmployeeTasks?: (employeeId: string) => void;
+  onEditTask?: (
+    taskId: string,
+    maxAttempts: number,
+    newDueDate: string,
+    newEmployees: AssignedEmployee[]
+  ) => void;
   onClearAll: () => void;
 }
 
@@ -20,20 +28,92 @@ export function CurrentAssignedTasks({
   viewMode,
   onViewModeChange,
   onRemoveAssignment,
+  onDeleteTask,
+  onClearAllEmployeeTasks,
+  onEditTask,
   onClearAll,
 }: CurrentAssignedTasksProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('newest');
+  const [sortBy, setSortBy] = useState('recently added');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const filteredTasks = tasks.filter((task) => {
     const searchLower = searchTerm.toLowerCase();
     const taskMatch = task.taskName.toLowerCase().includes(searchLower);
-    const employeeMatch = task.assignedEmployees.some((emp) =>
-      emp.name.toLowerCase().includes(searchLower)
+    const employeeMatch = task.assignedEmployees.some(
+      (emp) =>
+        emp.name.toLowerCase().includes(searchLower) ||
+        emp.empId.toLowerCase().includes(searchLower)
     );
     return taskMatch || employeeMatch;
   });
+
+  const sortedTasks = useMemo(() => {
+    const tasksCopy = [...filteredTasks];
+
+    if (viewMode === 'task') {
+      if (sortBy === 'recently added') {
+        tasksCopy.sort((a, b) => b.id.localeCompare(a.id));
+      } else if (sortBy === 'oldest') {
+        tasksCopy.sort((a, b) => a.id.localeCompare(b.id));
+      } else if (sortBy === 'closest') {
+        return tasksCopy.sort(
+          (a, b) => new Date(a.dateRange.end).getTime() - new Date(b.dateRange.end).getTime()
+        );
+      } else if (sortBy === 'farthest') {
+        return tasksCopy.sort(
+          (a, b) => new Date(b.dateRange.end).getTime() - new Date(a.dateRange.end).getTime()
+        );
+      }
+    } else {
+      if (sortBy === 'recently added' || sortBy === 'oldest') {
+        const employeeMap = new Map<string, { employee: AssignedEmployee; latestDate: Date }>();
+
+        tasksCopy.forEach((task) => {
+          task.assignedEmployees.forEach((emp) => {
+            const taskDate = new Date(task.dateRange.start);
+            if (!employeeMap.has(emp.id)) {
+              employeeMap.set(emp.id, { employee: emp, latestDate: taskDate });
+            } else {
+              const entry = employeeMap.get(emp.id)!;
+              if (taskDate > entry.latestDate) {
+                entry.latestDate = taskDate;
+              }
+            }
+          });
+        });
+
+        tasksCopy.sort((a, b) => {
+          const empA = a.assignedEmployees[0];
+          const empB = b.assignedEmployees[0];
+          if (!empA || !empB) return 0;
+
+          const dateA = employeeMap.get(empA.id)?.latestDate || new Date(0);
+          const dateB = employeeMap.get(empB.id)?.latestDate || new Date(0);
+
+          if (sortBy === 'recently added') {
+            return dateB.getTime() - dateA.getTime();
+          } else {
+            return dateA.getTime() - dateB.getTime();
+          }
+        });
+      } else if (sortBy === 'a-z') {
+        tasksCopy.sort((a, b) => {
+          const nameA = a.assignedEmployees[0]?.name || '';
+          const nameB = b.assignedEmployees[0]?.name || '';
+          return nameA.localeCompare(nameB);
+        });
+      } else if (sortBy === 'z-a') {
+        tasksCopy.sort((a, b) => {
+          const nameA = a.assignedEmployees[0]?.name || '';
+          const nameB = b.assignedEmployees[0]?.name || '';
+          return nameB.localeCompare(nameA);
+        });
+      }
+    }
+
+    return tasksCopy;
+  }, [filteredTasks, sortBy, viewMode]);
 
   return (
     <div className="rounded-3xl bg-[#FBF4E8] p-8 shadow-sm">
@@ -41,25 +121,25 @@ export function CurrentAssignedTasks({
         <h2 className="text-2xl font-bold text-[#690003]">Current Assigned Tasks</h2>
 
         {/* View Toggle */}
-        <div className="flex gap-2 bg-white rounded-full p-1 border-2 border-gray-300">
+        <div className="flex gap-2 bg-white rounded-2xl p-1 border-2 border-gray-300">
           <button
             onClick={() => onViewModeChange('task')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition ${
-              viewMode === 'task' ? 'bg-[#690003] text-white' : 'text-gray-700 hover:bg-gray-100'
+            className={`flex w-44 justify-center items-center gap-2 py-2.5 rounded-xl text-base font-medium transition ${
+              viewMode === 'task' ? 'bg-[#690003] text-white' : 'text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <ListTodo className="w-4 h-4" />
+            <ListTodo size={20} />
             Task View
           </button>
           <button
             onClick={() => onViewModeChange('employee')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition ${
+            className={`flex w-44 justify-center items-center gap-2 py-2.5 rounded-xl text-base font-medium transition ${
               viewMode === 'employee'
                 ? 'bg-[#690003] text-white'
-                : 'text-gray-700 hover:bg-gray-100'
+                : 'text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <Users className="w-4 h-4" />
+            <Users size={20} />
             Employee View
           </button>
         </div>
@@ -83,15 +163,26 @@ export function CurrentAssignedTasks({
           onChange={(e) => setSortBy(e.target.value)}
           className="px-4 py-3 border-2 border-gray-300 rounded-full bg-white focus:outline-none focus:border-[#690003]"
         >
-          <option value="newest">Sort by: Newest</option>
-          <option value="oldest">Oldest</option>
-          <option value="closest">Closest deadline</option>
-          <option value="farthest">Farthest deadline</option>
+          {viewMode === 'task' ? (
+            <>
+              <option value="recently added">Recently Added</option>
+              <option value="oldest">Oldest</option>
+              <option value="closest">Closest due</option>
+              <option value="farthest">Farthest due</option>
+            </>
+          ) : (
+            <>
+              <option value="recently added">Recently Added</option>
+              <option value="oldest">Oldest</option>
+              <option value="a-z">A-Z</option>
+              <option value="z-a">Z-A</option>
+            </>
+          )}
         </select>
 
         <Button
           onClick={() => setShowClearConfirm(true)}
-          disabled={filteredTasks.length == 0}
+          disabled={sortedTasks.length == 0}
           className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Clear All
@@ -100,16 +191,32 @@ export function CurrentAssignedTasks({
 
       {/* Task Cards */}
       <div className="space-y-6">
-        {filteredTasks.length === 0 ? (
+        {sortedTasks.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No tasks assigned yet.</p>
           </div>
         ) : viewMode === 'task' ? (
-          filteredTasks.map((task) => (
-            <TaskViewCard key={task.id} task={task} onRemoveAssignment={onRemoveAssignment} />
+          sortedTasks.map((task) => (
+            <TaskViewCard
+              key={task.id}
+              task={task}
+              onRemoveAssignment={onRemoveAssignment}
+              onDeleteTask={onDeleteTask}
+              // Updated to include newEmployees parameter
+              onEditTask={
+                onEditTask
+                  ? (taskId, maxAttempts, newDueDate, newEmployees) =>
+                      onEditTask(taskId, maxAttempts, newDueDate, newEmployees)
+                  : undefined
+              }
+            />
           ))
         ) : (
-          <EmployeeViewCard tasks={filteredTasks} onRemoveAssignment={onRemoveAssignment} />
+          <EmployeeViewCard
+            tasks={sortedTasks}
+            onRemoveAssignment={onRemoveAssignment}
+            onClearAllEmployeeTasks={onClearAllEmployeeTasks}
+          />
         )}
       </div>
 

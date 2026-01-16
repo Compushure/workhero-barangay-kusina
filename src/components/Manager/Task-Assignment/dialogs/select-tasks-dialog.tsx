@@ -1,5 +1,6 @@
 'use client';
 
+import type React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,75 +11,45 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Search, Plus } from 'lucide-react';
+import type { AssignedTask } from '../task-assignment-page';
+import { MOCK_TASKS } from '@/mock-data/employees';
 
-interface Task {
+export interface Task {
   id: string;
   name: string;
   type: string;
+  isRepeatable: boolean;
   points: number;
   xp: number;
-  maxRepeats: number;
+  maxAttempts: number;
 }
-
-// Mock task data
-const MOCK_TASKS: Task[] = [
-  {
-    id: 'task1',
-    name: '2024 FS Preparation',
-    type: 'Core Deliverables',
-    points: 5,
-    xp: 25,
-    maxRepeats: 1,
-  },
-  {
-    id: 'task2',
-    name: '2024 ITR Preparation Completeness',
-    type: 'Core Deliverables',
-    points: 5,
-    xp: 25,
-    maxRepeats: 1,
-  },
-  {
-    id: 'task3',
-    name: 'Turnaround Completion Time (TAT)',
-    type: 'Compliance & Discipline',
-    points: 3,
-    xp: 25,
-    maxRepeats: 1,
-  },
-  {
-    id: 'task4',
-    name: 'Zero Compliance Violations',
-    type: 'Compliance & Discipline',
-    points: 5,
-    xp: 25,
-    maxRepeats: 1,
-  },
-  {
-    id: 'task5',
-    name: 'Advanced Training',
-    type: 'Growth & Development',
-    points: 5,
-    xp: 25,
-    maxRepeats: 1,
-  },
-];
 
 interface SelectTasksDialogProps {
   selectedTasks: string[];
-  onTasksChange: (tasks: string[]) => void;
-  mode?: 'assign' | 'add-task';
+  onTasksChange: (tasks: string[], maxAttempts?: Record<string, number>) => void;
+  assignedTasks?: AssignedTask[];
+  buttonLabel?: string;
 }
 
 export function SelectTasksDialog({
   selectedTasks,
   onTasksChange,
-  mode = 'assign',
+  assignedTasks = [],
+  buttonLabel,
 }: SelectTasksDialogProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
-  const [taskMaxRepeats, setTaskMaxRepeats] = useState<Record<string, number>>({});
+  const [taskMaxAttempts, setTaskMaxAttempts] = useState<Record<string, number>>(() => {
+    const initial: Record<string, number> = {};
+    selectedTasks.forEach((taskId) => {
+      const task = MOCK_TASKS.find((t) => t.id === taskId);
+      if (task && task.isRepeatable) {
+        initial[taskId] = 1;
+      }
+    });
+    return initial;
+  });
 
   const filteredTasks = MOCK_TASKS.filter((task) => {
     const searchLower = searchTerm.toLowerCase();
@@ -88,24 +59,31 @@ export function SelectTasksDialog({
   });
 
   const taskTypes = ['all', ...new Set(MOCK_TASKS.map((t) => t.type))];
+  const assignedTaskIds = new Set(assignedTasks.map((t) => t.taskId));
 
   const toggleTask = (taskId: string) => {
     if (selectedTasks.includes(taskId)) {
-      onTasksChange(selectedTasks.filter((id) => id !== taskId));
-      const newMaxRepeats = { ...taskMaxRepeats };
-      delete newMaxRepeats[taskId];
-      setTaskMaxRepeats(newMaxRepeats);
+      // Deselect
+      onTasksChange([], {});
+      setTaskMaxAttempts({});
     } else {
-      onTasksChange([...selectedTasks, taskId]);
+      // Select this task and deselect others
       const task = MOCK_TASKS.find((t) => t.id === taskId);
-      if (task && !taskMaxRepeats[taskId]) {
-        setTaskMaxRepeats({ ...taskMaxRepeats, [taskId]: task.maxRepeats });
+      if (task) {
+        const newMaxAttempts = { [taskId]: task.isRepeatable ? 1 : 1 };
+        setTaskMaxAttempts(newMaxAttempts);
+        onTasksChange([taskId], newMaxAttempts);
       }
     }
   };
 
-  const updateMaxRepeats = (taskId: string, newValue: number) => {
-    setTaskMaxRepeats({ ...taskMaxRepeats, [taskId]: Math.max(1, newValue) });
+  const updateMaxAttempts = (taskId: string, newValue: number) => {
+    const task = MOCK_TASKS.find((t) => t.id === taskId);
+    if (task && task.isRepeatable) {
+      const newMaxAttempts = { ...taskMaxAttempts, [taskId]: Math.max(1, newValue) };
+      setTaskMaxAttempts(newMaxAttempts);
+      onTasksChange(selectedTasks, newMaxAttempts);
+    }
   };
 
   const handleConfirm = () => {
@@ -113,24 +91,42 @@ export function SelectTasksDialog({
     setSearchTerm('');
   };
 
-  const dialogTitle = mode === 'add-task' ? 'Add Task' : 'Select Tasks';
+  const handleCancel = () => {
+    setOpen(false);
+    setSearchTerm('');
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setSearchTerm('');
+    }
+    setOpen(newOpen);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    setSearchTerm(e.target.value);
+  };
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    e.stopPropagation();
+    setFilterType(e.target.value);
+  };
 
   return (
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+        className="bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2 min-w-50 justify-between"
       >
-        <div className="flex items-center gap-2">
-          <span>{selectedTasks.length} selected</span>
-          <Plus className="w-4 h-4" />
-        </div>
+        <span className="truncate">{buttonLabel || `${selectedTasks.length} selected`}</span>
+        <Plus className="w-4 h-4 shrink-0" />
       </Button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-[#FBF4E8] min-w-5/8 max-h-[90vh] flex flex-col">
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="bg-[#FBF4E8] max-w-full min-w-4xl max-h-[90vh] flex flex-col p-6">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[#690003]">{dialogTitle}</DialogTitle>
+            <DialogTitle className="text-2xl text-[#690003]">Select Tasks</DialogTitle>
           </DialogHeader>
 
           {/* Search and Filter */}
@@ -141,14 +137,16 @@ export function SelectTasksDialog({
                 type="text"
                 placeholder="Search Task"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-full bg-white focus:outline-none focus:border-[#690003]"
+                onChange={handleSearchChange}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-full bg-white focus:outline-none focus:border-[#690003] font-sans"
               />
             </div>
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="px-4 py-3 border-2 border-gray-300 rounded-full bg-white focus:outline-none focus:border-[#690003]"
+              onChange={handleFilterChange}
+              onClick={(e) => e.stopPropagation()}
+              className="px-4 py-3 border-2 border-gray-300 rounded-full bg-white focus:outline-none focus:border-[#690003] font-sans"
             >
               {taskTypes.map((type) => (
                 <option key={type} value={type}>
@@ -161,82 +159,129 @@ export function SelectTasksDialog({
           {/* Tasks Selected Badge */}
           <div>
             <h4 className="text-lg font-bold text-[#690003] mb-3">
-              Tasks Selected{' '}
+              Tasks Selected
               <span className="bg-gray-200 px-2 py-1 rounded-full text-sm ml-2">
                 {selectedTasks.length}
               </span>
             </h4>
           </div>
 
-          {/* Employees Table */}
-          <div className="bg-white rounded-2xl border-2 border-gray-300 flex-1 flex flex-col overflow-auto">
-            <table className="w-full">
-              <thead className="bg-[#690003] text-white">
-                <tr className="flex py-4 text-sm text-center font-bold items-center">
-                  <th className="w-[5%]"></th>
-                  <th className="w-[40%] text-left pl-1">TASK</th>
-                  <th className="w-[20%]">POINTS / INSTANCE</th>
-                  <th className="w-[15%]">XP / INSTANCE</th>
-                  <th className="w-[20%]">MAX REPEATS</th>
-                </tr>
-              </thead>
-              <tbody className="overflow-y-auto flex-1">
-                {filteredTasks.map((task) => {
-                  const isSelected = selectedTasks.includes(task.id);
-                  const currentMaxRepeats = taskMaxRepeats[task.id] ?? task.maxRepeats;
-                  return (
-                    <tr
-                      key={task.id}
-                      className="border-b border-gray-200 hover:bg-gray-50 flex w-full"
-                    >
-                      <td className="p-4">
-                        <div className="w-[5%] flex items-center gap-3">
+          {/* Tasks Table */}
+          <div className="bg-white rounded-2xl border-2 border-gray-300 overflow-hidden">
+            <div className="max-h-100 overflow-y-auto">
+              <table className="w-full">
+                <thead className="bg-[#690003] text-white sticky top-0 z-10">
+                  <tr>
+                    <th className="w-[5%] py-4"></th>
+                    <th className="w-[35%] py-4 text-left pl-4 text-sm font-bold">TASK</th>
+                    <th className="w-[20%] py-4 text-center text-sm font-bold">POINTS</th>
+                    <th className="w-[15%] py-4 text-center text-sm font-bold">XP</th>
+                    <th className="w-[25%] py-4 text-center text-sm font-bold">MAX ATTEMPTS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTasks.map((task) => {
+                    const isSelected = selectedTasks.includes(task.id);
+                    const currentMaxAttempts =
+                      taskMaxAttempts[task.id] ?? (task.isRepeatable ? 1 : task.maxAttempts);
+                    const isAlreadyAssigned = assignedTaskIds.has(task.id);
+                    const isDisabled = isAlreadyAssigned;
+
+                    return (
+                      <tr
+                        key={task.id}
+                        className={`border-b border-gray-200 ${
+                          isDisabled
+                            ? 'opacity-50 cursor-not-allowed bg-gray-100'
+                            : 'hover:bg-gray-50 cursor-pointer'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isDisabled) toggleTask(task.id);
+                        }}
+                      >
+                        <td className="w-[5%] p-4 text-center">
                           <input
-                            type="checkbox"
+                            type="radio"
                             checked={isSelected}
-                            onChange={() => toggleTask(task.id)}
-                            className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
+                            disabled={isDisabled}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              if (!isDisabled) toggleTask(task.id);
+                            }}
+                            className="w-5 h-5 cursor-pointer accent-[#690003] disabled:cursor-not-allowed"
+                            onClick={(e) => e.stopPropagation()}
                           />
-                        </div>
-                      </td>
-                      <td className="w-[40%] flex flex-col justify-center">
-                        <div className="font-medium text-gray-800">{task.name}</div>
-                        <div className="text-sm text-gray-500">{task.type}</div>
-                      </td>
-                      <td className="w-[20%] p-4 text-gray-600 shrink-0 text-center">
-                        {task.points}pts
-                      </td>
-                      <td className="w-[15%] p-4 text-gray-600 shrink-0 text-center">{task.xp}</td>
-                      <td className="w-[20%] p-4 shrink-0 flex justify-center">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => updateMaxRepeats(task.id, currentMaxRepeats - 1)}
-                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000]"
-                          >
-                            −
-                          </button>
-                          <span className="w-6 text-center font-medium">{currentMaxRepeats}</span>
-                          <button
-                            onClick={() => updateMaxRepeats(task.id, currentMaxRepeats + 1)}
-                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000]"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        </td>
+                        <td className="w-[35%] px-4 py-3">
+                          <div className="font-medium text-gray-800 font-sans">{task.name}</div>
+                          <div className="text-sm text-gray-500 font-sans">{task.type}</div>
+                        </td>
+                        <td className="w-[20%] p-4 text-gray-600 text-center font-sans">
+                          {task.points}pts
+                        </td>
+                        <td className="w-[15%] p-4 text-gray-600 text-center font-sans">
+                          {task.xp}
+                        </td>
+                        <td className="w-[25%] p-4" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-center gap-2">
+                            {task.isRepeatable ? (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateMaxAttempts(task.id, currentMaxAttempts - 1);
+                                  }}
+                                  disabled={isDisabled}
+                                  className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50"
+                                >
+                                  −
+                                </button>
+                                <input
+                                  type="number"
+                                  value={currentMaxAttempts}
+                                  onChange={(e) => {
+                                    e.stopPropagation();
+                                    updateMaxAttempts(
+                                      task.id,
+                                      Number.parseInt(e.target.value) || 1
+                                    );
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  disabled={isDisabled}
+                                  className="w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans disabled:opacity-50"
+                                  min="1"
+                                />
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateMaxAttempts(task.id, currentMaxAttempts + 1);
+                                  }}
+                                  disabled={isDisabled}
+                                  className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50"
+                                >
+                                  +
+                                </button>
+                              </>
+                            ) : (
+                              <span className="text-gray-600 font-sans">1</span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Dialog Footer */}
-          <DialogFooter>
+          <DialogFooter className="gap-3">
             <Button
               variant="outline"
-              onClick={() => setOpen(false)}
-              className="border-gray-300 text-gray-700 hover:bg-gray-100"
+              onClick={handleCancel}
+              className="border-gray-300 text-gray-700 hover:bg-gray-100 bg-transparent"
             >
               Cancel
             </Button>

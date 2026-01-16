@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,50 +10,19 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Search, Plus } from 'lucide-react';
-import type { AssignedEmployee } from '../task-assignment-page';
-
-// Mock employee data
-const MOCK_EMPLOYEES: AssignedEmployee[] = [
-  {
-    id: '1',
-    name: 'Juan Dela Cruz',
-    empId: 'EMP001',
-    tenure: 'Junior staff',
-    completedAttempts: 0,
-  },
-  {
-    id: '2',
-    name: 'Nicholas A. Hoult',
-    empId: 'EMP002',
-    tenure: 'Senior staff',
-    completedAttempts: 0,
-  },
-  { id: '3', name: 'Mariah Carey', empId: 'EMP003', tenure: 'Mid-level', completedAttempts: 0 },
-  {
-    id: '4',
-    name: 'Joshua Ullimer A. Demerin',
-    empId: 'EMP004',
-    tenure: 'Junior staff',
-    completedAttempts: 0,
-  },
-  { id: '5', name: 'Damon Albarn', empId: 'EMP005', tenure: 'Senior staff', completedAttempts: 0 },
-  {
-    id: '6',
-    name: 'José Protacio Rizal Mercado y Alonso',
-    empId: 'EMP006',
-    tenure: 'Manager',
-    completedAttempts: 0,
-  },
-];
+import { AssignedEmployee } from '../task-assignment-page';
+import { MOCK_EMPLOYEES } from '@/mock-data/employees';
 
 interface AssignEmployeesDialogProps {
   selectedEmployees: AssignedEmployee[];
   onEmployeesChange: (employees: AssignedEmployee[]) => void;
+  disabled?: boolean;
 }
 
 export function AssignEmployeesDialog({
   selectedEmployees,
   onEmployeesChange,
+  disabled = false,
 }: AssignEmployeesDialogProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -65,6 +34,11 @@ export function AssignEmployeesDialog({
     );
   });
 
+  const allFilteredSelected = useMemo(() => {
+    if (filteredEmployees.length === 0) return false;
+    return filteredEmployees.every((emp) => selectedEmployees.find((e) => e.id === emp.id));
+  }, [filteredEmployees, selectedEmployees]);
+
   const toggleEmployee = (employee: AssignedEmployee) => {
     const isSelected = selectedEmployees.find((e) => e.id === employee.id);
     if (isSelected) {
@@ -74,16 +48,40 @@ export function AssignEmployeesDialog({
     }
   };
 
+  const handleSelectAll = () => {
+    if (allFilteredSelected) {
+      // Deselect all filtered employees
+      const filteredIds = new Set(filteredEmployees.map((e) => e.id));
+      onEmployeesChange(selectedEmployees.filter((emp) => !filteredIds.has(emp.id)));
+    } else {
+      // Select all filtered employees
+      const newSelections = filteredEmployees.filter(
+        (emp) => !selectedEmployees.find((e) => e.id === emp.id)
+      );
+      onEmployeesChange([...selectedEmployees, ...newSelections]);
+    }
+  };
+
   const handleConfirm = () => {
     setOpen(false);
     setSearchTerm('');
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!disabled) {
+      if (!newOpen) {
+        setSearchTerm('');
+      }
+      setOpen(newOpen);
+    }
+  };
+
   return (
     <>
       <Button
-        onClick={() => setOpen(true)}
-        className="bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+        onClick={() => !disabled && setOpen(true)}
+        disabled={disabled}
+        className="bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <div className="flex items-center gap-2">
           <span>{selectedEmployees.length} selected</span>
@@ -91,7 +89,7 @@ export function AssignEmployeesDialog({
         </div>
       </Button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="bg-[#FBF4E8] max-h-[90vh] flex flex-col rounded-3xl pt-12">
           <DialogHeader>
             <DialogTitle className="text-2xl text-[#690003]">Assign Employees for Task</DialogTitle>
@@ -123,19 +121,27 @@ export function AssignEmployeesDialog({
           <div className="bg-white rounded-2xl border-2 border-gray-200 flex-1 flex flex-col overflow-auto">
             <table className="w-full">
               <thead className="bg-gray-100 border-b-2 border-gray-300">
-                <tr className="flex py-2">
-                  <th className="p-4 flex w-[10%]"></th>
-                  <th className="w-[60%] px-4 text-left font-bold text-[#690003]">NAME</th>
-                  <th className="w-[30%] px-4 text-left font-bold text-[#690003]">ID NO.</th>
+                <tr className="flex py-2 px-2 items-center">
+                  <th className="p-2 flex w-[10%]">
+                    <input
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      onChange={handleSelectAll}
+                      className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
+                    />
+                  </th>
+                  <th className="w-[60%] px-3 text-left font-bold text-[#690003]">NAME</th>
+                  <th className="w-[30%] px-5 text-left font-bold text-[#690003]">ID NO.</th>
                 </tr>
               </thead>
-              <tbody className="overflow-y-auto flex-1">
+              <tbody className="overflow-y-auto flex flex-col">
                 {filteredEmployees.map((employee) => {
                   const isSelected = selectedEmployees.find((e) => e.id === employee.id);
                   return (
                     <tr
                       key={employee.id}
-                      className="border-b border-gray-200 hover:bg-gray-50 flex w-full items-center py-1"
+                      className="border-b border-gray-200 hover:bg-gray-50 flex w-full items-center py-1 cursor-pointer"
+                      onClick={() => toggleEmployee(employee)}
                     >
                       <td className="p-4 flex w-[10%]">
                         <div className="flex items-center">
@@ -144,6 +150,7 @@ export function AssignEmployeesDialog({
                             checked={!!isSelected}
                             onChange={() => toggleEmployee(employee)}
                             className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
+                            onClick={(e) => e.stopPropagation()}
                           />
                         </div>
                       </td>
