@@ -6,7 +6,7 @@
     "dev": "next dev -p 3008",
     "test": "cross-env NODE_ENV=test jest --runInBand",
     "test:watch": "jest --watch",
-    "build": "next build",
+    "build": "cross-env NODE_ENV=production next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
