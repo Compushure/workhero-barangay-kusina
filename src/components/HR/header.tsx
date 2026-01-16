@@ -41,8 +41,8 @@ export function HeaderSection({ title, description, onSearch, onSort }: HeaderSe
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="date-desc">Date (Newest)</SelectItem>
-            <SelectItem value="date-asc">Date (Oldest)</SelectItem>
+            <SelectItem value="date-desc">Newest</SelectItem>
+            <SelectItem value="date-asc">Oldest</SelectItem>
             <SelectItem value="cost-desc">Cost (Highest)</SelectItem>
             <SelectItem value="cost-asc">Cost (Lowest)</SelectItem>
             <SelectItem value="employee">Employee Name</SelectItem>

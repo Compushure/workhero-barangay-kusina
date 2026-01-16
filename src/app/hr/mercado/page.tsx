@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
+import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 
 // Mock Data
 const MOCK_ITEMS = Array.from({ length: 8 }).map((_, i) => ({
@@ -11,9 +13,22 @@ const MOCK_ITEMS = Array.from({ length: 8 }).map((_, i) => ({
 }));
 
 export default function MercadoPage() {
-  const handleAdd = () => console.log('Open Add Modal');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const handleAdd = () => setIsAddModalOpen(true);
   const handleEdit = (id: string) => console.log('Editing', id);
   const handleDelete = (id: string) => console.log('Deleting', id);
+
+  const handleSaveItem = (data: {
+    icon?: File;
+    name: string;
+    unitWeight: string;
+    weightUnit: string;
+    cost: number;
+  }) => {
+    console.log('Saving item:', data);
+    // Add your save logic here
+  };
 
   return (
     <main className="min-h-screen bg-[#fff8f5] p-8">
@@ -29,6 +44,12 @@ export default function MercadoPage() {
             <MercadoCard key={item.id} item={item} onEdit={handleEdit} onDelete={handleDelete} />
           ))}
         </div>
+
+        <AddItemsModal
+          open={isAddModalOpen}
+          onOpenChange={setIsAddModalOpen}
+          onSave={handleSaveItem}
+        />
       </div>
     </main>
   );
