@@ -1,4 +1,4 @@
-import { TaskAssignmentPage } from '@/components/Manager/Task-Assignment/task-assignment-page';
+import { TaskAssignmentPage } from '@/components/manager/task-assignment/task-assignment-page';
 import { Sidebar } from '@/components/Manager/Task-Verification/sidebar';
 // import { VerificationRequestsPage } from '@/components/Manager/Task-Verification/verification-request-page';
 
