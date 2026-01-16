@@ -249,7 +249,7 @@ export function SelectTasksDialog({
                                   }}
                                   onClick={(e) => e.stopPropagation()}
                                   disabled={isDisabled}
-                                  className="w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans disabled:opacity-50"
+                                  className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans disabled:opacity-50"
                                   min="1"
                                 />
                                 <button
