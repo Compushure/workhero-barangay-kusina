@@ -87,7 +87,7 @@ export function RequestsTable({
                   {request.repeated_times ?? 0}
                 </TableCell>
                 <TableCell className="text-sm text-center font-medium pr-25">
-                  {request.category_points ?? 0} Pts
+                  {request.category_points ?? 0} Pts/XP
                 </TableCell>
                 <TableCell className="text-center px-2">
                   <div className="flex items-center justify-center gap-2">

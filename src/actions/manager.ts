@@ -185,23 +185,20 @@ export async function approveTaskAction(id: string) {
   if (updateError) {
     return { error: 'Failed to approve task: ' + updateError.message, data: undefined };
   }
-
-
 }
 
 export async function rejectTaskAction(id: string) {
   const supabase = await createClient();
 
   // First update the task
-  const {data,  error: updateError } = await supabase
+  const { data, error: updateError } = await supabase
     .from('KPITask')
     .update({ status: 'rejected' })
     .eq('id', id.trim())
-    .select()
+    .select();
 
-    console.log("id: ",id)
+  console.log('id: ', id);
   if (updateError) {
     return { error: 'Failed to reject task: ' + updateError.message, data: undefined };
   }
-
 }
