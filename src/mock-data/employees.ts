@@ -38,7 +38,21 @@ export const MOCK_EMPLOYEES: AssignedEmployee[] = [
     id: '6',
     name: 'José Protacio Rizal Mercado y Alonso',
     empId: 'EMP006',
-    tenure: 'Manager',
+    tenure: 'Junior Staff',
+    completedAttempts: 0,
+  },
+  {
+    id: '7',
+    name: 'Rob Baban',
+    empId: 'EMP007',
+    tenure: 'Junior Staff',
+    completedAttempts: 0,
+  },
+  {
+    id: '8',
+    name: 'JP Rosalita',
+    empId: 'EMP008',
+    tenure: 'Junior Staff',
     completedAttempts: 0,
   },
 ];

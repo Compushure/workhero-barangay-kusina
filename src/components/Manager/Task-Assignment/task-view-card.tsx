@@ -308,6 +308,7 @@ export function TaskViewCard({
                       <div
                         key={emp.id}
                         className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded"
+                        onClick={() => toggleEmployee(emp.id)}
                       >
                         <input
                           type="checkbox"
