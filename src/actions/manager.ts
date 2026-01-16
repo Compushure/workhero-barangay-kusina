@@ -39,7 +39,7 @@ export async function fetchTasksToReview(): Promise<ServerActionResponse<Verific
  */
 export async function fetchTasksToReviewPaginated(
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 8
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
   const supabase = await createClient();
 
@@ -91,7 +91,7 @@ export async function fetchApprovedTasks(): Promise<ServerActionResponse<Verific
  */
 export async function fetchApprovedTasksPaginated(
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 8
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
   const supabase = await createClient();
 
@@ -143,7 +143,7 @@ export async function fetchDeniedTasks(): Promise<ServerActionResponse<Verificat
  */
 export async function fetchDeniedTasksPaginated(
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 8
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
   const supabase = await createClient();
 
