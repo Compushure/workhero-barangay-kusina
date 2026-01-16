@@ -1,53 +1,50 @@
 'use client';
 
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { SearchBar } from '@/components/Manager/Task-Verification/search-bar';
+import { SortButton } from '@/components/Manager/Task-Verification/sort-button';
 
 interface HeaderSectionProps {
   title: string;
   description?: string;
+  searchTerm?: string;
   onSearch?: (value: string) => void;
   onSort?: (value: string) => void;
+  sortBy?: string;
 }
 
-export function HeaderSection({ title, description, onSearch, onSort }: HeaderSectionProps) {
+export function HeaderSection({
+  title,
+  description,
+  searchTerm = '',
+  onSearch,
+  onSort,
+  sortBy = 'date-desc',
+}: HeaderSectionProps) {
   return (
     <div className="space-y-6">
       {/* Title Section */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
-        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+        <h1 className="text-3xl font-bold tracking-tight text-[#5a2a2a]">{title}</h1>
+        {description && <p className="mt-1 text-sm text-[#7a3d3d]">{description}</p>}
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search"
-            className="pl-10"
-            onChange={(e) => onSearch?.(e.target.value)}
-          />
-        </div>
-        <Select onValueChange={onSort}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date-desc">Date (Newest)</SelectItem>
-            <SelectItem value="date-asc">Date (Oldest)</SelectItem>
-            <SelectItem value="cost-desc">Cost (Highest)</SelectItem>
-            <SelectItem value="cost-asc">Cost (Lowest)</SelectItem>
-            <SelectItem value="employee">Employee Name</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="flex items-center justify-end gap-3">
+        <SearchBar
+          searchTerm={searchTerm}
+          onSearchChange={(value) => onSearch?.(value)}
+          placeholder="Search by employee or items"
+          width="w-[320px]"
+        />
+        <SortButton
+          sortBy={sortBy as any}
+          onSortChange={(value) => onSort?.(value)}
+          options={[
+            { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
+            { value: 'date-asc' as any, label: 'Date (Oldest)' },
+            { value: 'employee' as any, label: 'Employee Name' },
+          ]}
+        />
       </div>
     </div>
   );
