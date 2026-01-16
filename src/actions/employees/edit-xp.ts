@@ -12,7 +12,6 @@ export type EditXPInput = {
 export type EditXPResult = {
   newXP: number;
   newLevel: number;
-  leveledUp: boolean;
 };
 
 /**
@@ -49,43 +48,36 @@ export async function editUserXP({
     }
 
     // Use admin client for manager operations
-    // Get current XP and level before update
-    const { data: currentData, error: fetchError } = await supabaseAdmin
-      .from('User')
-      .select('xp, level')
-      .eq('id', userId)
-      .single();
-
-    if (fetchError) {
-      throw new Error(`Failed to fetch user: ${fetchError.message}`);
-    }
-
-    if (!currentData) {
-      throw new Error('User not found');
-    }
-
-    const currentLevel = currentData.level ?? 1;
-    const currentXP = currentData.xp ?? 0;
-
-    // Add XP to current XP
-    // The database trigger will automatically calculate the new level
-    const { data, error: updateError } = await supabaseAdmin
+    // Update User table - database trigger handles increment and level calculation
+    const { error: updateError } = await supabaseAdmin
       .from('User')
       .update({
-        xp: currentXP + xpToAdd,
+        xp: xpToAdd,
       })
-      .eq('id', userId)
-      .select('xp, level')
-      .single();
+      .eq('id', userId);
 
     if (updateError) {
       throw new Error(`Failed to update XP: ${updateError.message}`);
     }
 
+    // Query user_attributes view to get final values
+    const { data, error: fetchError } = await supabaseAdmin
+      .from('user_attributes')
+      .select('xp, user_level')
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError) {
+      throw new Error(`Failed to fetch updated user data: ${fetchError.message}`);
+    }
+
+    if (!data) {
+      throw new Error('User not found after update');
+    }
+
     return {
       newXP: data.xp,
-      newLevel: data.level,
-      leveledUp: data.level > currentLevel,
+      newLevel: data.user_level,
     };
   });
 }

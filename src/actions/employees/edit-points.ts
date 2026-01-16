@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
 import { getUserRole } from '@/actions/auth';
 
@@ -41,36 +41,30 @@ export async function editUserPoints({
       throw new Error('User ID is required');
     }
 
-    const supabase = await createClient();
-
-    // Get current points
-    const { data: currentData, error: fetchError } = await supabase
+    // Use admin client for manager operations
+    // Update User table - database trigger handles increment
+    const { error: updateError } = await supabaseAdmin
       .from('User')
-      .select('points')
-      .eq('id', userId)
-      .single();
-
-    if (fetchError) {
-      throw new Error(`Failed to fetch user: ${fetchError.message}`);
-    }
-
-    if (!currentData) {
-      throw new Error('User not found');
-    }
-
-    const currentPoints = currentData.points ?? 0;
-    const newPoints = currentPoints + pointsToAdd;
-
-    // Update points
-    const { data, error: updateError } = await supabase
-      .from('User')
-      .update({ points: newPoints })
-      .eq('id', userId)
-      .select('points')
-      .single();
+      .update({ points: pointsToAdd })
+      .eq('id', userId);
 
     if (updateError) {
       throw new Error(`Failed to update points: ${updateError.message}`);
+    }
+
+    // Query user_attributes view to get final points value
+    const { data, error: fetchError } = await supabaseAdmin
+      .from('user_attributes')
+      .select('points')
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError) {
+      throw new Error(`Failed to fetch updated user data: ${fetchError.message}`);
+    }
+
+    if (!data) {
+      throw new Error('User not found after update');
     }
 
     return data.points;
