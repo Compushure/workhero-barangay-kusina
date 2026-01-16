@@ -160,7 +160,6 @@
   body {
     @apply bg-background text-foreground;
   }
-<<<<<<< HEAD
 }
 
 .remove-arrow::-webkit-inner-spin-button,
@@ -171,6 +170,3 @@
 .remove-arrow {
   -moz-appearance: textfield;
 }
-=======
-}
->>>>>>> 6c5425d759c0a4fca233497f5ee66ccbcb35c773
