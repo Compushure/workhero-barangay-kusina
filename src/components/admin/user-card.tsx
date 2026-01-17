@@ -25,7 +25,7 @@ import {
 import { format } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 
-type UserWithExtras = User & {
+export type UserWithExtras = User & {
   employeeId?: string;
   companyId?: string;
   employmentStatus?: 'probationary' | 'regular' | string;

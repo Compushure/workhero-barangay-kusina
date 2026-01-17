@@ -12,6 +12,9 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
+import { LogOutBtn } from '../sidebar/logout-btn';
+import { UserWithExtras } from '../admin/user-card';
+import { ProfilePic } from '../sidebar/profile-pic';
 
 interface NavItem {
   key: string;
@@ -22,9 +25,9 @@ interface NavItem {
 
 interface SidebarProps {
   navItems?: NavItem[];
-  user?: { name: string; email: string };
+ user?: UserWithExtras; 
 }
- 
+
 export function Sidebar({
   navItems = [
     {
@@ -46,7 +49,7 @@ export function Sidebar({
       href: '/hr/leaderboard',
     },
   ],
-  user = { name: 'User Name', email: 'username.email@gmail.com' },
+  user = { id: '1', name: 'John Doe', email: 'john.doe@example.com', employeeType: 'regular', date_added: new Date('2000-01-01') },
 }: SidebarProps) {
   const [activeNav, setActiveNav] = useState<string>('dashboard');
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -106,9 +109,7 @@ export function Sidebar({
             isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
           }`}
         >
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0">
-            <User size={24} className="text-[#690003]" />
-          </div>
+          <ProfilePic user={user} />
           {!isCollapsed && (
             <div className="min-w-0">
               <p className="font-semibold text-sm">{user.name}</p>
@@ -117,11 +118,7 @@ export function Sidebar({
           )}
         </div>
 
-        {!isCollapsed && (
-          <button className="w-full cursor-pointer bg-white text-[#690003] py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors text-sm">
-            Logout
-          </button>
-        )}
+        {!isCollapsed && <LogOutBtn />}
       </div>
     </aside>
   );
