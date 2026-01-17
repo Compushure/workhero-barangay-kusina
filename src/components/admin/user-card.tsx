@@ -25,17 +25,6 @@ import {
 import { format } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 
-type UserWithExtras = User & {
-  employeeId?: string;
-  companyId?: string;
-  employmentStatus?: 'probationary' | 'regular' | string;
-  contactNumber?: string;
-  address?: string;
-  tin?: string;
-  sss?: string;
-  pagibig?: string;
-  createdAt?: string | Date;
-};
 
 interface UserCardProps {
   user: UserWithExtras;
