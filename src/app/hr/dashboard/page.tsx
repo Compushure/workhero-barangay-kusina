@@ -43,9 +43,12 @@ export default function HRDashboard() {
   const [requests, setRequests] = useState<RedemptionRequest[]>(mockRedemptionRequests);
   const [filteredRequests, setFilteredRequests] =
     useState<RedemptionRequest[]>(mockRedemptionRequests);
+  const [sortBy, setSortBy] = useState<string>('date-desc');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const { toast } = useToast();
 
   const handleSearch = (value: string) => {
+    setSearchTerm(value);
     const filtered = requests.filter(
       (req) =>
         req.employee.toLowerCase().includes(value.toLowerCase()) ||
@@ -55,6 +58,7 @@ export default function HRDashboard() {
   };
 
   const handleSort = (value: string) => {
+    setSortBy(value);
     const sorted = [...filteredRequests].sort((a, b) => {
       switch (value) {
         case 'date-desc':
@@ -98,13 +102,15 @@ export default function HRDashboard() {
   };
 
   return (
-    <div className="p-8 min-h-screen">
+    <div className="min-h-screen bg-[#fff8f5] p-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <HeaderSection
           title="Redemption Requests"
           description="Manage employee's request of redemption"
+          searchTerm={searchTerm}
           onSearch={handleSearch}
           onSort={handleSort}
+          sortBy={sortBy}
         />
         <RedemptionTable
           data={filteredRequests}

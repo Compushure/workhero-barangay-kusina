@@ -1,182 +1,126 @@
 'use client';
 
-import { Gift, Store, BarChart3 } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import {
+  FileText,
+  CheckCircle,
+  User,
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  ShoppingCart,
+  Trophy,
+} from 'lucide-react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { LogOutBtn } from '../sidebar/logout-btn';
+import { UserWithExtras } from '@/types';
+import { ProfilePic } from '../sidebar/profile-pic';
+import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 
-interface SidebarProps {
-  className?: string;
-  variant?: 'default' | 'hr' | 'mercado' | 'rewards';
-  isExpanded: boolean;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
+interface NavItem {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+  href: string;
 }
 
-const navigation = [
-  { name: 'Rewards Requests', href: '/hr/dashboard', icon: Gift },
-  { name: 'Mercado Manager', href: '/hr/mercado', icon: Store },
-  { name: 'Leaderboard', href: '/hr/leaderboard', icon: BarChart3 },
-];
+interface SidebarProps {
+  navItems?: NavItem[];
+}
 
 export function Sidebar({
-  className,
-  variant = 'default',
-  isExpanded,
-  onMouseEnter,
-  onMouseLeave,
+  navItems = [
+    {
+      key: 'dashboard',
+      label: 'Dashboard',
+      icon: <LayoutDashboard size={20} className="shrink-0" />,
+      href: '/hr/dashboard',
+    },
+    {
+      key: 'mercado',
+      label: 'Mercado',
+      icon: <ShoppingCart size={20} className="shrink-0" />,
+      href: '/hr/mercado',
+    },
+    {
+      key: 'leaderboard',
+      label: 'Leaderboard',
+      icon: <Trophy size={20} className="shrink-0" />,
+      href: '/hr/leaderboard',
+    },
+  ],
 }: SidebarProps) {
-  const pathname = usePathname();
+  const [activeNav, setActiveNav] = useState<string>('dashboard');
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const isMercado = variant === 'mercado';
-  const sidebarBg = isMercado ? 'bg-[#730202]' : 'bg-sidebar';
-  const sidebarText = isMercado ? 'text-white/70' : 'text-sidebar-foreground/70';
-  const sidebarTitle = isMercado ? 'text-white' : 'text-sidebar-primary';
-
-  const activeBg = isMercado ? 'bg-[#fdf5e6]' : 'bg-secondary';
-  const activeText = isMercado ? 'text-white' : 'text-white';
-  const activeIcon = isMercado ? 'text-white' : 'text-white';
+  // Fetch current session user
+  const { data: user } = useGetSessionUser();
 
   return (
     <aside
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      className={cn(
-        'fixed left-0 top-0 z-40 h-screen border-r transition-all duration-300 ease-in-out',
-        isExpanded ? 'w-56' : 'w-20',
-        isMercado ? 'border-[#d94141]' : 'border-sidebar-border',
-        sidebarBg,
-        className
-      )}
+      className={`bg-[#690003] text-white flex flex-col justify-between transition-all duration-300 ${
+        isCollapsed ? 'w-20' : 'w-60'
+      }`}
     >
-      <div className="flex h-full flex-col overflow-hidden">
-        {/* Header */}
-        <div
-          className={cn(
-            'border-b px-6 py-5',
-            isMercado ? 'border-[#d94141]' : 'border-sidebar-border'
-          )}
-        >
-          <div className="flex flex-col">
-            <div className="flex items-center">
-              <h1 className={cn('text-2xl font-bold leading-none whitespace-nowrap', sidebarTitle)}>
-                W
-                <span
-                  className={cn(
-                    'transition-opacity duration-300',
-                    isExpanded ? 'opacity-100' : 'opacity-0'
-                  )}
-                >
-                  orkHero
-                </span>
-              </h1>
+      {/* Logo Section */}
+      <div className="p-6 border-b border-red-900">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-white rounded flex items-center justify-center shrink-0">
+              <span className="text-sm font-bold text-[#690003]">W</span>
             </div>
-            <p
-              className={cn(
-                'text-[10px] whitespace-nowrap mt-1 transition-opacity duration-300',
-                sidebarText,
-                isExpanded ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              Barangay Kusina
-            </p>
+            {!isCollapsed && <h1 className="text-2xl font-bold whitespace-nowrap">WorkHero</h1>}
           </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 px-3 py-4">
-          {navigation.map((item) => {
-            const isActive =
-              item.href === '/hr/dashboard'
-                ? pathname === item.href
-                : pathname.startsWith(item.href);
-
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  'relative flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
-                  isActive
-                    ? cn(activeBg, activeText)
-                    : cn(sidebarText, 'hover:bg-white/10 hover:text-white')
-                )}
-              >
-                <item.icon
-                  className={cn(
-                    'h-5 w-5 shrink-0',
-                    isActive ? activeIcon : 'group-hover:text-white text-sidebar-foreground'
-                  )}
-                />
-
-                <span
-                  className={cn(
-                    'ml-3 whitespace-nowrap transition-opacity duration-300',
-                    isExpanded ? 'opacity-100' : 'opacity-0'
-                  )}
-                >
-                  {item.name}
-                </span>
-
-                {isActive && (
-                  <div
-                    className={cn(
-                      'absolute left-0 h-6 w-1 rounded-sm  bg-[#f2e1c9]',
-                      isMercado ? 'bg-white' : 'bg-white'
-                    )}
-                  />
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* User Profile */}
-        <div
-          className={cn('border-t p-4', isMercado ? 'border-[#d94141]' : 'border-sidebar-border')}
-        >
-          <div className="flex items-center">
-            <Avatar className="h-10 w-10">
-              <AvatarFallback
-                className={cn(isMercado ? 'bg-[#d94141]' : 'bg-primary', 'text-white')}
-              >
-                UN
-              </AvatarFallback>
-            </Avatar>
-
-            <div
-              className={cn(
-                'ml-3 overflow-hidden transition-opacity duration-300',
-                isExpanded ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              <p className="text-sm font-medium whitespace-nowrap text-white">User Name</p>
-              <p className={cn('text-xs whitespace-nowrap opacity-75', sidebarText)}>
-                hradmin@gmail.com
-              </p>
-            </div>
-          </div>
-
-          <div
-            className={cn(
-              'mt-3 transition-opacity duration-300',
-              isExpanded ? 'opacity-100' : 'opacity-0'
-            )}
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-1 hover:bg-red-900 cursor-pointer rounded transition-colors"
+            aria-label="Toggle sidebar"
           >
-            <Button
-              className={cn(
-                'h-9 w-full font-medium',
-                isMercado
-                  ? 'bg-white text-[#730202] hover:bg-gray-100'
-                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
-              )}
-            >
-              Logout
-            </Button>
-          </div>
+            {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          </button>
         </div>
+        {!isCollapsed && <p className="text-sm text-red-200">Barangay Kusina</p>}
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-4 py-6 space-y-3">
+        {navItems.map((item) => (
+          <Link
+            key={item.key}
+            href={item.href}
+            onClick={() => setActiveNav(item.key)}
+            className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all ${
+              isCollapsed ? 'justify-center px-2' : 'justify-start'
+            } ${activeNav === item.key ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
+            title={isCollapsed ? item.label : ''}
+          >
+            {item.icon}
+            {!isCollapsed && item.label}
+          </Link>
+        ))}
+      </nav>
+
+      {/* User Profile Section */}
+      <div
+        className={`border-t border-red-900 ${
+          isCollapsed ? 'flex justify-center items-center h-24' : 'p-4'
+        }`}
+      >
+        <div
+          className={`bg-white/10 rounded-full flex items-center ${
+            isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
+          }`}
+        >
+          <ProfilePic user={user} />
+          {!isCollapsed && user && (
+            <div className="min-w-0">
+              <p className="font-semibold text-sm">{user.name} </p>
+              <p className="text-xs text-red-200 truncate">{user.email}</p>
+            </div>
+          )}
+        </div>
+
+        {!isCollapsed && <LogOutBtn />}
       </div>
     </aside>
   );
