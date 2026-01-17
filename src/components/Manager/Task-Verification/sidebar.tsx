@@ -1,7 +1,11 @@
 'use client';
 
+import { UserWithExtras } from '@/types';
+import { LogOutBtn } from '@/components/sidebar/logout-btn';
+import { ProfilePic } from '@/components/sidebar/profile-pic';
 import { FileText, CheckCircle, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
+import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 
 interface NavItem {
   key: string;
@@ -11,7 +15,6 @@ interface NavItem {
 
 interface SidebarProps {
   navItems?: NavItem[];
-  user?: { name: string; email: string };
 }
 
 export function Sidebar({
@@ -27,10 +30,12 @@ export function Sidebar({
       icon: <CheckCircle size={20} className="shrink-0" />,
     },
   ],
-  user = { name: 'User Name', email: 'username.email@gmail.com' },
 }: SidebarProps) {
   const [activeNav, setActiveNav] = useState<string>('verification');
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Fetch current session user
+  const { data: user } = useGetSessionUser();
 
   return (
     <aside
@@ -86,10 +91,8 @@ export function Sidebar({
             isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
           }`}
         >
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0">
-            <User size={24} className="text-[#690003]" />
-          </div>
-          {!isCollapsed && (
+          <ProfilePic user={user} />
+          {!isCollapsed && user && (
             <div className="min-w-0">
               <p className="font-semibold text-sm">{user.name}</p>
               <p className="text-xs text-red-200 truncate">{user.email}</p>
@@ -97,11 +100,7 @@ export function Sidebar({
           )}
         </div>
 
-        {!isCollapsed && (
-          <button className="w-full cursor-pointer bg-white text-[#690003] py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors text-sm">
-            Logout
-          </button>
-        )}
+        {!isCollapsed && <LogOutBtn />}
       </div>
     </aside>
   );

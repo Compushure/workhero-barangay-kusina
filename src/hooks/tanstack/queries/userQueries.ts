@@ -8,7 +8,8 @@
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { handleFetchUsers } from '@/action-handlers/manage';
-import type { User, UserQueryParams } from '@/types';
+import { handleFetchSessionUser } from '@/action-handlers/sidebar';
+import type { User, UserQueryParams, UserWithExtras } from '@/types';
 
 /**
  * Query key factory for user-related queries
@@ -27,6 +28,7 @@ export const userKeys = {
   list: (filters?: Partial<UserQueryParams>) => [...userKeys.lists(), filters] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
+  session: () => [...userKeys.all, 'session'] as const,
 };
 
 /**
@@ -90,4 +92,44 @@ export function useGetUsers(
     gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
     retry: 1, // Retry once on failure
   }) as UseQueryResult<User[], Error>;
+}
+
+/**
+ * Fetches the currently logged-in user's session information
+ * Used by components like ProfilePic to display user avatar and details
+ *
+ * @param options - Query options (enabled, staleTime, etc.)
+ * @returns Query result with UserWithExtras data, loading state, and error handling
+ *
+ * @example
+ * ```tsx
+ * function ProfilePic() {
+ *   const { data: user, isLoading, error } = useGetSessionUser()
+ *
+ *   if (isLoading) return <Skeleton />
+ *   if (error || !user) return <User size={24} />
+ *
+ *   return <img src={user.profilePictureUrl} alt={user.name} />
+ * }
+ * ```
+ */
+export function useGetSessionUser(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<UserWithExtras | null, Error> {
+  return useQuery({
+    queryKey: userKeys.session(),
+    queryFn: async () => {
+      const result = await handleFetchSessionUser();
+
+      if (result.error || !result.data) {
+        return null;
+      }
+
+      return result.data;
+    },
+    enabled: queryOptions.enabled !== false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: 1,
+  }) as UseQueryResult<UserWithExtras | null, Error>;
 }

@@ -95,3 +95,24 @@ export type ServerActionResponse<T = unknown> = {
   error: string | null;
   data?: T;
 };
+
+// ============================================
+// User Extended Type
+// ============================================
+
+/**
+ * UserWithExtras extends the base User interface with additional fields
+ * Used throughout the application for comprehensive user data display
+ */
+export type UserWithExtras = User & {
+  employeeId?: string;
+  companyId?: string;
+  employmentStatus?: 'probationary' | 'regular' | string;
+  contactNumber?: string;
+  address?: string;
+  tin?: string;
+  sss?: string;
+  pagibig?: string;
+  createdAt?: string | Date;
+  profilePictureUrl?: string;
+};
