@@ -13,8 +13,9 @@ import {
 import { useState } from 'react';
 import Link from 'next/link';
 import { LogOutBtn } from '../sidebar/logout-btn';
-import { UserWithExtras } from '../admin/user-card';
+import { UserWithExtras } from '@/types';
 import { ProfilePic } from '../sidebar/profile-pic';
+import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 
 interface NavItem {
   key: string;
@@ -25,7 +26,6 @@ interface NavItem {
 
 interface SidebarProps {
   navItems?: NavItem[];
- user?: UserWithExtras; 
 }
 
 export function Sidebar({
@@ -49,10 +49,12 @@ export function Sidebar({
       href: '/hr/leaderboard',
     },
   ],
-  user = { id: '1', name: 'John Doe', email: 'john.doe@example.com', employeeType: 'regular', date_added: new Date('2000-01-01') },
 }: SidebarProps) {
   const [activeNav, setActiveNav] = useState<string>('dashboard');
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Fetch current session user
+  const { data: user } = useGetSessionUser();
 
   return (
     <aside
@@ -110,9 +112,9 @@ export function Sidebar({
           }`}
         >
           <ProfilePic user={user} />
-          {!isCollapsed && (
+          {!isCollapsed && user && (
             <div className="min-w-0">
-              <p className="font-semibold text-sm">{user.name}</p>
+              <p className="font-semibold text-sm">{user.name} </p>
               <p className="text-xs text-red-200 truncate">{user.email}</p>
             </div>
           )}

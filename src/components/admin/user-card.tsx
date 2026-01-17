@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect as React_useEffect } from 'react';
 import * as React from 'react';
-import type { EmployeeTypeValue, User } from '@/types';
+import type { EmployeeTypeValue, User, UserWithExtras } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -24,20 +24,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
-
-export type UserWithExtras = User & {
-  employeeId?: string;
-  companyId?: string;
-  employmentStatus?: 'probationary' | 'regular' | string;
-  contactNumber?: string;
-  address?: string;
-  tin?: string;
-  sss?: string;
-  pagibig?: string;
-  createdAt?: string | Date;
-};
-
-
 
 interface UserCardProps {
   user: UserWithExtras;
@@ -122,7 +108,6 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
   const employmentStatusClass =
     EMPLOYMENT_STATUS_STYLES[employmentStatus] || 'bg-muted text-foreground';
   const dateCreated = formatDate(user.createdAt || user.date_added);
-
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
