@@ -5,7 +5,7 @@ import * as React from 'react';
 import type { EmployeeTypeValue, User } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { WhiteCard } from '@/components/ui/white-card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Award as IdCard,
@@ -36,8 +36,6 @@ type UserWithExtras = User & {
   pagibig?: string;
   createdAt?: string | Date;
 };
-
-
 
 interface UserCardProps {
   user: UserWithExtras;
@@ -123,12 +121,11 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
     EMPLOYMENT_STATUS_STYLES[employmentStatus] || 'bg-muted text-foreground';
   const dateCreated = formatDate(user.createdAt || user.date_added);
 
-
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="overflow-hidden border border-border hover:shadow-md transition-shadow">
+      <WhiteCard className="overflow-hidden border border-border hover:scale-101">
         <CollapsibleTrigger asChild>
-          <button className="w-full p-4 sm:p-6 flex items-center justify-between text-left hover:bg-muted/50 transition-colors gap-3 ">
+          <button className="w-full p-4 sm:p-6 flex items-center justify-between text-left cursor-pointer gap-3 ">
             <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
               <div
                 className="relative group cursor-pointer"
@@ -331,7 +328,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(user)}
-                className="gap-2 flex-1 sm:flex-none"
+                className="gap-2 flex-1 sm:flex-none cursor-pointer"
               >
                 <Edit2 className="h-4 w-4" />
                 Edit User
@@ -340,7 +337,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                 variant="destructive"
                 size="sm"
                 onClick={() => onDelete(user)}
-                className="gap-2 flex-1 sm:flex-none"
+                className="gap-2 flex-1 sm:flex-none bg-primary cursor-pointer"
               >
                 <Trash2 className="h-4 w-4" />
                 Delete User
@@ -348,7 +345,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
             </div>
           </div>
         </CollapsibleContent>
-      </Card>
+      </WhiteCard>
     </Collapsible>
   );
 }
