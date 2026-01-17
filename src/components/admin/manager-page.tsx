@@ -18,6 +18,7 @@ import type {
 } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { WhiteCard } from "@/components/ui/white-card";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -204,25 +205,31 @@ export function ManagerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f1f1f1]">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-background border-b border-border">
+      <header className="sticky top-0 z-10 bg-primary border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               <Link
                 href="/admin"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Link>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold">User Management</h1>
-                <p className="text-sm text-muted-foreground">{users.length} total users</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-primary-foreground">
+                  User Management
+                </h1>
+                <p className="text-sm text-primary-foreground/70">{users.length} total users</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={() => setAddModalOpen(true)} className="gap-2 flex-1 sm:flex-none">
+              <Button
+                variant="outline"
+                onClick={() => setAddModalOpen(true)}
+                className="gap-2 border-border bg-secondary text-red-foreground cursor-pointer hover:bg-primary/20 hover:text-primary-foreground"
+              >
                 <UserPlus className="h-4 w-4" />
                 <span>Add User</span>
               </Button>
@@ -230,10 +237,10 @@ export function ManagerPage() {
                 variant="outline"
                 onClick={handleLogout}
                 disabled={isPending}
-                className="gap-2 bg-transparent"
+                className="gap-2 border-border bg-secondary text-red-foreground cursor-pointer hover:bg-primary/20 hover:text-primary-foreground"
               >
                 <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Logout</span>
+                <span>Logout</span>
               </Button>
             </div>
           </div>
@@ -241,7 +248,7 @@ export function ManagerPage() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 space-y-4">
-        <Card className="p-4">
+        <WhiteCard className="p-4">
           <div className="flex items-center gap-2 mb-4">
             <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
             <p className="text-sm font-semibold">Search & Filters</p>
@@ -313,7 +320,7 @@ export function ManagerPage() {
               </Select>
             </div>
           </div>
-        </Card>
+        </WhiteCard>
       </div>
 
       {/* Content */}
@@ -323,12 +330,12 @@ export function ManagerPage() {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : error ? (
-          <Card className="p-8 sm:p-12 text-center">
+          <WhiteCard className="p-8 sm:p-12 text-center">
             <p className="text-destructive mb-4">Failed to load users</p>
             <p className="text-sm text-muted-foreground">{error.message}</p>
-          </Card>
+          </WhiteCard>
         ) : users.length === 0 ? (
-          <Card className="p-8 sm:p-12 text-center">
+          <WhiteCard className="p-8 sm:p-12 text-center">
             <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
               <UserPlus className="h-6 w-6 text-muted-foreground" />
             </div>
@@ -341,7 +348,7 @@ export function ManagerPage() {
             {!searchQuery && employeeTypeFilter === 'all' && employmentStatusFilter === 'all' && (
               <Button onClick={() => setAddModalOpen(true)}>Add User</Button>
             )}
-          </Card>
+          </WhiteCard>
         ) : (
           <div className="grid gap-4">
             {users.map((user) => (

@@ -12,6 +12,10 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
+import { LogOutBtn } from '../sidebar/logout-btn';
+import { UserWithExtras } from '@/types';
+import { ProfilePic } from '../sidebar/profile-pic';
+import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 
 interface NavItem {
   key: string;
@@ -22,9 +26,8 @@ interface NavItem {
 
 interface SidebarProps {
   navItems?: NavItem[];
-  user?: { name: string; email: string };
 }
- 
+
 export function Sidebar({
   navItems = [
     {
@@ -46,10 +49,12 @@ export function Sidebar({
       href: '/hr/leaderboard',
     },
   ],
-  user = { name: 'User Name', email: 'username.email@gmail.com' },
 }: SidebarProps) {
   const [activeNav, setActiveNav] = useState<string>('dashboard');
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Fetch current session user
+  const { data: user } = useGetSessionUser();
 
   return (
     <aside
@@ -106,22 +111,16 @@ export function Sidebar({
             isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
           }`}
         >
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0">
-            <User size={24} className="text-[#690003]" />
-          </div>
-          {!isCollapsed && (
+          <ProfilePic user={user} />
+          {!isCollapsed && user && (
             <div className="min-w-0">
-              <p className="font-semibold text-sm">{user.name}</p>
+              <p className="font-semibold text-sm">{user.name} </p>
               <p className="text-xs text-red-200 truncate">{user.email}</p>
             </div>
           )}
         </div>
 
-        {!isCollapsed && (
-          <button className="w-full cursor-pointer bg-white text-[#690003] py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors text-sm">
-            Logout
-          </button>
-        )}
+        {!isCollapsed && <LogOutBtn />}
       </div>
     </aside>
   );
