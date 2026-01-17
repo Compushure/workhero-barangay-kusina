@@ -37,15 +37,15 @@ export function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-6 px-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Email Address</Label>
+        <Label htmlFor="email" className="text-foreground">Email Address</Label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/70" />
           <Input
             id="email"
             name="email"
             type="email"
             placeholder="admin@compushure.com"
-            className="pl-10"
+            className="pl-10 border-border focus:border-primary focus:ring-primary"
             disabled={isPending}
             required
           />
@@ -53,15 +53,15 @@ export function LoginForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password" className="text-foreground">Password</Label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/70" />
           <Input
             id="password"
             name="password"
             type="password"
             placeholder="Enter your password"
-            className="pl-10"
+            className="pl-10 border-border focus:border-primary focus:ring-primary"
             disabled={isPending}
             required
           />
@@ -69,21 +69,21 @@ export function LoginForm() {
       </div>
 
       {error && (
-        <div className="p-3 bg-red-100 border border-red-300 rounded-lg">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
 
       <Button
         type="submit"
-        className="w-full h-11 cursor-pointer bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
+        className="w-full h-11 cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
         disabled={isPending}
       >
         {isPending ? 'Signing in...' : 'Sign In'}
       </Button>
 
       <div className="pt-4 pb-6">
-        <p className="text-xs text-center text-gray-500">
+        <p className="text-xs text-center text-foreground/70">
           Demo Credentials:
           <br />
           Superadmin: tonilegayada@gmail.com / Admin123

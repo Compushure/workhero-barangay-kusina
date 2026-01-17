@@ -20,18 +20,18 @@ const features = [
 
 export function FeatureList() {
   return (
-    <div className="hidden md:flex flex-col justify-center space-y-10 animate-slideInLeft text-[#1F2937]">
+    <div className="hidden md:flex flex-col justify-center space-y-10 animate-slideInLeft text-foreground">
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-14 h-14 bg-[#1D4ED8] rounded-xl flex items-center justify-center shadow-lg animate-float">
-            <Shield className="w-7 h-7 text-white" />
+          <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center shadow-lg animate-float">
+            <Shield className="w-7 h-7 text-primary-foreground" />
           </div>
-          <h1 className="text-4xl font-extrabold text-[#1F2937]">
+          <h1 className="text-4xl font-extrabold text-foreground">
             COMPUSHURE <br />
-            <span className="text-[#1D4ED8]">Admin</span>
+            <span className="text-primary">Admin</span>
           </h1>
         </div>
-        <p className="text-[#374151] text-lg mt-2">
+        <p className="text-foreground/70 text-lg mt-2">
           Secure Access to Your Dashboard
         </p>
       </div>
@@ -43,21 +43,21 @@ export function FeatureList() {
             className="flex gap-4 items-start animate-fadeInUp"
             style={{ animationDelay: `${0.1 * (i + 1)}s` }}
           >
-            <div className="w-12 h-12 bg-[#DBEAFE] rounded-xl flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 bg-card rounded-xl flex items-center justify-center shrink-0">
               {icon}
             </div>
             <div>
-              <h3 className="font-semibold text-[#1F2937]">{title}</h3>
-              <p className="text-sm text-[#374151]">{desc}</p>
+              <h3 className="font-semibold text-foreground">{title}</h3>
+              <p className="text-sm text-foreground/70">{desc}</p>
             </div>
           </div>
         ))}
       </div>
 
       <div className="pt-10">
-        <div className="inline-flex items-center gap-3 px-5 py-3 bg-[#DBEAFE] rounded-full shadow-md">
-          <div className="w-3 h-3 bg-[#1D4ED8] rounded-full animate-pulse" />
-          <span className="text-sm text-[#374151]">Trusted by 500+ organizations</span>
+        <div className="inline-flex items-center gap-3 px-5 py-3 bg-card rounded-full shadow-md">
+          <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
+          <span className="text-sm text-foreground/70">Trusted by 500+ organizations</span>
         </div>
       </div>
     </div>
