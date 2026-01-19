@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { MercadoCard } from '@/components/hr/mercado/mercado-card';
-import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
-import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
-import { DeleteModal } from '@/components/hr/mercado/delete-modal';
+import { MercadoCard } from '@/components/HR/mercado/mercado-card';
+import { MercadoHeader } from '@/components/HR/mercado/mercado-header';
+import { AddItemsModal } from '@/components/HR/mercado/add-items-modal';
+import { DeleteModal } from '@/components/HR/mercado/delete-modal';
 
 // Mock Data
 const MOCK_ITEMS = Array.from({ length: 8 }).map((_, i) => ({
