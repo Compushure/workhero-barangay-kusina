@@ -15,9 +15,15 @@ interface HideRewardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
+  isHidden?: boolean;
 }
 
-export function HideRewardDialog({ open, onOpenChange, onConfirm }: HideRewardDialogProps) {
+export function HideRewardDialog({
+  open,
+  onOpenChange,
+  onConfirm,
+  isHidden,
+}: HideRewardDialogProps) {
   const handleConfirm = () => {
     onConfirm();
     onOpenChange(false);
@@ -31,10 +37,13 @@ export function HideRewardDialog({ open, onOpenChange, onConfirm }: HideRewardDi
             <FileIcon className="h-6 w-6 text-orange-600" />
           </div>
           <div className="space-y-2 text-center">
-            <DialogTitle className="text-xl font-semibold">Hide Reward?</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">
+              {isHidden ? 'Unhide Reward?' : 'Hide Reward?'}
+            </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Are you sure? This action will prevent employees from viewing and interacting with the
-              reward.
+              {isHidden
+                ? 'Are you sure? This action will make the reward visible to employees again.'
+                : 'Are you sure? This action will prevent employees from viewing and interacting with the reward.'}
             </DialogDescription>
           </div>
         </DialogHeader>

@@ -1,10 +1,3 @@
-/**
- * Manager Dashboard Route (Server Component)
- * ===========================================
- * Server component for manager dashboard.
- * Only accessible by users with 'manager' role in claims.
- */
-
 import { Suspense } from 'react';
 import { protectManagerRoute } from '@/actions/auth';
 import { BarChart3, Users, Target } from 'lucide-react';
