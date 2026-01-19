@@ -1,14 +1,14 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { LoginForm } from "./login-form"
-import { LoginHero } from "./login-hero"
-import { useRouter } from "next/navigation"
-import { useTransition } from "react"
-import { handleLoginSubmit } from "@/action-handlers/auth"
-import { toast } from "sonner"
-import { handleUserRole } from "@/lib/utils/role-router"
-import { getUserRole } from "@/actions/auth"
+import { useState } from "react";
+import { LoginForm } from "./login-form";
+import { LoginHero } from "./login-hero";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { handleLoginSubmit } from "@/action-handlers/auth";
+import { toast } from "sonner";
+import { handleUserRole } from "@/lib/utils/role-router";
+import { getUserRole } from "@/actions/auth";
 
 export function LoginContainer() {
   const router = useRouter();
@@ -17,11 +17,10 @@ export function LoginContainer() {
 
   const handleSubmit = async (email: string, password: string) => {
     setError(null);
-    const formData = new FormData()
-    formData.append("email", email)
-    formData.append("password", password)
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
 
-    
     startTransition(async () => {
       const { error } = await handleLoginSubmit(formData);
 
@@ -36,7 +35,7 @@ export function LoginContainer() {
       // Get user role after successful login
       await handleUserRole({ router, setError, getUserRole });
     });
-  }
+  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted flex items-center justify-center p-4">
@@ -52,5 +51,5 @@ export function LoginContainer() {
         </div>
       </div>
     </div>
-  )
+  );
 }

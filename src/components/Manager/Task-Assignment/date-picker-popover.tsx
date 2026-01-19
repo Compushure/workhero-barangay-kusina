@@ -10,11 +10,16 @@ interface DatePickerPopoverProps {
 }
 
 export function DatePickerPopover({ deadline, onDeadlineChange }: DatePickerPopoverProps) {
-  const deadlineDisplay = deadline ? deadline.toLocaleDateString('en-CA') : 'Set Deadline';
+  const deadlineDisplay = deadline
+    ? deadline.toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
+    : 'Set Deadline';
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      onDeadlineChange(date);
+      // Adjust for Manila timezone (UTC+8) to prevent showing previous day
+      const manilaOffset = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+      const adjustedDate = new Date(date.getTime() + manilaOffset);
+      onDeadlineChange(adjustedDate);
     }
   };
 

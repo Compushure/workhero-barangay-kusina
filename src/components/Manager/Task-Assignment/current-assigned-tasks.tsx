@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Search, ListTodo, Users } from 'lucide-react';
 import { TaskViewCard } from './task-view-card';
 import { EmployeeViewCard } from './employee-view-card';
+import { TaskSortingBar } from './task-sorting-bar';
+import { EmployeeSortingBar } from './employee-sorting-bar';
 import type { AssignedTask, AssignedEmployee } from './task-assignment-page';
 
 interface CurrentAssignedTasksProps {
@@ -158,27 +160,11 @@ export function CurrentAssignedTasks({
           />
         </div>
 
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="px-4 py-3 border-2 border-gray-300 rounded-full bg-white focus:outline-none focus:border-[#690003]"
-        >
-          {viewMode === 'task' ? (
-            <>
-              <option value="recently added">Recently Added</option>
-              <option value="oldest">Oldest</option>
-              <option value="closest">Closest due</option>
-              <option value="farthest">Farthest due</option>
-            </>
-          ) : (
-            <>
-              <option value="recently added">Recently Added</option>
-              <option value="oldest">Oldest</option>
-              <option value="a-z">A-Z</option>
-              <option value="z-a">Z-A</option>
-            </>
-          )}
-        </select>
+        {viewMode === 'task' ? (
+          <TaskSortingBar sortBy={sortBy} onSortChange={setSortBy} />
+        ) : (
+          <EmployeeSortingBar sortBy={sortBy} onSortChange={setSortBy} />
+        )}
 
         <Button
           onClick={() => setShowClearConfirm(true)}

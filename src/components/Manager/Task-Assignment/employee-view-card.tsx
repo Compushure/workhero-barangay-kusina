@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { MoreVertical, ChevronDown, X } from 'lucide-react';
-import type { AssignedTask } from './task-assignment-page';
+import type { AssignedTask } from '@/components/manager/task-assignment/task-assignment-page';
 
 interface Employee {
   id: string;
@@ -62,11 +62,11 @@ export function EmployeeViewCard({
 
   const formatDate = (dateString: string) => {
     const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
-    const localDate = new Date(year, month - 1, day);
-    return localDate.toLocaleDateString('en-US', {
+    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: 'Asia/Manila',
     });
   };
 
