@@ -5,10 +5,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { LoginFormFields } from '../sign-in/sign-in-form-fields';
-<<<<<<< HEAD
-import { LoginFormHeader } from '../sign-in/sign-in-form-header';
-=======
->>>>>>> 416557d72ac65f2759f91d39b93a205848220060
 import { Loader2 } from 'lucide-react';
 
 interface LoginFormProps {
@@ -46,7 +42,6 @@ export function LoginForm({ onSubmit, isSubmitting }: LoginFormProps) {
   return (
     <Card className="w-full bg-card/50 backdrop-blur-sm border-border/50 shadow-2xl animate-scaleIn overflow-hidden">
       <div className="p-8 md:p-10">
-        <LoginFormHeader />
         <form onSubmit={handleSignInSubmit} className="space-y-6">
           <LoginFormFields
             email={email}
