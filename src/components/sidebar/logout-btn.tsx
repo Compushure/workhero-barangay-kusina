@@ -1,15 +1,14 @@
 'use client';
 
-
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import {handleSignOut} from '@/action-handlers/auth';
+import { handleSignOut } from '@/action-handlers/auth';
 import { toast } from 'sonner';
 
 export function LogOutBtn() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-const handleLogout = () => {
+  const handleLogout = () => {
     startTransition(async () => {
       const { error } = await handleSignOut();
       if (!error) {
@@ -18,15 +17,14 @@ const handleLogout = () => {
         toast.success('Logged out', {
           description: 'You have successfully logged out.',
         });
-      } else{
+      } else {
         toast.error('Logout failed', {
           description: error,
-        }); 
+        });
         router.push('/auth/login');
       }
     });
   };
-  
 
   return (
     <button

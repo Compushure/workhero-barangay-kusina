@@ -41,7 +41,7 @@ export function MercadoCard({ item, onEdit, onDelete }: MercadoCardProps) {
           <DropdownMenuContent align="end" className="w-32 rounded-xl">
             <DropdownMenuItem>Hide</DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit?.(item.id)}>Edit</DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => onDelete?.(item.id)}
               className="text-red-600 font-semibold"
             >

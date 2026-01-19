@@ -18,7 +18,7 @@ import type {
 } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { WhiteCard } from "@/components/ui/white-card";
+import { WhiteCard } from '@/components/ui/white-card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {

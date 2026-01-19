@@ -1,19 +1,19 @@
-"use client"
+'use client';
 
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Mail, Lock, User, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Mail, Lock, User, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface SignupFormFieldsProps {
-  fullName: string
-  email: string
-  password: string
-  confirmPassword: string
-  onFullNameChange: (value: string) => void
-  onEmailChange: (value: string) => void
-  onPasswordChange: (value: string) => void
-  onConfirmPasswordChange: (value: string) => void
-  error: string
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  onFullNameChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
+  onConfirmPasswordChange: (value: string) => void;
+  error: string;
 }
 
 export function SignupFormFields({
@@ -27,8 +27,8 @@ export function SignupFormFields({
   onConfirmPasswordChange,
   error,
 }: SignupFormFieldsProps) {
-  const passwordMatch = password && confirmPassword && password === confirmPassword
-  const passwordStrong = password && password.length >= 8
+  const passwordMatch = password && confirmPassword && password === confirmPassword;
+  const passwordStrong = password && password.length >= 8;
 
   return (
     <div className="space-y-5">
@@ -86,9 +86,9 @@ export function SignupFormFields({
         </div>
         {password && (
           <p
-            className={`text-xs ${passwordStrong ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}
+            className={`text-xs ${passwordStrong ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}
           >
-            {passwordStrong ? "Strong password" : "Use at least 8 characters"}
+            {passwordStrong ? 'Strong password' : 'Use at least 8 characters'}
           </p>
         )}
       </div>
@@ -118,7 +118,9 @@ export function SignupFormFields({
             </div>
           )}
         </div>
-        {confirmPassword && !passwordMatch && <p className="text-xs text-destructive">Passwords do not match</p>}
+        {confirmPassword && !passwordMatch && (
+          <p className="text-xs text-destructive">Passwords do not match</p>
+        )}
       </div>
 
       {/* Error Message */}
@@ -129,5 +131,5 @@ export function SignupFormFields({
         </div>
       )}
     </div>
-  )
+  );
 }
