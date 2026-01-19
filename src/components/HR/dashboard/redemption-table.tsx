@@ -8,6 +8,7 @@ import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
 } from '@/hooks/tanstack/mutations/hrMutations';
+import { RemarksDialog } from './remarks';
 
 export interface RedemptionRequest {
   id: string;
@@ -27,6 +28,9 @@ interface RedemptionTableProps {
 
 export function RedemptionTable({ data, onApprove, onReject }: RedemptionTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
+  const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
 
   const toggleRow = (id: string) => {
     const newExpanded = new Set(expandedRows);
@@ -39,14 +43,29 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
   };
 
   const declineMutation = useDeclineRedemptionRequest();
-
   const acceptMutation = useAcceptRedemptionRequest();
 
-  const handleRequestApproval = (isAccept: boolean, requestId: string) => {
-    if (isAccept) {
-      acceptMutation.mutate(requestId);
-    } else {
-      declineMutation.mutate(requestId);
+  const handleAcceptClick = (requestId: string) => {
+    setSelectedRequestId(requestId);
+    setAcceptDialogOpen(true);
+  };
+
+  const handleDeclineClick = (requestId: string) => {
+    setSelectedRequestId(requestId);
+    setDeclineDialogOpen(true);
+  };
+
+  const handleAcceptConfirm = (remarks?: string) => {
+    if (selectedRequestId) {
+      acceptMutation.mutate({ id: selectedRequestId, remarks });
+      setSelectedRequestId(null);
+    }
+  };
+
+  const handleDeclineConfirm = (remarks?: string) => {
+    if (selectedRequestId) {
+      declineMutation.mutate({ id: selectedRequestId, remarks });
+      setSelectedRequestId(null);
     }
   };
   return (
@@ -100,7 +119,8 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-[#8b0000] hover:bg-[#8b0000] hover:text-white"
-                onClick={() => handleRequestApproval(false, request.id)}
+                onClick={() => handleDeclineClick(request.id)}
+                disabled={declineMutation.isPending || acceptMutation.isPending}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -108,7 +128,8 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-[#2d5016] hover:bg-[#2d5016] hover:text-white"
-                onClick={() => handleRequestApproval(true, request.id)}
+                onClick={() => handleAcceptClick(request.id)}
+                disabled={declineMutation.isPending || acceptMutation.isPending}
               >
                 <Check className="h-4 w-4" />
               </Button>
@@ -116,6 +137,25 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
           </div>
         ))}
       </div>
+
+      {/* Remarks Dialogs */}
+      <RemarksDialog
+        open={acceptDialogOpen}
+        onOpenChange={setAcceptDialogOpen}
+        onConfirm={handleAcceptConfirm}
+        title="Accept Request (Optional Remark)"
+        description="If you wish to continue with the acceptance without any remarks, simply click OK."
+        placeholder="Type in any comments you wish to send alongside the acceptance."
+      />
+
+      <RemarksDialog
+        open={declineDialogOpen}
+        onOpenChange={setDeclineDialogOpen}
+        onConfirm={handleDeclineConfirm}
+        title="Decline (Optional Remark)"
+        description="If you wish to continue with the confirmation without any remarks, simply click OK."
+        placeholder="Type in remarks/comments you wish to send alongside the request confirmation."
+      />
     </div>
   );
 }

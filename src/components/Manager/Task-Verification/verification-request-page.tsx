@@ -28,10 +28,12 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const [deniedPage, setDeniedPage] = useState(1);
 
   // Use paginated Tanstack Query hooks with separate pagination for each category
-  const { data: pendingData, isLoading: isLoadingPending } = useGetTasksToReviewPaginated(pendingPage);
-  const { data: approvedData, isLoading: isLoadingApproved } = useGetApprovedTasksPaginated(approvedPage);
+  const { data: pendingData, isLoading: isLoadingPending } =
+    useGetTasksToReviewPaginated(pendingPage);
+  const { data: approvedData, isLoading: isLoadingApproved } =
+    useGetApprovedTasksPaginated(approvedPage);
   const { data: deniedData, isLoading: isLoadingDenied } = useGetDeniedTasksPaginated(deniedPage);
-  
+
   const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
 
@@ -143,46 +145,47 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   };
 
   return (
-  <div className="p-8 bg-gray-100 min-h-screen flex flex-col">
-    <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
-
-    <div className="flex-1 flex flex-col">
-      <div className="flex items-center justify-end gap-4 mb-6">
-        <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-        <SortButton sortBy={sortBy} onSortChange={setSortBy} />
-      </div>
+    <div className="p-8 bg-gray-100 min-h-screen flex flex-col">
+      <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
 
       <div className="flex-1 flex flex-col">
-        {(isLoadingPending || isLoadingApproved || isLoadingDenied) && filteredRequests.length === 0 ? (
-          <div className="text-center py-12">Loading tasks...</div>
-        ) : (
-          <RequestsTable
-            requests={filteredRequests}
-            onApprove={(id) => setConfirmAction({ type: 'approve', id })}
-            onDeny={(id) => setConfirmAction({ type: 'deny', id })}
-            sortBy={sortBy}
-            isApproving={approveTask.isPending}
-            isRejecting={rejectTask.isPending}
-          />
-        )}
+        <div className="flex items-center justify-end gap-4 mb-6">
+          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+          <SortButton sortBy={sortBy} onSortChange={setSortBy} />
+        </div>
 
-        {/* Pagination fixed at bottom */}
-        <div className="mt-auto pt-4">
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-          />
+        <div className="flex-1 flex flex-col">
+          {(isLoadingPending || isLoadingApproved || isLoadingDenied) &&
+          filteredRequests.length === 0 ? (
+            <div className="text-center py-12">Loading tasks...</div>
+          ) : (
+            <RequestsTable
+              requests={filteredRequests}
+              onApprove={(id) => setConfirmAction({ type: 'approve', id })}
+              onDeny={(id) => setConfirmAction({ type: 'deny', id })}
+              sortBy={sortBy}
+              isApproving={approveTask.isPending}
+              isRejecting={rejectTask.isPending}
+            />
+          )}
+
+          {/* Pagination fixed at bottom */}
+          <div className="mt-auto pt-4">
+            <Pagination
+              totalPages={totalPages}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </div>
       </div>
-    </div>
 
-    <ConfirmationDialog
-      open={!!confirmAction.type}
-      type={confirmAction.type}
-      onCancel={() => setConfirmAction({ type: null, id: null })}
-      onConfirm={handleConfirm}
-    />
-  </div>
-);
+      <ConfirmationDialog
+        open={!!confirmAction.type}
+        type={confirmAction.type}
+        onCancel={() => setConfirmAction({ type: null, id: null })}
+        onConfirm={handleConfirm}
+      />
+    </div>
+  );
 }
