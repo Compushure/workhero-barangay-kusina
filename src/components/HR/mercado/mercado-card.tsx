@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { MoreHorizontal, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -6,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { HideRewardDialog } from './hide-items';
 
 interface MercadoItem {
   id: string;
@@ -17,11 +21,19 @@ interface MercadoCardProps {
   item: MercadoItem;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onHide?: (id: string) => void;
 }
 
-export function MercadoCard({ item, onEdit, onDelete }: MercadoCardProps) {
+export function MercadoCard({ item, onEdit, onDelete, onHide }: MercadoCardProps) {
+  const [hideDialogOpen, setHideDialogOpen] = useState(false);
+
+  const handleHideConfirm = () => {
+    onHide?.(item.id);
+  };
+
   return (
-    <div className="bg-card border-border rounded-xl p-4 flex items-center relative shadow-sm hover:shadow-md transition-shadow">
+    <>
+      <div className="bg-card border-border rounded-xl p-4 flex items-center relative shadow-sm hover:shadow-md transition-shadow">
       <div className="h-24 w-24 bg-[#f2e1c9] rounded-lg flex items-center justify-center shrink-0">
         <ImageIcon className="h-8 w-8 text-[#730202]/40" />
       </div>
@@ -39,7 +51,7 @@ export function MercadoCard({ item, onEdit, onDelete }: MercadoCardProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32 rounded-xl">
-            <DropdownMenuItem>Hide</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setHideDialogOpen(true)}>Hide</DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit?.(item.id)}>Edit</DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => onDelete?.(item.id)}
@@ -50,6 +62,13 @@ export function MercadoCard({ item, onEdit, onDelete }: MercadoCardProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </div>
+      </div>
+
+      <HideRewardDialog
+        open={hideDialogOpen}
+        onOpenChange={setHideDialogOpen}
+        onConfirm={handleHideConfirm}
+      />
+    </>
   );
 }
