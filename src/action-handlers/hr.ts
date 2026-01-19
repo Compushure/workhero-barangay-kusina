@@ -2,33 +2,50 @@ import { acceptRedemptionRequestAction, declineRedemptionRequestAction } from '@
 import { safeAction } from '@/lib/utils/safe-action';
 import { toast } from 'sonner';
 
+interface RedemptionRequestParams {
+  id: string;
+  remarks?: string;
+}
+
 //hr action-handlers
 export async function handleDeclineRedemptionRequestAction(
-  requestId: string
+  params: RedemptionRequestParams
 ): Promise<{ error: string | null }> {
-  const result = await safeAction(() => declineRedemptionRequestAction(requestId));
+  const result = await safeAction(() =>
+    declineRedemptionRequestAction(params.id, params.remarks)
+  );
 
   if (!result.success) {
-    toast.error(`Failed to decline redemption request ${requestId}: ` + result.error);
+    toast.error(`Failed to decline redemption request: ` + result.error);
     return { error: result.error };
   }
 
-  toast.success(`Redemption request ${requestId} has been declined.`);
+  toast.success(
+    params.remarks
+      ? `Redemption request declined with remarks.`
+      : `Redemption request has been declined.`
+  );
 
   return { error: null };
 }
 
 export async function handleAcceptRedemptionRequestAction(
-  requestId: string
+  params: RedemptionRequestParams
 ): Promise<{ error: string | null }> {
-  const result = await safeAction(() => acceptRedemptionRequestAction(requestId));
+  const result = await safeAction(() =>
+    acceptRedemptionRequestAction(params.id, params.remarks)
+  );
 
   if (!result.success) {
-    toast.error(`Failed to accept redemption request ${requestId}: ` + result.error);
+    toast.error(`Failed to accept redemption request: ` + result.error);
     return { error: result.error };
   }
 
-  toast.success(`Redemption request ${requestId} has been accepted.`);
+  toast.success(
+    params.remarks
+      ? `Redemption request accepted with remarks.`
+      : `Redemption request has been accepted.`
+  );
 
   return { error: null };
 }
