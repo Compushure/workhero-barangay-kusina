@@ -7,6 +7,8 @@
 
 import { Suspense } from 'react';
 import { AdminClient } from '@/components/admin/admin-client';
+import { redirect } from 'next/navigation';
+import { redirectifSessionExists } from '@/actions/auth';
 
 export function LoadingFallback() {
   return (
@@ -19,7 +21,8 @@ export function LoadingFallback() {
   );
 }
 
-export default function Admin() {
+export default async function Admin() {
+  await redirectifSessionExists();
   return (
     <Suspense fallback={<LoadingFallback />}>
       <AdminClient />
