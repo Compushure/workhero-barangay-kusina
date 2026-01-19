@@ -64,7 +64,7 @@ export function RemarksDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-500px">
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
@@ -81,7 +81,7 @@ export function RemarksDialog({
               }
             }}
             placeholder={placeholder}
-            className="min-h-[120px] resize-none"
+            className="min-h-120px resize-none"
             maxLength={maxLength}
           />
           <div className="flex justify-end text-xs text-muted-foreground">
@@ -93,14 +93,14 @@ export function RemarksDialog({
           <Button
             variant="outline"
             onClick={handleCancel}
-            className="flex-1 sm:flex-none sm:min-w-[120px]"
+            className="flex-1 sm:flex-none sm:min-w-120px rounded-3xl px-24 py-2"
           >
             {cancelLabel}
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={required && !remarks.trim()}
-            className={`flex-1 sm:flex-none sm:min-w-[120px] ${
+            className={`flex-1 sm:flex-none sm:min-w-120px rounded-3xl px-24 py-2 ${
               confirmVariant === 'destructive' || confirmLabel === 'OK'
                 ? 'bg-[#690003] hover:bg-[#8B0000]'
                 : ''
