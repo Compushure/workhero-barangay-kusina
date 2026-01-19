@@ -42,7 +42,7 @@ export async function handleFetchUsers(params: UserQueryParams): Promise<User[]>
  */
 export async function handleUploadProfilePicture(username: string, userId: string, file: File) {
   const result = await safeAction(() => uploadProfilePicture(userId, file));
-  
+
   if (!result.success) {
     toast.error(`Failed to update ${username}'s profile picture: ` + result.error);
     return null;
@@ -56,7 +56,6 @@ export async function handleUploadProfilePicture(username: string, userId: strin
   toast.success(`Successfully updated ${username}'s profile picture`);
   return result.data?.data ?? null;
 }
-
 
 export async function handleAddUser(input: AddUserInput): Promise<User | null> {
   const result = await safeAction(() => addUserAction(input));
@@ -127,11 +126,10 @@ export async function handleDeleteUser(userId: string, userName: string): Promis
 }
 
 export async function redirectToCorrectDashboardClient(routerInstance: Router) {
-  const {role,error} = await getUserRole();
+  const { role, error } = await getUserRole();
   if (error) {
     routerInstance.push('/admin');
-  }
-  else{
+  } else {
     switch (role) {
       case 'superadmin':
         routerInstance.push('/admin/manage');

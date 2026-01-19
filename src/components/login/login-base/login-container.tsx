@@ -1,4 +1,5 @@
 'use client';
+'use client';
 
 import { useState } from "react";
 import { LoginForm } from "./login-form";
@@ -36,6 +37,7 @@ export function LoginContainer() {
       await handleUserRole({ router, setError, getUserRole });
     });
   };
+  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted flex items-center justify-center p-4">
@@ -51,5 +53,6 @@ export function LoginContainer() {
         </div>
       </div>
     </div>
+  );
   );
 }

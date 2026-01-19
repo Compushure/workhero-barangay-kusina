@@ -5,7 +5,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { LoginFormFields } from '../sign-in/sign-in-form-fields';
+<<<<<<< HEAD
 import { LoginFormHeader } from '../sign-in/sign-in-form-header';
+=======
+>>>>>>> 416557d72ac65f2759f91d39b93a205848220060
 import { Loader2 } from 'lucide-react';
 
 interface LoginFormProps {

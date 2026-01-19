@@ -31,9 +31,7 @@ export function FeatureList() {
             <span className="text-primary">Admin</span>
           </h1>
         </div>
-        <p className="text-foreground/70 text-lg mt-2">
-          Secure Access to Your Dashboard
-        </p>
+        <p className="text-foreground/70 text-lg mt-2">Secure Access to Your Dashboard</p>
       </div>
 
       <div className="space-y-8">

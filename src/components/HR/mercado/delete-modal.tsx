@@ -34,8 +34,7 @@ export function DeleteModal({ open, onOpenChange, itemName, onConfirm }: DeleteM
         <button
           onClick={handleClose}
           className="absolute top-6 right-6 text-[#5a2a2a] hover:text-[#690003] transition-colors"
-        >
-        </button>
+        ></button>
 
         {/* Trash Icon */}
         <div className="flex justify-start mb-6">

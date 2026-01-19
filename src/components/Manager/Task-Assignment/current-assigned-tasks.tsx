@@ -39,16 +39,27 @@ export function CurrentAssignedTasks({
   const [sortBy, setSortBy] = useState('recently added');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  const filteredTasks = tasks.filter((task) => {
+  const filteredTasks = useMemo(() => {
+    if (!searchTerm) return tasks;
+
     const searchLower = searchTerm.toLowerCase();
-    const taskMatch = task.taskName.toLowerCase().includes(searchLower);
-    const employeeMatch = task.assignedEmployees.some(
-      (emp) =>
-        emp.name.toLowerCase().includes(searchLower) ||
-        emp.empId.toLowerCase().includes(searchLower)
-    );
-    return taskMatch || employeeMatch;
-  });
+
+    if (viewMode === 'task') {
+      // Task View: Filter by task name OR any assigned employee name/ID
+      return tasks.filter((task) => {
+        const taskMatch = task.taskName.toLowerCase().includes(searchLower);
+        const employeeMatch = task.assignedEmployees.some(
+          (emp) =>
+            emp.name.toLowerCase().includes(searchLower) ||
+            emp.empId.toLowerCase().includes(searchLower)
+        );
+        return taskMatch || employeeMatch;
+      });
+    } else {
+      // Employee View: Pass all tasks, filtering happens in EmployeeViewCard
+      return tasks;
+    }
+  }, [tasks, searchTerm, viewMode]);
 
   const sortedTasks = useMemo(() => {
     const tasksCopy = [...filteredTasks];
@@ -69,7 +80,7 @@ export function CurrentAssignedTasks({
       }
     } else {
       if (sortBy === 'recently added' || sortBy === 'oldest') {
-        const employeeMap = new Map<string, { employee: AssignedEmployee; latestDate: Date }>();
+        const employeeMap = new Map<string, { employee: any; latestDate: Date }>();
 
         tasksCopy.forEach((task) => {
           task.assignedEmployees.forEach((emp) => {
@@ -153,7 +164,9 @@ export function CurrentAssignedTasks({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search"
+            placeholder={
+              viewMode === 'task' ? 'Search by task name...' : 'Search by employee name or ID...'
+            }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-full bg-white focus:outline-none focus:border-[#690003]"
@@ -200,6 +213,7 @@ export function CurrentAssignedTasks({
         ) : (
           <EmployeeViewCard
             tasks={sortedTasks}
+            searchTerm={searchTerm}
             onRemoveAssignment={onRemoveAssignment}
             onClearAllEmployeeTasks={onClearAllEmployeeTasks}
           />

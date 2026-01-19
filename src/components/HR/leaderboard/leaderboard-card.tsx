@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Player {
   name: string;
@@ -7,7 +7,7 @@ interface Player {
 }
 
 /**
- * LeaderboardCard: Displays the top-ranked player in a large, 
+ * LeaderboardCard: Displays the top-ranked player in a large,
  * central feature card.
  */
 export default function LeaderboardCard({ player }: { player: Player }) {
@@ -33,7 +33,9 @@ export default function LeaderboardCard({ player }: { player: Player }) {
         {/* Stars and Name */}
         <div className="mb-8">
           <div className="flex justify-center gap-1 text-[#6D1616] text-xl mb-1">
-            <span>☆</span><span className="text-2xl">☆</span><span>☆</span>
+            <span>☆</span>
+            <span className="text-2xl">☆</span>
+            <span>☆</span>
           </div>
           <h2 className="text-4xl font-bold text-[#6D1616]">{player.name}</h2>
         </div>

@@ -21,7 +21,7 @@ export async function handleUserRole({ router, setError, getUserRole }: HandleRo
     toast.error('Authorization Error', {
       description: 'Unable to verify your permissions.',
     });
-   return
+    return;
   }
 
   const normalizedRole = role.trim().toLowerCase();

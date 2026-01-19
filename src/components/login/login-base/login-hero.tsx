@@ -1,4 +1,4 @@
-import { Utensils, Heart, Users } from "lucide-react"
+import { Utensils, Heart, Users } from 'lucide-react';
 
 export function LoginHero() {
   return (
@@ -22,10 +22,7 @@ export function LoginHero() {
       {/* Gamified Features */}
       <div className="space-y-8">
         {/* Contribution Points */}
-        <div
-          className="flex gap-4 items-start animate-fadeInUp"
-          style={{ animationDelay: "0.1s" }}
-        >
+        <div className="flex gap-4 items-start animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
           <div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center shrink-0">
             <Heart className="w-6 h-6 text-accent" />
           </div>
@@ -38,10 +35,7 @@ export function LoginHero() {
         </div>
 
         {/* Team Feast Levels */}
-        <div
-          className="flex gap-4 items-start animate-fadeInUp"
-          style={{ animationDelay: "0.2s" }}
-        >
+        <div className="flex gap-4 items-start animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
           <div className="w-12 h-12 bg-secondary/20 rounded-xl flex items-center justify-center shrink-0">
             <Users className="w-6 h-6 text-secondary" />
           </div>
@@ -54,17 +48,15 @@ export function LoginHero() {
         </div>
 
         {/* Potluck Rewards */}
-        <div
-          className="flex gap-4 items-start animate-fadeInUp"
-          style={{ animationDelay: "0.3s" }}
-        >
+        <div className="flex gap-4 items-start animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
           <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center shrink-0">
             <Utensils className="w-6 h-6 text-primary" />
           </div>
           <div>
             <h3 className="font-semibold text-foreground">Redeem Your Rewards</h3>
             <p className="text-sm text-muted-foreground">
-              Earn Fiesta Points from completed tasks and redeem them for rewards — from team perks and community celebrations to vouchers, bonuses, and more.
+              Earn Fiesta Points from completed tasks and redeem them for rewards — from team perks
+              and community celebrations to vouchers, bonuses, and more.
             </p>
           </div>
         </div>
@@ -80,5 +72,5 @@ export function LoginHero() {
         </div>
       </div>
     </div>
-  )
+  );
 }

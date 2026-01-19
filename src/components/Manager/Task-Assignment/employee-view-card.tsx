@@ -18,12 +18,14 @@ interface Employee {
 
 interface EmployeeViewCardProps {
   tasks: AssignedTask[];
+  searchTerm?: string; // Added searchTerm prop
   onRemoveAssignment: (taskId: string, employeeId: string) => void;
   onClearAllEmployeeTasks?: (employeeId: string) => void;
 }
 
 export function EmployeeViewCard({
   tasks,
+  searchTerm = '', // Default to empty string
   onRemoveAssignment,
   onClearAllEmployeeTasks,
 }: EmployeeViewCardProps) {
@@ -48,7 +50,24 @@ export function EmployeeViewCard({
     });
   });
 
-  const employees = Array.from(employeeMap.values());
+  const allEmployees = Array.from(employeeMap.values());
+  const employees = searchTerm
+    ? allEmployees.filter((emp) => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          emp.name.toLowerCase().includes(searchLower) ||
+          emp.empId.toLowerCase().includes(searchLower)
+        );
+      })
+    : allEmployees;
+
+  if (employees.length === 0 && searchTerm) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500 text-lg">No employees match your search.</p>
+      </div>
+    );
+  }
 
   const toggleEmployeeExpand = (empId: string) => {
     const newSet = new Set(expandedEmployees);
@@ -187,6 +206,7 @@ export function EmployeeViewCard({
               open={showRemoveConfirm?.empId === employee.id}
               onOpenChange={(open) => !open && setShowRemoveConfirm(null)}
             >
+              <DialogTitle className="hidden">Unassign Task to Employee</DialogTitle>
               <DialogContent className="bg-white">
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold text-[#690003]">Unassign Task?</h3>
