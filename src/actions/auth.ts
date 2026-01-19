@@ -16,11 +16,19 @@ export async function getUserRole() {
   }
 }
 
+export async function redirectifSessionExists() {
+  const supabase = await createClient();
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionData.session && !sessionError) {
+    console.log('Active session found, redirecting to dashboard');
+    await redirectToCorrectDashboardServer();
+  }
+}
+
 export async function redirectToCorrectDashboardServer() {
   const { role, error } = await getUserRole();
   if (error || !role) {
     console.log('No role found, redirecting to login');
-    redirect('/admin');
     return;
   }
 
@@ -41,8 +49,7 @@ export async function redirectToCorrectDashboardServer() {
       redirect('/employee/dashboard');
       return;
     default:
-      console.log('Unknown role:', role);
-      redirect('/admin');
+      console.log('unknwon role');
       return;
   }
 }
@@ -196,7 +203,7 @@ export async function signOutAction(): Promise<ServerActionResponse> {
   const supabase = await createClient();
   const {
     data: { session },
-    error:sessionError,
+    error: sessionError,
   } = await supabase.auth.getSession();
 
   if (!session || sessionError) {
