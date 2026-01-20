@@ -5,6 +5,7 @@ interface Player {
   name: string;
   points: number;
   image?: string;
+  id?: string;
 }
 
 interface LeaderboardListProps {
@@ -22,10 +23,19 @@ export default function LeaderboardList({ players }: LeaderboardListProps) {
     return `${rank}th`;
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <div className="space-y-4">
       {players.map((player) => (
-        <div key={player.rank} className="flex items-center gap-4 group">
+        <div key={player.id || player.rank} className="flex items-center gap-4 group">
           {/* Rank Number */}
           <span className="text-lg font-bold text-primary w-12">{getRankSuffix(player.rank)}</span>
 
@@ -37,14 +47,8 @@ export default function LeaderboardList({ players }: LeaderboardListProps) {
                 <div className="w-12 h-12 rounded-full border-2 border-[#E9C496] bg-white flex items-center justify-center overflow-hidden">
                   <Avatar className="w-full h-full">
                     <AvatarImage src={player.image} />
-                    <AvatarFallback className="bg-transparent text-[#6D1616]">
-                      <svg
-                        className="w-6 h-6 text-[#6D1616]"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                      </svg>
+                    <AvatarFallback className="bg-transparent text-[#6D1616] font-semibold text-sm">
+                      {getInitials(player.name)}
                     </AvatarFallback>
                   </Avatar>
                 </div>
