@@ -21,6 +21,7 @@ interface AddItemsModalProps {
     id: string;
     name: string;
     cost: number;
+    quantity?: number;
   } | null;
   onSave?: (data: {
     id?: string;
@@ -43,6 +44,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
     if (editingItem) {
       setItemName(editingItem.name);
       setItemCost(editingItem.cost.toString());
+      setQuantity(editingItem.quantity?.toString() || '');
     } else {
       // Reset form when adding new
       setItemName('');
