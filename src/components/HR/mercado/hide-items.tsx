@@ -31,7 +31,7 @@ export function HideRewardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-425px">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="items-center space-y-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
             <FileIcon className="h-6 w-6 text-orange-600" />
