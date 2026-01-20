@@ -6,6 +6,7 @@ import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
 import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 import { DeleteModal } from '@/components/hr/mercado/delete-modal';
 import { Pagination } from '@/components/manager/task-verification/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   useGetRewards,
   useAddReward,
@@ -139,8 +140,22 @@ export default function MercadoPage() {
 
         <div className="flex-1">
           {isLoading ? (
-            <div className="text-center py-12">
-              <p className="text-[#730202]">Loading items...</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 min-h-100">
+              {Array.from({ length: 9 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-card border-border rounded-xl p-4 flex items-center relative shadow-sm h-32"
+                >
+                  <Skeleton className="h-24 w-24 rounded-lg shrink-0" />
+                  <div className="ml-4 flex-1 min-w-0 space-y-3">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                  <div className="absolute top-4 right-4">
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 min-h-100">
