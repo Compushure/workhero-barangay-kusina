@@ -22,7 +22,7 @@ import { useTaskStore } from '@/store/taskStore';
  *   const approveTask = useApproveTask()
  *
  *   const handleApprove = () => {
- *     approveTask.mutate(taskId, {
+ *     approveTask.mutate({ id: taskId, remark: 'Good job!' }, {
  *       onSuccess: () => {
  *         console.log('Task approved')
  *       }
@@ -36,17 +36,23 @@ import { useTaskStore } from '@/store/taskStore';
 export function useApproveTask(): UseMutationResult<
   VerificationRequest | null,
   Error,
-  string,
+  { id: string; remark: string },
   { previousTasks: VerificationRequest[] | undefined }
 > {
   const queryClient = useQueryClient();
   const { optimisticApprove, updateTask } = useTaskStore();
 
   return useMutation({
-    mutationFn: async (taskId: string): Promise<VerificationRequest | null> => {
-      return await handleApproveTask(taskId);
+    mutationFn: async ({
+      id,
+      remark,
+    }: {
+      id: string;
+      remark: string;
+    }): Promise<VerificationRequest | null> => {
+      return await handleApproveTask(id, remark);
     },
-    onMutate: async (taskId: string) => {
+    onMutate: async ({ id }: { id: string; remark: string }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: managerTaskKeys.lists() });
 
@@ -56,28 +62,26 @@ export function useApproveTask(): UseMutationResult<
       );
 
       // Optimistic update in Zustand store
-      optimisticApprove(taskId);
+      optimisticApprove(id);
 
       // Optimistically update the cache
       queryClient.setQueryData<VerificationRequest[]>(managerTaskKeys.list('in review'), (old) => {
         if (!old) return old;
-        return old.map((task) =>
-          task.kpitask_id === taskId ? { ...task, status: 'approved' } : task
-        );
+        return old.map((task) => (task.kpitask_id === id ? { ...task, status: 'approved' } : task));
       });
 
       return { previousTasks };
     },
-    onError: (error, taskId, context) => {
+    onError: (error, { id }, context) => {
       // Rollback on error
       if (context?.previousTasks) {
         queryClient.setQueryData(managerTaskKeys.list('in review'), context.previousTasks);
       }
     },
-    onSuccess: (data, taskId) => {
+    onSuccess: (data, { id }) => {
       // Update Zustand store with server response
       if (data) {
-        updateTask(taskId, data);
+        updateTask(id, data);
       }
     },
     onSettled: () => {
@@ -101,7 +105,7 @@ export function useApproveTask(): UseMutationResult<
  *   const rejectTask = useRejectTask()
  *
  *   const handleReject = () => {
- *     rejectTask.mutate(taskId, {
+ *     rejectTask.mutate({ id: taskId, remark: 'Incomplete' }, {
  *       onSuccess: () => {
  *         console.log('Task rejected')
  *       }
@@ -115,17 +119,23 @@ export function useApproveTask(): UseMutationResult<
 export function useRejectTask(): UseMutationResult<
   VerificationRequest | null,
   Error,
-  string,
+  { id: string; remark: string },
   { previousTasks: VerificationRequest[] | undefined }
 > {
   const queryClient = useQueryClient();
   const { optimisticReject, updateTask } = useTaskStore();
 
   return useMutation({
-    mutationFn: async (taskId: string): Promise<VerificationRequest | null> => {
-      return await handleRejectTask(taskId);
+    mutationFn: async ({
+      id,
+      remark,
+    }: {
+      id: string;
+      remark: string;
+    }): Promise<VerificationRequest | null> => {
+      return await handleRejectTask(id, remark);
     },
-    onMutate: async (taskId: string) => {
+    onMutate: async ({ id }: { id: string; remark: string }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: managerTaskKeys.lists() });
 
@@ -135,28 +145,26 @@ export function useRejectTask(): UseMutationResult<
       );
 
       // Optimistic update in Zustand store
-      optimisticReject(taskId);
+      optimisticReject(id);
 
       // Optimistically update the cache
       queryClient.setQueryData<VerificationRequest[]>(managerTaskKeys.list('in review'), (old) => {
         if (!old) return old;
-        return old.map((task) =>
-          task.kpitask_id === taskId ? { ...task, status: 'rejected' } : task
-        );
+        return old.map((task) => (task.kpitask_id === id ? { ...task, status: 'rejected' } : task));
       });
 
       return { previousTasks };
     },
-    onError: (error, taskId, context) => {
+    onError: (error, { id }, context) => {
       // Rollback on error
       if (context?.previousTasks) {
         queryClient.setQueryData(managerTaskKeys.list('in review'), context.previousTasks);
       }
     },
-    onSuccess: (data, taskId) => {
+    onSuccess: (data, { id }) => {
       // Update Zustand store with server response
       if (data) {
-        updateTask(taskId, data);
+        updateTask(id, data);
       }
     },
     onSettled: () => {
