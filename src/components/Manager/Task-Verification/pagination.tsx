@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
   totalPages: number;
@@ -19,7 +19,7 @@ export function Pagination({ totalPages, currentPage, onPageChange }: Pagination
 
   // Ellipsis before current if not near start
   if (currentPage > 2) {
-    pages.push("...");
+    pages.push('...');
   }
 
   // Current page (if not first or last)
@@ -29,7 +29,7 @@ export function Pagination({ totalPages, currentPage, onPageChange }: Pagination
 
   // Ellipsis after current if not near end
   if (currentPage < totalPages - 1) {
-    pages.push("...");
+    pages.push('...');
   }
 
   // Always show last page
@@ -51,12 +51,14 @@ export function Pagination({ totalPages, currentPage, onPageChange }: Pagination
 
       {/* Page numbers */}
       {pages.map((page, idx) =>
-        page === "..." ? (
-          <span key={`ellipsis-${idx}`} className="px-2">…</span>
+        page === '...' ? (
+          <span key={`ellipsis-${idx}`} className="px-2">
+            …
+          </span>
         ) : (
           <Button
             key={page}
-            variant={page === currentPage ? "default" : "outline"}
+            variant={page === currentPage ? 'default' : 'outline'}
             size="sm"
             onClick={() => onPageChange(page as number)}
           >

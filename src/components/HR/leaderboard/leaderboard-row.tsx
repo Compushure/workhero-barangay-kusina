@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface RowProps {
   rank: number;
@@ -21,7 +21,7 @@ export function LeaderboardRow({ rank, name, points }: RowProps) {
           {/* Avatar with overlapping design effect */}
           <div className="relative -ml-1">
             <div className="w-12 h-12 rounded-full border-2 border-[#E9C496] bg-[#F9F3E9] flex items-center justify-center overflow-hidden">
-               <span className="text-xs"></span>
+              <span className="text-xs"></span>
             </div>
           </div>
           <span className="font-semibold text-gray-700">{name}</span>

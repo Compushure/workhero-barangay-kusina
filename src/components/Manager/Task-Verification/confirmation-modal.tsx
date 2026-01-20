@@ -22,8 +22,8 @@ export function ConfirmationDialog({ open, type, onCancel, onConfirm }: Confirma
     type === 'approve'
       ? 'Are you sure you want to approve this request?'
       : type === 'deny'
-      ? 'Are you sure you want to deny this request?'
-      : '';
+        ? 'Are you sure you want to deny this request?'
+        : '';
 
   return (
     <Dialog open={open} onOpenChange={onCancel}>
@@ -36,10 +36,7 @@ export function ConfirmationDialog({ open, type, onCancel, onConfirm }: Confirma
           <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button
-            variant={type === 'approve' ? 'default' : 'destructive'}
-            onClick={onConfirm}
-          >
+          <Button variant={type === 'approve' ? 'default' : 'destructive'} onClick={onConfirm}>
             Confirm
           </Button>
         </DialogFooter>
