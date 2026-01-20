@@ -1,17 +1,41 @@
 import LeaderboardCard from '@/components/HR/leaderboard/leaderboard-card';
 import LeaderboardList from '@/components/HR/leaderboard/leaderboard-list';
 import LeaderboardFilters from '@/components/HR/leaderboard/leaderboard-filters';
+import { getTopPlayers } from '@/actions/leaderboard/get-top-players';
 
-// Mock data structure
-const LEADERBOARD_DATA = [
-  { rank: 1, name: 'John Doe', points: 5300, image: '' },
-  { rank: 2, name: 'Jane Smith', points: 5000, image: '' },
-  // ... rest of the data
-];
+export default async function LeaderboardPage() {
+  const result = await getTopPlayers();
 
-export default function LeaderboardPage() {
-  const topPlayer = LEADERBOARD_DATA[0];
-  const others = LEADERBOARD_DATA.slice(1);
+  // Handle error or empty data
+  if (result.error || !result.data || result.data.length === 0) {
+    return (
+      <div className="p-8 bg-[#F3F3F3] min-h-screen">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-[#6D1616]">Leaderboard Slide</h1>
+              <p className="text-gray-500">List of ranks for this week.</p>
+            </div>
+            <LeaderboardFilters />
+          </div>
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">
+              {result.error || 'No leaderboard data available at the moment.'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Map database results to include rank
+  const playersWithRank = result.data.map((player, index) => ({
+    ...player,
+    rank: index + 1,
+  }));
+
+  const topPlayer = playersWithRank[0];
+  const others = playersWithRank.slice(1);
 
   return (
     <div className="p-8 bg-[#F3F3F3] min-h-screen">
