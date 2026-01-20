@@ -25,7 +25,6 @@ import {
 import { format } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 
-
 interface UserCardProps {
   user: UserWithExtras;
   onEdit: (user: User) => void;

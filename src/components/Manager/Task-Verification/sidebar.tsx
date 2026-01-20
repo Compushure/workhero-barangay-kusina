@@ -6,11 +6,14 @@ import { ProfilePic } from '@/components/sidebar/profile-pic';
 import { FileText, CheckCircle, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface NavItem {
   key: string;
   label: string;
   icon: React.ReactNode;
+  href: string;
 }
 
 interface SidebarProps {
@@ -23,16 +26,18 @@ export function Sidebar({
       key: 'assignment',
       label: 'Task Assignment',
       icon: <FileText size={20} className="shrink-0" />,
+      href: '/manager/task-assignment',
     },
     {
       key: 'verification',
       label: 'Task Verification',
       icon: <CheckCircle size={20} className="shrink-0" />,
+      href: '/manager/task-verification',
     },
   ],
 }: SidebarProps) {
-  const [activeNav, setActiveNav] = useState<string>('verification');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = usePathname();
 
   // Fetch current session user
   const { data: user } = useGetSessionUser();
@@ -65,19 +70,22 @@ export function Sidebar({
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-3">
-        {navItems.map((item) => (
-          <button
-            key={item.key}
-            onClick={() => setActiveNav(item.key)}
-            className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all justify-center ${
-              isCollapsed ? 'px-2' : ''
-            } ${activeNav === item.key ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
-            title={isCollapsed ? item.label : ''}
-          >
-            {item.icon}
-            {!isCollapsed && item.label}
-          </button>
-        ))}
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all justify-center ${
+                isCollapsed ? 'px-2' : ''
+              } ${isActive ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
+              title={isCollapsed ? item.label : ''}
+            >
+              {item.icon}
+              {!isCollapsed && item.label}
+            </Link>
+          );
+        })}
       </nav>
 
       {/* User Profile Section */}

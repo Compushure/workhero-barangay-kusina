@@ -14,7 +14,7 @@ export function MercadoHeader({ title, description, onAddClick }: MercadoHeaderP
         <h1 className="text-4xl font-bold text-[#730202] tracking-tight">{title}</h1>
         <p className="text-muted-foreground mt-1">{description}</p>
       </div>
-      <Button 
+      <Button
         onClick={onAddClick}
         className="bg-[#730202] hover:bg-[#5a0202] text-white px-6 py-6 rounded-xl text-lg shadow-lg"
       >
