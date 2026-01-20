@@ -40,14 +40,14 @@ export function MercadoCard({ item, onEdit, onDelete, onHide, onUnhide }: Mercad
 
   return (
     <>
-      <div className="bg-card border-border rounded-xl p-4 flex items-center relative shadow-sm hover:shadow-md transition-shadow">
+      <div className="bg-card border-border rounded-xl p-4 flex items-center relative shadow-sm hover:shadow-md transition-shadow h-32">
         <div className="h-24 w-24 bg-[#f2e1c9] rounded-lg flex items-center justify-center shrink-0">
           <ImageIcon className="h-8 w-8 text-[#730202]/40" />
         </div>
 
-        <div className="ml-4 flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-xl font-bold text-[#730202]">{item.name}</h3>
+        <div className="ml-4 flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-xl font-bold text-[#730202] truncate">{item.name}</h3>
             {item.isActive === false && (
               <Badge variant="secondary" className="bg-gray-200 text-gray-700 hover:bg-gray-200">
                 <EyeOff className="h-3 w-3 mr-1" />
@@ -58,25 +58,27 @@ export function MercadoCard({ item, onEdit, onDelete, onHide, onUnhide }: Mercad
           <p className="text-[#730202] font-medium italic opacity-80">{item.price} pts</p>
         </div>
 
-      <div className="absolute top-4 right-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[#f2e1c9]">
-              <MoreHorizontal className="h-5 w-5 text-[#730202]" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32 rounded-xl">
-            <DropdownMenuItem onClick={() => setHideDialogOpen(true)}>Hide</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onEdit?.(item.id)}>Edit</DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete?.(item.id)}
-              className="text-red-600 font-semibold"
-            >
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+        <div className="absolute top-4 right-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[#f2e1c9]">
+                <MoreHorizontal className="h-5 w-5 text-[#730202]" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32 rounded-xl">
+              <DropdownMenuItem onClick={() => setHideDialogOpen(true)}>
+                {item.isActive === false ? 'Unhide' : 'Hide'}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEdit?.(item.id)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onDelete?.(item.id)}
+                className="text-red-600 font-semibold"
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <HideRewardDialog

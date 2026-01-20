@@ -8,7 +8,7 @@ import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
 } from '@/hooks/tanstack/mutations/hrMutations';
-import { RemarksDialog } from './remarks';
+import { RemarksDialog } from '@/components/hr/dashboard/remarks';
 
 export interface RedemptionRequest {
   id: string;

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
 import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 import { DeleteModal } from '@/components/hr/mercado/delete-modal';
+import { Pagination } from '@/components/manager/task-verification/pagination';
 import {
   useGetRewards,
   useAddReward,
@@ -25,9 +26,27 @@ export default function MercadoPage() {
     id: string;
     name: string;
   } | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9; 
 
   // Fetch rewards
   const { data: rewards, isLoading } = useGetRewards();
+
+  
+  const totalPages = Math.ceil((rewards?.length || 0) / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedRewards = useMemo(
+    () => rewards?.slice(startIndex, endIndex) || [],
+    [rewards, startIndex, endIndex]
+  );
+
+  // Reset to page 1 when items change and current page is invalid
+  useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [rewards?.length]);
 
   // Mutations
   const addReward = useAddReward();
@@ -105,41 +124,54 @@ export default function MercadoPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fff8f5] p-8">
-      <div className="max-w-7xl mx-auto">
+    <main className="min-h-screen bg-[#fff8f5] p-8 flex flex-col">
+      <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col">
         <MercadoHeader
           title="Mercado Manager"
           description="Manage Items visible in mercado"
           onAddClick={handleAdd}
         />
 
-        {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-[#730202]">Loading items...</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {rewards && rewards.length > 0 ? (
-              rewards.map((item) => (
-                <MercadoCard
-                  key={item.id}
-                  item={{
-                    id: item.id,
-                    name: item.name,
-                    price: item.pointsCost,
-                    isActive: item.isActive,
-                  }}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onHide={handleHide}
-                  onUnhide={handleUnhide}
-                />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <p className="text-[#730202]">No items yet. Click "Add Item" to create one.</p>
-              </div>
-            )}
+        <div className="flex-1">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-[#730202]">Loading items...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 min-h-[400px]">
+              {paginatedRewards && paginatedRewards.length > 0 ? (
+                paginatedRewards.map((item) => (
+                  <MercadoCard
+                    key={item.id}
+                    item={{
+                      id: item.id,
+                      name: item.name,
+                      price: item.pointsCost,
+                      isActive: item.isActive,
+                    }}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onHide={handleHide}
+                    onUnhide={handleUnhide}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-[#730202]">No items yet. Click "Add Item" to create one.</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Pagination */}
+        {!isLoading && (
+          <div className="mt-8 pb-4">
+            <Pagination
+              totalPages={totalPages}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+            />
           </div>
         )}
 
