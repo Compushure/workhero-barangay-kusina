@@ -18,14 +18,16 @@ interface Employee {
 
 interface EmployeeViewCardProps {
   tasks: AssignedTask[];
-  searchTerm?: string; // Added searchTerm prop
+  searchTerm?: string;
+  sortBy: string;
   onRemoveAssignment: (taskId: string, employeeId: string) => void;
   onClearAllEmployeeTasks?: (employeeId: string) => void;
 }
 
 export function EmployeeViewCard({
   tasks,
-  searchTerm = '', // Default to empty string
+  searchTerm = '',
+  sortBy,
   onRemoveAssignment,
   onClearAllEmployeeTasks,
 }: EmployeeViewCardProps) {
@@ -37,6 +39,7 @@ export function EmployeeViewCard({
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState<string | null>(null);
 
+  // Build employee map
   const employeeMap = new Map<string, Employee>();
   tasks.forEach((task) => {
     task.assignedEmployees.forEach((emp) => {
@@ -50,16 +53,43 @@ export function EmployeeViewCard({
     });
   });
 
-  const allEmployees = Array.from(employeeMap.values());
-  const employees = searchTerm
-    ? allEmployees.filter((emp) => {
-        const searchLower = searchTerm.toLowerCase();
-        return (
-          emp.name.toLowerCase().includes(searchLower) ||
-          emp.empId.toLowerCase().includes(searchLower)
-        );
-      })
-    : allEmployees;
+  let employees = Array.from(employeeMap.values());
+
+  // Apply search filter
+  if (searchTerm) {
+    const searchLower = searchTerm.toLowerCase();
+    employees = employees.filter(
+      (emp) =>
+        emp.name.toLowerCase().includes(searchLower) ||
+        emp.empId.toLowerCase().includes(searchLower)
+    );
+  }
+
+  // Apply sorting
+  switch (sortBy) {
+    case 'recently added':
+      employees.sort((a, b) => {
+        const aDate = new Date(a.assignedTasks[a.assignedTasks.length - 1].dateRange.start);
+        const bDate = new Date(b.assignedTasks[b.assignedTasks.length - 1].dateRange.start);
+        return bDate.getTime() - aDate.getTime();
+      });
+      break;
+    case 'oldest':
+      employees.sort((a, b) => {
+        const aDate = new Date(a.assignedTasks[0].dateRange.start);
+        const bDate = new Date(b.assignedTasks[0].dateRange.start);
+        return aDate.getTime() - bDate.getTime();
+      });
+      break;
+    case 'a-z':
+      employees.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+    case 'z-a':
+      employees.sort((a, b) => b.name.localeCompare(a.name));
+      break;
+    default:
+      break;
+  }
 
   if (employees.length === 0 && searchTerm) {
     return (

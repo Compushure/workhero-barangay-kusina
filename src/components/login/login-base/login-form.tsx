@@ -42,6 +42,15 @@ export function LoginForm({ onSubmit, isSubmitting }: LoginFormProps) {
   return (
     <Card className="w-full bg-card/50 backdrop-blur-sm border-border/50 shadow-2xl animate-scaleIn overflow-hidden">
       <div className="p-8 md:p-10">
+        <div className="mb-8 space-y-2">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+            Welcome Back
+          </h1>
+          <p className="text-muted-foreground text-base">
+            Sign in to your Barangay Kusina account to continue
+          </p>
+        </div>
+
         <form onSubmit={handleSignInSubmit} className="space-y-6">
           <LoginFormFields
             email={email}

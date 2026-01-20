@@ -70,61 +70,17 @@ export function CurrentAssignedTasks({
       } else if (sortBy === 'oldest') {
         tasksCopy.sort((a, b) => a.id.localeCompare(b.id));
       } else if (sortBy === 'closest') {
-        return tasksCopy.sort(
+        tasksCopy.sort(
           (a, b) => new Date(a.dateRange.end).getTime() - new Date(b.dateRange.end).getTime()
         );
       } else if (sortBy === 'farthest') {
-        return tasksCopy.sort(
+        tasksCopy.sort(
           (a, b) => new Date(b.dateRange.end).getTime() - new Date(a.dateRange.end).getTime()
         );
       }
-    } else {
-      if (sortBy === 'recently added' || sortBy === 'oldest') {
-        const employeeMap = new Map<string, { employee: any; latestDate: Date }>();
-
-        tasksCopy.forEach((task) => {
-          task.assignedEmployees.forEach((emp) => {
-            const taskDate = new Date(task.dateRange.start);
-            if (!employeeMap.has(emp.id)) {
-              employeeMap.set(emp.id, { employee: emp, latestDate: taskDate });
-            } else {
-              const entry = employeeMap.get(emp.id)!;
-              if (taskDate > entry.latestDate) {
-                entry.latestDate = taskDate;
-              }
-            }
-          });
-        });
-
-        tasksCopy.sort((a, b) => {
-          const empA = a.assignedEmployees[0];
-          const empB = b.assignedEmployees[0];
-          if (!empA || !empB) return 0;
-
-          const dateA = employeeMap.get(empA.id)?.latestDate || new Date(0);
-          const dateB = employeeMap.get(empB.id)?.latestDate || new Date(0);
-
-          if (sortBy === 'recently added') {
-            return dateB.getTime() - dateA.getTime();
-          } else {
-            return dateA.getTime() - dateB.getTime();
-          }
-        });
-      } else if (sortBy === 'a-z') {
-        tasksCopy.sort((a, b) => {
-          const nameA = a.assignedEmployees[0]?.name || '';
-          const nameB = b.assignedEmployees[0]?.name || '';
-          return nameA.localeCompare(nameB);
-        });
-      } else if (sortBy === 'z-a') {
-        tasksCopy.sort((a, b) => {
-          const nameA = a.assignedEmployees[0]?.name || '';
-          const nameB = b.assignedEmployees[0]?.name || '';
-          return nameB.localeCompare(nameA);
-        });
-      }
     }
 
+    // ⚠️ For employee view, don’t sort here — EmployeeViewCard will handle it
     return tasksCopy;
   }, [filteredTasks, sortBy, viewMode]);
 
@@ -201,19 +157,14 @@ export function CurrentAssignedTasks({
               task={task}
               onRemoveAssignment={onRemoveAssignment}
               onDeleteTask={onDeleteTask}
-              // Updated to include newEmployees parameter
-              onEditTask={
-                onEditTask
-                  ? (taskId, maxAttempts, newDueDate, newEmployees) =>
-                      onEditTask(taskId, maxAttempts, newDueDate, newEmployees)
-                  : undefined
-              }
+              onEditTask={onEditTask}
             />
           ))
         ) : (
           <EmployeeViewCard
-            tasks={sortedTasks}
+            tasks={filteredTasks} // pass filtered tasks, not sortedTasks
             searchTerm={searchTerm}
+            sortBy={sortBy} // NEW: pass sortBy down
             onRemoveAssignment={onRemoveAssignment}
             onClearAllEmployeeTasks={onClearAllEmployeeTasks}
           />
