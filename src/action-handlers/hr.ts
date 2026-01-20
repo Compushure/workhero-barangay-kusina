@@ -104,12 +104,7 @@ export async function handleDeleteRewardAction(
   return true;
 }
 
-/**
- * Action handler to hide/unhide a reward/mercado item
- * @param id - The ID of the reward to hide/unhide
- * @param isActive - Whether the item should be active (visible) or hidden
- * @returns true on success, false on error
- */
+// Action handler to hide/unhide a reward/mercado item
 export async function handleHideRewardAction(
   id: string,
   isActive: boolean = false

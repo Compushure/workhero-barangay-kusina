@@ -21,18 +21,18 @@ export default function MercadoPage() {
     id: string;
     name: string;
     cost: number;
+    quantity?: number;
   } | null>(null);
   const [deletingItem, setDeletingItem] = useState<{
     id: string;
     name: string;
   } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9; 
+  const itemsPerPage = 9;
 
   // Fetch rewards
   const { data: rewards, isLoading } = useGetRewards();
 
-  
   const totalPages = Math.ceil((rewards?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -62,7 +62,12 @@ export default function MercadoPage() {
   const handleEdit = (id: string) => {
     const item = rewards?.find((item) => item.id === id);
     if (item) {
-      setEditingItem({ id: item.id, name: item.name, cost: item.pointsCost });
+      setEditingItem({
+        id: item.id,
+        name: item.name,
+        cost: item.pointsCost,
+        quantity: item.quantity,
+      });
       setIsAddModalOpen(true);
     }
   };
@@ -138,7 +143,7 @@ export default function MercadoPage() {
               <p className="text-[#730202]">Loading items...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 min-h-[400px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 min-h-100">
               {paginatedRewards && paginatedRewards.length > 0 ? (
                 paginatedRewards.map((item) => (
                   <MercadoCard
@@ -147,6 +152,7 @@ export default function MercadoPage() {
                       id: item.id,
                       name: item.name,
                       price: item.pointsCost,
+                      quantity: item.quantity,
                       isActive: item.isActive,
                     }}
                     onEdit={handleEdit}

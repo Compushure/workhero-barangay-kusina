@@ -42,8 +42,12 @@ export function useAddReward() {
       return await handleAddRewardAction(input);
     },
     onSuccess: () => {
-      // Invalidate rewards list to refetch
+      // Invalidate and refetch rewards list immediately
       queryClient.invalidateQueries({ queryKey: rewardKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: rewardKeys.list() });
     },
   });
 }
@@ -59,8 +63,12 @@ export function useEditReward() {
       return await handleEditRewardAction(id, input);
     },
     onSuccess: () => {
-      // Invalidate rewards list to refetch
+      // Invalidate and refetch rewards list immediately
       queryClient.invalidateQueries({ queryKey: rewardKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: rewardKeys.list() });
     },
   });
 }
@@ -76,8 +84,12 @@ export function useDeleteReward() {
       return await handleDeleteRewardAction(id);
     },
     onSuccess: () => {
-      // Invalidate rewards list to refetch
+      // Invalidate and refetch rewards list immediately
       queryClient.invalidateQueries({ queryKey: rewardKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: rewardKeys.list() });
     },
   });
 }
@@ -93,8 +105,12 @@ export function useHideReward() {
       return await handleHideRewardAction(id, isActive);
     },
     onSuccess: () => {
-      // Invalidate rewards list to refetch
+      // Invalidate and refetch rewards list immediately
       queryClient.invalidateQueries({ queryKey: rewardKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: rewardKeys.list() });
     },
   });
 }

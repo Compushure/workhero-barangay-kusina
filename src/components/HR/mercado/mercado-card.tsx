@@ -16,6 +16,7 @@ interface MercadoItem {
   id: string;
   name: string;
   price: number;
+  quantity?: number;
   isActive?: boolean;
 }
 
@@ -55,7 +56,14 @@ export function MercadoCard({ item, onEdit, onDelete, onHide, onUnhide }: Mercad
               </Badge>
             )}
           </div>
-          <p className="text-[#730202] font-medium italic opacity-80">{item.price} pts</p>
+
+          {/* Price and Quantity */}
+          <div className="flex items-center gap-4 mt-2">
+            <p className="text-[#730202] font-medium italic opacity-80">{item.price} pts</p>
+            {item.quantity !== undefined && (
+              <p className="text-[#730202] text-sm opacity-70">| Available: {item.quantity}</p>
+            )}
+          </div>
         </div>
 
         <div className="absolute top-4 right-4">
