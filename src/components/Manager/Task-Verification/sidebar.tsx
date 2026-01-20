@@ -26,13 +26,13 @@ export function Sidebar({
       key: 'assignment',
       label: 'Task Assignment',
       icon: <FileText size={20} className="shrink-0" />,
-      href: '/manager/task-assignment',
+      href: '/manager/dashboard/task-assignment',
     },
     {
       key: 'verification',
       label: 'Task Verification',
       icon: <CheckCircle size={20} className="shrink-0" />,
-      href: '/manager/task-verification',
+      href: '/manager/dashboard/task-verification',
     },
   ],
 }: SidebarProps) {
