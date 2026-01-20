@@ -37,7 +37,9 @@ export function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-6 px-4">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-foreground">Email Address</Label>
+        <Label htmlFor="email" className="text-foreground">
+          Email Address
+        </Label>
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/70" />
           <Input
@@ -53,7 +55,9 @@ export function LoginForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-foreground">Password</Label>
+        <Label htmlFor="password" className="text-foreground">
+          Password
+        </Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/70" />
           <Input

@@ -58,27 +58,25 @@ export function MercadoCard({ item, onEdit, onDelete, onHide, onUnhide }: Mercad
           <p className="text-[#730202] font-medium italic opacity-80">{item.price} pts</p>
         </div>
 
-        <div className="absolute top-4 right-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[#f2e1c9]">
-                <MoreHorizontal className="h-5 w-5 text-[#730202]" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32 rounded-xl">
-              <DropdownMenuItem onClick={() => setHideDialogOpen(true)}>
-                {item.isActive === false ? 'Unhide' : 'Hide'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit?.(item.id)}>Edit</DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => onDelete?.(item.id)}
-                className="text-red-600 font-semibold"
-              >
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      <div className="absolute top-4 right-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[#f2e1c9]">
+              <MoreHorizontal className="h-5 w-5 text-[#730202]" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-32 rounded-xl">
+            <DropdownMenuItem onClick={() => setHideDialogOpen(true)}>Hide</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onEdit?.(item.id)}>Edit</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onDelete?.(item.id)}
+              className="text-red-600 font-semibold"
+            >
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       </div>
 
       <HideRewardDialog

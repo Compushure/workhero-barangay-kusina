@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
 export function SignupFormFooter({ onToggle }: { onToggle: () => void }) {
   return (
     <div className="mt-8 pt-6 border-t border-border/30 text-center">
       <p className="text-sm text-muted-foreground">
-        Already have an account?{" "}
+        Already have an account?{' '}
         <button
           onClick={onToggle}
           className="text-primary font-semibold hover:underline transition-colors cursor-pointer"
@@ -13,5 +13,5 @@ export function SignupFormFooter({ onToggle }: { onToggle: () => void }) {
         </button>
       </p>
     </div>
-  )
+  );
 }

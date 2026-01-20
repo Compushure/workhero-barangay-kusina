@@ -1,16 +1,27 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Player {
   name: string;
   points: number;
   image?: string;
+  id?: string;
+  rank?: number;
 }
 
 /**
- * LeaderboardCard: Displays the top-ranked player in a large, 
+ * LeaderboardCard: Displays the top-ranked player in a large,
  * central feature card.
  */
 export default function LeaderboardCard({ player }: { player: Player }) {
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <div className="w-full max-w-sm bg-card rounded-3xl overflow-hidden shadow-sm border border-accent">
       {/* Rank Badge */}
@@ -23,9 +34,8 @@ export default function LeaderboardCard({ player }: { player: Player }) {
         <div className="relative w-40 h-40 rounded-full border-8 border-[#E9C496] flex items-center justify-center bg-white mb-6">
           <Avatar className="w-full h-full">
             <AvatarImage src={player.image} />
-            <AvatarFallback className="bg-transparent text-[#6D1616]">
-              {/* Placeholder Icon from image */}
-              <span className="text-4xl"> </span>
+            <AvatarFallback className="bg-transparent text-[#6D1616] text-4xl font-bold">
+              {getInitials(player.name)}
             </AvatarFallback>
           </Avatar>
         </div>
@@ -33,7 +43,9 @@ export default function LeaderboardCard({ player }: { player: Player }) {
         {/* Stars and Name */}
         <div className="mb-8">
           <div className="flex justify-center gap-1 text-[#6D1616] text-xl mb-1">
-            <span>☆</span><span className="text-2xl">☆</span><span>☆</span>
+            <span>☆</span>
+            <span className="text-2xl">☆</span>
+            <span>☆</span>
           </div>
           <h2 className="text-4xl font-bold text-[#6D1616]">{player.name}</h2>
         </div>
