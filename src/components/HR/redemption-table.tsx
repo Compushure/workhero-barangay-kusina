@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Check, X, ChevronDown } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Check, X, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -35,6 +35,24 @@ interface RedemptionTableProps {
 
 export function RedemptionTable({ data, onApprove, onReject }: RedemptionTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Calculate pagination
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = useMemo(
+    () => data.slice(startIndex, endIndex),
+    [data, startIndex, endIndex]
+  );
+
+  // Reset to page 1 when data changes
+  const handleDataChange = useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [data.length]);
 
   const toggleRow = (id: string) => {
     const newExpanded = new Set(expandedRows);
@@ -76,7 +94,7 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((request) => (
+          {paginatedData.map((request) => (
             <TableRow
               key={request.id}
               className="bg-[#FBF4E8] hover:bg-[#ffffff] transition-colors border-b border-border"
@@ -135,6 +153,71 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
           ))}
         </TableBody>
       </Table>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 py-4 bg-[#FBF4E8]">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="cursor-pointer"
+          >
+            <ChevronLeft size={16} />
+          </Button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+            // Show first page, last page, current page, and pages around current
+            const showPage =
+              page === 1 ||
+              page === totalPages ||
+              (page >= currentPage - 1 && page <= currentPage + 1);
+
+            if (!showPage) {
+              // Show ellipsis before current page range
+              if (page === currentPage - 2 && currentPage > 3) {
+                return (
+                  <span key={`ellipsis-before`} className="px-2 text-muted-foreground">
+                    …
+                  </span>
+                );
+              }
+              // Show ellipsis after current page range
+              if (page === currentPage + 2 && currentPage < totalPages - 2) {
+                return (
+                  <span key={`ellipsis-after`} className="px-2 text-muted-foreground">
+                    …
+                  </span>
+                );
+              }
+              return null;
+            }
+
+            return (
+              <Button
+                key={page}
+                variant={page === currentPage ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setCurrentPage(page)}
+                className="cursor-pointer"
+              >
+                {page}
+              </Button>
+            );
+          })}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="cursor-pointer"
+          >
+            <ChevronRight size={16} />
+          </Button>
+        </div>
+      )}
 
       {/* Empty State */}
       {data.length === 0 && (

@@ -88,6 +88,18 @@ export type EditUserInput = z.infer<typeof import('@/zod/schemas').editUserSchem
 export type LoginInput = z.infer<typeof import('@/zod/schemas').loginSchema>;
 
 /**
+ * Type for adding a reward/mercado item
+ * Inferred from addRewardSchema in @/zod/schemas
+ */
+export type AddRewardInput = z.infer<typeof import('@/zod/schemas').addRewardSchema>;
+
+/**
+ * Type for editing a reward/mercado item
+ * Inferred from editRewardSchema in @/zod/schemas
+ */
+export type EditRewardInput = z.infer<typeof import('@/zod/schemas').editRewardSchema>;
+
+/**
  * Type for server action responses
  * Generic response type for consistent error handling
  */
@@ -95,6 +107,24 @@ export type ServerActionResponse<T = unknown> = {
   error: string | null;
   data?: T;
 };
+
+// ============================================
+// Reward/Mercado Item Type
+// ============================================
+
+/**
+ * Reward interface representing a mercado item in the system
+ */
+export interface Reward {
+  id: string;
+  name: string;
+  pointsCost: number;
+  quantity?: number;
+  category?: string;
+  isActive: boolean;
+  createdAt?: string | Date;
+  createdBy?: string;
+}
 
 // ============================================
 // User Extended Type

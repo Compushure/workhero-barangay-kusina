@@ -1,6 +1,6 @@
 'use client';
 
-import { Sidebar } from '@/components/HR/sidebar';
+import { Sidebar } from '@/components/hr/sidebar';
 
 export default function HRLayout({ children }: { children: React.ReactNode }) {
   return (
