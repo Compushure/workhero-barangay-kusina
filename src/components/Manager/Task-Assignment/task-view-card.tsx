@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { parseISO, format } from 'date-fns';
 import {
   Dialog,
   DialogContent,
@@ -41,7 +42,7 @@ export function TaskViewCard({
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editMaxAttempts, setEditMaxAttempts] = useState(task.maxAttempts);
-  const [editDueDate, setEditDueDate] = useState(new Date(task.dateRange.end + 'T00:00:00'));
+  const [editDueDate, setEditDueDate] = useState<Date>(() => parseISO(task.dateRange.end));
   const [editAssignedEmployees, setEditAssignedEmployees] = useState<string[]>(
     task.assignedEmployees.map((e) => e.id)
   );
@@ -75,14 +76,14 @@ export function TaskViewCard({
           completedAttempts: 0,
         };
       });
-      onEditTask(task.id, editMaxAttempts, editDueDate.toISOString().split('T')[0], newEmployees);
+      onEditTask(task.id, editMaxAttempts, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
     }
     setShowEditDialog(false);
   };
 
   const handleOpenEditDialog = () => {
     setEditMaxAttempts(task.maxAttempts);
-    setEditDueDate(new Date(task.dateRange.end + 'T00:00:00'));
+    setEditDueDate(parseISO(task.dateRange.end));
     setEditAssignedEmployees(task.assignedEmployees.map((e) => e.id));
     setShowEditDialog(true);
     setOpenPopover(false);
@@ -90,7 +91,7 @@ export function TaskViewCard({
 
   const handleCancelEdit = () => {
     setEditMaxAttempts(task.maxAttempts);
-    setEditDueDate(new Date(task.dateRange.end + 'T00:00:00'));
+    setEditDueDate(parseISO(task.dateRange.end));
     setEditAssignedEmployees(task.assignedEmployees.map((e) => e.id));
     setShowEditDialog(false);
   };
@@ -268,7 +269,7 @@ export function TaskViewCard({
               {/* Task Info (Read-only display) */}
               <div className="bg-white rounded-xl p-4 border-2 border-gray-300">
                 <h4 className="text-lg font-bold text-[#690003] mb-2">{task.taskName}</h4>
-                <p className="text-sm text-gray-600">{task.points}pts / client</p>
+                <p className="text-sm text-gray-600">{task.points}pts / attempt</p>
               </div>
 
               {/* Max Repeats */}
@@ -316,7 +317,11 @@ export function TaskViewCard({
                         <input
                           type="checkbox"
                           checked={editAssignedEmployees.includes(emp.id)}
-                          onChange={() => toggleEmployee(emp.id)}
+                          onChange={() => {}}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleEmployee(emp.id);
+                          }}
                           className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
                         />
                         <div className="flex-1">
