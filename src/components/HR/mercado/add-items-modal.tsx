@@ -158,8 +158,14 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                 <Input
                   id="quantity"
                   type="number"
+                  min="0"
                   value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '' || parseFloat(value) >= 0) {
+                      setQuantity(value);
+                    }
+                  }}
                   placeholder="Enter quantity"
                   className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
@@ -173,8 +179,14 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                 <Input
                   id="redeeming-limit"
                   type="number"
+                  min="0"
                   value={redeemingLimit}
-                  onChange={(e) => setRedeemingLimit(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '' || parseFloat(value) >= 0) {
+                      setRedeemingLimit(value);
+                    }
+                  }}
                   placeholder="Set a limit"
                   className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
