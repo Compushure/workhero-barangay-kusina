@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { TaskAssignmentCard } from './task-assignment-card';
-import { CurrentAssignedTasks } from './current-assigned-tasks';
+import { TaskAssignmentCard } from './task-assignment-card/task-assignment-card';
+import { CurrentAssignedTasks } from './assigned-tasks-section/current-assigned-tasks';
 // Importing the centralized mock data
 import { MOCK_TASKS } from '@/mock-data/employees';
 
@@ -60,8 +60,8 @@ export function TaskAssignmentPage() {
         xp: baseTask?.xp || 0,
         dateRange: {
           start: new Date().toISOString().split('T')[0],
-          end: filters.deadline 
-            ? filters.deadline.toISOString().split('T')[0] 
+          end: filters.deadline
+            ? filters.deadline.toISOString().split('T')[0]
             : new Date().toISOString().split('T')[0],
         },
         // Use the specific maxAttempts passed from the Selection Dialog

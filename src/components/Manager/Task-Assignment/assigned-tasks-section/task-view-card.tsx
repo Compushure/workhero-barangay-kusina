@@ -13,7 +13,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { MoreVertical, ChevronDown, X } from 'lucide-react';
-import { DatePickerPopover } from './date-picker-popover';
+import { DatePickerPopover } from '../task-assignment-card/date-picker-popover';
 import type {
   AssignedTask,
   AssignedEmployee,

@@ -1,5 +1,5 @@
 import { AssignedEmployee } from '@/components/manager/task-assignment/task-assignment-page';
-import { Task } from '@/components/manager/task-assignment/dialogs/select-tasks-dialog';
+import { Task } from '@/components/manager/task-assignment/task-assignment-card/dialogs/select-tasks-dialog';
 
 export interface Employee {
   id: string;
