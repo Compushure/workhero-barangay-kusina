@@ -1,8 +1,8 @@
-'use client';
-
+import { protectHRRoute } from '@/actions/auth';
 import { Sidebar } from '@/components/hr/sidebar';
 
-export default function HRLayout({ children }: { children: React.ReactNode }) {
+export default async function HRLayout({ children }: { children: React.ReactNode }) {
+  await protectHRRoute();
   return (
     <div className="flex min-h-screen">
       <Sidebar />
