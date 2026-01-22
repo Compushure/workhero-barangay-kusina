@@ -21,24 +21,24 @@ export default async function ErrorPage({
             <CardHeader>
               <div className="flex justify-center">
                 <Image
-                  src="/food.png"
+                  src="/500.png"
                   alt="500 Error Illustration"
-                  width={200}   // increase this value to make it bigger
-                  height={200}  // same here
+                  width={500} // increase this value to make it bigger
+                  height={500} // same here
                   className="object-contain"
                   priority
                 />
               </div>
-              <CardTitle className="text-2xl text-center">Sorry, something went wrong.</CardTitle>
+              <CardTitle className="text-2xl text-center">Oops! The Pot’s Overflowed.</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <p className="text-sm font-semibold text-muted-foreground">Error Status:</p>
-                <p className="text-lg font-mono">{status}</p>
+                <p className="text-lg text-red-400 font-mono">{status}</p>
               </div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground">Cause:</p>
-                <p className="text-sm">{decodeURIComponent(cause)}</p>
+                <p className="text-sm text-yellow-600">{decodeURIComponent(cause)}</p>
               </div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground">Recommendation:</p>
