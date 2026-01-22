@@ -3,36 +3,7 @@
 import { useState } from 'react';
 import { TaskAssignmentCard } from './task-assignment-card';
 import { CurrentAssignedTasks } from './current-assigned-tasks';
-
-export interface AssignedTask {
-  id: string;
-  taskId: string;
-  taskName: string;
-  taskType: string;
-  isRepeatable: boolean;
-  points: number;
-  xp: number;
-  dateRange: {
-    start: string;
-    end: string;
-  };
-  maxAttempts: number;
-  assignedEmployees: AssignedEmployee[];
-}
-
-export interface AssignedEmployee {
-  id: string;
-  name: string;
-  empId: string;
-  tenure?: string;
-  completedAttempts: number;
-}
-
-export interface SelectedFilters {
-  employees: AssignedEmployee[];
-  tasks: { id: string; maxAttempts: number }[];
-  deadline: Date | null;
-}
+import type { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
 
 const MOCK_TASK_MAP: Record<
   string,

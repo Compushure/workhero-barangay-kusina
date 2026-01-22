@@ -16,16 +16,7 @@ import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
 } from '@/hooks/tanstack/mutations/hrMutations';
-
-export interface RedemptionRequest {
-  id: string;
-  requestDate: string;
-  requestTime: string;
-  employee: string;
-  requestedItems: string;
-  cost: number;
-  status: 'pending' | 'approved' | 'rejected';
-}
+import type { RedemptionRequest } from '@/types';
 
 interface RedemptionTableProps {
   data: RedemptionRequest[];

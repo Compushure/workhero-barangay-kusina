@@ -11,18 +11,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Search, Plus } from 'lucide-react';
-import type { AssignedTask } from '../task-assignment-page';
+import type { AssignedTask, Task } from '@/types';
 import { MOCK_TASKS } from '@/mock-data/employees';
-
-export interface Task {
-  id: string;
-  name: string;
-  type: string;
-  isRepeatable: boolean;
-  points: number;
-  xp: number;
-  maxAttempts: number;
-}
 
 interface SelectTasksDialogProps {
   selectedTasks: string[];

@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { SortOption } from '@/types/manager-verification-req';
+import type { SortOption } from '@/types';
 
 interface SortButtonProps {
   sortBy: SortOption;

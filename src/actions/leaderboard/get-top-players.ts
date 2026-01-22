@@ -2,13 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
-
-export interface LeaderboardPlayer {
-  id: string;
-  name: string;
-  points: number;
-  image: string;
-}
+import type { LeaderboardPlayer } from '@/types';
 
 /**
  * Fetches the top 10 players ordered by points in descending order

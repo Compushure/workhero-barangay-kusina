@@ -16,9 +16,8 @@ import {
   fetchDeniedTasksPaginated,
   approveTaskAction,
   rejectTaskAction,
-  type PaginatedResponse,
 } from '@/actions/manager';
-import type { VerificationRequest } from '@/types/manager-verification-req';
+import type { VerificationRequest, PaginatedResponse } from '@/types';
 import { toast } from 'sonner';
 
 /**

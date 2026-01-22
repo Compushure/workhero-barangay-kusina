@@ -13,10 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { MoreVertical, ChevronDown, X } from 'lucide-react';
 import { DatePickerPopover } from './date-picker-popover';
-import type {
-  AssignedTask,
-  AssignedEmployee,
-} from '@/components/manager/task-assignment/task-assignment-page';
+import type { AssignedTask, AssignedEmployee } from '@/types';
 import { MOCK_EMPLOYEES } from '@/mock-data/employees';
 
 interface TaskViewCardProps {

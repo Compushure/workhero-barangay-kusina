@@ -7,15 +7,9 @@ import type {
   AddUserInput,
   EditUserInput,
   UserQueryParams,
+  VerificationRequest,
+  PaginatedResponse,
 } from '@/types';
-import type { VerificationRequest } from '@/types/manager-verification-req';
-
-// Paginated response type
-export interface PaginatedResponse<T> {
-  data: T[];
-  count: number;
-  totalPages: number;
-}
 
 export async function fetchTasksToReview(): Promise<ServerActionResponse<VerificationRequest[]>> {
   const supabase = await createClient();
