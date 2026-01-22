@@ -23,8 +23,8 @@ export default async function ErrorPage({
                 <Image
                   src="/500.png"
                   alt="500 Error Illustration"
-                  width={500} // increase this value to make it bigger
-                  height={500} // same here
+                  width={500}
+                  height={500}
                   className="object-contain"
                   priority
                 />
