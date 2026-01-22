@@ -6,13 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 
 interface AddItemsModalProps {
   open: boolean;
@@ -22,12 +16,14 @@ interface AddItemsModalProps {
     name: string;
     cost: number;
     quantity?: number;
+    redeemingLimit?: number;
   } | null;
   onSave?: (data: {
     id?: string;
     icon?: File;
     name: string;
     quantity: string;
+    redeemingLimit: string;
     cost: number;
   }) => void;
 }
@@ -38,6 +34,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [itemCost, setItemCost] = useState('');
+  const [redeemingLimit, setRedeemingLimit] = useState('');
 
   // Populate form when editing
   useEffect(() => {
@@ -45,11 +42,13 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
       setItemName(editingItem.name);
       setItemCost(editingItem.cost.toString());
       setQuantity(editingItem.quantity?.toString() || '');
+      setRedeemingLimit(editingItem.redeemingLimit?.toString() || '');
     } else {
       // Reset form when adding new
       setItemName('');
       setItemCost('');
       setQuantity('');
+      setRedeemingLimit('');
       setIconFile(null);
       setIconPreview('');
     }
@@ -74,6 +73,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
         icon: iconFile || undefined,
         name: itemName,
         quantity,
+        redeemingLimit,
         cost: parseFloat(itemCost),
       });
       handleClose();
@@ -85,6 +85,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
     setIconPreview('');
     setItemName('');
     setQuantity('');
+    setRedeemingLimit('');
     setItemCost('');
     onOpenChange(false);
   };
@@ -106,14 +107,12 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
         </DialogHeader>
 
         <div className="grid grid-cols-[195px_1fr] gap-6 mt-4">
-
-
           {/* Icon Upload Section */}
-                   <div className="space-y-2">
+          <div className="space-y-2">
             <Label className="text-sm font-medium text-[#5a2a2a]">Select Icon</Label>
             <label
               htmlFor="icon-upload"
-              className="w-full h-[195px] border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white"
+              className="w-full h-195px border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white"
             >
               {iconPreview ? (
                 <img
@@ -133,7 +132,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
               className="hidden"
             />
           </div>
-          
+
           {/* Form Fields */}
           <div className="space-y-4">
             {/* Item Name */}
@@ -150,19 +149,36 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
               />
             </div>
 
-            {/* Quantity */}
-            <div className="space-y-2">
-              <Label htmlFor="quantity" className="text-sm font-medium text-[#5a2a2a]">
-                Quantity
-              </Label>
-              <Input
-                id="quantity"
-                type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="Enter quantity"
-                className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
-              />
+            {/* Quantity and Redeeming Limit */}
+            <div className="flex gap-3">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="quantity" className="text-sm font-medium text-[#5a2a2a]">
+                  Quantity
+                </Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  placeholder="Enter quantity"
+                  className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
+                />
+              </div>
+
+              {/* Redeeming Limit */}
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="redeeming-limit" className="text-sm font-medium text-[#5a2a2a]">
+                  Redeeming limit
+                </Label>
+                <Input
+                  id="redeeming-limit"
+                  type="number"
+                  value={redeemingLimit}
+                  onChange={(e) => setRedeemingLimit(e.target.value)}
+                  placeholder="Set a limit"
+                  className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
+                />
+              </div>
             </div>
 
             {/* Item Cost */}
@@ -196,7 +212,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!itemName || !itemCost}
+            disabled={!itemName || !itemCost || !redeemingLimit}
             className="bg-[#690003] text-white hover:bg-[#8b0000] px-8"
           >
             Save

@@ -120,6 +120,7 @@ export interface Reward {
   name: string;
   pointsCost: number;
   quantity?: number;
+  redeemingLimit?: number;
   category?: string;
   isActive: boolean;
   createdAt?: string | Date;

@@ -54,6 +54,7 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
       name: item.name,
       pointsCost: item.points_cost,
       quantity: item.quantity,
+      redeemingLimit: item.redeeming_limit,
       category: item.category,
       isActive: item.is_active,
       createdAt: item.created_at,
@@ -98,6 +99,7 @@ export async function addRewardAction(
         name: validatedData.name,
         points_cost: validatedData.pointsCost,
         quantity: validatedData.quantity,
+        redeeming_limit: validatedData.redeemingLimit,
         category: validatedData.category,
         is_active: validatedData.isActive,
         created_by: user.id,
@@ -116,6 +118,7 @@ export async function addRewardAction(
       name: data.name,
       pointsCost: data.points_cost,
       quantity: data.quantity,
+      redeemingLimit: data.redeeming_limit,
       category: data.category,
       isActive: data.is_active,
       createdAt: data.created_at,
@@ -159,6 +162,7 @@ export async function editRewardAction(
     if (validatedData.name !== undefined) updateData.name = validatedData.name;
     if (validatedData.pointsCost !== undefined) updateData.points_cost = validatedData.pointsCost;
     if (validatedData.quantity !== undefined) updateData.quantity = validatedData.quantity;
+    if (validatedData.redeemingLimit !== undefined) updateData.redeeming_limit = validatedData.redeemingLimit;
     if (validatedData.category !== undefined) updateData.category = validatedData.category;
     if (validatedData.isActive !== undefined) updateData.is_active = validatedData.isActive;
 
@@ -181,6 +185,7 @@ export async function editRewardAction(
       name: data.name,
       pointsCost: data.points_cost,
       quantity: data.quantity,
+      redeemingLimit: data.redeeming_limit,
       category: data.category,
       isActive: data.is_active,
       createdAt: data.created_at,
