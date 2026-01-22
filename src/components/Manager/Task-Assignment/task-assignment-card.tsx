@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import type { SelectedFilters, AssignedEmployee, AssignedTask } from './task-assignment-page';
+import type { SelectedFilters, AssignedEmployee, AssignedTask } from '@/types';
 
 const MOCK_TASKS = [
   { id: 'task1', name: '2024 FS Preparation' },

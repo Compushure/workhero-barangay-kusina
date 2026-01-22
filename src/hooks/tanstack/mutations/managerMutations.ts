@@ -7,7 +7,7 @@
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { handleApproveTask, handleRejectTask } from '@/action-handlers/manager';
-import type { VerificationRequest } from '@/types/manager-verification-req';
+import type { VerificationRequest } from '@/types';
 import { managerTaskKeys } from '../queries/managerQueries';
 import { useTaskStore } from '@/store/taskStore';
 

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { MoreVertical, ChevronDown, X } from 'lucide-react';
-import type { AssignedTask } from '@/components/manager/task-assignment/task-assignment-page';
+import type { AssignedTask } from '@/types';
 
 interface Employee {
   id: string;

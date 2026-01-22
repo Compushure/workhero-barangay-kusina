@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { VerificationRequest } from '@/types/manager-verification-req';
+import type { VerificationRequest } from '@/types';
 
 interface TaskState {
   tasks: VerificationRequest[];

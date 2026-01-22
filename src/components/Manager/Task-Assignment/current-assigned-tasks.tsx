@@ -7,7 +7,7 @@ import { TaskViewCard } from './task-view-card';
 import { EmployeeViewCard } from './employee-view-card';
 import { TaskSortingBar } from './task-sorting-bar';
 import { EmployeeSortingBar } from './employee-sorting-bar';
-import type { AssignedTask, AssignedEmployee } from './task-assignment-page';
+import type { AssignedTask, AssignedEmployee } from '@/types';
 
 interface CurrentAssignedTasksProps {
   tasks: AssignedTask[];
