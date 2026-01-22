@@ -8,17 +8,8 @@ import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
 } from '@/hooks/tanstack/mutations/hrMutations';
-import { RemarksDialog } from './remarks';
-
-export interface RedemptionRequest {
-  id: string;
-  requestDate: string;
-  requestTime: string;
-  employee: string;
-  requestedItems: string;
-  cost: number;
-  status: 'pending' | 'approved' | 'rejected';
-}
+import { RemarksDialog } from '@/components/hr/dashboard/remarks';
+import type { RedemptionRequest } from '@/types';
 
 interface RedemptionTableProps {
   data: RedemptionRequest[];
@@ -152,9 +143,11 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
         open={declineDialogOpen}
         onOpenChange={setDeclineDialogOpen}
         onConfirm={handleDeclineConfirm}
-        title="Decline (Optional Remark)"
-        description="If you wish to continue with the confirmation without any remarks, simply click OK."
-        placeholder="Type in remarks/comments you wish to send alongside the request confirmation."
+        title="Decline Request"
+        description="Please provide a reason for declining this request. This will help the employee understand the decision."
+        placeholder="Enter remarks explaining the denial (required)"
+        required={true}
+        confirmVariant="destructive"
       />
     </div>
   );

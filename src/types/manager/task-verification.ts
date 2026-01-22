@@ -1,11 +1,18 @@
+/**
+ * Manager Task Verification Types
+ * ================================
+ * Types related to task verification and review
+ */
+
+/**
+ * Sort option for verification requests
+ */
 export type SortOption = 'pending' | 'approved' | 'denied';
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-}
-
+/**
+ * Verification request interface
+ * Represents a task submission pending review
+ */
 export interface VerificationRequest {
   kpitask_id: string;
   assigned_by: string | null;

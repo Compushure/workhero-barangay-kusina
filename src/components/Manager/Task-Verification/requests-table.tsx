@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import type { VerificationRequest, SortOption } from '@/types/manager-verification-req';
+import type { VerificationRequest, SortOption } from '@/types';
 
 interface RequestsTableProps {
   requests: VerificationRequest[];

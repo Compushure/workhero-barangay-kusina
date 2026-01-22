@@ -14,8 +14,7 @@ import {
   handleFetchApprovedTasksPaginated,
   handleFetchDeniedTasksPaginated,
 } from '@/action-handlers/manager';
-import type { VerificationRequest } from '@/types/manager-verification-req';
-import type { PaginatedResponse } from '@/actions/manager';
+import type { VerificationRequest, PaginatedResponse } from '@/types';
 
 /**
  * Query key factory for manager task-related queries

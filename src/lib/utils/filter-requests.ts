@@ -1,4 +1,4 @@
-import type { VerificationRequest, SortOption } from '@/types/manager-verification-req';
+import type { VerificationRequest, SortOption } from '@/types';
 
 /**
  * Filters and sorts verification requests based on search term, sort option, and statuses.

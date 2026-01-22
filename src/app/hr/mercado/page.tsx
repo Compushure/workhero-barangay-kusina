@@ -1,17 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-import { MercadoCard } from '@/components/HR/mercado/mercado-card';
-import { MercadoHeader } from '@/components/HR/mercado/mercado-header';
-import { AddItemsModal } from '@/components/HR/mercado/add-items-modal';
-import { DeleteModal } from '@/components/HR/mercado/delete-modal';
-
-// Mock Data
-const MOCK_ITEMS = Array.from({ length: 8 }).map((_, i) => ({
-  id: `${i + 1}`,
-  name: 'Rice sack 10kg',
-  price: 400,
-}));
+import { useState, useMemo } from 'react';
+import { MercadoCard } from '@/components/hr/mercado/mercado-card';
+import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
+import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
+import { DeleteModal } from '@/components/hr/mercado/delete-modal';
+import { Pagination } from '@/components/manager/task-verification/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  useGetRewards,
+  useAddReward,
+  useEditReward,
+  useDeleteReward,
+  useHideReward,
+} from '@/hooks/tanstack';
 
 export default function MercadoPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -20,11 +22,38 @@ export default function MercadoPage() {
     id: string;
     name: string;
     cost: number;
+    quantity?: number;
   } | null>(null);
   const [deletingItem, setDeletingItem] = useState<{
     id: string;
     name: string;
   } | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
+
+  // Fetch rewards
+  const { data: rewards, isLoading } = useGetRewards();
+
+  const totalPages = Math.ceil((rewards?.length || 0) / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedRewards = useMemo(
+    () => rewards?.slice(startIndex, endIndex) || [],
+    [rewards, startIndex, endIndex]
+  );
+
+  // Reset to page 1 when items change and current page is invalid
+  useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [rewards?.length]);
+
+  // Mutations
+  const addReward = useAddReward();
+  const editReward = useEditReward();
+  const deleteReward = useDeleteReward();
+  const hideReward = useHideReward();
 
   const handleAdd = () => {
     setEditingItem(null);
@@ -32,65 +61,145 @@ export default function MercadoPage() {
   };
 
   const handleEdit = (id: string) => {
-    // used the mock data for now to find the item being edited
-    const item = MOCK_ITEMS.find((item) => item.id === id);
+    const item = rewards?.find((item) => item.id === id);
     if (item) {
-      setEditingItem({ id: item.id, name: item.name, cost: item.price });
+      setEditingItem({
+        id: item.id,
+        name: item.name,
+        cost: item.pointsCost,
+        quantity: item.quantity,
+      });
       setIsAddModalOpen(true);
     }
   };
 
   const handleDelete = (id: string) => {
-    const item = MOCK_ITEMS.find((item) => item.id === id);
+    const item = rewards?.find((item) => item.id === id);
     if (item) {
       setDeletingItem({ id: item.id, name: item.name });
       setIsDeleteModalOpen(true);
     }
   };
 
-  const handleConfirmDelete = () => {
+  const handleHide = async (id: string) => {
+    await hideReward.mutateAsync({ id, isActive: false });
+  };
+
+  const handleUnhide = async (id: string) => {
+    await hideReward.mutateAsync({ id, isActive: true });
+  };
+
+  const handleConfirmDelete = async () => {
     if (deletingItem) {
-      console.log('Deleting item:', deletingItem.id);
-      // Delete logic here
+      await deleteReward.mutateAsync(deletingItem.id);
       setDeletingItem(null);
+      setIsDeleteModalOpen(false);
     }
   };
 
-  const handleSaveItem = (data: {
+  const handleSaveItem = async (data: {
     id?: string;
     icon?: File;
     name: string;
-    unitWeight: string;
-    weightUnit: string;
+    quantity: string;
     cost: number;
   }) => {
+    const quantityNum = data.quantity ? parseInt(data.quantity) : undefined;
+
     if (data.id) {
-      console.log('Updating item:', data);
-      // Update logic here
+      // Edit existing item
+      await editReward.mutateAsync({
+        id: data.id,
+        input: {
+          name: data.name,
+          pointsCost: data.cost,
+          quantity: quantityNum,
+        },
+      });
     } else {
-      console.log('Adding new item:', data);
-      // Add logic here
+      // Add new item
+      await addReward.mutateAsync({
+        name: data.name,
+        pointsCost: data.cost,
+        quantity: quantityNum,
+        isActive: true,
+      });
     }
+    setIsAddModalOpen(false);
+    setEditingItem(null);
   };
 
   return (
-    <main className="min-h-screen bg-[#fff8f5] p-8">
-      <div className="max-w-7xl mx-auto">
+    <main className="min-h-screen bg-[#fff8f5] p-8 flex flex-col">
+      <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col">
         <MercadoHeader
           title="Mercado Manager"
           description="Manage Items visible in mercado"
           onAddClick={handleAdd}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {MOCK_ITEMS.map((item) => (
-            <MercadoCard key={item.id} item={item} onEdit={handleEdit} onDelete={handleDelete} />
-          ))}
+        <div className="flex-1">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 min-h-100">
+              {Array.from({ length: 9 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-card border-border rounded-xl p-4 flex items-center relative shadow-sm h-32"
+                >
+                  <Skeleton className="h-24 w-24 rounded-lg shrink-0" />
+                  <div className="ml-4 flex-1 min-w-0 space-y-3">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                  <div className="absolute top-4 right-4">
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 min-h-100">
+              {paginatedRewards && paginatedRewards.length > 0 ? (
+                paginatedRewards.map((item) => (
+                  <MercadoCard
+                    key={item.id}
+                    item={{
+                      id: item.id,
+                      name: item.name,
+                      price: item.pointsCost,
+                      quantity: item.quantity,
+                      isActive: item.isActive,
+                    }}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onHide={handleHide}
+                    onUnhide={handleUnhide}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-[#730202]">No items yet. Click "Add Item" to create one.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
+        {/* Pagination */}
+        {!isLoading && (
+          <div className="mt-8 pb-4">
+            <Pagination
+              totalPages={totalPages}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
 
         <AddItemsModal
           open={isAddModalOpen}
           onOpenChange={setIsAddModalOpen}
+          editingItem={editingItem}
           onSave={handleSaveItem}
         />
 
