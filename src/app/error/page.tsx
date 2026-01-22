@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 export default async function ErrorPage({
   searchParams,
@@ -18,7 +19,17 @@ export default async function ErrorPage({
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Sorry, something went wrong.</CardTitle>
+              <div className="flex justify-center">
+                <Image
+                  src="/food.png"
+                  alt="500 Error Illustration"
+                  width={200}   // increase this value to make it bigger
+                  height={200}  // same here
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <CardTitle className="text-2xl text-center">Sorry, something went wrong.</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
