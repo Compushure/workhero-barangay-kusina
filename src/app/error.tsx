@@ -15,12 +15,10 @@ export default function GlobalError({
   useEffect(() => {
     console.error('Caught by error.tsx:', error);
 
-    // Default values
-    let status = '500'; // status may change depending on error type
+    let status = '500';
     const cause = error.message || 'Unknown';
     let recommendation = 'Please try again later or contact support.';
 
-    // Optional: parse error message for more specific codes
     if (cause.startsWith('404')) {
       status = '404';
       recommendation = 'Check the URL or return to the login page.';
@@ -32,7 +30,6 @@ export default function GlobalError({
       recommendation = 'Please log in again.';
     }
 
-    // Redirect into your branded /error/page.tsx
     router.replace(
       `/error?cause=${encodeURIComponent(cause)}&status=${encodeURIComponent(
         status
@@ -40,11 +37,9 @@ export default function GlobalError({
     );
   }, [error, router]);
 
-  // ✅ Temporary fallback UI while redirecting
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="flex flex-col items-center gap-4">
-        {/* Spinner */}
         <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
         <p className="text-gray-600">Redirecting to error page...</p>
         <button onClick={() => reset()} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
