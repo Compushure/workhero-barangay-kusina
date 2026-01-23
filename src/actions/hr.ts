@@ -54,6 +54,7 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
       name: item.name,
       pointsCost: item.points_cost,
       quantity: item.quantity,
+      redeemingLimit: item.redeeming_limit,
       category: item.category,
       isActive: item.is_active,
       createdAt: item.created_at,
@@ -78,7 +79,6 @@ export async function addRewardAction(
     // Validate input
     const validatedData = addRewardSchema.parse(input);
 
-    // Get Supabase client
     const supabase = await createClient();
 
     // Get current user
@@ -91,6 +91,16 @@ export async function addRewardAction(
       return { error: 'Unauthorized: User not authenticated' };
     }
 
+    // Additional backend validation for redeeming_limit
+    if (validatedData.redeemingLimit !== undefined) {
+      if (validatedData.redeemingLimit < 0) {
+        return { error: 'Redeeming limit cannot be negative' };
+      }
+      if (validatedData.quantity !== undefined && validatedData.redeemingLimit > validatedData.quantity) {
+        return { error: 'Redeeming limit cannot be greater than quantity' };
+      }
+    }
+
     // Insert reward into database
     const { data, error } = await supabase
       .from('Reward')
@@ -98,6 +108,7 @@ export async function addRewardAction(
         name: validatedData.name,
         points_cost: validatedData.pointsCost,
         quantity: validatedData.quantity,
+        redeeming_limit: validatedData.redeemingLimit,
         category: validatedData.category,
         is_active: validatedData.isActive,
         created_by: user.id,
@@ -116,6 +127,7 @@ export async function addRewardAction(
       name: data.name,
       pointsCost: data.points_cost,
       quantity: data.quantity,
+      redeemingLimit: data.redeeming_limit,
       category: data.category,
       isActive: data.is_active,
       createdAt: data.created_at,
@@ -154,11 +166,41 @@ export async function editRewardAction(
       return { error: 'Unauthorized: User not authenticated' };
     }
 
+    // Additional backend validation for redeeming_limit
+    if (validatedData.redeemingLimit !== undefined) {
+      if (validatedData.redeemingLimit < 0) {
+        return { error: 'Redeeming limit cannot be negative' };
+      }
+
+     // If quantity is also being updated, validate against it
+      if (validatedData.quantity !== undefined) {
+        if (validatedData.redeemingLimit > validatedData.quantity) {
+          return { error: 'Redeeming limit cannot be greater than quantity' };
+        }
+      } else {
+        // If quantity is not being updated, fetch current quantity and validate
+        const { data: currentReward, error: fetchError } = await supabase
+          .from('Reward')
+          .select('quantity, redeeming_limit')
+          .eq('id', id)
+          .single();
+
+        if (fetchError) {
+          return { error: 'Failed to validate redeeming limit exceeding current quantity' };
+        }
+
+        if (currentReward?.quantity !== undefined && validatedData.redeemingLimit > currentReward.quantity) {
+          return { error: 'Redeeming limit cannot be greater than current quantity' };
+        }
+      }
+    }
+
     // Build update object with only provided fields
     const updateData: Record<string, unknown> = {};
     if (validatedData.name !== undefined) updateData.name = validatedData.name;
     if (validatedData.pointsCost !== undefined) updateData.points_cost = validatedData.pointsCost;
     if (validatedData.quantity !== undefined) updateData.quantity = validatedData.quantity;
+    if (validatedData.redeemingLimit !== undefined) updateData.redeeming_limit = validatedData.redeemingLimit;
     if (validatedData.category !== undefined) updateData.category = validatedData.category;
     if (validatedData.isActive !== undefined) updateData.is_active = validatedData.isActive;
 
@@ -181,6 +223,7 @@ export async function editRewardAction(
       name: data.name,
       pointsCost: data.points_cost,
       quantity: data.quantity,
+      redeemingLimit: data.redeeming_limit,
       category: data.category,
       isActive: data.is_active,
       createdAt: data.created_at,

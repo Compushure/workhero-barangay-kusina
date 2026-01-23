@@ -23,6 +23,7 @@ export default function MercadoPage() {
     name: string;
     cost: number;
     quantity?: number;
+    redeemingLimit?: number;
   } | null>(null);
   const [deletingItem, setDeletingItem] = useState<{
     id: string;
@@ -68,6 +69,7 @@ export default function MercadoPage() {
         name: item.name,
         cost: item.pointsCost,
         quantity: item.quantity,
+        redeemingLimit: item.redeemingLimit,
       });
       setIsAddModalOpen(true);
     }
@@ -102,9 +104,11 @@ export default function MercadoPage() {
     icon?: File;
     name: string;
     quantity: string;
+    redeemingLimit: string;
     cost: number;
   }) => {
     const quantityNum = data.quantity ? parseInt(data.quantity) : undefined;
+    const redeemingLimitNum = data.redeemingLimit ? parseInt(data.redeemingLimit) : undefined;
 
     if (data.id) {
       // Edit existing item
@@ -114,6 +118,7 @@ export default function MercadoPage() {
           name: data.name,
           pointsCost: data.cost,
           quantity: quantityNum,
+          redeemingLimit: redeemingLimitNum,
         },
       });
     } else {
@@ -122,6 +127,7 @@ export default function MercadoPage() {
         name: data.name,
         pointsCost: data.cost,
         quantity: quantityNum,
+        redeemingLimit: redeemingLimitNum,
         isActive: true,
       });
     }
@@ -140,7 +146,7 @@ export default function MercadoPage() {
 
         <div className="flex-1">
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 min-h-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
               {Array.from({ length: 9 }).map((_, index) => (
                 <div
                   key={index}
@@ -158,7 +164,7 @@ export default function MercadoPage() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 min-h-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
               {paginatedRewards && paginatedRewards.length > 0 ? (
                 paginatedRewards.map((item) => (
                   <MercadoCard

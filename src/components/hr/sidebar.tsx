@@ -14,7 +14,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogOutBtn } from '../sidebar/logout-btn';
-import { UserWithExtras } from '@/types';
 import { ProfilePic } from '../sidebar/profile-pic';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 
@@ -33,7 +32,7 @@ export function Sidebar({
   navItems = [
     {
       key: 'dashboard',
-      label: 'Dashboard',
+      label: 'Rewards Requests',
       icon: <LayoutDashboard size={20} className="shrink-0" />,
       href: '/hr/dashboard',
     },
