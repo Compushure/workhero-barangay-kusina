@@ -3,32 +3,10 @@
 import { useState } from 'react';
 import { TaskAssignmentCard } from './task-assignment-card/task-assignment-card';
 import { CurrentAssignedTasks } from './assigned-tasks-section/current-assigned-tasks';
-// Importing the centralized mock data
 import { MOCK_TASKS } from '@/mock-data/employees';
+import { AssignedEmployee, AssignedTask } from '@/types';
 
-export interface AssignedTask {
-  id: string;
-  taskId: string;
-  taskName: string;
-  taskType: string;
-  isRepeatable: boolean;
-  points: number;
-  xp: number;
-  dateRange: {
-    start: string;
-    end: string;
-  };
-  maxAttempts: number;
-  assignedEmployees: AssignedEmployee[];
-}
 
-export interface AssignedEmployee {
-  id: string;
-  name: string;
-  empId: string;
-  tenure?: string;
-  completedAttempts: number;
-}
 
 export interface SelectedFilters {
   employees: AssignedEmployee[];

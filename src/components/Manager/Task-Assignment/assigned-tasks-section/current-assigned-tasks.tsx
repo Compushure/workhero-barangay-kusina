@@ -115,7 +115,7 @@ export function CurrentAssignedTasks({
       </div>
 
       {/* Controls */}
-      <div className="flex gap-4 mb-8 flex-wrap">
+      <div className="flex gap-4 mb-8 flex-wrap items-center">
         <div className="relative flex-1 min-w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
@@ -138,7 +138,7 @@ export function CurrentAssignedTasks({
         <Button
           onClick={() => setShowClearConfirm(true)}
           disabled={sortedTasks.length == 0}
-          className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          className="text-base py-5 bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Clear All
         </Button>

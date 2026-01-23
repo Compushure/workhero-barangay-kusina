@@ -3,25 +3,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
-import { SelectTasksDialog } from './dialogs/select-tasks-dialog';
+import { SelectTasksDialog } from './dialogs/select-task-dialog';
 import { DatePickerPopover } from './date-picker-popover';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
 import type { SelectedFilters, AssignedEmployee, AssignedTask } from '@/types';
-
-const MOCK_TASKS = [
-  { id: 'task1', name: '2024 FS Preparation' },
-  { id: 'task2', name: '2024 ITR Preparation Completeness' },
-  { id: 'task3', name: 'Turnaround Completion Time (TAT)' },
-  { id: 'task4', name: 'Zero Compliance Violations' },
-  { id: 'task5', name: 'Advanced Training' },
-];
+import { MOCK_TASKS } from '@/mock-data/employees';
+import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 
 interface TaskAssignmentCardProps {
   onAssign: (filters: SelectedFilters) => void;
@@ -134,28 +120,11 @@ export function TaskAssignmentCard({ onAssign, assignedTasks }: TaskAssignmentCa
       </div>
 
       {/* Clear Confirmation Dialog */}
-      <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
-        <DialogContent className="bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-[#690003]">Clear Selection?</DialogTitle>
-            <DialogDescription>
-              This will clear all selected employees, tasks, and deadline.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowClearConfirm(false)}
-              className="border-gray-300"
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleClear} className="bg-[#690003] hover:bg-[#8B0000] text-white">
-              Clear
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ClearSelectionDialog
+        showClearConfirm={showClearConfirm}
+        setShowClearConfirm={setShowClearConfirm}
+        handleClear={handleClear}
+      />
     </div>
   );
 }

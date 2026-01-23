@@ -1,20 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { MoreVertical, ChevronDown, X } from 'lucide-react';
-import type { AssignedTask } from '@/types';
+import type { AssignedTask, AssignedEmployee } from '@/types';
+import { ChevronDown, X } from 'lucide-react';
+import EmployeeViewCardMenu from './dialogs/employee-view/employee-view-card-menu';
+import ClearAllTasksDialog from './dialogs/employee-view/clear-all-tasks-dialog';
+import ClearTaskDialog from './dialogs/employee-view/clear-task-dialog';
 
-interface Employee {
-  id: string;
-  name: string;
-  empId: string;
-  tenure?: string;
-  assignedTasks: AssignedTask[];
-  completedAttempts?: number;
-}
 
 interface EmployeeViewCardProps {
   tasks: AssignedTask[];
@@ -40,7 +32,7 @@ export function EmployeeViewCard({
   const [showClearConfirm, setShowClearConfirm] = useState<string | null>(null);
 
   // Build employee map
-  const employeeMap = new Map<string, Employee>();
+  const employeeMap = new Map<string, AssignedEmployee>();
   tasks.forEach((task) => {
     task.assignedEmployees.forEach((emp) => {
       if (!employeeMap.has(emp.id)) {
@@ -203,106 +195,30 @@ export function EmployeeViewCard({
                 </div>
               </div>
 
-              <Popover
-                open={openPopoverId === employee.id}
-                onOpenChange={(open) => setOpenPopoverId(open ? employee.id : null)}
-              >
-                <div className="flex w-fit">
-                  <PopoverTrigger asChild>
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <MoreVertical className="size-6" />
-                    </button>
-                  </PopoverTrigger>
-                </div>
-                <PopoverContent className="w-40 p-2" align="end">
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      onClick={() => {
-                        setShowClearConfirm(employee.id);
-                        setOpenPopoverId(null);
-                      }}
-                      variant="ghost"
-                      className="justify-start text-red-600 hover:bg-red-50"
-                    >
-                      Clear All Tasks
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+              {/* Clear All Assigned Tasks for Employee */}
+              <EmployeeViewCardMenu 
+                openPopoverId={openPopoverId} 
+                setOpenPopoverId={setOpenPopoverId} 
+                employee={employee} 
+                setShowClearConfirm={setShowClearConfirm}
+              />
             </div>
 
             {/* Unassign Task Dialog */}
-            <Dialog
-              open={showRemoveConfirm?.empId === employee.id}
-              onOpenChange={(open) => !open && setShowRemoveConfirm(null)}
-            >
-              <DialogTitle className="hidden">Unassign Task to Employee</DialogTitle>
-              <DialogContent className="bg-white">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-[#690003]">Unassign Task?</h3>
-                  <p className="text-gray-600">
-                    Are you sure you want to unassign this task from this employee?
-                  </p>
-                  <div className="flex gap-4 justify-end">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowRemoveConfirm(null)}
-                      className="border-gray-300"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        if (showRemoveConfirm) {
-                          onRemoveAssignment(showRemoveConfirm.taskId, showRemoveConfirm.empId);
-                          setShowRemoveConfirm(null);
-                        }
-                      }}
-                      className="bg-[#690003] hover:bg-[#8B0000] text-white"
-                    >
-                      Unassign
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <ClearTaskDialog 
+              showRemoveConfirm={showRemoveConfirm} 
+              setShowRemoveConfirm={setShowRemoveConfirm} 
+              onRemoveAssignment={onRemoveAssignment} 
+              employee={employee}
+            />
 
             {/* Unassign All Tasks Dialog */}
-            <Dialog
-              open={showClearConfirm === employee.id}
-              onOpenChange={(open) => !open && setShowClearConfirm(null)}
-            >
-              <DialogTitle></DialogTitle>
-              <DialogContent className="bg-white">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-[#690003]">Clear All Tasks?</h3>
-                  <p className="text-gray-600">
-                    Are you sure you want to unassign all tasks from {employee.name}? This action
-                    cannot be undone.
-                  </p>
-                  <div className="flex gap-4 justify-end">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowClearConfirm(null)}
-                      className="border-gray-300"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        if (showClearConfirm && onClearAllEmployeeTasks) {
-                          onClearAllEmployeeTasks(showClearConfirm);
-                        }
-                        setShowClearConfirm(null);
-                      }}
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                      Clear All
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <ClearAllTasksDialog 
+              showClearConfirm={showClearConfirm} 
+              setShowClearConfirm={setShowClearConfirm} 
+              employee={employee} 
+              onClearAllEmployeeTasks={onClearAllEmployeeTasks} 
+            />
           </div>
         );
       })}
