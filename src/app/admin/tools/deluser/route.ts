@@ -21,12 +21,14 @@ export async function DELETE(req: Request) {
     }
 
     // Delete auth user
-    const { data: deleteData, error: deleteError } =
-      await supabaseAdmin.auth.admin.deleteUser(userid);
+    const { data: deleteData, error: deleteError } = await supabaseAdmin
+      .from('User')
+      .delete()
+      .eq('id', userid);
 
-    if (deleteError || !deleteData?.user) {
+    if (deleteError) {
       return NextResponse.json(
-        { error: deleteError?.message ?? 'Failed to delete auth user' },
+        { error: deleteError?.message ?? `Failed to delete auth user with id ${userid}` },
         { status: 500 }
       );
     }
