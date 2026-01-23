@@ -3,7 +3,6 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -11,7 +10,7 @@ import {
 import { DatePickerPopover } from '../../../task-assignment-card/date-picker-popover';
 import { MOCK_EMPLOYEES } from '@/mock-data/employees';
 import { Button } from '@/components/ui/button';
-import type { AssignedTask } from '@/components/manager/task-assignment/task-assignment-page';
+import { AssignedTask } from '@/types';
 
 interface EditTaskDialogProps {
   showEditDialog: boolean;

@@ -12,17 +12,9 @@ interface EmployeeViewCardProps {
   tasks: AssignedTask[];
   searchTerm?: string;
   sortBy: string;
-  onRemoveAssignment: (taskId: string, employeeId: string) => void;
-  onClearAllEmployeeTasks?: (employeeId: string) => void;
 }
 
-export function EmployeeViewCard({
-  tasks,
-  searchTerm = '',
-  sortBy,
-  onRemoveAssignment,
-  onClearAllEmployeeTasks,
-}: EmployeeViewCardProps) {
+export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeViewCardProps) {
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<{
     taskId: string;
@@ -208,7 +200,6 @@ export function EmployeeViewCard({
             <ClearTaskDialog 
               showRemoveConfirm={showRemoveConfirm} 
               setShowRemoveConfirm={setShowRemoveConfirm} 
-              onRemoveAssignment={onRemoveAssignment} 
               employee={employee}
             />
 
@@ -217,7 +208,6 @@ export function EmployeeViewCard({
               showClearConfirm={showClearConfirm} 
               setShowClearConfirm={setShowClearConfirm} 
               employee={employee} 
-              onClearAllEmployeeTasks={onClearAllEmployeeTasks} 
             />
           </div>
         );

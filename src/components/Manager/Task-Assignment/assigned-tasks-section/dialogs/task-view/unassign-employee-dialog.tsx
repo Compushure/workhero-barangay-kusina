@@ -1,20 +1,21 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AssignedTask } from '@/types';
+import { useTaskAssignment } from '../../../task-assignment-page-context';
 
 interface UnassignEmployeeDialogProps {
   showRemoveConfirm: string | null;
   setShowRemoveConfirm: (show: string | null) => void;
-  onRemoveAssignment: (taskId: string, employeeId: string) => void; // change to useContext
   task: AssignedTask;
 }
 
 function UnassignEmployeeDialog({
   showRemoveConfirm,
   setShowRemoveConfirm,
-  onRemoveAssignment,
   task,
 }: UnassignEmployeeDialogProps) {
+  const { removeAssignment } = useTaskAssignment();
+
   return (
     <Dialog open={!!showRemoveConfirm} onOpenChange={(open) => !open && setShowRemoveConfirm(null)}>
       <DialogContent className="bg-white">
@@ -35,7 +36,7 @@ function UnassignEmployeeDialog({
           <Button
             onClick={() => {
               if (showRemoveConfirm) {
-                onRemoveAssignment(task.id, showRemoveConfirm);
+                removeAssignment(task.id, showRemoveConfirm);
                 setShowRemoveConfirm(null);
               }
             }}

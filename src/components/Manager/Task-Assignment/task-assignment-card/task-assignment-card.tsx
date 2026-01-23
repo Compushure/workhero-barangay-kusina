@@ -8,13 +8,11 @@ import { DatePickerPopover } from './date-picker-popover';
 import type { SelectedFilters, AssignedEmployee, AssignedTask } from '@/types';
 import { MOCK_TASKS } from '@/mock-data/employees';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
+import { useTaskAssignment } from '../task-assignment-page-context';
 
-interface TaskAssignmentCardProps {
-  onAssign: (filters: SelectedFilters) => void;
-  assignedTasks: AssignedTask[];
-}
+export function TaskAssignmentCard() {
+  const { assignTasks, assignedTasks } = useTaskAssignment();
 
-export function TaskAssignmentCard({ onAssign, assignedTasks }: TaskAssignmentCardProps) {
   const [selectedEmployees, setSelectedEmployees] = useState<AssignedEmployee[]>([]);
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [taskMaxRepeats, setTaskMaxRepeats] = useState<Record<string, number>>({});
@@ -34,7 +32,7 @@ export function TaskAssignmentCard({ onAssign, assignedTasks }: TaskAssignmentCa
 
   const handleAssign = () => {
     if (selectedEmployees.length > 0 && selectedTasks.length > 0 && selectedDeadline) {
-      onAssign({
+      assignTasks({
         employees: selectedEmployees,
         tasks: selectedTasks.map((taskId) => ({
           id: taskId,

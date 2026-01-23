@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { parseISO, format } from 'date-fns';
-import type { AssignedTask, AssignedEmployee } from '@/types';
+import type { AssignedTask } from '@/types';
 import { ChevronDown, X } from 'lucide-react';
 import { MOCK_EMPLOYEES } from '@/mock-data/employees';
 
@@ -10,25 +10,15 @@ import TaskViewCardMenu from './dialogs/task-view/task-view-card-menu';
 import EditTaskDialog from './dialogs/task-view/edit-task-dialog';
 import DeleteTaskDialog from './dialogs/task-view/delete-task-dialog';
 import UnassignEmployeeDialog from './dialogs/task-view/unassign-employee-dialog';
+import { useTaskAssignment } from '../task-assignment-page-context';
 
 interface TaskViewCardProps {
   task: AssignedTask;
-  onRemoveAssignment: (taskId: string, employeeId: string) => void;
-  onDeleteTask?: (taskId: string) => void;
-  onEditTask?: (
-    taskId: string,
-    maxAttempts: number,
-    newDueDate: string,
-    newEmployees: AssignedEmployee[]
-  ) => void;
 }
 
-export function TaskViewCard({
-  task,
-  onRemoveAssignment,
-  onDeleteTask,
-  onEditTask,
-}: TaskViewCardProps) {
+export function TaskViewCard({ task }: TaskViewCardProps) {
+  const { editTask } = useTaskAssignment();
+
   const [expanded, setExpanded] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -54,22 +44,20 @@ export function TaskViewCard({
   };
 
   const handleEditTask = () => {
-    if (onEditTask) {
-      const newEmployees = editAssignedEmployees.map((empId) => {
-        const existingEmp = task.assignedEmployees.find((e) => e.id === empId);
-        if (existingEmp) return existingEmp;
-        const mockEmp = MOCK_EMPLOYEES.find((e) => e.id === empId);
-        return {
-          id: empId,
-          name: mockEmp?.name || '',
-          empId: mockEmp?.empId || '',
-          tenure: mockEmp?.tenure,
-          assignedTasks: [],
-          completedAttempts: 0,
-        };
-      });
-      onEditTask(task.id, editMaxAttempts, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
-    }
+    const newEmployees = editAssignedEmployees.map((empId) => {
+      const existingEmp = task.assignedEmployees.find((e) => e.id === empId);
+      if (existingEmp) return existingEmp;
+      const mockEmp = MOCK_EMPLOYEES.find((e) => e.id === empId);
+      return {
+        id: empId,
+        name: mockEmp?.name || '',
+        empId: mockEmp?.empId || '',
+        tenure: mockEmp?.tenure,
+        assignedTasks: [],
+        completedAttempts: 0,
+      };
+    });
+    editTask(task.id, editMaxAttempts, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
     setShowEditDialog(false);
   };
 
@@ -164,7 +152,6 @@ export function TaskViewCard({
         <UnassignEmployeeDialog
           showRemoveConfirm={showRemoveConfirm}
           setShowRemoveConfirm={setShowRemoveConfirm}
-          onRemoveAssignment={onRemoveAssignment}
           task={task}
         />
 
@@ -172,7 +159,6 @@ export function TaskViewCard({
         <DeleteTaskDialog
           showDeleteConfirm={showDeleteConfirm}
           setShowDeleteConfirm={setShowDeleteConfirm}
-          onDeleteTask={onDeleteTask}
           task={task}
         />
 

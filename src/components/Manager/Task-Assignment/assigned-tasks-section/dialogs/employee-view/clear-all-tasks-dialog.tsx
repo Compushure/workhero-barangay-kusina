@@ -1,15 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Employee } from "../../employee-view-card";
+import { AssignedEmployee } from "@/types";
+import { useTaskAssignment } from "../../../task-assignment-page-context";
 
 interface ClearAllTasksDialogProps {
   showClearConfirm: string | null, 
   setShowClearConfirm: (show: string | null) => void, 
-  employee: Employee, 
-  onClearAllEmployeeTasks?: (employeeId: string) => void;
+  employee: AssignedEmployee, 
 }
 
-function ClearAllTasksDialog({showClearConfirm, setShowClearConfirm, employee, onClearAllEmployeeTasks} : ClearAllTasksDialogProps) {
+function ClearAllTasksDialog({showClearConfirm, setShowClearConfirm, employee } : ClearAllTasksDialogProps) {
+  const { clearAllEmployeeTasks } = useTaskAssignment();
+
   return (
     <Dialog
       open={showClearConfirm === employee.id}
@@ -33,8 +35,8 @@ function ClearAllTasksDialog({showClearConfirm, setShowClearConfirm, employee, o
             </Button>
             <Button
               onClick={() => {
-                if (showClearConfirm && onClearAllEmployeeTasks) {
-                  onClearAllEmployeeTasks(showClearConfirm);
+                if (showClearConfirm && clearAllEmployeeTasks) {
+                  clearAllEmployeeTasks(showClearConfirm);
                 }
                 setShowClearConfirm(null);
               }}

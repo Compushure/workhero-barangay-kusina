@@ -1,19 +1,19 @@
 import { Button } from '@/components/ui/button';
 import { DialogFooter, DialogHeader, Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
-import { AssignedTask } from '../../../task-assignment-page';
+import { AssignedTask } from '@/types';
+import { useTaskAssignment } from '../../../task-assignment-page-context';
 
 interface DeleteTaskDialogProps {
   showDeleteConfirm: boolean;
   setShowDeleteConfirm: (show: boolean) => void;
-  onDeleteTask?: (taskId: string) => void; //change to use useContext
   task: AssignedTask;
 }
 function DeleteTaskDialog({
   showDeleteConfirm,
   setShowDeleteConfirm,
-  onDeleteTask,
   task,
 }: DeleteTaskDialogProps) {
+  const { deleteTask } = useTaskAssignment();
   return (
     <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
       <DialogContent className="bg-white">
@@ -34,8 +34,8 @@ function DeleteTaskDialog({
           </Button>
           <Button
             onClick={() => {
-              if (onDeleteTask) {
-                onDeleteTask(task.id);
+              if (deleteTask) {
+                deleteTask(task.id);
               }
               setShowDeleteConfirm(false);
             }}

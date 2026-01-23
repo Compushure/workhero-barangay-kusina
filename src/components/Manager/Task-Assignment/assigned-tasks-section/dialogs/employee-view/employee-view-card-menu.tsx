@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MoreVertical } from "lucide-react";
-import { Employee } from "../../employee-view-card";
+import { AssignedEmployee } from "@/types";
 
 interface EmployeeViewCardMenuProps {
   openPopoverId: string | null, 
   setOpenPopoverId: (open: string | null) => void, 
-  employee: Employee, // review if this typing is correct, try useContext
+  employee: AssignedEmployee,
   setShowClearConfirm: (open: string | null) => void
 }
 
