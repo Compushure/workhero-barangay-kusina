@@ -3,11 +3,7 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
 import { getUserRole } from '@/actions/auth';
-
-export type EditPointsInput = {
-  userId: string;
-  pointsToAdd: number;
-};
+import type { EditPointsInput } from '@/types';
 
 /**
  * Edit (add) points for a specific user

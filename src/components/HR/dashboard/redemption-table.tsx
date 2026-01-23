@@ -9,16 +9,7 @@ import {
   useDeclineRedemptionRequest,
 } from '@/hooks/tanstack/mutations/hrMutations';
 import { RemarksDialog } from '@/components/hr/dashboard/remarks';
-
-export interface RedemptionRequest {
-  id: string;
-  requestDate: string;
-  requestTime: string;
-  employee: string;
-  requestedItems: string;
-  cost: number;
-  status: 'pending' | 'approved' | 'rejected';
-}
+import type { RedemptionRequest } from '@/types';
 
 interface RedemptionTableProps {
   data: RedemptionRequest[];

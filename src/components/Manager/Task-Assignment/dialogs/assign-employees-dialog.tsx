@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Search, Plus } from 'lucide-react';
-import { AssignedEmployee } from '../task-assignment-page';
+import type { AssignedEmployee } from '@/types';
 import { MOCK_EMPLOYEES } from '@/mock-data/employees';
 
 interface AssignEmployeesDialogProps {

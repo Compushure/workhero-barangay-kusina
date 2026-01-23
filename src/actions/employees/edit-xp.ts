@@ -3,16 +3,7 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
 import { getUserRole } from '@/actions/auth';
-
-export type EditXPInput = {
-  userId: string;
-  xpToAdd: number;
-};
-
-export type EditXPResult = {
-  newXP: number;
-  newLevel: number;
-};
+import type { EditXPInput, EditXPResult } from '@/types';
 
 /**
  * Edit (add) XP for a specific user
