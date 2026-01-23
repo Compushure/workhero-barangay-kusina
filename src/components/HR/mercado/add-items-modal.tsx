@@ -22,12 +22,14 @@ interface AddItemsModalProps {
     name: string;
     cost: number;
     quantity?: number;
+    redeemingLimit?: number;
   } | null;
   onSave?: (data: {
     id?: string;
     icon?: File;
     name: string;
     quantity: string;
+    redeemingLimit: string;
     cost: number;
   }) => void;
 }
@@ -45,11 +47,13 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
       setItemName(editingItem.name);
       setItemCost(editingItem.cost.toString());
       setQuantity(editingItem.quantity?.toString() || '');
+      setRedeemingLimit(editingItem.redeemingLimit?.toString() || '');
     } else {
       // Reset form when adding new
       setItemName('');
       setItemCost('');
       setQuantity('');
+      setRedeemingLimit('');
       setIconFile(null);
       setIconPreview('');
     }
@@ -74,6 +78,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
         icon: iconFile || undefined,
         name: itemName,
         quantity,
+        redeemingLimit,
         cost: parseFloat(itemCost),
       });
       handleClose();
@@ -85,13 +90,39 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
     setIconPreview('');
     setItemName('');
     setQuantity('');
+    setRedeemingLimit('');
     setItemCost('');
     onOpenChange(false);
   };
 
+  function classNames(...classes: string[]) {
+    return classes.filter(Boolean).join(' ');
+  }
+
+  const [redeemingLimit, setRedeemingLimit] = useState('');
+
+  // Validation: Check if redeeming limit exceeds quantity
+  const isRedeemingLimitInvalid = () => {
+    const quantityNum = quantity ? parseInt(quantity) : 0;
+    const limitNum = redeemingLimit ? parseInt(redeemingLimit) : 0;
+
+    // If both values exist and limit > quantity, it's invalid
+    if (quantity && redeemingLimit && limitNum > quantityNum) {
+      return true;
+    }
+
+    return false;
+  };
+
+  // Validation: Check if item name has at least 2 characters
+  const isItemNameValid = itemName.trim().length >= 2;
+
+  const isSaveDisabled =
+    !itemName || !isItemNameValid || !itemCost || !quantity || isRedeemingLimitInvalid();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#f5e5dc] border-none max-w-xl rounded-2xl p-6">
+      <DialogContent className="bg-[#f5e5dc] border-none max-w-2000 rounded-2xl p-4">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-[#5a2a2a] text-lg font-semibold">
@@ -105,15 +136,13 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
           </div>
         </DialogHeader>
 
-        <div className="grid grid-cols-[195px_1fr] gap-6 mt-4">
-
-
+        <div className="grid grid-cols-[190px_1fr] gap-2 mt-4">
           {/* Icon Upload Section */}
-                   <div className="space-y-2">
+          <div className="space-y-2">
             <Label className="text-sm font-medium text-[#5a2a2a]">Select Icon</Label>
             <label
               htmlFor="icon-upload"
-              className="w-full h-[195px] border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white"
+              className="block w-45 h-47 border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white"
             >
               {iconPreview ? (
                 <img
@@ -133,37 +162,64 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
               className="hidden"
             />
           </div>
-          
+
           {/* Form Fields */}
           <div className="space-y-4">
             {/* Item Name */}
             <div className="space-y-2">
               <Label htmlFor="item-name" className="text-sm font-medium text-[#5a2a2a]">
-                Item name
+                Item name <span className="text-red-600">*</span>
               </Label>
               <Input
                 id="item-name"
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 placeholder="Ex: Vacation ticket"
+                minLength={2}
                 className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
               />
+              {itemName && !isItemNameValid && (
+                <p className="text-xs text-red-600">Item name must be at least 2 characters</p>
+              )}
             </div>
 
-            {/* Quantity */}
-            <div className="space-y-2">
-              <Label htmlFor="quantity" className="text-sm font-medium text-[#5a2a2a]">
-                Quantity
-              </Label>
-              <Input
-                id="quantity"
-                type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="Enter quantity"
-                className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
-              />
+            {/* Quantity and Redeeming Limit */}
+            <div className="flex gap-3">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="quantity" className="text-sm font-medium text-[#5a2a2a]">
+                  Quantity <span className="text-red-600">*</span>
+                </Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  placeholder="Enter quantity"
+                  required
+                  className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
+                />
+              </div>
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="redeeming-limit" className="text-sm font-medium text-[#5a2a2a]">
+                  Redeeming limit
+                </Label>
+                <Input
+                  id="redeeming-limit"
+                  type="number"
+                  value={redeemingLimit}
+                  onChange={(e) => setRedeemingLimit(e.target.value)}
+                  placeholder="Enter limit"
+                  className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
+                />
+              </div>
             </div>
+
+            {/* Validation Error Message */}
+            {isRedeemingLimitInvalid() && (
+              <p className="text-xs text-red-600 mt-1">
+                Redeeming limit cannot be greater than quantity
+              </p>
+            )}
 
             {/* Item Cost */}
             <div className="space-y-2">
@@ -176,10 +232,9 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                   type="number"
                   value={itemCost}
                   onChange={(e) => setItemCost(e.target.value)}
-                  placeholder="2000"
+                  placeholder="Fiesta Points"
                   className="w-120px bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
-                <span className="text-[#5a2a2a] font-medium">Fiesta Points</span>
               </div>
             </div>
           </div>
@@ -196,8 +251,8 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!itemName || !itemCost}
-            className="bg-[#690003] text-white hover:bg-[#8b0000] px-8"
+            disabled={isSaveDisabled}
+            className="bg-[#690003] text-white hover:bg-[#8b0000] px-8 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save
           </Button>
