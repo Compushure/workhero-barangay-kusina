@@ -1,5 +1,5 @@
 import { protectHRRoute } from '@/actions/auth';
-import { Sidebar } from '@/components/HR/sidebar';
+import { Sidebar } from '@/components/hr/sidebar';
 
 export default async function HRLayout({ children }: { children: React.ReactNode }) {
   await protectHRRoute();

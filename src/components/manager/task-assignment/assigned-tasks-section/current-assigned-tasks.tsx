@@ -52,7 +52,7 @@ export function CurrentAssignedTasks() {
   }, [filteredTasks, sortBy]);
 
   return (
-    <div className="rounded-3xl bg-[#FBF4E8] p-8 shadow-sm">
+    <div className="rounded-3xl bg-[#FBF4E8] p-8 shadow-sm/25">
       {/* Header & Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
         <h2 className="text-2xl font-bold text-[#690003]">Current Assigned Tasks</h2>
