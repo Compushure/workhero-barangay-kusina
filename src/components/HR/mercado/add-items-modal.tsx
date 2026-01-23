@@ -114,11 +114,11 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
     return false;
   };
 
-  const isSaveDisabled = !itemName || !itemCost || isRedeemingLimitInvalid();
+  const isSaveDisabled = !itemName || !itemCost || !quantity || isRedeemingLimitInvalid();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#f5e5dc] border-none max-w-xl rounded-2xl p-6">
+      <DialogContent className="bg-[#f5e5dc] border-none sm:max-w-2000px rounded-2xl p-4">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-[#5a2a2a] text-lg font-semibold">
@@ -132,13 +132,13 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
           </div>
         </DialogHeader>
 
-        <div className="grid grid-cols-[195px_1fr] gap-6 mt-4">
+        <div className="grid grid-cols-[190px_1fr] gap-2 mt-4">
           {/* Icon Upload Section */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-[#5a2a2a]">Select Icon</Label>
             <label
               htmlFor="icon-upload"
-              className="w-full h-195px border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white"
+              className="block w-[180px] h-[190px] border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white"
             >
               {iconPreview ? (
                 <img
@@ -179,7 +179,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
             <div className="flex gap-3">
               <div className="flex-1 space-y-2">
                 <Label htmlFor="quantity" className="text-sm font-medium text-[#5a2a2a]">
-                  Quantity
+                  Quantity <span className="text-red-600">*</span>
                 </Label>
                 <Input
                   id="quantity"
@@ -187,6 +187,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
                   placeholder="Enter quantity"
+                  required
                   className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
               </div>
@@ -199,7 +200,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                   type="number"
                   value={redeemingLimit}
                   onChange={(e) => setRedeemingLimit(e.target.value)}
-                  placeholder="Set a limit"
+                  placeholder="Enter limit"
                   className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
               </div>
@@ -223,10 +224,9 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                   type="number"
                   value={itemCost}
                   onChange={(e) => setItemCost(e.target.value)}
-                  placeholder="2000"
+                  placeholder="Fiesta Points"
                   className="w-120px bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
-                <span className="text-[#5a2a2a] font-medium">Fiesta Points</span>
               </div>
             </div>
           </div>
