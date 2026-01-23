@@ -13,7 +13,7 @@ export const addRewardSchema = z.object({
     name: z.string().min(2, 'Item name must be at least 2 characters').max(255),
     pointsCost: z.number().int().positive('Points cost must be a positive number'),
     quantity: z.number().int().positive('Quantity must be a positive number').optional(),
-    redeemingLimit: z.number().int().positive('Redeeming limit must be a positive number').optional(),
+    redeemingLimit: z.number().int().min(0, 'Redeeming limit cannot be negative').optional(),
     category: z.string().optional(),
     isActive: z.boolean().default(true),
 }).refine((data) => {
@@ -34,7 +34,7 @@ export const editRewardSchema = z.object({
     name: z.string().min(2, 'Item name must be at least 2 characters').max(255).optional(),
     pointsCost: z.number().int().positive('Points cost must be a positive number').optional(),
     quantity: z.number().int().positive('Quantity must be a positive number').optional(),
-    redeemingLimit: z.number().int().positive('Redeeming limit must be a positive number').optional(),
+    redeemingLimit: z.number().int().min(0, 'Redeeming limit cannot be negative').optional(),
     category: z.string().optional(),
     isActive: z.boolean().optional(),
 }).refine((data) => {

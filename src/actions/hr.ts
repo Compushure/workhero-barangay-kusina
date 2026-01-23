@@ -79,7 +79,6 @@ export async function addRewardAction(
     // Validate input
     const validatedData = addRewardSchema.parse(input);
 
-    // Get Supabase client
     const supabase = await createClient();
 
     // Get current user
@@ -90,6 +89,16 @@ export async function addRewardAction(
 
     if (userError || !user) {
       return { error: 'Unauthorized: User not authenticated' };
+    }
+
+    // Additional backend validation for redeeming_limit
+    if (validatedData.redeemingLimit !== undefined) {
+      if (validatedData.redeemingLimit < 0) {
+        return { error: 'Redeeming limit cannot be negative' };
+      }
+      if (validatedData.quantity !== undefined && validatedData.redeemingLimit > validatedData.quantity) {
+        return { error: 'Redeeming limit cannot be greater than quantity' };
+      }
     }
 
     // Insert reward into database
@@ -155,6 +164,35 @@ export async function editRewardAction(
 
     if (userError || !user) {
       return { error: 'Unauthorized: User not authenticated' };
+    }
+
+    // Additional backend validation for redeeming_limit
+    if (validatedData.redeemingLimit !== undefined) {
+      if (validatedData.redeemingLimit < 0) {
+        return { error: 'Redeeming limit cannot be negative' };
+      }
+
+     // If quantity is also being updated, validate against it
+      if (validatedData.quantity !== undefined) {
+        if (validatedData.redeemingLimit > validatedData.quantity) {
+          return { error: 'Redeeming limit cannot be greater than quantity' };
+        }
+      } else {
+        // If quantity is not being updated, fetch current quantity and validate
+        const { data: currentReward, error: fetchError } = await supabase
+          .from('Reward')
+          .select('quantity, redeeming_limit')
+          .eq('id', id)
+          .single();
+
+        if (fetchError) {
+          return { error: 'Failed to validate redeeming limit exceeding current quantity' };
+        }
+
+        if (currentReward?.quantity !== undefined && validatedData.redeemingLimit > currentReward.quantity) {
+          return { error: 'Redeeming limit cannot be greater than current quantity' };
+        }
+      }
     }
 
     // Build update object with only provided fields

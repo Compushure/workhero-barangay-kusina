@@ -6,7 +6,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface AddItemsModalProps {
   open: boolean;
@@ -34,7 +40,6 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [itemCost, setItemCost] = useState('');
-  const [redeemingLimit, setRedeemingLimit] = useState('');
 
   // Populate form when editing
   useEffect(() => {
@@ -89,6 +94,27 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
     setItemCost('');
     onOpenChange(false);
   };
+
+  function classNames(...classes: string[]) {
+    return classes.filter(Boolean).join(' ');
+  }
+
+  const [redeemingLimit, setRedeemingLimit] = useState('');
+
+  // Validation: Check if redeeming limit exceeds quantity
+  const isRedeemingLimitInvalid = () => {
+    const quantityNum = quantity ? parseInt(quantity) : 0;
+    const limitNum = redeemingLimit ? parseInt(redeemingLimit) : 0;
+
+    // If both values exist and limit > quantity, it's invalid
+    if (quantity && redeemingLimit && limitNum > quantityNum) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const isSaveDisabled = !itemName || !itemCost || isRedeemingLimitInvalid();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -158,20 +184,12 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                 <Input
                   id="quantity"
                   type="number"
-                  min="0"
                   value={quantity}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '' || parseFloat(value) >= 0) {
-                      setQuantity(value);
-                    }
-                  }}
+                  onChange={(e) => setQuantity(e.target.value)}
                   placeholder="Enter quantity"
                   className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
               </div>
-
-              {/* Redeeming Limit */}
               <div className="flex-1 space-y-2">
                 <Label htmlFor="redeeming-limit" className="text-sm font-medium text-[#5a2a2a]">
                   Redeeming limit
@@ -179,19 +197,20 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                 <Input
                   id="redeeming-limit"
                   type="number"
-                  min="0"
                   value={redeemingLimit}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '' || parseFloat(value) >= 0) {
-                      setRedeemingLimit(value);
-                    }
-                  }}
+                  onChange={(e) => setRedeemingLimit(e.target.value)}
                   placeholder="Set a limit"
                   className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
               </div>
             </div>
+
+            {/* Validation Error Message */}
+            {isRedeemingLimitInvalid() && (
+              <p className="text-xs text-red-600 mt-1">
+                Redeeming limit cannot be greater than quantity
+              </p>
+            )}
 
             {/* Item Cost */}
             <div className="space-y-2">
@@ -224,8 +243,8 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!itemName || !itemCost || !redeemingLimit}
-            className="bg-[#690003] text-white hover:bg-[#8b0000] px-8"
+            disabled={isSaveDisabled}
+            className="bg-[#690003] text-white hover:bg-[#8b0000] px-8 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save
           </Button>
