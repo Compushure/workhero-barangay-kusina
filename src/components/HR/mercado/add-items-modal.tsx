@@ -114,7 +114,11 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
     return false;
   };
 
-  const isSaveDisabled = !itemName || !itemCost || !quantity || isRedeemingLimitInvalid();
+  // Validation: Check if item name has at least 2 characters
+  const isItemNameValid = itemName.trim().length >= 2;
+
+  const isSaveDisabled =
+    !itemName || !isItemNameValid || !itemCost || !quantity || isRedeemingLimitInvalid();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -164,15 +168,19 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
             {/* Item Name */}
             <div className="space-y-2">
               <Label htmlFor="item-name" className="text-sm font-medium text-[#5a2a2a]">
-                Item name
+                Item name <span className="text-red-600">*</span>
               </Label>
               <Input
                 id="item-name"
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 placeholder="Ex: Vacation ticket"
+                minLength={2}
                 className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
               />
+              {itemName && !isItemNameValid && (
+                <p className="text-xs text-red-600">Item name must be at least 2 characters</p>
+              )}
             </div>
 
             {/* Quantity and Redeeming Limit */}
