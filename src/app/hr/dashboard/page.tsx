@@ -2,12 +2,10 @@
 
 import { useState } from 'react';
 import { HeaderSection } from '@/components/hr/dashboard/header';
-import {
-  RedemptionTable,
-  type RedemptionRequest,
-} from '@/components/hr/dashboard/redemption-table';
+import { RedemptionTable } from '@/components/hr/dashboard/redemption-table';
+import { RedemptionRequest } from '@/types';
 import { toast } from 'sonner';
- 
+
 // Mock data for now
 const mockRedemptionRequests: RedemptionRequest[] = [
   {

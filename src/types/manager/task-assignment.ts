@@ -25,6 +25,7 @@ export interface AssignedEmployee {
   name: string;
   empId: string;
   tenure?: string;
+  assignedTasks: AssignedTask[];
   completedAttempts: number;
 }
 
