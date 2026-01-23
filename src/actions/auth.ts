@@ -62,7 +62,7 @@ export async function protectAdminRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -70,7 +70,7 @@ export async function protectAdminRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -119,7 +119,7 @@ export async function protectManagerRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -127,7 +127,7 @@ export async function protectManagerRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -151,7 +151,7 @@ export async function protectHRRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -159,7 +159,7 @@ export async function protectHRRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -183,7 +183,7 @@ export async function protectEmployeeRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -191,7 +191,7 @@ export async function protectEmployeeRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
