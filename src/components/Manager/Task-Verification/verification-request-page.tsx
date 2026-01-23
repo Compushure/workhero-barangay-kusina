@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/manager/task-verification/page-header';
 import { SearchBar } from '@/components/manager/task-verification/search-bar';
 import { SortButton } from '@/components/manager/task-verification/sort-button';
 import { RequestsTable } from '@/components/manager/task-verification/requests-table';
-import type { VerificationRequest, SortOption } from '@/types/manager-verification-req';
+import type { VerificationRequest, SortOption } from '@/types';
 import { ConfirmationDialog } from '@/components/manager/task-verification/confirmation-modal';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import {
@@ -24,6 +24,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('pending');
   const [pendingPage, setPendingPage] = useState(1);
+  const [remark, setRemark] = useState('');
   const [approvedPage, setApprovedPage] = useState(1);
   const [deniedPage, setDeniedPage] = useState(1);
 
@@ -111,20 +112,28 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
     );
   }, [currentTasks, searchTerm]);
 
-  const handleApprove = (id: string) => {
-    approveTask.mutate(id, {
-      onSuccess: () => {
-        setConfirmAction({ type: null, id: null });
-      },
-    });
+  const handleApprove = (id: string, remark: string) => {
+    approveTask.mutate(
+      { id, remark },
+      {
+        onSuccess: () => {
+          setConfirmAction({ type: null, id: null });
+          setRemark('');
+        },
+      }
+    );
   };
 
-  const handleDeny = (id: string) => {
-    rejectTask.mutate(id, {
-      onSuccess: () => {
-        setConfirmAction({ type: null, id: null });
-      },
-    });
+  const handleDeny = (id: string, remark: string) => {
+    rejectTask.mutate(
+      { id, remark },
+      {
+        onSuccess: () => {
+          setConfirmAction({ type: null, id: null });
+          setRemark('');
+        },
+      }
+    );
   };
 
   const [confirmAction, setConfirmAction] = useState<{
@@ -135,12 +144,12 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
     id: null,
   });
 
-  const handleConfirm = () => {
+  const handleConfirm = (remark: string) => {
     if (confirmAction.type === 'approve' && confirmAction.id) {
-      handleApprove(confirmAction.id);
+      handleApprove(confirmAction.id, remark);
     }
     if (confirmAction.type === 'deny' && confirmAction.id) {
-      handleDeny(confirmAction.id);
+      handleDeny(confirmAction.id, remark);
     }
   };
 
@@ -181,7 +190,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       </div>
 
       <ConfirmationDialog
-        open={!!confirmAction.type}
+        open={confirmAction.id !== null}
         type={confirmAction.type}
         onCancel={() => setConfirmAction({ type: null, id: null })}
         onConfirm={handleConfirm}

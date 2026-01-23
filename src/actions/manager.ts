@@ -7,15 +7,9 @@ import type {
   AddUserInput,
   EditUserInput,
   UserQueryParams,
+  VerificationRequest,
+  PaginatedResponse,
 } from '@/types';
-import type { VerificationRequest } from '@/types/manager-verification-req';
-
-// Paginated response type
-export interface PaginatedResponse<T> {
-  data: T[];
-  count: number;
-  totalPages: number;
-}
 
 export async function fetchTasksToReview(): Promise<ServerActionResponse<VerificationRequest[]>> {
   const supabase = await createClient();
@@ -173,32 +167,84 @@ export async function fetchDeniedTasksPaginated(
   };
 }
 
-export async function approveTaskAction(id: string) {
+export async function approveTaskAction(
+  kpitask_id: string,
+  reqmark: string
+): Promise<ServerActionResponse<VerificationRequest>> {
   const supabase = await createClient();
 
-  // First update the task
+  // First, get task details from the view to get category_points
+  const { data: taskData, error: taskError } = await supabase
+    .from('task_info_view')
+    .select('assigned_to, category_points')
+    .eq('kpitask_id', kpitask_id)
+    .single();
+
+  if (taskError) {
+    return { error: 'Failed to fetch task details: ' + taskError.message, data: undefined };
+  }
+
+  // Update the task status and remark
   const { error: updateError } = await supabase
     .from('KPITask')
-    .update({ status: 'approved' })
-    .eq('id', id);
+    .update({ status: 'approved', remark: reqmark })
+    .eq('id', kpitask_id);
 
   if (updateError) {
     return { error: 'Failed to approve task: ' + updateError.message, data: undefined };
   }
+
+  // Update user points
+  const { error: pointsError } = await supabase.rpc('increment_points_for_user', {
+    target_user_id: taskData.assigned_to,
+    amount: taskData.category_points,
+  });
+
+  if (pointsError) {
+    return { error: 'Failed to update user points: ' + pointsError.message, data: undefined };
+  }
+
+  // Get the updated task from the view to return
+  const { data: updatedTask, error: fetchError } = await supabase
+    .from('task_info_view')
+    .select('*')
+    .eq('kpitask_id', kpitask_id)
+    .single();
+
+  if (fetchError) {
+    return { error: 'Failed to fetch updated task: ' + fetchError.message, data: undefined };
+  }
+
+  return { error: null, data: updatedTask as VerificationRequest };
 }
 
-export async function rejectTaskAction(id: string) {
+export async function rejectTaskAction(
+  kpitask_id: string,
+  reqmark: string
+): Promise<ServerActionResponse<VerificationRequest>> {
   const supabase = await createClient();
 
-  // First update the task
-  const { data, error: updateError } = await supabase
+  // Update the task status and remark
+  const { error: updateError } = await supabase
     .from('KPITask')
-    .update({ status: 'rejected' })
-    .eq('id', id.trim())
-    .select();
+    .update({ status: 'rejected', remark: reqmark })
+    .eq('id', kpitask_id.trim());
 
-  console.log('id: ', id);
   if (updateError) {
     return { error: 'Failed to reject task: ' + updateError.message, data: undefined };
   }
+
+  // Get the updated task from the view to return
+  const { data: rejectedTask, error: fetchError } = await supabase
+    .from('task_info_view')
+    .select('*')
+    .eq('kpitask_id', kpitask_id.trim())
+    .single();
+
+  if (fetchError) {
+    return { error: 'Failed to fetch updated task: ' + fetchError.message, data: undefined };
+  }
+
+  // No need to update the points for rejected tasks
+  return { error: null, data: rejectedTask as VerificationRequest };
 }

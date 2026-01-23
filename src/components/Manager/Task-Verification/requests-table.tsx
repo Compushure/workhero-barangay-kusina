@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import type { VerificationRequest, SortOption } from '@/types/manager-verification-req';
+import type { VerificationRequest, SortOption } from '@/types';
 
 interface RequestsTableProps {
   requests: VerificationRequest[];
@@ -96,6 +96,7 @@ export function RequestsTable({
                         <Button
                           variant="ghost"
                           size="sm"
+                          // need to pass extra params, request.category_points, request.assigned_to, request.remark and request.kpitask_id
                           onClick={() => onDeny(request.kpitask_id)}
                           disabled={isRejecting || isApproving}
                           className="p-2 h-auto text-muted-foreground hover:text-red-600 cursor-pointer hover:bg-red-50 disabled:opacity-50"
@@ -106,6 +107,7 @@ export function RequestsTable({
                         <Button
                           variant="ghost"
                           size="sm"
+                          // need to pass extra params, request.category_points, request.assigned_to, request.remark and request.kpitask_id
                           onClick={() => onApprove(request.kpitask_id)}
                           disabled={isRejecting || isApproving}
                           className="p-2 h-auto text-muted-foreground hover:text-green-600 cursor-pointer hover:bg-green-50 disabled:opacity-50"

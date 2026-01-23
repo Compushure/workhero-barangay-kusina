@@ -1,22 +1,7 @@
 'use client';
 
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-import { SearchBar } from '@/components/Manager/Task-Verification/search-bar';
-import { SortButton } from '@/components/Manager/Task-Verification/sort-button';
-=======
-<<<<<<< Updated upstream
 import { SearchBar } from '@/components/manager/task-verification/search-bar';
 import { SortButton } from '@/components/manager/task-verification/sort-button';
-=======
-import { SearchBar } from '@/components/manager/Task-Verification/search-bar';
-import { SortButton } from '@/components/manager/Task-Verification/sort-button';
->>>>>>> Stashed changes
->>>>>>> Stashed changes
-=======
-import { SearchBar } from '@/components/manager/task-verification/search-bar';
-import { SortButton } from '@/components/manager/task-verification/sort-button';
->>>>>>> origin/main
 
 interface HeaderSectionProps {
   title: string;

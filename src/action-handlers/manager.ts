@@ -16,9 +16,8 @@ import {
   fetchDeniedTasksPaginated,
   approveTaskAction,
   rejectTaskAction,
-  type PaginatedResponse,
 } from '@/actions/manager';
-import type { VerificationRequest } from '@/types/manager-verification-req';
+import type { VerificationRequest, PaginatedResponse } from '@/types';
 import { toast } from 'sonner';
 
 /**
@@ -153,10 +152,14 @@ export async function handleFetchDeniedTasksPaginated(
 /**
  * Approves a task with toast feedback
  * @param id - Task ID to approve
+ * @param remark - Remarks for the approval
  * @returns Approved task or null on error
  */
-export async function handleApproveTask(id: string): Promise<VerificationRequest | null> {
-  const result = await safeAction(() => approveTaskAction(id));
+export async function handleApproveTask(
+  id: string,
+  remark: string
+): Promise<VerificationRequest | null> {
+  const result = await safeAction(() => approveTaskAction(id, remark));
 
   if (!result.success) {
     toast.error('Failed to approve task: ' + result.error);
@@ -175,10 +178,14 @@ export async function handleApproveTask(id: string): Promise<VerificationRequest
 /**
  * Rejects a task with toast feedback
  * @param id - Task ID to reject
+ * @param remark - Remarks for the rejection
  * @returns Rejected task or null on error
  */
-export async function handleRejectTask(id: string): Promise<VerificationRequest | null> {
-  const result = await safeAction(() => rejectTaskAction(id));
+export async function handleRejectTask(
+  id: string,
+  remark: string
+): Promise<VerificationRequest | null> {
+  const result = await safeAction(() => rejectTaskAction(id, remark));
 
   if (!result.success) {
     toast.error('Failed to reject task: ' + result.error);
