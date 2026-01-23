@@ -119,3 +119,4 @@ export async function handleHideRewardAction(
   toast.success(`Item ${isActive ? 'unhidden' : 'hidden'} successfully`);
   return true;
 }
+

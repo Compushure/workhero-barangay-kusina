@@ -6,8 +6,8 @@ import {
   RedemptionTable,
   type RedemptionRequest,
 } from '@/components/hr/dashboard/redemption-table';
-import { useToast } from '@/hooks/use-toast';
-
+import { toast } from 'sonner';
+ 
 // Mock data for now
 const mockRedemptionRequests: RedemptionRequest[] = [
   {
@@ -45,7 +45,6 @@ export default function HRDashboard() {
     useState<RedemptionRequest[]>(mockRedemptionRequests);
   const [sortBy, setSortBy] = useState<string>('date-desc');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const { toast } = useToast();
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -80,10 +79,12 @@ export default function HRDashboard() {
 
   const handleApprove = (id: string) => {
     const request = requests.find((req) => req.id === id);
-    toast({
-      title: 'Request Approved',
-      description: `${request?.employee}'s redemption request has been approved.`,
-    });
+    if (!request) {
+      toast.error('Request not found');
+      return;
+    }
+
+    toast.success(`${request.employee}'s redemption request has been approved.`);
     // Database part would go here
     setRequests(requests.filter((req) => req.id !== id));
     setFilteredRequests(filteredRequests.filter((req) => req.id !== id));
@@ -91,12 +92,13 @@ export default function HRDashboard() {
 
   const handleReject = (id: string) => {
     const request = requests.find((req) => req.id === id);
-    toast({
-      title: 'Request Rejected',
-      description: `${request?.employee}'s redemption request has been rejected.`,
-      variant: 'destructive',
-    });
-    //Database part would go here
+    if (!request) {
+      toast.error('Request not found');
+      return;
+    }
+
+    toast.error(`${request.employee}'s redemption request has been rejected.`);
+    // Database part would go here
     setRequests(requests.filter((req) => req.id !== id));
     setFilteredRequests(filteredRequests.filter((req) => req.id !== id));
   };
