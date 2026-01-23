@@ -118,7 +118,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#f5e5dc] border-none sm:max-w-2000px rounded-2xl p-4">
+      <DialogContent className="bg-[#f5e5dc] border-none max-w-2000 rounded-2xl p-4">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-[#5a2a2a] text-lg font-semibold">
@@ -138,7 +138,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
             <Label className="text-sm font-medium text-[#5a2a2a]">Select Icon</Label>
             <label
               htmlFor="icon-upload"
-              className="block w-[180px] h-[190px] border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white"
+              className="block w-45 h-47 border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white"
             >
               {iconPreview ? (
                 <img
