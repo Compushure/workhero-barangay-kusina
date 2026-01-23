@@ -1,6 +1,6 @@
-import LeaderboardCard from '@/components/hr/leaderboard/leaderboard-card';
-import LeaderboardList from '@/components/hr/leaderboard/leaderboard-list';
-import LeaderboardFilters from '@/components/hr/leaderboard/leaderboard-filters';
+import LeaderboardCard from '@/components/HR/leaderboard/leaderboard-card';
+import LeaderboardList from '@/components/HR/leaderboard/leaderboard-list';
+import LeaderboardFilters from '@/components/HR/leaderboard/leaderboard-filters';
 import { getTopPlayers } from '@/actions/leaderboard/get-top-players';
 
 export default async function LeaderboardPage() {

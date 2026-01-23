@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { HeaderSection } from '@/components/hr/dashboard/header';
+import { HeaderSection } from '@/components/HR/dashboard/header';
 import {
   RedemptionTable,
   type RedemptionRequest,
-} from '@/components/hr/dashboard/redemption-table';
+} from '@/components/HR/dashboard/redemption-table';
 import { useToast } from '@/hooks/use-toast';
 
 // Mock data for now
