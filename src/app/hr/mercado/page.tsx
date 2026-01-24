@@ -7,6 +7,7 @@ import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 import { DeleteModal } from '@/components/hr/mercado/delete-modal';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2 } from 'lucide-react';
 import {
   useGetRewards,
   useAddReward,
@@ -55,6 +56,8 @@ export default function MercadoPage() {
   const editReward = useEditReward();
   const deleteReward = useDeleteReward();
   const hideReward = useHideReward();
+
+  const isProcessing = deleteReward.isPending || hideReward.isPending;
 
   const handleAdd = () => {
     setEditingItem(null);
@@ -145,24 +148,32 @@ export default function MercadoPage() {
         />
 
         <div className="flex-1">
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
-              {Array.from({ length: 9 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="bg-card border-border rounded-xl p-4 flex items-center relative shadow-sm h-32"
-                >
-                  <Skeleton className="h-24 w-24 rounded-lg shrink-0" />
-                  <div className="ml-4 flex-1 min-w-0 space-y-3">
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </div>
-                  <div className="absolute top-4 right-4">
-                    <Skeleton className="h-8 w-8 rounded-md" />
-                  </div>
+          {isLoading || isProcessing ? (
+            <>
+              {isProcessing && (
+                <div className="flex items-center justify-center gap-2 mb-4 text-[#730202]">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-sm font-medium">Deleting item...</span>
                 </div>
-              ))}
-            </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
+                {Array.from({ length: 9 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="bg-card border-border rounded-xl p-4 flex items-center relative shadow-sm h-32"
+                  >
+                    <Skeleton className="h-24 w-24 rounded-lg shrink-0" />
+                    <div className="ml-4 flex-1 min-w-0 space-y-3">
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                    <div className="absolute top-4 right-4">
+                      <Skeleton className="h-8 w-8 rounded-md" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
               {paginatedRewards && paginatedRewards.length > 0 ? (
@@ -192,7 +203,7 @@ export default function MercadoPage() {
         </div>
 
         {/* Pagination */}
-        {!isLoading && (
+        {!isLoading && !isProcessing && (
           <div className="mt-8 pb-4">
             <Pagination
               totalPages={totalPages}
