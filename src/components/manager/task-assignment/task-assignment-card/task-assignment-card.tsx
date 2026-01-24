@@ -84,6 +84,8 @@ export function TaskAssignmentCard() {
             selectedEmployees={selectedEmployees}
             onEmployeesChange={setSelectedEmployees}
             disabled={selectedTasks.length === 0}
+            selectedTaskIds={selectedTasks}
+            assignedTasks={assignedTasks}
           />
         </div>
 

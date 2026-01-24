@@ -11,6 +11,7 @@ import { DatePickerPopover } from '../../../task-assignment-card/date-picker-pop
 import { MOCK_EMPLOYEES } from '@/mock-data/employees';
 import { Button } from '@/components/ui/button';
 import { AssignedTask } from '@/types';
+import { useTaskAssignment } from '../../../task-assignment-page-context';
 
 interface EditTaskDialogProps {
   showEditDialog: boolean;
@@ -37,6 +38,25 @@ export default function EditTaskDialog({
   editAssignedEmployees,
   toggleEmployee,
 }: EditTaskDialogProps) {
+  const { assignedTasks } = useTaskAssignment();
+
+  // Get all employees assigned to other instances of this task
+  const otherTaskInstanceEmployees = new Set<string>();
+  assignedTasks.forEach((assignedTask) => {
+    // Find other instances of the same task (different IDs but same taskId)
+    if (assignedTask.taskId === task.taskId && assignedTask.id !== task.id) {
+      assignedTask.assignedEmployees.forEach((emp) => {
+        otherTaskInstanceEmployees.add(emp.id);
+      });
+    }
+  });
+
+  // An employee is disabled if they're assigned to another instance of this task
+  // (unless they're already assigned to this instance)
+  const disabledEmployeeIds = new Set<string>(
+    Array.from(otherTaskInstanceEmployees).filter((empId) => !editAssignedEmployees.includes(empId))
+  );
+
   return (
     <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>
       <DialogContent className="bg-[#FBF4E8] max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -87,30 +107,43 @@ export default function EditTaskDialog({
             <h4 className="font-bold text-[#690003]">Assign/Remove Employees</h4>
             <div className="bg-white rounded-xl p-4 border-2 border-gray-300 max-h-75 overflow-y-auto">
               <div className="space-y-2">
-                {MOCK_EMPLOYEES.map((emp) => (
-                  <div
-                    key={emp.id}
-                    className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded"
-                    onClick={() => toggleEmployee(emp.id)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={editAssignedEmployees.includes(emp.id)}
-                      onChange={() => {}}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleEmployee(emp.id);
-                      }}
-                      className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
-                    />
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-800">{emp.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {emp.empId} - {emp.tenure}
-                      </p>
+                {MOCK_EMPLOYEES.map((emp) => {
+                  const isDisabled = disabledEmployeeIds.has(emp.id);
+                  const isSelected = editAssignedEmployees.includes(emp.id);
+
+                  return (
+                    <div
+                      key={emp.id}
+                      className={`flex items-center gap-3 p-2 rounded ${
+                        isDisabled
+                          ? 'opacity-50 cursor-not-allowed bg-gray-100'
+                          : 'hover:bg-gray-50 cursor-pointer'
+                      }`}
+                      onClick={() => !isDisabled && toggleEmployee(emp.id)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        disabled={isDisabled}
+                        onChange={() => {}}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isDisabled) toggleEmployee(emp.id);
+                        }}
+                        className="w-5 h-5 rounded cursor-pointer accent-[#690003] disabled:cursor-not-allowed"
+                      />
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-800">{emp.name}</p>
+                        <p className="text-sm text-gray-500">
+                          {emp.empId} - {emp.tenure}
+                        </p>
+                      </div>
+                      {isDisabled && (
+                        <span className="text-xs text-gray-500 ml-2">Already assigned</span>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

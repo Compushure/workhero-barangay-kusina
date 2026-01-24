@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -41,6 +41,13 @@ export function SelectTasksDialog({
     });
     return initial;
   });
+
+  // Reset taskMaxAttempts when selectedTasks becomes empty (after assignment and clear)
+  useEffect(() => {
+    if (selectedTasks.length === 0) {
+      setTaskMaxAttempts({});
+    }
+  }, [selectedTasks]);
 
   const filteredTasks = MOCK_TASKS.filter((task) => {
     const searchLower = searchTerm.toLowerCase();
@@ -159,12 +166,14 @@ export function SelectTasksDialog({
 
           {/* Tasks Table */}
           <SelectTasksTable
-          filteredTasks={filteredTasks} 
-          toggleTask={toggleTask}
-          updateMaxAttempts={updateMaxAttempts}
-          selectedTasks={selectedTasks}
-          taskMaxAttempts={taskMaxAttempts}
-          assignedTaskIds={assignedTaskIds}
+            filteredTasks={filteredTasks}
+            toggleTask={toggleTask}
+            updateMaxAttempts={updateMaxAttempts}
+            selectedTaskInstances={selectedTasks.map((taskId) => ({
+              id: taskId,
+              maxAttempts: taskMaxAttempts[taskId] || 1,
+            }))}
+            taskMaxAttempts={taskMaxAttempts}
           />
 
           {/* Dialog Footer */}
