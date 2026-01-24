@@ -13,6 +13,7 @@ export default function ErrorPage() {
   const cause = params.get('cause') || 'Unknown error';
   const recommendation = params.get('recommendation') || 'Please try again later.';
 
+  // http://localhost:3008/error?status=404&cause=Page%20not%20found&recommendation=Check%20the%20URL%20or%20go%20back.
   let title = 'Something went wrong';
   let icon = '💥';
   let description = cause;
@@ -33,6 +34,10 @@ export default function ErrorPage() {
     title = 'Server Error';
     icon = '🔥';
     description = 'Something went wrong on our side.';
+  } else if (status === '403') {
+    title = 'Access Denied';
+    icon = '⛔';
+    description = 'You do not have permission to view this page.';
   }
 
   return (
