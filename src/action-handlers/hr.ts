@@ -4,7 +4,8 @@ import {
   addRewardAction,
   editRewardAction,
   deleteRewardAction,
-  hideRewardAction
+  hideRewardAction,
+  createRedemptionRequestAction,
 } from '@/actions/hr';
 import { safeAction } from '@/lib/utils/safe-action';
 import { toast } from 'sonner';
@@ -23,9 +24,9 @@ export async function handleDeclineRedemptionRequestAction(
     declineRedemptionRequestAction(params.id, params.remarks)
   );
 
-  if (!result.success) {
-    toast.error(`Failed to decline redemption request: ` + result.error);
-    return { error: result.error };
+  if (!result.success || result.data?.error) {
+    toast.error(`Failed to decline redemption request: ${result.error || result.data?.error}`);
+    return { error: result.error || result.data?.error || 'Unknown error' };
   }
 
   toast.success(
@@ -44,9 +45,9 @@ export async function handleAcceptRedemptionRequestAction(
     acceptRedemptionRequestAction(params.id, params.remarks)
   );
 
-  if (!result.success) {
-    toast.error(`Failed to accept redemption request: ` + result.error);
-    return { error: result.error };
+  if (!result.success || result.data?.error) {
+    toast.error(`Failed to accept redemption request: ${result.error || result.data?.error}`);
+    return { error: result.error || result.data?.error || 'Unknown error' };
   }
 
   toast.success(
@@ -55,8 +56,23 @@ export async function handleAcceptRedemptionRequestAction(
       : `Redemption request has been accepted.`
   );
 
-
   return { error: null };
+}
+
+// Action handler to create a new redemption request
+export async function handleCreateRedemptionRequestAction(
+  rewardId: string,
+  quantity: number
+): Promise<boolean> {
+  const result = await safeAction(() => createRedemptionRequestAction(rewardId, quantity));
+
+  if (!result.success || result.data?.error) {
+    toast.error(`Failed to create redemption request: ${result.error || result.data?.error}`);
+    return false;
+  }
+
+  toast.success('Redemption request submitted successfully');
+  return true;
 }
 
 // Action handler to add a new reward/mercado item
