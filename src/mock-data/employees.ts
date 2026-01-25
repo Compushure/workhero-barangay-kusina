@@ -1,13 +1,12 @@
-import { AssignedEmployee } from '@/components/manager/task-assignment/task-assignment-page';
-import { Task } from '@/components/manager/task-assignment/dialogs/select-tasks-dialog';
+import type { AssignedEmployee, Task } from '@/types';
 
-export interface Employee {
-  id: string;
-  name: string;
-  empId: string;
-  tenure: string;
-  assignedTasks: Task[];
-}
+// export interface Employee {
+//   id: string;
+//   name: string;
+//   empId: string;
+//   tenure: string;
+//   assignedTasks: Task[];
+// }
 
 // Mock employee data
 export const MOCK_EMPLOYEES: AssignedEmployee[] = [
@@ -16,6 +15,7 @@ export const MOCK_EMPLOYEES: AssignedEmployee[] = [
     name: 'Juan Dela Cruz',
     empId: 'EMP001',
     tenure: 'Junior staff',
+    assignedTasks: [],
     completedAttempts: 0,
   },
   {
@@ -23,22 +23,25 @@ export const MOCK_EMPLOYEES: AssignedEmployee[] = [
     name: 'Nicholas A. Hoult',
     empId: 'EMP002',
     tenure: 'Senior staff',
+    assignedTasks: [],
     completedAttempts: 0,
   },
-  { id: '3', name: 'Mariah Carey', empId: 'EMP003', tenure: 'Mid-level', completedAttempts: 0 },
+  { id: '3', name: 'Mariah Carey', empId: 'EMP003', tenure: 'Mid-level', assignedTasks: [], completedAttempts: 0 },
   {
     id: '4',
     name: 'Joshua Ullimer A. Demerin',
     empId: 'EMP004',
     tenure: 'Junior staff',
+    assignedTasks: [],
     completedAttempts: 0,
   },
-  { id: '5', name: 'Damon Albarn', empId: 'EMP005', tenure: 'Senior staff', completedAttempts: 0 },
+  { id: '5', name: 'Damon Albarn', empId: 'EMP005', tenure: 'Senior staff', assignedTasks: [], completedAttempts: 0 },
   {
     id: '6',
     name: 'José Protacio Rizal Mercado y Alonso',
     empId: 'EMP006',
     tenure: 'Junior Staff',
+    assignedTasks: [],
     completedAttempts: 0,
   },
   {
@@ -46,6 +49,7 @@ export const MOCK_EMPLOYEES: AssignedEmployee[] = [
     name: 'Rob Baban',
     empId: 'EMP007',
     tenure: 'Junior Staff',
+    assignedTasks: [],
     completedAttempts: 0,
   },
   {
@@ -53,6 +57,7 @@ export const MOCK_EMPLOYEES: AssignedEmployee[] = [
     name: 'JP Rosalita',
     empId: 'EMP008',
     tenure: 'Junior Staff',
+    assignedTasks: [],
     completedAttempts: 0,
   },
 ];

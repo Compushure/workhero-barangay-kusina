@@ -43,7 +43,7 @@ export async function handleUserRole({ router, setError, getUserRole }: HandleRo
       toast.success('Welcome HR!', {
         description: 'You have successfully logged in.',
       });
-      router.push('/hr/dashboard');
+      router.push('/hr/reward-requests');
       break;
     case 'regular':
     case 'employee':

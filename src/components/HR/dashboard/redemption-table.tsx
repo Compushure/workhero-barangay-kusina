@@ -8,17 +8,8 @@ import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
 } from '@/hooks/tanstack/mutations/hrMutations';
-import { RemarksDialog } from './remarks';
-
-export interface RedemptionRequest {
-  id: string;
-  requestDate: string;
-  requestTime: string;
-  employee: string;
-  requestedItems: string;
-  cost: number;
-  status: 'pending' | 'approved' | 'rejected';
-}
+import { RemarksDialog } from '@/components/hr/dashboard/remarks';
+import type { RedemptionRequest } from '@/types';
 
 interface RedemptionTableProps {
   data: RedemptionRequest[];
@@ -68,6 +59,23 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
       setSelectedRequestId(null);
     }
   };
+
+  // Format date and time from ISO string
+  const formatDateTime = (isoString: string) => {
+    const date = new Date(isoString);
+    const dateStr = date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
+    const timeStr = date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+    return { dateStr, timeStr };
+  };
+
   return (
     <div className="overflow-hidden rounded-lg shadow-md">
       {/* Table Header */}
@@ -83,59 +91,66 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
 
       {/* Table Body */}
       <div className="divide-y divide-border bg-[#fff8f5]">
-        {data.map((request) => (
-          <div
-            key={request.id}
-            className="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1fr] gap-4 px-6 py-4 transition-colors hover:bg-[#fbeaea]"
-          >
-            <div className="flex flex-col justify-center">
-              <p className="text-sm font-medium text-[#5a2a2a]">{request.requestDate}</p>
-              <p className="text-xs text-[#7a3d3d]">{request.requestTime}</p>
+        {data.map((request) => {
+          const { dateStr, timeStr } = formatDateTime(request.requestedAt);
+          const quantity = request.quantity || 1; // Default to 1 if not set
+          const totalCost = request.pointsCost * quantity;
+          const itemDisplay = `${quantity} x ${request.rewardName}`;
+          
+          return (
+            <div
+              key={request.id}
+              className="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1fr] gap-4 px-6 py-4 transition-colors hover:bg-[#fbeaea]"
+            >
+              <div className="flex flex-col justify-center">
+                <p className="text-sm font-medium text-[#5a2a2a]">{dateStr}</p>
+                <p className="text-xs text-[#7a3d3d]">{timeStr}</p>
+              </div>
+              <div className="flex items-center">
+                <p className="text-sm text-[#5a2a2a]">{request.userName}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-[#5a2a2a]">{itemDisplay}</p>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-[#5a2a2a] hover:bg-[#fbeaea]"
+                  onClick={() => toggleRow(request.id)}
+                >
+                  <ChevronDown
+                    className={cn(
+                      'h-4 w-4 transition-transform',
+                      expandedRows.has(request.id) && 'rotate-180'
+                    )}
+                  />
+                </Button>
+              </div>
+              <div className="flex items-center">
+                <p className="text-sm font-medium text-[#5a2a2a]">{totalCost} Pts</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-[#8b0000] hover:bg-[#8b0000] hover:text-white"
+                  onClick={() => handleDeclineClick(request.id)}
+                  disabled={declineMutation.isPending || acceptMutation.isPending}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-[#2d5016] hover:bg-[#2d5016] hover:text-white"
+                  onClick={() => handleAcceptClick(request.id)}
+                  disabled={declineMutation.isPending || acceptMutation.isPending}
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center">
-              <p className="text-sm text-[#5a2a2a]">{request.employee}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-[#5a2a2a]">{request.requestedItems}</p>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-[#5a2a2a] hover:bg-[#fbeaea]"
-                onClick={() => toggleRow(request.id)}
-              >
-                <ChevronDown
-                  className={cn(
-                    'h-4 w-4 transition-transform',
-                    expandedRows.has(request.id) && 'rotate-180'
-                  )}
-                />
-              </Button>
-            </div>
-            <div className="flex items-center">
-              <p className="text-sm font-medium text-[#5a2a2a]">{request.cost} Pts</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-[#8b0000] hover:bg-[#8b0000] hover:text-white"
-                onClick={() => handleDeclineClick(request.id)}
-                disabled={declineMutation.isPending || acceptMutation.isPending}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-[#2d5016] hover:bg-[#2d5016] hover:text-white"
-                onClick={() => handleAcceptClick(request.id)}
-                disabled={declineMutation.isPending || acceptMutation.isPending}
-              >
-                <Check className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Remarks Dialogs */}
@@ -152,9 +167,11 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
         open={declineDialogOpen}
         onOpenChange={setDeclineDialogOpen}
         onConfirm={handleDeclineConfirm}
-        title="Decline (Optional Remark)"
-        description="If you wish to continue with the confirmation without any remarks, simply click OK."
-        placeholder="Type in remarks/comments you wish to send alongside the request confirmation."
+        title="Decline Request"
+        description="Please provide a reason for declining this request. This will help the employee understand the decision."
+        placeholder="Enter remarks explaining the denial (required)"
+        required={true}
+        confirmVariant="destructive"
       />
     </div>
   );

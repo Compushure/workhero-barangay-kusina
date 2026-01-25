@@ -3,32 +3,16 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
-import { SelectTasksDialog } from './dialogs/select-tasks-dialog';
+import { SelectTasksDialog } from './dialogs/select-task-dialog';
 import { DatePickerPopover } from './date-picker-popover';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import type { SelectedFilters, AssignedEmployee, AssignedTask } from './task-assignment-page';
+import type { SelectedFilters, AssignedEmployee, AssignedTask } from '@/types';
+import { MOCK_TASKS } from '@/mock-data/employees';
+import ClearSelectionDialog from './dialogs/clear-selection-dialog';
+import { useTaskAssignment } from '../task-assignment-page-context';
 
-const MOCK_TASKS = [
-  { id: 'task1', name: '2024 FS Preparation' },
-  { id: 'task2', name: '2024 ITR Preparation Completeness' },
-  { id: 'task3', name: 'Turnaround Completion Time (TAT)' },
-  { id: 'task4', name: 'Zero Compliance Violations' },
-  { id: 'task5', name: 'Advanced Training' },
-];
+export function TaskAssignmentCard() {
+  const { assignTasks, assignedTasks } = useTaskAssignment();
 
-interface TaskAssignmentCardProps {
-  onAssign: (filters: SelectedFilters) => void;
-  assignedTasks: AssignedTask[];
-}
-
-export function TaskAssignmentCard({ onAssign, assignedTasks }: TaskAssignmentCardProps) {
   const [selectedEmployees, setSelectedEmployees] = useState<AssignedEmployee[]>([]);
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [taskMaxRepeats, setTaskMaxRepeats] = useState<Record<string, number>>({});
@@ -48,7 +32,7 @@ export function TaskAssignmentCard({ onAssign, assignedTasks }: TaskAssignmentCa
 
   const handleAssign = () => {
     if (selectedEmployees.length > 0 && selectedTasks.length > 0 && selectedDeadline) {
-      onAssign({
+      assignTasks({
         employees: selectedEmployees,
         tasks: selectedTasks.map((taskId) => ({
           id: taskId,
@@ -82,7 +66,7 @@ export function TaskAssignmentCard({ onAssign, assignedTasks }: TaskAssignmentCa
   };
 
   return (
-    <div className="rounded-3xl bg-[#FBF4E8] p-8 shadow-sm">
+    <div className="rounded-3xl bg-[#FBF4E8] p-8 shadow-sm/25">
       <h2 className="mb-8 text-2xl font-bold text-[#690003]">Assign Employees for Task</h2>
 
       <div className="flex flex-wrap gap-4 mb-2">
@@ -134,28 +118,11 @@ export function TaskAssignmentCard({ onAssign, assignedTasks }: TaskAssignmentCa
       </div>
 
       {/* Clear Confirmation Dialog */}
-      <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
-        <DialogContent className="bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-[#690003]">Clear Selection?</DialogTitle>
-            <DialogDescription>
-              This will clear all selected employees, tasks, and deadline.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowClearConfirm(false)}
-              className="border-gray-300"
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleClear} className="bg-[#690003] hover:bg-[#8B0000] text-white">
-              Clear
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ClearSelectionDialog
+        showClearConfirm={showClearConfirm}
+        setShowClearConfirm={setShowClearConfirm}
+        handleClear={handleClear}
+      />
     </div>
   );
 }

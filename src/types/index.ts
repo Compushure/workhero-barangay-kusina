@@ -2,6 +2,13 @@
  * Type Definitions
  * =================
  * Centralized location for all application types and interfaces.
+ * 
+ * Types are organized by domain:
+ * - shared: Common types used across the application
+ * - manager: Manager-specific types
+ * - hr: HR-specific types
+ * - employee: Employee-specific types
+ * - admin: Admin-specific types
  */
 
 import { z } from 'zod';
@@ -88,6 +95,18 @@ export type EditUserInput = z.infer<typeof import('@/zod/schemas').editUserSchem
 export type LoginInput = z.infer<typeof import('@/zod/schemas').loginSchema>;
 
 /**
+ * Type for adding a reward/mercado item
+ * Inferred from addRewardSchema in @/zod/schemas
+ */
+export type AddRewardInput = z.infer<typeof import('@/zod/schemas').addRewardSchema>;
+
+/**
+ * Type for editing a reward/mercado item
+ * Inferred from editRewardSchema in @/zod/schemas
+ */
+export type EditRewardInput = z.infer<typeof import('@/zod/schemas').editRewardSchema>;
+
+/**
  * Type for server action responses
  * Generic response type for consistent error handling
  */
@@ -95,6 +114,25 @@ export type ServerActionResponse<T = unknown> = {
   error: string | null;
   data?: T;
 };
+
+// ============================================
+// Reward/Mercado Item Type
+// ============================================
+
+/**
+ * Reward interface representing a mercado item in the system
+ */
+export interface Reward {
+  id: string;
+  name: string;
+  pointsCost: number;
+  quantity?: number;
+  redeemingLimit?: number;
+  category?: string;
+  isActive: boolean;
+  createdAt?: string | Date;
+  createdBy?: string;
+}
 
 // ============================================
 // User Extended Type
@@ -116,3 +154,9 @@ export type UserWithExtras = User & {
   createdAt?: string | Date;
   profilePictureUrl?: string;
 };
+// Re-export all domain types for convenience
+export * from './shared';
+export * from './manager';
+export * from './hr';
+export * from './employee';
+export * from './admin';

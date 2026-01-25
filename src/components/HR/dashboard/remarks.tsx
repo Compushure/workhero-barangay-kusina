@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 interface RemarksDialogProps {
   open: boolean;
@@ -40,11 +41,14 @@ export function RemarksDialog({
   confirmVariant = 'default',
 }: RemarksDialogProps) {
   const [remarks, setRemarks] = useState('');
+  const [error, setError] = useState('');
 
   const handleConfirm = () => {
     if (required && !remarks.trim()) {
+      setError('Remarks are required for denial');
       return;
     }
+    setError('');
     onConfirm(remarks.trim() || undefined);
     setRemarks('');
     onOpenChange(false);
@@ -52,19 +56,21 @@ export function RemarksDialog({
 
   const handleCancel = () => {
     setRemarks('');
+    setError('');
     onOpenChange(false);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       setRemarks('');
+      setError('');
     }
     onOpenChange(newOpen);
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
@@ -72,38 +78,51 @@ export function RemarksDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2 py-4">
-          <Textarea
-            value={remarks}
-            onChange={(e) => {
-              if (e.target.value.length <= maxLength) {
-                setRemarks(e.target.value);
-              }
-            }}
-            placeholder={placeholder}
-            className="min-h-[120px] resize-none"
-            maxLength={maxLength}
-          />
-          <div className="flex justify-end text-xs text-muted-foreground">
-            {remarks.length}/{maxLength}
+        <div className="space-y-4 py-4">
+          {/* Remarks Textarea */}
+          <div className="space-y-2">
+            {required && (
+              <Label htmlFor="remarks" className="text-sm font-medium">
+                Remarks <span className="text-red-600">*</span>
+              </Label>
+            )}
+            <Textarea
+              id="remarks"
+              value={remarks}
+              onChange={(e) => {
+                if (e.target.value.length <= maxLength) {
+                  setRemarks(e.target.value);
+                  if (error) setError(''); // Clear error on input
+                }
+              }}
+              placeholder={placeholder}
+              className="min-h-32 resize-none"
+              maxLength={maxLength}
+              aria-required={required}
+              aria-invalid={!!error}
+              aria-describedby={error ? 'remark-error' : undefined}
+            />
+            {error && (
+              <p id="remark-error" className="text-sm text-red-600">
+                {error}
+              </p>
+            )}
+            <div className="flex justify-end text-xs text-muted-foreground">
+              {remarks.length}/{maxLength}
+            </div>
           </div>
         </div>
 
-        <DialogFooter className="flex-row gap-2 sm:justify-center">
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            className="flex-1 sm:flex-none sm:min-w-[120px]"
-          >
+        <DialogFooter className="flex-row gap-2 sm:gap-3">
+          <Button variant="outline" onClick={handleCancel} className="flex-1 rounded-3xl">
             {cancelLabel}
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={required && !remarks.trim()}
-            className={`flex-1 sm:flex-none sm:min-w-[120px] ${
-              confirmVariant === 'destructive' || confirmLabel === 'OK'
-                ? 'bg-[#690003] hover:bg-[#8B0000]'
-                : ''
+            variant={confirmVariant}
+            className={`flex-1 rounded-3xl ${
+              confirmVariant === 'default' ? 'bg-[#690003] hover:bg-[#af3b3f]' : ''
             }`}
           >
             {confirmLabel}
@@ -113,52 +132,3 @@ export function RemarksDialog({
     </Dialog>
   );
 }
-
-// Example usage patterns:
-
-/**
- * Basic decline with optional remarks:
- *
- * const [remarksOpen, setRemarksOpen] = useState(false);
- *
- * <RemarksDialog
- *   open={remarksOpen}
- *   onOpenChange={setRemarksOpen}
- *   onConfirm={(remarks) => {
- *     declineMutation.mutate({ id: requestId, remarks });
- *   }}
- * />
- */
-
-/**
- * Required remarks for rejection:
- *
- * <RemarksDialog
- *   open={remarksOpen}
- *   onOpenChange={setRemarksOpen}
- *   onConfirm={(remarks) => {
- *     rejectMutation.mutate({ id: requestId, remarks });
- *   }}
- *   title="Reject Request"
- *   description="Please provide a reason for rejecting this request."
- *   confirmLabel="Reject"
- *   required={true}
- *   confirmVariant="destructive"
- * />
- */
-
-/**
- * Approval with optional comments:
- *
- * <RemarksDialog
- *   open={remarksOpen}
- *   onOpenChange={setRemarksOpen}
- *   onConfirm={(remarks) => {
- *     approveMutation.mutate({ id: requestId, comments: remarks });
- *   }}
- *   title="Approve Request"
- *   description="Add any additional comments to this approval (optional)."
- *   confirmLabel="Approve"
- *   placeholder="Add any notes or comments..."
- * />
- */
