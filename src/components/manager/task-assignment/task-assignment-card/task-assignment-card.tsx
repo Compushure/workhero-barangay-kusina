@@ -1,28 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
 import { SelectTasksDialog } from './dialogs/select-task-dialog';
 import { DatePickerPopover } from './date-picker-popover';
-import type { AssignedEmployee } from '@/types';
+import type { AssignedEmployee, Task } from '@/types';
 import { MOCK_TASKS } from '@/mock-data/employees';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
+<<<<<<< HEAD:src/components/Manager/Task-Assignment/task-assignment-card/task-assignment-card.tsx
 import { handleAddTaskAssignment } from '@/action-handlers/manager-assignments';
+=======
+import { handleAddTaskAssignment } from '@/action-handlers/manager-assignment';
+import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
+>>>>>>> 1051486b2122e9879d2d08c0d442e9583f67e6dd:src/components/manager/task-assignment/task-assignment-card/task-assignment-card.tsx
 
 export function TaskAssignmentCard() {
   const { assignTasks, assignedTasks } = useTaskAssignment();
 
+  const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<AssignedEmployee[]>([]);
-  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [selectedTask, setselectedTask] = useState<string[]>([]);
   const [taskMaxRepeats, setTaskMaxRepeats] = useState<Record<string, number>>({});
   const [selectedDeadline, setSelectedDeadline] = useState<Date | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showTaskWarning, setShowTaskWarning] = useState(false);
 
+  useEffect(() => {
+    async function loadTasks() {
+      const tasks = await handleFetchTaskList();
+      setAvailableTasks(tasks);
+    }
+    loadTasks();
+  }, []);
+
   const handleTasksChange = (tasks: string[], maxRepeats?: Record<string, number>) => {
-    setSelectedTasks(tasks);
+    setselectedTask(tasks);
     if (maxRepeats) {
       setTaskMaxRepeats(maxRepeats);
     }
@@ -32,6 +46,7 @@ export function TaskAssignmentCard() {
   };
 
   const handleAssign = async () => {
+<<<<<<< HEAD:src/components/Manager/Task-Assignment/task-assignment-card/task-assignment-card.tsx
     if (selectedEmployees.length > 0 && selectedTasks.length > 0 && selectedDeadline) {
       // Your dialog logic currently supports single task selection
       const taskId = selectedTasks[0];
@@ -39,6 +54,15 @@ export function TaskAssignmentCard() {
       const startDate = new Date().toISOString();
       const endDate = selectedDeadline.toISOString();
       const maxAttempts = taskMaxRepeats[taskId] || 1;
+=======
+      if (selectedEmployees.length > 0 && selectedTask.length > 0 && selectedDeadline) {
+        // Your dialog logic currently supports single task selection
+        const taskId = selectedTask[0]; 
+        const employeeIds = selectedEmployees.map((emp) => emp.id);
+        const startDate = new Date().toISOString();
+        const endDate = selectedDeadline.toISOString();
+        const maxAttempts = taskMaxRepeats[taskId] || 1;
+>>>>>>> 1051486b2122e9879d2d08c0d442e9583f67e6dd:src/components/manager/task-assignment/task-assignment-card/task-assignment-card.tsx
 
       // Call the server action handler
       const success = await handleAddTaskAssignment(
@@ -49,6 +73,7 @@ export function TaskAssignmentCard() {
         maxAttempts
       );
 
+<<<<<<< HEAD:src/components/Manager/Task-Assignment/task-assignment-card/task-assignment-card.tsx
       if (success) {
         // If the DB update succeeded, update the local context so the
         // "disabling" logic in the dialogs sees the new assignments
@@ -61,13 +86,28 @@ export function TaskAssignmentCard() {
           deadline: selectedDeadline,
         });
         handleClear();
+=======
+        if (success) {
+          // If the DB update succeeded, update the local context so the 
+          // "disabling" logic in the dialogs sees the new assignments
+          assignTasks({
+            employees: selectedEmployees,
+            tasks: selectedTask.map((id) => ({
+              id,
+              maxAttempts: taskMaxRepeats[id] || 1,
+            })),
+            deadline: selectedDeadline,
+          });
+          handleClear();
+        }
+>>>>>>> 1051486b2122e9879d2d08c0d442e9583f67e6dd:src/components/manager/task-assignment/task-assignment-card/task-assignment-card.tsx
       }
     }
   };
 
   const handleClear = () => {
     setSelectedEmployees([]);
-    setSelectedTasks([]);
+    setselectedTask([]);
     setTaskMaxRepeats({});
     setSelectedDeadline(null);
     setShowClearConfirm(false);
@@ -75,14 +115,14 @@ export function TaskAssignmentCard() {
   };
 
   const handleEmployeesDialogAttempt = () => {
-    if (selectedTasks.length === 0) {
+    if (selectedTask.length === 0) {
       setShowTaskWarning(true);
     }
   };
 
   const getSelectedTaskName = () => {
-    if (selectedTasks.length === 0) return 'Select Task';
-    const task = MOCK_TASKS.find((t) => t.id === selectedTasks[0]);
+    if (selectedTask.length === 0) return 'Select Task';
+    const task = availableTasks.find((t) => t.id === selectedTask[0]);
     return task?.name || 'Select Task';
   };
 
@@ -93,7 +133,7 @@ export function TaskAssignmentCard() {
       <div className="flex flex-wrap gap-4 mb-2">
         <div className="min-w-50">
           <SelectTasksDialog
-            selectedTasks={selectedTasks}
+            selectedTask={selectedTask}
             onTasksChange={handleTasksChange}
             assignedTasks={assignedTasks}
             buttonLabel={getSelectedTaskName()}
@@ -104,8 +144,8 @@ export function TaskAssignmentCard() {
           <AssignEmployeesDialog
             selectedEmployees={selectedEmployees}
             onEmployeesChange={setSelectedEmployees}
-            disabled={selectedTasks.length === 0}
-            selectedTaskIds={selectedTasks}
+            disabled={selectedTask.length === 0}
+            selectedTaskIds={selectedTask}
             assignedTasks={assignedTasks}
           />
         </div>
@@ -132,7 +172,7 @@ export function TaskAssignmentCard() {
         <Button
           onClick={handleAssign}
           disabled={
-            selectedEmployees.length === 0 || selectedTasks.length === 0 || !selectedDeadline
+            selectedEmployees.length === 0 || selectedTask.length === 0 || !selectedDeadline
           }
           className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50 disabled:cursor-not-allowed px-12"
         >
