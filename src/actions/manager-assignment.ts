@@ -102,7 +102,6 @@ export async function addTaskAssignmentAction(
       .select('assigned_to')
       .eq('category_id', taskId)
       .in('assigned_to', employeeIds)
-      .not('status', 'eq', 'completed'); // Only block if they haven't finished the old one
 
     if (checkError) throw checkError;
 
@@ -122,7 +121,7 @@ export async function addTaskAssignmentAction(
       assigned_by: user.id,
       assigned_to: empId,
       category_id: taskId,
-      status: 'pending',
+      status: 'assigned',
       created_at: startDate,
       deadline_date: endDate,
       max_attempts: maxAttempts || 1,
