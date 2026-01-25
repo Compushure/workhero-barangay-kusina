@@ -1,6 +1,7 @@
 'use client';
 
-import { Trash2, X } from 'lucide-react';
+import { Trash2, X, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -18,13 +19,22 @@ interface DeleteModalProps {
 }
 
 export function DeleteModal({ open, onOpenChange, itemName, onConfirm }: DeleteModalProps) {
-  const handleConfirm = () => {
-    onConfirm?.();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await onConfirm?.();
+    } finally {
+      setIsDeleting(false);
+    }
     onOpenChange(false);
   };
 
   const handleClose = () => {
-    onOpenChange(false);
+    if (!isDeleting) {
+      onOpenChange(false);
+    }
   };
 
   return (
@@ -56,15 +66,24 @@ export function DeleteModal({ open, onOpenChange, itemName, onConfirm }: DeleteM
           <Button
             variant="outline"
             onClick={handleClose}
-            className="flex-1 bg-white text-[#2d2d2d] border-2 border-gray-300 hover:bg-gray-50 py-6 text-lg font-semibold rounded-xl"
+            disabled={isDeleting}
+            className="flex-1 bg-white text-[#2d2d2d] border-2 border-gray-300 hover:bg-gray-50 py-6 text-lg font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </Button>
           <Button
             onClick={handleConfirm}
-            className="flex-1 bg-[#690003] text-white hover:bg-[#8b0000] py-6 text-lg font-semibold rounded-xl"
+            disabled={isDeleting}
+            className="flex-1 bg-[#690003] text-white hover:bg-[#8b0000] py-6 text-lg font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Delete
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              'Delete'
+            )}
           </Button>
         </div>
       </DialogContent>
