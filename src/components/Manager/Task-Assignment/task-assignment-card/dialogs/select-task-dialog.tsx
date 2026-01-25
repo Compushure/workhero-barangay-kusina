@@ -14,7 +14,7 @@ import { Search, Plus } from 'lucide-react';
 import type { AssignedTask, Task } from '@/types';
 import { MOCK_TASKS } from '@/mock-data/employees';
 import SelectTasksTable from './select-task-table';
-import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
+import { handleFetchTaskList } from '@/action-handlers/manager-assignments';
 
 interface SelectTasksDialogProps {
   selectedTasks: string[];

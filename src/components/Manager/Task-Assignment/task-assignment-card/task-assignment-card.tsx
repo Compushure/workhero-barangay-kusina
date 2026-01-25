@@ -9,7 +9,7 @@ import type { AssignedEmployee } from '@/types';
 import { MOCK_TASKS } from '@/mock-data/employees';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
-import { handleAddTaskAssignment } from '@/action-handlers/manager-assignment';
+import { handleAddTaskAssignment } from '@/action-handlers/manager-assignments';
 
 export function TaskAssignmentCard() {
   const { assignTasks, assignedTasks } = useTaskAssignment();
@@ -32,38 +32,38 @@ export function TaskAssignmentCard() {
   };
 
   const handleAssign = async () => {
-      if (selectedEmployees.length > 0 && selectedTasks.length > 0 && selectedDeadline) {
-        // Your dialog logic currently supports single task selection
-        const taskId = selectedTasks[0]; 
-        const employeeIds = selectedEmployees.map((emp) => emp.id);
-        const startDate = new Date().toISOString();
-        const endDate = selectedDeadline.toISOString();
-        const maxAttempts = taskMaxRepeats[taskId] || 1;
+    if (selectedEmployees.length > 0 && selectedTasks.length > 0 && selectedDeadline) {
+      // Your dialog logic currently supports single task selection
+      const taskId = selectedTasks[0];
+      const employeeIds = selectedEmployees.map((emp) => emp.id);
+      const startDate = new Date().toISOString();
+      const endDate = selectedDeadline.toISOString();
+      const maxAttempts = taskMaxRepeats[taskId] || 1;
 
-        // Call the server action handler
-        const success = await handleAddTaskAssignment(
-          taskId,
-          employeeIds,
-          startDate,
-          endDate,
-          maxAttempts
-        );
+      // Call the server action handler
+      const success = await handleAddTaskAssignment(
+        taskId,
+        employeeIds,
+        startDate,
+        endDate,
+        maxAttempts
+      );
 
-        if (success) {
-          // If the DB update succeeded, update the local context so the 
-          // "disabling" logic in the dialogs sees the new assignments
-          assignTasks({
-            employees: selectedEmployees,
-            tasks: selectedTasks.map((id) => ({
-              id,
-              maxAttempts: taskMaxRepeats[id] || 1,
-            })),
-            deadline: selectedDeadline,
-          });
-          handleClear();
-        }
+      if (success) {
+        // If the DB update succeeded, update the local context so the
+        // "disabling" logic in the dialogs sees the new assignments
+        assignTasks({
+          employees: selectedEmployees,
+          tasks: selectedTasks.map((id) => ({
+            id,
+            maxAttempts: taskMaxRepeats[id] || 1,
+          })),
+          deadline: selectedDeadline,
+        });
+        handleClear();
       }
-    };
+    }
+  };
 
   const handleClear = () => {
     setSelectedEmployees([]);

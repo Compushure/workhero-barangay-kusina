@@ -1,8 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
-import { MOCK_TASKS } from '@/mock-data/employees';
+import {
+  handleFetchCurrentAssignedTasks,
+  handleDeleteTask,
+  handleClearAllTasks,
+} from '@/action-handlers/manager-current-assigned-task';
 
 interface TaskAssignmentContextType {
   assignedTasks: AssignedTask[];
@@ -11,9 +15,15 @@ interface TaskAssignmentContextType {
   assignTasks: (filters: SelectedFilters) => void;
   removeAssignment: (taskId: string, employeeId: string) => void;
   deleteTask: (taskId: string) => void;
-  editTask: (taskId: string, maxAttempts: number, newDueDate: string, newEmployees: AssignedEmployee[]) => void;
+  editTask: (
+    taskId: string,
+    maxAttempts: number,
+    newDueDate: string,
+    newEmployees: AssignedEmployee[]
+  ) => void;
   clearAll: () => void;
   clearAllEmployeeTasks: (employeeId: string) => void;
+  setAssignedTasks: React.Dispatch<React.SetStateAction<AssignedTask[]>>;
 }
 
 const TaskAssignmentContext = createContext<TaskAssignmentContextType | undefined>(undefined);
@@ -22,26 +32,35 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
   const [assignedTasks, setAssignedTasks] = useState<AssignedTask[]>([]);
   const [viewMode, setViewMode] = useState<'task' | 'employee'>('task');
 
+  // ✅ Load tasks from backend on mount
+  useEffect(() => {
+    const loadTasks = async () => {
+      const tasks = await handleFetchCurrentAssignedTasks();
+      setAssignedTasks(tasks);
+    };
+    loadTasks();
+  }, []);
+
+  // Local context update after assigning tasks
   const assignTasks = (filters: SelectedFilters) => {
     if (filters.employees.length === 0 || filters.tasks.length === 0) return;
-    const newAssignments: AssignedTask[] = filters.tasks.map((taskSelection) => {
-      const baseTask = MOCK_TASKS.find((t) => t.id === taskSelection.id);
-      return {
-        id: `${taskSelection.id}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-        taskId: baseTask?.id || taskSelection.id,
-        taskName: baseTask?.name || 'Unknown Task',
-        taskType: baseTask?.type || 'General',
-        isRepeatable: baseTask?.isRepeatable || false,
-        points: baseTask?.points || 0,
-        xp: baseTask?.xp || 0,
-        dateRange: {
-          start: new Date().toISOString(),
-          end: filters.deadline ? filters.deadline.toISOString() : new Date().toISOString(),
-        },
-        maxAttempts: taskSelection.maxAttempts,
-        assignedEmployees: filters.employees,
-      };
-    });
+
+    const newAssignments: AssignedTask[] = filters.tasks.map((taskSelection) => ({
+      id: `${taskSelection.id}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      taskId: taskSelection.id,
+      taskName: 'New Task', // category_name can be fetched if needed
+      taskType: 'General',
+      isRepeatable: false,
+      points: 0,
+      xp: 0,
+      dateRange: {
+        start: new Date().toISOString(),
+        end: filters.deadline ? filters.deadline.toISOString() : new Date().toISOString(),
+      },
+      maxAttempts: taskSelection.maxAttempts,
+      assignedEmployees: filters.employees,
+    }));
+
     setAssignedTasks((prev) => [...prev, ...newAssignments]);
   };
 
@@ -50,28 +69,49 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
       prev
         .map((task) =>
           task.id === taskId
-            ? { ...task, assignedEmployees: task.assignedEmployees.filter((e) => e.id !== employeeId) }
+            ? {
+                ...task,
+                assignedEmployees: task.assignedEmployees.filter((e) => e.id !== employeeId),
+              }
             : task
         )
         .filter((task) => task.assignedEmployees.length > 0)
     );
   };
 
-  const deleteTask = (taskId: string) => {
-    setAssignedTasks((prev) => prev.filter((task) => task.id !== taskId));
+  const deleteTask = async (taskId: string) => {
+    const success = await handleDeleteTask(taskId);
+    if (success) {
+      setAssignedTasks((prev) => prev.filter((task) => task.id !== taskId));
+    }
   };
 
-  const editTask = (taskId: string, maxAttempts: number, newDueDate: string, newEmployees: AssignedEmployee[]) => {
+  const editTask = (
+    taskId: string,
+    maxAttempts: number,
+    newDueDate: string,
+    newEmployees: AssignedEmployee[]
+  ) => {
     setAssignedTasks((prev) =>
-      prev.map((task) =>
-        task.id === taskId
-          ? { ...task, maxAttempts, dateRange: { ...task.dateRange, end: newDueDate }, assignedEmployees: newEmployees }
-          : task
-      ).filter(task => task.assignedEmployees.length > 0)
+      prev
+        .map((task) =>
+          task.id === taskId
+            ? {
+                ...task,
+                maxAttempts,
+                dateRange: { ...task.dateRange, end: newDueDate },
+                assignedEmployees: newEmployees,
+              }
+            : task
+        )
+        .filter((task) => task.assignedEmployees.length > 0)
     );
   };
 
-  const clearAll = () => setAssignedTasks([]);
+  const clearAll = async () => {
+    const success = await handleClearAllTasks();
+    if (success) setAssignedTasks([]);
+  };
 
   const clearAllEmployeeTasks = (employeeId: string) => {
     setAssignedTasks((prev) =>
@@ -84,12 +124,27 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
     );
   };
 
-  const value = useMemo(() => ({
-    assignedTasks, viewMode, setViewMode, assignTasks, 
-    removeAssignment, deleteTask, editTask, clearAll, clearAllEmployeeTasks
-  }), [assignedTasks, viewMode]);
+  const value = useMemo(
+    () => ({
+      assignedTasks,
+      viewMode,
+      setViewMode,
+      assignTasks,
+      removeAssignment,
+      deleteTask,
+      editTask,
+      clearAll,
+      clearAllEmployeeTasks,
+      setAssignedTasks,
+    }),
+    [assignedTasks, viewMode]
+  );
 
-  return <TaskAssignmentContext.Provider value={value}>{children}</TaskAssignmentContext.Provider>;
+  return (
+    <TaskAssignmentContext.Provider value={value}>
+      {children}
+    </TaskAssignmentContext.Provider>
+  );
 }
 
 export function useTaskAssignment() {
