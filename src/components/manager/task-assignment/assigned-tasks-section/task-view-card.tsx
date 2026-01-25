@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { parseISO, format } from 'date-fns';
-import type { AssignedTask } from '@/types';
+import type { AssignedTask, AssignedEmployee } from '@/types';
 import { ChevronDown, X } from 'lucide-react';
-import { MOCK_EMPLOYEES } from '@/mock-data/employees';
-
 import TaskViewCardMenu from './dialogs/task-view/task-view-card-menu';
 import EditTaskDialog from './dialogs/task-view/edit-task-dialog';
 import DeleteTaskDialog from './dialogs/task-view/delete-task-dialog';
 import UnassignEmployeeDialog from './dialogs/task-view/unassign-employee-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
+import { handleUpdateTaskAssignment } from '@/action-handlers/manager-current-assigned-task';
+import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
 
 interface TaskViewCardProps {
   task: AssignedTask;
@@ -30,6 +30,12 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   const [openPopover, setOpenPopover] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // ✅ Fetch all employees from backend once
+  const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
+  useEffect(() => {
+    handleFetchEmployeeList().then(setEmployees);
+  }, []);
+
   const displayedEmployees = expanded ? task.assignedEmployees : task.assignedEmployees.slice(0, 4);
   const hiddenCount = Math.max(0, task.assignedEmployees.length - 4);
 
@@ -43,22 +49,34 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
     });
   };
 
-  const handleEditTask = () => {
+  const handleEditTask = async () => {
     const newEmployees = editAssignedEmployees.map((empId) => {
       const existingEmp = task.assignedEmployees.find((e) => e.id === empId);
       if (existingEmp) return existingEmp;
-      const mockEmp = MOCK_EMPLOYEES.find((e) => e.id === empId);
+
+      // ✅ Lookup in full backend employee list
+      const backendEmp = employees.find((e) => e.id === empId);
       return {
         id: empId,
-        name: mockEmp?.name || '',
-        empId: mockEmp?.empId || '',
-        tenure: mockEmp?.tenure,
+        name: backendEmp?.name || 'Unknown',
+        empId: backendEmp?.empId || '',
+        tenure: backendEmp?.tenure,
         assignedTasks: [],
         completedAttempts: 0,
       };
     });
-    editTask(task.id, editMaxAttempts, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
-    setShowEditDialog(false);
+
+    const success = await handleUpdateTaskAssignment(
+      task.id,
+      editMaxAttempts,
+      format(editDueDate, 'yyyy-MM-dd'),
+      editAssignedEmployees
+    );
+
+    if (success) {
+      editTask(task.id, editMaxAttempts, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
+      setShowEditDialog(false);
+    }
   };
 
   const handleOpenEditDialog = () => {

@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
 import {
-  handleFetchCurrentAssignedTasks,
+  handleFetchCurrentAssignedTasksPaginated, // ✅ updated import
   handleDeleteTask,
   handleClearAllTasks,
 } from '@/action-handlers/manager-current-assigned-task';
@@ -24,6 +24,9 @@ interface TaskAssignmentContextType {
   clearAll: () => void;
   clearAllEmployeeTasks: (employeeId: string) => void;
   setAssignedTasks: React.Dispatch<React.SetStateAction<AssignedTask[]>>;
+  page: number;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  totalPages: number;
 }
 
 const TaskAssignmentContext = createContext<TaskAssignmentContextType | undefined>(undefined);
@@ -32,14 +35,19 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
   const [assignedTasks, setAssignedTasks] = useState<AssignedTask[]>([]);
   const [viewMode, setViewMode] = useState<'task' | 'employee'>('task');
 
-  // ✅ Load tasks from backend on mount
+  // ✅ Pagination state
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+
+  // ✅ Load tasks from backend with pagination
   useEffect(() => {
     const loadTasks = async () => {
-      const tasks = await handleFetchCurrentAssignedTasks();
-      setAssignedTasks(tasks);
+      const res = await handleFetchCurrentAssignedTasksPaginated(page, 10);
+      setAssignedTasks(res.tasks);
+      setTotalPages(res.totalPages);
     };
     loadTasks();
-  }, []);
+  }, [page]);
 
   // Local context update after assigning tasks
   const assignTasks = (filters: SelectedFilters) => {
@@ -136,8 +144,11 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
       clearAll,
       clearAllEmployeeTasks,
       setAssignedTasks,
+      page,
+      setPage,
+      totalPages,
     }),
-    [assignedTasks, viewMode]
+    [assignedTasks, viewMode, page, totalPages]
   );
 
   return (

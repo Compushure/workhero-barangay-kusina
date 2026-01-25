@@ -31,14 +31,47 @@ function mapRow(row: any): AssignedTask {
   };
 }
 
-export async function fetchCurrentAssignedTasks(): Promise<ServerActionResponse<AssignedTask[]>> {
+/**
+ * Fetch paginated current assigned tasks
+ * @param page - Page number (1-indexed)
+ * @param pageSize - Number of items per page
+ */
+export async function fetchCurrentAssignedTasksPaginated(
+  page: number = 1,
+  pageSize: number = 5
+): Promise<
+  ServerActionResponse<{
+    data: AssignedTask[];
+    count: number;
+    totalPages: number;
+  }>
+> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from('task_info_view').select('*');
 
-  if (error) return { error: error.message, data: undefined };
+  // Calculate range for pagination
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize - 1;
+
+  const { data, error, count } = await supabase
+    .from('task_info_view')
+    .select('*', { count: 'exact' })
+    .range(start, end);
+
+  if (error) {
+    return { error: 'Failed to fetch assigned tasks: ' + error.message, data: undefined };
+  }
 
   const tasks = (data ?? []).map(mapRow);
-  return { error: null, data: tasks };
+  const totalPages = count ? Math.ceil(count / pageSize) : 0;
+
+  return {
+    error: null,
+    data: {
+      data: tasks,
+      count: count || 0,
+      totalPages,
+    },
+  };
 }
 
 export async function clearAllTasks(): Promise<ServerActionResponse<boolean>> {

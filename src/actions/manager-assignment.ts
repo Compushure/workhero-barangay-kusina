@@ -51,12 +51,12 @@
 //   try {
 //     const supabase = await createClient();
 
-//     // Fetch all users with role information
-//     const { data, error } = await supabase
-//       .from('user_attributes')
-//       .select('user_id, user_name, employee_id')
-//       .eq('employment_status', 'regular')
-//       .order('user_id', { ascending: true });
+    // Fetch all users with role information
+    // const { data, error } = await supabase
+    //   .from('user_attributes')
+    //   .select('user_id, user_name, employee_id')
+    //   .eq('role_type', 'regular')
+    //   .order('user_id', { ascending: true });
 
 //     if (error) {
 //       console.error('Error fetching employees:', error);
@@ -186,22 +186,56 @@ export async function addTaskAssignment(
   employeeIds: string[],
   startDate: string,
   endDate: string,
-  maxAttempts: number
-): Promise<ServerActionResponse<boolean>> {
-  const supabase = await createClient();
+  maxAttempts?: number
+): Promise<ServerActionResponse<void>> {
+  try {
+    const supabase = await createClient();
+    
+    // Check for existing active assignments for these employees in THIS task category
+    const { data: existing, error: checkError } = await supabase
+      .from('KPITask')
+      .select('assigned_to')
+      .eq('category_id', taskId)
+      .in('assigned_to', employeeIds)
 
-  const inserts = employeeIds.map((empId) => ({
-    assigned_by: null, // fill with manager user id if available
-    assigned_to: empId,
-    category_id: taskId,
-    status: 'assigned',
-    created_at: startDate,
-    deadline_date: endDate,
-    max_attempts: maxAttempts,
-  }));
+    const inserts = employeeIds.map((empId) => ({
+      assigned_by: null, // fill with manager user id if available
+      assigned_to: empId,
+      category_id: taskId,
+      status: 'assigned',
+      created_at: startDate,
+      deadline_date: endDate,
+      max_attempts: maxAttempts,
+    }));
 
-  const { error } = await supabase.from('KPITask').insert(inserts);
+    // Identify who is already busy
+    // const busyEmployeeIds = new Set(existing?.map(e => e.assigned_to) || []);
+    // const validEmployeeIds = employeeIds.filter(id => !busyEmployeeIds.has(id));
 
-  if (error) return { error: error.message, data: undefined };
-  return { error: null, data: true };
+    // if (validEmployeeIds.length === 0) {
+    //   return { error: 'All selected employees are already assigned to an active instance of this task.' };
+    // }
+
+    // Proceed with valid assignments
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) return { error: 'Unauthorized' };
+
+    const assignments = employeeIds.map((empId) => ({
+      assigned_by: user.id,
+      assigned_to: empId,
+      category_id: taskId,
+      status: 'assigned',
+      created_at: startDate,
+      deadline_date: endDate,
+      max_attempts: maxAttempts || 1,
+    }));
+
+    const { error: insertError } = await supabase.from('KPITask').insert(assignments);
+    
+    if (insertError) throw insertError;
+    return { error: null, data: undefined };
+
+  } catch (error: any) {
+    return { error: error.message || 'Failed to assign tasks' };
+  }
 }

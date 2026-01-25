@@ -1,44 +1,69 @@
 import { safeAction } from '@/lib/utils/safe-action';
 import {
-  fetchCurrentAssignedTasks,
+  fetchCurrentAssignedTasksPaginated, // ✅ use only the paginated fetch
   clearAllTasks,
   deleteTask,
   updateTaskAssignment,
 } from '@/actions/manager-current-assigned-task';
 import { toast } from 'sonner';
-import type { AssignedTask } from '@/types';
+import type { AssignedTask, ServerActionResponse } from '@/types';
 
-export async function handleFetchCurrentAssignedTasks(): Promise<AssignedTask[]> {
-  const result = await safeAction(() => fetchCurrentAssignedTasks());
+/**
+ * ✅ Handler for paginated fetch of current assigned tasks
+ */
+export async function handleFetchCurrentAssignedTasksPaginated(
+  page: number = 1,
+  pageSize: number = 5
+): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number }> {
+  const result = await safeAction<
+    ServerActionResponse<{ data: AssignedTask[]; count: number; totalPages: number }>
+  >(() => fetchCurrentAssignedTasksPaginated(page, pageSize));
+
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
-    return [];
+    return { tasks: [], count: 0, totalPages: 0 };
   }
-  return result.data?.data ?? [];
+
+  const payload = result.data?.data;
+  return {
+    tasks: payload?.data ?? [],
+    count: payload?.count ?? 0,
+    totalPages: payload?.totalPages ?? 0,
+  };
 }
 
+/**
+ * Clear all tasks
+ */
 export async function handleClearAllTasks(): Promise<boolean> {
-  const result = await safeAction(() => clearAllTasks());
+  const result = await safeAction<ServerActionResponse<boolean>>(() => clearAllTasks());
+
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
     return false;
   }
+
   toast.success('All tasks cleared');
   return true;
 }
 
+/**
+ * Delete a single task
+ */
 export async function handleDeleteTask(taskId: string): Promise<boolean> {
-  const result = await safeAction(() => deleteTask(taskId));
+  const result = await safeAction<ServerActionResponse<boolean>>(() => deleteTask(taskId));
+
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
     return false;
   }
+
   toast.success('Task deleted');
   return true;
 }
 
 /**
- * ✅ New: Handler for updating task assignment
+ * Update task assignment
  */
 export async function handleUpdateTaskAssignment(
   taskId: string,
@@ -46,7 +71,7 @@ export async function handleUpdateTaskAssignment(
   newDueDate: string,
   employeeIds: string[]
 ): Promise<boolean> {
-  const result = await safeAction(() =>
+  const result = await safeAction<ServerActionResponse<boolean>>(() =>
     updateTaskAssignment(taskId, maxAttempts, newDueDate, employeeIds)
   );
 

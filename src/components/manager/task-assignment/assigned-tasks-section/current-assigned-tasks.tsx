@@ -9,9 +9,19 @@ import { TaskSortingBar } from './task-sorting-bar';
 import { EmployeeSortingBar } from './employee-sorting-bar';
 import ClearAllDialog from './dialogs/clear-all-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
+import { Pagination } from '@/components/manager/task-verification/pagination';
 
 export function CurrentAssignedTasks() {
-  const { assignedTasks, viewMode, setViewMode, clearAll } = useTaskAssignment();
+  const {
+    assignedTasks,
+    viewMode,
+    setViewMode,
+    clearAll,
+    page,
+    setPage,
+    totalPages, // ✅ coming from context
+  } = useTaskAssignment();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recently added');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -51,12 +61,16 @@ export function CurrentAssignedTasks() {
     }
   }, [filteredTasks, sortBy]);
 
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage); // ✅ triggers context to fetch new slice
+  };
+
   return (
-    <div className="rounded-3xl bg-[#FBF4E8] p-8 shadow-sm/25">
+    <div className="rounded-3xl bg-[#FBF4E8] p-8 shadow-sm/25 flex flex-col min-h-screen">
       {/* Header & Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
         <h2 className="text-2xl font-bold text-[#690003]">Current Assigned Tasks</h2>
-        
+
         {/* View Toggle */}
         <div className="flex gap-2 bg-white rounded-2xl p-1 border-2 border-gray-300">
           <button
@@ -71,7 +85,9 @@ export function CurrentAssignedTasks() {
           <button
             onClick={() => setViewMode('employee')}
             className={`flex w-44 justify-center items-center gap-2 py-2.5 rounded-xl text-base font-medium transition ${
-              viewMode === 'employee' ? 'bg-[#690003] text-white' : 'text-gray-500 hover:bg-gray-200'
+              viewMode === 'employee'
+                ? 'bg-[#690003] text-white'
+                : 'text-gray-500 hover:bg-gray-200'
             }`}
           >
             <Users size={20} />
@@ -86,13 +102,13 @@ export function CurrentAssignedTasks() {
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder={viewMode === 'task' ? "Search tasks..." : "Search employees..."}
+            placeholder={viewMode === 'task' ? 'Search tasks...' : 'Search employees...'}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-full bg-white focus:outline-none focus:border-[#690003]"
           />
         </div>
-        
+
         {viewMode === 'task' ? (
           <TaskSortingBar sortBy={sortBy} onSortChange={setSortBy} />
         ) : (
@@ -109,18 +125,21 @@ export function CurrentAssignedTasks() {
       </div>
 
       {/* Task/Employee Lists */}
-      <div className="space-y-6">
+      <div className="flex-1 space-y-6">
         {sortedTasks.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No tasks assigned yet.</p>
           </div>
         ) : viewMode === 'task' ? (
-          sortedTasks.map((task) => (
-            <TaskViewCard key={task.id} task={task} />
-          ))
+          sortedTasks.map((task) => <TaskViewCard key={task.id} task={task} />)
         ) : (
           <EmployeeViewCard tasks={filteredTasks} searchTerm={searchTerm} sortBy={sortBy} />
         )}
+      </div>
+
+      {/* ✅ Pagination fixed at bottom */}
+      <div className="mt-auto pt-4">
+        <Pagination totalPages={totalPages} currentPage={page} onPageChange={handlePageChange} />
       </div>
 
       {/* Clear Confirmation Dialog */}
