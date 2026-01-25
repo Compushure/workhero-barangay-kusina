@@ -6,7 +6,7 @@ import type { ServerActionResponse, Task, Employee, PaginatedResponse } from '@/
 /**
  * Toggle between Task View and Employee View
  */
-export async function toggleViewAction(): Promise<ServerActionResponse<'list' | 'employee'>> {
+export async function toggleViewAction(): Promise<ServerActionResponse<'task' | 'employee'>> {
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc('toggle_user_default_view');
@@ -18,7 +18,7 @@ export async function toggleViewAction(): Promise<ServerActionResponse<'list' | 
     return { error: 'Unexpected RPC result', data: undefined };
   }
 
-  return { error: null, data: data as 'list' | 'employee' };
+  return { error: null, data: data as 'task' | 'employee' };
 }
 
 /**
