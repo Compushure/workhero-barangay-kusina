@@ -42,7 +42,7 @@ export async function redirectToCorrectDashboardServer() {
       redirect('/manager/dashboard/task-assignment');
       return;
     case 'hr':
-      redirect('/hr/dashboard');
+      redirect('/hr/reward-requests');
       return;
     case 'regular':
     case 'employee':
@@ -50,7 +50,9 @@ export async function redirectToCorrectDashboardServer() {
       return;
     default:
       console.log('unknwon role');
-      return;
+      //localhost:3008/error?status=404&cause=Page%20not%20found&recommendation=Check%20the%20URL%20or%20go%20back.
+      redirect('/error?status=403&cause=Access%20Denied&recommendation=Contact%20your%20administrator.');
+      http: return;
   }
 }
 
@@ -60,7 +62,7 @@ export async function protectAdminRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -68,7 +70,7 @@ export async function protectAdminRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -77,7 +79,9 @@ export async function protectAdminRoute() {
 
   if (normalizedRole !== 'superadmin') {
     console.log('Access denied: User has role', role, 'but superadmin is required');
-    redirect('/auth/login');
+    redirect(
+      '/error?status=403&cause=Access%20Denied&recommendation=Make%20sure%20you%20have%20the%20right%20permissions.'
+    );
     return;
   }
 
@@ -115,7 +119,7 @@ export async function protectManagerRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -123,7 +127,7 @@ export async function protectManagerRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -132,7 +136,9 @@ export async function protectManagerRoute() {
 
   if (normalizedRole !== 'manager') {
     console.log('Access denied: User has role', role, 'but manager is required');
-    redirect('/auth/login');
+   redirect(
+     '/error?status=403&cause=Access%20Denied&recommendation=Make%20sure%20you%20have%20the%20right%20permissions.'
+   );
     return;
   }
 
@@ -145,7 +151,7 @@ export async function protectHRRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -153,7 +159,7 @@ export async function protectHRRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -162,7 +168,9 @@ export async function protectHRRoute() {
 
   if (normalizedRole !== 'hr') {
     console.log('Access denied: User has role', role, 'but hr is required');
-    redirect('/auth/login');
+redirect(
+  '/error?status=403&cause=Access%20Denied&recommendation=Make%20sure%20you%20have%20the%20right%20permissions.'
+);
     return;
   }
 
@@ -175,7 +183,7 @@ export async function protectEmployeeRoute() {
 
   if (!sessionData.session || sessionError) {
     console.log('No session found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -183,7 +191,7 @@ export async function protectEmployeeRoute() {
 
   if (claimsError || !claimsData?.claims) {
     console.log('No claims found, redirecting to login');
-    redirect('/auth/login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
   }
 
@@ -192,7 +200,9 @@ export async function protectEmployeeRoute() {
 
   if (normalizedRole !== 'regular' && normalizedRole !== 'employee') {
     console.log('Access denied: User has role', role, 'but employee/regular is required');
-    redirect('/auth/login');
+ redirect(
+   '/error?status=403&cause=Access%20Denied&recommendation=Make%20sure%20you%20have%20the%20right%20permissions.'
+ );
     return;
   }
 
