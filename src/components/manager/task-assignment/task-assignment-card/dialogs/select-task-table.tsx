@@ -6,7 +6,7 @@ interface SelectTasksTableProps {
   filteredTasks: Task[];
   toggleTask: (taskId: string) => void;
   updateMaxAttempts: (taskId: string, newValue: number) => void;
-  selectedTaskInstances: Array<{ id: string; maxAttempts: number }>;
+  selectedTaskInstance: Array<{ id: string; maxAttempts: number }>;
   taskMaxAttempts: Record<string, number>;
 }
 
@@ -14,7 +14,7 @@ function SelectTasksTable({
   filteredTasks,
   toggleTask,
   updateMaxAttempts,
-  selectedTaskInstances,
+  selectedTaskInstance,
   taskMaxAttempts,
 }: SelectTasksTableProps) {
   return (
@@ -34,7 +34,7 @@ function SelectTasksTable({
         <table className="w-full">
           <tbody>
             {filteredTasks.map((task) => {
-              const isSelected = selectedTaskInstances.some((instance) => instance.id === task.id);
+              const isSelected = selectedTaskInstance.some((instance) => instance.id === task.id);
               const currentMaxAttempts =
                 taskMaxAttempts[task.id] ?? (task.isRepeatable ? 1 : task.maxAttempts);
 

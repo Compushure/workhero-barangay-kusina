@@ -17,14 +17,14 @@ import SelectTasksTable from './select-task-table';
 import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
 
 interface SelectTasksDialogProps {
-  selectedTasks: string[];
+  selectedTask: string[];
   onTasksChange: (tasks: string[], maxAttempts?: Record<string, number>) => void;
   assignedTasks?: AssignedTask[];
   buttonLabel?: string;
 }
 
 export function SelectTasksDialog({
-  selectedTasks,
+  selectedTask,
   onTasksChange,
   assignedTasks = [],
   buttonLabel,
@@ -36,7 +36,7 @@ export function SelectTasksDialog({
   const [isLoading, setIsLoading] = useState(true);
   const [taskMaxAttempts, setTaskMaxAttempts] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
-    selectedTasks.forEach((taskId) => {
+    selectedTask.forEach((taskId) => {
       const task = tasks.find((t) => t.id === taskId);
       if (task && task.isRepeatable) {
         initial[taskId] = 1;
@@ -45,12 +45,12 @@ export function SelectTasksDialog({
     return initial;
   });
 
-  // Reset taskMaxAttempts when selectedTasks becomes empty (after assignment and clear)
+  // Reset taskMaxAttempts when selectedTask becomes empty (after assignment and clear)
   useEffect(() => {
-    if (selectedTasks.length === 0) {
+    if (selectedTask.length === 0) {
       setTaskMaxAttempts({});
     }
-  }, [selectedTasks]);
+  }, [selectedTask]);
 
   // Fetch tasks on mount
   useEffect(() => {
@@ -73,7 +73,7 @@ export function SelectTasksDialog({
   const assignedTaskIds = new Set(assignedTasks.map((t) => t.taskId));
 
   const toggleTask = (taskId: string) => {
-    if (selectedTasks.includes(taskId)) {
+    if (selectedTask.includes(taskId)) {
       // Deselect
       onTasksChange([], {});
       setTaskMaxAttempts({});
@@ -93,7 +93,7 @@ export function SelectTasksDialog({
     if (task && task.isRepeatable) {
       const newMaxAttempts = { ...taskMaxAttempts, [taskId]: Math.max(1, newValue) };
       setTaskMaxAttempts(newMaxAttempts);
-      onTasksChange(selectedTasks, newMaxAttempts);
+      onTasksChange(selectedTask, newMaxAttempts);
     }
   };
 
@@ -130,7 +130,7 @@ export function SelectTasksDialog({
         onClick={() => setOpen(true)}
         className="bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2 min-w-50 justify-between"
       >
-        <span className="truncate">{buttonLabel || `${selectedTasks.length} selected`}</span>
+        <span className="truncate">{buttonLabel}</span>
         <Plus className="w-4 h-4 shrink-0" />
       </Button>
 
@@ -172,7 +172,7 @@ export function SelectTasksDialog({
             <h4 className="text-lg font-bold text-[#690003]">
               Tasks Selected
               <span className="bg-gray-200 px-2 py-1 rounded-full text-sm ml-2">
-                {selectedTasks.length}
+                {selectedTask.length}
               </span>
             </h4>
           </div>
@@ -182,7 +182,7 @@ export function SelectTasksDialog({
             filteredTasks={filteredTasks}
             toggleTask={toggleTask}
             updateMaxAttempts={updateMaxAttempts}
-            selectedTaskInstances={selectedTasks.map((taskId) => ({
+            selectedTaskInstance={selectedTask.map((taskId) => ({
               id: taskId,
               maxAttempts: taskMaxAttempts[taskId] || 1,
             }))}
@@ -200,7 +200,7 @@ export function SelectTasksDialog({
             </Button>
             <Button
               onClick={handleConfirm}
-              disabled={selectedTasks.length === 0}
+              disabled={selectedTask.length === 0}
               className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50"
             >
               Confirm
