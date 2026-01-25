@@ -55,7 +55,7 @@ export async function fetchEmployeeList(): Promise<ServerActionResponse<Assigned
     const { data, error } = await supabase
       .from('user_attributes')
       .select('user_id, user_name, employee_id')
-      .eq('employment_status', 'regular')
+      .eq('role_type', 'regular')
       .order('user_id', { ascending: true });
 
     if (error) {
@@ -96,7 +96,7 @@ export async function addTaskAssignmentAction(
   try {
     const supabase = await createClient();
     
-    // 1. Check for existing active assignments for these employees in THIS task category
+    // Check for existing active assignments for these employees in THIS task category
     const { data: existing, error: checkError } = await supabase
       .from('KPITask')
       .select('assigned_to')
@@ -105,19 +105,19 @@ export async function addTaskAssignmentAction(
 
     if (checkError) throw checkError;
 
-    // 2. Identify who is already busy
-    const busyEmployeeIds = new Set(existing?.map(e => e.assigned_to) || []);
-    const validEmployeeIds = employeeIds.filter(id => !busyEmployeeIds.has(id));
+    // Identify who is already busy
+    // const busyEmployeeIds = new Set(existing?.map(e => e.assigned_to) || []);
+    // const validEmployeeIds = employeeIds.filter(id => !busyEmployeeIds.has(id));
 
-    if (validEmployeeIds.length === 0) {
-      return { error: 'All selected employees are already assigned to an active instance of this task.' };
-    }
+    // if (validEmployeeIds.length === 0) {
+    //   return { error: 'All selected employees are already assigned to an active instance of this task.' };
+    // }
 
-    // 3. Proceed with valid assignments only
+    // Proceed with valid assignments
     const user = (await supabase.auth.getUser()).data.user;
     if (!user) return { error: 'Unauthorized' };
 
-    const assignments = validEmployeeIds.map((empId) => ({
+    const assignments = employeeIds.map((empId) => ({
       assigned_by: user.id,
       assigned_to: empId,
       category_id: taskId,
