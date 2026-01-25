@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Search, Plus } from 'lucide-react';
-import type { AssignedEmployee } from '@/types';
+import type { AssignedEmployee, AssignedTask } from '@/types';
 import { MOCK_EMPLOYEES } from '@/mock-data/employees';
 import AssignEmployeesTable from './assign-employees-table';
 
@@ -18,15 +18,39 @@ interface AssignEmployeesDialogProps {
   selectedEmployees: AssignedEmployee[];
   onEmployeesChange: (employees: AssignedEmployee[]) => void;
   disabled?: boolean;
+  selectedTaskIds?: string[];
+  assignedTasks?: AssignedTask[];
 }
 
 export function AssignEmployeesDialog({
   selectedEmployees,
   onEmployeesChange,
   disabled = false,
+  selectedTaskIds = [],
+  assignedTasks = [],
 }: AssignEmployeesDialogProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Get employees already assigned to any instance of the selected tasks
+  const getDisabledEmployeeIds = () => {
+    const disabledIds = new Set<string>();
+
+    selectedTaskIds.forEach((taskId) => {
+      assignedTasks.forEach((assignedTask) => {
+        // If this is an instance of the selected task
+        if (assignedTask.taskId === taskId) {
+          assignedTask.assignedEmployees.forEach((emp) => {
+            disabledIds.add(emp.id);
+          });
+        }
+      });
+    });
+
+    return disabledIds;
+  };
+
+  const disabledEmployeeIds = getDisabledEmployeeIds();
 
   const filteredEmployees = MOCK_EMPLOYEES.filter((emp) => {
     const searchLower = searchTerm.toLowerCase();
@@ -55,9 +79,9 @@ export function AssignEmployeesDialog({
       const filteredIds = new Set(filteredEmployees.map((e) => e.id));
       onEmployeesChange(selectedEmployees.filter((emp) => !filteredIds.has(emp.id)));
     } else {
-      // Select all filtered employees
+      // Select all filtered employees (excluding disabled ones)
       const newSelections = filteredEmployees.filter(
-        (emp) => !selectedEmployees.find((e) => e.id === emp.id)
+        (emp) => !selectedEmployees.find((e) => e.id === emp.id) && !disabledEmployeeIds.has(emp.id)
       );
       onEmployeesChange([...selectedEmployees, ...newSelections]);
     }
@@ -119,12 +143,13 @@ export function AssignEmployeesDialog({
           </div>
 
           {/* Employees Table */}
-          <AssignEmployeesTable 
-            allFilteredSelected={allFilteredSelected} 
-            handleSelectAll={handleSelectAll} 
+          <AssignEmployeesTable
+            allFilteredSelected={allFilteredSelected}
+            handleSelectAll={handleSelectAll}
             filteredEmployees={filteredEmployees}
-            selectedEmployees={selectedEmployees} 
+            selectedEmployees={selectedEmployees}
             toggleEmployee={toggleEmployee}
+            disabledEmployeeIds={disabledEmployeeIds}
           />
 
           {/* Dialog Footer */}
