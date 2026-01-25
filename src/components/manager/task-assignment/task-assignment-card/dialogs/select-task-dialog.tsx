@@ -12,9 +12,8 @@ import {
 } from '@/components/ui/dialog';
 import { Search, Plus } from 'lucide-react';
 import type { AssignedTask, Task } from '@/types';
-import { MOCK_TASKS } from '@/mock-data/employees';
 import SelectTasksTable from './select-task-table';
-import { handleFetchTaskList } from '@/action-handlers/manager-assignments';
+import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
 
 interface SelectTasksDialogProps {
   selectedTask: string[];
@@ -44,13 +43,6 @@ export function SelectTasksDialog({
     });
     return initial;
   });
-
-  // Reset taskMaxAttempts when selectedTask becomes empty (after assignment and clear)
-  useEffect(() => {
-    if (selectedTask.length === 0) {
-      setTaskMaxAttempts({});
-    }
-  }, [selectedTask]);
 
   // Fetch tasks on mount
   useEffect(() => {
