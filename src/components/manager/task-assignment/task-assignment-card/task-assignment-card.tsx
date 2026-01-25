@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
 import { SelectTasksDialog } from './dialogs/select-task-dialog';
 import { DatePickerPopover } from './date-picker-popover';
-import type { SelectedFilters, AssignedEmployee, AssignedTask } from '@/types';
+import type { AssignedEmployee } from '@/types';
 import { MOCK_TASKS } from '@/mock-data/employees';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
+import { handleAddTaskAssignment } from '@/action-handlers/manager-assignment';
 
 export function TaskAssignmentCard() {
   const { assignTasks, assignedTasks } = useTaskAssignment();
@@ -30,19 +31,39 @@ export function TaskAssignmentCard() {
     }
   };
 
-  const handleAssign = () => {
-    if (selectedEmployees.length > 0 && selectedTask.length > 0 && selectedDeadline) {
-      assignTasks({
-        employees: selectedEmployees,
-        tasks: selectedTask.map((taskId) => ({
-          id: taskId,
-          maxAttempts: taskMaxRepeats[taskId] || 1,
-        })),
-        deadline: selectedDeadline,
-      });
-      handleClear();
-    }
-  };
+  const handleAssign = async () => {
+      if (selectedEmployees.length > 0 && selectedTask.length > 0 && selectedDeadline) {
+        // Your dialog logic currently supports single task selection
+        const taskId = selectedTask[0]; 
+        const employeeIds = selectedEmployees.map((emp) => emp.id);
+        const startDate = new Date().toISOString();
+        const endDate = selectedDeadline.toISOString();
+        const maxAttempts = taskMaxRepeats[taskId] || 1;
+
+        // Call the server action handler
+        const success = await handleAddTaskAssignment(
+          taskId,
+          employeeIds,
+          startDate,
+          endDate,
+          maxAttempts
+        );
+
+        if (success) {
+          // If the DB update succeeded, update the local context so the 
+          // "disabling" logic in the dialogs sees the new assignments
+          assignTasks({
+            employees: selectedEmployees,
+            tasks: selectedTask.map((id) => ({
+              id,
+              maxAttempts: taskMaxRepeats[id] || 1,
+            })),
+            deadline: selectedDeadline,
+          });
+          handleClear();
+        }
+      }
+    };
 
   const handleClear = () => {
     setSelectedEmployees([]);

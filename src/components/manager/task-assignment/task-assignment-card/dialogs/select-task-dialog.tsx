@@ -14,6 +14,7 @@ import { Search, Plus } from 'lucide-react';
 import type { AssignedTask, Task } from '@/types';
 import { MOCK_TASKS } from '@/mock-data/employees';
 import SelectTasksTable from './select-task-table';
+import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
 
 interface SelectTasksDialogProps {
   selectedTask: string[];
@@ -31,10 +32,12 @@ export function SelectTasksDialog({
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [tasks, setTasks] = useState<Task[]>([]); // New state for real data
+  const [isLoading, setIsLoading] = useState(true);
   const [taskMaxAttempts, setTaskMaxAttempts] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
     selectedTask.forEach((taskId) => {
-      const task = MOCK_TASKS.find((t) => t.id === taskId);
+      const task = tasks.find((t) => t.id === taskId);
       if (task && task.isRepeatable) {
         initial[taskId] = 1;
       }
@@ -49,14 +52,24 @@ export function SelectTasksDialog({
     }
   }, [selectedTask]);
 
-  const filteredTasks = MOCK_TASKS.filter((task) => {
+  // Fetch tasks on mount
+  useEffect(() => {
+    async function loadTasks() {
+      const data = await handleFetchTaskList();
+      setTasks(data);
+      setIsLoading(false);
+    }
+    loadTasks();
+  }, []);
+
+  const filteredTasks = tasks.filter((task) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = task.name.toLowerCase().includes(searchLower);
     const matchesType = filterType === 'all' || task.type === filterType;
     return matchesSearch && matchesType;
   });
 
-  const taskTypes = ['all', ...new Set(MOCK_TASKS.map((t) => t.type))];
+  const taskTypes = ['all', ...new Set(tasks.map((t) => t.type))];
   const assignedTaskIds = new Set(assignedTasks.map((t) => t.taskId));
 
   const toggleTask = (taskId: string) => {
@@ -66,7 +79,7 @@ export function SelectTasksDialog({
       setTaskMaxAttempts({});
     } else {
       // Select this task and deselect others
-      const task = MOCK_TASKS.find((t) => t.id === taskId);
+      const task = tasks.find((t) => t.id === taskId);
       if (task) {
         const newMaxAttempts = { [taskId]: task.isRepeatable ? 1 : 1 };
         setTaskMaxAttempts(newMaxAttempts);
@@ -76,7 +89,7 @@ export function SelectTasksDialog({
   };
 
   const updateMaxAttempts = (taskId: string, newValue: number) => {
-    const task = MOCK_TASKS.find((t) => t.id === taskId);
+    const task = tasks.find((t) => t.id === taskId);
     if (task && task.isRepeatable) {
       const newMaxAttempts = { ...taskMaxAttempts, [taskId]: Math.max(1, newValue) };
       setTaskMaxAttempts(newMaxAttempts);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,6 +13,7 @@ import { Search, Plus } from 'lucide-react';
 import type { AssignedEmployee, AssignedTask } from '@/types';
 import { MOCK_EMPLOYEES } from '@/mock-data/employees';
 import AssignEmployeesTable from './assign-employees-table';
+import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
 
 interface AssignEmployeesDialogProps {
   selectedEmployees: AssignedEmployee[];
@@ -31,6 +32,8 @@ export function AssignEmployeesDialog({
 }: AssignEmployeesDialogProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Get employees already assigned to any instance of the selected tasks
   const getDisabledEmployeeIds = () => {
@@ -52,7 +55,16 @@ export function AssignEmployeesDialog({
 
   const disabledEmployeeIds = getDisabledEmployeeIds();
 
-  const filteredEmployees = MOCK_EMPLOYEES.filter((emp) => {
+  useEffect(() => {
+    async function loadEmployees() {
+      const data = await handleFetchEmployeeList();
+      setEmployees(data);
+      setIsLoading(false);
+    }
+    loadEmployees();
+  }, []);
+
+  const filteredEmployees = employees.filter((emp) => {
     const searchLower = searchTerm.toLowerCase();
     return (
       emp.name.toLowerCase().includes(searchLower) || emp.empId.toLowerCase().includes(searchLower)
