@@ -34,6 +34,19 @@ interface AddItemsModalProps {
   }) => void;
 }
 
+// Format number with comma separators
+const formatNumber = (value: string): string => {
+  if (!value) return '';
+  const num = value.replace(/,/g, '');
+  if (isNaN(Number(num))) return value;
+  return Number(num).toLocaleString('en-US');
+};
+
+// Remove commas for storage
+const unformatNumber = (value: string): string => {
+  return value.replace(/,/g, '');
+};
+
 export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddItemsModalProps) {
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconPreview, setIconPreview] = useState<string>('');
@@ -81,9 +94,9 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
           id: editingItem?.id,
           icon: iconFile || undefined,
           name: itemName,
-          quantity,
-          redeemingLimit,
-          cost: parseFloat(itemCost),
+          quantity: unformatNumber(quantity),
+          redeemingLimit: unformatNumber(redeemingLimit),
+          cost: parseFloat(unformatNumber(itemCost)),
         });
         handleClose();
       } catch (error) {
@@ -112,8 +125,8 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
 
   // Validation: Check if redeeming limit exceeds quantity
   const isRedeemingLimitInvalid = () => {
-    const quantityNum = quantity ? parseInt(quantity) : 0;
-    const limitNum = redeemingLimit ? parseInt(redeemingLimit) : 0;
+    const quantityNum = quantity ? parseInt(unformatNumber(quantity)) : 0;
+    const limitNum = redeemingLimit ? parseInt(unformatNumber(redeemingLimit)) : 0;
 
     // If both values exist and limit > quantity, it's invalid
     if (quantity && redeemingLimit && limitNum > quantityNum) {
@@ -128,7 +141,10 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
 
   // Check if any character limits are exceeded
   const hasCharacterLimitErrors =
-    itemName.length > 50 || quantity.length > 6 || redeemingLimit.length > 6 || itemCost.length > 6;
+    itemName.length > 50 ||
+    unformatNumber(quantity).length > 6 ||
+    unformatNumber(redeemingLimit).length > 6 ||
+    unformatNumber(itemCost).length > 6;
 
   const isSaveDisabled =
     !itemName ||
@@ -219,19 +235,19 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                 </Label>
                 <Input
                   id="quantity"
-                  type="number"
+                  type="text"
                   value={quantity}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    if (value.length <= 6) {
-                      setQuantity(value);
+                    const value = unformatNumber(e.target.value);
+                    if (value.length <= 6 && /^\d*$/.test(value)) {
+                      setQuantity(formatNumber(value));
                     }
                   }}
                   placeholder="Enter quantity"
                   required
                   className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
-                {quantity.length === 6}
+                {unformatNumber(quantity).length === 6}
               </div>
               <div className="flex-1 space-y-2">
                 <Label htmlFor="redeeming-limit" className="text-sm font-medium text-[#5a2a2a]">
@@ -239,18 +255,18 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                 </Label>
                 <Input
                   id="redeeming-limit"
-                  type="number"
+                  type="text"
                   value={redeemingLimit}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    if (value.length <= 6) {
-                      setRedeemingLimit(value);
+                    const value = unformatNumber(e.target.value);
+                    if (value.length <= 6 && /^\d*$/.test(value)) {
+                      setRedeemingLimit(formatNumber(value));
                     }
                   }}
                   placeholder="Enter limit"
                   className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
-                {redeemingLimit.length === 6}
+                {unformatNumber(redeemingLimit).length === 6}
               </div>
             </div>
 
@@ -269,19 +285,19 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
               <div className="flex items-center gap-3">
                 <Input
                   id="item-cost"
-                  type="number"
+                  type="text"
                   value={itemCost}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    if (value.length <= 6) {
-                      setItemCost(value);
+                    const value = unformatNumber(e.target.value);
+                    if (value.length <= 6 && /^\d*$/.test(value)) {
+                      setItemCost(formatNumber(value));
                     }
                   }}
                   placeholder="Fiesta Points"
                   className="w-120px bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
               </div>
-              {itemCost.length === 6}
+              {unformatNumber(itemCost).length === 6}
             </div>
           </div>
         </div>

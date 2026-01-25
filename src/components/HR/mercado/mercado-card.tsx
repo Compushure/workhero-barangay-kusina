@@ -28,6 +28,11 @@ interface MercadoCardProps {
   onUnhide?: (id: string) => void;
 }
 
+// Format number with comma separators
+function formatNumber(num: number): string {
+  return num.toLocaleString('en-US');
+}
+
 export function MercadoCard({ item, onEdit, onDelete, onHide, onUnhide }: MercadoCardProps) {
   const [hideDialogOpen, setHideDialogOpen] = useState(false);
 
@@ -59,9 +64,13 @@ export function MercadoCard({ item, onEdit, onDelete, onHide, onUnhide }: Mercad
 
           {/* Price and Quantity */}
           <div className="flex items-center gap-4 mt-2">
-            <p className="text-[#730202] font-medium italic opacity-80">{item.price} pts</p>
+            <p className="text-[#730202] font-medium italic opacity-80">
+              {formatNumber(item.price)} pts
+            </p>
             {item.quantity !== undefined && (
-              <p className="text-[#730202] text-sm opacity-70">| Available: {item.quantity}</p>
+              <p className="text-[#730202] text-sm opacity-70">
+                | Available: {formatNumber(item.quantity)}
+              </p>
             )}
           </div>
         </div>
