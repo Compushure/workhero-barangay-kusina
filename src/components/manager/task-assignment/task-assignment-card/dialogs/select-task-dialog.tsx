@@ -182,7 +182,7 @@ export function SelectTasksDialog({
             filteredTasks={filteredTasks}
             toggleTask={toggleTask}
             updateMaxAttempts={updateMaxAttempts}
-            selectedTaskInstances={selectedTask.map((taskId) => ({
+            selectedTaskInstance={selectedTask.map((taskId) => ({
               id: taskId,
               maxAttempts: taskMaxAttempts[taskId] || 1,
             }))}

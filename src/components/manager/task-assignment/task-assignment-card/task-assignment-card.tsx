@@ -1,25 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
 import { SelectTasksDialog } from './dialogs/select-task-dialog';
 import { DatePickerPopover } from './date-picker-popover';
-import type { AssignedEmployee } from '@/types';
+import type { AssignedEmployee, Task } from '@/types';
 import { MOCK_TASKS } from '@/mock-data/employees';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
 import { handleAddTaskAssignment } from '@/action-handlers/manager-assignment';
+import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
 
 export function TaskAssignmentCard() {
   const { assignTasks, assignedTasks } = useTaskAssignment();
 
+  const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<AssignedEmployee[]>([]);
   const [selectedTask, setselectedTask] = useState<string[]>([]);
   const [taskMaxRepeats, setTaskMaxRepeats] = useState<Record<string, number>>({});
   const [selectedDeadline, setSelectedDeadline] = useState<Date | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showTaskWarning, setShowTaskWarning] = useState(false);
+
+  useEffect(() => {
+    async function loadTasks() {
+      const tasks = await handleFetchTaskList();
+      setAvailableTasks(tasks);
+    }
+    loadTasks();
+  }, []);
 
   const handleTasksChange = (tasks: string[], maxRepeats?: Record<string, number>) => {
     setselectedTask(tasks);
@@ -82,7 +92,7 @@ export function TaskAssignmentCard() {
 
   const getSelectedTaskName = () => {
     if (selectedTask.length === 0) return 'Select Task';
-    const task = MOCK_TASKS.find((t) => t.id === selectedTask[0]);
+    const task = availableTasks.find((t) => t.id === selectedTask[0]);
     return task?.name || 'Select Task';
   };
 
