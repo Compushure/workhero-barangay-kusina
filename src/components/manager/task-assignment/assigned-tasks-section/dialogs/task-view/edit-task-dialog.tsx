@@ -82,7 +82,15 @@ export default function EditTaskDialog({
                 >
                   −
                 </button>
-                <span className="w-8 text-center font-bold">{editMaxAttempts}</span>
+                <input
+                  type="number"
+                  value={editMaxAttempts}
+                  onChange={(e) => {
+                    setEditMaxAttempts(Math.max(1, Number.parseInt(e.target.value) || 1));
+                  }}
+                  className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans bg-[#fafafa]"
+                  min="1"
+                />
                 <button
                   onClick={() => setEditMaxAttempts(editMaxAttempts + 1)}
                   className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
