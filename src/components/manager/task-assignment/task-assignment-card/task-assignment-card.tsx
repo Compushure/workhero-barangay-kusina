@@ -14,14 +14,14 @@ export function TaskAssignmentCard() {
   const { assignTasks, assignedTasks } = useTaskAssignment();
 
   const [selectedEmployees, setSelectedEmployees] = useState<AssignedEmployee[]>([]);
-  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [selectedTask, setselectedTask] = useState<string[]>([]);
   const [taskMaxRepeats, setTaskMaxRepeats] = useState<Record<string, number>>({});
   const [selectedDeadline, setSelectedDeadline] = useState<Date | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showTaskWarning, setShowTaskWarning] = useState(false);
 
   const handleTasksChange = (tasks: string[], maxRepeats?: Record<string, number>) => {
-    setSelectedTasks(tasks);
+    setselectedTask(tasks);
     if (maxRepeats) {
       setTaskMaxRepeats(maxRepeats);
     }
@@ -31,10 +31,10 @@ export function TaskAssignmentCard() {
   };
 
   const handleAssign = () => {
-    if (selectedEmployees.length > 0 && selectedTasks.length > 0 && selectedDeadline) {
+    if (selectedEmployees.length > 0 && selectedTask.length > 0 && selectedDeadline) {
       assignTasks({
         employees: selectedEmployees,
-        tasks: selectedTasks.map((taskId) => ({
+        tasks: selectedTask.map((taskId) => ({
           id: taskId,
           maxAttempts: taskMaxRepeats[taskId] || 1,
         })),
@@ -46,7 +46,7 @@ export function TaskAssignmentCard() {
 
   const handleClear = () => {
     setSelectedEmployees([]);
-    setSelectedTasks([]);
+    setselectedTask([]);
     setTaskMaxRepeats({});
     setSelectedDeadline(null);
     setShowClearConfirm(false);
@@ -54,14 +54,14 @@ export function TaskAssignmentCard() {
   };
 
   const handleEmployeesDialogAttempt = () => {
-    if (selectedTasks.length === 0) {
+    if (selectedTask.length === 0) {
       setShowTaskWarning(true);
     }
   };
 
   const getSelectedTaskName = () => {
-    if (selectedTasks.length === 0) return 'Select Task';
-    const task = MOCK_TASKS.find((t) => t.id === selectedTasks[0]);
+    if (selectedTask.length === 0) return 'Select Task';
+    const task = MOCK_TASKS.find((t) => t.id === selectedTask[0]);
     return task?.name || 'Select Task';
   };
 
@@ -72,7 +72,7 @@ export function TaskAssignmentCard() {
       <div className="flex flex-wrap gap-4 mb-2">
         <div className="min-w-50">
           <SelectTasksDialog
-            selectedTasks={selectedTasks}
+            selectedTask={selectedTask}
             onTasksChange={handleTasksChange}
             assignedTasks={assignedTasks}
             buttonLabel={getSelectedTaskName()}
@@ -83,8 +83,8 @@ export function TaskAssignmentCard() {
           <AssignEmployeesDialog
             selectedEmployees={selectedEmployees}
             onEmployeesChange={setSelectedEmployees}
-            disabled={selectedTasks.length === 0}
-            selectedTaskIds={selectedTasks}
+            disabled={selectedTask.length === 0}
+            selectedTaskIds={selectedTask}
             assignedTasks={assignedTasks}
           />
         </div>
@@ -111,7 +111,7 @@ export function TaskAssignmentCard() {
         <Button
           onClick={handleAssign}
           disabled={
-            selectedEmployees.length === 0 || selectedTasks.length === 0 || !selectedDeadline
+            selectedEmployees.length === 0 || selectedTask.length === 0 || !selectedDeadline
           }
           className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50 disabled:cursor-not-allowed px-12"
         >
