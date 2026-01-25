@@ -42,7 +42,7 @@ export async function redirectToCorrectDashboardServer() {
       redirect('/manager/dashboard/task-assignment');
       return;
     case 'hr':
-      redirect('/hr/dashboard');
+      redirect('/hr/reward-requests');
       return;
     case 'regular':
     case 'employee':

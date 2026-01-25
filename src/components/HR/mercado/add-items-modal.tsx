@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Pencil, Plus, X } from 'lucide-react';
+import { Pencil, Plus, X, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -40,6 +40,8 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [itemCost, setItemCost] = useState('');
+  const [redeemingLimit, setRedeemingLimit] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Populate form when editing
   useEffect(() => {
@@ -71,35 +73,42 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (itemName && itemCost) {
-      onSave?.({
-        id: editingItem?.id,
-        icon: iconFile || undefined,
-        name: itemName,
-        quantity,
-        redeemingLimit,
-        cost: parseFloat(itemCost),
-      });
-      handleClose();
+      setIsLoading(true);
+      try {
+        await onSave?.({
+          id: editingItem?.id,
+          icon: iconFile || undefined,
+          name: itemName,
+          quantity,
+          redeemingLimit,
+          cost: parseFloat(itemCost),
+        });
+        handleClose();
+      } catch (error) {
+        console.error('Error saving item:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleClose = () => {
+    if (isLoading) return; // Prevent closing while loading
     setIconFile(null);
     setIconPreview('');
     setItemName('');
     setQuantity('');
     setRedeemingLimit('');
     setItemCost('');
+    setIsLoading(false);
     onOpenChange(false);
   };
 
   function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ');
   }
-
-  const [redeemingLimit, setRedeemingLimit] = useState('');
 
   // Validation: Check if redeeming limit exceeds quantity
   const isRedeemingLimitInvalid = () => {
@@ -115,13 +124,23 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
   };
 
   // Validation: Check if item name has at least 2 characters
-  const isItemNameValid = itemName.trim().length >= 2;
+  const isItemNameValid = itemName.trim().length >= 2 && itemName.length <= 50;
+
+  // Check if any character limits are exceeded
+  const hasCharacterLimitErrors =
+    itemName.length > 50 || quantity.length > 6 || redeemingLimit.length > 6 || itemCost.length > 6;
 
   const isSaveDisabled =
-    !itemName || !isItemNameValid || !itemCost || !quantity || isRedeemingLimitInvalid();
+    !itemName ||
+    !isItemNameValid ||
+    !itemCost ||
+    !quantity ||
+    isRedeemingLimitInvalid() ||
+    hasCharacterLimitErrors ||
+    isLoading;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
       <DialogContent className="bg-[#f5e5dc] border-none max-w-2000 rounded-2xl p-4">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
@@ -173,14 +192,23 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
               <Input
                 id="item-name"
                 value={itemName}
-                onChange={(e) => setItemName(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.length <= 50) {
+                    setItemName(value);
+                  }
+                }}
                 placeholder="Ex: Vacation ticket"
                 minLength={2}
                 className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
               />
-              {itemName && !isItemNameValid && (
+              {itemName && !isItemNameValid && itemName.length < 2 && (
                 <p className="text-xs text-red-600">Item name must be at least 2 characters</p>
               )}
+              {itemName.length > 50 && (
+                <p className="text-xs text-red-600">Item name cannot exceed 50 characters</p>
+              )}
+              {itemName.length === 50}
             </div>
 
             {/* Quantity and Redeeming Limit */}
@@ -193,11 +221,17 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                   id="quantity"
                   type="number"
                   value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 6) {
+                      setQuantity(value);
+                    }
+                  }}
                   placeholder="Enter quantity"
                   required
                   className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
+                {quantity.length === 6}
               </div>
               <div className="flex-1 space-y-2">
                 <Label htmlFor="redeeming-limit" className="text-sm font-medium text-[#5a2a2a]">
@@ -207,10 +241,16 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                   id="redeeming-limit"
                   type="number"
                   value={redeemingLimit}
-                  onChange={(e) => setRedeemingLimit(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 6) {
+                      setRedeemingLimit(value);
+                    }
+                  }}
                   placeholder="Enter limit"
                   className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
+                {redeemingLimit.length === 6}
               </div>
             </div>
 
@@ -231,11 +271,17 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                   id="item-cost"
                   type="number"
                   value={itemCost}
-                  onChange={(e) => setItemCost(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 6) {
+                      setItemCost(value);
+                    }
+                  }}
                   placeholder="Fiesta Points"
                   className="w-120px bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
               </div>
+              {itemCost.length === 6}
             </div>
           </div>
         </div>
@@ -245,7 +291,8 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
           <Button
             variant="outline"
             onClick={handleClose}
-            className="bg-white text-[#5a2a2a] border-[#e0cfcf] hover:bg-[#fbeaea] px-8"
+            disabled={isLoading}
+            className="bg-white text-[#5a2a2a] border-[#e0cfcf] hover:bg-[#fbeaea] px-8 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </Button>
@@ -254,7 +301,14 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
             disabled={isSaveDisabled}
             className="bg-[#690003] text-white hover:bg-[#8b0000] px-8 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save'
+            )}
           </Button>
         </div>
       </DialogContent>

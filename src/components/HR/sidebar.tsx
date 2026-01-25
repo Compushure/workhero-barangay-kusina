@@ -31,10 +31,10 @@ interface SidebarProps {
 export function Sidebar({
   navItems = [
     {
-      key: 'dashboard',
+      key: 'reward-requests',
       label: 'Rewards Requests',
       icon: <LayoutDashboard size={20} className="shrink-0" />,
-      href: '/hr/dashboard',
+      href: '/hr/reward-requests',
     },
     {
       key: 'mercado',
