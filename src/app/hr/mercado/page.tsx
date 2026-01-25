@@ -5,6 +5,7 @@ import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
 import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 import { DeleteModal } from '@/components/hr/mercado/delete-modal';
+import { MercadoSkeleton } from '@/components/hr/mercado/mercado-skeleton';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import {
   useGetRewards,
@@ -31,13 +32,13 @@ export default function MercadoPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
 
-
   // Fetch rewards
   const { data: rewards, isLoading } = useGetRewards();
   <Suspense fallback={<div>Loading...</div>}>
     <MercadoHeader
       title="Mercado Manager"
-      description="Manage Items visible in mercado" onAddClick={() => {}}
+      description="Manage Items visible in mercado"
+      onAddClick={() => {}}
     />
     <div>...</div>
   </Suspense>;
@@ -155,12 +156,7 @@ export default function MercadoPage() {
 
         <div className="flex-1">
           {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 border-4 border-[#f97316] border-t-transparent rounded-full animate-spin gap-2"/>
-                <span className="text-[#5a2a2a] font-medium">Loading items...</span>
-              </div>
-            </div>
+            <MercadoSkeleton />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
               {paginatedRewards && paginatedRewards.length > 0 ? (
