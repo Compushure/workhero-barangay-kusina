@@ -55,10 +55,10 @@ export function RequestsTable({
             <TableHead className="text-white font-semibold px-6 w-32">REQUEST DATE</TableHead>
             <TableHead className="text-white font-semibold w-40 px-6">EMPLOYEE</TableHead>
             <TableHead className="text-white font-semibold px-10 pl-15 w-56">TASK</TableHead>
-            <TableHead className="text-white font-semibold text-center pl-10 pr-25 w-10">
-              REPETITION
+            <TableHead className="text-white font-semibold text-center pl-8 pr-15 w-10">
+              PENDING ATTEMPTS
             </TableHead>
-            <TableHead className="text-white font-semibold text-center pr-18 w-24">
+            <TableHead className="text-white font-semibold text-center pr-10 w-24">
               TOTAL POINTS & XP
             </TableHead>
             <TableHead className="text-white font-semibold text-center px-2 w-28">ACTION</TableHead>
@@ -83,10 +83,10 @@ export function RequestsTable({
                 <TableCell className="text-sm px-4 pl-15">
                   {request.category_name || 'N/A'}
                 </TableCell>
-                <TableCell className="text-sm text-center pl-10 pr-25">
+                <TableCell className="text-sm text-center pl-15 pr-25">
                   {request.repeated_times ?? 0}
                 </TableCell>
-                <TableCell className="text-sm text-center font-medium pr-25">
+                <TableCell className="text-sm text-center font-medium pr-10">
                   {request.category_points ?? 0} Pts/XP
                 </TableCell>
                 <TableCell className="text-center px-2">

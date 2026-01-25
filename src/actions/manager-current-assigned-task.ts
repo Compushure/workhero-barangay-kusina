@@ -1,43 +1,38 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import type {
-  ServerActionResponse,
-  Task,
-  Employee,
-  PaginatedResponse,
-} from '@/types';
+import type { ServerActionResponse, Task, Employee, PaginatedResponse } from '@/types';
 
 /**
  * Toggle between Task View and Employee View
  */
-export async function toggleViewAction(): Promise<ServerActionResponse<'task' | 'employee'>> {
+export async function toggleViewAction(): Promise<ServerActionResponse<'list' | 'employee'>> {
   const supabase = await createClient();
 
-  try {
-    // Example: store current view in a settings table or session
-    const { data, error } = await supabase
-      .rpc('toggle_task_employee_view'); // <-- define this RPC in Supabase
+  const { data, error } = await supabase.rpc('toggle_user_default_view');
 
-    if (error) return { error: 'Failed to toggle view: ' + error.message, data: undefined };
+  if (error) return { error: 'Failed to toggle view: ' + error.message, data: undefined };
 
-    return { error: null, data: data as 'task' | 'employee' };
-  } catch (err: any) {
-    return { error: 'Unexpected error: ' + err.message, data: undefined };
+  // Validate response
+  if (!data || (data !== 'list' && data !== 'employee')) {
+    return { error: 'Unexpected RPC result', data: undefined };
   }
+
+  return { error: null, data: data as 'list' | 'employee' };
 }
 
 /**
  * Clear all tasks and employees
  */
-export async function clearAllTasksAction(): Promise<ServerActionResponse<boolean>> {
+export async function clearAllTasksAction(): Promise<ServerActionResponse<number>> {
   const supabase = await createClient();
 
-  const { error } = await supabase.from('KPITask').delete().neq('id', 0);
+  // Calls server-side admin RPC which checks admin claim
+  const { data, error } = await supabase.rpc('clear_all_tasks_admin');
 
   if (error) return { error: 'Failed to clear tasks: ' + error.message, data: undefined };
 
-  return { error: null, data: true };
+  return { error: null, data: data as number };
 }
 
 /**
@@ -49,21 +44,21 @@ export async function removeEmployeeFromTaskAction(
 ): Promise<ServerActionResponse<Task>> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('TaskAssignments')
-    .delete()
-    .match({ task_id: taskId, employee_id: employeeId });
+  const { error: rpcError } = await supabase.rpc('remove_employee_from_task', {
+    p_task_id: taskId,
+    p_employee_id: employeeId,
+  });
 
-  if (error) return { error: 'Failed to remove employee: ' + error.message, data: undefined };
+  if (rpcError) return { error: 'Failed to remove employee: ' + rpcError.message, data: undefined };
 
-  // Return updated task info
   const { data: updatedTask, error: fetchError } = await supabase
     .from('task_info_view')
     .select('*')
     .eq('id', taskId)
     .single();
 
-  if (fetchError) return { error: 'Failed to fetch updated task: ' + fetchError.message, data: undefined };
+  if (fetchError)
+    return { error: 'Failed to fetch updated task: ' + fetchError.message, data: undefined };
 
   return { error: null, data: updatedTask as Task };
 }
@@ -117,7 +112,8 @@ export async function saveTaskEditAction(
     .eq('id', taskId)
     .single();
 
-  if (fetchError) return { error: 'Failed to fetch updated task: ' + fetchError.message, data: undefined };
+  if (fetchError)
+    return { error: 'Failed to fetch updated task: ' + fetchError.message, data: undefined };
 
   return { error: null, data: updatedTask as Task };
 }
@@ -144,7 +140,8 @@ export async function removeTaskFromEmployeeAction(
     .eq('id', employeeId)
     .single();
 
-  if (fetchError) return { error: 'Failed to fetch updated employee: ' + fetchError.message, data: undefined };
+  if (fetchError)
+    return { error: 'Failed to fetch updated employee: ' + fetchError.message, data: undefined };
 
   return { error: null, data: updatedEmployee as Employee };
 }
@@ -157,10 +154,7 @@ export async function clearEmployeeTasksAction(
 ): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
 
-  const { error } = await supabase
-    .from('TaskAssignments')
-    .delete()
-    .eq('employee_id', employeeId);
+  const { error } = await supabase.from('TaskAssignments').delete().eq('employee_id', employeeId);
 
   if (error) return { error: 'Failed to clear employee tasks: ' + error.message, data: undefined };
 

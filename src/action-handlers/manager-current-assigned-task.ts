@@ -68,9 +68,7 @@ export async function handleRemoveEmployeeFromTask(
   taskId: string,
   employeeId: string
 ): Promise<Task | null> {
-  const result = await safeAction(() =>
-    removeEmployeeFromTaskAction(taskId, employeeId)
-  );
+  const result = await safeAction(() => removeEmployeeFromTaskAction(taskId, employeeId));
 
   if (!result.success) {
     toast.error('Failed to remove employee: ' + result.error);
@@ -155,9 +153,7 @@ export async function handleRemoveTaskFromEmployee(
   employeeId: string,
   taskId: string
 ): Promise<Employee | null> {
-  const result = await safeAction(() =>
-    removeTaskFromEmployeeAction(employeeId, taskId)
-  );
+  const result = await safeAction(() => removeTaskFromEmployeeAction(employeeId, taskId));
 
   if (!result.success) {
     toast.error('Failed to remove task from employee: ' + result.error);
@@ -176,9 +172,7 @@ export async function handleRemoveTaskFromEmployee(
 /**
  * Clears all tasks assigned to an employee (removes employee card)
  */
-export async function handleClearEmployeeTasks(
-  employeeId: string
-): Promise<boolean> {
+export async function handleClearEmployeeTasks(employeeId: string): Promise<boolean> {
   const result = await safeAction(() => clearEmployeeTasksAction(employeeId));
 
   if (!result.success) {

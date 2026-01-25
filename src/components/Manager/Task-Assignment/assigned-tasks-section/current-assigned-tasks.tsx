@@ -16,6 +16,7 @@ export function CurrentAssignedTasks() {
   const [sortBy, setSortBy] = useState('recently added');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
+  // ✅ Filtering now works with updated backend fields
   const filteredTasks = useMemo(() => {
     return assignedTasks.filter((task) => {
       const searchLower = searchTerm.toLowerCase();
@@ -31,6 +32,7 @@ export function CurrentAssignedTasks() {
     });
   }, [assignedTasks, searchTerm, viewMode]);
 
+  // ✅ Sorting still works, but note that tasks now use `pending_attempts` instead of `repeat_times`
   const sortedTasks = useMemo(() => {
     const tasksCopy = [...filteredTasks];
     switch (sortBy) {
