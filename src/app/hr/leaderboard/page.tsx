@@ -2,6 +2,8 @@ import LeaderboardCard from '@/components/hr/leaderboard/leaderboard-card';
 import LeaderboardList from '@/components/hr/leaderboard/leaderboard-list';
 import LeaderboardFilters from '@/components/hr/leaderboard/leaderboard-filters';
 import { getTopPlayers } from '@/actions/leaderboard/get-top-players';
+import { Suspense } from 'react';
+import { TaskAssignmentPage } from '@/components/manager/task-assignment/task-assignment-page';
 
 export default async function LeaderboardPage() {
   const result = await getTopPlayers();

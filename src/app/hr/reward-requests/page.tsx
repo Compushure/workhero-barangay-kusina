@@ -8,10 +8,11 @@ import { useGetRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQue
 export default function HRDashboard() {
   const [sortBy, setSortBy] = useState<string>('date-desc');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  
 
   // Fetch redemption requests from database (pending by default)
   const { data: requests = [], isLoading, error } = useGetRedemptionRequests('pending');
-
+  
   // Filter and sort the data
   const filteredRequests = requests
     .filter(
@@ -47,8 +48,9 @@ export default function HRDashboard() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#fff8f5] p-8">
-        <div className="mx-auto max-w-7xl space-y-8">
-          <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center py-16">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-[#f97316] border-t-transparent rounded-full animate-spin gap-2" />
             <p className="text-[#5a2a2a]">Loading redemption requests...</p>
           </div>
         </div>
@@ -59,8 +61,8 @@ export default function HRDashboard() {
   if (error) {
     return (
       <div className="min-h-screen bg-[#fff8f5] p-8">
-        <div className="mx-auto max-w-7xl space-y-8">
-          <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center py-16">
+          <div className="flex flex-col items-center gap-4">
             <p className="text-red-600">Error loading redemption requests: {error.message}</p>
           </div>
         </div>
