@@ -1,23 +1,21 @@
 'use client';
 
-import { Task } from "@/types";
+import { Task } from '@/types';
 
 interface SelectTasksTableProps {
   filteredTasks: Task[];
   toggleTask: (taskId: string) => void;
   updateMaxAttempts: (taskId: string, newValue: number) => void;
-  selectedTasks: string[];
+  selectedTaskInstance: Array<{ id: string; maxAttempts: number }>;
   taskMaxAttempts: Record<string, number>;
-  assignedTaskIds: Set<string>;
 }
 
 function SelectTasksTable({
   filteredTasks,
   toggleTask,
   updateMaxAttempts,
-  selectedTasks,
+  selectedTaskInstance,
   taskMaxAttempts,
-  assignedTaskIds,
 }: SelectTasksTableProps) {
   return (
     <div className="bg-white rounded-2xl border-2 border-gray-300 flex-1 flex flex-col overflow-auto">
@@ -36,35 +34,30 @@ function SelectTasksTable({
         <table className="w-full">
           <tbody>
             {filteredTasks.map((task) => {
-              const isSelected = selectedTasks.includes(task.id);
+              const isSelected = selectedTaskInstance.some((instance) => instance.id === task.id);
               const currentMaxAttempts =
                 taskMaxAttempts[task.id] ?? (task.isRepeatable ? 1 : task.maxAttempts);
-              const isAlreadyAssigned = assignedTaskIds.has(task.id);
-              const isDisabled = isAlreadyAssigned;
 
               return (
                 <tr
                   key={task.id}
                   className={`border-b border-gray-200 ${
-                    isDisabled
-                      ? 'opacity-50 cursor-not-allowed bg-gray-100'
-                      : 'hover:bg-gray-50 cursor-pointer'
-                  }`}
+                    isSelected ? 'bg-gray-100' : 'hover:bg-gray-50'
+                  } cursor-pointer`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (!isDisabled) toggleTask(task.id);
+                    toggleTask(task.id);
                   }}
                 >
                   <td className="w-[5%] p-4 text-center">
                     <input
-                      type="radio"
+                      type="checkbox"
                       checked={isSelected}
-                      disabled={isDisabled}
                       onChange={(e) => {
                         e.stopPropagation();
-                        if (!isDisabled) toggleTask(task.id);
+                        toggleTask(task.id);
                       }}
-                      className="w-5 h-5 cursor-pointer accent-[#690003] disabled:cursor-not-allowed"
+                      className="w-5 h-5 cursor-pointer accent-[#690003]"
                       onClick={(e) => e.stopPropagation()}
                     />
                   </td>
@@ -85,8 +78,7 @@ function SelectTasksTable({
                               e.stopPropagation();
                               updateMaxAttempts(task.id, currentMaxAttempts - 1);
                             }}
-                            disabled={isDisabled}
-                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50"
+                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000]"
                           >
                             −
                           </button>
@@ -98,8 +90,7 @@ function SelectTasksTable({
                               updateMaxAttempts(task.id, Number.parseInt(e.target.value) || 1);
                             }}
                             onClick={(e) => e.stopPropagation()}
-                            disabled={isDisabled}
-                            className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans disabled:opacity-50"
+                            className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans"
                             min="1"
                           />
                           <button
@@ -107,8 +98,7 @@ function SelectTasksTable({
                               e.stopPropagation();
                               updateMaxAttempts(task.id, currentMaxAttempts + 1);
                             }}
-                            disabled={isDisabled}
-                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50"
+                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000]"
                           >
                             +
                           </button>
