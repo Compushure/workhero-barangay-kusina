@@ -158,11 +158,11 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
-      <DialogContent className="bg-[#f5e5dc] border-none max-w-2000 rounded-2xl p-4">
+      <DialogContent className="bg-[#f5e5dc] border-none max-w-[95vw] sm:max-w-[550px] md:max-w-[650px] lg:max-w-[700px] rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2 text-[#5a2a2a] text-lg font-semibold">
-              <Pencil className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-[#5a2a2a] text-base sm:text-lg font-semibold">
+              <Pencil className="h-4 w-4 sm:h-5 sm:w-5" />
               {editingItem ? 'Edit Item Reward' : 'Add Item Reward'}
             </DialogTitle>
             <button
@@ -172,13 +172,13 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
           </div>
         </DialogHeader>
 
-        <div className="grid grid-cols-[190px_1fr] gap-2 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-[160px_1fr] lg:grid-cols-[190px_1fr] gap-4 mt-4">
           {/* Icon Upload Section */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-[#5a2a2a]">Select Icon</Label>
             <label
               htmlFor="icon-upload"
-              className="w-45 h-47 border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white"
+              className="w-full md:w-[160px] lg:w-[180px] h-[140px] md:h-[160px] lg:h-[180px] border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white mx-auto md:mx-0"
             >
               {iconPreview ? (
                 <img
@@ -229,7 +229,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
             </div>
 
             {/* Quantity and Redeeming Limit */}
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 space-y-2">
                 <Label htmlFor="quantity" className="text-sm font-medium text-[#5a2a2a]">
                   Quantity
@@ -305,19 +305,19 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3 mt-6">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
           <Button
             variant="outline"
             onClick={handleClose}
             disabled={isLoading}
-            className="bg-white text-[#5a2a2a] border-[#e0cfcf] hover:bg-[#fbeaea] px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-white text-[#5a2a2a] border-[#e0cfcf] hover:bg-[#fbeaea] px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="bg-[#690003] text-white hover:bg-[#8b0000] px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-[#690003] text-white hover:bg-[#8b0000] px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isLoading ? (
               <>
