@@ -18,6 +18,7 @@ interface MercadoItem {
   price: number;
   quantity?: number;
   isActive?: boolean;
+  imageUrl?: string;
 }
 
 interface MercadoCardProps {
@@ -43,6 +44,7 @@ export function MercadoCard({
   onUnhide,
 }: MercadoCardProps) {
   const [hideDialogOpen, setHideDialogOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const handleHideConfirm = () => {
     if (item.isActive === false) {
@@ -70,8 +72,18 @@ export function MercadoCard({
           }
         }}
       >
-        <div className="h-24 w-24 bg-[#f2e1c9] rounded-xl flex items-center justify-center shrink-0">
-          <ImageIcon className="h-8 w-8 text-[#730202]/40" />
+        <div className="h-24 w-24 bg-[#f2e1c9] rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+          {item.imageUrl && !imageError ? (
+            <img
+              src={item.imageUrl}
+              alt={`${item.name} icon`}
+              className="h-full w-full object-cover"
+              loading="lazy"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <ImageIcon className="h-8 w-8 text-[#730202]/40" />
+          )}
         </div>
 
         <div className="ml-4 flex-1 min-w-0">

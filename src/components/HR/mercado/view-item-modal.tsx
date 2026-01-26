@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { ImageIcon, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,7 @@ interface ViewItemModalProps {
     quantity?: number;
     redeemingLimit?: number;
     isActive: boolean;
+    imageUrl?: string;
   } | null;
 }
 
@@ -26,9 +28,11 @@ function formatNumber(num: number | undefined): string {
 export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModalProps) {
   if (!item) return null;
 
+  const [imageError, setImageError] = useState(false);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl rounded-2xl p-6 [&>button]:hidden">
+      <DialogContent className="max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto [&>button]:hidden">
         {/* Custom Close Button */}
         <button
           onClick={() => onOpenChange(false)}
@@ -39,14 +43,24 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
         </button>
 
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-[#730202]">Mercado Item</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl font-bold text-[#730202]">Mercado Item</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-2">
           {/* Image Preview */}
           <div className="flex justify-center">
-            <div className="h-32 w-32 bg-[#f2e1c9] rounded-xl flex items-center justify-center">
-              <ImageIcon className="h-10 w-10 text-[#730202]/40" />
+            <div className="h-28 w-28 sm:h-32 sm:w-32 bg-[#f2e1c9] rounded-xl flex items-center justify-center overflow-hidden">
+              {item.imageUrl && !imageError ? (
+                <img
+                  src={item.imageUrl}
+                  alt={`${item.name} preview`}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <ImageIcon className="h-10 w-10 text-[#730202]/40" />
+              )}
             </div>
           </div>
 
@@ -66,7 +80,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
           </div>
 
           {/* Item Details Grid */}
-          <div className="grid grid-cols-3 gap-3 py-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 py-2">
             {item.quantity !== undefined && (
               <div className="text-center">
                 <p className="text-xs font-medium text-[#730202]/60 mb-1">Available Quantity</p>
@@ -94,11 +108,11 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
           </div>
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border mt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-border mt-2">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="h-11 rounded-xl border-[#730202]/20 text-[#730202] hover:bg-[#f2e1c9] font-semibold text-base"
+              className="h-10 sm:h-11 rounded-xl border-[#730202]/20 text-[#730202] hover:bg-[#f2e1c9] font-semibold text-sm sm:text-base order-2 sm:order-1"
             >
               Cancel
             </Button>
@@ -108,7 +122,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
                   onEdit();
                   onOpenChange(false);
                 }}
-                className="h-11 rounded-xl bg-[#730202] hover:bg-[#730202]/90 text-white font-semibold text-base"
+                className="h-10 sm:h-11 rounded-xl bg-[#730202] hover:bg-[#730202]/90 text-white font-semibold text-sm sm:text-base order-1 sm:order-2"
               >
                 Edit
               </Button>

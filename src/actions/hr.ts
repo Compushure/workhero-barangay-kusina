@@ -1,7 +1,13 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { ServerActionResponse, AddRewardInput, EditRewardInput, Reward, RedemptionRequest } from '@/types';
+import {
+  ServerActionResponse,
+  AddRewardInput,
+  EditRewardInput,
+  Reward,
+  RedemptionRequest,
+} from '@/types';
 import { addRewardSchema, editRewardSchema } from '@/zod/schemas';
 
 // ============================================
@@ -22,7 +28,8 @@ export async function getRedemptionRequestsAction(
     // Build query with joins
     let query = supabase
       .from('RewardRequest')
-      .select(`
+      .select(
+        `
         id,
         user_id,
         reward_id,
@@ -37,7 +44,8 @@ export async function getRedemptionRequestsAction(
           name,
           points_cost
         )
-      `)
+      `
+      )
       .order('requested_at', { ascending: false });
 
     // Apply status filter if provided
@@ -100,7 +108,8 @@ export async function getMyRedemptionRequestsAction(
     // Build query with joins, filtered by current user
     let query = supabase
       .from('RewardRequest')
-      .select(`
+      .select(
+        `
         id,
         user_id,
         reward_id,
@@ -115,7 +124,8 @@ export async function getMyRedemptionRequestsAction(
           name,
           points_cost
         )
-      `)
+      `
+      )
       .eq('user_id', user.id)
       .order('requested_at', { ascending: false });
 
@@ -182,7 +192,8 @@ export async function acceptRedemptionRequestAction(
     // Fetch the redemption request with user and reward details
     const { data: request, error: fetchError } = await supabase
       .from('RewardRequest')
-      .select(`
+      .select(
+        `
         id,
         user_id,
         reward_id,
@@ -194,7 +205,8 @@ export async function acceptRedemptionRequestAction(
         User:user_id (
           points
         )
-      `)
+      `
+      )
       .eq('id', requestId)
       .single();
 
@@ -215,7 +227,9 @@ export async function acceptRedemptionRequestAction(
 
     // Check if user has sufficient points
     if (userPoints < totalPointsCost) {
-      return { error: `User has insufficient points for this redemption. Needs ${totalPointsCost} but has ${userPoints}` };
+      return {
+        error: `User has insufficient points for this redemption. Needs ${totalPointsCost} but has ${userPoints}`,
+      };
     }
 
     // Update request status to approved
@@ -390,15 +404,13 @@ export async function createRedemptionRequestAction(
     }
 
     // Insert redemption request
-    const { error: insertError } = await supabase
-      .from('RewardRequest')
-      .insert({
-        user_id: user.id,
-        reward_id: rewardId,
-        quantity: quantity,
-        status: 'pending',
-        requested_at: new Date().toISOString(),
-      });
+    const { error: insertError } = await supabase.from('RewardRequest').insert({
+      user_id: user.id,
+      reward_id: rewardId,
+      quantity: quantity,
+      status: 'pending',
+      requested_at: new Date().toISOString(),
+    });
 
     if (insertError) {
       console.error('Error creating redemption request:', insertError);
@@ -414,7 +426,6 @@ export async function createRedemptionRequestAction(
     return { error: 'An unexpected error occurred while creating the request' };
   }
 }
-
 
 // Action to get all reward/mercado items
 export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>> {
@@ -444,6 +455,8 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
       isActive: item.is_active,
       createdAt: item.created_at,
       createdBy: item.created_by,
+      imageUrl: supabase.storage.from('reward').getPublicUrl(`${item.id}/profile.png`).data
+        .publicUrl,
     }));
 
     return { error: null, data: rewards };
@@ -481,7 +494,10 @@ export async function addRewardAction(
       if (validatedData.redeemingLimit < 0) {
         return { error: 'Redeeming limit cannot be negative' };
       }
-      if (validatedData.quantity !== undefined && validatedData.redeemingLimit > validatedData.quantity) {
+      if (
+        validatedData.quantity !== undefined &&
+        validatedData.redeemingLimit > validatedData.quantity
+      ) {
         return { error: 'Redeeming limit cannot be greater than quantity' };
       }
     }
@@ -517,6 +533,8 @@ export async function addRewardAction(
       isActive: data.is_active,
       createdAt: data.created_at,
       createdBy: data.created_by,
+      imageUrl: supabase.storage.from('reward').getPublicUrl(`${data.id}/profile.png`).data
+        .publicUrl,
     };
 
     return { error: null, data: reward };
@@ -528,7 +546,6 @@ export async function addRewardAction(
     return { error: 'An unexpected error occurred while adding the item' };
   }
 }
-
 
 export async function editRewardAction(
   id: string,
@@ -557,7 +574,7 @@ export async function editRewardAction(
         return { error: 'Redeeming limit cannot be negative' };
       }
 
-     // If quantity is also being updated, validate against it
+      // If quantity is also being updated, validate against it
       if (validatedData.quantity !== undefined) {
         if (validatedData.redeemingLimit > validatedData.quantity) {
           return { error: 'Redeeming limit cannot be greater than quantity' };
@@ -574,7 +591,10 @@ export async function editRewardAction(
           return { error: 'Failed to validate redeeming limit exceeding current quantity' };
         }
 
-        if (currentReward?.quantity !== undefined && validatedData.redeemingLimit > currentReward.quantity) {
+        if (
+          currentReward?.quantity !== undefined &&
+          validatedData.redeemingLimit > currentReward.quantity
+        ) {
           return { error: 'Redeeming limit cannot be greater than current quantity' };
         }
       }
@@ -585,7 +605,8 @@ export async function editRewardAction(
     if (validatedData.name !== undefined) updateData.name = validatedData.name;
     if (validatedData.pointsCost !== undefined) updateData.points_cost = validatedData.pointsCost;
     if (validatedData.quantity !== undefined) updateData.quantity = validatedData.quantity;
-    if (validatedData.redeemingLimit !== undefined) updateData.redeeming_limit = validatedData.redeemingLimit;
+    if (validatedData.redeemingLimit !== undefined)
+      updateData.redeeming_limit = validatedData.redeemingLimit;
     if (validatedData.category !== undefined) updateData.category = validatedData.category;
     if (validatedData.isActive !== undefined) updateData.is_active = validatedData.isActive;
 
@@ -613,6 +634,8 @@ export async function editRewardAction(
       isActive: data.is_active,
       createdAt: data.created_at,
       createdBy: data.created_by,
+      imageUrl: supabase.storage.from('reward').getPublicUrl(`${data.id}/profile.png`).data
+        .publicUrl,
     };
 
     return { error: null, data: reward };
@@ -625,10 +648,7 @@ export async function editRewardAction(
   }
 }
 
-
-export async function deleteRewardAction(
-  id: string
-): Promise<ServerActionResponse<void>> {
+export async function deleteRewardAction(id: string): Promise<ServerActionResponse<void>> {
   try {
     // Get Supabase client
     const supabase = await createClient();
@@ -644,10 +664,7 @@ export async function deleteRewardAction(
     }
 
     // Delete reward from database
-    const { error } = await supabase
-      .from('Reward')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('Reward').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting reward:', error);
@@ -689,10 +706,7 @@ export async function hideRewardAction(
     }
 
     // Update reward is_active status
-    const { error } = await supabase
-      .from('Reward')
-      .update({ is_active: isActive })
-      .eq('id', id);
+    const { error } = await supabase.from('Reward').update({ is_active: isActive }).eq('id', id);
 
     if (error) {
       console.error('Error hiding/unhiding reward:', error);
@@ -705,6 +719,35 @@ export async function hideRewardAction(
     if (error instanceof Error) {
       return { error: error.message };
     }
-    return { error: `An unexpected error occurred while ${isActive ? 'unhiding' : 'hiding'} the item` };
+    return {
+      error: `An unexpected error occurred while ${isActive ? 'unhiding' : 'hiding'} the item`,
+    };
   }
+}
+
+export async function uploadRewardPicture(
+  rewardId: string,
+  file: File
+): Promise<ServerActionResponse<{ path: string | null; publicUrl: string }>> {
+  const supabase = await createClient();
+  const { data: uploadResult, error } = await supabase.storage
+    .from('reward')
+    .upload(`${rewardId}/profile.png`, file, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: (file as any)?.type || 'image/png',
+    });
+
+  if (error) {
+    return { error: 'Failed to upload Reward picture: ' + error.message };
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from('reward')
+    .getPublicUrl(`${rewardId}/profile.png`);
+
+  return {
+    error: null,
+    data: { path: uploadResult?.path ?? null, publicUrl: publicUrlData.publicUrl },
+  };
 }
