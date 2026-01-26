@@ -6,6 +6,7 @@ import {
   handleDeleteRewardAction,
   handleHideRewardAction,
   handleCreateRedemptionRequestAction,
+  handleUploadRewardPicture,
 } from '@/action-handlers/hr';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AddRewardInput, EditRewardInput, Reward } from '@/types';
@@ -142,6 +143,43 @@ export function useHideReward() {
       queryClient.invalidateQueries({ queryKey: rewardKeys.all });
 
       // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: rewardKeys.list() });
+    },
+  });
+}
+
+/**
+ * Mutation hook for uploading/updating a reward image
+ */
+export function useUploadRewardPicture() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      rewardId,
+      file,
+      rewardName,
+    }: {
+      rewardId: string;
+      file: File;
+      rewardName: string;
+    }): Promise<string | null> => {
+      return await handleUploadRewardPicture(rewardId, file, rewardName);
+    },
+    onSuccess: (publicUrl, variables) => {
+      if (publicUrl) {
+        // Optimistically update cached rewards with new image URL
+        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+          if (!existing) return existing;
+          return existing.map((reward) =>
+            reward.id === variables.rewardId ? { ...reward, imageUrl: publicUrl } : reward
+          );
+        });
+      }
+
+      // Ensure reward list reflects latest image URL
+      queryClient.invalidateQueries({ queryKey: rewardKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
       queryClient.refetchQueries({ queryKey: rewardKeys.list() });
     },
   });

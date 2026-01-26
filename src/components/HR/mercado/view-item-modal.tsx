@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { ImageIcon, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,7 @@ interface ViewItemModalProps {
     quantity?: number;
     redeemingLimit?: number;
     isActive: boolean;
+    imageUrl?: string;
   } | null;
 }
 
@@ -25,6 +27,8 @@ function formatNumber(num: number | undefined): string {
 
 export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModalProps) {
   if (!item) return null;
+
+  const [imageError, setImageError] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -45,8 +49,18 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
         <div className="flex flex-col gap-4 py-2">
           {/* Image Preview */}
           <div className="flex justify-center">
-            <div className="h-32 w-32 bg-[#f2e1c9] rounded-xl flex items-center justify-center">
-              <ImageIcon className="h-10 w-10 text-[#730202]/40" />
+            <div className="h-32 w-32 bg-[#f2e1c9] rounded-xl flex items-center justify-center overflow-hidden">
+              {item.imageUrl && !imageError ? (
+                <img
+                  src={item.imageUrl}
+                  alt={`${item.name} preview`}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <ImageIcon className="h-10 w-10 text-[#730202]/40" />
+              )}
             </div>
           </div>
 
