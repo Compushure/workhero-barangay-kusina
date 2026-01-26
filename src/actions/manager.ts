@@ -176,7 +176,7 @@ export async function approveTaskAction(
   // First, get task details from the view to get category_points
   const { data: taskData, error: taskError } = await supabase
     .from('task_info_view')
-    .select('assigned_to, category_points')
+    .select('assigned_to, category_points, max_orders, completed_orders')
     .eq('kpitask_id', kpitask_id)
     .single();
 
@@ -185,13 +185,30 @@ export async function approveTaskAction(
   }
 
   // Update the task status and remark
-  const { error: updateError } = await supabase
-    .from('KPITask')
-    .update({ status: 'approved', remark: reqmark })
-    .eq('id', kpitask_id);
 
-  if (updateError) {
-    return { error: 'Failed to approve task: ' + updateError.message, data: undefined };
+  // if the status max_orders is == completed_orders then change to approved, else changed to assigned
+   
+
+  if (taskData.max_orders > taskData.completed_orders + 1) {
+  
+     const { error: assignError } = await supabase
+       .from('KPITask')
+       .update({ status: 'assigned', remark: reqmark , completed_orders: taskData.completed_orders + 1 })
+       .eq('id', kpitask_id);
+
+      if (assignError) {
+        return { error: 'Failed to reassign task: ' + assignError.message, data: undefined };
+      }
+  } else{
+     const { error: updateError } = await supabase
+       .from('KPITask')
+       .update({ status: 'approved', remark: reqmark })
+       .eq('id', kpitask_id);
+
+     if (updateError) {
+       return { error: 'Failed to approve task: ' + updateError.message, data: undefined };
+     }
+
   }
 
   // Update user points
@@ -199,6 +216,7 @@ export async function approveTaskAction(
     target_user_id: taskData.assigned_to,
     amount: taskData.category_points,
   });
+
 
   if (pointsError) {
     return { error: 'Failed to update user points: ' + pointsError.message, data: undefined };

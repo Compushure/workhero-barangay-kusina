@@ -27,7 +27,9 @@ export interface VerificationRequest {
   totalPoints: number;
   kpitask_created_at: Date | null;
   kpitask_completed_at: Date | null;
-  repeated_times: number | null;
+ pending_orders: number ;
+  completed_orders: number;
+  max_orders: number ;
 
   // Assigned by (from) user info
   assigned_by_role_id: string | null;
