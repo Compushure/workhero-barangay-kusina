@@ -7,9 +7,9 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { handleFetchUsers } from '@/action-handlers/manage';
+import { handleFetchUsers, handleFetchUsersPaginated } from '@/action-handlers/manage';
 import { handleFetchSessionUser } from '@/action-handlers/sidebar';
-import type { User, UserQueryParams, UserWithExtras } from '@/types';
+import type { User, UserQueryParams, UserWithExtras, PaginatedResponse } from '@/types';
 
 /**
  * Query key factory for user-related queries
@@ -26,6 +26,9 @@ export const userKeys = {
   all: ['users'] as const,
   lists: () => [...userKeys.all, 'list'] as const,
   list: (filters?: Partial<UserQueryParams>) => [...userKeys.lists(), filters] as const,
+  paginatedLists: () => [...userKeys.all, 'paginated'] as const,
+  paginatedList: (filters?: Partial<UserQueryParams>, page?: number) =>
+    [...userKeys.paginatedLists(), filters, page] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
   session: () => [...userKeys.all, 'session'] as const,
@@ -133,3 +136,69 @@ export function useGetSessionUser(
     retry: 1,
   }) as UseQueryResult<UserWithExtras | null, Error>;
 }
+
+/**
+ * Fetches paginated users with search, filter, and sorting
+ * Optimized for list pages that need pagination controls
+ *
+ * @param params - Filter and search parameters
+ * @param page - Page number (1-indexed)
+ * @param options - Additional query options (enabled, staleTime, etc.)
+ * @returns Query result with paginated users data, loading state, and error handling
+ *
+ * @example
+ * ```tsx
+ * function UserListWithPagination() {
+ *   const [page, setPage] = useState(1)
+ *   const [searchQuery, setSearchQuery] = useState('')
+ *   const debouncedQuery = useDebounce(searchQuery, 300)
+ *
+ *   const { data: { data: users, totalPages } = { data: [], totalPages: 0 }, isLoading } = useGetUsersPaginated(
+ *     {
+ *       searchQuery: debouncedQuery,
+ *       employeeTypeFilter: 'all',
+ *       employmentStatusFilter: 'all',
+ *       sortBy: 'date-desc',
+ *       pageSize: 25,
+ *     },
+ *     page
+ *   )
+ *
+ *   return (
+ *     <>
+ *       <UserTable users={users} />
+ *       <Pagination totalPages={totalPages} currentPage={page} onPageChange={setPage} />
+ *     </>
+ *   )
+ * }
+ * ```
+ */
+export function useGetUsersPaginated(
+  params: Partial<UserQueryParams> = {},
+  page: number = 1,
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<PaginatedResponse<User>, Error> {
+  // Merge with defaults
+  const queryParams: UserQueryParams = {
+    searchQuery: params.searchQuery ?? '',
+    searchType: params.searchType ?? 'name',
+    employeeTypeFilter: params.employeeTypeFilter ?? 'all',
+    employmentStatusFilter: params.employmentStatusFilter ?? 'all',
+    sortBy: params.sortBy ?? 'date-desc',
+    page: page,
+    pageSize: params.pageSize ?? 25,
+  };
+
+  return useQuery({
+    queryKey: userKeys.paginatedList(queryParams, page),
+    queryFn: async () => {
+      const result = await handleFetchUsersPaginated(queryParams);
+      return result;
+    },
+    enabled: queryOptions.enabled !== false && page >= 1,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 1,
+  }) as UseQueryResult<PaginatedResponse<User>, Error>;
+}
+

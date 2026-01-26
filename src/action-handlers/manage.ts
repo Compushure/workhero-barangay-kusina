@@ -9,12 +9,13 @@
 import { safeAction } from '@/lib/utils/safe-action';
 import {
   fetchUsersAction,
+  fetchUsersPaginatedAction,
   addUserAction,
   editUserAction,
   deleteUserAction,
   uploadProfilePicture,
 } from '@/actions/manage';
-import { type User, type AddUserInput, type EditUserInput, type UserQueryParams } from '@/types';
+import { type User, type AddUserInput, type EditUserInput, type UserQueryParams, type PaginatedResponse } from '@/types';
 import { toast } from 'sonner';
 import { getUserRole } from '@/actions/auth';
 import { Router } from 'next/router';
@@ -33,6 +34,29 @@ export async function handleFetchUsers(params: UserQueryParams): Promise<User[]>
   }
 
   return result.data;
+}
+
+/**
+ * Fetches paginated users with error handling and toast feedback
+ * @param params - Filter, search, and pagination parameters
+ * @returns Paginated response with users array, count, and total pages
+ */
+export async function handleFetchUsersPaginated(
+  params: UserQueryParams
+): Promise<PaginatedResponse<User>> {
+  const result = await safeAction(() => fetchUsersPaginatedAction(params));
+
+  if (!result.success) {
+    toast.error('Failed to load users: ' + result.error);
+    return { data: [], count: 0, totalPages: 0 };
+  }
+
+  if (result.data?.error) {
+    toast.error(result.data.error);
+    return { data: [], count: 0, totalPages: 0 };
+  }
+
+  return result.data?.data ?? { data: [], count: 0, totalPages: 0 };
 }
 
 /**
