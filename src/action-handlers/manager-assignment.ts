@@ -61,7 +61,7 @@
  * @param employeeIds - Array of employee IDs to assign the task to
  * @param startDate - Start date for the task assignment
  * @param endDate - End date for the task assignment
- * @param maxAttempts - Optional maximum number of attempts for the task
+ * @param maxOrders - Optional maximum number of orders for the task
  * @returns boolean indicating success or failure
  */
 // export async function handleAddTaskAssignment(
@@ -69,10 +69,10 @@
 //   employeeIds: string[],
 //   startDate: string,
 //   endDate: string,
-//   maxAttempts?: number
+//   maxOrders?: number
 // ): Promise<boolean> {
 //   const result = await safeAction(() =>
-//     addTaskAssignmentAction(taskId, employeeIds, startDate, endDate, maxAttempts)
+//     addTaskAssignmentAction(taskId, employeeIds, startDate, endDate, maxOrders)
 //   );
 
 //   if (!result.success) {
@@ -117,10 +117,10 @@ export async function handleAddTaskAssignment(
   employeeIds: string[],
   startDate: string,
   endDate: string,
-  maxAttempts: number
+  maxOrders: number
 ): Promise<boolean> {
   const result = await safeAction(() =>
-    addTaskAssignment(taskId, employeeIds, startDate, endDate, maxAttempts)
+    addTaskAssignment(taskId, employeeIds, startDate, endDate, maxOrders)
   );
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);

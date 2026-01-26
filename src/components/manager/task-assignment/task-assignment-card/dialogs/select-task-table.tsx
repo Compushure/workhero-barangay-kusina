@@ -5,17 +5,17 @@ import { Task } from '@/types';
 interface SelectTasksTableProps {
   filteredTasks: Task[];
   toggleTask: (taskId: string) => void;
-  updateMaxAttempts: (taskId: string, newValue: number) => void;
-  selectedTaskInstance: Array<{ id: string; maxAttempts: number }>;
-  taskMaxAttempts: Record<string, number>;
+  updateMaxOrders: (taskId: string, newValue: number) => void;
+  selectedTaskInstance: Array<{ id: string; maxOrders: number }>;
+  taskMaxOrders: Record<string, number>;
 }
 
 function SelectTasksTable({
   filteredTasks,
   toggleTask,
-  updateMaxAttempts,
+  updateMaxOrders,
   selectedTaskInstance,
-  taskMaxAttempts,
+  taskMaxOrders,
 }: SelectTasksTableProps) {
   return (
     <div className="bg-white rounded-2xl border-2 border-gray-300 flex-1 flex flex-col overflow-auto">
@@ -26,7 +26,7 @@ function SelectTasksTable({
             <th className="w-[35%] py-4 text-left pl-4 text-sm font-bold">TASK</th>
             <th className="w-[20%] py-4 text-center text-sm font-bold">POINTS</th>
             <th className="w-[15%] py-4 text-center text-sm font-bold">XP</th>
-            <th className="w-[25%] py-4 text-center text-sm font-bold">MAX ATTEMPTS</th>
+            <th className="w-[25%] py-4 text-center text-sm font-bold">MAX ORDERS</th>
           </tr>
         </thead>
       </table>
@@ -35,8 +35,8 @@ function SelectTasksTable({
           <tbody>
             {filteredTasks.map((task) => {
               const isSelected = selectedTaskInstance.some((instance) => instance.id === task.id);
-              const currentMaxAttempts =
-                taskMaxAttempts[task.id] ?? (task.isRepeatable ? 1 : task.maxAttempts);
+              const currentMaxOrders =
+                taskMaxOrders[task.id] ?? (task.isRepeatable ? 1 : task.maxOrders);
 
               return (
                 <tr
@@ -76,7 +76,7 @@ function SelectTasksTable({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              updateMaxAttempts(task.id, currentMaxAttempts - 1);
+                              updateMaxOrders(task.id, currentMaxOrders - 1);
                             }}
                             className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000]"
                           >
@@ -84,10 +84,10 @@ function SelectTasksTable({
                           </button>
                           <input
                             type="number"
-                            value={currentMaxAttempts}
+                            value={currentMaxOrders}
                             onChange={(e) => {
                               e.stopPropagation();
-                              updateMaxAttempts(task.id, Number.parseInt(e.target.value) || 1);
+                              updateMaxOrders(task.id, Number.parseInt(e.target.value) || 1);
                             }}
                             onClick={(e) => e.stopPropagation()}
                             className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans"
@@ -96,7 +96,7 @@ function SelectTasksTable({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              updateMaxAttempts(task.id, currentMaxAttempts + 1);
+                              updateMaxOrders(task.id, currentMaxOrders + 1);
                             }}
                             className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000]"
                           >

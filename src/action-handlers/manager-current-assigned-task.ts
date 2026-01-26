@@ -67,12 +67,12 @@ export async function handleDeleteTask(taskId: string): Promise<boolean> {
  */
 export async function handleUpdateTaskAssignment(
   taskId: string,
-  maxAttempts: number,
+  maxOrders: number,
   newDueDate: string,
   employeeIds: string[]
 ): Promise<boolean> {
   const result = await safeAction<ServerActionResponse<boolean>>(() =>
-    updateTaskAssignment(taskId, maxAttempts, newDueDate, employeeIds)
+    updateTaskAssignment(taskId, maxOrders, newDueDate, employeeIds)
   );
 
   if (!result.success || result.data?.error) {

@@ -7,14 +7,13 @@ import EmployeeViewCardMenu from './dialogs/employee-view/employee-view-card-men
 import ClearAllTasksDialog from './dialogs/employee-view/clear-all-tasks-dialog';
 import ClearTaskDialog from './dialogs/employee-view/clear-task-dialog';
 
-
 interface EmployeeViewCardProps {
   tasks: AssignedTask[];
   searchTerm?: string;
   sortBy: string;
 }
 
-export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeViewCardProps) {
+export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeViewCardProps) {
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<{
     taskId: string;
@@ -150,7 +149,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeVi
                     const taskEmployee = task.assignedEmployees.find(
                       (emp) => emp.id === employee.id
                     );
-                    const completedAttempts = taskEmployee?.completedAttempts || 0;
+                    const completedOrders = taskEmployee?.completedOrders || 0;
 
                     return (
                       <div
@@ -159,7 +158,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeVi
                       >
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-gray-700 truncate">
-                            {task.taskName} ({completedAttempts} / {task.maxAttempts})
+                            {task.taskName} ({completedOrders} / {task.maxOrders})
                           </p>
                           <p className="text-xs text-gray-500">
                             {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
@@ -188,26 +187,26 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeVi
               </div>
 
               {/* Clear All Assigned Tasks for Employee */}
-              <EmployeeViewCardMenu 
-                openPopoverId={openPopoverId} 
-                setOpenPopoverId={setOpenPopoverId} 
-                employee={employee} 
+              <EmployeeViewCardMenu
+                openPopoverId={openPopoverId}
+                setOpenPopoverId={setOpenPopoverId}
+                employee={employee}
                 setShowClearConfirm={setShowClearConfirm}
               />
             </div>
 
             {/* Unassign Task Dialog */}
-            <ClearTaskDialog 
-              showRemoveConfirm={showRemoveConfirm} 
-              setShowRemoveConfirm={setShowRemoveConfirm} 
+            <ClearTaskDialog
+              showRemoveConfirm={showRemoveConfirm}
+              setShowRemoveConfirm={setShowRemoveConfirm}
               employee={employee}
             />
 
             {/* Unassign All Tasks Dialog */}
-            <ClearAllTasksDialog 
-              showClearConfirm={showClearConfirm} 
-              setShowClearConfirm={setShowClearConfirm} 
-              employee={employee} 
+            <ClearAllTasksDialog
+              showClearConfirm={showClearConfirm}
+              setShowClearConfirm={setShowClearConfirm}
+              employee={employee}
             />
           </div>
         );

@@ -10,7 +10,7 @@ function mapRow(row: any): AssignedTask {
     name: row.assigned_to_name ?? '',
     empId: row.assigned_to_employee_id ?? '',
     assignedTasks: [],
-    completedAttempts: row.completed_attempts ?? 0,
+    completedOrders: row.completed_orders ?? 0,
   };
 
   return {
@@ -20,13 +20,13 @@ function mapRow(row: any): AssignedTask {
     taskType: row.category_description || '',
     isRepeatable: row.is_repeatable ?? true,
     points: row.category_points,
-    xp: 0,
+    xp: row.category_points, // assuming xp is same as points for now
     dateRange: {
       start: row.kpitask_created_at,
       end: row.k_deadline_date,
     },
-    maxAttempts: row.max_attempts ?? 1,
-    pendingAttempts: row.pending_attempts,
+    maxOrders: row.max_orders ?? 1,
+    pendingOrders: row.pending_orders,
     assignedEmployees: [employee],
   };
 }
@@ -53,7 +53,7 @@ export async function fetchCurrentAssignedTasksPaginated(
   const end = start + pageSize - 1;
 
   const { data, error, count } = await supabase
-    .from('task_info_view')
+    .from('task_info_view_temp')
     .select('*', { count: 'exact' })
     .range(start, end);
 
@@ -95,7 +95,7 @@ export async function deleteTask(taskId: string): Promise<ServerActionResponse<b
  */
 export async function updateTaskAssignment(
   taskId: string,
-  maxAttempts: number,
+  maxOrders: number,
   newDueDate: string,
   employeeIds: string[]
 ): Promise<ServerActionResponse<boolean>> {
@@ -105,7 +105,7 @@ export async function updateTaskAssignment(
   const { error } = await supabase
     .from('KPITask')
     .update({
-      max_attempts: maxAttempts,
+      max_orders: maxOrders,
       deadline_date: newDueDate,
     })
     .eq('id', taskId);

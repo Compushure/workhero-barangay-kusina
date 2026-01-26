@@ -17,7 +17,7 @@ interface TaskAssignmentContextType {
   deleteTask: (taskId: string) => void;
   editTask: (
     taskId: string,
-    maxAttempts: number,
+    maxOrders: number,
     newDueDate: string,
     newEmployees: AssignedEmployee[]
   ) => void;
@@ -65,7 +65,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
         start: new Date().toISOString(),
         end: filters.deadline ? filters.deadline.toISOString() : new Date().toISOString(),
       },
-      maxAttempts: taskSelection.maxAttempts,
+      maxOrders: taskSelection.maxOrders,
       assignedEmployees: filters.employees,
     }));
 
@@ -96,7 +96,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
 
   const editTask = (
     taskId: string,
-    maxAttempts: number,
+    maxOrders: number,
     newDueDate: string,
     newEmployees: AssignedEmployee[]
   ) => {
@@ -106,7 +106,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
           task.id === taskId
             ? {
                 ...task,
-                maxAttempts,
+                maxOrders,
                 dateRange: { ...task.dateRange, end: newDueDate },
                 assignedEmployees: newEmployees,
               }
@@ -151,11 +151,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
     [assignedTasks, viewMode, page, totalPages]
   );
 
-  return (
-    <TaskAssignmentContext.Provider value={value}>
-      {children}
-    </TaskAssignmentContext.Provider>
-  );
+  return <TaskAssignmentContext.Provider value={value}>{children}</TaskAssignmentContext.Provider>;
 }
 
 export function useTaskAssignment() {

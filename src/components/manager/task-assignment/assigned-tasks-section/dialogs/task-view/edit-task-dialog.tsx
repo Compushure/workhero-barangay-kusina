@@ -20,8 +20,8 @@ interface EditTaskDialogProps {
   handleCancelEdit: () => void;
   handleEditTask: () => void; // local context updater
   task: AssignedTask;
-  editMaxAttempts: number;
-  setEditMaxAttempts: (edit: number) => void;
+  editMaxOrders: number;
+  setEditMaxOrders: (edit: number) => void;
   editDueDate: Date;
   setEditDueDate: (edit: Date) => void;
   editAssignedEmployees: string[];
@@ -33,8 +33,8 @@ export default function EditTaskDialog({
   handleCancelEdit,
   handleEditTask,
   task,
-  editMaxAttempts,
-  setEditMaxAttempts,
+  editMaxOrders,
+  setEditMaxOrders,
   editDueDate,
   setEditDueDate,
   editAssignedEmployees,
@@ -62,7 +62,7 @@ export default function EditTaskDialog({
     Array.from(otherTaskInstanceEmployees).filter((empId) => !editAssignedEmployees.includes(empId))
   );
 
-  const safeMaxAttempts = editMaxAttempts ?? 1;
+  const safeMaxOrders = editMaxOrders ?? 1;
 
   return (
     <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>
@@ -84,23 +84,23 @@ export default function EditTaskDialog({
               <label className="font-bold text-[#690003]">Max Repeats</label>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setEditMaxAttempts(Math.max(1, safeMaxAttempts - 1))}
+                  onClick={() => setEditMaxOrders(Math.max(1, safeMaxOrders - 1))}
                   className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
                 >
                   −
                 </button>
                 <input
                   type="number"
-                  value={safeMaxAttempts}
+                  value={safeMaxOrders}
                   onChange={(e) => {
                     const val = Number.parseInt(e.target.value);
-                    setEditMaxAttempts(Math.max(1, isNaN(val) ? 1 : val));
+                    setEditMaxOrders(Math.max(1, isNaN(val) ? 1 : val));
                   }}
                   className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans bg-[#fafafa]"
                   min="1"
                 />
                 <button
-                  onClick={() => setEditMaxAttempts(safeMaxAttempts + 1)}
+                  onClick={() => setEditMaxOrders(safeMaxOrders + 1)}
                   className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
                 >
                   +
@@ -177,7 +177,7 @@ export default function EditTaskDialog({
             onClick={async () => {
               const success = await handleUpdateTaskAssignment(
                 task.id,
-                safeMaxAttempts,
+                safeMaxOrders,
                 editDueDate.toISOString().split('T')[0], // YYYY-MM-DD
                 editAssignedEmployees
               );

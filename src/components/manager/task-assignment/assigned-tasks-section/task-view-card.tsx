@@ -22,7 +22,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editMaxAttempts, setEditMaxAttempts] = useState(task.maxAttempts);
+  const [editMaxOrders, setEditMaxOrders] = useState(task.maxOrders);
   const [editDueDate, setEditDueDate] = useState<Date>(() => parseISO(task.dateRange.end));
   const [editAssignedEmployees, setEditAssignedEmployees] = useState<string[]>(
     task.assignedEmployees.map((e) => e.id)
@@ -62,25 +62,25 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         empId: backendEmp?.empId || '',
         tenure: backendEmp?.tenure,
         assignedTasks: [],
-        completedAttempts: 0,
+        completedOrders: 0,
       };
     });
 
     const success = await handleUpdateTaskAssignment(
       task.id,
-      editMaxAttempts,
+      editMaxOrders,
       format(editDueDate, 'yyyy-MM-dd'),
       editAssignedEmployees
     );
 
     if (success) {
-      editTask(task.id, editMaxAttempts, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
+      editTask(task.id, editMaxOrders, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
       setShowEditDialog(false);
     }
   };
 
   const handleOpenEditDialog = () => {
-    setEditMaxAttempts(task.maxAttempts);
+    setEditMaxOrders(task.maxOrders);
     setEditDueDate(parseISO(task.dateRange.end));
     setEditAssignedEmployees(task.assignedEmployees.map((e) => e.id));
     setShowEditDialog(true);
@@ -88,7 +88,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   };
 
   const handleCancelEdit = () => {
-    setEditMaxAttempts(task.maxAttempts);
+    setEditMaxOrders(task.maxOrders);
     setEditDueDate(parseISO(task.dateRange.end));
     setEditAssignedEmployees(task.assignedEmployees.map((e) => e.id));
     setShowEditDialog(false);
@@ -111,7 +111,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
             <span>
               {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
             </span>
-            <span>Max attempts: {task.maxAttempts}</span>
+            <span>Max orders: {task.maxOrders}</span>
             <span className="flex items-center gap-2">
               <span>{task.points} pts</span>
               <span>XP {task.xp}</span>
@@ -186,8 +186,8 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           handleCancelEdit={handleCancelEdit}
           handleEditTask={handleEditTask}
           task={task}
-          editMaxAttempts={editMaxAttempts}
-          setEditMaxAttempts={setEditMaxAttempts}
+          editMaxOrders={editMaxOrders}
+          setEditMaxOrders={setEditMaxOrders}
           editDueDate={editDueDate}
           setEditDueDate={setEditDueDate}
           editAssignedEmployees={editAssignedEmployees}

@@ -14,7 +14,7 @@
 //   isRepeatable: boolean;
 //   points: number;
 //   xp: number;
-//   maxAttempts: number;
+//   maxOrders: number;
 // }
 
 /**
@@ -26,7 +26,7 @@
 //   empId: string;
 //   tenure?: string;
 //   assignedTasks: AssignedTask[];
-//   completedAttempts: number;
+//   completedOrders: number;
 // }
 
 /**
@@ -44,7 +44,7 @@
 //     start: string;
 //     end: string;
 //   };
-//   maxAttempts: number;
+//   maxOrders: number;
 //   assignedEmployees: AssignedEmployee[];
 // }
 
@@ -53,7 +53,7 @@
  */
 // export interface SelectedFilters {
 //   employees: AssignedEmployee[];
-//   tasks: { id: string; maxAttempts: number }[];
+//   tasks: { id: string; maxOrders: number }[];
 //   deadline: Date | null;
 // }
 
@@ -74,7 +74,7 @@ export interface Task {
   isRepeatable: boolean; // from KPICategory.is_repeatable
   points: number; // from KPICategory.points
   xp?: number; // optional, if you add XP later
-  maxAttempts: number; // default 1, but editable if repeatable
+  maxOrders: number; // default 1, but editable if repeatable
 }
 
 /**
@@ -87,7 +87,7 @@ export interface AssignedEmployee {
   roleName?: string; // Role.type (optional)
   tenure?: string; // optional field if you track tenure
   assignedTasks: AssignedTask[];
-  completedAttempts: number; // from KPITask.completed_attempts
+  completedOrders: number; // from KPITask.completed_orders
 }
 
 /**
@@ -105,8 +105,8 @@ export interface AssignedTask {
     start: string; // KPITask.created_at
     end: string; // KPITask.deadline_date
   };
-  maxAttempts: number; // KPITask.max_attempts
-  pendingAttempts?: number; // KPITask.pending_attempts
+  maxOrders: number; // KPITask.max_orders
+  pendingOrders?: number; // KPITask.pending_orders
   assignedEmployees: AssignedEmployee[];
 }
 
@@ -115,6 +115,6 @@ export interface AssignedTask {
  */
 export interface SelectedFilters {
   employees: AssignedEmployee[];
-  tasks: { id: string; maxAttempts: number }[];
+  tasks: { id: string; maxOrders: number }[];
   deadline: Date | null;
 }

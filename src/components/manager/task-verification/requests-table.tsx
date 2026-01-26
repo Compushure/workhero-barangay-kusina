@@ -56,7 +56,7 @@ export function RequestsTable({
             <TableHead className="text-white font-semibold w-40 px-6">EMPLOYEE</TableHead>
             <TableHead className="text-white font-semibold px-10 pl-15 w-56">TASK</TableHead>
             <TableHead className="text-white font-semibold text-center pl-8 pr-15 w-10">
-              PENDING ATTEMPTS
+              PENDING ORDERS
             </TableHead>
             <TableHead className="text-white font-semibold text-center pr-10 w-24">
               TOTAL POINTS & XP

@@ -46,7 +46,7 @@ export function TaskAssignmentCard() {
       const employeeIds = selectedEmployees.map((emp) => emp.id);
       const startDate = new Date().toISOString();
       const endDate = selectedDeadline.toISOString();
-      const maxAttempts = taskMaxRepeats[taskId] || 1;
+      const maxOrders = taskMaxRepeats[taskId] || 1;
 
       // Call the server action handler
       const success = await handleAddTaskAssignment(
@@ -54,7 +54,7 @@ export function TaskAssignmentCard() {
         employeeIds,
         startDate,
         endDate,
-        maxAttempts
+        maxOrders
       );
 
       if (success) {
@@ -64,7 +64,7 @@ export function TaskAssignmentCard() {
           employees: selectedEmployees,
           tasks: selectedTask.map((id) => ({
             id,
-            maxAttempts: taskMaxRepeats[id] || 1,
+            maxOrders: taskMaxRepeats[id] || 1,
           })),
           deadline: selectedDeadline,
         });

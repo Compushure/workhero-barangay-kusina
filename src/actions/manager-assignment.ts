@@ -31,7 +31,7 @@
 //   isRepeatable: item.is_repeatable,
 //   points: item.points,
 //   xp: item.points,
-//   maxAttempts: 1,
+//   maxOrders: 1,
 // }));
 
 //     return { error: null, data: tasks };
@@ -51,12 +51,12 @@
 //   try {
 //     const supabase = await createClient();
 
-    // Fetch all users with role information
-    // const { data, error } = await supabase
-    //   .from('user_attributes')
-    //   .select('user_id, user_name, employee_id')
-    //   .eq('role_type', 'regular')
-    //   .order('user_id', { ascending: true });
+// Fetch all users with role information
+// const { data, error } = await supabase
+//   .from('user_attributes')
+//   .select('user_id, user_name, employee_id')
+//   .eq('role_type', 'regular')
+//   .order('user_id', { ascending: true });
 
 //     if (error) {
 //       console.error('Error fetching employees:', error);
@@ -70,7 +70,7 @@
 //       empId: item.employee_id || '',
 //       tenure: undefined,
 //       assignedTasks: [],
-//       completedAttempts: 0,
+//       completedOrders: 0,
 //     }));
 
 //     return { error: null, data: employees };
@@ -91,7 +91,7 @@
 //   employeeIds: string[],
 //   startDate: string,
 //   endDate: string,
-//   maxAttempts?: number
+//   maxOrders?: number
 // ): Promise<ServerActionResponse<void>> {
 //   try {
 //     const supabase = await createClient();
@@ -124,7 +124,7 @@
 //       status: 'assigned',
 //       created_at: startDate,
 //       deadline_date: endDate,
-//       max_attempts: maxAttempts || 1,
+//       max_orders: maxOrders || 1,
 //     }));
 
 //     const { error: insertError } = await supabase.from('KPITask').insert(assignments);
@@ -155,8 +155,8 @@ export async function fetchTaskList(): Promise<ServerActionResponse<Task[]>> {
     points: row.points,
     isRepeatable: row.is_repeatable,
     type: row.type,
-    xp: 0, // optional
-    maxAttempts: 1,
+    xp: row.points, // optional
+    maxOrders: 1,
   }));
 
   return { error: null, data: tasks };
@@ -174,7 +174,7 @@ export async function fetchEmployeeList(): Promise<ServerActionResponse<Assigned
     name: row.name,
     empId: row.employee_id,
     assignedTasks: [],
-    completedAttempts: 0,
+    completedOrders: 0,
   }));
 
   return { error: null, data: employees };
@@ -186,17 +186,17 @@ export async function addTaskAssignment(
   employeeIds: string[],
   startDate: string,
   endDate: string,
-  maxAttempts?: number
+  maxOrders?: number
 ): Promise<ServerActionResponse<void>> {
   try {
     const supabase = await createClient();
-    
+
     // Check for existing active assignments for these employees in THIS task category
     const { data: existing, error: checkError } = await supabase
       .from('KPITask')
       .select('assigned_to')
       .eq('category_id', taskId)
-      .in('assigned_to', employeeIds)
+      .in('assigned_to', employeeIds);
 
     const inserts = employeeIds.map((empId) => ({
       assigned_by: null, // fill with manager user id if available
@@ -205,7 +205,7 @@ export async function addTaskAssignment(
       status: 'assigned',
       created_at: startDate,
       deadline_date: endDate,
-      max_attempts: maxAttempts,
+      max_orders: maxOrders,
     }));
 
     // Identify who is already busy
@@ -227,14 +227,13 @@ export async function addTaskAssignment(
       status: 'assigned',
       created_at: startDate,
       deadline_date: endDate,
-      max_attempts: maxAttempts || 1,
+      max_orders: maxOrders || 1,
     }));
 
     const { error: insertError } = await supabase.from('KPITask').insert(assignments);
-    
+
     if (insertError) throw insertError;
     return { error: null, data: undefined };
-
   } catch (error: any) {
     return { error: error.message || 'Failed to assign tasks' };
   }
