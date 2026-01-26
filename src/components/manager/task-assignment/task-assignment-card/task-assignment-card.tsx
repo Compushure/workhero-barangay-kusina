@@ -49,28 +49,17 @@ export function TaskAssignmentCard() {
       const endDate = selectedDeadline.toISOString();
       const maxOrders = taskMaxRepeats[taskId] || 1;
 
-      // Call the server action handler
-      const success = await handleAddTaskAssignment(
-        taskId,
-        employeeIds,
-        startDate,
-        endDate,
-        maxOrders
-      );
+      // Call the server action handler - this will update the context automatically
+      await assignTasks({
+        employees: selectedEmployees,
+        tasks: selectedTask.map((id) => ({
+          id,
+          maxOrders: taskMaxRepeats[id] || 1,
+        })),
+        deadline: selectedDeadline,
+      });
 
-      if (success) {
-        // If the DB update succeeded, update the local context so the
-        // "disabling" logic in the dialogs sees the new assignments
-        assignTasks({
-          employees: selectedEmployees,
-          tasks: selectedTask.map((id) => ({
-            id,
-            maxOrders: taskMaxRepeats[id] || 1,
-          })),
-          deadline: selectedDeadline,
-        });
-        handleClear();
-      }
+      handleClear();
     }
   };
 

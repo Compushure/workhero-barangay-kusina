@@ -56,7 +56,7 @@ export async function fetchEmployeeList(): Promise<ServerActionResponse<Assigned
       .from('user_attributes')
       .select('user_id, user_name, employee_id')
       .eq('role_type', 'regular')
-      .order('user_id', { ascending: true });
+      .order('employee_id', { ascending: true });
 
     if (error) {
       console.error('Error fetching employees:', error);
@@ -122,23 +122,24 @@ export async function addTaskAssignmentAction(
       .from('KPITask')
       .select('assigned_to')
       .eq('category_id', taskId)
-      .in('assigned_to', employeeIds);
+      .in('assigned_to', employeeIds)
+      .in('status', ['assigned', 'in review', 'rejected', 'approved']); // Only check active assignments
 
     if (checkError) throw checkError;
 
     // Identify who is already busy
-    // const busyEmployeeIds = new Set(existing?.map(e => e.assigned_to) || []);
-    // const validEmployeeIds = employeeIds.filter(id => !busyEmployeeIds.has(id));
+    const busyEmployeeIds = new Set(existing?.map(e => e.assigned_to) || []);
+    const validEmployeeIds = employeeIds.filter(id => !busyEmployeeIds.has(id));
 
-    // if (validEmployeeIds.length === 0) {
-    //   return { error: 'All selected employees are already assigned to an active instance of this task.' };
-    // }
+    if (validEmployeeIds.length === 0) {
+      return { error: 'All selected employees are already assigned to an active instance of this task.', data: undefined };
+    }
 
-    // Proceed with valid assignments
+    // Proceed with valid assignments only
     const user = (await supabase.auth.getUser()).data.user;
     if (!user) return { error: 'Unauthorized', data: undefined };
 
-    const assignments = employeeIds.map((empId) => ({
+    const assignments = validEmployeeIds.map((empId) => ({
       assigned_by: user.id,
       assigned_to: empId,
       category_id: taskId,
@@ -174,10 +175,12 @@ export async function addTaskAssignmentAction(
 
     (insertedData || []).forEach((row) => {
       const employee = (employeeData as any[])?.find((emp: any) => emp.user_id === row.assigned_to);
+      if (!employee) return; // Skip if employee data not found
+      
       const assignedEmployee: AssignedEmployee = {
-        id: employee?.user_id || row.assigned_to,
-        name: employee?.user_name || 'Unknown Employee',
-        empId: employee?.employee_id || '',
+        id: employee.user_id,
+        name: employee.user_name || 'Unknown Employee',
+        empId: employee.employee_id || '',
         assignedTasks: [],
         completedOrders: 0,
       };
