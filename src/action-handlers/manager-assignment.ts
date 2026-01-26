@@ -6,54 +6,54 @@
  * Uses safeAction wrapper for consistent error handling.
  */
 
-// import { safeAction } from '@/lib/utils/safe-action';
-// import {
-//   fetchTaskList,
-//   fetchEmployeeList,
-//   addTaskAssignmentAction,
-// } from '@/actions/manager-assignment';
-// import type { Task, AssignedEmployee } from '@/types';
-// import { toast } from 'sonner';
+import { safeAction } from '@/lib/utils/safe-action';
+import {
+  fetchTaskList,
+  fetchEmployeeList,
+  addTaskAssignmentAction,
+} from '@/actions/manager-assignment';
+import type { Task, AssignedEmployee } from '@/types';
+import { toast } from 'sonner';
 
 /**
  * Fetches all available tasks for assignment with error handling and toast feedback
  * @returns Array of tasks or empty array on error
  */
-// export async function handleFetchTaskList(): Promise<Task[]> {
-//   const result = await safeAction(() => fetchTaskList());
+export async function handleFetchTaskList(): Promise<Task[]> {
+  const result = await safeAction(() => fetchTaskList());
 
-//   if (!result.success) {
-//     toast.error('Failed to load tasks: ' + result.error);
-//     return [];
-//   }
+  if (!result.success) {
+    toast.error('Failed to load tasks: ' + result.error);
+    return [];
+  }
 
-//   if (result.data?.error) {
-//     toast.error(result.data.error);
-//     return [];
-//   }
+  if (result.data?.error) {
+    toast.error(result.data.error);
+    return [];
+  }
 
-//   return result.data?.data ?? [];
-// }
+  return result.data?.data ?? [];
+}
 
 /**
  * Fetches all active employees for task assignment with error handling and toast feedback
  * @returns Array of employees or empty array on error
  */
-// export async function handleFetchEmployeeList(): Promise<AssignedEmployee[]> {
-//   const result = await safeAction(() => fetchEmployeeList());
+export async function handleFetchEmployeeList(): Promise<AssignedEmployee[]> {
+  const result = await safeAction(() => fetchEmployeeList());
 
-//   if (!result.success) {
-//     toast.error('Failed to load employees: ' + result.error);
-//     return [];
-//   }
+  if (!result.success) {
+    toast.error('Failed to load employees: ' + result.error);
+    return [];
+  }
 
-//   if (result.data?.error) {
-//     toast.error(result.data.error);
-//     return [];
-//   }
+  if (result.data?.error) {
+    toast.error(result.data.error);
+    return [];
+  }
 
-//   return result.data?.data ?? [];
-// }
+  return result.data?.data ?? [];
+}
 
 /**
  * Assigns a task to one or more employees with error handling and toast feedback
@@ -64,68 +64,27 @@
  * @param maxOrders - Optional maximum number of orders for the task
  * @returns boolean indicating success or failure
  */
-// export async function handleAddTaskAssignment(
-//   taskId: string,
-//   employeeIds: string[],
-//   startDate: string,
-//   endDate: string,
-//   maxOrders?: number
-// ): Promise<boolean> {
-//   const result = await safeAction(() =>
-//     addTaskAssignmentAction(taskId, employeeIds, startDate, endDate, maxOrders)
-//   );
-
-//   if (!result.success) {
-//     toast.error('Failed to assign task: ' + result.error);
-//     return false;
-//   }
-
-//   if (result.data?.error) {
-//     toast.error(result.data.error);
-//     return false;
-//   }
-
-//   toast.success('Task assigned successfully');
-//   return true;
-// }
-
-import { safeAction } from '@/lib/utils/safe-action';
-import { fetchTaskList, fetchEmployeeList, addTaskAssignment } from '@/actions/manager-assignment';
-import { toast } from 'sonner';
-import type { Task, AssignedEmployee } from '@/types';
-
-export async function handleFetchTaskList(): Promise<Task[]> {
-  const result = await safeAction(() => fetchTaskList());
-  if (!result.success || result.data?.error) {
-    toast.error(result.error || result.data?.error);
-    return [];
-  }
-  return result.data?.data ?? [];
-}
-
-export async function handleFetchEmployeeList(): Promise<AssignedEmployee[]> {
-  const result = await safeAction(() => fetchEmployeeList());
-  if (!result.success || result.data?.error) {
-    toast.error(result.error || result.data?.error);
-    return [];
-  }
-  return result.data?.data ?? [];
-}
-
 export async function handleAddTaskAssignment(
   taskId: string,
   employeeIds: string[],
   startDate: string,
   endDate: string,
-  maxOrders: number
+  maxOrders?: number
 ): Promise<boolean> {
   const result = await safeAction(() =>
-    addTaskAssignment(taskId, employeeIds, startDate, endDate, maxOrders)
+    addTaskAssignmentAction(taskId, employeeIds, startDate, endDate, maxOrders)
   );
-  if (!result.success || result.data?.error) {
-    toast.error(result.error || result.data?.error);
+
+  if (!result.success) {
+    toast.error('Failed to assign task: ' + result.error);
     return false;
   }
+
+  if (result.data?.error) {
+    toast.error(result.data.error);
+    return false;
+  }
+
   toast.success('Task assigned successfully');
   return true;
 }

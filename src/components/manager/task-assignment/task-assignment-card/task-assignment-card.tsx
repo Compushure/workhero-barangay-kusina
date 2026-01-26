@@ -8,7 +8,8 @@ import { DatePickerPopover } from './date-picker-popover';
 import type { AssignedEmployee, Task } from '@/types';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
-import { handleAddTaskAssignment, handleFetchTaskList } from '@/action-handlers/manager-assignment';
+import { handleAddTaskAssignment } from '@/action-handlers/manager-assignment';
+import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
 
 export function TaskAssignmentCard() {
   const { assignTasks, assignedTasks } = useTaskAssignment();

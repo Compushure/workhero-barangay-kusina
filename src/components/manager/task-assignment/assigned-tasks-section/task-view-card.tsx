@@ -193,36 +193,9 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           setEditDueDate={setEditDueDate}
           editAssignedEmployees={editAssignedEmployees}
           toggleEmployee={toggleEmployee}
+          employees={employees} // ✅ backend employees passed in
         />
       </div>
-
-      {/* Unassign Employee Dialog */}
-      <UnassignEmployeeDialog
-        showRemoveConfirm={showRemoveConfirm}
-        setShowRemoveConfirm={setShowRemoveConfirm}
-        task={task}
-      />
-
-      {/* Delete Task Dialog */}
-      <DeleteTaskDialog
-        showDeleteConfirm={showDeleteConfirm}
-        setShowDeleteConfirm={setShowDeleteConfirm}
-        task={task}
-      />
-
-      {/* Edit Task Dialog */}
-      <EditTaskDialog
-        showEditDialog={showEditDialog}
-        handleCancelEdit={handleCancelEdit}
-        handleEditTask={handleEditTask}
-        task={task}
-        editMaxOrders={editMaxOrders}
-        setEditMaxOrders={setEditMaxOrders}
-        editDueDate={editDueDate}
-        setEditDueDate={setEditDueDate}
-        editAssignedEmployees={editAssignedEmployees}
-        toggleEmployee={toggleEmployee}
-      />
     </div>
   );
 }

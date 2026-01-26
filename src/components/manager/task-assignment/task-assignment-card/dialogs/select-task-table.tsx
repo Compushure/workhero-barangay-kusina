@@ -76,7 +76,7 @@ function SelectTasksTable({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              updateMaxOrders(task.id, currentMaxOrders - 1);
+                              updateMaxOrders(task.id, Math.max(1, currentMaxOrders - 1));
                             }}
                             className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000]"
                           >

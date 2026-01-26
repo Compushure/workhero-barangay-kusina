@@ -31,7 +31,7 @@ export function SelectTasksDialog({
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
-  const [tasks, setTasks] = useState<Task[]>([]); // New state for real data
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [taskMaxOrders, setTaskMaxOrders] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
@@ -43,6 +43,13 @@ export function SelectTasksDialog({
     });
     return initial;
   });
+
+  // Reset taskMaxOrders when selectedTask becomes empty
+  useEffect(() => {
+    if (selectedTask.length === 0) {
+      setTaskMaxOrders({});
+    }
+  }, [selectedTask]);
 
   // Fetch tasks on mount
   useEffect(() => {
@@ -79,6 +86,8 @@ export function SelectTasksDialog({
       }
     }
   };
+
+
 
   const updateMaxOrders = (taskId: string, newValue: number) => {
     const task = tasks.find((t) => t.id === taskId);
