@@ -12,18 +12,15 @@ import { useTaskAssignment } from '../task-assignment-page-context';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 
 export function CurrentAssignedTasks() {
-  const { tasksById, viewMode, setViewMode, clearAll, page, setPage, totalPages } =
+  const { assignedTasks, viewMode, setViewMode, clearAll, page, setPage, totalPages } =
     useTaskAssignment();
-
-  // ✅ Always derive assignedTasks as an array
-  const assignedTasks = Object.values(tasksById);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recently added');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const filteredTasks = useMemo(() => {
-    if (!Array.isArray(assignedTasks)) return [];
+    if (!assignedTasks || !Array.isArray(assignedTasks)) return [];
     return assignedTasks.filter((task) => {
       const searchLower = searchTerm.toLowerCase();
       if (viewMode === 'task') {

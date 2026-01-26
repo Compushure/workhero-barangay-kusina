@@ -3,15 +3,14 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
 import {
-  handleFetchCurrentAssignedTasksPaginated,
+  handleFetchCurrentAssignedTasksPaginated, // ✅ updated import
   handleDeleteTask,
   handleClearAllTasks,
 } from '@/action-handlers/manager-current-assigned-task';
-import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import { handleAddTaskAssignment } from '@/action-handlers/manager-assignment';
 
 interface TaskAssignmentContextType {
-  tasksById: Record<string, AssignedTask>;
-  employees: AssignedEmployee[];
+  assignedTasks: AssignedTask[];
   viewMode: 'task' | 'employee';
   setViewMode: (mode: 'task' | 'employee') => void;
   assignTasks: (filters: SelectedFilters) => void;
@@ -25,6 +24,7 @@ interface TaskAssignmentContextType {
   ) => void;
   clearAll: () => void;
   clearAllEmployeeTasks: (employeeId: string) => void;
+  setAssignedTasks: React.Dispatch<React.SetStateAction<AssignedTask[]>>;
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   totalPages: number;
@@ -33,77 +33,71 @@ interface TaskAssignmentContextType {
 const TaskAssignmentContext = createContext<TaskAssignmentContextType | undefined>(undefined);
 
 export function TaskAssignmentProvider({ children }: { children: React.ReactNode }) {
-  const [tasksById, setTasksById] = useState<Record<string, AssignedTask>>({});
-  const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
+  const [assignedTasks, setAssignedTasks] = useState<AssignedTask[]>([]);
   const [viewMode, setViewMode] = useState<'task' | 'employee'>('task');
 
+  // ✅ Pagination state
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
-  // ✅ Load tasks with pagination
+  // ✅ Load tasks from backend with pagination
   useEffect(() => {
     const loadTasks = async () => {
       const res = await handleFetchCurrentAssignedTasksPaginated(page, 10);
-      const newTasks: Record<string, AssignedTask> = {};
-      res.tasks.forEach((t) => (newTasks[t.id] = t));
-      setTasksById(newTasks);
+      setAssignedTasks(res.tasks);
       setTotalPages(res.totalPages);
     };
     loadTasks();
   }, [page]);
 
-  // ✅ Fetch employees once globally
-  useEffect(() => {
-    handleFetchEmployeeList().then(setEmployees);
-  }, []);
-
-  const assignTasks = (filters: SelectedFilters) => {
+  // Server action for assigning tasks
+  const assignTasks = async (filters: SelectedFilters) => {
     if (filters.employees.length === 0 || filters.tasks.length === 0) return;
-    const newAssignments: Record<string, AssignedTask> = {};
-    filters.tasks.forEach((taskSelection) => {
-      const id = `${taskSelection.id}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
-      newAssignments[id] = {
-        id,
-        taskId: taskSelection.id,
-        taskName: 'New Task',
-        taskType: 'General',
-        isRepeatable: false,
-        points: 0,
-        xp: 0,
-        dateRange: {
-          start: new Date().toISOString(),
-          end: filters.deadline ? filters.deadline.toISOString() : new Date().toISOString(),
-        },
-        maxOrders: taskSelection.maxOrders,
-        assignedEmployees: filters.employees,
-      };
-    });
-    setTasksById((prev) => ({ ...prev, ...newAssignments }));
+
+    try {
+      const startDate = new Date().toISOString();
+      const endDate = filters.deadline ? filters.deadline.toISOString() : new Date().toISOString();
+
+      // Create assignments for each task-employee combination
+      for (const taskSelection of filters.tasks) {
+        const employeeIds = filters.employees.map(emp => emp.id);
+        const newAssignments = await handleAddTaskAssignment(
+          taskSelection.id,
+          employeeIds,
+          startDate,
+          endDate,
+          taskSelection.maxOrders
+        );
+
+        // Add the new assignments to local state for immediate UI update
+        if (newAssignments.length > 0) {
+          setAssignedTasks(prev => [...prev, ...newAssignments]);
+        }
+      }
+    } catch (error) {
+      console.error('Error assigning tasks:', error);
+    }
   };
 
   const removeAssignment = (taskId: string, employeeId: string) => {
-    setTasksById((prev) => {
-      const task = prev[taskId];
-      if (!task) return prev;
-      const updated = {
-        ...task,
-        assignedEmployees: task.assignedEmployees.filter((e) => e.id !== employeeId),
-      };
-      if (updated.assignedEmployees.length === 0) {
-        const { [taskId]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [taskId]: updated };
-    });
+    setAssignedTasks((prev) =>
+      prev
+        .map((task) =>
+          task.id === taskId
+            ? {
+                ...task,
+                assignedEmployees: task.assignedEmployees.filter((e) => e.id !== employeeId),
+              }
+            : task
+        )
+        .filter((task) => task.assignedEmployees.length > 0)
+    );
   };
 
   const deleteTask = async (taskId: string) => {
     const success = await handleDeleteTask(taskId);
     if (success) {
-      setTasksById((prev) => {
-        const { [taskId]: _, ...rest } = prev;
-        return rest;
-      });
+      setAssignedTasks((prev) => prev.filter((task) => task.id !== taskId));
     }
   };
 
@@ -113,43 +107,41 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
     newDueDate: string,
     newEmployees: AssignedEmployee[]
   ) => {
-    setTasksById((prev) => {
-      const task = prev[taskId];
-      if (!task) return prev;
-      return {
-        ...prev,
-        [taskId]: {
-          ...task,
-          maxOrders,
-          dateRange: { ...task.dateRange, end: newDueDate },
-          assignedEmployees: newEmployees,
-        },
-      };
-    });
+    setAssignedTasks((prev) =>
+      prev
+        .map((task) =>
+          task.id === taskId
+            ? {
+                ...task,
+                maxOrders,
+                dateRange: { ...task.dateRange, end: newDueDate },
+                assignedEmployees: newEmployees,
+              }
+            : task
+        )
+        .filter((task) => task.assignedEmployees.length > 0)
+    );
   };
 
   const clearAll = async () => {
     const success = await handleClearAllTasks();
-    if (success) setTasksById({});
+    if (success) setAssignedTasks([]);
   };
 
   const clearAllEmployeeTasks = (employeeId: string) => {
-    setTasksById((prev) => {
-      const updated: Record<string, AssignedTask> = {};
-      Object.values(prev).forEach((task) => {
-        const filteredEmployees = task.assignedEmployees.filter((e) => e.id !== employeeId);
-        if (filteredEmployees.length > 0) {
-          updated[task.id] = { ...task, assignedEmployees: filteredEmployees };
-        }
-      });
-      return updated;
-    });
+    setAssignedTasks((prev) =>
+      prev
+        .map((task) => ({
+          ...task,
+          assignedEmployees: task.assignedEmployees.filter((e) => e.id !== employeeId),
+        }))
+        .filter((task) => task.assignedEmployees.length > 0)
+    );
   };
 
   const value = useMemo(
     () => ({
-      tasksById,
-      employees,
+      assignedTasks,
       viewMode,
       setViewMode,
       assignTasks,
@@ -158,11 +150,12 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
       editTask,
       clearAll,
       clearAllEmployeeTasks,
+      setAssignedTasks,
       page,
       setPage,
       totalPages,
     }),
-    [tasksById, employees, viewMode, page, totalPages]
+    [assignedTasks, viewMode, page, totalPages]
   );
 
   return <TaskAssignmentContext.Provider value={value}>{children}</TaskAssignmentContext.Provider>;

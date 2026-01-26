@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import type { ServerActionResponse, Task, AssignedEmployee } from '@/types';
+import type { ServerActionResponse, Task, AssignedEmployee, AssignedTask } from '@/types';
 // import { assignTaskToMultipleEmployeesSchema } from '@/zod/schemas/task-assignment';
 
 /**
@@ -84,7 +84,7 @@ export async function fetchEmployeeList(): Promise<ServerActionResponse<Assigned
 }
 
 /**
- * Assign a task to employees
+ * Assign a task to employees and return the created assignment data
  */
 export async function addTaskAssignmentAction(
   taskId: string,
@@ -92,9 +92,30 @@ export async function addTaskAssignmentAction(
   startDate: string,
   endDate: string,
   maxOrders?: number
-): Promise<ServerActionResponse<void>> {
+): Promise<ServerActionResponse<AssignedTask[]>> {
   try {
     const supabase = await createClient();
+
+    // First, get the task details from KPICategory
+    const { data: taskData, error: taskError } = await supabase
+      .from('KPICategory')
+      .select('id, name, type, is_repeatable, points')
+      .eq('id', taskId)
+      .single();
+
+    if (taskError || !taskData) {
+      return { error: `Task not found: ${taskError?.message || 'Unknown error'}`, data: undefined };
+    }
+
+    // Get employee details
+    const { data: employeeData, error: employeeError } = await supabase
+      .from('user_attributes')
+      .select('user_id, user_name, employee_id')
+      .in('user_id', employeeIds);
+
+    if (employeeError) {
+      return { error: `Failed to fetch employee data: ${employeeError.message}`, data: undefined };
+    }
 
     // Check for existing active assignments for these employees in THIS task category
     const { data: existing, error: checkError } = await supabase
@@ -115,7 +136,7 @@ export async function addTaskAssignmentAction(
 
     // Proceed with valid assignments
     const user = (await supabase.auth.getUser()).data.user;
-    if (!user) return { error: 'Unauthorized' };
+    if (!user) return { error: 'Unauthorized', data: undefined };
 
     const assignments = employeeIds.map((empId) => ({
       assigned_by: user.id,
@@ -127,11 +148,70 @@ export async function addTaskAssignmentAction(
       max_orders: maxOrders || 1,
     }));
 
-    const { error: insertError } = await supabase.from('KPITask').insert(assignments);
+    const { data: insertedData, error: insertError } = await supabase
+      .from('KPITask')
+      .insert(assignments)
+      .select();
 
     if (insertError) throw insertError;
-    return { error: null, data: undefined };
+
+    // Group assignments by task to create one AssignedTask with multiple employees
+    const taskGroups = new Map<string, {
+      id: string;
+      taskId: string;
+      taskName: string;
+      taskType: string;
+      isRepeatable: boolean;
+      points: number;
+      xp: number;
+      dateRange: {
+        start: string;
+        end: string;
+      };
+      maxOrders: number;
+      assignedEmployees: AssignedEmployee[];
+    }>();
+
+    (insertedData || []).forEach((row) => {
+      const employee = (employeeData as any[])?.find((emp: any) => emp.user_id === row.assigned_to);
+      const assignedEmployee: AssignedEmployee = {
+        id: employee?.user_id || row.assigned_to,
+        name: employee?.user_name || 'Unknown Employee',
+        empId: employee?.employee_id || '',
+        assignedTasks: [],
+        completedOrders: 0,
+      };
+
+      const key = `${row.category_id}-${row.created_at}-${row.deadline_date}-${row.max_orders}`;
+      
+      if (taskGroups.has(key)) {
+        // Add employee to existing task group
+        const existingTask = taskGroups.get(key)!;
+        existingTask.assignedEmployees.push(assignedEmployee);
+      } else {
+        // Create new task group
+        taskGroups.set(key, {
+          id: row.id, // Use the first assignment's ID as the group ID
+          taskId: row.category_id,
+          taskName: taskData.name,
+          taskType: taskData.type || 'General',
+          isRepeatable: taskData.is_repeatable,
+          points: taskData.points,
+          xp: taskData.points,
+          dateRange: {
+            start: row.created_at,
+            end: row.deadline_date,
+          },
+          maxOrders: row.max_orders || 1,
+          assignedEmployees: [assignedEmployee],
+        });
+      }
+    });
+
+    const assignedTasks = Array.from(taskGroups.values());
+
+    return { error: null, data: assignedTasks };
   } catch (error: any) {
-    return { error: error.message || 'Failed to assign tasks' };
+    return { error: error.message || 'Failed to assign tasks', data: undefined };
   }
 }
