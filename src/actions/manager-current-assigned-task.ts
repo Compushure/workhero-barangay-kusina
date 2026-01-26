@@ -65,7 +65,61 @@ export async function fetchCurrentAssignedTasksPaginated(
     return { error: 'Failed to fetch assigned tasks: ' + error.message, data: undefined };
   }
 
-  const tasks = (data ?? []).map(mapRow);
+  // Group assignments by task to create one AssignedTask with multiple employees
+  const taskGroups = new Map<string, {
+    id: string;
+    taskId: string;
+    taskName: string;
+    taskType: string;
+    isRepeatable: boolean;
+    points: number;
+    xp: number;
+    dateRange: {
+      start: string;
+      end: string;
+    };
+    maxOrders: number;
+    pendingOrders?: number;
+    assignedEmployees: AssignedEmployee[];
+  }>();
+
+  (data ?? []).forEach((row) => {
+    const employee: AssignedEmployee = {
+      id: row.assigned_to ?? '',
+      name: row.assigned_to_name ?? '',
+      empId: row.assigned_to_employee_id ?? '',
+      assignedTasks: [],
+      completedOrders: row.completed_orders ?? 0,
+    };
+
+    const key = `${row.category_id}-${row.kpitask_created_at}-${row.k_deadline_date}-${row.max_orders}`;
+    
+    if (taskGroups.has(key)) {
+      // Add employee to existing task group
+      const existingTask = taskGroups.get(key)!;
+      existingTask.assignedEmployees.push(employee);
+    } else {
+      // Create new task group
+      taskGroups.set(key, {
+        id: row.kpitask_id,
+        taskId: row.category_id,
+        taskName: row.category_name || 'Unnamed Task',
+        taskType: row.category_description || '',
+        isRepeatable: true, // Default value since is_repeatable is not in the view
+        points: row.category_points,
+        xp: row.category_points, // assuming xp is same as points for now
+        dateRange: {
+          start: row.kpitask_created_at,
+          end: row.k_deadline_date,
+        },
+        maxOrders: row.max_orders ?? 1,
+        pendingOrders: row.pending_orders,
+        assignedEmployees: [employee],
+      });
+    }
+  });
+
+  const tasks = Array.from(taskGroups.values());
   const totalPages = count ? Math.ceil(count / pageSize) : 0;
 
   return {
