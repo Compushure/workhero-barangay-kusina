@@ -53,7 +53,7 @@ export async function fetchCurrentAssignedTasksPaginated(
   const end = start + pageSize - 1;
 
   const { data, error, count } = await supabase
-    .from('task_info_view_temp')
+    .from('task_info_view')
     .select('*', { count: 'exact' })
     .range(start, end);
 

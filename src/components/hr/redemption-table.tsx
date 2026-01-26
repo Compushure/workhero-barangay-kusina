@@ -27,7 +27,7 @@ interface RedemptionTableProps {
 export function RedemptionTable({ data, onApprove, onReject }: RedemptionTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 8;
 
   // Calculate pagination
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -91,13 +91,13 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
               className="bg-[#FBF4E8] hover:bg-[#ffffff] transition-colors border-b border-border"
             >
               <TableCell className="px-6">
-                <div className="text-sm font-medium">{request.requestDate}</div>
-                <div className="text-xs text-muted-foreground">{request.requestTime}</div>
+                <div className="text-sm font-medium">{new Date(request.requestedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                <div className="text-xs text-muted-foreground">{new Date(request.requestedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</div>
               </TableCell>
-              <TableCell className="text-sm px-6">{request.employee}</TableCell>
+              <TableCell className="text-sm px-6">{request.userName}</TableCell>
               <TableCell className="px-6">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">{request.requestedItems}</span>
+                  <span className="text-sm">{`${request.quantity || 1} x ${request.rewardName}`}</span>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -114,7 +114,7 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
                 </div>
               </TableCell>
               <TableCell className="text-sm text-right font-medium px-6">
-                {request.cost} Pts
+                {(request.pointsCost * (request.quantity || 1))} Pts
               </TableCell>
               <TableCell className="text-center px-6">
                 <div className="flex items-center justify-center gap-2">
