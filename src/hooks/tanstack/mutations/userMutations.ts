@@ -106,7 +106,8 @@ export function useAddUser(): UseMutationResult<User, Error, AddUserInput, { pre
 
         // Check if this is a paginated query
         if (query.queryKey.includes('paginated')) {
-          const paginatedData = oldData as any;
+          type PaginatedUsers = { data: User[]; count?: number };
+          const paginatedData = oldData as PaginatedUsers | undefined;
           if (paginatedData?.data) {
             // Add to beginning of paginated results
             queryClient.setQueryData(query.queryKey, {

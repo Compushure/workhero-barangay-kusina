@@ -202,7 +202,7 @@ export function ManagerPage() {
     startTransition(async () => {
       const { error } = await handleSignOut();
       if (!error) {
-        router.push('/admin');
+        router.push('/auth/adminlogin');
 
         toast.success('Logged out', {
           description: 'You have successfully logged out.',

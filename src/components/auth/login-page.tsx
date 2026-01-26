@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { LoginHeader } from './admin-login-header';
 import { LoginForm } from './admin-login-form';
 
-const FeatureList = lazy(() => import('./feature-list'));
+const FeatureList = lazy(() => import('./feature-list').then((mod) => ({ default: mod.FeatureList })));
 
 export function AdminLoginPage() {
   return (
