@@ -17,12 +17,26 @@ interface ViewItemModalProps {
     redeemingLimit?: number;
     isActive: boolean;
     imageUrl?: string;
+    createdAt?: string;
   } | null;
 }
 
 function formatNumber(num: number | undefined): string {
   if (num === undefined || num === null) return '0';
   return num.toLocaleString('en-US');
+}
+
+function formatDate(dateString: string | undefined): string {
+  if (!dateString) return 'N/A';
+  try {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return 'N/A';
+  }
 }
 
 export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModalProps) {
@@ -55,8 +69,13 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
                   src={item.imageUrl}
                   alt={`${item.name} preview`}
                   className="h-full w-full object-cover"
-                  loading="lazy"
+                  loading="eager"
+                  decoding="async"
                   onError={() => setImageError(true)}
+                  onLoad={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  style={{ opacity: 0, transition: 'opacity 0.2s' }}
                 />
               ) : (
                 <ImageIcon className="h-10 w-10 text-[#730202]/40" />
@@ -80,7 +99,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
           </div>
 
           {/* Item Details Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 py-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 py-2">
             {item.quantity !== undefined && (
               <div className="text-center">
                 <p className="text-xs font-medium text-[#730202]/60 mb-1">Available Quantity</p>
@@ -102,6 +121,15 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
                 <p className="text-xs font-medium text-[#730202]/60 mb-1">Redeeming Limit</p>
                 <p className="text-base font-semibold text-[#730202]">
                   {formatNumber(item.redeemingLimit)}
+                </p>
+              </div>
+            )}
+
+            {item.createdAt && (
+              <div className="text-center">
+                <p className="text-xs font-medium text-[#730202]/60 mb-1">Created At</p>
+                <p className="text-base font-semibold text-[#730202]">
+                  {formatDate(item.createdAt)}
                 </p>
               </div>
             )}

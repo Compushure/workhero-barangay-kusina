@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { HeaderSection } from '@/components/hr/dashboard/header';
 import { RedemptionTable } from '@/components/hr/dashboard/redemption-table';
 import { useGetRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
@@ -12,37 +12,39 @@ export function RewardRequestsContent() {
   // Fetch redemption requests from database (pending by default)
   const { data: requests = [], isLoading, error } = useGetRedemptionRequests('pending');
 
-  // Filter and sort the data
-  const filteredRequests = requests
-    .filter(
-      (req) =>
-        req.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.rewardName.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'date-desc':
-          return new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime();
-        case 'date-asc':
-          return new Date(a.requestedAt).getTime() - new Date(b.requestedAt).getTime();
-        case 'cost-desc':
-          return b.pointsCost - a.pointsCost;
-        case 'cost-asc':
-          return a.pointsCost - b.pointsCost;
-        case 'employee':
-          return a.userName.localeCompare(b.userName);
-        default:
-          return 0;
-      }
-    });
+  // Filter and sort the data with memoization
+  const filteredRequests = useMemo(() => {
+    return requests
+      .filter(
+        (req) =>
+          req.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          req.rewardName.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'date-desc':
+            return new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime();
+          case 'date-asc':
+            return new Date(a.requestedAt).getTime() - new Date(b.requestedAt).getTime();
+          case 'cost-desc':
+            return b.pointsCost - a.pointsCost;
+          case 'cost-asc':
+            return a.pointsCost - b.pointsCost;
+          case 'employee':
+            return a.userName.localeCompare(b.userName);
+          default:
+            return 0;
+        }
+      });
+  }, [requests, searchTerm, sortBy]);
 
-  const handleSearch = (value: string) => {
+  const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
-  };
+  }, []);
 
-  const handleSort = (value: string) => {
+  const handleSort = useCallback((value: string) => {
     setSortBy(value);
-  };
+  }, []);
 
   if (isLoading) {
     return (
