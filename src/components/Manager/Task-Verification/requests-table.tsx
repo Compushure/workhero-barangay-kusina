@@ -84,7 +84,7 @@ export function RequestsTable({
                   {request.category_name || 'N/A'}
                 </TableCell>
                 <TableCell className="text-sm text-center pl-10 pr-25">
-                  {request.completed_orders ?? 0 }/ {request.max_orders ?? 0}
+                  {request.completed_orders ?? 0} / {request.max_orders ?? 0}
                 </TableCell>
                 <TableCell className="text-sm text-center font-medium pr-25">
                   {request.category_points ?? 0} Pts/XP
