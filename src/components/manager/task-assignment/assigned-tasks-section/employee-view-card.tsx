@@ -22,10 +22,10 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState<string | null>(null);
 
-  // Build employee map
+  // ✅ Build employee map safely
   const employeeMap = new Map<string, AssignedEmployee>();
-  tasks.forEach((task) => {
-    task.assignedEmployees.forEach((emp) => {
+  (tasks ?? []).forEach((task) => {
+    (task.assignedEmployees ?? []).forEach((emp) => {
       if (!employeeMap.has(emp.id)) {
         employeeMap.set(emp.id, { ...emp, assignedTasks: [] });
       }
@@ -38,20 +38,21 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
 
   let employees = Array.from(employeeMap.values());
 
-  // Apply search filter
+  // ✅ Apply search filter safely
   if (searchTerm) {
     const searchLower = searchTerm.toLowerCase();
     employees = employees.filter(
       (emp) =>
-        emp.name.toLowerCase().includes(searchLower) ||
-        emp.empId.toLowerCase().includes(searchLower)
+        emp.name?.toLowerCase().includes(searchLower) ||
+        emp.empId?.toLowerCase().includes(searchLower)
     );
   }
 
-  // Apply sorting
+  // ✅ Apply sorting with guards
   switch (sortBy) {
     case 'recently added':
       employees.sort((a, b) => {
+        if (a.assignedTasks.length === 0 || b.assignedTasks.length === 0) return 0;
         const aDate = new Date(a.assignedTasks[a.assignedTasks.length - 1].dateRange.start);
         const bDate = new Date(b.assignedTasks[b.assignedTasks.length - 1].dateRange.start);
         return bDate.getTime() - aDate.getTime();
@@ -59,6 +60,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
       break;
     case 'oldest':
       employees.sort((a, b) => {
+        if (a.assignedTasks.length === 0 || b.assignedTasks.length === 0) return 0;
         const aDate = new Date(a.assignedTasks[0].dateRange.start);
         const bDate = new Date(b.assignedTasks[0].dateRange.start);
         return aDate.getTime() - bDate.getTime();
@@ -93,6 +95,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
     return new Date(year, month - 1, day).toLocaleDateString('en-US', {
       day: 'numeric',
@@ -146,7 +149,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
                 {/* Task Badges */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {displayedTasks.map((task: AssignedTask) => {
-                    const taskEmployee = task.assignedEmployees.find(
+                    const taskEmployee = task.assignedEmployees?.find(
                       (emp) => emp.id === employee.id
                     );
                     const completedOrders = taskEmployee?.completedOrders || 0;

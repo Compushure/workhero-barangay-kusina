@@ -18,7 +18,7 @@ import { handleUpdateTaskAssignment } from '@/action-handlers/manager-current-as
 interface EditTaskDialogProps {
   showEditDialog: boolean;
   handleCancelEdit: () => void;
-  handleEditTask: () => void; // local context updater
+  handleEditTask: () => void;
   task: AssignedTask;
   editMaxOrders: number;
   setEditMaxOrders: (edit: number) => void;
@@ -40,10 +40,10 @@ export default function EditTaskDialog({
   editAssignedEmployees,
   toggleEmployee,
 }: EditTaskDialogProps) {
-  const { assignedTasks } = useTaskAssignment();
+  const { tasksById } = useTaskAssignment();
+  const assignedTasks = Object.values(tasksById); // ✅ derive array safely
   const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
 
-  // ✅ Fetch employees from backend
   useEffect(() => {
     handleFetchEmployeeList().then(setEmployees);
   }, []);
@@ -52,7 +52,7 @@ export default function EditTaskDialog({
   const otherTaskInstanceEmployees = new Set<string>();
   assignedTasks.forEach((assignedTask) => {
     if (assignedTask.taskId === task.taskId && assignedTask.id !== task.id) {
-      assignedTask.assignedEmployees.forEach((emp) => {
+      (assignedTask.assignedEmployees ?? []).forEach((emp) => {
         otherTaskInstanceEmployees.add(emp.id);
       });
     }

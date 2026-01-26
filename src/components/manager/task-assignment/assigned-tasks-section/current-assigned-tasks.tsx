@@ -12,21 +12,18 @@ import { useTaskAssignment } from '../task-assignment-page-context';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 
 export function CurrentAssignedTasks() {
-  const {
-    assignedTasks,
-    viewMode,
-    setViewMode,
-    clearAll,
-    page,
-    setPage,
-    totalPages, // ✅ coming from context
-  } = useTaskAssignment();
+  const { tasksById, viewMode, setViewMode, clearAll, page, setPage, totalPages } =
+    useTaskAssignment();
+
+  // ✅ Always derive assignedTasks as an array
+  const assignedTasks = Object.values(tasksById);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recently added');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const filteredTasks = useMemo(() => {
+    if (!Array.isArray(assignedTasks)) return [];
     return assignedTasks.filter((task) => {
       const searchLower = searchTerm.toLowerCase();
       if (viewMode === 'task') {
@@ -62,7 +59,7 @@ export function CurrentAssignedTasks() {
   }, [filteredTasks, sortBy]);
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage); // ✅ triggers context to fetch new slice
+    setPage(newPage);
   };
 
   return (
@@ -137,7 +134,7 @@ export function CurrentAssignedTasks() {
         )}
       </div>
 
-      {/* ✅ Pagination fixed at bottom */}
+      {/* Pagination */}
       <div className="mt-auto pt-4">
         <Pagination totalPages={totalPages} currentPage={page} onPageChange={handlePageChange} />
       </div>
