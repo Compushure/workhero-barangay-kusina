@@ -219,9 +219,12 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                 minLength={2}
                 className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
               />
+              {/* Validation Messages for Item Name */}
               {itemName && !isItemNameValid && itemName.length < 2 && (
                 <p className="text-xs text-red-600">Item name must be at least 2 characters</p>
               )}
+
+              {/* Character limit  */}
               {itemName.length > 50 && (
                 <p className="text-xs text-red-600">Item name cannot exceed 50 characters</p>
               )}
