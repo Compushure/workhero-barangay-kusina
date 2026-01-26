@@ -217,12 +217,6 @@ export function ManagerPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Link
-                href="/admin"
-                className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-primary-foreground">
                   User Management
@@ -357,7 +351,7 @@ export function ManagerPage() {
           </WhiteCard>
         ) : (
           <>
-            <div className="grid gap-4 flex-1">
+            <div className="grid gap-4">
               {users.map((user) => (
                 <UserCard
                   key={user.id}

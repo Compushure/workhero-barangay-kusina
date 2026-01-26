@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useTransition, useEffect } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { User, EditUserInput, EmployeeTypeValue } from '@/types';
@@ -43,6 +43,8 @@ import {
   MapPin,
   CreditCard,
   BadgeCheck,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 type EditUserFormValues = EditUserInput & {
@@ -74,6 +76,7 @@ const EMPLOYMENT_STATUS_OPTIONS = [
 
 export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUserModalProps) {
   const [isPending, startTransition] = useTransition();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -81,6 +84,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
     watch,
     setValue,
     reset,
+    setError,
     formState: { errors },
   } = useForm<EditUserFormValues>({
     resolver: zodResolver(editUserSchema) as any,
@@ -109,6 +113,91 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
   }, [user, open, reset]);
 
   const onSubmit = (data: EditUserInput) => {
+    // Prevent submitting unchanged values (except password)
+    const normalize = (v?: string | null) => (v ?? '').trim();
+
+    // Track if we blocked submit
+    let blocked = false;
+
+    // Name check
+    if (normalize(data.name) && normalize(data.name) === normalize(user.name)) {
+      setError('name', { type: 'validate', message: 'Name is unchanged. Please enter a new name or leave blank.' });
+      blocked = true;
+    }
+
+    // Contact number check
+    if (
+      normalize(data.contactNumber) &&
+      normalize(data.contactNumber) === normalize((user as any).contactNumber)
+    ) {
+      setError('contactNumber', {
+        type: 'validate',
+        message: 'Contact number is unchanged. Please enter a new value or leave blank.',
+      });
+      blocked = true;
+    }
+
+    // Address check
+    if (normalize(data.address) && normalize(data.address) === normalize((user as any).address)) {
+      setError('address', {
+        type: 'validate',
+        message: 'Address is unchanged. Please enter a new address or leave blank.',
+      });
+      blocked = true;
+    }
+
+    // Government IDs checks
+    if (normalize(data.tin) && normalize(data.tin) === normalize((user as any).tin)) {
+      setError('tin', {
+        type: 'validate',
+        message: 'TIN is unchanged. Please enter a new TIN or leave blank.',
+      });
+      blocked = true;
+    }
+
+    if (normalize(data.sss) && normalize(data.sss) === normalize((user as any).sss)) {
+      setError('sss', {
+        type: 'validate',
+        message: 'SSS is unchanged. Please enter a new SSS or leave blank.',
+      });
+      blocked = true;
+    }
+
+    if (normalize(data.pagibig) && normalize(data.pagibig) === normalize((user as any).pagibig)) {
+      setError('pagibig', {
+        type: 'validate',
+        message: 'Pag-IBIG is unchanged. Please enter a new Pag-IBIG or leave blank.',
+      });
+      blocked = true;
+    }
+
+    // Employee type and status checks (ignore password)
+    if (
+      data.employeeType &&
+      data.employeeType !== 'no-change' &&
+      data.employeeType === (user as any).employeeType
+    ) {
+      setError('employeeType', {
+        type: 'validate',
+        message: 'Role is unchanged. Choose a different role or leave as No change.',
+      });
+      blocked = true;
+    }
+
+    if (
+      data.employmentStatus &&
+      data.employmentStatus !== 'no-change' &&
+      data.employmentStatus === (user as any).employmentStatus
+    ) {
+      setError('employmentStatus', {
+        type: 'validate',
+        message: 'Employment status is unchanged. Choose a different status or leave as No change.',
+      });
+      blocked = true;
+    }
+
+    if (blocked) return;
+
     startTransition(async () => {
       await onEditUser(user.id, data);
       onOpenChange(false);
@@ -119,16 +208,16 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="admin-theme bg-primary-foreground w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl">
-        <DialogHeader className="px-6 pt-6 pb-2 border-b border-border">
+      <DialogContent className="admin-theme bg-primary-foreground w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col">
+        <DialogHeader className="px-6 pt-6 pb-2 border-b border-border shrink-0">
           <DialogTitle className="text-xl font-bold text-primary">Edit User</DialogTitle>
           <DialogDescription className="text-sm text-foreground/80">
             Leave fields blank to keep current values. Only filled fields will be updated.
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(90vh-120px)] px-6">
-          <div className="space-y-6 pb-6">
+        <ScrollArea className="flex-1 overflow-y-auto">
+          <div className="px-6 py-4">
             {/* Read-only information section */}
             <div className="space-y-3 p-4 bg-card rounded-lg border border-border">
               <p className="text-xs font-semibold text-primary uppercase">Read-Only Information</p>
@@ -162,7 +251,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
             </div>
 
             {/* Current values */}
-            <div className="p-3 bg-card rounded-lg border border-border text-sm space-y-1">
+            <div className="p-3 bg-card rounded-lg border border-border text-sm space-y-1 mt-4">
               <p className="text-xs text-primary font-medium">Current Values:</p>
               <p>
                 <span className="text-foreground/70">Name:</span> {user.name}
@@ -172,7 +261,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
               </p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-6" id="edit-user-form">
               {/* Basic Information */}
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-primary">Basic Information (Optional)</h3>
@@ -187,7 +276,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       <Input
                         id="edit-name"
                         placeholder={`Current: ${user.name}`}
-                        className="pl-10 border-border focus:border-primary focus:ring-primary"
+                        className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
                         disabled={isPending}
                         {...register('name')}
                       />
@@ -200,18 +289,30 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                   {/* New Password */}
                   <div className="space-y-2">
                     <Label htmlFor="edit-password" className="text-foreground">
-                      New Password
+                      New Password (Optional)
                     </Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                       <Input
                         id="edit-password"
-                        type="password"
-                        placeholder="Leave blank to keep current"
-                        className="pl-10 border-border focus:border-primary focus:ring-primary"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Leave blank to keep current (min 6 chars)"
+                        className="pl-10 pr-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
                         disabled={isPending}
                         {...register('password')}
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                        disabled={isPending}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
                     {errors.password && (
                       <p className="text-sm text-destructive">{errors.password.message}</p>
@@ -228,7 +329,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       <Input
                         id="edit-contact"
                         placeholder={`Current: ${(user as any).contactNumber || 'Not set'}`}
-                        className="pl-10 border-border focus:border-primary focus:ring-primary"
+                        className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
                         disabled={isPending}
                         {...register('contactNumber')}
                       />
@@ -337,7 +438,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                   <Textarea
                     id="edit-address"
                     placeholder={`Current: ${(user as any).address || 'Not set'}`}
-                    className="pl-10 min-h-20 resize-none border-border focus:border-primary focus:ring-primary"
+                    className="pl-10 min-h-20 resize-none border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
                     disabled={isPending}
                     {...register('address')}
                   />
@@ -361,7 +462,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       <Input
                         id="edit-tin"
                         placeholder={`Current: ${(user as any).tin || 'Not set'}`}
-                        className="pl-10 border-border focus:border-primary focus:ring-primary"
+                        className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
                         disabled={isPending}
                         {...register('tin')}
                       />
@@ -379,7 +480,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       <Input
                         id="edit-sss"
                         placeholder={`Current: ${(user as any).sss || 'Not set'}`}
-                        className="pl-10 border-border focus:border-primary focus:ring-primary"
+                        className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
                         disabled={isPending}
                         {...register('sss')}
                       />
@@ -397,7 +498,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                       <Input
                         id="edit-pagibig"
                         placeholder={`Current: ${(user as any).pagibig || 'Not set'}`}
-                        className="pl-10 border-border focus:border-primary focus:ring-primary"
+                        className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
                         disabled={isPending}
                         {...register('pagibig')}
                       />
@@ -408,29 +509,32 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
                   </div>
                 </div>
               </div>
-
-              {/* Footer Actions */}
-              <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
-                <Button
-                  type="submit"
-                  disabled={isPending}
-                  className="flex-1 bg-primary cursor-pointer text-primary-foreground hover:bg-primary/90"
-                >
-                  {isPending ? 'Saving...' : 'Save Changes'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  disabled={isPending}
-                  className="flex-1 border-border cursor-pointer bg-accent text-primary hover:bg-primary/10 hover:text-primary"
-                >
-                  Cancel
-                </Button>
-              </div>
             </form>
           </div>
         </ScrollArea>
+
+        {/* Footer outside ScrollArea to avoid overflow issues */}
+        <div className="px-6 py-4 border-t border-border shrink-0 bg-primary-foreground">
+          <div className="flex flex-col-reverse sm:flex-row gap-3">
+            <Button
+              type="submit"
+              form="edit-user-form"
+              disabled={isPending}
+              className="flex-1 bg-primary cursor-pointer text-primary-foreground hover:bg-primary/90"
+            >
+              {isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isPending}
+              className="flex-1 border-border cursor-pointer bg-accent text-primary hover:bg-primary/10 hover:text-primary"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
