@@ -5,6 +5,7 @@ import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
 import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 import { DeleteModal } from '@/components/hr/mercado/delete-modal';
+import { ViewItemModal } from '@/components/hr/mercado/view-item-modal';
 import { MercadoSkeleton } from '@/components/hr/mercado/mercado-skeleton';
 import { Pagination } from '@/components/Manager/Task-Verification/pagination';
 import {
@@ -19,6 +20,7 @@ import {
 export default function MercadoPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<{
     id: string;
     name: string;
@@ -29,6 +31,14 @@ export default function MercadoPage() {
   const [deletingItem, setDeletingItem] = useState<{
     id: string;
     name: string;
+  } | null>(null);
+  const [viewingItem, setViewingItem] = useState<{
+    id: string;
+    name: string;
+    cost: number;
+    quantity?: number;
+    redeemingLimit?: number;
+    isActive: boolean;
   } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
@@ -92,6 +102,27 @@ export default function MercadoPage() {
     if (item) {
       setDeletingItem({ id: item.id, name: item.name });
       setIsDeleteModalOpen(true);
+    }
+  };
+
+  const handleView = (id: string) => {
+    const item = rewards?.find((item) => item.id === id);
+    if (item) {
+      setViewingItem({
+        id: item.id,
+        name: item.name,
+        cost: item.pointsCost,
+        quantity: item.quantity,
+        redeemingLimit: item.redeemingLimit,
+        isActive: item.isActive,
+      });
+      setIsViewModalOpen(true);
+    }
+  };
+
+  const handleEditFromView = () => {
+    if (viewingItem) {
+      handleEdit(viewingItem.id);
     }
   };
 
@@ -184,6 +215,7 @@ export default function MercadoPage() {
                       isActive: item.isActive,
                       imageUrl: item.imageUrl,
                     }}
+                    onClick={handleView}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onHide={handleHide}
@@ -216,6 +248,13 @@ export default function MercadoPage() {
         onOpenChange={setIsAddModalOpen}
         editingItem={editingItem}
         onSave={handleSaveItem}
+      />
+
+      <ViewItemModal
+        open={isViewModalOpen}
+        onOpenChange={setIsViewModalOpen}
+        onEdit={handleEditFromView}
+        item={viewingItem}
       />
 
       <DeleteModal
