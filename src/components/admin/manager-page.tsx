@@ -57,6 +57,7 @@ export function ManagerPage() {
 
   // Debounce search query to prevent excessive API calls (1500ms delay)
   const debouncedSearchQuery = useDebounce(searchQuery, 1500);
+  const isDebouncing = searchQuery !== debouncedSearchQuery;
 
   // TanStack Query hook with debounced parameters and pagination
   const {
@@ -263,10 +264,13 @@ export function ManagerPage() {
                 <Input
                   id="search"
                   placeholder="Search by name..."
-                  className="pl-10"
+                  className={`pl-10 pr-9 ${isDebouncing ? 'bg-muted/50' : ''}`}
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                 />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground">
+                  {isDebouncing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                </div>
               </div>
             </div>
 

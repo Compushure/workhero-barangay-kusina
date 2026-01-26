@@ -337,7 +337,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
             {/* Address */}
             <div className="space-y-2">
               <Label htmlFor="add-address" className="text-foreground">
-                Home Address * (50-250 characters)
+                Home Address * (10-250 characters)
               </Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-3 h-4 w-4 text-primary" />

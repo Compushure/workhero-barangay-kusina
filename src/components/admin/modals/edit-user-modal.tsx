@@ -431,7 +431,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser }: EditUser
               {/* Address */}
               <div className="space-y-2">
                 <Label htmlFor="edit-address" className="text-foreground">
-                  New Address
+                  New Address (10-250 characters)
                 </Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 h-4 w-4 text-primary" />
