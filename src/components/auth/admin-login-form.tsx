@@ -86,14 +86,8 @@ export function LoginForm() {
         {isPending ? 'Signing in...' : 'Sign In'}
       </Button>
 
-      <div className="pt-4 pb-6">
-        <p className="text-xs text-center text-foreground/70">
-          Demo Credentials:
-          <br />
-          Superadmin: tonilegayada@gmail.com / Admin123
-          <br />
-          User: gpuser@gpmail.com / Admin123
-        </p>
+      <div className="pt-1 pb-0">
+
       </div>
     </form>
   );

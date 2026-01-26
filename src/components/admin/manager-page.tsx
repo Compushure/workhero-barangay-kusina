@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, lazy, Suspense, useCallback } from 'react';
 import { useGetUsersPaginated } from '@/hooks/tanstack/queries/userQueries';
 import {
   useAddUser,
@@ -17,7 +17,6 @@ import type {
   EmploymentStatusValue,
 } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { WhiteCard } from '@/components/ui/white-card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,12 +28,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { UserCard } from './user-card';
-import { AddUserModal } from './modals/add-user-modal';
-import { EditUserModal } from './modals/edit-user-modal';
-import { DeleteUserModal } from './modals/delete-user-modal';
+// Lazy load modals for better performance
+const AddUserModal = lazy(() => import('./modals/add-user-modal').then((mod) => ({ default: mod.AddUserModal })));
+const EditUserModal = lazy(() => import('./modals/edit-user-modal').then((mod) => ({ default: mod.EditUserModal })));
+const DeleteUserModal = lazy(() => import('./modals/delete-user-modal').then((mod) => ({ default: mod.DeleteUserModal })));
 import { Pagination } from '@/components/Manager/Task-Verification/pagination';
-import { UserPlus, LogOut, ArrowLeft, Loader2, Search, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import { UserPlus, LogOut, Loader2, Search, SlidersHorizontal } from 'lucide-react';
 import { handleSignOut } from '@/action-handlers/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -90,7 +89,7 @@ export function ManagerPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const onHandleProfilePictureUpload = async (
+  const onHandleProfilePictureUpload = useCallback(async (
     userid: string,
     file: File,
     username: string
@@ -102,32 +101,26 @@ export function ManagerPage() {
         { file, userid, username },
         {
           onSuccess: () => {
-            // toast.success('Profile picture updated', {
-            //   description: `${username}'s profile picture has been uploaded successfully.`,
-            // });
             resolve(true);
           },
           onError: () => {
-            // toast.error('Failed to upload profile picture', {
-            //   description: 'Please try again. If the issue persists, contact support.',
-            // });
             resolve(false);
           },
         }
       );
     });
-  };
+  }, [users, uploadProfilePictureMutation]);
 
   // CRUD handlers using TanStack Query mutations
-  const onAddUser = async (data: AddUserInput): Promise<void> => {
+  const onAddUser = useCallback(async (data: AddUserInput): Promise<void> => {
     addUserMutation.mutate(data, {
       onSuccess: () => {
         setAddModalOpen(false);
       },
     });
-  };
+  }, [addUserMutation]);
 
-  const onEditUser = async (userId: string, data: EditUserInput): Promise<boolean> => {
+  const onEditUser = useCallback(async (userId: string, data: EditUserInput): Promise<boolean> => {
     const currentUser = users.find((u) => u.id === userId);
     if (!currentUser) return false;
 
@@ -145,9 +138,9 @@ export function ManagerPage() {
         }
       );
     });
-  };
+  }, [users, editUserMutation]);
 
-  const onDeleteUser = async (): Promise<boolean> => {
+  const onDeleteUser = useCallback(async (): Promise<boolean> => {
     if (!selectedUser) return false;
 
     return new Promise((resolve) => {
@@ -165,40 +158,40 @@ export function ManagerPage() {
         }
       );
     });
-  };
+  }, [selectedUser, deleteUserMutation]);
 
-  const handleEditClick = (user: User) => {
+  const handleEditClick = useCallback((user: User) => {
     setSelectedUser(user);
     setEditModalOpen(true);
-  };
+  }, []);
 
-  const handleDeleteClick = (user: User) => {
+  const handleDeleteClick = useCallback((user: User) => {
     setSelectedUser(user);
     setDeleteModalOpen(true);
-  };
+  }, []);
 
   // Reset to page 1 when filters change
-  const handleSearchChange = (query: string) => {
+  const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);
-    setPage(1); // Reset pagination when searching
-  };
-
-  const handleEmployeeTypeFilterChange = (value: string) => {
-    setEmployeeTypeFilter(value as any);
     setPage(1);
-  };
+  }, []);
 
-  const handleEmploymentStatusFilterChange = (value: string) => {
-    setEmploymentStatusFilter(value as any);
+  const handleEmployeeTypeFilterChange = useCallback((value: string) => {
+    setEmployeeTypeFilter(value as EmployeeTypeValue);
     setPage(1);
-  };
+  }, []);
 
-  const handleSortChange = (value: string) => {
-    setSortBy(value as any);
+  const handleEmploymentStatusFilterChange = useCallback((value: string) => {
+    setEmploymentStatusFilter(value as EmploymentStatusValue);
     setPage(1);
-  };
+  }, []);
 
-  const handleLogout = () => {
+  const handleSortChange = useCallback((value: string) => {
+    setSortBy(value as 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc');
+    setPage(1);
+  }, []);
+
+  const handleLogout = useCallback(() => {
     startTransition(async () => {
       const { error } = await handleSignOut();
       if (!error) {
@@ -209,7 +202,7 @@ export function ManagerPage() {
         });
       }
     });
-  };
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-[#f1f1f1]">
@@ -379,23 +372,35 @@ export function ManagerPage() {
       </main>
 
       {/* Modals */}
-      <AddUserModal open={addModalOpen} onOpenChange={setAddModalOpen} onAddUser={onAddUser} />
+      {addModalOpen && (
+        <Suspense fallback={<div className="hidden" />}>
+          <AddUserModal open={addModalOpen} onOpenChange={setAddModalOpen} onAddUser={onAddUser} />
+        </Suspense>
+      )}
 
       {selectedUser && (
         <>
-          <EditUserModal
-            open={editModalOpen}
-            onOpenChange={setEditModalOpen}
-            user={selectedUser}
-            onEditUser={onEditUser}
-          />
+          {editModalOpen && (
+            <Suspense fallback={<div className="hidden" />}>
+              <EditUserModal
+                open={editModalOpen}
+                onOpenChange={setEditModalOpen}
+                user={selectedUser}
+                onEditUser={onEditUser}
+              />
+            </Suspense>
+          )}
 
-          <DeleteUserModal
-            open={deleteModalOpen}
-            onOpenChange={setDeleteModalOpen}
-            userName={selectedUser.name}
-            onConfirm={onDeleteUser}
-          />
+          {deleteModalOpen && (
+            <Suspense fallback={<div className="hidden" />}>
+              <DeleteUserModal
+                open={deleteModalOpen}
+                onOpenChange={setDeleteModalOpen}
+                userName={selectedUser.name}
+                onConfirm={onDeleteUser}
+              />
+            </Suspense>
+          )}
         </>
       )}
     </div>

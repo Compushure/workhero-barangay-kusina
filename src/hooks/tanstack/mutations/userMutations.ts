@@ -85,7 +85,7 @@ export function useAddUser(): UseMutationResult<User, Error, AddUserInput, { pre
         employeeType: input.employeeType,
         employmentStatus: input.employmentStatus || '',
         date_added: new Date(),
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
         employeeId: input.employeeId || '',
         contactNumber: input.contactNumber || '',
         address: input.address,
