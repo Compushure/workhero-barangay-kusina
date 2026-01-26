@@ -1,5 +1,5 @@
 import { protectManagerRoute } from '@/actions/auth';
-import { Sidebar } from '@/components/manager/task-verification/sidebar';
+import { Sidebar } from '@/components/Manager/Task-Verification/sidebar';
 import React from 'react';
 
 export default async function ManagerLayout({ children }: { children: React.ReactNode }) {

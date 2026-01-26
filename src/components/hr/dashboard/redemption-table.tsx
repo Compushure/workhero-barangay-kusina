@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Check, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Pagination } from '@/components/Manager/Task-Verification/pagination';
 import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
@@ -22,6 +23,24 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  // Pagination logic
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = useMemo(
+    () => data.slice(startIndex, endIndex),
+    [data, startIndex, endIndex]
+  );
+
+  // Reset to page 1 when data changes and current page is invalid
+  useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [data.length, currentPage, totalPages]);
 
   const toggleRow = (id: string) => {
     const newExpanded = new Set(expandedRows);
@@ -91,7 +110,7 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
 
       {/* Table Body */}
       <div className="divide-y divide-border bg-[#fff8f5]">
-        {data.map((request) => {
+        {paginatedData.map((request) => {
           const { dateStr, timeStr } = formatDateTime(request.requestedAt);
           const quantity = request.quantity || 1; // Default to 1 if not set
           const totalCost = request.pointsCost * quantity;
@@ -152,6 +171,17 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
           );
         })}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="bg-[#fff8f5] py-4">
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
 
       {/* Remarks Dialogs */}
       <RemarksDialog

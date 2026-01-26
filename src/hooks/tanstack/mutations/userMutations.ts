@@ -45,8 +45,9 @@ export function useUploadProfilePicture() {
       await handleUploadProfilePicture(username, userid, file);
     },
     onSuccess: () => {
-      // Invalidate to ensure server state is reflected
+      // Invalidate both regular and paginated lists to ensure server state is reflected
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       // Toast is handled by action-handler
     },
     onError: (_error) => {
@@ -71,8 +72,9 @@ export function useAddUser(): UseMutationResult<User, Error, AddUserInput, unkno
       return user;
     },
     onSuccess: () => {
-      // Invalidate users query to trigger refetch
+      // Invalidate both regular and paginated lists to ensure server state is reflected
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       // Toast is handled by action-handler
     },
     onError: () => {
@@ -163,6 +165,7 @@ export function useEditUser(): UseMutationResult<
     onSuccess: () => {
       // Invalidate to ensure server state is reflected
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       // Toast is handled by action-handler
     },
     onError: (_error, _variables, context) => {
@@ -242,6 +245,7 @@ export function useDeleteUser(): UseMutationResult<
     onSuccess: () => {
       // Invalidate to ensure server state is reflected
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       // Toast is handled by action-handler
     },
     onError: (_error, _variables, context) => {
