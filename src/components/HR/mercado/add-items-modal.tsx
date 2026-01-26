@@ -151,6 +151,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
     !isItemNameValid ||
     !itemCost ||
     !quantity ||
+    !redeemingLimit ||
     isRedeemingLimitInvalid() ||
     hasCharacterLimitErrors ||
     isLoading;
@@ -177,7 +178,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
             <Label className="text-sm font-medium text-[#5a2a2a]">Select Icon</Label>
             <label
               htmlFor="icon-upload"
-              className="block w-45 h-47 border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white"
+              className="w-45 h-47 border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white"
             >
               {iconPreview ? (
                 <img
@@ -203,7 +204,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
             {/* Item Name */}
             <div className="space-y-2">
               <Label htmlFor="item-name" className="text-sm font-medium text-[#5a2a2a]">
-                Item name <span className="text-red-600">*</span>
+                Item name
               </Label>
               <Input
                 id="item-name"
@@ -231,7 +232,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
             <div className="flex gap-3">
               <div className="flex-1 space-y-2">
                 <Label htmlFor="quantity" className="text-sm font-medium text-[#5a2a2a]">
-                  Quantity <span className="text-red-600">*</span>
+                  Quantity
                 </Label>
                 <Input
                   id="quantity"
@@ -264,6 +265,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                     }
                   }}
                   placeholder="Enter limit"
+                  required
                   className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
                 {unformatNumber(redeemingLimit).length === 6}

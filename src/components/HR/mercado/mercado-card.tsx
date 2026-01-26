@@ -22,6 +22,7 @@ interface MercadoItem {
 
 interface MercadoCardProps {
   item: MercadoItem;
+  onClick?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onHide?: (id: string) => void;
@@ -33,7 +34,14 @@ function formatNumber(num: number): string {
   return num.toLocaleString('en-US');
 }
 
-export function MercadoCard({ item, onEdit, onDelete, onHide, onUnhide }: MercadoCardProps) {
+export function MercadoCard({
+  item,
+  onClick,
+  onEdit,
+  onDelete,
+  onHide,
+  onUnhide,
+}: MercadoCardProps) {
   const [hideDialogOpen, setHideDialogOpen] = useState(false);
 
   const handleHideConfirm = () => {
@@ -44,10 +52,25 @@ export function MercadoCard({ item, onEdit, onDelete, onHide, onUnhide }: Mercad
     }
   };
 
+  const handleCardClick = () => {
+    onClick?.(item.id);
+  };
+
   return (
     <>
-      <div className="bg-card border-border rounded-xl p-4 flex items-center relative shadow-sm hover:shadow-md transition-shadow h-32">
-        <div className="h-24 w-24 bg-[#f2e1c9] rounded-lg flex items-center justify-center shrink-0">
+      <div
+        className="bg-card border border-border rounded-xl p-4 flex items-center relative shadow-sm hover:shadow-md transition-all h-32 cursor-pointer hover:border-[#730202]/20 hover:scale-[1.02]"
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCardClick();
+          }
+        }}
+      >
+        <div className="h-24 w-24 bg-[#f2e1c9] rounded-xl flex items-center justify-center shrink-0">
           <ImageIcon className="h-8 w-8 text-[#730202]/40" />
         </div>
 
@@ -55,16 +78,18 @@ export function MercadoCard({ item, onEdit, onDelete, onHide, onUnhide }: Mercad
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-xl font-bold text-[#730202] truncate">{item.name}</h3>
             {item.isActive === false && (
-              <Badge variant="secondary" className="bg-gray-200 text-gray-700 hover:bg-gray-200">
+              <Badge
+                variant="secondary"
+                className="bg-gray-200 text-gray-700 hover:bg-gray-200 text-xs"
+              >
                 <EyeOff className="h-3 w-3 mr-1" />
                 Hidden
               </Badge>
             )}
           </div>
 
-          {/* Price and Quantity */}
           <div className="flex items-center gap-4 mt-2">
-            <p className="text-[#730202] font-medium italic opacity-80">
+            <p className="text-[#730202] font-medium italic opacity-80 text-base">
               {formatNumber(item.price)} pts
             </p>
             {item.quantity !== undefined && (
@@ -75,7 +100,7 @@ export function MercadoCard({ item, onEdit, onDelete, onHide, onUnhide }: Mercad
           </div>
         </div>
 
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[#f2e1c9]">

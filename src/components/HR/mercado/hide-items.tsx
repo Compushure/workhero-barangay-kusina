@@ -1,21 +1,20 @@
 'use client';
 
-import { FileIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { EyeOff, Eye } from 'lucide-react';
 
 interface HideRewardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
-  isHidden?: boolean;
+  isHidden: boolean;
 }
 
 export function HideRewardDialog({
@@ -24,37 +23,47 @@ export function HideRewardDialog({
   onConfirm,
   isHidden,
 }: HideRewardDialogProps) {
-  const handleConfirm = () => {
-    onConfirm();
-    onOpenChange(false);
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader className="items-center space-y-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
-            <FileIcon className="h-6 w-6 text-orange-600" />
-          </div>
-          <div className="space-y-2 text-center">
-            <DialogTitle className="text-xl font-semibold">
-              {isHidden ? 'Unhide Reward?' : 'Hide Reward?'}
+      <DialogContent className="max-w-md rounded-2xl p-6">
+        <DialogHeader>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="h-12 w-12 rounded-xl bg-[#f2e1c9] flex items-center justify-center">
+              {isHidden ? (
+                <Eye className="h-6 w-6 text-[#730202]" />
+              ) : (
+                <EyeOff className="h-6 w-6 text-[#730202]" />
+              )}
+            </div>
+            <DialogTitle className="text-xl font-bold text-[#730202]">
+              {isHidden ? 'Unhide Item' : 'Hide Item'}
             </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              {isHidden
-                ? 'Are you sure? This action will make the reward visible to employees again.'
-                : 'Are you sure? This action will prevent employees from viewing and interacting with the reward.'}
-            </DialogDescription>
           </div>
+          <DialogDescription className="text-base text-[#730202]/70">
+            {isHidden
+              ? 'This item will be visible to employees in the Mercado.'
+              : 'This item will be hidden from employees in the Mercado.'}
+          </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex-row gap-2 sm:justify-center">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+
+        <div className="grid grid-cols-2 gap-3 mt-6">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="h-11 rounded-xl border-[#730202]/20 text-[#730202] hover:bg-[#f2e1c9] font-semibold text-base"
+          >
             Cancel
           </Button>
-          <Button onClick={handleConfirm} className="flex-1 bg-red-700 hover:bg-red-800">
-            Confirm
+          <Button
+            onClick={() => {
+              onConfirm();
+              onOpenChange(false);
+            }}
+            className="h-11 rounded-xl bg-[#730202] hover:bg-[#730202]/90 text-white font-semibold text-base"
+          >
+            {isHidden ? 'Unhide' : 'Hide'}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
