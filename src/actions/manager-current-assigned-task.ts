@@ -52,9 +52,13 @@ export async function fetchCurrentAssignedTasksPaginated(
   const start = (page - 1) * pageSize;
   const end = start + pageSize - 1;
 
+  // ✅ Replace the old select('*') with this optimized query
   const { data, error, count } = await supabase
     .from('task_info_view')
-    .select('*', { count: 'exact' })
+    .select(
+      'kpitask_id, category_id, category_name, category_description, category_points, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date',
+      { count: 'exact' }
+    )
     .range(start, end);
 
   if (error) {
