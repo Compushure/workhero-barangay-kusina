@@ -1,19 +1,19 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
 import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 import { DeleteModal } from '@/components/hr/mercado/delete-modal';
-import { Pagination } from '@/components/manager/task-verification/pagination';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Loader2 } from 'lucide-react';
+import { MercadoSkeleton } from '@/components/hr/mercado/mercado-skeleton';
+import { Pagination } from '@/components/Manager/Task-Verification/pagination';
 import {
   useGetRewards,
   useAddReward,
   useEditReward,
   useDeleteReward,
   useHideReward,
+  useUploadRewardPicture,
 } from '@/hooks/tanstack';
 
 export default function MercadoPage() {
@@ -35,7 +35,15 @@ export default function MercadoPage() {
 
   // Fetch rewards
   const { data: rewards, isLoading } = useGetRewards();
-
+  <Suspense fallback={<div>Loading...</div>}>
+    <MercadoHeader
+      title="Mercado Manager"
+      description="Manage Items visible in mercado"
+      onAddClick={() => {}}
+    />
+    <div>...</div>
+  </Suspense>;
+  // Pagination logic
   const totalPages = Math.ceil((rewards?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -56,6 +64,7 @@ export default function MercadoPage() {
   const editReward = useEditReward();
   const deleteReward = useDeleteReward();
   const hideReward = useHideReward();
+  const uploadRewardPicture = useUploadRewardPicture();
 
   const isProcessing = deleteReward.isPending || hideReward.isPending;
 
@@ -113,6 +122,8 @@ export default function MercadoPage() {
     const quantityNum = data.quantity ? parseInt(data.quantity) : undefined;
     const redeemingLimitNum = data.redeemingLimit ? parseInt(data.redeemingLimit) : undefined;
 
+    let rewardId = data.id;
+
     if (data.id) {
       // Edit existing item
       await editReward.mutateAsync({
@@ -126,12 +137,21 @@ export default function MercadoPage() {
       });
     } else {
       // Add new item
-      await addReward.mutateAsync({
+      const createdReward = await addReward.mutateAsync({
         name: data.name,
         pointsCost: data.cost,
         quantity: quantityNum,
         redeemingLimit: redeemingLimitNum,
         isActive: true,
+      });
+      rewardId = createdReward?.id;
+    }
+
+    if (data.icon && rewardId) {
+      await uploadRewardPicture.mutateAsync({
+        rewardId,
+        file: data.icon,
+        rewardName: data.name,
       });
     }
     setIsAddModalOpen(false);
@@ -148,32 +168,8 @@ export default function MercadoPage() {
         />
 
         <div className="flex-1">
-          {isLoading || isProcessing ? (
-            <>
-              {isProcessing && (
-                <div className="flex items-center justify-center gap-2 mb-4 text-[#730202]">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span className="text-sm font-medium">Deleting item...</span>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
-                {Array.from({ length: 9 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="bg-card border-border rounded-xl p-4 flex items-center relative shadow-sm h-32"
-                  >
-                    <Skeleton className="h-24 w-24 rounded-lg shrink-0" />
-                    <div className="ml-4 flex-1 min-w-0 space-y-3">
-                      <Skeleton className="h-6 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </div>
-                    <div className="absolute top-4 right-4">
-                      <Skeleton className="h-8 w-8 rounded-md" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
+          {isLoading ? (
+            <MercadoSkeleton />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
               {paginatedRewards && paginatedRewards.length > 0 ? (
@@ -186,6 +182,7 @@ export default function MercadoPage() {
                       price: item.pointsCost,
                       quantity: item.quantity,
                       isActive: item.isActive,
+                      imageUrl: item.imageUrl,
                     }}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
@@ -203,7 +200,7 @@ export default function MercadoPage() {
         </div>
 
         {/* Pagination */}
-        {!isLoading && !isProcessing && (
+        {!isLoading && (
           <div className="mt-8 pb-4">
             <Pagination
               totalPages={totalPages}
@@ -212,21 +209,21 @@ export default function MercadoPage() {
             />
           </div>
         )}
-
-        <AddItemsModal
-          open={isAddModalOpen}
-          onOpenChange={setIsAddModalOpen}
-          editingItem={editingItem}
-          onSave={handleSaveItem}
-        />
-
-        <DeleteModal
-          open={isDeleteModalOpen}
-          onOpenChange={setIsDeleteModalOpen}
-          itemName={deletingItem?.name}
-          onConfirm={handleConfirmDelete}
-        />
       </div>
+
+      <AddItemsModal
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        editingItem={editingItem}
+        onSave={handleSaveItem}
+      />
+
+      <DeleteModal
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        itemName={deletingItem?.name}
+        onConfirm={handleConfirmDelete}
+      />
     </main>
   );
 }

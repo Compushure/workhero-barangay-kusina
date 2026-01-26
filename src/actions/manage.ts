@@ -7,6 +7,7 @@ import type {
   AddUserInput,
   EditUserInput,
   UserQueryParams,
+  PaginatedResponse,
 } from '@/types';
 import { addUserSchema, editUserSchema } from '@/zod/schemas';
 
@@ -109,6 +110,46 @@ export async function fetchUsersAction(params: UserQueryParams = {}): Promise<Us
 
   const data = await res.json();
   return data.users as User[];
+}
+
+export async function fetchUsersPaginatedAction(
+  params: UserQueryParams = {}
+): Promise<ServerActionResponse<PaginatedResponse<User>>> {
+  const qs = buildQueryParams(params);
+
+  try {
+    const res = await fetch(`${baseUrl}/admin/tools/filter?${qs}`, { method: 'GET' });
+    if (!res.ok) {
+      return {
+        error: `Error fetching users: ${res.statusText}`,
+        data: undefined,
+      };
+    }
+
+    const data = await res.json();
+    const users = data.users as User[];
+    const page = params.page ?? 1;
+    const pageSize = params.pageSize ?? 25;
+
+    // Calculate pagination metadata
+    // Note: The backend doesn't return total count directly in the current implementation,
+    // so we estimate based on whether results are less than pageSize
+    const totalPages = users.length < pageSize ? page : page + 1; // Simplified estimation
+
+    return {
+      error: null,
+      data: {
+        data: users,
+        count: users.length,
+        totalPages,
+      },
+    };
+  } catch (error) {
+    return {
+      error: `Failed to fetch users: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      data: undefined,
+    };
+  }
 }
 
 export async function addUserAction(input: AddUserInput): Promise<ServerActionResponse<User>> {
