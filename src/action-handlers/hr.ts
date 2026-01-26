@@ -6,6 +6,7 @@ import {
   deleteRewardAction,
   hideRewardAction,
   createRedemptionRequestAction,
+  uploadRewardPicture,
 } from '@/actions/hr';
 import { safeAction } from '@/lib/utils/safe-action';
 import { toast } from 'sonner';
@@ -134,5 +135,26 @@ export async function handleHideRewardAction(
 
   toast.success(`Item ${isActive ? 'unhidden' : 'hidden'} successfully`);
   return true;
+}
+
+export async function handleUploadRewardPicture(
+  rewardId: string,
+  file: File,
+  rewardName?: string
+): Promise<string | null> {
+  const result = await safeAction(() => uploadRewardPicture(rewardId, file));
+
+  if (!result.success) {
+    toast.error(`Failed to update ${rewardName ?? 'item'} picture: ${result.error}`);
+    return null;
+  }
+
+  if (result.data?.error) {
+    toast.error(result.data.error);
+    return null;
+  }
+
+  toast.success(`Successfully updated ${rewardName ?? 'item'} picture`);
+  return (result.data?.data as { publicUrl?: string })?.publicUrl ?? null;
 }
 

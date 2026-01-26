@@ -1,70 +1,75 @@
 'use client';
 
-import { Trash2, X } from 'lucide-react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 
 interface DeleteModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   itemName?: string;
-  onConfirm?: () => void;
+  onConfirm: () => Promise<void> | void;
 }
 
 export function DeleteModal({ open, onOpenChange, itemName, onConfirm }: DeleteModalProps) {
-  const handleConfirm = () => {
-    onConfirm?.();
-    onOpenChange(false);
-  };
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleClose = () => {
-    onOpenChange(false);
+  const handleConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await onConfirm();
+      onOpenChange(false);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#f5e5dc] border-none max-w-lg rounded-3xl p-8">
-        {/* Close Button */}
-        <button
-          onClick={handleClose}
-          className="absolute top-6 right-6 text-[#5a2a2a] hover:text-[#690003] transition-colors"
-        ></button>
-
-        {/* Trash Icon */}
-        <div className="flex justify-start mb-6">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-            <Trash2 className="h-8 w-8 text-[#8b0000]" />
+      <DialogContent className="max-w-md rounded-2xl p-6">
+        <DialogHeader>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="h-12 w-12 rounded-xl bg-red-100 flex items-center justify-center">
+              <AlertTriangle className="h-6 w-6 text-red-600" />
+            </div>
+            <DialogTitle className="text-xl font-bold text-[#730202]">Delete Item</DialogTitle>
           </div>
-        </div>
-
-        {/* Content */}
-        <DialogHeader className="space-y-4 text-left">
-          <DialogTitle className="text-2xl font-bold text-[#2d2d2d]">Delete Reward</DialogTitle>
-          <DialogDescription className="text-[#6b6b6b] text-base leading-relaxed">
-            Are you sure you want to delete this reward? This action cannot be undone.
+          <DialogDescription className="text-base text-[#730202]/70">
+            Are you sure you want to delete{' '}
+            <span className="font-semibold text-[#730202]">{itemName}</span>? This action cannot be
+            undone.
           </DialogDescription>
         </DialogHeader>
 
-        {/* Action Buttons */}
-        <div className="flex gap-4 mt-8">
+        <div className="grid grid-cols-2 gap-3 mt-6">
           <Button
             variant="outline"
-            onClick={handleClose}
-            className="flex-1 bg-white text-[#2d2d2d] border-2 border-gray-300 hover:bg-gray-50 py-6 text-lg font-semibold rounded-xl"
+            onClick={() => onOpenChange(false)}
+            disabled={isDeleting}
+            className="h-11 rounded-xl border-[#730202]/20 text-[#730202] hover:bg-[#f2e1c9] font-semibold text-base"
           >
             Cancel
           </Button>
           <Button
             onClick={handleConfirm}
-            className="flex-1 bg-[#690003] text-white hover:bg-[#8b0000] py-6 text-lg font-semibold rounded-xl"
+            disabled={isDeleting}
+            className="h-11 rounded-xl bg-[#730202] hover:bg-[#730202]/90 text-white font-semibold text-base"
           >
-            Delete
+            {isDeleting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              'Delete'
+            )}
           </Button>
         </div>
       </DialogContent>

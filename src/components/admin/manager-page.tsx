@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useGetUsers } from '@/hooks/tanstack/queries/userQueries';
+import { useGetUsersPaginated } from '@/hooks/tanstack/queries/userQueries';
 import {
   useAddUser,
   useEditUser,
@@ -32,7 +32,8 @@ import { UserCard } from './user-card';
 import { AddUserModal } from './modals/add-user-modal';
 import { EditUserModal } from './modals/edit-user-modal';
 import { DeleteUserModal } from './modals/delete-user-modal';
-import { UserPlus, LogOut, ArrowLeft, Loader2, Search, SlidersHorizontal } from 'lucide-react';
+import { Pagination } from '@/components/Manager/Task-Verification/pagination';
+import { UserPlus, LogOut, ArrowLeft, Loader2, Search, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { handleSignOut } from '@/action-handlers/auth';
 import { useRouter } from 'next/navigation';
@@ -52,24 +53,29 @@ export function ManagerPage() {
     'date-desc'
   );
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize] = useState(8);
 
   // Debounce search query to prevent excessive API calls (1500ms delay)
   const debouncedSearchQuery = useDebounce(searchQuery, 1500);
 
-  // TanStack Query hook with debounced parameters
+  // TanStack Query hook with debounced parameters and pagination
   const {
-    data: users = [],
+    data: paginatedData = { data: [], count: 0, totalPages: 0 },
     isLoading,
     error,
-  } = useGetUsers({
-    searchQuery: debouncedSearchQuery,
-    employeeTypeFilter,
-    employmentStatusFilter,
-    sortBy,
-    page,
-    pageSize,
-  });
+  } = useGetUsersPaginated(
+    {
+      searchQuery: debouncedSearchQuery,
+      employeeTypeFilter,
+      employmentStatusFilter,
+      sortBy,
+      pageSize,
+    },
+    page
+  );
+
+  const users = paginatedData.data;
+  const totalPages = paginatedData.totalPages;
 
   // TanStack Query mutation hooks
   const addUserMutation = useAddUser();
@@ -221,7 +227,7 @@ export function ManagerPage() {
                 <h1 className="text-xl sm:text-2xl font-bold text-primary-foreground">
                   User Management
                 </h1>
-                <p className="text-sm text-primary-foreground/70">{users.length} total users</p>
+                <p className="text-sm text-primary-foreground/70">{users.length} total users on page {page}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -324,7 +330,7 @@ export function ManagerPage() {
       </div>
 
       {/* Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-6 flex flex-col min-h-[calc(100vh-300px)]">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -350,17 +356,27 @@ export function ManagerPage() {
             )}
           </WhiteCard>
         ) : (
-          <div className="grid gap-4">
-            {users.map((user) => (
-              <UserCard
-                key={user.id}
-                user={user}
-                onEdit={handleEditClick}
-                onDelete={handleDeleteClick}
-                onHandleProfilePictureUpload={onHandleProfilePictureUpload}
+          <>
+            <div className="grid gap-4 flex-1">
+              {users.map((user) => (
+                <UserCard
+                  key={user.id}
+                  user={user}
+                  onEdit={handleEditClick}
+                  onDelete={handleDeleteClick}
+                  onHandleProfilePictureUpload={onHandleProfilePictureUpload}
+                />
+              ))}
+            </div>
+            {/* Pagination fixed at bottom */}
+            <div className="mt-auto pt-4">
+              <Pagination
+                totalPages={totalPages}
+                currentPage={page}
+                onPageChange={setPage}
               />
-            ))}
-          </div>
+            </div>
+          </>
         )}
       </main>
 
