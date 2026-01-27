@@ -7,14 +7,13 @@ import EmployeeViewCardMenu from './dialogs/employee-view/employee-view-card-men
 import ClearAllTasksDialog from './dialogs/employee-view/clear-all-tasks-dialog';
 import ClearTaskDialog from './dialogs/employee-view/clear-task-dialog';
 
-
 interface EmployeeViewCardProps {
   tasks: AssignedTask[];
   searchTerm?: string;
   sortBy: string;
 }
 
-export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeViewCardProps) {
+export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeViewCardProps) {
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<{
     taskId: string;
@@ -23,10 +22,10 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeVi
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState<string | null>(null);
 
-  // Build employee map
+  // ✅ Build employee map safely
   const employeeMap = new Map<string, AssignedEmployee>();
-  tasks.forEach((task) => {
-    task.assignedEmployees.forEach((emp) => {
+  (tasks ?? []).forEach((task) => {
+    (task.assignedEmployees ?? []).forEach((emp) => {
       if (!employeeMap.has(emp.id)) {
         employeeMap.set(emp.id, { ...emp, assignedTasks: [] });
       }
@@ -39,46 +38,12 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeVi
 
   let employees = Array.from(employeeMap.values());
 
-  // Apply search filter
-  if (searchTerm) {
-    const searchLower = searchTerm.toLowerCase();
-    employees = employees.filter(
-      (emp) =>
-        emp.name.toLowerCase().includes(searchLower) ||
-        emp.empId.toLowerCase().includes(searchLower)
-    );
-  }
+  // Remove client-side sorting since it's handled server-side
 
-  // Apply sorting
-  switch (sortBy) {
-    case 'recently added':
-      employees.sort((a, b) => {
-        const aDate = new Date(a.assignedTasks[a.assignedTasks.length - 1].dateRange.start);
-        const bDate = new Date(b.assignedTasks[b.assignedTasks.length - 1].dateRange.start);
-        return bDate.getTime() - aDate.getTime();
-      });
-      break;
-    case 'oldest':
-      employees.sort((a, b) => {
-        const aDate = new Date(a.assignedTasks[0].dateRange.start);
-        const bDate = new Date(b.assignedTasks[0].dateRange.start);
-        return aDate.getTime() - bDate.getTime();
-      });
-      break;
-    case 'a-z':
-      employees.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-    case 'z-a':
-      employees.sort((a, b) => b.name.localeCompare(a.name));
-      break;
-    default:
-      break;
-  }
-
-  if (employees.length === 0 && searchTerm) {
+  if (employees.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">No employees match your search.</p>
+        <p className="text-gray-500 text-lg">No employees found.</p>
       </div>
     );
   }
@@ -94,6 +59,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeVi
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
     return new Date(year, month - 1, day).toLocaleDateString('en-US', {
       day: 'numeric',
@@ -147,10 +113,10 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeVi
                 {/* Task Badges */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {displayedTasks.map((task: AssignedTask) => {
-                    const taskEmployee = task.assignedEmployees.find(
+                    const taskEmployee = task.assignedEmployees?.find(
                       (emp) => emp.id === employee.id
                     );
-                    const completedAttempts = taskEmployee?.completedAttempts || 0;
+                    const completedOrders = taskEmployee?.completedOrders || 0;
 
                     return (
                       <div
@@ -159,7 +125,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeVi
                       >
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-gray-700 truncate">
-                            {task.taskName} ({completedAttempts} / {task.maxAttempts})
+                            {task.taskName} ({completedOrders} / {task.maxOrders})
                           </p>
                           <p className="text-xs text-gray-500">
                             {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
@@ -188,26 +154,26 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy } : EmployeeVi
               </div>
 
               {/* Clear All Assigned Tasks for Employee */}
-              <EmployeeViewCardMenu 
-                openPopoverId={openPopoverId} 
-                setOpenPopoverId={setOpenPopoverId} 
-                employee={employee} 
+              <EmployeeViewCardMenu
+                openPopoverId={openPopoverId}
+                setOpenPopoverId={setOpenPopoverId}
+                employee={employee}
                 setShowClearConfirm={setShowClearConfirm}
               />
             </div>
 
             {/* Unassign Task Dialog */}
-            <ClearTaskDialog 
-              showRemoveConfirm={showRemoveConfirm} 
-              setShowRemoveConfirm={setShowRemoveConfirm} 
+            <ClearTaskDialog
+              showRemoveConfirm={showRemoveConfirm}
+              setShowRemoveConfirm={setShowRemoveConfirm}
               employee={employee}
             />
 
             {/* Unassign All Tasks Dialog */}
-            <ClearAllTasksDialog 
-              showClearConfirm={showClearConfirm} 
-              setShowClearConfirm={setShowClearConfirm} 
-              employee={employee} 
+            <ClearAllTasksDialog
+              showClearConfirm={showClearConfirm}
+              setShowClearConfirm={setShowClearConfirm}
+              employee={employee}
             />
           </div>
         );

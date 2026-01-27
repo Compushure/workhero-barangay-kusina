@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { parseISO, format } from 'date-fns';
-import type { AssignedTask } from '@/types';
+import type { AssignedTask, AssignedEmployee } from '@/types';
 import { ChevronDown, X } from 'lucide-react';
-import { MOCK_EMPLOYEES } from '@/mock-data/employees';
-
 import TaskViewCardMenu from './dialogs/task-view/task-view-card-menu';
 import EditTaskDialog from './dialogs/task-view/edit-task-dialog';
 import DeleteTaskDialog from './dialogs/task-view/delete-task-dialog';
 import UnassignEmployeeDialog from './dialogs/task-view/unassign-employee-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
+import { handleUpdateTaskAssignment } from '@/action-handlers/manager-current-assigned-task';
+import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
 
 interface TaskViewCardProps {
   task: AssignedTask;
@@ -22,18 +22,26 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editMaxAttempts, setEditMaxAttempts] = useState(task.maxAttempts);
+  const [editMaxOrders, setEditMaxOrders] = useState(task.maxOrders);
   const [editDueDate, setEditDueDate] = useState<Date>(() => parseISO(task.dateRange.end));
   const [editAssignedEmployees, setEditAssignedEmployees] = useState<string[]>(
-    task.assignedEmployees.map((e) => e.id)
+    (task.assignedEmployees ?? []).map((e) => e.id)
   );
   const [openPopover, setOpenPopover] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const displayedEmployees = expanded ? task.assignedEmployees : task.assignedEmployees.slice(0, 4);
-  const hiddenCount = Math.max(0, task.assignedEmployees.length - 4);
+  const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
+  useEffect(() => {
+    handleFetchEmployeeList().then(setEmployees);
+  }, []);
+
+  const displayedEmployees = expanded
+    ? (task.assignedEmployees ?? [])
+    : (task.assignedEmployees ?? []).slice(0, 4);
+  const hiddenCount = Math.max(0, (task.assignedEmployees ?? []).length - 4);
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
     return new Date(year, month - 1, day).toLocaleDateString('en-US', {
       day: 'numeric',
@@ -43,36 +51,47 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
     });
   };
 
-  const handleEditTask = () => {
+  const handleEditTask = async () => {
     const newEmployees = editAssignedEmployees.map((empId) => {
-      const existingEmp = task.assignedEmployees.find((e) => e.id === empId);
+      const existingEmp = (task.assignedEmployees ?? []).find((e) => e.id === empId);
       if (existingEmp) return existingEmp;
-      const mockEmp = MOCK_EMPLOYEES.find((e) => e.id === empId);
+
+      const backendEmp = employees.find((e) => e.id === empId);
       return {
         id: empId,
-        name: mockEmp?.name || '',
-        empId: mockEmp?.empId || '',
-        tenure: mockEmp?.tenure,
+        name: backendEmp?.name || 'Unknown',
+        empId: backendEmp?.empId || '',
+        tenure: backendEmp?.tenure,
         assignedTasks: [],
-        completedAttempts: 0,
+        completedOrders: 0,
       };
     });
-    editTask(task.id, editMaxAttempts, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
-    setShowEditDialog(false);
+
+    const success = await handleUpdateTaskAssignment(
+      task.id,
+      editMaxOrders,
+      format(editDueDate, 'yyyy-MM-dd'),
+      editAssignedEmployees
+    );
+
+    if (success) {
+      editTask(task.id, editMaxOrders, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
+      setShowEditDialog(false);
+    }
   };
 
   const handleOpenEditDialog = () => {
-    setEditMaxAttempts(task.maxAttempts);
+    setEditMaxOrders(task.maxOrders);
     setEditDueDate(parseISO(task.dateRange.end));
-    setEditAssignedEmployees(task.assignedEmployees.map((e) => e.id));
+    setEditAssignedEmployees((task.assignedEmployees ?? []).map((e) => e.id));
     setShowEditDialog(true);
     setOpenPopover(false);
   };
 
   const handleCancelEdit = () => {
-    setEditMaxAttempts(task.maxAttempts);
+    setEditMaxOrders(task.maxOrders);
     setEditDueDate(parseISO(task.dateRange.end));
-    setEditAssignedEmployees(task.assignedEmployees.map((e) => e.id));
+    setEditAssignedEmployees((task.assignedEmployees ?? []).map((e) => e.id));
     setShowEditDialog(false);
   };
 
@@ -93,7 +112,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
             <span>
               {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
             </span>
-            <span>Max attempts: {task.maxAttempts}</span>
+            <span>Max orders: {task.maxOrders}</span>
             <span className="flex items-center gap-2">
               <span>{task.points} pts</span>
               <span>XP {task.xp}</span>
@@ -114,8 +133,8 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-lg font-bold text-[#690003]">
             Assigned to{' '}
-            <span className="bg-gray-300 text-gray-700 px-2 py-1 rounded-full text-sm ml-2">
-              {task.assignedEmployees.length}
+            <span className="bg-gray-300 text-gray-700 w-7 h-6 px-1 rounded-full text-sm ml-1.5 inline-flex items-center justify-center">
+              {(task.assignedEmployees ?? []).length}
             </span>
           </h4>
           {hiddenCount > 0 && (
@@ -131,7 +150,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
         {/* Employee Assigned Badges */}
         <div className="flex flex-wrap gap-3">
-          {displayedEmployees.map((emp) => (
+          {(displayedEmployees ?? []).map((emp) => (
             <div
               key={emp.id}
               className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border-2 border-gray-300"
@@ -168,8 +187,8 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           handleCancelEdit={handleCancelEdit}
           handleEditTask={handleEditTask}
           task={task}
-          editMaxAttempts={editMaxAttempts}
-          setEditMaxAttempts={setEditMaxAttempts}
+          editMaxOrders={editMaxOrders}
+          setEditMaxOrders={setEditMaxOrders}
           editDueDate={editDueDate}
           setEditDueDate={setEditDueDate}
           editAssignedEmployees={editAssignedEmployees}

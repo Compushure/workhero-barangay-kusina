@@ -8,18 +8,19 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { DatePickerPopover } from '../../../task-assignment-card/date-picker-popover';
-import { MOCK_EMPLOYEES } from '@/mock-data/employees';
 import { Button } from '@/components/ui/button';
-import { AssignedTask } from '@/types';
+import { AssignedTask, AssignedEmployee } from '@/types';
 import { useTaskAssignment } from '../../../task-assignment-page-context';
+import { useEffect, useState } from 'react';
+import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
 
 interface EditTaskDialogProps {
   showEditDialog: boolean;
   handleCancelEdit: () => void;
   handleEditTask: () => void;
   task: AssignedTask;
-  editMaxAttempts: number;
-  setEditMaxAttempts: (edit: number) => void;
+  editMaxOrders: number;
+  setEditMaxOrders: (edit: number) => void;
   editDueDate: Date;
   setEditDueDate: (edit: Date) => void;
   editAssignedEmployees: string[];
@@ -31,28 +32,37 @@ export default function EditTaskDialog({
   handleCancelEdit,
   handleEditTask,
   task,
-  editMaxAttempts,
-  setEditMaxAttempts,
+  editMaxOrders,
+  setEditMaxOrders,
   editDueDate,
   setEditDueDate,
   editAssignedEmployees,
   toggleEmployee,
 }: EditTaskDialogProps) {
-  const { assignedTasks } = useTaskAssignment();
+  // ✅ Renamed to avoid duplicate identifier
+  const { assignedTasks: contextAssignedTasks } = useTaskAssignment();
+
+  // ✅ Fetch employees from DB instead of mock data
+  const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
+  useEffect(() => {
+    async function loadEmployees() {
+      const data = await handleFetchEmployeeList();
+      setEmployees(data);
+    }
+    loadEmployees();
+  }, []);
 
   // Get all employees assigned to other instances of this task
   const otherTaskInstanceEmployees = new Set<string>();
-  assignedTasks.forEach((assignedTask) => {
-    // Find other instances of the same task (different IDs but same taskId)
+  (contextAssignedTasks ?? []).forEach((assignedTask) => {
     if (assignedTask.taskId === task.taskId && assignedTask.id !== task.id) {
-      assignedTask.assignedEmployees.forEach((emp) => {
+      (assignedTask.assignedEmployees ?? []).forEach((emp) => {
         otherTaskInstanceEmployees.add(emp.id);
       });
     }
   });
 
   // An employee is disabled if they're assigned to another instance of this task
-  // (unless they're already assigned to this instance)
   const disabledEmployeeIds = new Set<string>(
     Array.from(otherTaskInstanceEmployees).filter((empId) => !editAssignedEmployees.includes(empId))
   );
@@ -65,7 +75,7 @@ export default function EditTaskDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Task Info (Read-only display) */}
+          {/* Task Info */}
           <div className="bg-white rounded-xl p-4 border-2 border-gray-300">
             <h4 className="text-lg font-bold text-[#690003] mb-2">{task.taskName}</h4>
             <p className="text-sm text-gray-600">{task.points}pts / attempt</p>
@@ -77,22 +87,22 @@ export default function EditTaskDialog({
               <label className="font-bold text-[#690003]">Max Repeats</label>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setEditMaxAttempts(Math.max(1, editMaxAttempts - 1))}
+                  onClick={() => setEditMaxOrders(Math.max(1, editMaxOrders - 1))}
                   className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
                 >
                   −
                 </button>
                 <input
                   type="number"
-                  value={editMaxAttempts}
-                  onChange={(e) => {
-                    setEditMaxAttempts(Math.max(1, Number.parseInt(e.target.value) || 1));
-                  }}
+                  value={editMaxOrders}
+                  onChange={(e) =>
+                    setEditMaxOrders(Math.max(1, Number.parseInt(e.target.value) || 1))
+                  }
                   className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans bg-[#fafafa]"
                   min="1"
                 />
                 <button
-                  onClick={() => setEditMaxAttempts(editMaxAttempts + 1)}
+                  onClick={() => setEditMaxOrders(editMaxOrders + 1)}
                   className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
                 >
                   +
@@ -115,7 +125,7 @@ export default function EditTaskDialog({
             <h4 className="font-bold text-[#690003]">Assign/Remove Employees</h4>
             <div className="bg-white rounded-xl p-4 border-2 border-gray-300 max-h-75 overflow-y-auto">
               <div className="space-y-2">
-                {MOCK_EMPLOYEES.map((emp) => {
+                {employees.map((emp) => {
                   const isDisabled = disabledEmployeeIds.has(emp.id);
                   const isSelected = editAssignedEmployees.includes(emp.id);
 
@@ -142,9 +152,7 @@ export default function EditTaskDialog({
                       />
                       <div className="flex-1">
                         <p className="font-medium text-gray-800">{emp.name}</p>
-                        <p className="text-sm text-gray-500">
-                          {emp.empId} - {emp.tenure}
-                        </p>
+                        <p className="text-sm text-gray-500">{emp.empId}</p>
                       </div>
                       {isDisabled && (
                         <span className="text-xs text-gray-500 ml-2">Already assigned</span>

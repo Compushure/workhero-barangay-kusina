@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { PageHeader } from '@/components/Manager/Task-Verification/page-header';
-import { SearchBar } from '@/components/Manager/Task-Verification/search-bar';
-import { SortButton } from '@/components/Manager/Task-Verification/sort-button';
-import { RequestsTable } from '@/components/Manager/Task-Verification/requests-table';
+import { PageHeader } from '@/components/manager/task-verification/page-header';
+import { SearchBar } from '@/components/manager/task-verification/search-bar';
+import { SortButton } from '@/components/manager/task-verification/sort-button';
+import { RequestsTable } from '@/components/manager/task-verification/requests-table';
 import type { VerificationRequest, SortOption } from '@/types';
-import { ConfirmationDialog } from '@/components/Manager/Task-Verification/confirmation-modal';
-import { Pagination } from '@/components/Manager/Task-Verification/pagination';
+import { ConfirmationDialog } from '@/components/manager/task-verification/confirmation-modal';
+import { Pagination } from '@/components/manager/task-verification/pagination';
 import {
   useGetTasksToReviewPaginated,
   useGetApprovedTasksPaginated,

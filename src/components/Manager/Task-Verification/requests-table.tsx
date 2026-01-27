@@ -58,7 +58,7 @@ export function RequestsTable({
             <TableHead className="text-white font-semibold text-center pl-10 pr-25 w-10">
               COMPLETED
             </TableHead>
-            <TableHead className="text-white font-semibold text-center pr-18 w-24">
+            <TableHead className="text-white font-semibold text-center pr-10 w-24">
               TOTAL POINTS & XP
             </TableHead>
             <TableHead className="text-white font-semibold text-center px-2 w-28">ACTION</TableHead>
@@ -86,7 +86,7 @@ export function RequestsTable({
                 <TableCell className="text-sm text-center pl-10 pr-25">
                   {request.completed_orders ?? 0} / {request.max_orders ?? 0}
                 </TableCell>
-                <TableCell className="text-sm text-center font-medium pr-25">
+                <TableCell className="text-sm text-center font-medium pr-10">
                   {request.category_points ?? 0} Pts/XP
                 </TableCell>
                 <TableCell className="text-center px-2">

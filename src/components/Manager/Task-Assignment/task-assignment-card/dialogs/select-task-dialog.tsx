@@ -12,13 +12,12 @@ import {
 } from '@/components/ui/dialog';
 import { Search, Plus } from 'lucide-react';
 import type { AssignedTask, Task } from '@/types';
-import { MOCK_TASKS } from '@/mock-data/employees';
 import SelectTasksTable from './select-task-table';
 import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
 
 interface SelectTasksDialogProps {
   selectedTask: string[];
-  onTasksChange: (tasks: string[], maxAttempts?: Record<string, number>) => void;
+  onTasksChange: (tasks: string[], maxOrders?: Record<string, number>) => void;
   assignedTasks?: AssignedTask[];
   buttonLabel?: string;
 }
@@ -32,9 +31,9 @@ export function SelectTasksDialog({
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
-  const [tasks, setTasks] = useState<Task[]>([]); // New state for real data
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [taskMaxAttempts, setTaskMaxAttempts] = useState<Record<string, number>>(() => {
+  const [taskMaxOrders, setTaskMaxOrders] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
     selectedTask.forEach((taskId) => {
       const task = tasks.find((t) => t.id === taskId);
@@ -45,10 +44,10 @@ export function SelectTasksDialog({
     return initial;
   });
 
-  // Reset taskMaxAttempts when selectedTask becomes empty (after assignment and clear)
+  // Reset taskMaxOrders when selectedTask becomes empty
   useEffect(() => {
     if (selectedTask.length === 0) {
-      setTaskMaxAttempts({});
+      setTaskMaxOrders({});
     }
   }, [selectedTask]);
 
@@ -76,24 +75,26 @@ export function SelectTasksDialog({
     if (selectedTask.includes(taskId)) {
       // Deselect
       onTasksChange([], {});
-      setTaskMaxAttempts({});
+      setTaskMaxOrders({});
     } else {
       // Select this task and deselect others
       const task = tasks.find((t) => t.id === taskId);
       if (task) {
-        const newMaxAttempts = { [taskId]: task.isRepeatable ? 1 : 1 };
-        setTaskMaxAttempts(newMaxAttempts);
-        onTasksChange([taskId], newMaxAttempts);
+        const newMaxOrders = { [taskId]: task.isRepeatable ? 1 : 1 };
+        setTaskMaxOrders(newMaxOrders);
+        onTasksChange([taskId], newMaxOrders);
       }
     }
   };
 
-  const updateMaxAttempts = (taskId: string, newValue: number) => {
+
+
+  const updateMaxOrders = (taskId: string, newValue: number) => {
     const task = tasks.find((t) => t.id === taskId);
     if (task && task.isRepeatable) {
-      const newMaxAttempts = { ...taskMaxAttempts, [taskId]: Math.max(1, newValue) };
-      setTaskMaxAttempts(newMaxAttempts);
-      onTasksChange(selectedTask, newMaxAttempts);
+      const newMaxOrders = { ...taskMaxOrders, [taskId]: Math.max(1, newValue) };
+      setTaskMaxOrders(newMaxOrders);
+      onTasksChange(selectedTask, newMaxOrders);
     }
   };
 
@@ -181,12 +182,12 @@ export function SelectTasksDialog({
           <SelectTasksTable
             filteredTasks={filteredTasks}
             toggleTask={toggleTask}
-            updateMaxAttempts={updateMaxAttempts}
+            updateMaxOrders={updateMaxOrders}
             selectedTaskInstance={selectedTask.map((taskId) => ({
               id: taskId,
-              maxAttempts: taskMaxAttempts[taskId] || 1,
+              maxOrders: taskMaxOrders[taskId] || 1,
             }))}
-            taskMaxAttempts={taskMaxAttempts}
+            taskMaxOrders={taskMaxOrders}
           />
 
           {/* Dialog Footer */}
