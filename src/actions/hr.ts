@@ -12,8 +12,8 @@ import { addRewardSchema, editRewardSchema } from '@/zod/schemas';
 
 // Helper function to get public URL with cache busting
 function getRewardImageUrl(supabase: any, rewardId: string): string {
-  const baseUrl = supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`).data
-    .publicUrl;
+  const baseUrl = supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`)
+    .data.publicUrl;
   // Add cache-busting query parameter to force fresh image on every fetch
   return `${baseUrl}?t=${Date.now()}`;
 }
@@ -445,7 +445,7 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
     const { data, error } = await supabase
       .from('Reward')
       .select('*')
-      .order('created_at', { ascending: false});
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching rewards:', error);
@@ -643,6 +643,14 @@ export async function deleteRewardAction(id: string): Promise<ServerActionRespon
     if (error) {
       console.error('Error deleting reward:', error);
       return { error: `Failed to delete item: ${error.message}` };
+    }
+
+    const { data, error: profileError } = await supabase.storage
+      .from('reward')
+      .remove([`${id}/profile.png`]);
+
+    if (profileError) {
+      return { error: 'Failed to delete profile picture: ' + profileError.message };
     }
 
     return { error: null };
