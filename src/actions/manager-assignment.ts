@@ -165,6 +165,7 @@ export async function addTaskAssignmentAction(
       isRepeatable: boolean;
       points: number;
       xp: number;
+      status?: string;
       dateRange: {
         start: string;
         end: string;
@@ -201,6 +202,7 @@ export async function addTaskAssignmentAction(
           isRepeatable: taskData.is_repeatable,
           points: taskData.points,
           xp: taskData.points,
+          status: 'assigned',
           dateRange: {
             start: row.created_at,
             end: row.deadline_date,

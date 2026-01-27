@@ -39,8 +39,8 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
 
-  // Extract tasks based on current sort category
-  const getCurrentTasks = () => {
+  // Extract tasks based on current sort category - memoized to prevent unnecessary recalculations
+  const getCurrentTasks = useMemo(() => {
     switch (sortBy) {
       case 'pending':
         return pendingData?.data ?? initialRequests;
@@ -51,10 +51,10 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       default:
         return initialRequests;
     }
-  };
+  }, [sortBy, pendingData, approvedData, deniedData, initialRequests]);
 
-  // Get total pages for current category
-  const getTotalPages = () => {
+  // Get total pages for current category - memoized to prevent unnecessary recalculations
+  const getTotalPages = useMemo(() => {
     switch (sortBy) {
       case 'pending':
         return pendingData?.totalPages ?? 1;
@@ -65,10 +65,10 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       default:
         return 1;
     }
-  };
+  }, [sortBy, pendingData, approvedData, deniedData]);
 
-  // Get current page based on sort category
-  const getCurrentPage = () => {
+  // Get current page based on sort category - memoized to prevent unnecessary recalculations
+  const getCurrentPage = useMemo(() => {
     switch (sortBy) {
       case 'pending':
         return pendingPage;
@@ -79,7 +79,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       default:
         return 1;
     }
-  };
+  }, [sortBy, pendingPage, approvedPage, deniedPage]);
 
   const handlePageChange = (page: number) => {
     switch (sortBy) {
@@ -95,9 +95,10 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
     }
   };
 
-  const currentTasks = getCurrentTasks();
-  const totalPages = getTotalPages();
-  const currentPage = getCurrentPage();
+  // Use memoized values directly instead of calling functions
+  const currentTasks = getCurrentTasks;
+  const totalPages = getTotalPages;
+  const currentPage = getCurrentPage;
 
   // Filter requests based on search term (pagination already done server-side by status)
   const filteredRequests = useMemo(() => {

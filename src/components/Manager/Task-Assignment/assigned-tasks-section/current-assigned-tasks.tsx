@@ -1,67 +1,79 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Search, ListTodo, Users } from 'lucide-react';
-import { TaskViewCard } from './task-view-card';
-import { EmployeeViewCard } from './employee-view-card';
+import { MemoizedTaskViewCard as TaskViewCard } from './task-view-card';
+import { MemoizedEmployeeViewCard as EmployeeViewCard } from './employee-view-card';
 import { TaskSortingBar } from './task-sorting-bar';
 import { EmployeeSortingBar } from './employee-sorting-bar';
 import ClearAllDialog from './dialogs/clear-all-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
 import { Pagination } from '@/components/manager/task-verification/pagination';
-import { handleFetchCurrentAssignedTasksPaginated, handleFetchCurrentAssignedEmployeesPaginated } from '@/action-handlers/manager-current-assigned-task';
+import { useGetCurrentAssignedTasksPaginated, useGetCurrentAssignedEmployeesPaginated } from '@/hooks/tanstack/queries/managerAssignmentQueries';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export function CurrentAssignedTasks() {
-  const { assignedTasks, viewMode, setViewMode, clearAll, page, setPage, totalPages, setAssignedTasks, setTotalPages } =
-    useTaskAssignment();
+  const { viewMode, setViewMode, clearAll } = useTaskAssignment();
 
+  const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recently added');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // Debounce search to reduce query churn (900ms)
+  const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
-  // Refetch data when sort, view mode, or search changes
-  useEffect(() => {
-    const loadTasks = async () => {
-      setIsLoading(true);
-      try {
-        const res = viewMode === 'task' 
-          ? await handleFetchCurrentAssignedTasksPaginated(page, 4, sortBy, searchTerm)
-          : await handleFetchCurrentAssignedEmployeesPaginated(page, 4, sortBy, searchTerm);
-        
-        setAssignedTasks(res.tasks);
-        setTotalPages(res.totalPages);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadTasks();
-  }, [sortBy, page, viewMode, searchTerm]);
+  // Fetch data based on view mode
+  const taskQuery = useGetCurrentAssignedTasksPaginated(
+    page,
+    4,
+    sortBy,
+    debouncedSearchTerm,
+    viewMode === 'task'
+  );
+
+  const employeeQuery = useGetCurrentAssignedEmployeesPaginated(
+    page,
+    4,
+    sortBy,
+    debouncedSearchTerm,
+    viewMode === 'employee'
+  );
+
+  const isLoading = viewMode === 'task' ? taskQuery.isLoading : employeeQuery.isLoading;
+  const isError = viewMode === 'task' ? taskQuery.isError : employeeQuery.isError;
+  const data = viewMode === 'task' ? taskQuery.data : employeeQuery.data;
+
+  const tasks = data?.tasks || [];
+  const totalPages = data?.totalPages || 1;
 
   // Reset to default sort and page when switching views
-  useEffect(() => {
+  const handleViewModeChange = (newMode: 'task' | 'employee') => {
+    setViewMode(newMode);
     setSortBy('recently added');
     setPage(1);
     setSearchTerm('');
-  }, [viewMode]);
+  };
 
   // Reset page to 1 when sort changes
-  useEffect(() => {
+  const handleSortChange = (newSort: string) => {
+    setSortBy(newSort);
     setPage(1);
-  }, [sortBy]);
+  };
 
   // Reset page to 1 when search changes
-  useEffect(() => {
+  const handleSearchChange = (term: string) => {
+    setSearchTerm(term);
     setPage(1);
-  }, [searchTerm]);
-
-  // Remove client-side filtering to avoid interfering with server-side pagination
-  const filteredTasks = assignedTasks || [];
+  };
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
+
+  // Memoize filtered tasks to prevent unnecessary re-renders
+  const memoizedTasks = useMemo(() => tasks || [], [tasks]);
 
   return (
     <div className="rounded-3xl bg-[#FBF4E8] p-8 shadow-sm/25 flex flex-col min-h-screen">
@@ -72,7 +84,7 @@ export function CurrentAssignedTasks() {
         {/* View Toggle */}
         <div className="flex gap-2 bg-white rounded-2xl p-1 border-2 border-gray-300">
           <button
-            onClick={() => setViewMode('task')}
+            onClick={() => handleViewModeChange('task')}
             className={`flex w-44 justify-center items-center gap-2 py-2.5 rounded-xl text-base font-medium transition ${
               viewMode === 'task' ? 'bg-[#690003] text-white' : 'text-gray-500 hover:bg-gray-200'
             }`}
@@ -81,7 +93,7 @@ export function CurrentAssignedTasks() {
             Task View
           </button>
           <button
-            onClick={() => setViewMode('employee')}
+            onClick={() => handleViewModeChange('employee')}
             className={`flex w-44 justify-center items-center gap-2 py-2.5 rounded-xl text-base font-medium transition ${
               viewMode === 'employee'
                 ? 'bg-[#690003] text-white'
@@ -102,20 +114,20 @@ export function CurrentAssignedTasks() {
             type="text"
             placeholder={viewMode === 'task' ? 'Search tasks...' : 'Search employees...'}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-full bg-white focus:outline-none focus:border-[#690003]"
           />
         </div>
 
         {viewMode === 'task' ? (
-          <TaskSortingBar sortBy={sortBy} onSortChange={setSortBy} />
+          <TaskSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
         ) : (
-          <EmployeeSortingBar sortBy={sortBy} onSortChange={setSortBy} />
+          <EmployeeSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
         )}
 
         <Button
           onClick={() => setShowClearConfirm(true)}
-          disabled={assignedTasks.length === 0}
+          disabled={memoizedTasks.length === 0}
           className="text-base py-5 bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50"
         >
           Clear All
@@ -129,14 +141,18 @@ export function CurrentAssignedTasks() {
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#690003]"></div>
             <p className="text-gray-500 text-lg mt-4">Loading assigned tasks...</p>
           </div>
-        ) : filteredTasks.length === 0 ? (
+        ) : isError ? (
+          <div className="text-center py-12">
+            <p className="text-red-500 text-lg">Error loading tasks. Please try again.</p>
+          </div>
+        ) : memoizedTasks.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No tasks assigned yet.</p>
           </div>
         ) : viewMode === 'task' ? (
-          filteredTasks.map((task: any) => <TaskViewCard key={task.id} task={task} />)
+          memoizedTasks.map((task: any) => <TaskViewCard key={task.id} task={task} />)
         ) : (
-          <EmployeeViewCard tasks={filteredTasks} searchTerm={searchTerm} sortBy={sortBy} />
+          <EmployeeViewCard tasks={memoizedTasks} searchTerm={debouncedSearchTerm} sortBy={sortBy} />
         )}
       </div>
 

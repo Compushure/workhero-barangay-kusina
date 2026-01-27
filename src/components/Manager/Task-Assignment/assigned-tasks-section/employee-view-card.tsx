@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import type { AssignedTask, AssignedEmployee } from '@/types';
 import { ChevronDown, X } from 'lucide-react';
 import EmployeeViewCardMenu from './dialogs/employee-view/employee-view-card-menu';
@@ -125,7 +125,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
                       >
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-gray-700 truncate">
-                            {task.taskName} ({completedOrders} / {task.maxOrders})
+                            {task.taskName} ({completedOrders} / {task.maxOrders}) {t
                           </p>
                           <p className="text-xs text-gray-500">
                             {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
@@ -181,3 +181,5 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
     </div>
   );
 }
+
+export const MemoizedEmployeeViewCard = memo(EmployeeViewCard);

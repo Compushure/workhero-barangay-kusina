@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { parseISO, format } from 'date-fns';
 import type { AssignedTask, AssignedEmployee } from '@/types';
 import { ChevronDown, X } from 'lucide-react';
@@ -9,7 +9,7 @@ import EditTaskDialog from './dialogs/task-view/edit-task-dialog';
 import DeleteTaskDialog from './dialogs/task-view/delete-task-dialog';
 import UnassignEmployeeDialog from './dialogs/task-view/unassign-employee-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
-import { handleUpdateTaskAssignment } from '@/action-handlers/manager-current-assigned-task';
+import { useUpdateTaskAssignmentMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
 
 interface TaskViewCardProps {
@@ -18,6 +18,7 @@ interface TaskViewCardProps {
 
 export function TaskViewCard({ task }: TaskViewCardProps) {
   const { editTask } = useTaskAssignment();
+  const updateTaskMutation = useUpdateTaskAssignmentMutation();
 
   const [expanded, setExpanded] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(null);
@@ -67,17 +68,20 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
       };
     });
 
-    const success = await handleUpdateTaskAssignment(
-      task.id,
-      editMaxOrders,
-      format(editDueDate, 'yyyy-MM-dd'),
-      editAssignedEmployees
+    updateTaskMutation.mutate(
+      {
+        taskId: task.id,
+        maxOrders: editMaxOrders,
+        newDueDate: format(editDueDate, 'yyyy-MM-dd'),
+        employeeIds: editAssignedEmployees,
+      },
+      {
+        onSuccess: () => {
+          editTask(task.id, editMaxOrders, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
+          setShowEditDialog(false);
+        },
+      }
     );
-
-    if (success) {
-      editTask(task.id, editMaxOrders, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
-      setShowEditDialog(false);
-    }
   };
 
   const handleOpenEditDialog = () => {
@@ -106,7 +110,9 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div className="flex-1 ">
-          <h3 className="text-xl font-bold text-[#690003] mb-1">{task.taskName}</h3>
+          <div className="flex items-center gap-3 mb-1">
+            <h3 className="text-xl font-bold text-[#690003] mb-1">{task.taskName}</h3>
+          </div>
           <p className="text-sm text-gray-500 mb-3">{task.taskType}</p>
           <div className="flex gap-6 text-sm text-gray-600">
             <span>
@@ -186,6 +192,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           showEditDialog={showEditDialog}
           handleCancelEdit={handleCancelEdit}
           handleEditTask={handleEditTask}
+          isProcessing={updateTaskMutation.isPending}
           task={task}
           editMaxOrders={editMaxOrders}
           setEditMaxOrders={setEditMaxOrders}
@@ -198,3 +205,5 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
     </div>
   );
 }
+
+export const MemoizedTaskViewCard = memo(TaskViewCard);
