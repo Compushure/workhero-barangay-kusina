@@ -133,7 +133,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-lg font-bold text-[#690003]">
             Assigned to{' '}
-            <span className="bg-gray-300 text-gray-700 px-2 py-1 rounded-full text-sm ml-2">
+            <span className="bg-gray-300 text-gray-700 w-7 h-6 px-1 rounded-full text-sm ml-1.5 inline-flex items-center justify-center">
               {(task.assignedEmployees ?? []).length}
             </span>
           </h4>
@@ -193,7 +193,6 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           setEditDueDate={setEditDueDate}
           editAssignedEmployees={editAssignedEmployees}
           toggleEmployee={toggleEmployee}
-          employees={employees} // ✅ backend employees passed in
         />
       </div>
     </div>
