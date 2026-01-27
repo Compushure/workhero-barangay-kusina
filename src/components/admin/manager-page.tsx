@@ -38,7 +38,7 @@ const EditUserModal = lazy(() =>
 const DeleteUserModal = lazy(() =>
   import('./modals/delete-user-modal').then((mod) => ({ default: mod.DeleteUserModal }))
 );
-import { Pagination } from '@/components/manager/Task-Verification/pagination';
+import { Pagination } from '@/components/manager/task-verification/pagination';
 import { UserPlus, LogOut, Loader2, Search, SlidersHorizontal } from 'lucide-react';
 import { handleSignOut } from '@/action-handlers/auth';
 import { useRouter } from 'next/navigation';

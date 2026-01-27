@@ -7,7 +7,7 @@ import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 import { DeleteModal } from '@/components/hr/mercado/delete-modal';
 import { ViewItemModal } from '@/components/hr/mercado/view-item-modal';
 import { MercadoSkeleton } from '@/components/hr/mercado/mercado-skeleton';
-import { Pagination } from '@/components/manager/Task-Verification/pagination';
+import { Pagination } from '@/components/manager/task-verification/pagination';
 import {
   useGetRewards,
   useAddReward,
@@ -84,7 +84,7 @@ export default function MercadoPage() {
           redeemingLimit: updatedItem.redeemingLimit,
           isActive: updatedItem.isActive,
           imageUrl: updatedItem.imageUrl,
-          createdAt: updatedItem.createdAt,
+          createdAt: updatedItem.createdAt instanceof Date ? updatedItem.createdAt.toISOString() : updatedItem.createdAt,
         });
       }
     }
@@ -144,7 +144,7 @@ export default function MercadoPage() {
           redeemingLimit: item.redeemingLimit,
           isActive: item.isActive,
           imageUrl: item.imageUrl,
-          createdAt: item.createdAt,
+          createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : item.createdAt,
         });
         setIsViewModalOpen(true);
       }
@@ -255,7 +255,7 @@ export default function MercadoPage() {
                       quantity: item.quantity,
                       isActive: item.isActive,
                       imageUrl: item.imageUrl,
-                      createdAt: item.createdAt,
+                      createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : item.createdAt,
                     }}
                     onClick={handleView}
                     onEdit={handleEdit}

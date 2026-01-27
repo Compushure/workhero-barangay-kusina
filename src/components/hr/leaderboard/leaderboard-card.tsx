@@ -33,7 +33,7 @@ export default function LeaderboardCard({ player }: { player: Player }) {
         {/* Profile Circle */}
         <div className="relative w-40 h-40 rounded-full border-8 border-[#E9C496] flex items-center justify-center bg-white mb-6">
           <Avatar className="w-full h-full">
-            <AvatarImage src={player.image} />
+            <AvatarImage src={player.image ?? undefined} />
             <AvatarFallback className="bg-transparent text-[#6D1616] text-4xl font-bold">
               {getInitials(player.name)}
             </AvatarFallback>
