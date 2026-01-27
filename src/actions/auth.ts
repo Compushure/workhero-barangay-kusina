@@ -4,7 +4,6 @@ import type { ServerActionResponse } from '@/lib/utils/safe-action';
 import { loginSchema } from '@/zod/schemas';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { de } from 'zod/v4/locales';
 
 export async function getUserRole() {
   const supabase = await createClient();
@@ -52,7 +51,7 @@ export async function redirectToCorrectDashboardServer() {
       console.log('unknwon role');
       //localhost:3008/error?status=404&cause=Page%20not%20found&recommendation=Check%20the%20URL%20or%20go%20back.
       redirect('/error?status=403&cause=Access%20Denied&recommendation=Contact%20your%20administrator.');
-      http: return;
+      return;
   }
 }
 
@@ -219,11 +218,11 @@ export async function signOutAction(): Promise<ServerActionResponse> {
   if (!session || sessionError) {
     return { error: 'Error verifying user session' };
   }
-  if (session) {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      return { error: 'Failed to sign out: ' + error.message };
-    }
+
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    return { error: 'Failed to sign out: ' + error.message };
   }
+
   return { error: null };
 }

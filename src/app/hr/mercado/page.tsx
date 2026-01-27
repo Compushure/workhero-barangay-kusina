@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useMemo, Suspense } from 'react';
+import { useState, useMemo, useCallback, Suspense, useEffect } from 'react';
 import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
 import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 import { DeleteModal } from '@/components/hr/mercado/delete-modal';
+import { ViewItemModal } from '@/components/hr/mercado/view-item-modal';
 import { MercadoSkeleton } from '@/components/hr/mercado/mercado-skeleton';
 import { Pagination } from '@/components/Manager/Task-Verification/pagination';
 import {
@@ -19,6 +20,7 @@ import {
 export default function MercadoPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<{
     id: string;
     name: string;
@@ -29,6 +31,16 @@ export default function MercadoPage() {
   const [deletingItem, setDeletingItem] = useState<{
     id: string;
     name: string;
+  } | null>(null);
+  const [viewingItem, setViewingItem] = useState<{
+    id: string;
+    name: string;
+    cost: number;
+    quantity?: number;
+    redeemingLimit?: number;
+    isActive: boolean;
+    imageUrl?: string;
+    createdAt?: string;
   } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
@@ -59,6 +71,25 @@ export default function MercadoPage() {
     }
   }, [rewards?.length]);
 
+  // Sync viewing item with updated rewards when mutations complete
+  useEffect(() => {
+    if (viewingItem && rewards && isViewModalOpen) {
+      const updatedItem = rewards.find((r) => r.id === viewingItem.id);
+      if (updatedItem) {
+        setViewingItem({
+          id: updatedItem.id,
+          name: updatedItem.name,
+          cost: updatedItem.pointsCost,
+          quantity: updatedItem.quantity,
+          redeemingLimit: updatedItem.redeemingLimit,
+          isActive: updatedItem.isActive,
+          imageUrl: updatedItem.imageUrl,
+          createdAt: updatedItem.createdAt,
+        });
+      }
+    }
+  }, [rewards, viewingItem?.id, isViewModalOpen]);
+
   // Mutations
   const addReward = useAddReward();
   const editReward = useEditReward();
@@ -68,12 +99,12 @@ export default function MercadoPage() {
 
   const isProcessing = deleteReward.isPending || hideReward.isPending;
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     setEditingItem(null);
     setIsAddModalOpen(true);
-  };
+  }, []);
 
-  const handleEdit = (id: string) => {
+  const handleEdit = useCallback((id: string) => {
     const item = rewards?.find((item) => item.id === id);
     if (item) {
       setEditingItem({
@@ -85,33 +116,56 @@ export default function MercadoPage() {
       });
       setIsAddModalOpen(true);
     }
-  };
+  }, [rewards]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     const item = rewards?.find((item) => item.id === id);
     if (item) {
       setDeletingItem({ id: item.id, name: item.name });
       setIsDeleteModalOpen(true);
     }
-  };
+  }, [rewards]);
 
-  const handleHide = async (id: string) => {
+  const handleView = useCallback((id: string) => {
+    const item = rewards?.find((item) => item.id === id);
+    if (item) {
+      setViewingItem({
+        id: item.id,
+        name: item.name,
+        cost: item.pointsCost,
+        quantity: item.quantity,
+        redeemingLimit: item.redeemingLimit,
+        isActive: item.isActive,
+        imageUrl: item.imageUrl,
+        createdAt: item.createdAt,
+      });
+      setIsViewModalOpen(true);
+    }
+  }, [rewards]);
+
+  const handleEditFromView = useCallback(() => {
+    if (viewingItem) {
+      handleEdit(viewingItem.id);
+    }
+  }, [viewingItem, handleEdit]);
+
+  const handleHide = useCallback(async (id: string) => {
     await hideReward.mutateAsync({ id, isActive: false });
-  };
+  }, [hideReward]);
 
-  const handleUnhide = async (id: string) => {
+  const handleUnhide = useCallback(async (id: string) => {
     await hideReward.mutateAsync({ id, isActive: true });
-  };
+  }, [hideReward]);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (deletingItem) {
       await deleteReward.mutateAsync(deletingItem.id);
       setDeletingItem(null);
       setIsDeleteModalOpen(false);
     }
-  };
+  }, [deletingItem, deleteReward]);
 
-  const handleSaveItem = async (data: {
+  const handleSaveItem = useCallback(async (data: {
     id?: string;
     icon?: File;
     name: string;
@@ -156,7 +210,7 @@ export default function MercadoPage() {
     }
     setIsAddModalOpen(false);
     setEditingItem(null);
-  };
+  }, [addReward, editReward, uploadRewardPicture]);
 
   return (
     <main className="min-h-screen bg-[#fff8f5] p-8 flex flex-col">
@@ -183,7 +237,9 @@ export default function MercadoPage() {
                       quantity: item.quantity,
                       isActive: item.isActive,
                       imageUrl: item.imageUrl,
+                      createdAt: item.createdAt,
                     }}
+                    onClick={handleView}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onHide={handleHide}
@@ -216,6 +272,13 @@ export default function MercadoPage() {
         onOpenChange={setIsAddModalOpen}
         editingItem={editingItem}
         onSave={handleSaveItem}
+      />
+
+      <ViewItemModal
+        open={isViewModalOpen}
+        onOpenChange={setIsViewModalOpen}
+        onEdit={handleEditFromView}
+        item={viewingItem}
       />
 
       <DeleteModal

@@ -4,33 +4,6 @@ import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse } from '@/types';
 import type { AssignedTask, AssignedEmployee } from '@/types';
 
-function mapRow(row: any): AssignedTask {
-  const employee: AssignedEmployee = {
-    id: row.assigned_to ?? '',
-    name: row.assigned_to_name ?? '',
-    empId: row.assigned_to_employee_id ?? '',
-    assignedTasks: [],
-    completedOrders: row.completed_orders ?? 0,
-  };
-
-  return {
-    id: row.kpitask_id,
-    taskId: row.category_id,
-    taskName: row.category_name || 'Unnamed Task',
-    taskType: row.category_description || '',
-    isRepeatable: row.is_repeatable ?? true,
-    points: row.category_points,
-    xp: row.category_points, // assuming xp is same as points for now
-    dateRange: {
-      start: row.kpitask_created_at,
-      end: row.k_deadline_date,
-    },
-    maxOrders: row.max_orders ?? 1,
-    pendingOrders: row.pending_orders,
-    assignedEmployees: [employee],
-  };
-}
-
 /**
  * Fetch paginated current assigned tasks
  * @param page - Page number (1-indexed)
