@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 interface Player {
   name: string;
   points: number;
-  image?: string;
+  image?: string | null;
   id?: string;
   rank?: number;
 }

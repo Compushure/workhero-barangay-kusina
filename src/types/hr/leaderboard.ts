@@ -12,7 +12,7 @@ export interface LeaderboardPlayer {
   id: string;
   name: string;
   points: number;
-  image: string;
+  image: string | null;
 }
 
 /**

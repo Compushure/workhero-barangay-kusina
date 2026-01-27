@@ -29,10 +29,16 @@ import {
 } from '@/components/ui/select';
 import { UserCard } from './user-card';
 // Lazy load modals for better performance
-const AddUserModal = lazy(() => import('./modals/add-user-modal').then((mod) => ({ default: mod.AddUserModal })));
-const EditUserModal = lazy(() => import('./modals/edit-user-modal').then((mod) => ({ default: mod.EditUserModal })));
-const DeleteUserModal = lazy(() => import('./modals/delete-user-modal').then((mod) => ({ default: mod.DeleteUserModal })));
-import { Pagination } from '@/components/Manager/Task-Verification/pagination';
+const AddUserModal = lazy(() =>
+  import('./modals/add-user-modal').then((mod) => ({ default: mod.AddUserModal }))
+);
+const EditUserModal = lazy(() =>
+  import('./modals/edit-user-modal').then((mod) => ({ default: mod.EditUserModal }))
+);
+const DeleteUserModal = lazy(() =>
+  import('./modals/delete-user-modal').then((mod) => ({ default: mod.DeleteUserModal }))
+);
+import { Pagination } from '@/components/manager/Task-Verification/pagination';
 import { UserPlus, LogOut, Loader2, Search, SlidersHorizontal } from 'lucide-react';
 import { handleSignOut } from '@/action-handlers/auth';
 import { useRouter } from 'next/navigation';
@@ -89,56 +95,61 @@ export function ManagerPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const onHandleProfilePictureUpload = useCallback(async (
-    userid: string,
-    file: File,
-    username: string
-  ): Promise<boolean> => {
-    const currentUser = users.find((u) => u.id === userid);
-    if (!currentUser) return false;
-    return new Promise((resolve) => {
-      uploadProfilePictureMutation.mutate(
-        { file, userid, username },
-        {
-          onSuccess: () => {
-            resolve(true);
-          },
-          onError: () => {
-            resolve(false);
-          },
-        }
-      );
-    });
-  }, [users, uploadProfilePictureMutation]);
+  const onHandleProfilePictureUpload = useCallback(
+    async (userid: string, file: File, username: string): Promise<boolean> => {
+      const currentUser = users.find((u) => u.id === userid);
+      if (!currentUser) return false;
+      return new Promise((resolve) => {
+        uploadProfilePictureMutation.mutate(
+          { file, userid, username },
+          {
+            onSuccess: () => {
+              resolve(true);
+            },
+            onError: () => {
+              resolve(false);
+            },
+          }
+        );
+      });
+    },
+    [users, uploadProfilePictureMutation]
+  );
 
   // CRUD handlers using TanStack Query mutations
-  const onAddUser = useCallback(async (data: AddUserInput): Promise<void> => {
-    addUserMutation.mutate(data, {
-      onSuccess: () => {
-        setAddModalOpen(false);
-      },
-    });
-  }, [addUserMutation]);
+  const onAddUser = useCallback(
+    async (data: AddUserInput): Promise<void> => {
+      addUserMutation.mutate(data, {
+        onSuccess: () => {
+          setAddModalOpen(false);
+        },
+      });
+    },
+    [addUserMutation]
+  );
 
-  const onEditUser = useCallback(async (userId: string, data: EditUserInput): Promise<boolean> => {
-    const currentUser = users.find((u) => u.id === userId);
-    if (!currentUser) return false;
+  const onEditUser = useCallback(
+    async (userId: string, data: EditUserInput): Promise<boolean> => {
+      const currentUser = users.find((u) => u.id === userId);
+      if (!currentUser) return false;
 
-    return new Promise((resolve) => {
-      editUserMutation.mutate(
-        { userId, data, userName: currentUser.name },
-        {
-          onSuccess: () => {
-            setEditModalOpen(false);
-            resolve(true);
-          },
-          onError: () => {
-            resolve(false);
-          },
-        }
-      );
-    });
-  }, [users, editUserMutation]);
+      return new Promise((resolve) => {
+        editUserMutation.mutate(
+          { userId, data, userName: currentUser.name },
+          {
+            onSuccess: () => {
+              setEditModalOpen(false);
+              resolve(true);
+            },
+            onError: () => {
+              resolve(false);
+            },
+          }
+        );
+      });
+    },
+    [users, editUserMutation]
+  );
 
   const onDeleteUser = useCallback(async (): Promise<boolean> => {
     if (!selectedUser) return false;
@@ -215,7 +226,9 @@ export function ManagerPage() {
                 <h1 className="text-xl sm:text-2xl font-bold text-primary-foreground">
                   User Management
                 </h1>
-                <p className="text-sm text-primary-foreground/70">{users.length} total users on page {page}</p>
+                <p className="text-sm text-primary-foreground/70">
+                  {users.length} total users on page {page}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -361,11 +374,7 @@ export function ManagerPage() {
             </div>
             {/* Pagination fixed at bottom */}
             <div className="mt-auto pt-4">
-              <Pagination
-                totalPages={totalPages}
-                currentPage={page}
-                onPageChange={setPage}
-              />
+              <Pagination totalPages={totalPages} currentPage={page} onPageChange={setPage} />
             </div>
           </>
         )}

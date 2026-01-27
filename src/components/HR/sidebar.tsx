@@ -116,7 +116,7 @@ export function Sidebar({
           <ProfilePic user={user} />
           {!isCollapsed && user && (
             <div className="min-w-0">
-              <p className="font-semibold text-sm">{user.name} </p>
+              <p className="font-semibold text-sm truncate">{user.name} </p>
               <p className="text-xs text-red-200 truncate">{user.email}</p>
             </div>
           )}

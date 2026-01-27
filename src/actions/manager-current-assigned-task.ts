@@ -59,8 +59,10 @@ export async function fetchCurrentAssignedTasksPaginated(
   let query = supabase
     .from('task_info_view')
     .select(
-      'kpitask_id, category_id, category_name, category_description, category_points, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
-    );
+      'status, kpitask_id, category_id, category_name, category_description, category_points, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
+    )
+    // Only include currently assigned tasks
+    
 
   // Apply search filter if provided
   if (searchTerm && searchTerm.trim()) {
@@ -82,6 +84,7 @@ export async function fetchCurrentAssignedTasksPaginated(
     isRepeatable: boolean;
     points: number;
     xp: number;
+    status?: string;
     dateRange: {
       start: string;
       end: string;
@@ -115,6 +118,7 @@ export async function fetchCurrentAssignedTasksPaginated(
         isRepeatable: true,
         points: row.category_points,
         xp: row.category_points,
+        status: row.status || 'assigned',
         dateRange: {
           start: row.kpitask_created_at,
           end: row.k_deadline_date,
@@ -212,8 +216,9 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   let query = supabase
     .from('task_info_view')
     .select(
-      'kpitask_id, category_id, category_name, category_description, category_points, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
+      'status, kpitask_id, category_id, category_name, category_description, category_points, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
     )
+    // Only include employees with currently assigned tasks
     .not('assigned_to', 'is', null);
 
   // Apply search filter if provided (search by employee name or employee ID)
@@ -308,6 +313,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
       isRepeatable: true,
       points: employee.firstAssignment?.category_points || 0,
       xp: employee.firstAssignment?.category_points || 0,
+      status: employee.firstAssignment?.status || 'assigned',
       dateRange: {
         start: employee.firstAssignment?.kpitask_created_at || employee.latestDate,
         end: employee.firstAssignment?.k_deadline_date || '',

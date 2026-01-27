@@ -202,7 +202,7 @@ export async function approveTaskAction(
   } else{
      const { error: updateError } = await supabase
        .from('KPITask')
-       .update({ status: 'approved', remark: reqmark })
+       .update({ status: 'approved', remark: reqmark , completed_orders: taskData.completed_orders + 1 })
        .eq('id', kpitask_id);
 
      if (updateError) {

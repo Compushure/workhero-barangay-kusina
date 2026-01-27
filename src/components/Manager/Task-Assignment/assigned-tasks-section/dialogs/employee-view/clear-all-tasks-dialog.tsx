@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { AssignedEmployee } from "@/types";
 import { useTaskAssignment } from "../../../task-assignment-page-context";
+import { useState } from "react";
 
 interface ClearAllTasksDialogProps {
   showClearConfirm: string | null, 
@@ -11,6 +12,18 @@ interface ClearAllTasksDialogProps {
 
 function ClearAllTasksDialog({showClearConfirm, setShowClearConfirm, employee } : ClearAllTasksDialogProps) {
   const { clearAllEmployeeTasks } = useTaskAssignment();
+  const [isClearing, setIsClearing] = useState(false);
+
+  const handleClearAllTasks = async () => {
+    if (isClearing || !showClearConfirm || !clearAllEmployeeTasks) return;
+    setIsClearing(true);
+    try {
+      clearAllEmployeeTasks(showClearConfirm);
+    } finally {
+      setIsClearing(false);
+      setShowClearConfirm(null);
+    }
+  };
 
   return (
     <Dialog
@@ -29,20 +42,17 @@ function ClearAllTasksDialog({showClearConfirm, setShowClearConfirm, employee } 
             <Button
               variant="outline"
               onClick={() => setShowClearConfirm(null)}
+              disabled={isClearing}
               className="border-gray-300"
             >
               Cancel
             </Button>
             <Button
-              onClick={() => {
-                if (showClearConfirm && clearAllEmployeeTasks) {
-                  clearAllEmployeeTasks(showClearConfirm);
-                }
-                setShowClearConfirm(null);
-              }}
+              onClick={handleClearAllTasks}
+              disabled={isClearing}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              Clear All
+              {isClearing ? 'Clearing...' : 'Clear All'}
             </Button>
           </div>
         </div>

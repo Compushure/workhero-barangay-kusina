@@ -18,6 +18,7 @@ interface EditTaskDialogProps {
   showEditDialog: boolean;
   handleCancelEdit: () => void;
   handleEditTask: () => void;
+  isProcessing?: boolean;
   task: AssignedTask;
   editMaxOrders: number;
   setEditMaxOrders: (edit: number) => void;
@@ -31,6 +32,7 @@ export default function EditTaskDialog({
   showEditDialog,
   handleCancelEdit,
   handleEditTask,
+  isProcessing = false,
   task,
   editMaxOrders,
   setEditMaxOrders,
@@ -169,16 +171,17 @@ export default function EditTaskDialog({
           <Button
             variant="outline"
             onClick={handleCancelEdit}
+            disabled={isProcessing}
             className="border-gray-300 bg-transparent"
           >
             Cancel
           </Button>
           <Button
             onClick={handleEditTask}
-            disabled={editAssignedEmployees.length === 0}
+            disabled={editAssignedEmployees.length === 0 || isProcessing}
             className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50"
           >
-            Confirm
+            {isProcessing ? 'Saving...' : 'Confirm'}
           </Button>
         </DialogFooter>
       </DialogContent>

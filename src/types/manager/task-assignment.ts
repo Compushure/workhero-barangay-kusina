@@ -40,6 +40,7 @@ export interface AssignedTask {
   isRepeatable: boolean;
   points: number;
   xp: number;
+  status?: string;
   dateRange: {
     start: string;
     end: string;

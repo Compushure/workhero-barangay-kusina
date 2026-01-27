@@ -7,7 +7,7 @@ import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 import { DeleteModal } from '@/components/hr/mercado/delete-modal';
 import { ViewItemModal } from '@/components/hr/mercado/view-item-modal';
 import { MercadoSkeleton } from '@/components/hr/mercado/mercado-skeleton';
-import { Pagination } from '@/components/Manager/Task-Verification/pagination';
+import { Pagination } from '@/components/manager/Task-Verification/pagination';
 import {
   useGetRewards,
   useAddReward,
@@ -104,44 +104,53 @@ export default function MercadoPage() {
     setIsAddModalOpen(true);
   }, []);
 
-  const handleEdit = useCallback((id: string) => {
-    const item = rewards?.find((item) => item.id === id);
-    if (item) {
-      setEditingItem({
-        id: item.id,
-        name: item.name,
-        cost: item.pointsCost,
-        quantity: item.quantity,
-        redeemingLimit: item.redeemingLimit,
-      });
-      setIsAddModalOpen(true);
-    }
-  }, [rewards]);
+  const handleEdit = useCallback(
+    (id: string) => {
+      const item = rewards?.find((item) => item.id === id);
+      if (item) {
+        setEditingItem({
+          id: item.id,
+          name: item.name,
+          cost: item.pointsCost,
+          quantity: item.quantity,
+          redeemingLimit: item.redeemingLimit,
+        });
+        setIsAddModalOpen(true);
+      }
+    },
+    [rewards]
+  );
 
-  const handleDelete = useCallback((id: string) => {
-    const item = rewards?.find((item) => item.id === id);
-    if (item) {
-      setDeletingItem({ id: item.id, name: item.name });
-      setIsDeleteModalOpen(true);
-    }
-  }, [rewards]);
+  const handleDelete = useCallback(
+    (id: string) => {
+      const item = rewards?.find((item) => item.id === id);
+      if (item) {
+        setDeletingItem({ id: item.id, name: item.name });
+        setIsDeleteModalOpen(true);
+      }
+    },
+    [rewards]
+  );
 
-  const handleView = useCallback((id: string) => {
-    const item = rewards?.find((item) => item.id === id);
-    if (item) {
-      setViewingItem({
-        id: item.id,
-        name: item.name,
-        cost: item.pointsCost,
-        quantity: item.quantity,
-        redeemingLimit: item.redeemingLimit,
-        isActive: item.isActive,
-        imageUrl: item.imageUrl,
-        createdAt: item.createdAt,
-      });
-      setIsViewModalOpen(true);
-    }
-  }, [rewards]);
+  const handleView = useCallback(
+    (id: string) => {
+      const item = rewards?.find((item) => item.id === id);
+      if (item) {
+        setViewingItem({
+          id: item.id,
+          name: item.name,
+          cost: item.pointsCost,
+          quantity: item.quantity,
+          redeemingLimit: item.redeemingLimit,
+          isActive: item.isActive,
+          imageUrl: item.imageUrl,
+          createdAt: item.createdAt,
+        });
+        setIsViewModalOpen(true);
+      }
+    },
+    [rewards]
+  );
 
   const handleEditFromView = useCallback(() => {
     if (viewingItem) {
@@ -149,13 +158,19 @@ export default function MercadoPage() {
     }
   }, [viewingItem, handleEdit]);
 
-  const handleHide = useCallback(async (id: string) => {
-    await hideReward.mutateAsync({ id, isActive: false });
-  }, [hideReward]);
+  const handleHide = useCallback(
+    async (id: string) => {
+      await hideReward.mutateAsync({ id, isActive: false });
+    },
+    [hideReward]
+  );
 
-  const handleUnhide = useCallback(async (id: string) => {
-    await hideReward.mutateAsync({ id, isActive: true });
-  }, [hideReward]);
+  const handleUnhide = useCallback(
+    async (id: string) => {
+      await hideReward.mutateAsync({ id, isActive: true });
+    },
+    [hideReward]
+  );
 
   const handleConfirmDelete = useCallback(async () => {
     if (deletingItem) {
@@ -165,52 +180,55 @@ export default function MercadoPage() {
     }
   }, [deletingItem, deleteReward]);
 
-  const handleSaveItem = useCallback(async (data: {
-    id?: string;
-    icon?: File;
-    name: string;
-    quantity: string;
-    redeemingLimit: string;
-    cost: number;
-  }) => {
-    const quantityNum = data.quantity ? parseInt(data.quantity) : undefined;
-    const redeemingLimitNum = data.redeemingLimit ? parseInt(data.redeemingLimit) : undefined;
+  const handleSaveItem = useCallback(
+    async (data: {
+      id?: string;
+      icon?: File;
+      name: string;
+      quantity: string;
+      redeemingLimit: string;
+      cost: number;
+    }) => {
+      const quantityNum = data.quantity ? parseInt(data.quantity) : undefined;
+      const redeemingLimitNum = data.redeemingLimit ? parseInt(data.redeemingLimit) : undefined;
 
-    let rewardId = data.id;
+      let rewardId = data.id;
 
-    if (data.id) {
-      // Edit existing item
-      await editReward.mutateAsync({
-        id: data.id,
-        input: {
+      if (data.id) {
+        // Edit existing item
+        await editReward.mutateAsync({
+          id: data.id,
+          input: {
+            name: data.name,
+            pointsCost: data.cost,
+            quantity: quantityNum,
+            redeemingLimit: redeemingLimitNum,
+          },
+        });
+      } else {
+        // Add new item
+        const createdReward = await addReward.mutateAsync({
           name: data.name,
           pointsCost: data.cost,
           quantity: quantityNum,
           redeemingLimit: redeemingLimitNum,
-        },
-      });
-    } else {
-      // Add new item
-      const createdReward = await addReward.mutateAsync({
-        name: data.name,
-        pointsCost: data.cost,
-        quantity: quantityNum,
-        redeemingLimit: redeemingLimitNum,
-        isActive: true,
-      });
-      rewardId = createdReward?.id;
-    }
+          isActive: true,
+        });
+        rewardId = createdReward?.id;
+      }
 
-    if (data.icon && rewardId) {
-      await uploadRewardPicture.mutateAsync({
-        rewardId,
-        file: data.icon,
-        rewardName: data.name,
-      });
-    }
-    setIsAddModalOpen(false);
-    setEditingItem(null);
-  }, [addReward, editReward, uploadRewardPicture]);
+      if (data.icon && rewardId) {
+        await uploadRewardPicture.mutateAsync({
+          rewardId,
+          file: data.icon,
+          rewardName: data.name,
+        });
+      }
+      setIsAddModalOpen(false);
+      setEditingItem(null);
+    },
+    [addReward, editReward, uploadRewardPicture]
+  );
 
   return (
     <main className="min-h-screen bg-[#fff8f5] p-8 flex flex-col">
