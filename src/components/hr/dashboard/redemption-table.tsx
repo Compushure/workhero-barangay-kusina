@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { Check, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Pagination } from '@/components/manager/Task-Verification/pagination';
+import { Pagination } from '@/components/manager/task-verification/pagination';
 import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,

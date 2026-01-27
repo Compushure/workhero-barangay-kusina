@@ -125,7 +125,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
                       >
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-gray-700 truncate">
-                            {task.taskName} ({completedOrders} / {task.maxOrders}) {t
+                            {task.taskName} ({completedOrders} / {task.maxOrders})
                           </p>
                           <p className="text-xs text-gray-500">
                             {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}

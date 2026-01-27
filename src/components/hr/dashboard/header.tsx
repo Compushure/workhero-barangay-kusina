@@ -1,7 +1,7 @@
 'use client';
 
-import { SearchBar } from '@/components/manager/Task-Verification/search-bar';
-import { SortButton } from '@/components/manager/Task-Verification/sort-button';
+import { SearchBar } from '@/components/manager/task-verification/search-bar';
+import { SortButton } from '@/components/manager/task-verification/sort-button';
 
 interface HeaderSectionProps {
   title: string;
