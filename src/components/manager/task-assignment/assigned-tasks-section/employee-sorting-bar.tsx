@@ -17,8 +17,8 @@ export function EmployeeSortingBar({ sortBy, onSortChange }: EmployeeSortingBarP
       >
         <option value="recently added">Recently Added</option>
         <option value="oldest">Oldest</option>
-        <option value="a-z">A-Z (Employee Name)</option>
-        <option value="z-a">Z-A (Employee Name)</option>
+        <option value="name-asc">A-Z (Employee Name)</option>
+        <option value="name-desc">Z-A (Employee Name)</option>
       </select>
       <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#690003] pointer-events-none" />
     </div>

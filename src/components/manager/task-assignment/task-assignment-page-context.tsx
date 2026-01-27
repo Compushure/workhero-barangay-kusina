@@ -28,6 +28,7 @@ interface TaskAssignmentContextType {
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   totalPages: number;
+  setTotalPages: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const TaskAssignmentContext = createContext<TaskAssignmentContextType | undefined>(undefined);
@@ -40,15 +41,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
-  // ✅ Load tasks from backend with pagination
-  useEffect(() => {
-    const loadTasks = async () => {
-      const res = await handleFetchCurrentAssignedTasksPaginated(page, 10);
-      setAssignedTasks(res.tasks);
-      setTotalPages(res.totalPages);
-    };
-    loadTasks();
-  }, [page]);
+  // Remove duplicate API call - let the component handle data fetching
 
   // Server action for assigning tasks
   const assignTasks = async (filters: SelectedFilters) => {
@@ -154,6 +147,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
       page,
       setPage,
       totalPages,
+      setTotalPages,
     }),
     [assignedTasks, viewMode, page, totalPages]
   );

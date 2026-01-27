@@ -38,48 +38,12 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
 
   let employees = Array.from(employeeMap.values());
 
-  // ✅ Apply search filter safely
-  if (searchTerm) {
-    const searchLower = searchTerm.toLowerCase();
-    employees = employees.filter(
-      (emp) =>
-        emp.name?.toLowerCase().includes(searchLower) ||
-        emp.empId?.toLowerCase().includes(searchLower)
-    );
-  }
+  // Remove client-side sorting since it's handled server-side
 
-  // ✅ Apply sorting with guards
-  switch (sortBy) {
-    case 'recently added':
-      employees.sort((a, b) => {
-        if (a.assignedTasks.length === 0 || b.assignedTasks.length === 0) return 0;
-        const aDate = new Date(a.assignedTasks[a.assignedTasks.length - 1].dateRange.start);
-        const bDate = new Date(b.assignedTasks[b.assignedTasks.length - 1].dateRange.start);
-        return bDate.getTime() - aDate.getTime();
-      });
-      break;
-    case 'oldest':
-      employees.sort((a, b) => {
-        if (a.assignedTasks.length === 0 || b.assignedTasks.length === 0) return 0;
-        const aDate = new Date(a.assignedTasks[0].dateRange.start);
-        const bDate = new Date(b.assignedTasks[0].dateRange.start);
-        return aDate.getTime() - bDate.getTime();
-      });
-      break;
-    case 'a-z':
-      employees.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-    case 'z-a':
-      employees.sort((a, b) => b.name.localeCompare(a.name));
-      break;
-    default:
-      break;
-  }
-
-  if (employees.length === 0 && searchTerm) {
+  if (employees.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">No employees match your search.</p>
+        <p className="text-gray-500 text-lg">No employees found.</p>
       </div>
     );
   }

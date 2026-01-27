@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Search, ListTodo, Users } from 'lucide-react';
 import { TaskViewCard } from './task-view-card';
@@ -10,50 +10,54 @@ import { EmployeeSortingBar } from './employee-sorting-bar';
 import ClearAllDialog from './dialogs/clear-all-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
 import { Pagination } from '@/components/manager/task-verification/pagination';
+import { handleFetchCurrentAssignedTasksPaginated, handleFetchCurrentAssignedEmployeesPaginated } from '@/action-handlers/manager-current-assigned-task';
 
 export function CurrentAssignedTasks() {
-  const { assignedTasks, viewMode, setViewMode, clearAll, page, setPage, totalPages } =
+  const { assignedTasks, viewMode, setViewMode, clearAll, page, setPage, totalPages, setAssignedTasks, setTotalPages } =
     useTaskAssignment();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recently added');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const filteredTasks = useMemo(() => {
-    if (!assignedTasks || !Array.isArray(assignedTasks)) return [];
-    return assignedTasks.filter((task) => {
-      const searchLower = searchTerm.toLowerCase();
-      if (viewMode === 'task') {
-        return task.taskName.toLowerCase().includes(searchLower);
-      } else {
-        return task.assignedEmployees.some(
-          (emp) =>
-            emp.name.toLowerCase().includes(searchLower) ||
-            emp.empId.toLowerCase().includes(searchLower)
-        );
+  // Refetch data when sort, view mode, or search changes
+  useEffect(() => {
+    const loadTasks = async () => {
+      setIsLoading(true);
+      try {
+        const res = viewMode === 'task' 
+          ? await handleFetchCurrentAssignedTasksPaginated(page, 4, sortBy, searchTerm)
+          : await handleFetchCurrentAssignedEmployeesPaginated(page, 4, sortBy, searchTerm);
+        
+        setAssignedTasks(res.tasks);
+        setTotalPages(res.totalPages);
+      } finally {
+        setIsLoading(false);
       }
-    });
-  }, [assignedTasks, searchTerm, viewMode]);
+    };
+    loadTasks();
+  }, [sortBy, page, viewMode, searchTerm]);
 
-  const sortedTasks = useMemo(() => {
-    const tasksCopy = [...filteredTasks];
-    switch (sortBy) {
-      case 'oldest':
-        return tasksCopy;
-      case 'recently added':
-        return tasksCopy.reverse();
-      case 'closest':
-        return tasksCopy.sort(
-          (a, b) => new Date(a.dateRange.end).getTime() - new Date(b.dateRange.end).getTime()
-        );
-      case 'farthest':
-        return tasksCopy.sort(
-          (a, b) => new Date(b.dateRange.end).getTime() - new Date(a.dateRange.end).getTime()
-        );
-      default:
-        return tasksCopy;
-    }
-  }, [filteredTasks, sortBy]);
+  // Reset to default sort and page when switching views
+  useEffect(() => {
+    setSortBy('recently added');
+    setPage(1);
+    setSearchTerm('');
+  }, [viewMode]);
+
+  // Reset page to 1 when sort changes
+  useEffect(() => {
+    setPage(1);
+  }, [sortBy]);
+
+  // Reset page to 1 when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
+  // Remove client-side filtering to avoid interfering with server-side pagination
+  const filteredTasks = assignedTasks || [];
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -120,12 +124,17 @@ export function CurrentAssignedTasks() {
 
       {/* Task/Employee Lists */}
       <div className="flex-1 space-y-6">
-        {sortedTasks.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#690003]"></div>
+            <p className="text-gray-500 text-lg mt-4">Loading assigned tasks...</p>
+          </div>
+        ) : filteredTasks.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No tasks assigned yet.</p>
           </div>
         ) : viewMode === 'task' ? (
-          sortedTasks.map((task) => <TaskViewCard key={task.id} task={task} />)
+          filteredTasks.map((task: any) => <TaskViewCard key={task.id} task={task} />)
         ) : (
           <EmployeeViewCard tasks={filteredTasks} searchTerm={searchTerm} sortBy={sortBy} />
         )}

@@ -1,6 +1,7 @@
 import { safeAction } from '@/lib/utils/safe-action';
 import {
   fetchCurrentAssignedTasksPaginated, // ✅ use only the paginated fetch
+  fetchCurrentAssignedEmployeesPaginated, // ✅ new employee-specific fetch
   clearAllTasks,
   deleteTask,
   updateTaskAssignment,
@@ -13,11 +14,13 @@ import type { AssignedTask, ServerActionResponse } from '@/types';
  */
 export async function handleFetchCurrentAssignedTasksPaginated(
   page: number = 1,
-  pageSize: number = 5
+  pageSize: number = 4,
+  sortBy: string = 'recently added',
+  searchTerm: string = ''
 ): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number }> {
   const result = await safeAction<
     ServerActionResponse<{ data: AssignedTask[]; count: number; totalPages: number }>
-  >(() => fetchCurrentAssignedTasksPaginated(page, pageSize));
+  >(() => fetchCurrentAssignedTasksPaginated(page, pageSize, sortBy, searchTerm));
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
@@ -60,6 +63,32 @@ export async function handleDeleteTask(taskId: string): Promise<boolean> {
 
   toast.success('Task deleted');
   return true;
+}
+
+/**
+ * ✅ Handler for paginated fetch of current assigned tasks for EMPLOYEE view
+ */
+export async function handleFetchCurrentAssignedEmployeesPaginated(
+  page: number = 1,
+  pageSize: number = 4,
+  sortBy: string = 'recently added',
+  searchTerm: string = ''
+): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number }> {
+  const result = await safeAction<
+    ServerActionResponse<{ data: AssignedTask[]; count: number; totalPages: number }>
+  >(() => fetchCurrentAssignedEmployeesPaginated(page, pageSize, sortBy, searchTerm));
+
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error);
+    return { tasks: [], count: 0, totalPages: 0 };
+  }
+
+  const payload = result.data?.data;
+  return {
+    tasks: payload?.data ?? [],
+    count: payload?.count ?? 0,
+    totalPages: payload?.totalPages ?? 0,
+  };
 }
 
 /**
