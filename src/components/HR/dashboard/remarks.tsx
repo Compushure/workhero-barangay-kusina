@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,7 @@ interface RemarksDialogProps {
   placeholder?: string;
   required?: boolean;
   confirmVariant?: 'default' | 'destructive';
+  isProcessing?: boolean;
 }
 
 export function RemarksDialog({
@@ -39,19 +40,28 @@ export function RemarksDialog({
   placeholder = 'Type in remarks/comments you wish to send alongside the request confirmation.',
   required = false,
   confirmVariant = 'default',
+  isProcessing = false,
 }: RemarksDialogProps) {
   const [remarks, setRemarks] = useState('');
   const [error, setError] = useState('');
+  const [isConfirming, setIsConfirming] = useState(false);
+  const isSubmittingRef = useRef(false);
+  
+  // Disable if either the modal's internal state OR the parent's processing state is true
+  const isDisabled = isConfirming || isProcessing;
 
   const handleConfirm = () => {
-    if (required && !remarks.trim()) {
-      setError('Remarks are required for denial');
-      return;
+    // Prevent multiple submissions using ref (synchronous check)
+    if (isSubmittingRef.current) return;
+    
+    isSubmittingRef.current = true;
+    setIsConfirming(true);
+    try {
+      onConfirm(remarks.trim() || undefined);
+    } catch (err) {
+      isSubmittingRef.current = false;
+      setIsConfirming(false);
     }
-    setError('');
-    onConfirm(remarks.trim() || undefined);
-    setRemarks('');
-    onOpenChange(false);
   };
 
   const handleCancel = () => {
@@ -64,6 +74,8 @@ export function RemarksDialog({
     if (!newOpen) {
       setRemarks('');
       setError('');
+      setIsConfirming(false); // Reset confirming state when dialog closes
+      isSubmittingRef.current = false; // Reset ref when dialog closes
     }
     onOpenChange(newOpen);
   };
@@ -96,11 +108,12 @@ export function RemarksDialog({
                 }
               }}
               placeholder={placeholder}
-              className="min-h-32 resize-none"
+                className="min-h-32 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
               maxLength={maxLength}
               aria-required={required}
               aria-invalid={!!error}
               aria-describedby={error ? 'remark-error' : undefined}
+                disabled={isDisabled}
             />
             {error && (
               <p id="remark-error" className="text-sm text-red-600">
@@ -114,18 +127,18 @@ export function RemarksDialog({
         </div>
 
         <DialogFooter className="flex-row gap-2 sm:gap-3">
-          <Button variant="outline" onClick={handleCancel} className="flex-1 rounded-3xl">
+          <Button variant="outline" onClick={handleCancel} disabled={isDisabled} className="flex-1 rounded-3xl">
             {cancelLabel}
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={required && !remarks.trim()}
+            disabled={isDisabled}
             variant={confirmVariant}
             className={`flex-1 rounded-3xl ${
               confirmVariant === 'default' ? 'bg-[#690003] hover:bg-[#af3b3f]' : ''
             }`}
           >
-            {confirmLabel}
+            {isProcessing ? 'Processing...' : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

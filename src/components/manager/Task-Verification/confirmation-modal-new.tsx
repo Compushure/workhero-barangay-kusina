@@ -20,7 +20,13 @@ interface ConfirmationDialogProps {
   isProcessing?: boolean;
 }
 
-export function ConfirmationDialog({ open, type, onCancel, onConfirm, isProcessing = false }: ConfirmationDialogProps) {
+export function ConfirmationDialog({
+  open,
+  type,
+  onCancel,
+  onConfirm,
+  isProcessing = false,
+}: ConfirmationDialogProps) {
   const [remark, setRemark] = useState('');
   const [error, setError] = useState('');
   const [isConfirming, setIsConfirming] = useState(false);
@@ -28,7 +34,7 @@ export function ConfirmationDialog({ open, type, onCancel, onConfirm, isProcessi
 
   const title = type === 'approve' ? 'Confirm Approval' : type === 'deny' ? 'Confirm Denial' : '';
   const isRequired = type === 'deny';
-  
+
   // Disable if either the modal's internal state OR the parent's processing state is true
   const isDisabled = isConfirming || isProcessing;
 

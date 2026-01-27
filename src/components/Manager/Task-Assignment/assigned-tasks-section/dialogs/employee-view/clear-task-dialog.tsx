@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { AssignedEmployee } from "@/types";
 import { useTaskAssignment } from "../../../task-assignment-page-context";
+import { useState } from "react";
 
 interface ClearTaskDialogProps {
 showRemoveConfirm: {
@@ -17,6 +18,18 @@ employee: AssignedEmployee
 
 function ClearTaskDialog({showRemoveConfirm, setShowRemoveConfirm, employee} : ClearTaskDialogProps) {
   const { removeAssignment } = useTaskAssignment();
+  const [isRemoving, setIsRemoving] = useState(false);
+
+  const handleRemoveAssignment = async () => {
+    if (isRemoving || !showRemoveConfirm) return;
+    setIsRemoving(true);
+    try {
+      removeAssignment(showRemoveConfirm.taskId, showRemoveConfirm.empId);
+    } finally {
+      setIsRemoving(false);
+      setShowRemoveConfirm(null);
+    }
+  };
 
   return (
     <Dialog
@@ -34,20 +47,17 @@ function ClearTaskDialog({showRemoveConfirm, setShowRemoveConfirm, employee} : C
             <Button
               variant="outline"
               onClick={() => setShowRemoveConfirm(null)}
+              disabled={isRemoving}
               className="border-gray-300"
             >
               Cancel
             </Button>
             <Button
-              onClick={() => {
-                if (showRemoveConfirm) {
-                  removeAssignment(showRemoveConfirm.taskId, showRemoveConfirm.empId);
-                  setShowRemoveConfirm(null);
-                }
-              }}
+              onClick={handleRemoveAssignment}
+              disabled={isRemoving}
               className="bg-[#690003] hover:bg-[#8B0000] text-white"
             >
-              Unassign
+              {isRemoving ? 'Unassigning...' : 'Unassign'}
             </Button>
           </div>
         </div>

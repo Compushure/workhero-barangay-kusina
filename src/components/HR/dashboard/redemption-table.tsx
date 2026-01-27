@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { Check, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Pagination } from '@/components/Manager/Task-Verification/pagination';
+import { Pagination } from '@/components/manager/Task-Verification/pagination';
 import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
@@ -69,6 +69,7 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
     if (selectedRequestId) {
       acceptMutation.mutate({ id: selectedRequestId, remarks });
       setSelectedRequestId(null);
+      setAcceptDialogOpen(false); // close to prevent repeat clicks
     }
   };
 
@@ -76,21 +77,22 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
     if (selectedRequestId) {
       declineMutation.mutate({ id: selectedRequestId, remarks });
       setSelectedRequestId(null);
+      setDeclineDialogOpen(false); // close to prevent repeat clicks
     }
   };
 
   // Format date and time from ISO string
   const formatDateTime = (isoString: string) => {
     const date = new Date(isoString);
-    const dateStr = date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
+    const dateStr = date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
     });
-    const timeStr = date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
+    const timeStr = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
     });
     return { dateStr, timeStr };
   };
@@ -115,7 +117,7 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
           const quantity = request.quantity || 1; // Default to 1 if not set
           const totalCost = request.pointsCost * quantity;
           const itemDisplay = `${quantity} x ${request.rewardName}`;
-          
+
           return (
             <div
               key={request.id}
@@ -191,6 +193,7 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
         title="Accept Request (Optional Remark)"
         description="If you wish to continue with the acceptance without any remarks, simply click OK."
         placeholder="Type in any comments you wish to send alongside the acceptance."
+        isProcessing={acceptMutation.isPending || declineMutation.isPending}
       />
 
       <RemarksDialog
@@ -202,6 +205,7 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
         placeholder="Enter remarks explaining the denial (required)"
         required={true}
         confirmVariant="destructive"
+        isProcessing={acceptMutation.isPending || declineMutation.isPending}
       />
     </div>
   );
