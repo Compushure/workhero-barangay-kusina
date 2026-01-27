@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, memo, useCallback } from 'react';
 import { MoreHorizontal, ImageIcon, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,7 @@ interface MercadoItem {
   quantity?: number;
   isActive?: boolean;
   imageUrl?: string;
+  createdAt?: string;
 }
 
 interface MercadoCardProps {
@@ -35,7 +36,20 @@ function formatNumber(num: number): string {
   return num.toLocaleString('en-US');
 }
 
-export function MercadoCard({
+function formatDate(dateString: string | undefined): string {
+  if (!dateString) return '';
+  try {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return '';
+  }
+}
+
+export const MercadoCard = memo(function MercadoCard({
   item,
   onClick,
   onEdit,
@@ -46,17 +60,24 @@ export function MercadoCard({
   const [hideDialogOpen, setHideDialogOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const handleHideConfirm = () => {
+  // Memoize formatted price
+  const formattedPrice = useMemo(() => formatNumber(item.price), [item.price]);
+  const formattedQuantity = useMemo(
+    () => (item.quantity !== undefined ? formatNumber(item.quantity) : undefined),
+    [item.quantity]
+  );
+
+  const handleHideConfirm = useCallback(() => {
     if (item.isActive === false) {
       onUnhide?.(item.id);
     } else {
       onHide?.(item.id);
     }
-  };
+  }, [item.isActive, item.id, onHide, onUnhide]);
 
-  const handleCardClick = () => {
+  const handleCardClick = useCallback(() => {
     onClick?.(item.id);
-  };
+  }, [onClick, item.id]);
 
   return (
     <>
@@ -79,7 +100,13 @@ export function MercadoCard({
               alt={`${item.name} icon`}
               className="h-full w-full object-cover"
               loading="lazy"
+              decoding="async"
               onError={() => setImageError(true)}
+              onLoad={(e) => {
+                // Mark image as loaded to prevent layout shift
+                e.currentTarget.style.opacity = '1';
+              }}
+              style={{ opacity: 0, transition: 'opacity 0.2s' }}
             />
           ) : (
             <ImageIcon className="h-8 w-8 text-[#730202]/40" />
@@ -102,14 +129,19 @@ export function MercadoCard({
 
           <div className="flex items-center gap-4 mt-2">
             <p className="text-[#730202] font-medium italic opacity-80 text-base">
-              {formatNumber(item.price)} pts
+              {formattedPrice} pts
             </p>
-            {item.quantity !== undefined && (
+            {formattedQuantity !== undefined && (
               <p className="text-[#730202] text-sm opacity-70">
-                | Available: {formatNumber(item.quantity)}
+                | Available: {formattedQuantity}
               </p>
             )}
           </div>
+          {item.createdAt && (
+            <p className="text-[#730202]/50 text-xs mt-1">
+              Created: {formatDate(item.createdAt)}
+            </p>
+          )}
         </div>
 
         <div className="absolute top-4 right-4" onClick={(e) => e.stopPropagation()}>
@@ -143,4 +175,4 @@ export function MercadoCard({
       />
     </>
   );
-}
+});
