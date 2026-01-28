@@ -36,7 +36,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
     });
   });
 
-  let employees = Array.from(employeeMap.values());
+  const employees = Array.from(employeeMap.values());
 
   // Remove client-side sorting since it's handled server-side
 
@@ -124,28 +124,26 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
                         className="flex items-center gap-2 bg-white px-4 py-3 rounded-2xl border-2 border-gray-300 h-full"
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-700 truncate">
+                          <p className="font-medium text-black truncate">
                             {task.taskName} ({completedOrders} / {task.maxOrders})
                           </p>
                           <p className="text-xs text-gray-500">
                             {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
                           </p>
                           <div className="flex gap-2 mt-1">
-                            <span className="text-xs text-gray-600 font-semibold">
+                            <span className="text-xs text-black font-semibold">
                               {task.points}pts
                             </span>
-                            <span className="text-xs text-gray-600 font-semibold">
-                              XP {task.xp}
-                            </span>
+                            <span className="text-xs text-black font-semibold">XP {task.xp}</span>
                           </div>
                         </div>
                         <button
                           onClick={() =>
                             setShowRemoveConfirm({ taskId: task.id, empId: employee.id })
                           }
-                          className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                          className="hover:scale-130 transition-all duration-500 ease-in-out text-red-500 cursor-pointer"
                         >
-                          <X className="w-4 h-4" />
+                          <X className="w-4 h-4 text-red-500" />
                         </button>
                       </div>
                     );

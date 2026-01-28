@@ -90,7 +90,7 @@ export default function EditTaskDialog({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setEditMaxOrders(Math.max(1, editMaxOrders - 1))}
-                  className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
+                  className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
                 >
                   −
                 </button>
@@ -105,7 +105,7 @@ export default function EditTaskDialog({
                 />
                 <button
                   onClick={() => setEditMaxOrders(editMaxOrders + 1)}
-                  className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
+                  className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
                 >
                   +
                 </button>
@@ -169,19 +169,19 @@ export default function EditTaskDialog({
 
         <DialogFooter>
           <Button
+            onClick={handleEditTask}
+            disabled={editAssignedEmployees.length === 0 || isProcessing}
+            className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out"
+          >
+            {isProcessing ? 'Saving...' : 'Confirm'}
+          </Button>
+          <Button
             variant="outline"
             onClick={handleCancelEdit}
             disabled={isProcessing}
-            className="border-gray-300 bg-transparent"
+            className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
           >
             Cancel
-          </Button>
-          <Button
-            onClick={handleEditTask}
-            disabled={editAssignedEmployees.length === 0 || isProcessing}
-            className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50"
-          >
-            {isProcessing ? 'Saving...' : 'Confirm'}
           </Button>
         </DialogFooter>
       </DialogContent>

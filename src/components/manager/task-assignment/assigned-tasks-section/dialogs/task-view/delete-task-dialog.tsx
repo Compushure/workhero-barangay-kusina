@@ -1,5 +1,12 @@
 import { Button } from '@/components/ui/button';
-import { DialogFooter, DialogHeader, Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import {
+  DialogFooter,
+  DialogHeader,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { AssignedTask } from '@/types';
 import { useTaskAssignment } from '../../../task-assignment-page-context';
 import { useState } from 'react';
@@ -39,19 +46,19 @@ function DeleteTaskDialog({
         </DialogHeader>
         <DialogFooter>
           <Button
+            onClick={handleDeleteTask}
+            disabled={isDeleting}
+            className="bg-red-600 hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out"
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
+          <Button
             variant="outline"
             onClick={() => setShowDeleteConfirm(false)}
             disabled={isDeleting}
-            className="border-gray-300"
+            className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
           >
             Cancel
-          </Button>
-          <Button
-            onClick={handleDeleteTask}
-            disabled={isDeleting}
-            className="bg-red-600 hover:bg-red-700 text-white"
-          >
-            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogFooter>
       </DialogContent>

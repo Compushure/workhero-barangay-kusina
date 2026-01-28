@@ -29,19 +29,19 @@ function ClearAllDialog({ setShowClearConfirm, onClearAll } : ClearAllDialogProp
         </p>
         <div className="flex gap-4 justify-end">
           <Button
+            onClick={handleClearAll}
+            disabled={isClearing}
+            className="bg-red-600 hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out"
+          >
+            {isClearing ? 'Clearing...' : 'Clear All'}
+          </Button>
+          <Button
             variant="outline"
             onClick={() => setShowClearConfirm(false)}
             disabled={isClearing}
-            className="border-gray-300"
+            className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
           >
             Cancel
-          </Button>
-          <Button
-            onClick={handleClearAll}
-            disabled={isClearing}
-            className="bg-[#690003] hover:bg-[#8B0000] text-white"
-          >
-            {isClearing ? 'Clearing...' : 'Clear All'}
           </Button>
         </div>
       </div>

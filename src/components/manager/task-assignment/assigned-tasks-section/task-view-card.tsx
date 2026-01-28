@@ -114,11 +114,11 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
             <h3 className="text-xl font-bold text-[#690003] mb-1">{task.taskName}</h3>
           </div>
           <p className="text-sm text-gray-500 mb-3">{task.taskType}</p>
-          <div className="flex gap-6 text-sm text-gray-600">
+          <div className="flex gap-6 text-sm text-black">
             <span>
               {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
             </span>
-            <span>Max orders: {task.maxOrders}</span>
+            <span>Max Orders: {task.maxOrders}</span>
             <span className="flex items-center gap-2">
               <span>{task.points} pts</span>
               <span>XP {task.xp}</span>
@@ -161,13 +161,13 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
               key={emp.id}
               className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border-2 border-gray-300"
             >
-              <span className="font-medium text-sm text-gray-700">{emp.name}</span>
+              <span className="font-medium text-sm text-black">{emp.name}</span>
               <span className="text-gray-500 font-light text-sm">{emp.empId}</span>
               <button
                 onClick={() => setShowRemoveConfirm(emp.id)}
-                className="text-gray-400 hover:text-red-500 ml-2"
+                className="text-gray-400 hover:text-red-500 ml-2 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 text-red-500" />
               </button>
             </div>
           ))}

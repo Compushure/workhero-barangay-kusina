@@ -1,4 +1,11 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AssignedTask } from '@/types';
 import { useTaskAssignment } from '../../../task-assignment-page-context';
@@ -27,22 +34,22 @@ function UnassignEmployeeDialog({
         </DialogHeader>
         <DialogFooter>
           <Button
-            variant="outline"
-            onClick={() => setShowRemoveConfirm(null)}
-            className="border-gray-300"
-          >
-            Cancel
-          </Button>
-          <Button
             onClick={() => {
               if (showRemoveConfirm) {
                 removeAssignment(task.id, showRemoveConfirm);
                 setShowRemoveConfirm(null);
               }
             }}
-            className="bg-[#690003] hover:bg-[#8B0000] text-white"
+            className="bg-red-600 hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
             Unassign
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setShowRemoveConfirm(null)}
+            className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+          >
+            Cancel
           </Button>
         </DialogFooter>
       </DialogContent>

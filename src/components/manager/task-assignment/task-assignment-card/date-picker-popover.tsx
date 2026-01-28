@@ -26,13 +26,13 @@ export function DatePickerPopover({ deadline, onDeadlineChange }: DatePickerPopo
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+        <Button className="bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer transition-all duration-500 ease-in-out">
           <CalendarIcon className="w-4 h-4" />
           <span>{deadlineDisplay}</span>
           <ChevronDown className="w-4 h-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 bg-white" align="start">
+      <PopoverContent className="w-auto cursor-pointer p-0 bg-white" align="start">
         <div className="p-3">
           <Calendar
             mode="single"

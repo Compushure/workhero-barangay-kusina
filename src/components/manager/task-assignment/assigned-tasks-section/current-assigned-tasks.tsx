@@ -10,7 +10,10 @@ import { EmployeeSortingBar } from './employee-sorting-bar';
 import ClearAllDialog from './dialogs/clear-all-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
 import { Pagination } from '@/components/manager/task-verification/pagination';
-import { useGetCurrentAssignedTasksPaginated, useGetCurrentAssignedEmployeesPaginated } from '@/hooks/tanstack/queries/managerAssignmentQueries';
+import {
+  useGetCurrentAssignedTasksPaginated,
+  useGetCurrentAssignedEmployeesPaginated,
+} from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export function CurrentAssignedTasks() {
@@ -20,7 +23,7 @@ export function CurrentAssignedTasks() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recently added');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  
+
   // Debounce search to reduce query churn (900ms)
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
@@ -85,7 +88,7 @@ export function CurrentAssignedTasks() {
         <div className="flex gap-2 bg-white rounded-2xl p-1 border-2 border-gray-300">
           <button
             onClick={() => handleViewModeChange('task')}
-            className={`flex w-44 justify-center items-center gap-2 py-2.5 rounded-xl text-base font-medium transition ${
+            className={`flex w-44 justify-center cursor-pointer items-center gap-2 py-2.5 rounded-xl text-base font-medium transition-all duration-500 ease-in-out ${
               viewMode === 'task' ? 'bg-[#690003] text-white' : 'text-gray-500 hover:bg-gray-200'
             }`}
           >
@@ -94,7 +97,7 @@ export function CurrentAssignedTasks() {
           </button>
           <button
             onClick={() => handleViewModeChange('employee')}
-            className={`flex w-44 justify-center items-center gap-2 py-2.5 rounded-xl text-base font-medium transition ${
+            className={`flex w-44 cursor-pointer justify-center items-center gap-2 py-2.5 rounded-xl text-base font-medium transition-all duration-500 ease-in-out ${
               viewMode === 'employee'
                 ? 'bg-[#690003] text-white'
                 : 'text-gray-500 hover:bg-gray-200'
@@ -128,7 +131,7 @@ export function CurrentAssignedTasks() {
         <Button
           onClick={() => setShowClearConfirm(true)}
           disabled={memoizedTasks.length === 0}
-          className="text-base py-5 bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50"
+          className="text-base py-5 bg-[#690003] hover:bg-[#b52828] cursor-pointer text-white disabled:opacity-50 transition-all duration-500 ease-in-out"
         >
           Clear All
         </Button>
@@ -152,7 +155,11 @@ export function CurrentAssignedTasks() {
         ) : viewMode === 'task' ? (
           memoizedTasks.map((task: any) => <TaskViewCard key={task.id} task={task} />)
         ) : (
-          <EmployeeViewCard tasks={memoizedTasks} searchTerm={debouncedSearchTerm} sortBy={sortBy} />
+          <EmployeeViewCard
+            tasks={memoizedTasks}
+            searchTerm={debouncedSearchTerm}
+            sortBy={sortBy}
+          />
         )}
       </div>
 
