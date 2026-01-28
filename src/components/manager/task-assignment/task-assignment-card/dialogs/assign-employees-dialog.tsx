@@ -117,7 +117,7 @@ export function AssignEmployeesDialog({
       <Button
         onClick={() => !disabled && setOpen(true)}
         disabled={disabled}
-        className="bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="bg-white border-2 border-gray-300 text-black cursor-pointer transition-all duration-500 ease-in-out hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <div className="flex items-center gap-2">
           <span>{selectedEmployees.length} selected</span>
@@ -166,18 +166,18 @@ export function AssignEmployeesDialog({
           {/* Dialog Footer */}
           <DialogFooter>
             <Button
-              variant="outline"
-              onClick={() => setOpen(false)}
-              className="border-gray-300 text-gray-700 hover:bg-gray-100"
-            >
-              Close
-            </Button>
-            <Button
               onClick={handleConfirm}
               disabled={selectedEmployees.length === 0}
-              className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50"
+              className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50"
             >
               Confirm
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

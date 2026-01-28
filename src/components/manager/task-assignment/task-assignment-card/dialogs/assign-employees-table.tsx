@@ -48,7 +48,7 @@ function AssignEmployeesTable({
               return (
                 <tr
                   key={employee.id}
-                  className={`border-b border-gray-200 flex w-full items-center py-1 ${
+                  className={`border-b border-gray-200 flex w-full items-center py-1 transition-all duration-300 ease-in-out ${
                     isDisabled
                       ? 'opacity-50 cursor-not-allowed bg-gray-100'
                       : 'hover:bg-gray-50 cursor-pointer'
