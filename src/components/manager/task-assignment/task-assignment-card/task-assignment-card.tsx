@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
 import { SelectTasksDialog } from './dialogs/select-task-dialog';
@@ -8,11 +9,18 @@ import { DatePickerPopover } from './date-picker-popover';
 import type { AssignedEmployee, Task } from '@/types';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
-import { handleAddTaskAssignment } from '@/action-handlers/manager-assignment';
 import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
+import {
+  useGetCurrentAssignedTasksPaginated,
+  managerAssignmentKeys,
+} from '@/hooks/tanstack/queries/managerAssignmentQueries';
 
 export function TaskAssignmentCard() {
   const { assignTasks, assignedTasks } = useTaskAssignment();
+  const queryClient = useQueryClient();
+
+  const assignedTasksQuery = useGetCurrentAssignedTasksPaginated(1, 1000, 'recently added', '', true);
+  const assignedTasksForAssign = assignedTasksQuery.data?.tasks ?? assignedTasks;
 
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<AssignedEmployee[]>([]);
@@ -59,6 +67,10 @@ export function TaskAssignmentCard() {
         deadline: selectedDeadline,
       });
 
+      // Ensure assignment lists refresh for disabled employee calculations
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
+
       handleClear();
     }
   };
@@ -93,7 +105,7 @@ export function TaskAssignmentCard() {
           <SelectTasksDialog
             selectedTask={selectedTask}
             onTasksChange={handleTasksChange}
-            assignedTasks={assignedTasks}
+            assignedTasks={assignedTasksForAssign}
             buttonLabel={getSelectedTaskName()}
           />
         </div>
@@ -104,7 +116,7 @@ export function TaskAssignmentCard() {
             onEmployeesChange={setSelectedEmployees}
             disabled={selectedTask.length === 0}
             selectedTaskIds={selectedTask}
-            assignedTasks={assignedTasks}
+            assignedTasks={assignedTasksForAssign}
           />
         </div>
 
