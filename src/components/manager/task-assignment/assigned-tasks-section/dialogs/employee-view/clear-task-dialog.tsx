@@ -24,10 +24,10 @@ function ClearTaskDialog({showRemoveConfirm, setShowRemoveConfirm, employee} : C
     if (isRemoving || !showRemoveConfirm) return;
     setIsRemoving(true);
     try {
-      removeAssignment(showRemoveConfirm.taskId, showRemoveConfirm.empId);
+      await removeAssignment(showRemoveConfirm.taskId, showRemoveConfirm.empId);
+      setShowRemoveConfirm(null);
     } finally {
       setIsRemoving(false);
-      setShowRemoveConfirm(null);
     }
   };
 

@@ -336,7 +336,11 @@ export async function fetchCurrentAssignedEmployeesPaginated(
 
 export async function clearAllTasks(): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
-  const { error } = await supabase.from('KPITask').delete().neq('status', 'done');
+  // Delete all KPITask entries that are not in 'done' status (i.e., all active assignments)
+  const { error } = await supabase
+    .from('KPITask')
+    .delete()
+    .in('status', ['assigned', 'in review', 'rejected', 'approved']);
 
   if (error) return { error: error.message, data: undefined };
   return { error: null, data: true };

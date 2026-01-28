@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button';
 import { AssignedTask } from '@/types';
 import { useTaskAssignment } from '../../../task-assignment-page-context';
+import { useState } from 'react';
 
 interface UnassignEmployeeDialogProps {
   showRemoveConfirm: string | null;
@@ -15,6 +16,19 @@ function UnassignEmployeeDialog({
   task,
 }: UnassignEmployeeDialogProps) {
   const { removeAssignment } = useTaskAssignment();
+  const [isRemoving, setIsRemoving] = useState(false);
+
+  const handleUnassign = async () => {
+    if (!showRemoveConfirm || isRemoving) return;
+    
+    setIsRemoving(true);
+    try {
+      await removeAssignment(task.id, showRemoveConfirm);
+      setShowRemoveConfirm(null);
+    } finally {
+      setIsRemoving(false);
+    }
+  };
 
   return (
     <Dialog open={!!showRemoveConfirm} onOpenChange={(open) => !open && setShowRemoveConfirm(null)}>
@@ -29,20 +43,17 @@ function UnassignEmployeeDialog({
           <Button
             variant="outline"
             onClick={() => setShowRemoveConfirm(null)}
+            disabled={isRemoving}
             className="border-gray-300"
           >
             Cancel
           </Button>
           <Button
-            onClick={() => {
-              if (showRemoveConfirm) {
-                removeAssignment(task.id, showRemoveConfirm);
-                setShowRemoveConfirm(null);
-              }
-            }}
+            onClick={handleUnassign}
+            disabled={isRemoving}
             className="bg-[#690003] hover:bg-[#8B0000] text-white"
           >
-            Unassign
+            {isRemoving ? 'Unassigning...' : 'Unassign'}
           </Button>
         </DialogFooter>
       </DialogContent>
