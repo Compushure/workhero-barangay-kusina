@@ -1,8 +1,13 @@
 'use client';
 
 import { useState, useMemo, useCallback, Suspense, useEffect } from 'react';
+import { Plus } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
+import { Button } from '@/components/ui/button';
 import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
+import { MercadoSearchBar } from '@/components/hr/mercado/mercado-search-bar';
+import { MercadoSortToggle } from '@/components/hr/mercado/mercado-sort-toggle';
 import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 import { DeleteModal } from '@/components/hr/mercado/delete-modal';
 import { ViewItemModal } from '@/components/hr/mercado/view-item-modal';
@@ -21,6 +26,8 @@ export default function MercadoPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [editingItem, setEditingItem] = useState<{
     id: string;
     name: string;
@@ -45,16 +52,35 @@ export default function MercadoPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
 
+  // Debounced search
+  const debouncedSearch = useDebounce(search, 300);
+
   // Fetch rewards
-  const { data: rewards, isLoading } = useGetRewards();
-  <Suspense fallback={<div>Loading...</div>}>
-    <MercadoHeader
-      title="Mercado Manager"
-      description="Manage Items visible in mercado"
-      onAddClick={() => {}}
-    />
-    <div>...</div>
-  </Suspense>;
+  const { data: allRewards, isLoading } = useGetRewards();
+
+  // Filter and sort rewards
+  const rewards = useMemo(() => {
+    if (!allRewards) return [];
+
+    let filtered = allRewards;
+
+    // Filter by search
+    if (debouncedSearch) {
+      filtered = filtered.filter((reward) =>
+        reward.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+      );
+    }
+
+    // Sort by date
+    return [...filtered].sort((a, b) => {
+      const dateA =
+        a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt || 0).getTime();
+      const dateB =
+        b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt || 0).getTime();
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+  }, [allRewards, debouncedSearch, sortOrder]);
+
   // Pagination logic
   const totalPages = Math.ceil((rewards?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -64,12 +90,10 @@ export default function MercadoPage() {
     [rewards, startIndex, endIndex]
   );
 
-  // Reset to page 1 when items change and current page is invalid
-  useMemo(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(1);
-    }
-  }, [rewards?.length]);
+  // Reset to page 1 when search or sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, sortOrder]);
 
   // Sync viewing item with updated rewards when mutations complete
   useEffect(() => {
@@ -84,7 +108,10 @@ export default function MercadoPage() {
           redeemingLimit: updatedItem.redeemingLimit,
           isActive: updatedItem.isActive,
           imageUrl: updatedItem.imageUrl,
-          createdAt: updatedItem.createdAt instanceof Date ? updatedItem.createdAt.toISOString() : updatedItem.createdAt,
+          createdAt:
+            updatedItem.createdAt instanceof Date
+              ? updatedItem.createdAt.toISOString()
+              : updatedItem.createdAt,
         });
       }
     }
@@ -219,7 +246,7 @@ export default function MercadoPage() {
 
       if (data.icon && rewardId) {
         await uploadRewardPicture.mutateAsync({
-          rewardId,
+          rewardId: rewardId,
           file: data.icon,
           rewardName: data.name,
         });
@@ -233,11 +260,34 @@ export default function MercadoPage() {
   return (
     <main className="min-h-screen bg-[#fff8f5] p-8 flex flex-col">
       <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col">
-        <MercadoHeader
-          title="Mercado Manager"
-          description="Manage Items visible in mercado"
-          onAddClick={handleAdd}
-        />
+        {/* Header with Search and Sort */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-[#730202]">Mercado Manager</h1>
+              <p className="text-muted-foreground">Manage Items visible in mercado</p>
+            </div>
+          </div>
+
+          {/* Search and Sort Row */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 max-w-md">
+              <MercadoSearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search by employee or items"
+              />
+            </div>
+            <MercadoSortToggle value={sortOrder} onChange={setSortOrder} />
+            <Button
+              onClick={() => setIsAddModalOpen(true)}
+              className="h-11 px-6 rounded-xl bg-[#730202] hover:bg-[#730202]/90 text-white font-semibold text-base ml-auto"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Add Item
+            </Button>
+          </div>
+        </div>
 
         <div className="flex-1">
           {isLoading ? (
@@ -255,7 +305,10 @@ export default function MercadoPage() {
                       quantity: item.quantity,
                       isActive: item.isActive,
                       imageUrl: item.imageUrl,
-                      createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : item.createdAt,
+                      createdAt:
+                        item.createdAt instanceof Date
+                          ? item.createdAt.toISOString()
+                          : item.createdAt,
                     }}
                     onClick={handleView}
                     onEdit={handleEdit}
@@ -266,7 +319,11 @@ export default function MercadoPage() {
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <p className="text-[#730202]">No items yet. Click "Add Item" to create one.</p>
+                  {search ? (
+                    <p className="text-[#730202]">No items found matching your search.</p>
+                  ) : (
+                    <p className="text-[#730202]">No items yet. Click "Add Item" to create one.</p>
+                  )}
                 </div>
               )}
             </div>
@@ -274,7 +331,7 @@ export default function MercadoPage() {
         </div>
 
         {/* Pagination */}
-        {!isLoading && (
+        {!isLoading && totalPages > 0 && (
           <div className="mt-8 pb-4">
             <Pagination
               totalPages={totalPages}
