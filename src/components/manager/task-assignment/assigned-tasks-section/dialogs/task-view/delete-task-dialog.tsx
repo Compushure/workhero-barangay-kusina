@@ -1,8 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { DialogFooter, DialogHeader, Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { AssignedTask } from '@/types';
-import { useTaskAssignment } from '../../../task-assignment-page-context';
-import { useState } from 'react';
+import { useDeleteTaskMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface DeleteTaskDialogProps {
   showDeleteConfirm: boolean;
@@ -14,18 +13,17 @@ function DeleteTaskDialog({
   setShowDeleteConfirm,
   task,
 }: DeleteTaskDialogProps) {
-  const { deleteTask } = useTaskAssignment();
-  const [isDeleting, setIsDeleting] = useState(false);
+  const deleteTaskMutation = useDeleteTaskMutation();
 
   const handleDeleteTask = async () => {
-    if (isDeleting || !deleteTask) return;
-    setIsDeleting(true);
-    try {
-      deleteTask(task.id);
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteConfirm(false);
-    }
+    deleteTaskMutation.mutate(
+      { taskId: task.id },
+      {
+        onSuccess: () => {
+          setShowDeleteConfirm(false);
+        },
+      }
+    );
   };
   return (
     <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
@@ -41,17 +39,17 @@ function DeleteTaskDialog({
           <Button
             variant="outline"
             onClick={() => setShowDeleteConfirm(false)}
-            disabled={isDeleting}
+            disabled={deleteTaskMutation.isPending}
             className="border-gray-300"
           >
             Cancel
           </Button>
           <Button
             onClick={handleDeleteTask}
-            disabled={isDeleting}
+            disabled={deleteTaskMutation.isPending}
             className="bg-red-600 hover:bg-red-700 text-white"
           >
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {deleteTaskMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogFooter>
       </DialogContent>

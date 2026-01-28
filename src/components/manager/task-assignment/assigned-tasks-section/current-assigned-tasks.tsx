@@ -14,7 +14,7 @@ import { useGetCurrentAssignedTasksPaginated, useGetCurrentAssignedEmployeesPagi
 import { useDebounce } from '@/hooks/useDebounce';
 
 export function CurrentAssignedTasks() {
-  const { viewMode, setViewMode, clearAll } = useTaskAssignment();
+  const { viewMode, setViewMode } = useTaskAssignment();
 
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -163,7 +163,7 @@ export function CurrentAssignedTasks() {
 
       {/* Clear Confirmation Dialog */}
       {showClearConfirm && (
-        <ClearAllDialog setShowClearConfirm={setShowClearConfirm} onClearAll={clearAll} />
+        <ClearAllDialog setShowClearConfirm={setShowClearConfirm} />
       )}
     </div>
   );

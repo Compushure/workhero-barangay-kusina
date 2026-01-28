@@ -1,8 +1,8 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AssignedTask } from '@/types';
-import { useTaskAssignment } from '../../../task-assignment-page-context';
 import { useState } from 'react';
+import { useDeleteTaskMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface UnassignEmployeeDialogProps {
   showRemoveConfirm: string | null;
@@ -15,19 +15,20 @@ function UnassignEmployeeDialog({
   setShowRemoveConfirm,
   task,
 }: UnassignEmployeeDialogProps) {
-  const { removeAssignment } = useTaskAssignment();
-  const [isRemoving, setIsRemoving] = useState(false);
+  const deleteTaskMutation = useDeleteTaskMutation();
 
   const handleUnassign = async () => {
-    if (!showRemoveConfirm || isRemoving) return;
+    if (!showRemoveConfirm) return;
     
-    setIsRemoving(true);
-    try {
-      await removeAssignment(task.id, showRemoveConfirm);
-      setShowRemoveConfirm(null);
-    } finally {
-      setIsRemoving(false);
-    }
+    // Use the mutation which will handle cache invalidation
+    deleteTaskMutation.mutate(
+      { taskId: task.id },
+      {
+        onSuccess: () => {
+          setShowRemoveConfirm(null);
+        },
+      }
+    );
   };
 
   return (
@@ -43,17 +44,17 @@ function UnassignEmployeeDialog({
           <Button
             variant="outline"
             onClick={() => setShowRemoveConfirm(null)}
-            disabled={isRemoving}
+            disabled={deleteTaskMutation.isPending}
             className="border-gray-300"
           >
             Cancel
           </Button>
           <Button
             onClick={handleUnassign}
-            disabled={isRemoving}
+            disabled={deleteTaskMutation.isPending}
             className="bg-[#690003] hover:bg-[#8B0000] text-white"
           >
-            {isRemoving ? 'Unassigning...' : 'Unassign'}
+            {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -346,6 +346,19 @@ export async function clearAllTasks(): Promise<ServerActionResponse<boolean>> {
   return { error: null, data: true };
 }
 
+export async function clearAllEmployeeTasks(employeeId: string): Promise<ServerActionResponse<boolean>> {
+  const supabase = await createClient();
+  // Delete all KPITask entries for a specific employee
+  const { error } = await supabase
+    .from('KPITask')
+    .delete()
+    .eq('assigned_to', employeeId)
+    .in('status', ['assigned', 'in review', 'rejected', 'approved']);
+
+  if (error) return { error: error.message, data: undefined };
+  return { error: null, data: true };
+}
+
 export async function deleteTask(taskId: string): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
   const { error } = await supabase.from('KPITask').delete().eq('id', taskId);
@@ -355,7 +368,8 @@ export async function deleteTask(taskId: string): Promise<ServerActionResponse<b
 }
 
 /**
- * ✅ New: Update task assignment
+ * Update task assignment including max orders, deadline, and reassigning employees
+ * Handles adding/removing employees from a task assignment group
  */
 export async function updateTaskAssignment(
   taskId: string,
@@ -365,19 +379,93 @@ export async function updateTaskAssignment(
 ): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
 
-  // Update the task row itself
-  const { error } = await supabase
-    .from('KPITask')
-    .update({
-      max_orders: maxOrders,
-      deadline_date: newDueDate,
-    })
-    .eq('id', taskId);
+  try {
+    // Get the current task to find all related assignments
+    const { data: currentTask, error: fetchError } = await supabase
+      .from('KPITask')
+      .select('category_id, created_at, deadline_date, assigned_by')
+      .eq('id', taskId)
+      .single();
 
-  if (error) return { error: error.message, data: undefined };
+    if (fetchError || !currentTask) {
+      return { error: 'Task not found', data: undefined };
+    }
 
-  // ⚠️ If employees are modeled as separate KPITask rows, you’d also handle reassignments here
-  // For now, we just update the task metadata
+    // Find all assignments in this task group
+    const { data: existingAssignments, error: groupError } = await supabase
+      .from('KPITask')
+      .select('id, assigned_to')
+      .eq('category_id', currentTask.category_id)
+      .eq('created_at', currentTask.created_at)
+      .eq('deadline_date', currentTask.deadline_date);
 
-  return { error: null, data: true };
+    if (groupError) {
+      return { error: groupError.message, data: undefined };
+    }
+
+    type TaskAssignment = { id: string; assigned_to: string };
+    const existingEmployeeIds = new Set(
+      (existingAssignments as TaskAssignment[] || []).map(a => a.assigned_to)
+    );
+    const newEmployeeIds = new Set(employeeIds);
+
+    // Update max_orders and deadline for all existing assignments
+    const { error: updateError } = await supabase
+      .from('KPITask')
+      .update({
+        max_orders: maxOrders,
+        deadline_date: newDueDate,
+      })
+      .eq('category_id', currentTask.category_id)
+      .eq('created_at', currentTask.created_at)
+      .eq('deadline_date', currentTask.deadline_date);
+
+    if (updateError) {
+      return { error: updateError.message, data: undefined };
+    }
+
+    // Remove employees not in the new list
+    const employeesToRemove = (existingAssignments as TaskAssignment[] || [])
+      .filter(a => !newEmployeeIds.has(a.assigned_to))
+      .map(a => a.id);
+
+    if (employeesToRemove.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('KPITask')
+        .delete()
+        .in('id', employeesToRemove);
+
+      if (deleteError) {
+        return { error: deleteError.message, data: undefined };
+      }
+    }
+
+    // Add new employees
+    const employeesToAdd = employeeIds.filter(empId => !existingEmployeeIds.has(empId));
+
+    if (employeesToAdd.length > 0) {
+      const newAssignments = employeesToAdd.map(empId => ({
+        assigned_by: currentTask.assigned_by,
+        assigned_to: empId,
+        category_id: currentTask.category_id,
+        status: 'assigned',
+        created_at: currentTask.created_at,
+        deadline_date: newDueDate,
+        max_orders: maxOrders,
+      }));
+
+      const { error: insertError } = await supabase
+        .from('KPITask')
+        .insert(newAssignments);
+
+      if (insertError) {
+        return { error: insertError.message, data: undefined };
+      }
+    }
+
+    return { error: null, data: true };
+  } catch (error: any) {
+    return { error: error.message || 'Failed to update task assignment', data: undefined };
+  }
 }
+

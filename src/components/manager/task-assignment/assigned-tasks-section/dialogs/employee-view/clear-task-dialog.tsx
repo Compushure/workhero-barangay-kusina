@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { AssignedEmployee } from "@/types";
-import { useTaskAssignment } from "../../../task-assignment-page-context";
-import { useState } from "react";
+import { useDeleteTaskMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface ClearTaskDialogProps {
 showRemoveConfirm: {
@@ -17,18 +16,20 @@ employee: AssignedEmployee
 }
 
 function ClearTaskDialog({showRemoveConfirm, setShowRemoveConfirm, employee} : ClearTaskDialogProps) {
-  const { removeAssignment } = useTaskAssignment();
-  const [isRemoving, setIsRemoving] = useState(false);
+  const deleteTaskMutation = useDeleteTaskMutation();
 
   const handleRemoveAssignment = async () => {
-    if (isRemoving || !showRemoveConfirm) return;
-    setIsRemoving(true);
-    try {
-      await removeAssignment(showRemoveConfirm.taskId, showRemoveConfirm.empId);
-      setShowRemoveConfirm(null);
-    } finally {
-      setIsRemoving(false);
-    }
+    if (!showRemoveConfirm) return;
+    
+    // Use the mutation which will handle cache invalidation
+    deleteTaskMutation.mutate(
+      { taskId: showRemoveConfirm.taskId },
+      {
+        onSuccess: () => {
+          setShowRemoveConfirm(null);
+        },
+      }
+    );
   };
 
   return (
@@ -47,17 +48,17 @@ function ClearTaskDialog({showRemoveConfirm, setShowRemoveConfirm, employee} : C
             <Button
               variant="outline"
               onClick={() => setShowRemoveConfirm(null)}
-              disabled={isRemoving}
+              disabled={deleteTaskMutation.isPending}
               className="border-gray-300"
             >
               Cancel
             </Button>
             <Button
               onClick={handleRemoveAssignment}
-              disabled={isRemoving}
+              disabled={deleteTaskMutation.isPending}
               className="bg-[#690003] hover:bg-[#8B0000] text-white"
             >
-              {isRemoving ? 'Unassigning...' : 'Unassign'}
+              {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
             </Button>
           </div>
         </div>
