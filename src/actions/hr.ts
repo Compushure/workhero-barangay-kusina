@@ -10,6 +10,14 @@ import {
 } from '@/types';
 import { addRewardSchema, editRewardSchema } from '@/zod/schemas';
 
+// Helper function to get public URL with cache busting
+function getRewardImageUrl(supabase: any, rewardId: string): string {
+  const baseUrl = supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`)
+    .data.publicUrl;
+  // Add cache-busting query parameter to force fresh image on every fetch
+  return `${baseUrl}?t=${Date.now()}`;
+}
+
 // ============================================
 // Redemption Request Actions
 // ============================================
@@ -455,8 +463,7 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
       isActive: item.is_active,
       createdAt: item.created_at,
       createdBy: item.created_by,
-      imageUrl: supabase.storage.from('reward').getPublicUrl(`${item.id}/profile.png`).data
-        .publicUrl,
+      imageUrl: getRewardImageUrl(supabase, item.id),
     }));
 
     return { error: null, data: rewards };
@@ -478,16 +485,6 @@ export async function addRewardAction(
     const validatedData = addRewardSchema.parse(input);
 
     const supabase = await createClient();
-
-    // Get current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return { error: 'Unauthorized: User not authenticated' };
-    }
 
     // Additional backend validation for redeeming_limit
     if (validatedData.redeemingLimit !== undefined) {
@@ -512,7 +509,6 @@ export async function addRewardAction(
         redeeming_limit: validatedData.redeemingLimit,
         category: validatedData.category,
         is_active: validatedData.isActive,
-        created_by: user.id,
       })
       .select()
       .single();
@@ -533,8 +529,7 @@ export async function addRewardAction(
       isActive: data.is_active,
       createdAt: data.created_at,
       createdBy: data.created_by,
-      imageUrl: supabase.storage.from('reward').getPublicUrl(`${data.id}/profile.png`).data
-        .publicUrl,
+      imageUrl: getRewardImageUrl(supabase, data.id),
     };
 
     return { error: null, data: reward };
@@ -557,16 +552,6 @@ export async function editRewardAction(
 
     // Get Supabase client
     const supabase = await createClient();
-
-    // Get current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return { error: 'Unauthorized: User not authenticated' };
-    }
 
     // Additional backend validation for redeeming_limit
     if (validatedData.redeemingLimit !== undefined) {
@@ -634,8 +619,7 @@ export async function editRewardAction(
       isActive: data.is_active,
       createdAt: data.created_at,
       createdBy: data.created_by,
-      imageUrl: supabase.storage.from('reward').getPublicUrl(`${data.id}/profile.png`).data
-        .publicUrl,
+      imageUrl: getRewardImageUrl(supabase, data.id),
     };
 
     return { error: null, data: reward };
@@ -653,22 +637,20 @@ export async function deleteRewardAction(id: string): Promise<ServerActionRespon
     // Get Supabase client
     const supabase = await createClient();
 
-    // Get current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return { error: 'Unauthorized: User not authenticated' };
-    }
-
     // Delete reward from database
     const { error } = await supabase.from('Reward').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting reward:', error);
       return { error: `Failed to delete item: ${error.message}` };
+    }
+
+    const { data, error: profileError } = await supabase.storage
+      .from('reward')
+      .remove([`${id}/profile.png`]);
+
+    if (profileError) {
+      return { error: 'Failed to delete profile picture: ' + profileError.message };
     }
 
     return { error: null };
@@ -694,16 +676,6 @@ export async function hideRewardAction(
   try {
     // Get Supabase client
     const supabase = await createClient();
-
-    // Get current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return { error: 'Unauthorized: User not authenticated' };
-    }
 
     // Update reward is_active status
     const { error } = await supabase.from('Reward').update({ is_active: isActive }).eq('id', id);
@@ -733,7 +705,7 @@ export async function uploadRewardPicture(
   const { data: uploadResult, error } = await supabase.storage
     .from('reward')
     .upload(`${rewardId}/profile.png`, file, {
-      cacheControl: '3600',
+      cacheControl: '0',
       upsert: true,
       contentType: (file as any)?.type || 'image/png',
     });
@@ -742,12 +714,10 @@ export async function uploadRewardPicture(
     return { error: 'Failed to upload Reward picture: ' + error.message };
   }
 
-  const { data: publicUrlData } = supabase.storage
-    .from('reward')
-    .getPublicUrl(`${rewardId}/profile.png`);
+  const publicUrl = getRewardImageUrl(supabase, rewardId);
 
   return {
     error: null,
-    data: { path: uploadResult?.path ?? null, publicUrl: publicUrlData.publicUrl },
+    data: { path: uploadResult?.path ?? null, publicUrl },
   };
 }

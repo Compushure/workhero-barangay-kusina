@@ -12,7 +12,7 @@ import {
   fetchEmployeeList,
   addTaskAssignmentAction,
 } from '@/actions/manager-assignment';
-import type { Task, AssignedEmployee } from '@/types';
+import type { Task, AssignedEmployee, AssignedTask } from '@/types';
 import { toast } from 'sonner';
 
 /**
@@ -61,30 +61,30 @@ export async function handleFetchEmployeeList(): Promise<AssignedEmployee[]> {
  * @param employeeIds - Array of employee IDs to assign the task to
  * @param startDate - Start date for the task assignment
  * @param endDate - End date for the task assignment
- * @param maxAttempts - Optional maximum number of attempts for the task
- * @returns boolean indicating success or failure
+ * @param maxOrders - Optional maximum number of orders for the task
+ * @returns Array of assigned tasks or empty array on error
  */
 export async function handleAddTaskAssignment(
   taskId: string,
   employeeIds: string[],
   startDate: string,
   endDate: string,
-  maxAttempts?: number
-): Promise<boolean> {
+  maxOrders?: number
+): Promise<AssignedTask[]> {
   const result = await safeAction(() =>
-    addTaskAssignmentAction(taskId, employeeIds, startDate, endDate, maxAttempts)
+    addTaskAssignmentAction(taskId, employeeIds, startDate, endDate, maxOrders)
   );
 
   if (!result.success) {
     toast.error('Failed to assign task: ' + result.error);
-    return false;
+    return [];
   }
 
   if (result.data?.error) {
     toast.error(result.data.error);
-    return false;
+    return [];
   }
 
   toast.success('Task assigned successfully');
-  return true;
+  return result.data?.data ?? [];
 }

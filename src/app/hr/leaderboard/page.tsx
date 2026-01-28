@@ -43,6 +43,7 @@ export default async function LeaderboardPage() {
   const playersWithRank = result.data.map((player, index) => ({
     ...player,
     rank: index + 1,
+    image: player.image ?? undefined,
   }));
 
   const topPlayer = playersWithRank[0];

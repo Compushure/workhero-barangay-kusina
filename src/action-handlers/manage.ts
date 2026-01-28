@@ -17,8 +17,6 @@ import {
 } from '@/actions/manage';
 import { type User, type AddUserInput, type EditUserInput, type UserQueryParams, type PaginatedResponse } from '@/types';
 import { toast } from 'sonner';
-import { getUserRole } from '@/actions/auth';
-import { Router } from 'next/router';
 
 /**
  * Fetches all users with error handling and toast feedback
@@ -147,20 +145,4 @@ export async function handleDeleteUser(userId: string, userName: string): Promis
 
   toast.success(`Successfully deleted ${userName}`);
   return true;
-}
-
-export async function redirectToCorrectDashboardClient(routerInstance: Router) {
-  const { role, error } = await getUserRole();
-  if (error) {
-    routerInstance.push('/admin');
-  } else {
-    switch (role) {
-      case 'superadmin':
-        routerInstance.push('/admin/manage');
-      case 'manager':
-        routerInstance.push('/manager/dashboard');
-      default:
-        routerInstance.push('/user/dashboard');
-    }
-  }
 }

@@ -284,6 +284,14 @@ export async function deleteUserAction(userId: string): Promise<ServerActionResp
   if (error) {
     return { error: 'Failed to delete user: ' + error };
   }
+  const supabase = await createClient();
+  const { data, error: profileError } = await supabase.storage
+    .from('employees')
+    .remove([`${userId}/profile.png`]);
+
+    if (profileError) {
+      return { error: 'Failed to delete profile picture: ' + profileError.message };
+    }
   return { error: null };
 }
 
