@@ -10,9 +10,9 @@ import {
 import { DatePickerPopover } from '../../../task-assignment-card/date-picker-popover';
 import { Button } from '@/components/ui/button';
 import { AssignedTask, AssignedEmployee } from '@/types';
-import { useTaskAssignment } from '../../../task-assignment-page-context';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import { useGetCurrentAssignedTasksPaginated } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 
 interface EditTaskDialogProps {
   showEditDialog: boolean;
@@ -41,8 +41,14 @@ export default function EditTaskDialog({
   editAssignedEmployees,
   toggleEmployee,
 }: EditTaskDialogProps) {
-  // ✅ Renamed to avoid duplicate identifier
-  const { assignedTasks: contextAssignedTasks } = useTaskAssignment();
+  const assignedTasksQuery = useGetCurrentAssignedTasksPaginated(
+    1,
+    1000,
+    'recently added',
+    '',
+    showEditDialog
+  );
+  const assignedTasks = assignedTasksQuery.data?.tasks ?? [];
 
   // ✅ Fetch employees from DB instead of mock data
   const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
@@ -55,19 +61,23 @@ export default function EditTaskDialog({
   }, []);
 
   // Get all employees assigned to other instances of this task
-  const otherTaskInstanceEmployees = new Set<string>();
-  (contextAssignedTasks ?? []).forEach((assignedTask) => {
-    if (assignedTask.taskId === task.taskId && assignedTask.id !== task.id) {
-      (assignedTask.assignedEmployees ?? []).forEach((emp) => {
-        otherTaskInstanceEmployees.add(emp.id);
-      });
-    }
-  });
+  const disabledEmployeeIds = useMemo(() => {
+    const otherTaskInstanceEmployees = new Set<string>();
+    assignedTasks.forEach((assignedTask) => {
+      if (assignedTask.taskId === task.taskId && assignedTask.id !== task.id) {
+        (assignedTask.assignedEmployees ?? []).forEach((emp) => {
+          otherTaskInstanceEmployees.add(emp.id);
+        });
+      }
+    });
 
-  // An employee is disabled if they're assigned to another instance of this task
-  const disabledEmployeeIds = new Set<string>(
-    Array.from(otherTaskInstanceEmployees).filter((empId) => !editAssignedEmployees.includes(empId))
-  );
+    // An employee is disabled if they're assigned to another instance of this task
+    return new Set<string>(
+      Array.from(otherTaskInstanceEmployees).filter(
+        (empId) => !editAssignedEmployees.includes(empId)
+      )
+    );
+  }, [assignedTasks, editAssignedEmployees, task.id, task.taskId]);
 
   return (
     <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>

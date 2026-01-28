@@ -9,6 +9,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import {
   handleDeleteTask,
   handleClearAllTasks,
+  handleClearAllEmployeeTasks,
   handleUpdateTaskAssignment,
 } from '@/action-handlers/manager-current-assigned-task';
 import { managerAssignmentKeys } from '../queries/managerAssignmentQueries';
@@ -64,6 +65,34 @@ export function useClearAllTasksMutation(): UseMutationResult<
     },
     onError: (error) => {
       console.error('Error clearing all tasks:', error);
+    },
+  });
+}
+
+/**
+ * Mutation for clearing all tasks for a specific employee
+ * Automatically invalidates relevant queries on success
+ */
+export function useClearAllEmployeeTasksMutation(): UseMutationResult<
+  boolean,
+  Error,
+  { employeeId: string }
+> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ employeeId }: { employeeId: string }) => {
+      return await handleClearAllEmployeeTasks(employeeId);
+    },
+    onSuccess: () => {
+      // Invalidate both task and employee views
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
+      queryClient.invalidateQueries({
+        queryKey: managerAssignmentKeys.employees(),
+      });
+    },
+    onError: (error) => {
+      console.error('Error clearing employee tasks:', error);
     },
   });
 }

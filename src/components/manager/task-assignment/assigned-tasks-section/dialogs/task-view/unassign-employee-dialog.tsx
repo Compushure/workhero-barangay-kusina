@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AssignedTask } from '@/types';
-import { useTaskAssignment } from '../../../task-assignment-page-context';
+import { useState } from 'react';
+import { useDeleteTaskMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface UnassignEmployeeDialogProps {
   showRemoveConfirm: string | null;
@@ -14,7 +15,21 @@ function UnassignEmployeeDialog({
   setShowRemoveConfirm,
   task,
 }: UnassignEmployeeDialogProps) {
-  const { removeAssignment } = useTaskAssignment();
+  const deleteTaskMutation = useDeleteTaskMutation();
+
+  const handleUnassign = async () => {
+    if (!showRemoveConfirm) return;
+    
+    // Use the mutation which will handle cache invalidation
+    deleteTaskMutation.mutate(
+      { taskId: task.id },
+      {
+        onSuccess: () => {
+          setShowRemoveConfirm(null);
+        },
+      }
+    );
+  };
 
   return (
     <Dialog open={!!showRemoveConfirm} onOpenChange={(open) => !open && setShowRemoveConfirm(null)}>
@@ -29,20 +44,17 @@ function UnassignEmployeeDialog({
           <Button
             variant="outline"
             onClick={() => setShowRemoveConfirm(null)}
+            disabled={deleteTaskMutation.isPending}
             className="border-gray-300"
           >
             Cancel
           </Button>
           <Button
-            onClick={() => {
-              if (showRemoveConfirm) {
-                removeAssignment(task.id, showRemoveConfirm);
-                setShowRemoveConfirm(null);
-              }
-            }}
+            onClick={handleUnassign}
+            disabled={deleteTaskMutation.isPending}
             className="bg-[#690003] hover:bg-[#8B0000] text-white"
           >
-            Unassign
+            {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
           </Button>
         </DialogFooter>
       </DialogContent>

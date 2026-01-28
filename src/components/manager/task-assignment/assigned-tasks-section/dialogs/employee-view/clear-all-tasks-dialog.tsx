@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { AssignedEmployee } from "@/types";
-import { useTaskAssignment } from "../../../task-assignment-page-context";
-import { useState } from "react";
+import { useClearAllEmployeeTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface ClearAllTasksDialogProps {
   showClearConfirm: string | null, 
@@ -11,18 +10,19 @@ interface ClearAllTasksDialogProps {
 }
 
 function ClearAllTasksDialog({showClearConfirm, setShowClearConfirm, employee } : ClearAllTasksDialogProps) {
-  const { clearAllEmployeeTasks } = useTaskAssignment();
-  const [isClearing, setIsClearing] = useState(false);
+  const clearAllEmployeeTasksMutation = useClearAllEmployeeTasksMutation();
 
   const handleClearAllTasks = async () => {
-    if (isClearing || !showClearConfirm || !clearAllEmployeeTasks) return;
-    setIsClearing(true);
-    try {
-      clearAllEmployeeTasks(showClearConfirm);
-    } finally {
-      setIsClearing(false);
-      setShowClearConfirm(null);
-    }
+    if (!showClearConfirm) return;
+    
+    clearAllEmployeeTasksMutation.mutate(
+      { employeeId: showClearConfirm },
+      {
+        onSuccess: () => {
+          setShowClearConfirm(null);
+        },
+      }
+    );
   };
 
   return (
@@ -42,17 +42,17 @@ function ClearAllTasksDialog({showClearConfirm, setShowClearConfirm, employee } 
             <Button
               variant="outline"
               onClick={() => setShowClearConfirm(null)}
-              disabled={isClearing}
+              disabled={clearAllEmployeeTasksMutation.isPending}
               className="border-gray-300"
             >
               Cancel
             </Button>
             <Button
               onClick={handleClearAllTasks}
-              disabled={isClearing}
+              disabled={clearAllEmployeeTasksMutation.isPending}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              {isClearing ? 'Clearing...' : 'Clear All'}
+              {clearAllEmployeeTasksMutation.isPending ? 'Clearing...' : 'Clear All'}
             </Button>
           </div>
         </div>

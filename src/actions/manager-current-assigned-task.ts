@@ -239,24 +239,31 @@ export async function fetchCurrentAssignedEmployeesPaginated(
     name: string;
     empId: string;
     latestDate: string;
-    sortKey: string; // For maintaining sort order
-    firstAssignment: any; // Store first assignment for task details
+    sortKey: string;
+    assignments: any[]; // Store ALL assignments for this employee
   }>();
   
   (allSortedData ?? []).forEach((row: any) => {
     const empId = row.assigned_to;
-    const currentLatest = employeeGroups.get(empId)?.latestDate || '';
     
-    // Keep the latest (most recent) task assignment date for each employee
-    if (row.kpitask_created_at > currentLatest || !employeeGroups.has(empId)) {
+    if (!employeeGroups.has(empId)) {
       employeeGroups.set(empId, {
         id: empId,
         name: row.assigned_to_name || '',
         empId: row.assigned_to_employee_id || '',
         latestDate: row.kpitask_created_at,
-        sortKey: row[orderByColumn], // Store the sort key
-        firstAssignment: row // Store the first assignment for task details
+        sortKey: row[orderByColumn],
+        assignments: []
       });
+    }
+    
+    const group = employeeGroups.get(empId)!;
+    group.assignments.push(row);
+    
+    // Keep track of the latest date for sorting
+    if (row.kpitask_created_at > group.latestDate) {
+      group.latestDate = row.kpitask_created_at;
+      group.sortKey = row[orderByColumn];
     }
   });
 
@@ -295,33 +302,71 @@ export async function fetchCurrentAssignedEmployeesPaginated(
     };
   }
 
-  // Create the final result - one entry per employee with their task details
-  const result: AssignedTask[] = employeesForPage.map((employee) => {
-    const employeeData: AssignedEmployee = {
-      id: employee.id,
-      name: employee.name,
-      empId: employee.empId,
-      assignedTasks: [],
-      completedOrders: employee.firstAssignment?.completed_orders ?? 0,
-    };
+  // Create the final result - one entry per employee with ALL their tasks
+  const result: AssignedTask[] = employeesForPage.flatMap((employee) => {
+    // Group this employee's assignments by task (category_id + created_at + deadline_date)
+    const taskGroups = new Map<string, {
+      taskKey: string;
+      categoryId: string;
+      categoryName: string;
+      categoryDescription: string;
+      categoryPoints: number;
+      maxOrders: number;
+      createdAt: string;
+      deadlineDate: string;
+      status: string;
+      assignments: any[];
+    }>();
 
-    return {
-      id: employee.firstAssignment?.kpitask_id || employee.id,
-      taskId: employee.firstAssignment?.category_id || '',
-      taskName: employee.firstAssignment?.category_name || 'Unnamed Task',
-      taskType: employee.firstAssignment?.category_description || '',
-      isRepeatable: true,
-      points: employee.firstAssignment?.category_points || 0,
-      xp: employee.firstAssignment?.category_points || 0,
-      status: employee.firstAssignment?.status || 'assigned',
-      dateRange: {
-        start: employee.firstAssignment?.kpitask_created_at || employee.latestDate,
-        end: employee.firstAssignment?.k_deadline_date || '',
-      },
-      maxOrders: employee.firstAssignment?.max_orders ?? 1,
-      pendingOrders: employee.firstAssignment?.pending_orders,
-      assignedEmployees: [employeeData],
-    };
+    employee.assignments.forEach((assignment: any) => {
+      const taskKey = `${assignment.category_id}_${assignment.kpitask_created_at}_${assignment.k_deadline_date}`;
+      
+      if (!taskGroups.has(taskKey)) {
+        taskGroups.set(taskKey, {
+          taskKey,
+          categoryId: assignment.category_id,
+          categoryName: assignment.category_name || 'Unnamed Task',
+          categoryDescription: assignment.category_description || '',
+          categoryPoints: assignment.category_points || 0,
+          maxOrders: assignment.max_orders || 1,
+          createdAt: assignment.kpitask_created_at,
+          deadlineDate: assignment.k_deadline_date,
+          status: assignment.status || 'assigned',
+          assignments: []
+        });
+      }
+      
+      taskGroups.get(taskKey)!.assignments.push(assignment);
+    });
+
+    // Convert each task group to an AssignedTask with this employee
+    return Array.from(taskGroups.values()).map((taskGroup) => {
+      const employeeData: AssignedEmployee = {
+        id: employee.id,
+        name: employee.name,
+        empId: employee.empId,
+        assignedTasks: [],
+        completedOrders: taskGroup.assignments[0]?.completed_orders ?? 0,
+      };
+
+      return {
+        id: taskGroup.assignments[0]?.kpitask_id || taskGroup.taskKey,
+        taskId: taskGroup.categoryId,
+        taskName: taskGroup.categoryName,
+        taskType: taskGroup.categoryDescription,
+        isRepeatable: true,
+        points: taskGroup.categoryPoints,
+        xp: taskGroup.categoryPoints,
+        status: taskGroup.status,
+        dateRange: {
+          start: taskGroup.createdAt,
+          end: taskGroup.deadlineDate,
+        },
+        maxOrders: taskGroup.maxOrders,
+        pendingOrders: taskGroup.assignments[0]?.pending_orders,
+        assignedEmployees: [employeeData],
+      };
+    });
   });
 
   return {
@@ -336,7 +381,24 @@ export async function fetchCurrentAssignedEmployeesPaginated(
 
 export async function clearAllTasks(): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
-  const { error } = await supabase.from('KPITask').delete().neq('status', 'done');
+  // Delete all KPITask entries that are not in 'done' status (i.e., all active assignments)
+  const { error } = await supabase
+    .from('KPITask')
+    .delete()
+    .in('status', ['assigned', 'in review', 'rejected', 'approved']);
+
+  if (error) return { error: error.message, data: undefined };
+  return { error: null, data: true };
+}
+
+export async function clearAllEmployeeTasks(employeeId: string): Promise<ServerActionResponse<boolean>> {
+  const supabase = await createClient();
+  // Delete all KPITask entries for a specific employee
+  const { error } = await supabase
+    .from('KPITask')
+    .delete()
+    .eq('assigned_to', employeeId)
+    .in('status', ['assigned', 'in review', 'rejected', 'approved']);
 
   if (error) return { error: error.message, data: undefined };
   return { error: null, data: true };
@@ -351,7 +413,8 @@ export async function deleteTask(taskId: string): Promise<ServerActionResponse<b
 }
 
 /**
- * ✅ New: Update task assignment
+ * Update task assignment including max orders, deadline, and reassigning employees
+ * Handles adding/removing employees from a task assignment group
  */
 export async function updateTaskAssignment(
   taskId: string,
@@ -361,19 +424,97 @@ export async function updateTaskAssignment(
 ): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
 
-  // Update the task row itself
-  const { error } = await supabase
-    .from('KPITask')
-    .update({
-      max_orders: maxOrders,
-      deadline_date: newDueDate,
-    })
-    .eq('id', taskId);
+  try {
+    // Get the current task to find all related assignments
+    const { data: currentTask, error: fetchError } = await supabase
+      .from('KPITask')
+      .select('category_id, created_at, deadline_date, assigned_by')
+      .eq('id', taskId)
+      .single();
 
-  if (error) return { error: error.message, data: undefined };
+    if (fetchError || !currentTask) {
+      return { error: 'Task not found', data: undefined };
+    }
 
-  // ⚠️ If employees are modeled as separate KPITask rows, you’d also handle reassignments here
-  // For now, we just update the task metadata
+    // Find all assignments in this task group
+    const { data: existingAssignments, error: groupError } = await supabase
+      .from('KPITask')
+      .select('id, assigned_to')
+      .eq('category_id', currentTask.category_id)
+      .eq('created_at', currentTask.created_at)
+      .eq('deadline_date', currentTask.deadline_date);
 
-  return { error: null, data: true };
+    if (groupError) {
+      return { error: groupError.message, data: undefined };
+    }
+
+    type TaskAssignment = { id: string; assigned_to: string };
+    const existingEmployeeIds = new Set(
+      (existingAssignments as TaskAssignment[] || []).map(a => a.assigned_to)
+    );
+    const newEmployeeIds = new Set(employeeIds);
+
+    // Remove employees not in the new list BEFORE updating
+    const employeesToRemove = (existingAssignments as TaskAssignment[] || [])
+      .filter(a => !newEmployeeIds.has(a.assigned_to))
+      .map(a => a.id);
+
+    if (employeesToRemove.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('KPITask')
+        .delete()
+        .in('id', employeesToRemove);
+
+      if (deleteError) {
+        return { error: deleteError.message, data: undefined };
+      }
+    }
+
+    // Update max_orders and deadline for remaining assignments
+    const employeesToKeep = (existingAssignments as TaskAssignment[] || [])
+      .filter(a => newEmployeeIds.has(a.assigned_to))
+      .map(a => a.id);
+
+    if (employeesToKeep.length > 0) {
+      const { error: updateError } = await supabase
+        .from('KPITask')
+        .update({
+          max_orders: maxOrders,
+          deadline_date: newDueDate,
+        })
+        .in('id', employeesToKeep);
+
+      if (updateError) {
+        return { error: updateError.message, data: undefined };
+      }
+    }
+
+    // Add new employees
+    const employeesToAdd = employeeIds.filter(empId => !existingEmployeeIds.has(empId));
+
+    if (employeesToAdd.length > 0) {
+      const newAssignments = employeesToAdd.map(empId => ({
+        assigned_by: currentTask.assigned_by,
+        assigned_to: empId,
+        category_id: currentTask.category_id,
+        status: 'assigned',
+        created_at: currentTask.created_at,
+        deadline_date: newDueDate,
+        max_orders: maxOrders,
+      }));
+
+      const { error: insertError } = await supabase
+        .from('KPITask')
+        .insert(newAssignments);
+
+      if (insertError) {
+        return { error: insertError.message, data: undefined };
+      }
+    }
+
+    return { error: null, data: true };
+  } catch (error: any) {
+    return { error: error.message || 'Failed to update task assignment', data: undefined };
+  }
 }
+
