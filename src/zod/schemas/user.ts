@@ -6,7 +6,54 @@
 
 import { z } from 'zod';
 import { EmployeeType } from '@/types';
-import { CompassIcon } from 'lucide-react';
+
+/**
+ * Philippine TIN (Tax Identification Number) validation
+ * Format: 9 digits (e.g., 123-456-789)
+ */
+const tinSchema = z
+  .string()
+  .optional()
+  .refine(
+    (val) => !val || /^\d{9}$/.test(val.replace(/[^\d]/g, '')),
+    'TIN must be 9 digits'
+  );
+
+/**
+ * Philippine SSS (Social Security System) validation
+ * Format: 10 digits (e.g., 12-3456789-0)
+ */
+const sssSchema = z
+  .string()
+  .optional()
+  .refine(
+    (val) => !val || /^\d{10}$/.test(val.replace(/[^\d]/g, '')),
+    'SSS must be 10 digits'
+  );
+
+/**
+ * Philippine Pag-IBIG (HDMF) validation
+ * Format: 12 digits (e.g., 1234-5678-9012)
+ */
+const pagibigSchema = z
+  .string()
+  .optional()
+  .refine(
+    (val) => !val || /^\d{12}$/.test(val.replace(/[^\d]/g, '')),
+    'Pag-IBIG must be 12 digits'
+  );
+
+/**
+ * Philippine mobile number validation
+ * Format: 11 digits starting with 09 (e.g., 09123456789)
+ */
+const contactNumberSchema = z
+  .string()
+  .optional()
+  .refine(
+    (val) => !val || /^09\d{9}$/.test(val.replace(/[^\d]/g, '')),
+    'Contact number must be 11 digits starting with 09'
+  );
 
 /**
  * Schema for adding a new user
@@ -19,11 +66,14 @@ export const addUserSchema = z.object({
   employeeType: EmployeeType,
   companyId: z.string().optional(),
   employeeId: z.string().optional(),
-  contactNumber: z.string().optional(),
-  address: z.string().optional(),
-  tin: z.string().optional(),
-  sss: z.string().optional(),
-  pagibig: z.string().optional(),
+  contactNumber: contactNumberSchema,
+  address: z
+    .string()
+    .min(10, 'Address must be at least 10 characters')
+    .max(250, 'Address must not exceed 250 characters'),
+  tin: tinSchema,
+  sss: sssSchema,
+  pagibig: pagibigSchema,
 });
 
 /**
@@ -37,12 +87,18 @@ export const editUserSchema = z.object({
   password: z
     .string()
     .optional()
-    .refine((val) => !val || val.length >= 6, 'Password must be 6+ chars '),
+    .refine((val) => !val || val.length >= 6, 'Password must be 6+ chars'),
   employeeType: z.enum(['superadmin', 'manager', 'hr', 'regular', 'no-change', '']).optional(),
   employmentStatus: z.enum(['', 'probational', 'regular', 'no-change']).optional(),
-  contactNumber: z.string().optional(),
-  address: z.string().optional(),
-  tin: z.string().optional(),
-  sss: z.string().optional(),
-  pagibig: z.string().optional(),
+  contactNumber: contactNumberSchema,
+  address: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || (val.length >= 10 && val.length <= 250),
+      'Address must be between 10-250 characters if provided'
+    ),
+  tin: tinSchema,
+  sss: sssSchema,
+  pagibig: pagibigSchema,
 });

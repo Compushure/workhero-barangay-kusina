@@ -29,8 +29,9 @@ export async function getTopPlayers(): Promise<ActionResult<LeaderboardPlayer[]>
       return [];
     }
 
-    // Map data and fetch profile pictures for each user
+    // Map data with profile picture URLs (synchronous generation)
     const players: LeaderboardPlayer[] = data.map((user) => {
+      // Get the public URL synchronously without awaiting
       const { data: storageData } = supabase.storage
         .from('employees')
         .getPublicUrl(`${user.user_id}/profile.png`);
@@ -39,7 +40,7 @@ export async function getTopPlayers(): Promise<ActionResult<LeaderboardPlayer[]>
         id: user.user_id,
         name: user.user_name || 'Unknown User',
         points: user.points ?? 0,
-        image: storageData?.publicUrl || '',
+        image: storageData?.publicUrl ?? null,
       };
     });
 

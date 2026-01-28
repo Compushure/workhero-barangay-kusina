@@ -112,100 +112,109 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <WhiteCard className="overflow-hidden border border-border hover:scale-101">
-        <CollapsibleTrigger asChild>
-          <button className="w-full p-4 sm:p-6 flex items-center justify-between text-left cursor-pointer gap-3 ">
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+        <div className="w-full p-4 sm:p-6 flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+            <div
+              className="relative group cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering collapsible
+                handleAvatarClick(e);
+              }}
+              onMouseEnter={() => setIsHoveringAvatar(true)}
+              onMouseLeave={() => setIsHoveringAvatar(false)}
+            >
               <div
-                className="relative group cursor-pointer"
-                onClick={(e) => handleAvatarClick(e)}
-                onMouseEnter={() => setIsHoveringAvatar(true)}
-                onMouseLeave={() => setIsHoveringAvatar(false)}
+                className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 transition-colors ${
+                  isHoveringAvatar ? 'bg-primary/20' : ''
+                }`}
               >
-                <div
-                  className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 transition-colors ${
-                    isHoveringAvatar ? 'bg-primary/20' : ''
-                  }`}
-                >
-                  {previewUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={previewUrl}
-                      alt={`${user.name}'s profile (preview)`}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  ) : hasImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={`${user.id}-${imageKey}`}
-                      src={`${getProfileUrl(user.id)}?t=${imageKey}`}
-                      alt={`${user.name}'s profile`}
-                      className="w-10 h-10 rounded-full object-cover"
-                      onError={() => setHasImage(false)}
-                    />
-                  ) : (
-                    <UserIcon className="h-5 w-5 text-primary" />
-                  )}
-                </div>
-                {isHoveringAvatar && (
-                  <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center ">
-                    <Upload className="h-4 w-4 text-white" />
-                  </div>
+                {previewUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previewUrl}
+                    alt={`${user.name}'s profile (preview)`}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : hasImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={`${user.id}-${imageKey}`}
+                    src={`${getProfileUrl(user.id)}?t=${imageKey}`}
+                    alt={`${user.name}'s profile`}
+                    className="w-10 h-10 rounded-full object-cover"
+                    onError={() => setHasImage(false)}
+                  />
+                ) : (
+                  <UserIcon className="h-5 w-5 text-primary" />
                 )}
               </div>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                hidden
-                onChange={handleFileChange}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="font-semibold truncate">{user.name}</p>
-                  {user.employeeId ? (
-                    <Badge variant="outline" className="hidden sm:inline-flex text-xs">
-                      {user.employeeId}
-                    </Badge>
-                  ) : null}
+              {isHoveringAvatar && (
+                <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center ">
+                  <Upload className="h-4 w-4 text-white" />
                 </div>
-                <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-                <div className="flex gap-2 mt-2 sm:hidden">
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
-                      EMPLOYEE_TYPE_STYLES[user.employeeType]
-                    }`}
-                  >
-                    {user.employeeType}
-                  </span>
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${employmentStatusClass}`}
-                  >
-                    {employmentStatus}
-                  </span>
-                </div>
+              )}
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              hidden
+              onChange={handleFileChange}
+            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <p className="font-semibold truncate">{user.name}</p>
+                {user.employeeId ? (
+                  <Badge variant="outline" className="hidden sm:inline-flex text-xs">
+                    {user.employeeId}
+                  </Badge>
+                ) : null}
               </div>
-              <div className="hidden sm:flex items-center gap-2 shrink-0">
+              <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+              <div className="flex gap-2 mt-2 sm:hidden">
                 <span
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                  className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
                     EMPLOYEE_TYPE_STYLES[user.employeeType]
                   }`}
                 >
                   {user.employeeType}
                 </span>
                 <span
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${employmentStatusClass}`}
+                  className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${employmentStatusClass}`}
                 >
                   {employmentStatus}
                 </span>
               </div>
             </div>
-            <ChevronDown
-              className={`h-5 w-5 text-muted-foreground transition-transform ml-2 shrink-0 ${
-                isOpen ? 'rotate-180' : ''
-              }`}
-            />
-          </button>
-        </CollapsibleTrigger>
+            <div className="hidden sm:flex items-center gap-2 shrink-0">
+              <span
+                className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                  EMPLOYEE_TYPE_STYLES[user.employeeType]
+                }`}
+              >
+                {user.employeeType}
+              </span>
+              <span
+                className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${employmentStatusClass}`}
+              >
+                {employmentStatus}
+              </span>
+            </div>
+          </div>
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              aria-label={isOpen ? 'Collapse user' : 'Expand user'}
+              className="p-2 rounded-full hover:bg-muted transition-colors shrink-0"
+            >
+              <ChevronDown
+                className={`h-5 w-5 text-muted-foreground transition-transform ${
+                  isOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+          </CollapsibleTrigger>
+        </div>
 
         <CollapsibleContent>
           <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-border pt-4 space-y-6">

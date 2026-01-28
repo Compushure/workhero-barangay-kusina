@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 interface LoginFormFieldsProps {
   email: string;
@@ -19,6 +20,7 @@ export function LoginFormFields({
   onPasswordChange,
   error,
 }: LoginFormFieldsProps) {
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="space-y-5">
       {/* Email Field */}
@@ -51,13 +53,24 @@ export function LoginFormFields({
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
           <Input
             id="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             placeholder="Enter your password"
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
-            className="pl-10 bg-input border-border/50 focus:border-primary focus:ring-primary/50 transition-colors"
+            className="pl-10 pr-10 bg-input border-border/50 focus:border-primary focus:ring-primary/50 transition-colors"
             disabled={false}
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showPassword ? (
+              <EyeOff className="w-5 h-5" />
+            ) : (
+              <Eye className="w-5 h-5" />
+            )}
+          </button>
         </div>
       </div>
 
