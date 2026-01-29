@@ -3,6 +3,7 @@ import {
   fetchCurrentAssignedTasksPaginated, // ✅ use only the paginated fetch
   fetchCurrentAssignedEmployeesPaginated, // ✅ new employee-specific fetch
   clearAllTasks,
+  clearAllEmployeeTasks,
   deleteTask,
   updateTaskAssignment,
 } from '@/actions/manager-current-assigned-task';
@@ -47,6 +48,21 @@ export async function handleClearAllTasks(): Promise<boolean> {
   }
 
   toast.success('All tasks cleared');
+  return true;
+}
+
+/**
+ * Clear all tasks for a specific employee
+ */
+export async function handleClearAllEmployeeTasks(employeeId: string): Promise<boolean> {
+  const result = await safeAction<ServerActionResponse<boolean>>(() => clearAllEmployeeTasks(employeeId));
+
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error);
+    return false;
+  }
+
+  toast.success('All employee tasks cleared');
   return true;
 }
 
