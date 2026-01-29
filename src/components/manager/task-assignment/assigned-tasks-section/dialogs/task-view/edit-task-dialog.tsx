@@ -181,7 +181,7 @@ export default function EditTaskDialog({
           <Button
             onClick={handleEditTask}
             disabled={editAssignedEmployees.length === 0 || isProcessing}
-            className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out"
+            className="bg-[#690003] hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
             {isProcessing ? 'Saving...' : 'Confirm'}
           </Button>

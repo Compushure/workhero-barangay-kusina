@@ -73,16 +73,16 @@ export function CurrentAssignedTasks() {
   const memoizedTasks = useMemo(() => tasks || [], [tasks]);
 
   return (
-    <div className="rounded-3xl bg-[#FBF4E8] pl-6 pr-6 pt-6 shadow-sm/25 flex flex-col">
+    <div className="rounded-3xl bg-[#FBF4E8] pl-6 pr-6 pt-6 shadow-sm/50 flex flex-col">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-5">
         <h2 className="text-xl font-bold text-[#690003]">Current Assigned Tasks</h2>
 
         {/* View Toggle */}
-        <div className="flex gap-2 bg-white rounded-xl p-1 border border-gray-300 mt-3 md:mt-0">
+        <div className="flex gap-2 bg-white rounded-xl p-1 shadow-sm/25 mt-3 md:mt-0">
           <button
             onClick={() => handleViewModeChange('task')}
-            className={`flex w-32 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out ${
+            className={`flex w-32 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out shadow-sm/15 ${
               viewMode === 'task' ? 'bg-[#690003] text-white' : 'text-gray-500 hover:bg-gray-200'
             }`}
           >
@@ -91,7 +91,7 @@ export function CurrentAssignedTasks() {
           </button>
           <button
             onClick={() => handleViewModeChange('employee')}
-            className={`flex w-32 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out ${
+            className={`flex w-32 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out shadow-sm/15 ${
               viewMode === 'employee'
                 ? 'bg-[#690003] text-white'
                 : 'text-gray-500 hover:bg-gray-200'
@@ -113,7 +113,7 @@ export function CurrentAssignedTasks() {
             placeholder={viewMode === 'task' ? 'Search tasks...' : 'Search employees...'}
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-full bg-white text-sm focus:outline-none transition-all duration-500 ease-in-out focus:border-[#690003]"
+            className="w-full pl-9 pr-3 py-2 rounded-full bg-white shadow-sm/25 text-sm focus:outline-none transition-all duration-500 ease-in-out focus:border focus:border-[#690003]"
           />
         </div>
 
@@ -130,7 +130,7 @@ export function CurrentAssignedTasks() {
         <Button
           onClick={() => setShowClearConfirm(true)}
           disabled={memoizedTasks.length === 0}
-          className="text-sm px-10 py-2 bg-[#690003] hover:bg-[#b52828] cursor-pointer text-white disabled:opacity-50 transition-all duration-500 ease-in-out"
+          className="text-sm px-10 py-2 bg-[#690003] shadow-sm/25 hover:bg-[#af3b3f] cursor-pointer text-white disabled:opacity-50 transition-all duration-500 ease-in-out"
         >
           Clear All
         </Button>
@@ -140,7 +140,7 @@ export function CurrentAssignedTasks() {
       <div className={`${memoizedTasks.length === 0 ? 'flex-grow-0' : 'flex-1'} space-y-5`}>
         {isLoading ? (
           <div className="text-center py-10">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#690003]"></div>
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#690003] shadow-sm/25"></div>
             <p className="text-gray-500 text-base mt-3">Loading assigned tasks...</p>
           </div>
         ) : isError ? (

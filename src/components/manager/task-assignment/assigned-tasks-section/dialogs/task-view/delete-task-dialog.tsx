@@ -46,7 +46,7 @@ function DeleteTaskDialog({
           <Button
             onClick={handleDeleteTask}
             disabled={deleteTaskMutation.isPending}
-            className="bg-red-600 hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out"
+            className="bg-[#690003] hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
             {deleteTaskMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>

@@ -115,7 +115,7 @@ export function AssignEmployeesDialog({
       <Button
         onClick={() => !disabled && setOpen(true)}
         disabled={disabled}
-        className="bg-white border-2 border-gray-300 text-black cursor-pointer transition-all duration-500 ease-in-out hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="bg-white shadow-sm/25 text-black cursor-pointer transition-all duration-500 ease-in-out hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <div className="flex items-center gap-2">
           <span>{selectedEmployees.length} selected</span>
@@ -137,7 +137,7 @@ export function AssignEmployeesDialog({
               placeholder="Enter in Employee Name or ID"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-full border-2 border-white bg-white shadow-xs/25 focus:outline-none focus:border-2 focus:border-[#690003]"
+              className="w-full pl-10 pr-4 py-2 rounded-full bg-white shadow-sm/25 focus:outline-none focus:border focus:border-[#690003]"
             />
           </div>
 
@@ -145,7 +145,7 @@ export function AssignEmployeesDialog({
           <div className="mb-1">
             <h4 className="text-lg font-bold text-[#690003]">
               Employees Selected{' '}
-              <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-xs/25">
+              <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
                 {selectedEmployees.length}
               </span>
             </h4>
