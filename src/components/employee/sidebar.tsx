@@ -124,7 +124,7 @@ export function Sidebar({
       >
         {/* Rank Widget */}
         <RankWidget 
-          rankData={rankData} 
+          rankData={rankData ?? null} 
           isLoading={isRankLoading} 
           isCollapsed={isCollapsed}
           totalXP={xpResult?.totalXP}
