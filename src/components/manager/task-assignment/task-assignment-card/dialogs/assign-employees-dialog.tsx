@@ -34,13 +34,11 @@ export function AssignEmployeesDialog({
   const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get employees already assigned to any instance of the selected tasks
-  const getDisabledEmployeeIds = () => {
+  const disabledEmployeeIds = useMemo(() => {
     const disabledIds = new Set<string>();
 
     selectedTaskIds.forEach((taskId) => {
       assignedTasks.forEach((assignedTask) => {
-        // If this is an instance of the selected task
         if (assignedTask.taskId === taskId) {
           assignedTask.assignedEmployees.forEach((emp) => {
             disabledIds.add(emp.id);
@@ -50,9 +48,7 @@ export function AssignEmployeesDialog({
     });
 
     return disabledIds;
-  };
-
-  const disabledEmployeeIds = getDisabledEmployeeIds();
+  }, [assignedTasks, selectedTaskIds]);
 
   useEffect(() => {
     async function loadEmployees() {
@@ -63,12 +59,14 @@ export function AssignEmployeesDialog({
     loadEmployees();
   }, []);
 
-  const filteredEmployees = employees.filter((emp) => {
+  const filteredEmployees = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
-    return (
-      emp.name.toLowerCase().includes(searchLower) || emp.empId.toLowerCase().includes(searchLower)
+    return employees.filter(
+      (emp) =>
+        emp.name.toLowerCase().includes(searchLower) ||
+        emp.empId.toLowerCase().includes(searchLower)
     );
-  });
+  }, [employees, searchTerm]);
 
   const allFilteredSelected = useMemo(() => {
     if (filteredEmployees.length === 0) return false;

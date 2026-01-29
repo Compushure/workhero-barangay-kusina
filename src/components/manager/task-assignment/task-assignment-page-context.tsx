@@ -14,7 +14,7 @@ interface TaskAssignmentContextType {
   viewMode: 'task' | 'employee';
   setViewMode: (mode: 'task' | 'employee') => void;
   assignTasks: (filters: SelectedFilters) => void;
-  removeAssignment: (taskId: string, employeeId: string) => void;
+  removeAssignment: (taskId: string, employeeId: string) => Promise<void>;
   deleteTask: (taskId: string) => void;
   editTask: (
     taskId: string,
@@ -72,19 +72,25 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
     }
   };
 
-  const removeAssignment = (taskId: string, employeeId: string) => {
-    setAssignedTasks((prev) =>
-      prev
-        .map((task) =>
-          task.id === taskId
-            ? {
-                ...task,
-                assignedEmployees: task.assignedEmployees.filter((e) => e.id !== employeeId),
-              }
-            : task
-        )
-        .filter((task) => task.assignedEmployees.length > 0)
-    );
+  const removeAssignment = async (taskId: string, employeeId: string) => {
+    // Call server action to delete from database
+    const success = await handleDeleteTask(taskId);
+    
+    if (success) {
+      // Only update local state if server deletion succeeded
+      setAssignedTasks((prev) =>
+        prev
+          .map((task) =>
+            task.id === taskId
+              ? {
+                  ...task,
+                  assignedEmployees: task.assignedEmployees.filter((e) => e.id !== employeeId),
+                }
+              : task
+          )
+          .filter((task) => task.assignedEmployees.length > 0)
+      );
+    }
   };
 
   const deleteTask = async (taskId: string) => {

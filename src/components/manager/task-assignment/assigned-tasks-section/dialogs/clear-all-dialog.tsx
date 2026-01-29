@@ -1,23 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useClearAllTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface ClearAllDialogProps {
-  setShowClearConfirm: (show: boolean) => void, 
-  onClearAll: () => void
+  setShowClearConfirm: (show: boolean) => void
 }
 
-function ClearAllDialog({ setShowClearConfirm, onClearAll } : ClearAllDialogProps) {
-  const [isClearing, setIsClearing] = useState(false);
+function ClearAllDialog({ setShowClearConfirm } : ClearAllDialogProps) {
+  const clearAllMutation = useClearAllTasksMutation();
 
   const handleClearAll = async () => {
-    if (isClearing) return;
-    setIsClearing(true);
-    try {
-      await onClearAll();
-    } finally {
-      setIsClearing(false);
-      setShowClearConfirm(false);
-    }
+    clearAllMutation.mutate(undefined, {
+      onSuccess: () => {
+        setShowClearConfirm(false);
+      },
+    });
   };
 
   return (
@@ -30,18 +26,25 @@ function ClearAllDialog({ setShowClearConfirm, onClearAll } : ClearAllDialogProp
         <div className="flex gap-4 justify-end">
           <Button
             onClick={handleClearAll}
-            disabled={isClearing}
+            disabled={clearAllMutation.isPending}
             className="bg-red-600 hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
-            {isClearing ? 'Clearing...' : 'Clear All'}
+            {clearAllMutation.isPending ? 'Clearing...' : 'Clear All'}
           </Button>
           <Button
             variant="outline"
             onClick={() => setShowClearConfirm(false)}
-            disabled={isClearing}
-            className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+            disabled={clearAllMutation.isPending}
+            className="border-gray-300"
           >
             Cancel
+          </Button>
+          <Button
+            onClick={handleClearAll}
+            disabled={clearAllMutation.isPending}
+            className="bg-[#690003] hover:bg-[#8B0000] text-white"
+          >
+            {clearAllMutation.isPending ? 'Clearing...' : 'Clear All'}
           </Button>
         </div>
       </div>
