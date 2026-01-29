@@ -97,7 +97,7 @@ export function TaskAssignmentCard() {
   };
 
   return (
-    <div className="rounded-3xl bg-[#FBF4E8] p-8 shadow-sm/25">
+    <div className="rounded-3xl bg-[#FBF4E8] p-6 shadow-sm/25">
       <h2 className="mb-8 text-2xl font-bold text-[#690003]">Assign Employees for Task</h2>
 
       <div className="flex flex-wrap gap-4 mb-2">
@@ -131,7 +131,7 @@ export function TaskAssignmentCard() {
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-4 justify-end mt-6">
+      <div className="flex gap-3 justify-end mt-6">
         <Button
           variant="outline"
           onClick={() => setShowClearConfirm(true)}
