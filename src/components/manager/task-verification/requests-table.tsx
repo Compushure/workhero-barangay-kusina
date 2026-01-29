@@ -140,7 +140,7 @@ export function RequestsTable({
 
       {/* Empty State */}
       {requests.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="text-center bg-[#FBF4E8] py-12 text-muted-foreground">
           <p className="text-sm">No requests found</p>
         </div>
       )}

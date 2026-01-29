@@ -31,7 +31,7 @@ export function SortButton({
         <Button
           variant="default"
           size="default"
-          className="bg-[#690003] hover:bg-[#af3b3f] cursor-pointer text-white whitespace-nowrap shadow-md"
+          className="bg-[#690003] hover:bg-[#af3b3f] w-20 cursor-pointer rounded-full text-white whitespace-nowrap shadow-md transition-all duration-500 ease-in-out"
         >
           <ArrowUpDown size={18} />
           Sort
@@ -42,7 +42,7 @@ export function SortButton({
           <DropdownMenuItem
             key={opt.value}
             onClick={() => onSortChange(opt.value)}
-            className={sortBy === opt.value ? 'bg-accent' : ''}
+            className={`cursor-pointer transition-all duration-500 ease-in-out ${sortBy === opt.value ? 'bg-red-100' : ''}`}
           >
             {opt.label}
           </DropdownMenuItem>
