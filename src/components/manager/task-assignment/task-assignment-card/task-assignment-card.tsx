@@ -19,7 +19,7 @@ export function TaskAssignmentCard() {
   const { assignTasks, assignedTasks } = useTaskAssignment();
   const queryClient = useQueryClient();
 
-  const assignedTasksQuery = useGetCurrentAssignedTasksPaginated(1, 1000, 'recently added', '', true);
+  const assignedTasksQuery = useGetCurrentAssignedTasksPaginated(1, 4, 'recently added', '', true);
   const assignedTasksForAssign = assignedTasksQuery.data?.tasks ?? assignedTasks;
 
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);

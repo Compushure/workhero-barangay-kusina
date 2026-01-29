@@ -31,7 +31,7 @@ export function CurrentAssignedTasks() {
     4,
     sortBy,
     debouncedSearchTerm,
-    viewMode === 'task'
+    true
   );
 
   const employeeQuery = useGetCurrentAssignedEmployeesPaginated(
@@ -39,7 +39,7 @@ export function CurrentAssignedTasks() {
     4,
     sortBy,
     debouncedSearchTerm,
-    viewMode === 'employee'
+    true
   );
 
   const isLoading = viewMode === 'task' ? taskQuery.isLoading : employeeQuery.isLoading;
@@ -76,14 +76,14 @@ export function CurrentAssignedTasks() {
     <div className="rounded-3xl bg-[#FBF4E8] pl-6 pr-6 pt-6 shadow-sm/50 flex flex-col">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-5">
-        <h2 className="text-xl font-bold text-[#690003]">Current Assigned Tasks</h2>
+        <h2 className="text-2xl font-bold text-[#690003]">Current Assigned Tasks</h2>
 
         {/* View Toggle */}
         <div className="flex gap-2 bg-white rounded-xl p-1 shadow-sm/25 mt-3 md:mt-0">
           <button
             onClick={() => handleViewModeChange('task')}
-            className={`flex w-32 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out shadow-sm/15 ${
-              viewMode === 'task' ? 'bg-[#690003] text-white' : 'text-gray-500 hover:bg-gray-200'
+            className={`flex w-36 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out ${
+              viewMode === 'task' ? 'bg-[#690003] text-white shadow-sm/15' : 'text-gray-500 hover:bg-gray-200'
             }`}
           >
             <ListTodo size={16} />
@@ -91,9 +91,9 @@ export function CurrentAssignedTasks() {
           </button>
           <button
             onClick={() => handleViewModeChange('employee')}
-            className={`flex w-32 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out shadow-sm/15 ${
+            className={`flex w-36 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out ${
               viewMode === 'employee'
-                ? 'bg-[#690003] text-white'
+                ? 'bg-[#690003] text-white shadow-sm/15'
                 : 'text-gray-500 hover:bg-gray-200'
             }`}
           >
@@ -104,7 +104,11 @@ export function CurrentAssignedTasks() {
       </div>
 
       {/* Controls: Search, Sort, Clear */}
-      <div className="flex flex-col md:flex-row md:items-center justify-end gap-3 mb-5">
+      <section className="flex flex-col md:flex-row md:items-center justify-end gap-3 mb-5">
+        <div className='flex gap-2'>
+          <span>Tasks: {taskQuery.data?.count || 0}</span>
+          <span>Employees: {employeeQuery.data?.count || 0}</span>
+        </div>
         {/* Search */}
         <div className="relative w-full md:w-90">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -134,10 +138,10 @@ export function CurrentAssignedTasks() {
         >
           Clear All
         </Button>
-      </div>
+      </section>
 
       {/* Task/Employee Lists */}
-      <div className={`${memoizedTasks.length === 0 ? 'flex-grow-0' : 'flex-1'} space-y-5`}>
+      <section className={`${memoizedTasks.length === 0 ? 'grow-0' : 'grow'} space-y-5`}>
         {isLoading ? (
           <div className="text-center py-10">
             <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#690003] shadow-sm/25"></div>
@@ -160,11 +164,11 @@ export function CurrentAssignedTasks() {
             sortBy={sortBy}
           />
         )}
-      </div>
+      </section>
 
       {/* Pagination */}
       {memoizedTasks.length > 0 && (
-        <div className="mt-5">
+        <div className="my-5">
           <Pagination totalPages={totalPages} currentPage={page} onPageChange={handlePageChange} />
         </div>
       )}
