@@ -147,7 +147,7 @@ export default function EditTaskDialog({
                       className={`flex items-center gap-3 p-2 rounded ${
                         isDisabled
                           ? 'opacity-50 cursor-not-allowed bg-gray-100'
-                          : 'hover:bg-gray-50 cursor-pointer'
+                          : 'hover:bg-gray-50 cursor-pointer transition-all duration-300 ease-in-out'
                       }`}
                       onClick={() => !isDisabled && toggleEmployee(emp.id)}
                     >

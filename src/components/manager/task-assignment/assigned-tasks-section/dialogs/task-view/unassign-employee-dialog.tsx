@@ -26,7 +26,7 @@ function UnassignEmployeeDialog({
 
   const handleUnassign = async () => {
     if (!showRemoveConfirm) return;
-    
+
     // Use the mutation which will handle cache invalidation
     deleteTaskMutation.mutate(
       { taskId: task.id },
@@ -49,17 +49,9 @@ function UnassignEmployeeDialog({
         </DialogHeader>
         <DialogFooter>
           <Button
-            variant="outline"
-            onClick={() => setShowRemoveConfirm(null)}
-            disabled={deleteTaskMutation.isPending}
-            className="border-gray-300"
-          >
-            Cancel
-          </Button>
-          <Button
             onClick={handleUnassign}
             disabled={deleteTaskMutation.isPending}
-            className="bg-[#690003] hover:bg-[#8B0000] text-white"
+            className="bg-red-600 hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
             {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
           </Button>

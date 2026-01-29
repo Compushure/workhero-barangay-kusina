@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { AssignedEmployee } from "@/types";
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { AssignedEmployee } from '@/types';
 import { useClearAllEmployeeTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface ClearAllTasksDialogProps {
@@ -9,12 +9,16 @@ interface ClearAllTasksDialogProps {
   employee: AssignedEmployee;
 }
 
-function ClearAllTasksDialog({showClearConfirm, setShowClearConfirm, employee } : ClearAllTasksDialogProps) {
+function ClearAllTasksDialog({
+  showClearConfirm,
+  setShowClearConfirm,
+  employee,
+}: ClearAllTasksDialogProps) {
   const clearAllEmployeeTasksMutation = useClearAllEmployeeTasksMutation();
 
   const handleClearAllTasks = async () => {
     if (!showClearConfirm) return;
-    
+
     clearAllEmployeeTasksMutation.mutate(
       { employeeId: showClearConfirm },
       {
@@ -50,16 +54,9 @@ function ClearAllTasksDialog({showClearConfirm, setShowClearConfirm, employee } 
               variant="outline"
               onClick={() => setShowClearConfirm(null)}
               disabled={clearAllEmployeeTasksMutation.isPending}
-              className="border-gray-300"
+              className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
             >
               Cancel
-            </Button>
-            <Button
-              onClick={handleClearAllTasks}
-              disabled={clearAllEmployeeTasksMutation.isPending}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              {clearAllEmployeeTasksMutation.isPending ? 'Clearing...' : 'Clear All'}
             </Button>
           </div>
         </div>
