@@ -17,6 +17,7 @@ import { useSubmitCart } from '@/hooks/tanstack/mutations/cartMutations';
 
 interface CartDrawerProps {
   userPoints: number;
+  deductedPoints?: number;
 }
 
 function formatNumber(num: number): string {
@@ -62,9 +63,7 @@ function CartItemRow({
       {/* Item Details */}
       <div className="flex-1 min-w-0">
         <h4 className="font-semibold text-[#690003] truncate">{item.reward.name}</h4>
-        <p className="text-sm text-[#7a3d3d]">
-          {formatNumber(item.reward.pointsCost)} pts each
-        </p>
+        <p className="text-sm text-[#7a3d3d]">{formatNumber(item.reward.pointsCost)} pts each</p>
         {!canAfford && (
           <p className="text-xs text-red-600 mt-1">Insufficient points for this item</p>
         )}
@@ -111,7 +110,7 @@ function CartItemRow({
   );
 }
 
-export function CartDrawer({ userPoints }: CartDrawerProps) {
+export function CartDrawer({ userPoints, deductedPoints = 0 }: CartDrawerProps) {
   const { items, isOpen, setIsOpen, updateQuantity, removeItem, clearCart, getTotalPoints } =
     useCartStore();
   const submitCartMutation = useSubmitCart();
@@ -149,8 +148,13 @@ export function CartDrawer({ userPoints }: CartDrawerProps) {
         {/* Points Display */}
         <div className="flex items-center justify-between bg-[#fff8f5] rounded-lg p-4 border border-[#690003]/20">
           <div>
-            <p className="text-sm text-[#7a3d3d]">Your Available Points</p>
+            <p className="text-sm text-[#7a3d3d]">Available Points</p>
             <p className="text-2xl font-bold text-[#690003]">{formatNumber(userPoints)}</p>
+            {deductedPoints > 0 && (
+              <p className="text-xs text-orange-600 mt-1">
+                Pending: {formatNumber(deductedPoints)} pts
+              </p>
+            )}
           </div>
           {hasItems && (
             <div className="text-right">

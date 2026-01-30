@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import {
   ServerActionResponse,
   AddRewardInput,
@@ -197,8 +198,8 @@ export async function acceptRedemptionRequestAction(
       return { error: 'Unauthorized: Admin not authenticated' };
     }
 
-    // Fetch the redemption request with user and reward details
-    const { data: request, error: fetchError } = await supabase
+    // Fetch the redemption request with user and reward details (admin client: User join not readable by authenticated)
+    const { data: request, error: fetchError } = await supabaseAdmin
       .from('RewardRequest')
       .select(
         `
@@ -211,7 +212,7 @@ export async function acceptRedemptionRequestAction(
           points_cost
         ),
         User:user_id (
-          points
+          deducted_points
         )
       `
       )
@@ -231,17 +232,10 @@ export async function acceptRedemptionRequestAction(
     const user = Array.isArray(request.User) ? request.User[0] : request.User;
     const pointsCostPerItem = reward?.points_cost || 0;
     const totalPointsCost = pointsCostPerItem * quantity;
-    const userPoints = user?.points || 0;
-
-    // Check if user has sufficient points
-    if (userPoints < totalPointsCost) {
-      return {
-        error: `User has insufficient points for this redemption. Needs ${totalPointsCost} but has ${userPoints}`,
-      };
-    }
+    const currentDeductedPoints = user?.deducted_points || 0;
 
     // Update request status to approved
-    const { error: updateRequestError } = await supabase
+    const { error: updateRequestError } = await supabaseAdmin
       .from('RewardRequest')
       .update({
         status: 'approved',
@@ -254,22 +248,22 @@ export async function acceptRedemptionRequestAction(
       return { error: `Failed to approve request: ${updateRequestError.message}` };
     }
 
-    // Deduct points from user
-    const { error: deductPointsError } = await supabase
+    // Clear deducted points (admin client: User table not writable by authenticated)
+    const { error: clearDeductedPointsError } = await supabaseAdmin
       .from('User')
       .update({
-        points: userPoints - totalPointsCost,
+        deducted_points: currentDeductedPoints - totalPointsCost,
       })
       .eq('id', request.user_id);
 
-    if (deductPointsError) {
-      console.error('Error deducting points:', deductPointsError);
+    if (clearDeductedPointsError) {
+      console.error('Error clearing deducted points:', clearDeductedPointsError);
       // Try to revert the approval
-      await supabase
+      await supabaseAdmin
         .from('RewardRequest')
         .update({ status: 'pending', approved_by: null })
         .eq('id', requestId);
-      return { error: 'Failed to deduct points. Request approval reverted.' };
+      return { error: 'Failed to clear deducted points. Request approval reverted.' };
     }
 
     return { error: null };
@@ -306,10 +300,25 @@ export async function declineRedemptionRequestAction(
       return { error: 'Unauthorized: Admin not authenticated' };
     }
 
-    // Check if request exists and is pending
-    const { data: request, error: fetchError } = await supabase
+    // Fetch the redemption request with user and reward details (admin client: User join not readable by authenticated)
+    const { data: request, error: fetchError } = await supabaseAdmin
       .from('RewardRequest')
-      .select('id, status')
+      .select(
+        `
+        id,
+        user_id,
+        reward_id,
+        quantity,
+        status,
+        Reward:reward_id (
+          points_cost
+        ),
+        User:user_id (
+          points,
+          deducted_points
+        )
+      `
+      )
       .eq('id', requestId)
       .single();
 
@@ -321,8 +330,16 @@ export async function declineRedemptionRequestAction(
       return { error: 'This request has already been processed' };
     }
 
+    const quantity = request.quantity || 1;
+    const reward = Array.isArray(request.Reward) ? request.Reward[0] : request.Reward;
+    const user = Array.isArray(request.User) ? request.User[0] : request.User;
+    const pointsCostPerItem = reward?.points_cost || 0;
+    const totalPointsCost = pointsCostPerItem * quantity;
+    const currentPoints = user?.points || 0;
+    const currentDeductedPoints = user?.deducted_points || 0;
+
     // Update request status to rejected
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('RewardRequest')
       .update({
         status: 'rejected',
@@ -333,6 +350,25 @@ export async function declineRedemptionRequestAction(
     if (updateError) {
       console.error('Error declining redemption request:', updateError);
       return { error: `Failed to decline request: ${updateError.message}` };
+    }
+
+    // Return points to user (admin client: User table not writable by authenticated)
+    const { error: returnPointsError } = await supabaseAdmin
+      .from('User')
+      .update({
+        points: currentPoints + totalPointsCost,
+        deducted_points: currentDeductedPoints - totalPointsCost,
+      })
+      .eq('id', request.user_id);
+
+    if (returnPointsError) {
+      console.error('Error returning points:', returnPointsError);
+      // Try to revert the rejection
+      await supabaseAdmin
+        .from('RewardRequest')
+        .update({ status: 'pending', approved_by: null })
+        .eq('id', requestId);
+      return { error: 'Failed to return points. Request rejection reverted.' };
     }
 
     return { error: null };
@@ -393,10 +429,10 @@ export async function createRedemptionRequestAction(
       return { error: 'Quantity must be at least 1' };
     }
 
-    // Fetch user's current points
-    const { data: userData, error: userDataError } = await supabase
+    // Fetch user's current points and deducted_points (admin client: User table not readable by authenticated)
+    const { data: userData, error: userDataError } = await supabaseAdmin
       .from('User')
-      .select('points')
+      .select('points, deducted_points')
       .eq('id', user.id)
       .single();
 
@@ -405,10 +441,25 @@ export async function createRedemptionRequestAction(
     }
 
     const userPoints = userData.points || 0;
+    const currentDeductedPoints = userData.deducted_points || 0;
     const totalCost = reward.points_cost * quantity;
 
     if (userPoints < totalCost) {
       return { error: `Insufficient points. You need ${totalCost} points but have ${userPoints}` };
+    }
+
+    // Deduct points immediately and add to deducted_points (admin client: User table not writable by authenticated)
+    const { error: updatePointsError } = await supabaseAdmin
+      .from('User')
+      .update({
+        points: userPoints - totalCost,
+        deducted_points: currentDeductedPoints + totalCost,
+      })
+      .eq('id', user.id);
+
+    if (updatePointsError) {
+      console.error('Error deducting points:', updatePointsError);
+      return { error: `Failed to deduct points: ${updatePointsError.message}` };
     }
 
     // Insert redemption request
@@ -422,6 +473,14 @@ export async function createRedemptionRequestAction(
 
     if (insertError) {
       console.error('Error creating redemption request:', insertError);
+      // Rollback points deduction
+      await supabaseAdmin
+        .from('User')
+        .update({
+          points: userPoints,
+          deducted_points: currentDeductedPoints,
+        })
+        .eq('id', user.id);
       return { error: `Failed to create redemption request: ${insertError.message}` };
     }
 

@@ -15,14 +15,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import {
-  ShoppingCart,
-  Loader2,
-  Minus,
-  Plus,
-  Check,
-  ImageIcon,
-} from 'lucide-react';
+import { ShoppingCart, Loader2, Minus, Plus, Check, ImageIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useCartStore } from '@/store/cartStore';
 import { CartDrawer, CartButton } from '@/components/employee';
@@ -106,11 +99,11 @@ function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCardProps) 
         inCart ? 'ring-2 ring-[#690003]/40' : ''
       }`}
     >
-      <CardHeader className="bg-gradient-to-br from-[#fff8f5] to-[#fbeaea] pb-4">
+      <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-3">
             {/* Item Image */}
-            <div className="h-12 w-12 bg-[#f2e1c9] rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+            <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
               {reward.imageUrl && !imageError ? (
                 <img
                   src={reward.imageUrl}
@@ -119,23 +112,20 @@ function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCardProps) 
                   onError={() => setImageError(true)}
                 />
               ) : (
-                <ImageIcon className="h-5 w-5 text-[#730202]/40" />
+                <ImageIcon className="h-5 w-5 text-gray-400" />
               )}
             </div>
-            <CardTitle className="text-xl text-[#690003]">{reward.name}</CardTitle>
+            <CardTitle className="text-xl text-gray-900">{reward.name}</CardTitle>
           </div>
           <div className="flex flex-col items-end gap-1">
             {inCart && (
-              <Badge className="bg-[#690003] text-white text-xs">
+              <Badge className="bg-gray-700 text-white text-xs">
                 <Check className="h-3 w-3 mr-1" />
                 In Cart
               </Badge>
             )}
             {reward.quantity !== undefined && reward.quantity <= 10 && reward.quantity > 0 && (
-              <Badge
-                variant="outline"
-                className="bg-yellow-100 text-yellow-800 border-yellow-300"
-              >
+              <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
                 Only {reward.quantity} left
               </Badge>
             )}
@@ -147,7 +137,7 @@ function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCardProps) 
           </div>
         </div>
         {reward.category && (
-          <CardDescription className="text-[#7a3d3d]">{reward.category}</CardDescription>
+          <CardDescription className="text-gray-600">{reward.category}</CardDescription>
         )}
       </CardHeader>
       <CardContent className="pt-6">
@@ -166,15 +156,18 @@ function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCardProps) 
             </div>
           )}
 
-          {/* Quantity Selector */}
+          {/* Quantity Selector — disabled when item is in cart (edit in cart drawer) */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-[#5a2a2a]">Quantity</label>
-            <div className="flex items-center gap-3">
+            <div
+              className={`flex items-center gap-3 ${inCart ? 'pointer-events-none opacity-60' : ''}`}
+              aria-disabled={inCart}
+            >
               <Button
                 variant="outline"
                 size="icon"
                 onClick={handleDecrementQuantity}
-                disabled={displayQuantity <= 1 || isOutOfStock}
+                disabled={displayQuantity <= 1 || isOutOfStock || inCart}
                 className="h-9 w-9 border-[#690003] text-[#690003] hover:bg-[#fbeaea]"
               >
                 <Minus className="h-4 w-4" />
@@ -185,14 +178,14 @@ function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCardProps) 
                 max={maxQuantity}
                 value={displayQuantity}
                 onChange={(e) => handleQuantityChange(e.target.value)}
-                disabled={isOutOfStock}
+                disabled={isOutOfStock || inCart}
                 className="h-9 w-16 text-center border-[#690003] focus-visible:ring-[#690003]"
               />
               <Button
                 variant="outline"
                 size="icon"
                 onClick={handleIncrementQuantity}
-                disabled={displayQuantity >= maxQuantity || isOutOfStock}
+                disabled={displayQuantity >= maxQuantity || isOutOfStock || inCart}
                 className="h-9 w-9 border-[#690003] text-[#690003] hover:bg-[#fbeaea]"
               >
                 <Plus className="h-4 w-4" />
@@ -209,7 +202,7 @@ function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCardProps) 
           </div>
         </div>
       </CardContent>
-      <CardFooter className="bg-[#fff8f5] pt-4">
+      <CardFooter>
         {inCart ? (
           <div className="w-full flex gap-2">
             <Button
@@ -251,21 +244,14 @@ function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCardProps) 
 
 export default function EmployeeMercadoPage() {
   // Fetch active rewards
-  const {
-    data: allRewards = [],
-    isLoading: rewardsLoading,
-    error: rewardsError,
-  } = useGetRewards();
-  const activeRewards = useMemo(
-    () => allRewards.filter((reward) => reward.isActive),
-    [allRewards]
-  );
+  const { data: allRewards = [], isLoading: rewardsLoading, error: rewardsError } = useGetRewards();
+  const activeRewards = useMemo(() => allRewards.filter((reward) => reward.isActive), [allRewards]);
 
   // Fetch user's pending redemption requests
   const { data: pendingRequests = [], isLoading: requestsLoading } =
     useGetMyRedemptionRequests('pending');
 
-  // Fetch user's current points
+  // Fetch user's current points and deducted points
   const { data: pointsData, isLoading: pointsLoading } = useQuery({
     queryKey: ['employeePoints'],
     queryFn: async () => {
@@ -277,12 +263,8 @@ export default function EmployeeMercadoPage() {
     },
   });
 
-  const userPoints = pointsData ?? 0;
-
-  // Cart state
-  const { getTotalPoints, getTotalItems } = useCartStore();
-  const cartTotalPoints = getTotalPoints();
-  const cartTotalItems = getTotalItems();
+  const userPoints = pointsData?.points ?? 0;
+  const deductedPoints = pointsData?.deductedPoints ?? 0;
 
   // Create a set of reward IDs with pending requests for quick lookup
   const pendingRewardIds = useMemo(
@@ -330,20 +312,19 @@ export default function EmployeeMercadoPage() {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              {/* Cart Summary */}
-              {cartTotalItems > 0 && (
-                <div className="bg-white rounded-lg shadow-md px-4 py-3 border border-[#690003]/20">
-                  <p className="text-xs text-[#7a3d3d] font-medium">Cart Total</p>
-                  <p className="text-lg font-bold text-[#690003]">
-                    {formatNumber(cartTotalPoints)} pts
-                  </p>
-                  <p className="text-xs text-[#7a3d3d]">{cartTotalItems} item(s)</p>
-                </div>
-              )}
-              {/* Points Display */}
-              <div className="bg-white rounded-lg shadow-md px-6 py-4 border-2 border-[#690003]">
-                <p className="text-sm text-[#7a3d3d] font-medium">Your Points</p>
-                <p className="text-3xl font-bold text-[#690003]">{formatNumber(userPoints)}</p>
+              {/* Cart Button */}
+              <CartButton variant="inline" />
+              {/* Points Display — same height as cart button (h-9) */}
+              <div className="bg-white rounded-lg shadow-md h-9 px-4 border-2 border-[#690003] flex items-center gap-2">
+                <span className="text-xs text-[#7a3d3d] font-medium whitespace-nowrap">
+                  Available Points
+                </span>
+                <span className="text-lg font-bold text-[#690003]">{formatNumber(userPoints)}</span>
+                {deductedPoints > 0 && (
+                  <span className="text-xs text-orange-600 whitespace-nowrap">
+                    Pending: {formatNumber(deductedPoints)}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -368,11 +349,8 @@ export default function EmployeeMercadoPage() {
         )}
       </div>
 
-      {/* Floating Cart Button */}
-      <CartButton variant="floating" />
-
       {/* Cart Drawer */}
-      <CartDrawer userPoints={userPoints} />
+      <CartDrawer userPoints={userPoints} deductedPoints={deductedPoints} />
     </div>
   );
 }
