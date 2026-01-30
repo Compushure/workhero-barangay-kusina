@@ -26,7 +26,7 @@ export function CartButton({ variant = 'floating', className = '' }: CartButtonP
           <ShoppingCart className="h-6 w-6" />
           {hasItems && (
             <Badge className="absolute -top-3 -right-3 h-5 min-w-5 flex items-center justify-center p-0 bg-yellow-500 text-[#690003] text-xs font-bold border-2 border-white">
-              {totalItems > 99 ? '99+' : totalItems}
+              {totalItems > MAX_BADGE_COUNT ? `${MAX_BADGE_COUNT}+` : totalItems}
             </Badge>
           )}
         </div>
