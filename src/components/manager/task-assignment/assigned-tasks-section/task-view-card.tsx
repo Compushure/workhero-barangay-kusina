@@ -106,14 +106,14 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   };
 
   return (
-    <div className="rounded-2xl bg-[#FAFAFA] p-6 shadow-sm/25">
+    <div className="rounded-xl bg-[#FAFAFA] p-4 shadow-sm/25">
       {/* Header */}
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex justify-between items-start mb-4">
         <div className="flex-1 ">
-          <div className="flex items-center gap-3 mb-1">
-            <h3 className="text-xl font-bold text-[#690003] mb-1">{task.taskName}</h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-bold text-[#690003]">{task.taskName}</h3>
           </div>
-          <p className="text-sm text-gray-500 mb-3">{task.taskType}</p>
+          <p className="text-sm text-gray-500 mb-2">{task.taskType}</p>
           <div className="flex gap-6 text-sm text-black">
             <span>
               {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}

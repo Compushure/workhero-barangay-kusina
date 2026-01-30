@@ -70,7 +70,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {employees.map((employee) => {
         const isExpanded = expandedEmployees.has(employee.id);
         const displayedTasks = isExpanded
@@ -79,19 +79,19 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
         const hiddenCount = Math.max(0, employee.assignedTasks.length - 2);
 
         return (
-          <div key={employee.id} className="rounded-2xl bg-[#FAFAFA] p-6 shadow-sm/25">
+          <div key={employee.id} className="rounded-xl bg-[#FAFAFA] p-4 shadow-sm/25">
             {/* Employee Details */}
-            <div className="flex justify-between items-start mb-6 w-full">
-              <div className="w-[30%]">
-                <h3 className="text-xl font-bold text-[#690003]">{employee.name}</h3>
-                <p className="text-sm text-gray-600">{employee.empId}</p>
+            <div className="flex justify-between items-start w-200px">
+              <div className="w-[25%]">
+                <h3 className="text-lg font-bold text-[#690003]">{employee.name}</h3>
+                <p className="text-sm text-gray-500">{employee.empId}</p>
                 {employee.tenure && <p className="text-sm text-gray-500">{employee.tenure}</p>}
               </div>
 
               {/* Assigned Tasks */}
-              <div className="flex flex-col pl-8 pr-4 w-full">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-bold text-[#690003]">
+              <div className="flex flex-col w-190">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-md font-bold text-[#690003]">
                     Current Tasks{' '}
                     <span className="bg-gray-300 text-gray-700 px-2 py-1 rounded-full text-sm ml-2">
                       {employee.assignedTasks.length}
@@ -100,11 +100,11 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
                   {hiddenCount > 0 && (
                     <button
                       onClick={() => toggleEmployeeExpand(employee.id)}
-                      className="text-[#690003] font-medium flex items-center gap-1 hover:underline"
+                      className="text-[#690003] text-sm font-medium flex items-center gap-1 hover:underline transition-all duration-500 ease-in-out cursor-pointer"
                     >
                       See All{' '}
                       <ChevronDown
-                        className={`w-4 h-4 transition ${isExpanded ? 'rotate-180' : ''}`}
+                        className={`w-4 h-4 transition-all duration-500 ease-in-out cursor-pointer ${isExpanded ? 'rotate-180 transition-all duration-500 ease-in-out cursor-pointer' : ''}`}
                       />
                     </button>
                   )}
@@ -121,20 +121,18 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
                     return (
                       <div
                         key={task.id}
-                        className="flex items-center gap-2 bg-white px-4 py-3 rounded-2xl border-2 border-gray-300 h-full"
+                        className="flex items-center gap-2 shadow-sm/25 bg-white px-4 pb-2 pt-1 rounded-lg border border-gray-300 h-full"
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-black truncate">
+                          <p className="font-semibold text-black truncate mb-1">
                             {task.taskName} ({completedOrders} / {task.maxOrders})
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 mb-1">
                             {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
                           </p>
                           <div className="flex gap-2 mt-1">
-                            <span className="text-xs text-black font-semibold">
-                              {task.points}pts
-                            </span>
-                            <span className="text-xs text-black font-semibold">XP {task.xp}</span>
+                            <span className="text-xs text-black">{task.points}pts</span>
+                            <span className="text-xs text-black">XP {task.xp}</span>
                           </div>
                         </div>
                         <button

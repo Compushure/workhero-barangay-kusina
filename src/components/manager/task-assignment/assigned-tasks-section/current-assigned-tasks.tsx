@@ -73,7 +73,7 @@ export function CurrentAssignedTasks() {
   const memoizedTasks = useMemo(() => tasks || [], [tasks]);
 
   return (
-    <div className="rounded-3xl bg-[#FBF4E8] pl-6 pr-6 pt-6 shadow-sm/50 flex flex-col">
+    <div className="rounded-xl bg-[#FBF4E8] pl-4 pr-4 pt-4 shadow-sm/50 flex flex-col">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-5">
         <h2 className="text-xl font-bold text-[#690003]">Current Assigned Tasks</h2>
@@ -137,7 +137,7 @@ export function CurrentAssignedTasks() {
       </div>
 
       {/* Task/Employee Lists */}
-      <div className={`${memoizedTasks.length === 0 ? 'flex-grow-0' : 'flex-1'} space-y-5`}>
+      <div className={`${memoizedTasks.length === 0 ? 'grow-0' : 'flex-1'} space-y-4`}>
         {isLoading ? (
           <div className="text-center py-10">
             <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#690003] shadow-sm/25"></div>
@@ -164,7 +164,7 @@ export function CurrentAssignedTasks() {
 
       {/* Pagination */}
       {memoizedTasks.length > 0 && (
-        <div className="mt-5">
+        <div className="mt-1 mb-4">
           <Pagination totalPages={totalPages} currentPage={page} onPageChange={handlePageChange} />
         </div>
       )}
