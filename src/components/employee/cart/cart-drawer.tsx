@@ -33,7 +33,7 @@ function CartItemRow({
   onRemove: (rewardId: string) => void;
 }) {
   const [imageError, setImageError] = useState(false);
-  const maxQuantity = item.reward.redeemingLimit || 99;
+  const maxQuantity = item.reward.redeemingLimit || MAX_REWARD_QUANTITY;
   const itemTotal = item.reward.pointsCost * item.quantity;
   const canAfford = userPoints >= itemTotal;
 
