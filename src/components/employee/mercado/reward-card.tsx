@@ -82,11 +82,6 @@ export function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCard
                 In Cart
               </Badge>
             )}
-            {reward.quantity !== undefined && reward.quantity <= 10 && reward.quantity > 0 && (
-              <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
-                Only {reward.quantity} left
-              </Badge>
-            )}
             {isOutOfStock && (
               <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-300">
                 Out of Stock
