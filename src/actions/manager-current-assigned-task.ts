@@ -61,6 +61,7 @@ export async function fetchCurrentAssignedTasksPaginated(
     .select(
       'status, kpitask_id, category_id, category_name, category_description, category_points, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
     )
+    .eq('status', 'assigned');
     // Only include currently assigned tasks
     
 
@@ -219,7 +220,8 @@ export async function fetchCurrentAssignedEmployeesPaginated(
       'status, kpitask_id, category_id, category_name, category_description, category_points, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
     )
     // Only include employees with currently assigned tasks
-    .not('assigned_to', 'is', null);
+    .not('assigned_to', 'is', null)
+    .eq('status', 'assigned');
 
   // Apply search filter if provided (search by employee name or employee ID)
   if (searchTerm && searchTerm.trim()) {
@@ -517,4 +519,3 @@ export async function updateTaskAssignment(
     return { error: error.message || 'Failed to update task assignment', data: undefined };
   }
 }
-
