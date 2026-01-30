@@ -42,7 +42,7 @@ export function useGetCurrentAssignedTasksPaginated(
   searchTerm: string = '',
   enabled: boolean = true
 ): UseQueryResult<
-  { tasks: AssignedTask[]; count: number; totalPages: number },
+  { tasks: AssignedTask[]; count: number; totalPages: number; employeeCount: number },
   Error
 > {
   return useQuery({
@@ -61,7 +61,7 @@ export function useGetCurrentAssignedTasksPaginated(
     retry: 2,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<
-    { tasks: AssignedTask[]; count: number; totalPages: number },
+    { tasks: AssignedTask[]; count: number; totalPages: number; employeeCount: number },
     Error
   >;
 }
@@ -82,7 +82,7 @@ export function useGetCurrentAssignedEmployeesPaginated(
   searchTerm: string = '',
   enabled: boolean = true
 ): UseQueryResult<
-  { tasks: AssignedTask[]; count: number; totalPages: number },
+  { tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number },
   Error
 > {
   return useQuery({
@@ -101,7 +101,7 @@ export function useGetCurrentAssignedEmployeesPaginated(
     retry: 2,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<
-    { tasks: AssignedTask[]; count: number; totalPages: number },
+    { tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number },
     Error
   >;
 }

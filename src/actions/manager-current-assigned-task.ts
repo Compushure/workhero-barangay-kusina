@@ -21,6 +21,7 @@ export async function fetchCurrentAssignedTasksPaginated(
     data: AssignedTask[];
     count: number;
     totalPages: number;
+    employeeCount: number;
   }>
 > {
   const supabase = await createClient();
@@ -133,6 +134,14 @@ export async function fetchCurrentAssignedTasksPaginated(
 
   // Convert to array and maintain sort order
   const allTasks = Array.from(taskGroups.values());
+
+  const uniqueEmployeeIds = new Set<string>();
+  allTasks.forEach((task) => {
+    (task.assignedEmployees ?? []).forEach((emp) => {
+      if (emp.id) uniqueEmployeeIds.add(emp.id);
+    });
+  });
+  const employeeCount = uniqueEmployeeIds.size;
   
   // Apply final sorting based on the sort key to maintain order
   allTasks.sort((a, b) => {
@@ -160,6 +169,7 @@ export async function fetchCurrentAssignedTasksPaginated(
       data: finalTasks,
       count: totalCount,
       totalPages,
+      employeeCount,
     },
   };
 }
@@ -182,6 +192,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
     data: AssignedTask[];
     count: number;
     totalPages: number;
+    taskCount: number;
   }>
 > {
   const supabase = await createClient();
@@ -232,6 +243,15 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   if (error) {
     return { error: 'Failed to fetch assigned tasks: ' + error.message, data: undefined };
   }
+
+  const uniqueTaskKeys = new Set<string>();
+  (allSortedData ?? []).forEach((row: any) => {
+    if (!row.assigned_to) return;
+    uniqueTaskKeys.add(
+      `${row.category_id}-${row.kpitask_created_at}-${row.k_deadline_date}-${row.max_orders}`
+    );
+  });
+  const taskCount = uniqueTaskKeys.size;
 
   // Group assignments by employee to get their latest task date and sort key
   const employeeGroups = new Map<string, {
@@ -298,6 +318,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
         data: [],
         count: totalCount,
         totalPages,
+        taskCount,
       },
     };
   }
@@ -375,6 +396,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
       data: result,
       count: totalCount,
       totalPages,
+      taskCount,
     },
   };
 }

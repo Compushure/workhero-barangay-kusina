@@ -18,14 +18,19 @@ export async function handleFetchCurrentAssignedTasksPaginated(
   pageSize: number = 4,
   sortBy: string = 'recently added',
   searchTerm: string = ''
-): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number }> {
+): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number; employeeCount: number }> {
   const result = await safeAction<
-    ServerActionResponse<{ data: AssignedTask[]; count: number; totalPages: number }>
+    ServerActionResponse<{
+      data: AssignedTask[];
+      count: number;
+      totalPages: number;
+      employeeCount: number;
+    }>
   >(() => fetchCurrentAssignedTasksPaginated(page, pageSize, sortBy, searchTerm));
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
-    return { tasks: [], count: 0, totalPages: 0 };
+    return { tasks: [], count: 0, totalPages: 0, employeeCount: 0 };
   }
 
   const payload = result.data?.data;
@@ -33,6 +38,7 @@ export async function handleFetchCurrentAssignedTasksPaginated(
     tasks: payload?.data ?? [],
     count: payload?.count ?? 0,
     totalPages: payload?.totalPages ?? 0,
+    employeeCount: payload?.employeeCount ?? 0,
   };
 }
 
@@ -89,14 +95,14 @@ export async function handleFetchCurrentAssignedEmployeesPaginated(
   pageSize: number = 4,
   sortBy: string = 'recently added',
   searchTerm: string = ''
-): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number }> {
+): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number }> {
   const result = await safeAction<
-    ServerActionResponse<{ data: AssignedTask[]; count: number; totalPages: number }>
+    ServerActionResponse<{ data: AssignedTask[]; count: number; totalPages: number; taskCount: number }>
   >(() => fetchCurrentAssignedEmployeesPaginated(page, pageSize, sortBy, searchTerm));
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
-    return { tasks: [], count: 0, totalPages: 0 };
+    return { tasks: [], count: 0, totalPages: 0, taskCount: 0 };
   }
 
   const payload = result.data?.data;
@@ -104,6 +110,7 @@ export async function handleFetchCurrentAssignedEmployeesPaginated(
     tasks: payload?.data ?? [],
     count: payload?.count ?? 0,
     totalPages: payload?.totalPages ?? 0,
+    taskCount: payload?.taskCount ?? 0,
   };
 }
 

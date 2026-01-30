@@ -49,6 +49,10 @@ export function CurrentAssignedTasks() {
   const tasks = data?.tasks || [];
   const totalPages = data?.totalPages || 1;
 
+  const totalTasksCount = viewMode === 'task' ? taskQuery.data?.count : employeeQuery.data?.taskCount;
+  const totalEmployeesCount =
+    viewMode === 'employee' ? employeeQuery.data?.count : taskQuery.data?.employeeCount;
+
   const handleViewModeChange = (newMode: 'task' | 'employee') => {
     setViewMode(newMode);
     setSortBy('recently added');
@@ -104,40 +108,53 @@ export function CurrentAssignedTasks() {
       </div>
 
       {/* Controls: Search, Sort, Clear */}
-      <section className="flex flex-col md:flex-row md:items-center justify-end gap-3 mb-5">
-        <div className='flex gap-2'>
-          <span>Tasks: {taskQuery.data?.count || 0}</span>
-          <span>Employees: {employeeQuery.data?.count || 0}</span>
+      <section className="flex flex-col md:flex-row md:items-center justify-between mb-5">
+        <div className='flex gap-4 text-lg font-bold text-[#690003] pl-2'>
+          <h5 className="">
+              Tasks{' '}
+              <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+                {totalTasksCount ?? 0}
+              </span>
+          </h5>
+          <h5 className="">
+              Employees{' '}
+              <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+                {totalEmployeesCount ?? 0}
+              </span>
+          </h5>
         </div>
-        {/* Search */}
-        <div className="relative w-full md:w-90">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
-            type="text"
-            placeholder={viewMode === 'task' ? 'Search tasks...' : 'Search employees...'}
-            value={searchTerm}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-full bg-white shadow-sm/25 text-sm focus:outline-none transition-all duration-500 ease-in-out focus:border focus:border-[#690003]"
-          />
-        </div>
+        
+        <div className='flex gap-3'>
+          {/* Search */}
+          <div className="relative w-full md:w-90">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder={viewMode === 'task' ? 'Search tasks' : 'Search employees by name or ID'}
+              value={searchTerm}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 rounded-full bg-white shadow-sm/25 text-sm focus:outline-none transition-all duration-500 ease-in-out focus:border focus:border-[#690003]"
+            />
+          </div>
 
-        {/* Sort Bar */}
-        <div className="">
-          {viewMode === 'task' ? (
-            <TaskSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
-          ) : (
-            <EmployeeSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
-          )}
-        </div>
+          {/* Sort Bar */}
+          <div className="">
+            {viewMode === 'task' ? (
+              <TaskSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
+            ) : (
+              <EmployeeSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
+            )}
+          </div>
 
-        {/* Clear All */}
-        <Button
-          onClick={() => setShowClearConfirm(true)}
-          disabled={memoizedTasks.length === 0}
-          className="text-sm px-10 py-2 bg-[#690003] shadow-sm/25 hover:bg-[#af3b3f] cursor-pointer text-white disabled:opacity-50 transition-all duration-500 ease-in-out"
-        >
-          Clear All
-        </Button>
+          {/* Clear All */}
+          <Button
+            onClick={() => setShowClearConfirm(true)}
+            disabled={memoizedTasks.length === 0}
+            className="text-sm px-10 py-2 bg-[#690003] shadow-sm/25 hover:bg-red-500 cursor-pointer text-white disabled:opacity-50 transition-all duration-500 ease-in-out"
+          >
+            Clear All
+          </Button>
+        </div>
       </section>
 
       {/* Task/Employee Lists */}

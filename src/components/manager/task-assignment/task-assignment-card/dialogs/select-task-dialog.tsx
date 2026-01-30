@@ -140,7 +140,7 @@ export function SelectTasksDialog({
           </DialogHeader>
 
           {/* Search and Filter */}
-          <div className="flex gap-4">
+          <div className="flex gap-4 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -166,15 +166,7 @@ export function SelectTasksDialog({
             </select>
           </div>
 
-          {/* Tasks Selected Badge */}
-          <div>
-            <h4 className="text-lg font-bold text-[#690003]">
-              Tasks Selected
-              <span className="bg-gray-200 px-2 py-1 rounded-full text-sm ml-2">
-                {selectedTask.length}
-              </span>
-            </h4>
-          </div>
+
 
           {/* Tasks Table */}
           <SelectTasksTable

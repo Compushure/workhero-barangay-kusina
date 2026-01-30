@@ -2,7 +2,7 @@
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, MoreVertical } from 'lucide-react';
 
 interface TaskViewCardMenuProps {
   openPopover: boolean;
@@ -21,7 +21,7 @@ export default function TaskViewCardMenu({
     <Popover open={openPopover} onOpenChange={setOpenPopover}>
       <PopoverTrigger asChild>
         <button className="text-black hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer">
-          <MoreHorizontal className="w-5 h-5" />
+          <MoreVertical className="size-6" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-40 p-2" align="end">
