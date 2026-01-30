@@ -132,6 +132,7 @@ export interface Reward {
   isActive: boolean;
   createdAt?: string | Date;
   createdBy?: string;
+  imageUrl?: string;
 }
 
 // ============================================
