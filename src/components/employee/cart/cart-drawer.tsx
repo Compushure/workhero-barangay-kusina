@@ -14,14 +14,11 @@ import {
 } from '@/components/ui/dialog';
 import { useCartStore, CartItem } from '@/store/cartStore';
 import { useSubmitCart } from '@/hooks/tanstack/mutations/cartMutations';
+import { formatNumber } from '@/lib/format';
 
 interface CartDrawerProps {
   userPoints: number;
   deductedPoints?: number;
-}
-
-function formatNumber(num: number): string {
-  return num.toLocaleString('en-US');
 }
 
 function CartItemRow({
