@@ -131,7 +131,7 @@ export function CartDrawer({ userPoints, deductedPoints = 0 }: CartDrawerProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-lg md:max-w-2xl max-h-[var(--dialog-max-height)] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-[#690003]">
             <ShoppingCart className="h-5 w-5" />
