@@ -46,14 +46,26 @@ export function RemarksDialog({
   const [error, setError] = useState('');
   const [isConfirming, setIsConfirming] = useState(false);
   const isSubmittingRef = useRef(false);
-  
+
   // Disable if either the modal's internal state OR the parent's processing state is true
   const isDisabled = isConfirming || isProcessing;
 
+  // Check if remarks are valid based on required prop
+  const isRemarksValid = !required || remarks.trim().length > 0;
+
+  // Disable confirm button if remarks are required but empty
+  const isConfirmDisabled = isDisabled || !isRemarksValid;
+
   const handleConfirm = () => {
+    // Validate required remarks
+    if (required && remarks.trim().length === 0) {
+      setError('Remarks are required when declining a request');
+      return;
+    }
+
     // Prevent multiple submissions using ref (synchronous check)
     if (isSubmittingRef.current) return;
-    
+
     isSubmittingRef.current = true;
     setIsConfirming(true);
     try {
@@ -108,12 +120,12 @@ export function RemarksDialog({
                 }
               }}
               placeholder={placeholder}
-                className="min-h-32 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="min-h-32 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
               maxLength={maxLength}
               aria-required={required}
               aria-invalid={!!error}
               aria-describedby={error ? 'remark-error' : undefined}
-                disabled={isDisabled}
+              disabled={isDisabled}
             />
             {error && (
               <p id="remark-error" className="text-sm text-red-600">
@@ -127,12 +139,17 @@ export function RemarksDialog({
         </div>
 
         <DialogFooter className="flex-row gap-2 sm:gap-3">
-          <Button variant="outline" onClick={handleCancel} disabled={isDisabled} className="flex-1 rounded-3xl">
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isDisabled}
+            className="flex-1 rounded-3xl"
+          >
             {cancelLabel}
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={isDisabled}
+            disabled={isConfirmDisabled}
             variant={confirmVariant}
             className={`flex-1 rounded-3xl ${
               confirmVariant === 'default' ? 'bg-[#690003] hover:bg-[#af3b3f]' : ''
