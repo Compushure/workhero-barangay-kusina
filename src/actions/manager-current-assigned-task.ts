@@ -103,6 +103,7 @@ export async function fetchCurrentAssignedTasksPaginated(
       empId: row.assigned_to_employee_id ?? '',
       assignedTasks: [],
       completedOrders: row.completed_orders ?? 0,
+      status: row.status || 'assigned',
     };
 
     const key = `${row.category_id}-${row.kpitask_created_at}-${row.k_deadline_date}-${row.max_orders}`;
@@ -368,6 +369,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
         empId: employee.empId,
         assignedTasks: [],
         completedOrders: taskGroup.assignments[0]?.completed_orders ?? 0,
+        status: taskGroup.status,
       };
 
       return {

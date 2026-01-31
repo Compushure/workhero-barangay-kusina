@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { parseISO, format } from 'date-fns';
 import type { AssignedTask, AssignedEmployee } from '@/types';
-import { ChevronDown, Coins, Soup, X } from 'lucide-react';
+import { ChevronDown, CircleDashed, CircleCheck, CircleX, Target, Coins, Soup, X } from 'lucide-react';
 import TaskViewCardMenu from './dialogs/task-view/task-view-card-menu';
 import EditTaskDialog from './dialogs/task-view/edit-task-dialog';
 import DeleteTaskDialog from './dialogs/task-view/delete-task-dialog';
@@ -213,8 +213,16 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
             {(displayedEmployees ?? []).map((emp) => (
               <div
                 key={emp.id}
-                className="flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border-2 border-gray-300"
+                className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border-2 border-gray-300"
               >
+                {emp.status === "assigned" ? 
+                  <CircleDashed strokeWidth={2.5} className="size-5 p-0.5 text-zinc-500" /> :
+                emp.status === "in review" ?
+                  <Target strokeWidth={2.5} className="size-5 p-0.5 text-yellow-500" /> :
+                emp.status === "approved" ?
+                  <CircleCheck strokeWidth={2.5} className="size-5 p-0.5 text-green-600" /> :
+                  <CircleX strokeWidth={2.5} className="size-5 p-0.5 text-red-600" />
+                }
                 <span className="font-medium text-sm text-zinc-700">{emp.name}</span>
                 <span className="text-gray-500 font-normal text-xs">{emp.empId}</span>
                 <button
