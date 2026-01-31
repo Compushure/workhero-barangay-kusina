@@ -1,4 +1,11 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AssignedTask } from '@/types';
 import { useState } from 'react';
@@ -19,7 +26,7 @@ function UnassignEmployeeDialog({
 
   const handleUnassign = async () => {
     if (!showRemoveConfirm) return;
-    
+
     // Use the mutation which will handle cache invalidation
     deleteTaskMutation.mutate(
       { taskId: task.id },
@@ -42,19 +49,18 @@ function UnassignEmployeeDialog({
         </DialogHeader>
         <DialogFooter>
           <Button
-            variant="outline"
-            onClick={() => setShowRemoveConfirm(null)}
-            disabled={deleteTaskMutation.isPending}
-            className="border-gray-300"
-          >
-            Cancel
-          </Button>
-          <Button
             onClick={handleUnassign}
             disabled={deleteTaskMutation.isPending}
-            className="bg-[#690003] hover:bg-[#8B0000] text-white"
+            className="bg-[#690003] hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
             {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setShowRemoveConfirm(null)}
+            className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+          >
+            Cancel
           </Button>
         </DialogFooter>
       </DialogContent>

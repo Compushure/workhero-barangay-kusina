@@ -106,19 +106,19 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   };
 
   return (
-    <div className="rounded-2xl bg-[#FAFAFA] p-6 shadow-sm/25">
+    <div className="rounded-xl bg-[#FAFAFA] p-4 shadow-sm/25">
       {/* Header */}
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex justify-between items-start mb-4">
         <div className="flex-1 ">
-          <div className="flex items-center gap-3 mb-1">
-            <h3 className="text-xl font-bold text-[#690003] mb-1">{task.taskName}</h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-bold text-[#690003]">{task.taskName}</h3>
           </div>
-          <p className="text-sm text-gray-500 mb-3">{task.taskType}</p>
-          <div className="flex gap-6 text-sm text-gray-600">
+          <p className="text-sm text-gray-500 mb-2">{task.taskType}</p>
+          <div className="flex gap-6 text-sm text-black">
             <span>
               {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
             </span>
-            <span>Max orders: {task.maxOrders}</span>
+            <span>Max Orders: {task.maxOrders}</span>
             <span className="flex items-center gap-2">
               <span>{task.points} pts</span>
               <span>XP {task.xp}</span>
@@ -161,13 +161,13 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
               key={emp.id}
               className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border-2 border-gray-300"
             >
-              <span className="font-medium text-sm text-gray-700">{emp.name}</span>
+              <span className="font-medium text-sm text-black">{emp.name}</span>
               <span className="text-gray-500 font-light text-sm">{emp.empId}</span>
               <button
                 onClick={() => setShowRemoveConfirm(emp.id)}
-                className="text-gray-400 hover:text-red-500 ml-2"
+                className="text-gray-400 hover:text-red-500 ml-2 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 text-red-500" />
               </button>
             </div>
           ))}

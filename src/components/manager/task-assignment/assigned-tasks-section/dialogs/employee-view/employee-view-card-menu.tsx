@@ -1,16 +1,21 @@
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MoreVertical } from "lucide-react";
-import { AssignedEmployee } from "@/types";
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { MoreHorizontal } from 'lucide-react';
+import { AssignedEmployee } from '@/types';
 
 interface EmployeeViewCardMenuProps {
-  openPopoverId: string | null, 
-  setOpenPopoverId: (open: string | null) => void, 
-  employee: AssignedEmployee,
-  setShowClearConfirm: (open: string | null) => void
+  openPopoverId: string | null;
+  setOpenPopoverId: (open: string | null) => void;
+  employee: AssignedEmployee;
+  setShowClearConfirm: (open: string | null) => void;
 }
 
-function EmployeeViewCardMenu({openPopoverId, setOpenPopoverId, employee, setShowClearConfirm} : EmployeeViewCardMenuProps) {
+function EmployeeViewCardMenu({
+  openPopoverId,
+  setOpenPopoverId,
+  employee,
+  setShowClearConfirm,
+}: EmployeeViewCardMenuProps) {
   return (
     <Popover
       open={openPopoverId === employee.id}
@@ -18,8 +23,8 @@ function EmployeeViewCardMenu({openPopoverId, setOpenPopoverId, employee, setSho
     >
       <div className="flex w-fit">
         <PopoverTrigger asChild>
-          <button className="text-gray-400 hover:text-gray-600">
-            <MoreVertical className="size-6" />
+          <button className="text-black hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer">
+            <MoreHorizontal className="size-6" />
           </button>
         </PopoverTrigger>
       </div>
@@ -31,7 +36,7 @@ function EmployeeViewCardMenu({openPopoverId, setOpenPopoverId, employee, setSho
               setOpenPopoverId(null);
             }}
             variant="ghost"
-            className="justify-start text-red-600 hover:bg-red-50"
+            className="justify-start text-red-600 hover:bg-red-50 cursor-pointer hover:transition-all duration-500 ease-in-out"
           >
             Clear All Tasks
           </Button>
