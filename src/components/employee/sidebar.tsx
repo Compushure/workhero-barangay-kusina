@@ -13,6 +13,7 @@ import { usePathname } from 'next/navigation';
 import { LogOutBtn } from '../sidebar/logout-btn';
 import { ProfilePic } from '../sidebar/profile-pic';
 import { RankWidget } from '../sidebar/rank-widget';
+import { ProfileModal } from './modals/profile-modal';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
 import { useQuery } from '@tanstack/react-query';
@@ -53,6 +54,7 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Fetch current session user
   const { data: user } = useGetSessionUser();
@@ -135,7 +137,7 @@ export function Sidebar({
             isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
           }`}
         >
-          <ProfilePic user={user} />
+          <ProfilePic user={user} onClick={() => setShowProfileModal(true)} />
           {!isCollapsed && user && (
             <div className="min-w-0">
               <p className="font-semibold text-sm">{user.name}</p>
@@ -146,6 +148,13 @@ export function Sidebar({
 
         {!isCollapsed && <LogOutBtn />}
       </div>
+
+      {/* Profile Modal */}
+      <ProfileModal 
+        open={showProfileModal} 
+        onOpenChange={setShowProfileModal} 
+        user={user ?? null} 
+      />
     </aside>
   );
 }
