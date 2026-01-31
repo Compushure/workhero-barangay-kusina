@@ -1,3 +1,6 @@
+export { CartButton, CartDrawer } from './cart';
+
+export { RewardCard } from './mercado';
 export { Sidebar } from './sidebar';
 export {
   TaskStatusBoard,
