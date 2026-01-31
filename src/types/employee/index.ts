@@ -7,3 +7,4 @@
 export * from './employee';
 export * from './xp';
 export * from './points';
+export * from './rank';

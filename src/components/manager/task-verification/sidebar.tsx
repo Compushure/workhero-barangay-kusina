@@ -44,7 +44,7 @@ export function Sidebar({
 
   return (
     <aside
-      className={`bg-[#690003] text-white flex flex-col justify-between transition-all duration-300 ${
+      className={`bg-[#690003] text-white flex flex-col justify-between transition-all duration-500 ease-in-out ${
         isCollapsed ? 'w-20' : 'w-60'
       }`}
     >
@@ -76,7 +76,7 @@ export function Sidebar({
             <Link
               key={item.key}
               href={item.href}
-              className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all justify-center ${
+              className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium hover:transition-all duration-500 ease-in-out justify-center ${
                 isCollapsed ? 'px-2' : ''
               } ${isActive ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
               title={isCollapsed ? item.label : ''}
