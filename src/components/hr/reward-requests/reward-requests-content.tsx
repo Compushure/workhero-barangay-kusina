@@ -6,11 +6,12 @@ import { RedemptionTable } from '@/components/hr/dashboard/redemption-table';
 import { useGetRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
 
 export function RewardRequestsContent() {
+  const [statusFilter, setStatusFilter] = useState<string>('pending');
   const [sortBy, setSortBy] = useState<string>('date-desc');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  // Fetch redemption requests from database (pending by default)
-  const { data: requests = [], isLoading, error } = useGetRedemptionRequests('pending');
+  // Fetch redemption requests from database with status filter
+  const { data: requests = [], isLoading, error } = useGetRedemptionRequests(statusFilter);
 
   // Filter and sort the data with memoization
   const filteredRequests = useMemo(() => {
@@ -44,6 +45,10 @@ export function RewardRequestsContent() {
 
   const handleSort = useCallback((value: string) => {
     setSortBy(value);
+  }, []);
+
+  const handleStatusChange = useCallback((value: string) => {
+    setStatusFilter(value);
   }, []);
 
   if (isLoading) {
@@ -81,17 +86,19 @@ export function RewardRequestsContent() {
           onSearch={handleSearch}
           onSort={handleSort}
           sortBy={sortBy}
+          statusFilter={statusFilter}
+          onStatusChange={handleStatusChange}
         />
         {filteredRequests.length === 0 ? (
           <div className="flex items-center justify-center h-64 bg-white rounded-lg shadow-md">
             <p className="text-[#5a2a2a]">
               {searchTerm
                 ? 'No redemption requests match your search.'
-                : 'No pending redemption requests.'}
+                : `No ${statusFilter} redemption requests.`}
             </p>
           </div>
         ) : (
-          <RedemptionTable data={filteredRequests} />
+          <RedemptionTable data={filteredRequests} status={statusFilter} />
         )}
       </div>
     </div>
