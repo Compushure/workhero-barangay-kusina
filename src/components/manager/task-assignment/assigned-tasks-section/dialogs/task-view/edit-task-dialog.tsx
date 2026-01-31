@@ -86,56 +86,61 @@ export default function EditTaskDialog({
           <DialogTitle className="text-2xl text-[#690003]">Edit Task</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Task Info */}
-          <div className="bg-white rounded-xl p-4 border-2 border-gray-300">
-            <h4 className="text-lg font-bold text-[#690003] mb-2">{task.taskName}</h4>
-            <p className="text-sm text-gray-600">{task.points}pts / attempt</p>
+          <div className="bg-white rounded-xl px-4 py-2 border-2 border-gray-300">
+            <h4 className="text-base font-bold text-[#690003] mb-2">{task.taskName}</h4>
+            <p className="text-sm text-gray-600">{task.points}pts / order</p>
           </div>
 
-          {/* Max Repeats */}
-          {task.isRepeatable && (
-            <div className="flex items-center gap-4">
-              <label className="font-bold text-[#690003]">Max Repeats</label>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setEditMaxOrders(Math.max(1, editMaxOrders - 1))}
-                  className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
-                >
-                  −
-                </button>
-                <input
-                  type="number"
-                  value={editMaxOrders}
-                  onChange={(e) =>
-                    setEditMaxOrders(Math.max(1, Number.parseInt(e.target.value) || 1))
-                  }
-                  className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 bg-[#fafafa]"
-                  min="1"
+          
+            <div className="flex justify-center items-start gap-4 text-sm">
+              {/* Max Repeats */}
+              {task.isRepeatable && (
+              <div className='flex flex-col items-center gap-3'>
+                <label className="font-bold text-[#690003]">Max Repeats</label>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEditMaxOrders(Math.max(1, editMaxOrders - 1))}
+                    className="bg-[#690003] text-white size-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    value={editMaxOrders}
+                    onChange={(e) =>
+                      setEditMaxOrders(Math.max(1, Number.parseInt(e.target.value) || 1))
+                    }
+                    className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 bg-[#fafafa]"
+                    min="1"
+                  />
+                  <button
+                    onClick={() => setEditMaxOrders(editMaxOrders + 1)}
+                    className="bg-[#690003] text-white size-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              )}
+
+              {/* Due Date */}
+              <div className="flex flex-col items-center justify-baseline gap-2">
+                <label className="font-bold text-[#690003]">Due Date</label>
+                <DatePickerPopover
+                  deadline={editDueDate}
+                  onDeadlineChange={(date) => date && setEditDueDate(date)}
                 />
-                <button
-                  onClick={() => setEditMaxOrders(editMaxOrders + 1)}
-                  className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
-                >
-                  +
-                </button>
               </div>
             </div>
-          )}
+          
 
-          {/* Due Date */}
-          <div className="flex items-center gap-4">
-            <label className="font-bold text-[#690003]">Due Date</label>
-            <DatePickerPopover
-              deadline={editDueDate}
-              onDeadlineChange={(date) => date && setEditDueDate(date)}
-            />
-          </div>
 
           {/* Assign/Remove Employees */}
           <div className="space-y-3">
             <h4 className="font-bold text-[#690003]">Assign/Remove Employees</h4>
-            <div className="bg-white rounded-xl p-4 border-2 border-gray-300 max-h-75 overflow-y-auto">
+            <div className="bg-white rounded-xl p-4 border-2 border-gray-300 max-h-50 overflow-y-auto">
               <div className="space-y-2">
                 {employees.map((emp) => {
                   const isDisabled = disabledEmployeeIds.has(emp.id);
