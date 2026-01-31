@@ -32,7 +32,7 @@ function AssignEmployeesTable({
                 className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
               />
             </th>
-            <th className="w-[60%] px-3 text-left font-bold text-white">NAME</th>
+            <th className="w-[60%] px-2 text-left font-bold text-white">NAME</th>
             <th className="w-[30%] px-5 text-left font-bold text-white">ID NO.</th>
           </tr>
         </thead>

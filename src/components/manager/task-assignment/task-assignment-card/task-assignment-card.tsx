@@ -133,13 +133,6 @@ export function TaskAssignmentCard() {
       {/* Action Buttons */}
       <div className="flex gap-3 justify-end mt-6">
         <Button
-          variant="outline"
-          onClick={() => setShowClearConfirm(true)}
-          className="text-black bg-white hover:bg-gray-100 px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
-        >
-          Clear
-        </Button>
-        <Button
           onClick={handleAssign}
           disabled={
             selectedEmployees.length === 0 || selectedTask.length === 0 || !selectedDeadline
@@ -147,6 +140,14 @@ export function TaskAssignmentCard() {
           className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:shadow-sm/25 disabled:cursor-not-allowed px-12 shadow-sm/25"
         >
           Assign
+        </Button>
+        
+        <Button
+          variant="outline"
+          onClick={() => setShowClearConfirm(true)}
+          className="text-black bg-white hover:bg-gray-100 px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
+        >
+          Clear
         </Button>
       </div>
 

@@ -157,19 +157,19 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           <div className="flex gap-4 text-zinc-500 items-baseline">
             
             <div className="flex flex-col items-end">
-              <p className="flex text-base font-medium items-end gap-1">
+              <div className="flex text-base font-medium items-end gap-1">
                 <Soup strokeWidth={1.5} className="size-7 mb-3.5" />
                 <p className='flex flex-col items-center'>
                   <span className="inline-block font-semibold pb-1 leading-none">{task.maxOrders} max order/s</span>
-                  <p className="text-xs font-extralight text-zinc-400 leading-none">per employee</p>
+                  <span className="text-xs font-extralight text-zinc-400 leading-none">per employee</span>
                 </p>
-              </p>
+              </div>
             </div>
 
             <div className="flex flex-col items-center">
               <div className="flex items-end gap-2">
                 <p className="flex gap-1 items-end text-xl font-medium leading-none">
-                  <Coins strokeWidth={1.5} className="size-6" />
+                  <Coins strokeWidth={1.75} className="size-6" />
                   <span className="inline-block font-semibold pb-0.5">{task.points}</span>
                 </p>
 
@@ -190,7 +190,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-base font-semibold text-[#690003]">
               Assigned to{' '}
-              <span className="bg-gray-300 text-gray-700 w-7 h-6 px-1 rounded-full text-sm ml-1.5 inline-flex items-center justify-center">
+              <span className="bg-zinc-200 text-gray-700 shadow w-7 h-6 px-1 rounded-full text-sm ml-1.5 inline-flex items-center justify-center">
                 {(task.assignedEmployees ?? []).length}
               </span>
             </h4>
@@ -219,7 +219,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
                 <span className="text-gray-500 font-normal text-xs">{emp.empId}</span>
                 <button
                   onClick={() => setShowRemoveConfirm(emp.id)}
-                  className="text-gray-400 hover:text-red-500 ml-2 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130"
+                  className="ml-2 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130"
                 >
                   <X className="size-3.5 text-[#690003] hover:text-red-500" />
                 </button>

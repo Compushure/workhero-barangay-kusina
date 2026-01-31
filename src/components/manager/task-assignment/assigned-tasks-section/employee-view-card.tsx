@@ -2,7 +2,7 @@
 
 import { useState, memo } from 'react';
 import type { AssignedTask, AssignedEmployee } from '@/types';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, CircleDashed, Coins, Soup, X } from 'lucide-react';
 import EmployeeViewCardMenu from './dialogs/employee-view/employee-view-card-menu';
 import ClearAllTasksDialog from './dialogs/employee-view/clear-all-tasks-dialog';
 import ClearTaskDialog from './dialogs/employee-view/clear-task-dialog';
@@ -61,7 +61,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
-    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+    return new Date(year, month - 1, day).toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -79,17 +79,17 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
         const hiddenCount = Math.max(0, employee.assignedTasks.length - 2);
 
         return (
-          <div key={employee.id} className="rounded-2xl bg-[#FAFAFA] p-6 shadow-sm/25">
-            {/* Employee Details */}
-            <div className="flex justify-between items-start mb-6 w-full">
-              <div className="w-[30%]">
-                <h3 className="text-xl font-bold text-[#690003]">{employee.name}</h3>
+          <div className={`flex w-full items-start justify-between rounded-2xl bg-[#FAFAFA] p-6 transition-all ease-in-out duration-150 
+          ${isExpanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`} key={employee.id}>
+              {/* Employee Details */}
+              <div className="flex flex-col w-[20%]">
+                <h3 className="text-lg font-bold text-[#690003] wrap-break-word">{employee.name}</h3>
                 <p className="text-sm text-gray-600">{employee.empId}</p>
                 {employee.tenure && <p className="text-sm text-gray-500">{employee.tenure}</p>}
               </div>
 
               {/* Assigned Tasks */}
-              <div className="flex flex-col pl-8 pr-4 w-full">
+              <div className="flex flex-col pl-4 pr-2 w-full">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-lg font-bold text-[#690003]">
                     Current Tasks{' '}
@@ -102,7 +102,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
                       onClick={() => toggleEmployeeExpand(employee.id)}
                       className="text-[#690003] font-medium flex items-center gap-1 hover:underline"
                     >
-                      See All{' '}
+                      {isExpanded ? 'Show Less' : 'See All'}{' '}
                       <ChevronDown
                         className={`w-4 h-4 transition ${isExpanded ? 'rotate-180' : ''}`}
                       />
@@ -111,7 +111,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
                 </div>
 
                 {/* Task Badges */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {displayedTasks.map((task: AssignedTask) => {
                     const taskEmployee = task.assignedEmployees?.find(
                       (emp) => emp.id === employee.id
@@ -121,29 +121,46 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
                     return (
                       <div
                         key={task.id}
-                        className="flex items-center gap-2 bg-white px-4 py-3 rounded-2xl border-2 border-gray-300 h-full"
+                        className="flex items-center justify-between bg-white px-4 py-3 rounded-2xl border-2 border-gray-300 h-full"
                       >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-black truncate">
-                            {task.taskName} ({completedOrders} / {task.maxOrders})
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
-                          </p>
-                          <div className="flex gap-2 mt-1">
-                            <span className="text-xs text-black font-semibold">
-                              {task.points}pts
+                        <div className="flex flex-col w-[65%] gap-1">
+                            <span className='truncate text-zinc-700 text-sm font-semibold'>
+                              {task.taskName}
                             </span>
-                            <span className="text-xs text-black font-semibold">XP {task.xp}</span>
-                          </div>
+
+                            <div className='flex gap-3'>
+                              <span className='flex text-zinc-500 text-sm leading-none items-end'>
+                                <Soup strokeWidth={1.75} className="size-5 mr-1" />
+                                {completedOrders} / {task.maxOrders}
+                              </span>
+
+                              <div className="flex items-end gap-1 text-zinc-500">
+                                <p className="flex gap-1 items-end font-semibold text-sm leading-none">
+                                  <Coins strokeWidth={2.5} className="size-4" />
+                                  <span className="inline-block">{task.points}</span>
+                                </p>
+
+                                <p className="flex gap-1.5 items-end">
+                                  <span className="inline-block italic font-normal text-sm leading-none">XP</span>
+                                  <span className="inline-block font-semibold text-sm leading-none">{task.xp}</span>
+                                </p>
+                              </div>
+                            </div>
                         </div>
+
+                        <div className='flex flex-col w-[30%] items-end pr-3 gap-2'>
+                          <p className="text-xs text-gray-500">
+                            {formatDate(task.dateRange.end)}
+                          </p>
+                        </div>
+
                         <button
                           onClick={() =>
                             setShowRemoveConfirm({ taskId: task.id, empId: employee.id })
                           }
-                          className="hover:scale-130 transition-all duration-500 ease-in-out text-red-500 cursor-pointer"
+                          className="hover:scale-130 transition-all duration-500 ease-in-out cursor-pointer"
                         >
-                          <X className="w-4 h-4 text-red-500" />
+                          <X className="size-4 text-[#690003] hover:text-red-500" />
                         </button>
                       </div>
                     );
@@ -152,13 +169,14 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
               </div>
 
               {/* Clear All Assigned Tasks for Employee */}
-              <EmployeeViewCardMenu
-                openPopoverId={openPopoverId}
-                setOpenPopoverId={setOpenPopoverId}
-                employee={employee}
-                setShowClearConfirm={setShowClearConfirm}
-              />
-            </div>
+              <div className='flex w-fit justify-center'>
+                <EmployeeViewCardMenu
+                  openPopoverId={openPopoverId}
+                  setOpenPopoverId={setOpenPopoverId}
+                  employee={employee}
+                  setShowClearConfirm={setShowClearConfirm}
+                />
+              </div>
 
             {/* Unassign Task Dialog */}
             <ClearTaskDialog

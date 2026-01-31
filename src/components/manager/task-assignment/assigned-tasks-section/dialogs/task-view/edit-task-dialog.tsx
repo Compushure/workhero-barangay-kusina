@@ -110,7 +110,7 @@ export default function EditTaskDialog({
                   onChange={(e) =>
                     setEditMaxOrders(Math.max(1, Number.parseInt(e.target.value) || 1))
                   }
-                  className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans bg-[#fafafa]"
+                  className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 bg-[#fafafa]"
                   min="1"
                 />
                 <button

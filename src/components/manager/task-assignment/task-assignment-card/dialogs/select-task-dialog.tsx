@@ -127,9 +127,10 @@ export function SelectTasksDialog({
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="bg-white shadow-sm/25 text-black hover:bg-gray-100 flex items-center gap-2 min-w-50 justify-between cursor-pointer transition-all duration-500 ease-in-out"
+        className={`bg-zinc-50 shadow-sm/25 hover:bg-gray-100 flex items-center gap-16 min-w-50 justify-between cursor-pointer transition-all duration-500 ease-in-out
+          ${selectedTask.length === 0 ? 'text-zinc-700' : 'text-[#690003]'}`}
       >
-        <span className="truncate">{buttonLabel}</span>
+        <span className='truncate'>{buttonLabel}</span>
         <Plus className="w-4 h-4 shrink-0" />
       </Button>
 

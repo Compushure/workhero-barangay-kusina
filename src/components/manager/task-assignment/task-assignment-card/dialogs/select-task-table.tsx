@@ -21,12 +21,12 @@ function SelectTasksTable({
     <div className="bg-white rounded-2xl border-2 border-gray-300 flex-1 flex flex-col overflow-auto">
       <table className="w-full">
         <thead className="bg-[#690003] text-white">
-          <tr>
-            <th className="w-[5%] py-4"></th>
-            <th className="w-[35%] py-4 text-left pl-4 text-sm font-bold">TASK</th>
+          <tr className='flex justify-baseline'>
+            <th className="w-[6%] py-4"></th>
+            <th className="w-[33.5%] py-4 text-left pl-4 text-sm font-bold">TASK</th>
             <th className="w-[20%] py-4 text-center text-sm font-bold">POINTS</th>
-            <th className="w-[15%] py-4 text-center text-sm font-bold">XP</th>
-            <th className="w-[25%] py-4 text-center text-sm font-bold">MAX ORDERS</th>
+            <th className="w-[14.5%] py-4 text-center text-sm font-bold">XP</th>
+            <th className="w-[23.5%] py-4 text-center text-sm font-bold">MAX ORDERS</th>
           </tr>
         </thead>
       </table>
@@ -64,11 +64,11 @@ function SelectTasksTable({
                     />
                   </td>
                   <td className="w-[35%] px-4 py-3">
-                    <div className="font-medium text-gray-800 font-sans">{task.name}</div>
-                    <div className="text-sm text-gray-500 font-sans">{task.type}</div>
+                    <div className="font-medium text-gray-800">{task.name}</div>
+                    <div className="text-sm text-gray-500">{task.type}</div>
                   </td>
-                  <td className="w-[20%] p-4 text-black text-center font-sans">{task.points}pts</td>
-                  <td className="w-[15%] p-4 text-black text-center font-sans">{task.xp}</td>
+                  <td className="w-[20%] p-4 text-black text-center">{task.points}pts</td>
+                  <td className="w-[15%] p-4 text-black text-center">{task.xp}</td>
                   <td className="w-[25%] p-4" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-center gap-2">
                       {task.isRepeatable ? (
@@ -90,7 +90,7 @@ function SelectTasksTable({
                               updateMaxOrders(task.id, Number.parseInt(e.target.value) || 1);
                             }}
                             onClick={(e) => e.stopPropagation()}
-                            className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans"
+                            className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1"
                             min="1"
                           />
                           <button
@@ -104,7 +104,7 @@ function SelectTasksTable({
                           </button>
                         </>
                       ) : (
-                        <span className="text-black font-sans">1</span>
+                        <span className="text-black">1</span>
                       )}
                     </div>
                   </td>
