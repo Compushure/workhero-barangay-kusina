@@ -69,8 +69,8 @@ export function TaskStatusBoard({
         </Select>
       </div>
 
-      {/* Single column until lg (1024px); 2 cols until 2xl (1536px); then 4 cols — avoids narrow cramped columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-[repeat(2,minmax(0,1fr))] 2xl:grid-cols-[repeat(4,minmax(0,1fr))] gap-6 sm:gap-8 w-full min-w-0">
+      {/* Single column on small screens; 2x2 grid on lg and up (Current | On Review, Verified | Denied Approval) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[repeat(2,minmax(0,1fr))] gap-6 sm:gap-8 w-full min-w-0">
         <TaskStatusColumn status="Current">
           {current.map((task) => (
             <TaskCard key={task.id} task={task} />
