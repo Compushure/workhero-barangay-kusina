@@ -1,26 +1,32 @@
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { AssignedEmployee } from "@/types";
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { AssignedEmployee } from '@/types';
 import { useDeleteTaskMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface ClearTaskDialogProps {
-showRemoveConfirm: {
+  showRemoveConfirm: {
     taskId: string;
     empId: string;
-  } | null, 
-setShowRemoveConfirm: (show: {
-    taskId: string;
-    empId: string;
-  } | null) => void, 
-employee: AssignedEmployee
+  } | null;
+  setShowRemoveConfirm: (
+    show: {
+      taskId: string;
+      empId: string;
+    } | null
+  ) => void;
+  employee: AssignedEmployee;
 }
 
-function ClearTaskDialog({showRemoveConfirm, setShowRemoveConfirm, employee} : ClearTaskDialogProps) {
+function ClearTaskDialog({
+  showRemoveConfirm,
+  setShowRemoveConfirm,
+  employee,
+}: ClearTaskDialogProps) {
   const deleteTaskMutation = useDeleteTaskMutation();
 
   const handleRemoveAssignment = async () => {
     if (!showRemoveConfirm) return;
-    
+
     // Use the mutation which will handle cache invalidation
     deleteTaskMutation.mutate(
       { taskId: showRemoveConfirm.taskId },
@@ -46,19 +52,19 @@ function ClearTaskDialog({showRemoveConfirm, setShowRemoveConfirm, employee} : C
           </p>
           <div className="flex gap-4 justify-end">
             <Button
+              onClick={handleRemoveAssignment}
+              disabled={deleteTaskMutation.isPending}
+              className="bg-[#690003] hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
+            >
+              {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
+            </Button>
+            <Button
               variant="outline"
               onClick={() => setShowRemoveConfirm(null)}
               disabled={deleteTaskMutation.isPending}
-              className="border-gray-300"
+              className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
             >
               Cancel
-            </Button>
-            <Button
-              onClick={handleRemoveAssignment}
-              disabled={deleteTaskMutation.isPending}
-              className="bg-[#690003] hover:bg-[#8B0000] text-white"
-            >
-              {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
             </Button>
           </div>
         </div>

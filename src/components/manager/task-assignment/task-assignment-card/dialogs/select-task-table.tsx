@@ -42,7 +42,9 @@ function SelectTasksTable({
                 <tr
                   key={task.id}
                   className={`border-b border-gray-200 ${
-                    isSelected ? 'bg-gray-100' : 'hover:bg-gray-50'
+                    isSelected
+                      ? 'bg-gray-100'
+                      : 'hover:bg-gray-50 cursor-pointer transition-all duration-300 ease-in-out'
                   } cursor-pointer`}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -65,10 +67,8 @@ function SelectTasksTable({
                     <div className="font-medium text-gray-800 font-sans">{task.name}</div>
                     <div className="text-sm text-gray-500 font-sans">{task.type}</div>
                   </td>
-                  <td className="w-[20%] p-4 text-gray-600 text-center font-sans">
-                    {task.points}pts
-                  </td>
-                  <td className="w-[15%] p-4 text-gray-600 text-center font-sans">{task.xp}</td>
+                  <td className="w-[20%] p-4 text-black text-center font-sans">{task.points}pts</td>
+                  <td className="w-[15%] p-4 text-black text-center font-sans">{task.xp}</td>
                   <td className="w-[25%] p-4" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-center gap-2">
                       {task.isRepeatable ? (
@@ -78,7 +78,7 @@ function SelectTasksTable({
                               e.stopPropagation();
                               updateMaxOrders(task.id, Math.max(1, currentMaxOrders - 1));
                             }}
-                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000]"
+                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
                           >
                             −
                           </button>
@@ -98,13 +98,13 @@ function SelectTasksTable({
                               e.stopPropagation();
                               updateMaxOrders(task.id, currentMaxOrders + 1);
                             }}
-                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000]"
+                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
                           >
                             +
                           </button>
                         </>
                       ) : (
-                        <span className="text-gray-600 font-sans">1</span>
+                        <span className="text-black font-sans">1</span>
                       )}
                     </div>
                   </td>

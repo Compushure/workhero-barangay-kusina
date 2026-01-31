@@ -22,7 +22,7 @@ function AssignEmployeesTable({
   return (
     <div className="bg-white rounded-2xl border-2 border-gray-200 flex-1 flex flex-col overflow-auto">
       <table className="w-full">
-        <thead className="bg-gray-100 border-b-2 border-gray-300">
+        <thead className="bg-[#690003] border-b-2 border-gray-300">
           <tr className="flex py-2 px-2 items-center">
             <th className="p-2 flex w-[10%]">
               <input
@@ -32,8 +32,8 @@ function AssignEmployeesTable({
                 className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
               />
             </th>
-            <th className="w-[60%] px-3 text-left font-bold text-[#690003]">NAME</th>
-            <th className="w-[30%] px-5 text-left font-bold text-[#690003]">ID NO.</th>
+            <th className="w-[60%] px-3 text-left font-bold text-white">NAME</th>
+            <th className="w-[30%] px-5 text-left font-bold text-white">ID NO.</th>
           </tr>
         </thead>
       </table>
@@ -48,7 +48,7 @@ function AssignEmployeesTable({
               return (
                 <tr
                   key={employee.id}
-                  className={`border-b border-gray-200 flex w-full items-center py-1 ${
+                  className={`border-b border-gray-200 flex w-full items-center py-1 transition-all duration-300 ease-in-out ${
                     isDisabled
                       ? 'opacity-50 cursor-not-allowed bg-gray-100'
                       : 'hover:bg-gray-50 cursor-pointer'
