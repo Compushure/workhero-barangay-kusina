@@ -148,7 +148,13 @@ export function TaskAssignmentCard() {
         <Button
           variant="outline"
           onClick={() => setShowClearConfirm(true)}
-          className="text-black bg-white hover:bg-gray-100 px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
+          disabled={
+            isAssigning ||
+            selectedEmployees.length === 0 ||
+            selectedTask.length === 0 ||
+            !selectedDeadline
+          }
+          className="text-black bg-white hover:bg-gray-100 px-12 cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed shadow-sm/25"
         >
           Clear
         </Button>

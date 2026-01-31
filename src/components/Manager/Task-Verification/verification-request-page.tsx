@@ -175,7 +175,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
 
       <div className="flex-1 flex flex-col">
-        <div className="flex items-center justify-end gap-4 mb-6">
+        <div className="flex items-center justify-end gap-2 mb-6">
           <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
           <SortButton sortBy={sortBy} onSortChange={setSortBy} />
         </div>
