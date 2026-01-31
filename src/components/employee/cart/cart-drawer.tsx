@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Trash2, Minus, Plus, ShoppingCart, Loader2, ImageIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
   DialogContent,
@@ -167,7 +166,7 @@ export function CartDrawer({ userPoints, deductedPoints = 0 }: CartDrawerProps) 
 
         {/* Cart Items */}
         {hasItems ? (
-          <ScrollArea className="flex-1 max-h-[400px]">
+          <div className={`${items.length > 3 ? 'max-h-[280px] overflow-y-auto' : ''}`}>
             <div className="space-y-3 pr-4">
               {items.map((item) => (
                 <CartItemRow
@@ -179,7 +178,7 @@ export function CartDrawer({ userPoints, deductedPoints = 0 }: CartDrawerProps) 
                 />
               ))}
             </div>
-          </ScrollArea>
+          </div>
         ) : (
           <div className="flex-1 flex items-center justify-center py-12">
             <div className="text-center">
