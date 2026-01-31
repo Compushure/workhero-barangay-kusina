@@ -54,27 +54,23 @@ export function TaskStatusBoard({
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-end">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Sort by</span>
-          <Select
-            value={sortBy}
-            onValueChange={(value) => setSortBy(value as SortOption)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="due-date">Due date</SelectItem>
-              <SelectItem value="points">Points</SelectItem>
-              <SelectItem value="title">Title</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="flex flex-col gap-4 sm:gap-6 w-full min-w-0 overflow-hidden">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+        <span className="text-sm text-muted-foreground">Sort by</span>
+        <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="due-date">Due date</SelectItem>
+            <SelectItem value="points">Points</SelectItem>
+            <SelectItem value="title">Title</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full min-w-0">
+      {/* Single column until lg (1024px); 2 cols until 2xl (1536px); then 4 cols — avoids narrow cramped columns */}
+      <div className="grid grid-cols-1 lg:grid-cols-[repeat(2,minmax(0,1fr))] 2xl:grid-cols-[repeat(4,minmax(0,1fr))] gap-6 sm:gap-8 w-full min-w-0">
         <TaskStatusColumn status="Current">
           {current.map((task) => (
             <TaskCard key={task.id} task={task} />
