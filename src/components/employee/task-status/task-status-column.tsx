@@ -14,8 +14,8 @@ export function TaskStatusColumn({ status, children }: TaskStatusColumnProps) {
       <span className="inline-flex w-fit rounded-full bg-muted text-muted-foreground px-4 py-1.5 text-base font-semibold">
         {status}
       </span>
-      {/* Height fits ~3 task cards; responsive so columns don't overflow on small screens */}
-      <div className="bg-muted/50 border rounded-xl p-4 sm:p-5 shadow-sm h-[340px] sm:h-[400px] md:h-[462px] flex flex-col min-h-0 overflow-hidden w-full">
+      {/* Exactly 3 task cards visible; 4+ tasks scroll vertically */}
+      <div className="bg-muted/50 border rounded-xl p-4 sm:p-5 shadow-sm h-[300px] sm:h-[340px] md:h-[350px] flex flex-col min-h-0 overflow-hidden w-full">
         <ScrollArea className="flex-1 min-h-0">
           <div className="flex flex-col gap-4 pr-4">{children}</div>
         </ScrollArea>
