@@ -132,15 +132,11 @@ export const MercadoCard = memo(function MercadoCard({
               {formattedPrice} pts
             </p>
             {formattedQuantity !== undefined && (
-              <p className="text-[#730202] text-sm opacity-70">
-                | Available: {formattedQuantity}
-              </p>
+              <p className="text-[#730202] text-sm opacity-70">| Available: {formattedQuantity}</p>
             )}
           </div>
           {item.createdAt && (
-            <p className="text-[#730202]/50 text-xs mt-1">
-              Created: {formatDate(item.createdAt)}
-            </p>
+            <p className="text-[#730202]/50 text-xs mt-1">Created: {formatDate(item.createdAt)}</p>
           )}
         </div>
 

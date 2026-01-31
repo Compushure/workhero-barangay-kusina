@@ -117,6 +117,8 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
           const quantity = request.quantity || 1; // Default to 1 if not set
           const totalCost = request.pointsCost * quantity;
           const itemDisplay = `${quantity} x ${request.rewardName}`;
+          const userPoints = request.userPoints || 0;
+          const hasInsufficientPoints = userPoints < totalCost;
 
           return (
             <div
@@ -162,9 +164,16 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-[#2d5016] hover:bg-[#2d5016] hover:text-white"
+                  className="h-8 w-8 text-[#2d5016] hover:bg-[#2d5016] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => handleAcceptClick(request.id)}
-                  disabled={declineMutation.isPending || acceptMutation.isPending}
+                  disabled={
+                    declineMutation.isPending || acceptMutation.isPending || hasInsufficientPoints
+                  }
+                  title={
+                    hasInsufficientPoints
+                      ? `Insufficient points: User has ${userPoints} but needs ${totalCost}`
+                      : 'Accept request'
+                  }
                 >
                   <Check className="h-4 w-4" />
                 </Button>
