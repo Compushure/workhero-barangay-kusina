@@ -2,7 +2,7 @@
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { MoreVertical } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 
 interface TaskViewCardMenuProps {
   openPopover: boolean;
@@ -20,8 +20,8 @@ export default function TaskViewCardMenu({
   return (
     <Popover open={openPopover} onOpenChange={setOpenPopover}>
       <PopoverTrigger asChild>
-        <button className="text-gray-400 hover:text-gray-600">
-          <MoreVertical className="w-5 h-5" />
+        <button className="text-black hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer">
+          <MoreHorizontal className="w-5 h-5" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-40 p-2" align="end">
@@ -29,7 +29,7 @@ export default function TaskViewCardMenu({
           <Button
             onClick={handleOpenEditDialog}
             variant="ghost"
-            className="justify-start text-[#690003] hover:bg-[#FBF4E8]"
+            className="justify-start text-[#690003] hover:bg-red-50 cursor-pointer hover: transition-all duration-500 ease-in-out"
           >
             Edit Task
           </Button>
@@ -39,7 +39,7 @@ export default function TaskViewCardMenu({
               setOpenPopover(false);
             }}
             variant="ghost"
-            className="justify-start text-red-600 hover:bg-red-50"
+            className="justify-start text-red-600 hover: transition-all duration-500 ease-in-out hover:bg-red-50 cursor-pointer"
           >
             Delete Task
           </Button>
