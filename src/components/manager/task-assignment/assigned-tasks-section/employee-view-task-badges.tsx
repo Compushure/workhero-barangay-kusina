@@ -74,12 +74,12 @@ export default function EmployeeViewTaskBadges({
                   </span>
                   <div className='flex items-center gap-2'>
                       {task.status === "assigned" ? 
-                        <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-600"/> :
+                        <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500"/> :
                       task.status === "in review" ?
-                        <StatusIcon icon={Target} className="bg-yellow-100 text-yellow-600"/> : 
+                        <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400"/> : 
                       task.status === "approved" ?
-                        <StatusIcon icon={CircleCheck} className="bg-green-100 text-green-800"/> :
-                        <StatusIcon icon={CircleX} className="bg-red-100 text-red-800"/>
+                        <StatusIcon icon={CircleCheck} className="bg-green-100 text-green-600"/> :
+                        <StatusIcon icon={CircleX} className="bg-red-100 text-red-600"/>
                       }
                     
                     <p className={`text-xs text-gray-500 

@@ -21,6 +21,11 @@ export default function TaskViewEmployeeBadges({
   displayedEmployees,
   setShowRemoveConfirm
 } : TaskViewEmployeeBadgesProps) {
+  // Reusable StatusIcon component
+  const StatusIcon = ({ icon: Icon, className = "",  }: { icon: any; className?: string;}) => (
+    <Icon strokeWidth={2.5} className={`size-5 p-0.5 rounded-full ${className}`} />
+  );
+
   return (     
     <section className="">
       <div className="flex items-center justify-between mb-3">
@@ -49,15 +54,15 @@ export default function TaskViewEmployeeBadges({
         {(displayedEmployees ?? []).map((emp) => (
           <div
             key={emp.id}
-            className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border-2 border-gray-300"
+            className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border-2 border-gray-300"
           >
             {emp.status === "assigned" ? 
-              <CircleDashed strokeWidth={2.5} className="size-5 p-0.5 text-zinc-500" /> :
+              <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" /> :
             emp.status === "in review" ?
-              <Target strokeWidth={2.5} className="size-5 p-0.5 text-yellow-500" /> :
+              <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400" /> :
             emp.status === "approved" ?
-              <CircleCheck strokeWidth={2.5} className="size-5 p-0.5 text-green-600" /> :
-              <CircleX strokeWidth={2.5} className="size-5 p-0.5 text-red-600" />
+              <StatusIcon icon={CircleCheck} className="bg-green-100 text-green-600" /> :
+              <StatusIcon icon={CircleX} className="bg-red-100 text-red-600"/>
             }
             <span className="font-medium text-sm text-zinc-700">{emp.name}</span>
             <span className="text-gray-500 font-normal text-xs">{emp.empId}</span>
