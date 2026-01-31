@@ -7,15 +7,18 @@ import { UserWithExtras } from '@/types';
 
 interface ProfilePicProps {
   user?: UserWithExtras | null;
+  onClick?: () => void;
 }
 
-export function ProfilePic({ user }: ProfilePicProps) {
+export function ProfilePic({ user, onClick }: ProfilePicProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [hasImage, setHasImage] = useState(true);
 
   const handleProfileClick = () => {
-    if (user) {
+    if (onClick) {
+      onClick();
+    } else if (user) {
       router.push(`/profile?userid=${user.id}`);
     }
   };
