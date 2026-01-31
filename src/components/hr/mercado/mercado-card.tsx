@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, memo, useCallback } from 'react';
-import { MoreHorizontal, ImageIcon, EyeOff } from 'lucide-react';
+import { Pencil, ImageIcon, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -140,11 +140,15 @@ export const MercadoCard = memo(function MercadoCard({
           )}
         </div>
 
-        <div className="absolute top-4 right-4" onClick={(e) => e.stopPropagation()}>
+        <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[#f2e1c9]">
-                <MoreHorizontal className="h-5 w-5 text-[#730202]" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 bg-white shadow-md hover:bg-[#690003] hover:text-white transition-all duration-200"
+              >
+                <Pencil className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32 rounded-xl">

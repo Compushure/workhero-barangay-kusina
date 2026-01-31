@@ -26,6 +26,7 @@ export default function MercadoPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [saveError, setSaveError] = useState<string>('');
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [editingItem, setEditingItem] = useState<{
@@ -34,6 +35,7 @@ export default function MercadoPage() {
     cost: number;
     quantity?: number;
     redeemingLimit?: number;
+    imageUrl?: string;
   } | null>(null);
   const [deletingItem, setDeletingItem] = useState<{
     id: string;
@@ -141,6 +143,7 @@ export default function MercadoPage() {
           cost: item.pointsCost,
           quantity: item.quantity,
           redeemingLimit: item.redeemingLimit,
+          imageUrl: item.imageUrl,
         });
         setIsAddModalOpen(true);
       }
@@ -216,6 +219,9 @@ export default function MercadoPage() {
       redeemingLimit: string;
       cost: number;
     }) => {
+      // Clear previous error
+      setSaveError('');
+
       const quantityNum = data.quantity ? parseInt(data.quantity) : undefined;
       const redeemingLimitNum = data.redeemingLimit ? parseInt(data.redeemingLimit) : undefined;
 
@@ -251,7 +257,8 @@ export default function MercadoPage() {
           rewardName: data.name,
         });
       }
-      setIsAddModalOpen(false);
+      
+      // Modal closes from within the modal component after successful save
       setEditingItem(null);
     },
     [addReward, editReward, uploadRewardPicture]
@@ -344,9 +351,14 @@ export default function MercadoPage() {
 
       <AddItemsModal
         open={isAddModalOpen}
-        onOpenChange={setIsAddModalOpen}
+        onOpenChange={(open) => {
+          if (!open) setSaveError('');
+          setIsAddModalOpen(open);
+        }}
         editingItem={editingItem}
         onSave={handleSaveItem}
+        saveError={saveError}
+        onErrorClear={() => setSaveError('')}
       />
 
       <ViewItemModal
