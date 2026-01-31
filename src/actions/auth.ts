@@ -208,6 +208,23 @@ export async function protectEmployeeRoute() {
   console.log('✓ Employee access granted');
 }
 
+/**
+ * Protects routes that require any authenticated session (all roles)
+ * Used for routes like /profile/* that should be accessible to any logged-in user
+ */
+export async function protectSessionRoute() {
+  const supabase = await createClient();
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+  if (!sessionData.session || sessionError) {
+    console.log('No session found, redirecting to login');
+    redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
+    return;
+  }
+
+  console.log('✓ Session access granted');
+}
+
 export async function signOutAction(): Promise<ServerActionResponse> {
   const supabase = await createClient();
   const {

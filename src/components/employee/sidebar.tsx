@@ -13,7 +13,7 @@ import { usePathname } from 'next/navigation';
 import { LogOutBtn } from '../sidebar/logout-btn';
 import { ProfilePic } from '../sidebar/profile-pic';
 import { RankWidget } from '../sidebar/rank-widget';
-import { ProfileModal } from './modals/profile-modal';
+import { ProfileModal } from '../sidebar/profile-modal';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
 import { useQuery } from '@tanstack/react-query';
@@ -71,6 +71,10 @@ export function Sidebar({
     },
     staleTime: 5 * 60 * 1000,
   });
+
+  const handleProfileClick = () => {
+    setShowProfileModal(true);
+  };
 
   return (
     <aside
@@ -137,7 +141,7 @@ export function Sidebar({
             isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
           }`}
         >
-          <ProfilePic user={user} onClick={() => setShowProfileModal(true)} />
+          <ProfilePic user={user} onClick={handleProfileClick} />
           {!isCollapsed && user && (
             <div className="min-w-0">
               <p className="font-semibold text-sm">{user.name}</p>
