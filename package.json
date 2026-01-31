@@ -44,11 +44,7 @@
     "cross-env": "^10.1.0",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.556.0",
-<<<<<<< HEAD
-    "next": "^16.1.6",
-=======
     "next": "16.1.5",
->>>>>>> f6d8e9ac8982cb39f051a9d4275e37513bfbdd27
     "react": "19.2.0",
     "react-day-picker": "^9.13.0",
     "react-dom": "^19.2.4",
