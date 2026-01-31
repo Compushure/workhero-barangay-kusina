@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { parseISO, format } from 'date-fns';
 import type { AssignedTask, AssignedEmployee } from '@/types';
-import { ChevronDown, CircleDashed, CircleCheck, CircleX, Target, Coins, Soup, X } from 'lucide-react';
+import { Coins, Soup } from 'lucide-react';
 import TaskViewCardMenu from './dialogs/task-view/task-view-card-menu';
 import EditTaskDialog from './dialogs/task-view/edit-task-dialog';
 import DeleteTaskDialog from './dialogs/task-view/delete-task-dialog';
@@ -138,7 +138,8 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   return (
     <div
-      className={`flex items-center justify-between rounded-2xl bg-[#FAFAFA] p-6 gap-8 transition-all ease-in-out duration-150 ${expanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`}
+      className={`flex items-center justify-between rounded-2xl bg-[#FAFAFA] p-6 gap-8 transition-all ease-in-out duration-150 
+        ${expanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`}
     >
       <main className="flex flex-col w-full gap-5">
         <section className="flex justify-between">

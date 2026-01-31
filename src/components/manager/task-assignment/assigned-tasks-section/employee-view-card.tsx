@@ -2,13 +2,10 @@
 
 import { useState, memo } from 'react';
 import type { AssignedTask, AssignedEmployee } from '@/types';
-import { ChevronDown, CircleCheck, CircleDashed, CircleX, Coins, Soup, Target, X } from 'lucide-react';
 import EmployeeViewCardMenu from './dialogs/employee-view/employee-view-card-menu';
 import ClearAllTasksDialog from './dialogs/employee-view/clear-all-tasks-dialog';
 import ClearTaskDialog from './dialogs/employee-view/clear-task-dialog';
 import EmployeeViewTaskBadges from './employee-view-task-badges';
-
-
 
 interface EmployeeViewCardProps {
   tasks: AssignedTask[];

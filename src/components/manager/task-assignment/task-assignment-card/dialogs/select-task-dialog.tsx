@@ -10,10 +10,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, ChevronDown } from 'lucide-react';
 import type { AssignedTask, Task } from '@/types';
 import SelectTasksTable from './select-task-table';
 import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface SelectTasksDialogProps {
   selectedTask: string[];
@@ -70,6 +76,8 @@ export function SelectTasksDialog({
 
   const taskTypes = ['all', ...new Set(tasks.map((t) => t.type))];
   const assignedTaskIds = new Set(assignedTasks.map((t) => t.taskId));
+  
+  const currentFilterLabel = filterType === 'all' ? 'All Types' : filterType;
 
   const toggleTask = (taskId: string) => {
     if (selectedTask.includes(taskId)) {
@@ -118,9 +126,8 @@ export function SelectTasksDialog({
     setSearchTerm(e.target.value);
   };
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    e.stopPropagation();
-    setFilterType(e.target.value);
+  const handleFilterChange = (value: string) => {
+    setFilterType(value);
   };
 
   return (
@@ -137,34 +144,45 @@ export function SelectTasksDialog({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="bg-[#FBF4E8] max-w-full min-w-4xl max-h-[90vh] flex flex-col p-6">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[#690003]">Select Tasks</DialogTitle>
+            <DialogTitle className="text-2xl text-[#690003] text-left">Select Tasks</DialogTitle>
           </DialogHeader>
 
           {/* Search and Filter */}
-          <div className="flex gap-4 mb-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <div className="flex gap-4 mb-4 justify-center">
+            <div className="relative flex w-1/2">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search Task"
                 value={searchTerm}
                 onChange={handleSearchChange}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full pl-10 pr-4 py-3 rounded-full bg-white shadow-sm/25 focus:outline-none focus:border-[#690003] font-sans"
+                className="w-full pl-10 pr-4 py-2 rounded-full text-sm bg-white shadow-sm/25 focus:outline-none focus:border-[#690003]"
               />
             </div>
-            <select
-              value={filterType}
-              onChange={handleFilterChange}
-              onClick={(e) => e.stopPropagation()}
-              className="px-4 py-3 rounded-full bg-white shadow-sm/25 focus:outline-none focus:border-[#690003] font-sans  cursor-pointer transition-all duration-500 ease-in-out"
-            >
-              {taskTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type === 'all' ? 'All Types' : type}
-                </option>
-              ))}
-            </select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="default"
+                  size="default"
+                  className="bg-white shadow-sm/25 hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-48 py-2 justify-between border border-gray-200"
+                >
+                  <span className="truncate">{currentFilterLabel}</span>
+                  <ChevronDown size={18} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {taskTypes.map((type) => (
+                  <DropdownMenuItem
+                    key={type}
+                    onClick={() => handleFilterChange(type)}
+                    className={`cursor-pointer transition-all duration-500 ease-in-out ${filterType === type ? 'bg-red-100' : ''}`}
+                  >
+                    {type === 'all' ? 'All Types' : type}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
 
@@ -182,7 +200,7 @@ export function SelectTasksDialog({
           />
 
           {/* Dialog Footer */}
-          <DialogFooter className="gap-3">
+          <DialogFooter className="gap-3 flex flex-row">
             <Button
               onClick={handleConfirm}
               disabled={selectedTask.length === 0}

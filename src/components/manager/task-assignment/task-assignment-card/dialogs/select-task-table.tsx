@@ -53,7 +53,7 @@ function SelectTasksTable({
                 >
                   <td className="w-[5%] p-4 text-center">
                     <input
-                      type="checkbox"
+                      type="radio"
                       checked={isSelected}
                       onChange={(e) => {
                         e.stopPropagation();
