@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,30 +10,63 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Search, Plus } from 'lucide-react';
-import type { AssignedEmployee } from '@/types';
-import { MOCK_EMPLOYEES } from '@/mock-data/employees';
+import type { AssignedEmployee, AssignedTask } from '@/types';
 import AssignEmployeesTable from './assign-employees-table';
+import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
 
 interface AssignEmployeesDialogProps {
   selectedEmployees: AssignedEmployee[];
   onEmployeesChange: (employees: AssignedEmployee[]) => void;
   disabled?: boolean;
+  selectedTaskIds?: string[];
+  assignedTasks?: AssignedTask[];
 }
 
 export function AssignEmployeesDialog({
   selectedEmployees,
   onEmployeesChange,
   disabled = false,
+  selectedTaskIds = [],
+  assignedTasks = [],
 }: AssignEmployeesDialogProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredEmployees = MOCK_EMPLOYEES.filter((emp) => {
+  const disabledEmployeeIds = useMemo(() => {
+    const disabledIds = new Set<string>();
+
+    selectedTaskIds.forEach((taskId) => {
+      assignedTasks.forEach((assignedTask) => {
+        if (assignedTask.taskId === taskId) {
+          assignedTask.assignedEmployees.forEach((emp) => {
+            disabledIds.add(emp.id);
+          });
+        }
+      });
+    });
+
+    return disabledIds;
+  }, [assignedTasks, selectedTaskIds]);
+
+  useEffect(() => {
+    async function loadEmployees() {
+      const data = await handleFetchEmployeeList();
+      setEmployees(data);
+      setIsLoading(false);
+    }
+    loadEmployees();
+  }, []);
+
+  const filteredEmployees = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
-    return (
-      emp.name.toLowerCase().includes(searchLower) || emp.empId.toLowerCase().includes(searchLower)
+    return employees.filter(
+      (emp) =>
+        emp.name.toLowerCase().includes(searchLower) ||
+        emp.empId.toLowerCase().includes(searchLower)
     );
-  });
+  }, [employees, searchTerm]);
 
   const allFilteredSelected = useMemo(() => {
     if (filteredEmployees.length === 0) return false;
@@ -55,9 +88,9 @@ export function AssignEmployeesDialog({
       const filteredIds = new Set(filteredEmployees.map((e) => e.id));
       onEmployeesChange(selectedEmployees.filter((emp) => !filteredIds.has(emp.id)));
     } else {
-      // Select all filtered employees
+      // Select all filtered employees (excluding disabled ones)
       const newSelections = filteredEmployees.filter(
-        (emp) => !selectedEmployees.find((e) => e.id === emp.id)
+        (emp) => !selectedEmployees.find((e) => e.id === emp.id) && !disabledEmployeeIds.has(emp.id)
       );
       onEmployeesChange([...selectedEmployees, ...newSelections]);
     }
@@ -119,12 +152,13 @@ export function AssignEmployeesDialog({
           </div>
 
           {/* Employees Table */}
-          <AssignEmployeesTable 
-            allFilteredSelected={allFilteredSelected} 
-            handleSelectAll={handleSelectAll} 
+          <AssignEmployeesTable
+            allFilteredSelected={allFilteredSelected}
+            handleSelectAll={handleSelectAll}
             filteredEmployees={filteredEmployees}
-            selectedEmployees={selectedEmployees} 
+            selectedEmployees={selectedEmployees}
             toggleEmployee={toggleEmployee}
+            disabledEmployeeIds={disabledEmployeeIds}
           />
 
           {/* Dialog Footer */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,21 +17,34 @@ interface ConfirmationDialogProps {
   type: 'approve' | 'deny' | null;
   onCancel: () => void;
   onConfirm: (remark: string) => void;
+  isProcessing?: boolean;
 }
 
-export function ConfirmationDialog({ open, type, onCancel, onConfirm }: ConfirmationDialogProps) {
+export function ConfirmationDialog({ open, type, onCancel, onConfirm, isProcessing = false }: ConfirmationDialogProps) {
   const [remark, setRemark] = useState('');
   const [error, setError] = useState('');
+  const [isConfirming, setIsConfirming] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   const title = type === 'approve' ? 'Confirm Approval' : type === 'deny' ? 'Confirm Denial' : '';
   const isRequired = type === 'deny';
+  
+  // Disable if either the modal's internal state OR the parent's processing state is true
+  const isDisabled = isConfirming || isProcessing;
 
   const handleConfirm = () => {
+    // Prevent multiple submissions using ref (synchronous check)
+    if (isSubmittingRef.current || isProcessing) return;
+
     // Validate remarks for deny action
     if (isRequired && !remark.trim()) {
       setError('Remarks are required for denial');
       return;
     }
+
+    // Mark as submitting immediately (synchronous)
+    isSubmittingRef.current = true;
+    setIsConfirming(true);
 
     // Clear error and trigger callback
     setError('');
@@ -47,7 +60,9 @@ export function ConfirmationDialog({ open, type, onCancel, onConfirm }: Confirma
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
+      isSubmittingRef.current = false; // Reset ref when dialog closes
       handleCancel();
+      setIsConfirming(false); // Reset confirming state when dialog closes
     }
   };
 
@@ -83,7 +98,8 @@ export function ConfirmationDialog({ open, type, onCancel, onConfirm }: Confirma
                 setRemark(e.target.value);
                 if (error) setError(''); // Clear error on input
               }}
-              className="min-h-24 resize-none"
+              disabled={isDisabled}
+              className="min-h-24 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
               aria-required={isRequired}
               aria-invalid={!!error}
               aria-describedby={error ? 'remark-error' : undefined}
@@ -97,15 +113,16 @@ export function ConfirmationDialog({ open, type, onCancel, onConfirm }: Confirma
         </div>
 
         <DialogFooter className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={handleCancel}>
+          <Button variant="outline" onClick={handleCancel} disabled={isDisabled}>
             Cancel
           </Button>
           <Button
             variant={type === 'approve' ? 'default' : 'destructive'}
             onClick={handleConfirm}
+            disabled={isDisabled}
             className={type === 'approve' ? 'bg-[#690003] hover:bg-[#af3b3f]' : ''}
           >
-            Confirm
+            {isProcessing || isConfirming ? 'Processing...' : 'Confirm'}
           </Button>
         </DialogFooter>
       </DialogContent>

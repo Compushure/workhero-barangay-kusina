@@ -4,8 +4,9 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
-export default function ErrorPage() {
+function ErrorPageContent() {
   const params = useSearchParams();
   const router = useRouter();
 
@@ -79,5 +80,13 @@ export default function ErrorPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function ErrorPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">Loading...</div>}>
+      <ErrorPageContent />
+    </Suspense>
   );
 }

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { AssignedEmployee } from "@/types";
-import { useTaskAssignment } from "../../../task-assignment-page-context";
+import { useClearAllEmployeeTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface ClearAllTasksDialogProps {
   showClearConfirm: string | null, 
@@ -10,7 +10,20 @@ interface ClearAllTasksDialogProps {
 }
 
 function ClearAllTasksDialog({showClearConfirm, setShowClearConfirm, employee } : ClearAllTasksDialogProps) {
-  const { clearAllEmployeeTasks } = useTaskAssignment();
+  const clearAllEmployeeTasksMutation = useClearAllEmployeeTasksMutation();
+
+  const handleClearAllTasks = async () => {
+    if (!showClearConfirm) return;
+    
+    clearAllEmployeeTasksMutation.mutate(
+      { employeeId: showClearConfirm },
+      {
+        onSuccess: () => {
+          setShowClearConfirm(null);
+        },
+      }
+    );
+  };
 
   return (
     <Dialog
@@ -29,20 +42,17 @@ function ClearAllTasksDialog({showClearConfirm, setShowClearConfirm, employee } 
             <Button
               variant="outline"
               onClick={() => setShowClearConfirm(null)}
+              disabled={clearAllEmployeeTasksMutation.isPending}
               className="border-gray-300"
             >
               Cancel
             </Button>
             <Button
-              onClick={() => {
-                if (showClearConfirm && clearAllEmployeeTasks) {
-                  clearAllEmployeeTasks(showClearConfirm);
-                }
-                setShowClearConfirm(null);
-              }}
+              onClick={handleClearAllTasks}
+              disabled={clearAllEmployeeTasksMutation.isPending}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              Clear All
+              {clearAllEmployeeTasksMutation.isPending ? 'Clearing...' : 'Clear All'}
             </Button>
           </div>
         </div>

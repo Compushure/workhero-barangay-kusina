@@ -1,11 +1,21 @@
 import { Button } from "@/components/ui/button";
+import { useClearAllTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface ClearAllDialogProps {
-  setShowClearConfirm: (show: boolean) => void, 
-  onClearAll: () => void
+  setShowClearConfirm: (show: boolean) => void
 }
 
-function ClearAllDialog({ setShowClearConfirm, onClearAll } : ClearAllDialogProps) {
+function ClearAllDialog({ setShowClearConfirm } : ClearAllDialogProps) {
+  const clearAllMutation = useClearAllTasksMutation();
+
+  const handleClearAll = async () => {
+    clearAllMutation.mutate(undefined, {
+      onSuccess: () => {
+        setShowClearConfirm(false);
+      },
+    });
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-6 max-w-sm shadow-lg">
@@ -17,18 +27,17 @@ function ClearAllDialog({ setShowClearConfirm, onClearAll } : ClearAllDialogProp
           <Button
             variant="outline"
             onClick={() => setShowClearConfirm(false)}
+            disabled={clearAllMutation.isPending}
             className="border-gray-300"
           >
             Cancel
           </Button>
           <Button
-            onClick={() => {
-              onClearAll();
-              setShowClearConfirm(false);
-            }}
+            onClick={handleClearAll}
+            disabled={clearAllMutation.isPending}
             className="bg-[#690003] hover:bg-[#8B0000] text-white"
           >
-            Clear All
+            {clearAllMutation.isPending ? 'Clearing...' : 'Clear All'}
           </Button>
         </div>
       </div>

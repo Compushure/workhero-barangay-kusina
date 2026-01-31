@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { AssignedEmployee } from "@/types";
-import { useTaskAssignment } from "../../../task-assignment-page-context";
+import { useDeleteTaskMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface ClearTaskDialogProps {
 showRemoveConfirm: {
@@ -16,7 +16,21 @@ employee: AssignedEmployee
 }
 
 function ClearTaskDialog({showRemoveConfirm, setShowRemoveConfirm, employee} : ClearTaskDialogProps) {
-  const { removeAssignment } = useTaskAssignment();
+  const deleteTaskMutation = useDeleteTaskMutation();
+
+  const handleRemoveAssignment = async () => {
+    if (!showRemoveConfirm) return;
+    
+    // Use the mutation which will handle cache invalidation
+    deleteTaskMutation.mutate(
+      { taskId: showRemoveConfirm.taskId },
+      {
+        onSuccess: () => {
+          setShowRemoveConfirm(null);
+        },
+      }
+    );
+  };
 
   return (
     <Dialog
@@ -34,20 +48,17 @@ function ClearTaskDialog({showRemoveConfirm, setShowRemoveConfirm, employee} : C
             <Button
               variant="outline"
               onClick={() => setShowRemoveConfirm(null)}
+              disabled={deleteTaskMutation.isPending}
               className="border-gray-300"
             >
               Cancel
             </Button>
             <Button
-              onClick={() => {
-                if (showRemoveConfirm) {
-                  removeAssignment(showRemoveConfirm.taskId, showRemoveConfirm.empId);
-                  setShowRemoveConfirm(null);
-                }
-              }}
+              onClick={handleRemoveAssignment}
+              disabled={deleteTaskMutation.isPending}
               className="bg-[#690003] hover:bg-[#8B0000] text-white"
             >
-              Unassign
+              {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
             </Button>
           </div>
         </div>

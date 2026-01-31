@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,18 +12,18 @@ import {
 } from '@/components/ui/dialog';
 import { Search, Plus } from 'lucide-react';
 import type { AssignedTask, Task } from '@/types';
-import { MOCK_TASKS } from '@/mock-data/employees';
 import SelectTasksTable from './select-task-table';
+import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
 
 interface SelectTasksDialogProps {
-  selectedTasks: string[];
-  onTasksChange: (tasks: string[], maxAttempts?: Record<string, number>) => void;
+  selectedTask: string[];
+  onTasksChange: (tasks: string[], maxOrders?: Record<string, number>) => void;
   assignedTasks?: AssignedTask[];
   buttonLabel?: string;
 }
 
 export function SelectTasksDialog({
-  selectedTasks,
+  selectedTask,
   onTasksChange,
   assignedTasks = [],
   buttonLabel,
@@ -31,10 +31,12 @@ export function SelectTasksDialog({
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
-  const [taskMaxAttempts, setTaskMaxAttempts] = useState<Record<string, number>>(() => {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [taskMaxOrders, setTaskMaxOrders] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
-    selectedTasks.forEach((taskId) => {
-      const task = MOCK_TASKS.find((t) => t.id === taskId);
+    selectedTask.forEach((taskId) => {
+      const task = tasks.find((t) => t.id === taskId);
       if (task && task.isRepeatable) {
         initial[taskId] = 1;
       }
@@ -42,38 +44,57 @@ export function SelectTasksDialog({
     return initial;
   });
 
-  const filteredTasks = MOCK_TASKS.filter((task) => {
+  // Reset taskMaxOrders when selectedTask becomes empty
+  useEffect(() => {
+    if (selectedTask.length === 0) {
+      setTaskMaxOrders({});
+    }
+  }, [selectedTask]);
+
+  // Fetch tasks on mount
+  useEffect(() => {
+    async function loadTasks() {
+      const data = await handleFetchTaskList();
+      setTasks(data);
+      setIsLoading(false);
+    }
+    loadTasks();
+  }, []);
+
+  const filteredTasks = tasks.filter((task) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = task.name.toLowerCase().includes(searchLower);
     const matchesType = filterType === 'all' || task.type === filterType;
     return matchesSearch && matchesType;
   });
 
-  const taskTypes = ['all', ...new Set(MOCK_TASKS.map((t) => t.type))];
+  const taskTypes = ['all', ...new Set(tasks.map((t) => t.type))];
   const assignedTaskIds = new Set(assignedTasks.map((t) => t.taskId));
 
   const toggleTask = (taskId: string) => {
-    if (selectedTasks.includes(taskId)) {
+    if (selectedTask.includes(taskId)) {
       // Deselect
       onTasksChange([], {});
-      setTaskMaxAttempts({});
+      setTaskMaxOrders({});
     } else {
       // Select this task and deselect others
-      const task = MOCK_TASKS.find((t) => t.id === taskId);
+      const task = tasks.find((t) => t.id === taskId);
       if (task) {
-        const newMaxAttempts = { [taskId]: task.isRepeatable ? 1 : 1 };
-        setTaskMaxAttempts(newMaxAttempts);
-        onTasksChange([taskId], newMaxAttempts);
+        const newMaxOrders = { [taskId]: task.isRepeatable ? 1 : 1 };
+        setTaskMaxOrders(newMaxOrders);
+        onTasksChange([taskId], newMaxOrders);
       }
     }
   };
 
-  const updateMaxAttempts = (taskId: string, newValue: number) => {
-    const task = MOCK_TASKS.find((t) => t.id === taskId);
+
+
+  const updateMaxOrders = (taskId: string, newValue: number) => {
+    const task = tasks.find((t) => t.id === taskId);
     if (task && task.isRepeatable) {
-      const newMaxAttempts = { ...taskMaxAttempts, [taskId]: Math.max(1, newValue) };
-      setTaskMaxAttempts(newMaxAttempts);
-      onTasksChange(selectedTasks, newMaxAttempts);
+      const newMaxOrders = { ...taskMaxOrders, [taskId]: Math.max(1, newValue) };
+      setTaskMaxOrders(newMaxOrders);
+      onTasksChange(selectedTask, newMaxOrders);
     }
   };
 
@@ -110,7 +131,7 @@ export function SelectTasksDialog({
         onClick={() => setOpen(true)}
         className="bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2 min-w-50 justify-between"
       >
-        <span className="truncate">{buttonLabel || `${selectedTasks.length} selected`}</span>
+        <span className="truncate">{buttonLabel}</span>
         <Plus className="w-4 h-4 shrink-0" />
       </Button>
 
@@ -152,19 +173,21 @@ export function SelectTasksDialog({
             <h4 className="text-lg font-bold text-[#690003]">
               Tasks Selected
               <span className="bg-gray-200 px-2 py-1 rounded-full text-sm ml-2">
-                {selectedTasks.length}
+                {selectedTask.length}
               </span>
             </h4>
           </div>
 
           {/* Tasks Table */}
           <SelectTasksTable
-          filteredTasks={filteredTasks} 
-          toggleTask={toggleTask}
-          updateMaxAttempts={updateMaxAttempts}
-          selectedTasks={selectedTasks}
-          taskMaxAttempts={taskMaxAttempts}
-          assignedTaskIds={assignedTaskIds}
+            filteredTasks={filteredTasks}
+            toggleTask={toggleTask}
+            updateMaxOrders={updateMaxOrders}
+            selectedTaskInstance={selectedTask.map((taskId) => ({
+              id: taskId,
+              maxOrders: taskMaxOrders[taskId] || 1,
+            }))}
+            taskMaxOrders={taskMaxOrders}
           />
 
           {/* Dialog Footer */}
@@ -178,7 +201,7 @@ export function SelectTasksDialog({
             </Button>
             <Button
               onClick={handleConfirm}
-              disabled={selectedTasks.length === 0}
+              disabled={selectedTask.length === 0}
               className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50"
             >
               Confirm

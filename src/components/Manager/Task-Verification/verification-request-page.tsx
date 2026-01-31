@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { PageHeader } from '@/components/manager/task-verification/page-header';
 import { SearchBar } from '@/components/manager/task-verification/search-bar';
 import { SortButton } from '@/components/manager/task-verification/sort-button';
@@ -27,6 +27,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const [remark, setRemark] = useState('');
   const [approvedPage, setApprovedPage] = useState(1);
   const [deniedPage, setDeniedPage] = useState(1);
+  const isSubmittingRef = useRef(false);
 
   // Use paginated Tanstack Query hooks with separate pagination for each category
   const { data: pendingData, isLoading: isLoadingPending } =
@@ -38,8 +39,8 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
 
-  // Extract tasks based on current sort category
-  const getCurrentTasks = () => {
+  // Extract tasks based on current sort category - memoized to prevent unnecessary recalculations
+  const getCurrentTasks = useMemo(() => {
     switch (sortBy) {
       case 'pending':
         return pendingData?.data ?? initialRequests;
@@ -50,10 +51,10 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       default:
         return initialRequests;
     }
-  };
+  }, [sortBy, pendingData, approvedData, deniedData, initialRequests]);
 
-  // Get total pages for current category
-  const getTotalPages = () => {
+  // Get total pages for current category - memoized to prevent unnecessary recalculations
+  const getTotalPages = useMemo(() => {
     switch (sortBy) {
       case 'pending':
         return pendingData?.totalPages ?? 1;
@@ -64,10 +65,10 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       default:
         return 1;
     }
-  };
+  }, [sortBy, pendingData, approvedData, deniedData]);
 
-  // Get current page based on sort category
-  const getCurrentPage = () => {
+  // Get current page based on sort category - memoized to prevent unnecessary recalculations
+  const getCurrentPage = useMemo(() => {
     switch (sortBy) {
       case 'pending':
         return pendingPage;
@@ -78,7 +79,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       default:
         return 1;
     }
-  };
+  }, [sortBy, pendingPage, approvedPage, deniedPage]);
 
   const handlePageChange = (page: number) => {
     switch (sortBy) {
@@ -94,9 +95,10 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
     }
   };
 
-  const currentTasks = getCurrentTasks();
-  const totalPages = getTotalPages();
-  const currentPage = getCurrentPage();
+  // Use memoized values directly instead of calling functions
+  const currentTasks = getCurrentTasks;
+  const totalPages = getTotalPages;
+  const currentPage = getCurrentPage;
 
   // Filter requests based on search term (pagination already done server-side by status)
   const filteredRequests = useMemo(() => {
@@ -112,25 +114,33 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
     );
   }, [currentTasks, searchTerm]);
 
-  const handleApprove = (id: string, remark: string) => {
+  const resetConfirmState = () => setConfirmAction({ type: null, id: null });
+
+  const handleApprove = (id: string, remarkText: string) => {
     approveTask.mutate(
-      { id, remark },
+      { id, remark: remarkText },
       {
         onSuccess: () => {
-          setConfirmAction({ type: null, id: null });
+          resetConfirmState();
           setRemark('');
+        },
+        onSettled: () => {
+          isSubmittingRef.current = false;
         },
       }
     );
   };
 
-  const handleDeny = (id: string, remark: string) => {
+  const handleDeny = (id: string, remarkText: string) => {
     rejectTask.mutate(
-      { id, remark },
+      { id, remark: remarkText },
       {
         onSuccess: () => {
-          setConfirmAction({ type: null, id: null });
+          resetConfirmState();
           setRemark('');
+        },
+        onSettled: () => {
+          isSubmittingRef.current = false;
         },
       }
     );
@@ -145,10 +155,17 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   });
 
   const handleConfirm = (remark: string) => {
-    if (confirmAction.type === 'approve' && confirmAction.id) {
+    if (isSubmittingRef.current) return;
+    if (!confirmAction.type || !confirmAction.id) return;
+
+    // Close the modal immediately to block further interaction
+    resetConfirmState();
+    isSubmittingRef.current = true;
+
+    if (confirmAction.type === 'approve') {
       handleApprove(confirmAction.id, remark);
     }
-    if (confirmAction.type === 'deny' && confirmAction.id) {
+    if (confirmAction.type === 'deny') {
       handleDeny(confirmAction.id, remark);
     }
   };
@@ -194,6 +211,9 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
         type={confirmAction.type}
         onCancel={() => setConfirmAction({ type: null, id: null })}
         onConfirm={handleConfirm}
+        isProcessing={
+          approveTask.isPending || rejectTask.isPending || isSubmittingRef.current
+        }
       />
     </div>
   );

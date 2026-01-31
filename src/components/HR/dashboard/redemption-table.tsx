@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Check, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Pagination } from '@/components/manager/task-verification/pagination';
 import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
 } from '@/hooks/tanstack/mutations/hrMutations';
-import { RemarksDialog } from '@/components/hr/dashboard/remarks';
+import { RemarksDialog } from './remarks';
 import type { RedemptionRequest } from '@/types';
 
 interface RedemptionTableProps {
@@ -22,6 +23,24 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  // Pagination logic
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = useMemo(
+    () => data.slice(startIndex, endIndex),
+    [data, startIndex, endIndex]
+  );
+
+  // Reset to page 1 when data changes and current page is invalid
+  useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [data.length, currentPage, totalPages]);
 
   const toggleRow = (id: string) => {
     const newExpanded = new Set(expandedRows);
@@ -50,6 +69,7 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
     if (selectedRequestId) {
       acceptMutation.mutate({ id: selectedRequestId, remarks });
       setSelectedRequestId(null);
+      setAcceptDialogOpen(false); // close to prevent repeat clicks
     }
   };
 
@@ -57,21 +77,22 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
     if (selectedRequestId) {
       declineMutation.mutate({ id: selectedRequestId, remarks });
       setSelectedRequestId(null);
+      setDeclineDialogOpen(false); // close to prevent repeat clicks
     }
   };
 
   // Format date and time from ISO string
   const formatDateTime = (isoString: string) => {
     const date = new Date(isoString);
-    const dateStr = date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
+    const dateStr = date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
     });
-    const timeStr = date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
+    const timeStr = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
     });
     return { dateStr, timeStr };
   };
@@ -91,12 +112,12 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
 
       {/* Table Body */}
       <div className="divide-y divide-border bg-[#fff8f5]">
-        {data.map((request) => {
+        {paginatedData.map((request) => {
           const { dateStr, timeStr } = formatDateTime(request.requestedAt);
           const quantity = request.quantity || 1; // Default to 1 if not set
           const totalCost = request.pointsCost * quantity;
           const itemDisplay = `${quantity} x ${request.rewardName}`;
-          
+
           return (
             <div
               key={request.id}
@@ -153,6 +174,17 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
         })}
       </div>
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="bg-[#fff8f5] py-4">
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
+
       {/* Remarks Dialogs */}
       <RemarksDialog
         open={acceptDialogOpen}
@@ -161,6 +193,7 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
         title="Accept Request (Optional Remark)"
         description="If you wish to continue with the acceptance without any remarks, simply click OK."
         placeholder="Type in any comments you wish to send alongside the acceptance."
+        isProcessing={acceptMutation.isPending || declineMutation.isPending}
       />
 
       <RemarksDialog
@@ -172,6 +205,7 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
         placeholder="Enter remarks explaining the denial (required)"
         required={true}
         confirmVariant="destructive"
+        isProcessing={acceptMutation.isPending || declineMutation.isPending}
       />
     </div>
   );

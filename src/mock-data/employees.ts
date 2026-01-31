@@ -16,7 +16,7 @@ export const MOCK_EMPLOYEES: AssignedEmployee[] = [
     empId: 'EMP001',
     tenure: 'Junior staff',
     assignedTasks: [],
-    completedAttempts: 0,
+    completedOrders: 0,
   },
   {
     id: '2',
@@ -24,25 +24,39 @@ export const MOCK_EMPLOYEES: AssignedEmployee[] = [
     empId: 'EMP002',
     tenure: 'Senior staff',
     assignedTasks: [],
-    completedAttempts: 0,
+    completedOrders: 0,
   },
-  { id: '3', name: 'Mariah Carey', empId: 'EMP003', tenure: 'Mid-level', assignedTasks: [], completedAttempts: 0 },
+  {
+    id: '3',
+    name: 'Mariah Carey',
+    empId: 'EMP003',
+    tenure: 'Mid-level',
+    assignedTasks: [],
+    completedOrders: 0,
+  },
   {
     id: '4',
     name: 'Joshua Ullimer A. Demerin',
     empId: 'EMP004',
     tenure: 'Junior staff',
     assignedTasks: [],
-    completedAttempts: 0,
+    completedOrders: 0,
   },
-  { id: '5', name: 'Damon Albarn', empId: 'EMP005', tenure: 'Senior staff', assignedTasks: [], completedAttempts: 0 },
+  {
+    id: '5',
+    name: 'Damon Albarn',
+    empId: 'EMP005',
+    tenure: 'Senior staff',
+    assignedTasks: [],
+    completedOrders: 0,
+  },
   {
     id: '6',
     name: 'José Protacio Rizal Mercado y Alonso',
     empId: 'EMP006',
     tenure: 'Junior Staff',
     assignedTasks: [],
-    completedAttempts: 0,
+    completedOrders: 0,
   },
   {
     id: '7',
@@ -50,7 +64,7 @@ export const MOCK_EMPLOYEES: AssignedEmployee[] = [
     empId: 'EMP007',
     tenure: 'Junior Staff',
     assignedTasks: [],
-    completedAttempts: 0,
+    completedOrders: 0,
   },
   {
     id: '8',
@@ -58,7 +72,7 @@ export const MOCK_EMPLOYEES: AssignedEmployee[] = [
     empId: 'EMP008',
     tenure: 'Junior Staff',
     assignedTasks: [],
-    completedAttempts: 0,
+    completedOrders: 0,
   },
 ];
 
@@ -70,7 +84,7 @@ export const MOCK_TASKS: Task[] = [
     isRepeatable: true,
     points: 5,
     xp: 25,
-    maxAttempts: 5,
+    maxOrders: 5,
   },
   {
     id: 'task2',
@@ -79,7 +93,7 @@ export const MOCK_TASKS: Task[] = [
     isRepeatable: false,
     points: 5,
     xp: 25,
-    maxAttempts: 1,
+    maxOrders: 1,
   },
   {
     id: 'task3',
@@ -88,7 +102,7 @@ export const MOCK_TASKS: Task[] = [
     isRepeatable: true,
     points: 3,
     xp: 25,
-    maxAttempts: 5,
+    maxOrders: 5,
   },
   {
     id: 'task4',
@@ -97,7 +111,7 @@ export const MOCK_TASKS: Task[] = [
     isRepeatable: false,
     points: 5,
     xp: 25,
-    maxAttempts: 1,
+    maxOrders: 1,
   },
   {
     id: 'task5',
@@ -106,6 +120,6 @@ export const MOCK_TASKS: Task[] = [
     isRepeatable: true,
     points: 5,
     xp: 25,
-    maxAttempts: 5,
+    maxOrders: 5,
   },
 ];

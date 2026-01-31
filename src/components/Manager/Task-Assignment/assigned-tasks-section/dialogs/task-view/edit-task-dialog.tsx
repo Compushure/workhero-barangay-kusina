@@ -8,17 +8,20 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { DatePickerPopover } from '../../../task-assignment-card/date-picker-popover';
-import { MOCK_EMPLOYEES } from '@/mock-data/employees';
 import { Button } from '@/components/ui/button';
-import { AssignedTask } from '@/types';
+import { AssignedTask, AssignedEmployee } from '@/types';
+import { useEffect, useMemo, useState } from 'react';
+import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import { useGetCurrentAssignedTasksPaginated } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 
 interface EditTaskDialogProps {
   showEditDialog: boolean;
   handleCancelEdit: () => void;
   handleEditTask: () => void;
+  isProcessing?: boolean;
   task: AssignedTask;
-  editMaxAttempts: number;
-  setEditMaxAttempts: (edit: number) => void;
+  editMaxOrders: number;
+  setEditMaxOrders: (edit: number) => void;
   editDueDate: Date;
   setEditDueDate: (edit: Date) => void;
   editAssignedEmployees: string[];
@@ -29,14 +32,53 @@ export default function EditTaskDialog({
   showEditDialog,
   handleCancelEdit,
   handleEditTask,
+  isProcessing = false,
   task,
-  editMaxAttempts,
-  setEditMaxAttempts,
+  editMaxOrders,
+  setEditMaxOrders,
   editDueDate,
   setEditDueDate,
   editAssignedEmployees,
   toggleEmployee,
 }: EditTaskDialogProps) {
+  const assignedTasksQuery = useGetCurrentAssignedTasksPaginated(
+    1,
+    1000,
+    'recently added',
+    '',
+    showEditDialog
+  );
+  const assignedTasks = assignedTasksQuery.data?.tasks ?? [];
+
+  // ✅ Fetch employees from DB instead of mock data
+  const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
+  useEffect(() => {
+    async function loadEmployees() {
+      const data = await handleFetchEmployeeList();
+      setEmployees(data);
+    }
+    loadEmployees();
+  }, []);
+
+  // Get all employees assigned to other instances of this task
+  const disabledEmployeeIds = useMemo(() => {
+    const otherTaskInstanceEmployees = new Set<string>();
+    assignedTasks.forEach((assignedTask) => {
+      if (assignedTask.taskId === task.taskId && assignedTask.id !== task.id) {
+        (assignedTask.assignedEmployees ?? []).forEach((emp) => {
+          otherTaskInstanceEmployees.add(emp.id);
+        });
+      }
+    });
+
+    // An employee is disabled if they're assigned to another instance of this task
+    return new Set<string>(
+      Array.from(otherTaskInstanceEmployees).filter(
+        (empId) => !editAssignedEmployees.includes(empId)
+      )
+    );
+  }, [assignedTasks, editAssignedEmployees, task.id, task.taskId]);
+
   return (
     <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>
       <DialogContent className="bg-[#FBF4E8] max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -45,7 +87,7 @@ export default function EditTaskDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Task Info (Read-only display) */}
+          {/* Task Info */}
           <div className="bg-white rounded-xl p-4 border-2 border-gray-300">
             <h4 className="text-lg font-bold text-[#690003] mb-2">{task.taskName}</h4>
             <p className="text-sm text-gray-600">{task.points}pts / attempt</p>
@@ -57,14 +99,22 @@ export default function EditTaskDialog({
               <label className="font-bold text-[#690003]">Max Repeats</label>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setEditMaxAttempts(Math.max(1, editMaxAttempts - 1))}
+                  onClick={() => setEditMaxOrders(Math.max(1, editMaxOrders - 1))}
                   className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
                 >
                   −
                 </button>
-                <span className="w-8 text-center font-bold">{editMaxAttempts}</span>
+                <input
+                  type="number"
+                  value={editMaxOrders}
+                  onChange={(e) =>
+                    setEditMaxOrders(Math.max(1, Number.parseInt(e.target.value) || 1))
+                  }
+                  className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 font-sans bg-[#fafafa]"
+                  min="1"
+                />
                 <button
-                  onClick={() => setEditMaxAttempts(editMaxAttempts + 1)}
+                  onClick={() => setEditMaxOrders(editMaxOrders + 1)}
                   className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000]"
                 >
                   +
@@ -87,30 +137,41 @@ export default function EditTaskDialog({
             <h4 className="font-bold text-[#690003]">Assign/Remove Employees</h4>
             <div className="bg-white rounded-xl p-4 border-2 border-gray-300 max-h-75 overflow-y-auto">
               <div className="space-y-2">
-                {MOCK_EMPLOYEES.map((emp) => (
-                  <div
-                    key={emp.id}
-                    className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded"
-                    onClick={() => toggleEmployee(emp.id)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={editAssignedEmployees.includes(emp.id)}
-                      onChange={() => {}}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleEmployee(emp.id);
-                      }}
-                      className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
-                    />
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-800">{emp.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {emp.empId} - {emp.tenure}
-                      </p>
+                {employees.map((emp) => {
+                  const isDisabled = disabledEmployeeIds.has(emp.id);
+                  const isSelected = editAssignedEmployees.includes(emp.id);
+
+                  return (
+                    <div
+                      key={emp.id}
+                      className={`flex items-center gap-3 p-2 rounded ${
+                        isDisabled
+                          ? 'opacity-50 cursor-not-allowed bg-gray-100'
+                          : 'hover:bg-gray-50 cursor-pointer'
+                      }`}
+                      onClick={() => !isDisabled && toggleEmployee(emp.id)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        disabled={isDisabled}
+                        onChange={() => {}}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isDisabled) toggleEmployee(emp.id);
+                        }}
+                        className="w-5 h-5 rounded cursor-pointer accent-[#690003] disabled:cursor-not-allowed"
+                      />
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-800">{emp.name}</p>
+                        <p className="text-sm text-gray-500">{emp.empId}</p>
+                      </div>
+                      {isDisabled && (
+                        <span className="text-xs text-gray-500 ml-2">Already assigned</span>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -120,16 +181,17 @@ export default function EditTaskDialog({
           <Button
             variant="outline"
             onClick={handleCancelEdit}
+            disabled={isProcessing}
             className="border-gray-300 bg-transparent"
           >
             Cancel
           </Button>
           <Button
             onClick={handleEditTask}
-            disabled={editAssignedEmployees.length === 0}
+            disabled={editAssignedEmployees.length === 0 || isProcessing}
             className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50"
           >
-            Confirm
+            {isProcessing ? 'Saving...' : 'Confirm'}
           </Button>
         </DialogFooter>
       </DialogContent>

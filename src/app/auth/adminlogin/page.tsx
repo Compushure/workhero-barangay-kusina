@@ -7,7 +7,6 @@
 
 import { Suspense } from 'react';
 import { AdminClient } from '@/components/admin/admin-client';
-import { redirect } from 'next/navigation';
 import { redirectifSessionExists } from '@/actions/auth';
 
 export function LoadingFallback() {

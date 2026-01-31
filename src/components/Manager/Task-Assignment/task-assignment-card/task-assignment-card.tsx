@@ -1,27 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
 import { SelectTasksDialog } from './dialogs/select-task-dialog';
 import { DatePickerPopover } from './date-picker-popover';
-import type { SelectedFilters, AssignedEmployee, AssignedTask } from '@/types';
-import { MOCK_TASKS } from '@/mock-data/employees';
+import type { AssignedEmployee, Task } from '@/types';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
+import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
+import {
+  useGetCurrentAssignedTasksPaginated,
+  managerAssignmentKeys,
+} from '@/hooks/tanstack/queries/managerAssignmentQueries';
 
 export function TaskAssignmentCard() {
   const { assignTasks, assignedTasks } = useTaskAssignment();
+  const queryClient = useQueryClient();
 
+  const assignedTasksQuery = useGetCurrentAssignedTasksPaginated(1, 1000, 'recently added', '', true);
+  const assignedTasksForAssign = assignedTasksQuery.data?.tasks ?? assignedTasks;
+
+  const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<AssignedEmployee[]>([]);
-  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [selectedTask, setselectedTask] = useState<string[]>([]);
   const [taskMaxRepeats, setTaskMaxRepeats] = useState<Record<string, number>>({});
   const [selectedDeadline, setSelectedDeadline] = useState<Date | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showTaskWarning, setShowTaskWarning] = useState(false);
 
+  useEffect(() => {
+    async function loadTasks() {
+      const tasks = await handleFetchTaskList();
+      setAvailableTasks(tasks);
+    }
+    loadTasks();
+  }, []);
+
   const handleTasksChange = (tasks: string[], maxRepeats?: Record<string, number>) => {
-    setSelectedTasks(tasks);
+    setselectedTask(tasks);
     if (maxRepeats) {
       setTaskMaxRepeats(maxRepeats);
     }
@@ -30,23 +48,36 @@ export function TaskAssignmentCard() {
     }
   };
 
-  const handleAssign = () => {
-    if (selectedEmployees.length > 0 && selectedTasks.length > 0 && selectedDeadline) {
-      assignTasks({
+  const handleAssign = async () => {
+    if (selectedEmployees.length > 0 && selectedTask.length > 0 && selectedDeadline) {
+      // Your dialog logic currently supports single task selection
+      const taskId = selectedTask[0];
+      const employeeIds = selectedEmployees.map((emp) => emp.id);
+      const startDate = new Date().toISOString();
+      const endDate = selectedDeadline.toISOString();
+      const maxOrders = taskMaxRepeats[taskId] || 1;
+
+      // Call the server action handler - this will update the context automatically
+      await assignTasks({
         employees: selectedEmployees,
-        tasks: selectedTasks.map((taskId) => ({
-          id: taskId,
-          maxAttempts: taskMaxRepeats[taskId] || 1,
+        tasks: selectedTask.map((id) => ({
+          id,
+          maxOrders: taskMaxRepeats[id] || 1,
         })),
         deadline: selectedDeadline,
       });
+
+      // Ensure assignment lists refresh for disabled employee calculations
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
+
       handleClear();
     }
   };
 
   const handleClear = () => {
     setSelectedEmployees([]);
-    setSelectedTasks([]);
+    setselectedTask([]);
     setTaskMaxRepeats({});
     setSelectedDeadline(null);
     setShowClearConfirm(false);
@@ -54,14 +85,14 @@ export function TaskAssignmentCard() {
   };
 
   const handleEmployeesDialogAttempt = () => {
-    if (selectedTasks.length === 0) {
+    if (selectedTask.length === 0) {
       setShowTaskWarning(true);
     }
   };
 
   const getSelectedTaskName = () => {
-    if (selectedTasks.length === 0) return 'Select Task';
-    const task = MOCK_TASKS.find((t) => t.id === selectedTasks[0]);
+    if (selectedTask.length === 0) return 'Select Task';
+    const task = availableTasks.find((t) => t.id === selectedTask[0]);
     return task?.name || 'Select Task';
   };
 
@@ -72,9 +103,9 @@ export function TaskAssignmentCard() {
       <div className="flex flex-wrap gap-4 mb-2">
         <div className="min-w-50">
           <SelectTasksDialog
-            selectedTasks={selectedTasks}
+            selectedTask={selectedTask}
             onTasksChange={handleTasksChange}
-            assignedTasks={assignedTasks}
+            assignedTasks={assignedTasksForAssign}
             buttonLabel={getSelectedTaskName()}
           />
         </div>
@@ -83,7 +114,9 @@ export function TaskAssignmentCard() {
           <AssignEmployeesDialog
             selectedEmployees={selectedEmployees}
             onEmployeesChange={setSelectedEmployees}
-            disabled={selectedTasks.length === 0}
+            disabled={selectedTask.length === 0}
+            selectedTaskIds={selectedTask}
+            assignedTasks={assignedTasksForAssign}
           />
         </div>
 
@@ -109,7 +142,7 @@ export function TaskAssignmentCard() {
         <Button
           onClick={handleAssign}
           disabled={
-            selectedEmployees.length === 0 || selectedTasks.length === 0 || !selectedDeadline
+            selectedEmployees.length === 0 || selectedTask.length === 0 || !selectedDeadline
           }
           className="bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50 disabled:cursor-not-allowed px-12"
         >
