@@ -58,7 +58,7 @@ export function Sidebar({
 
   return (
     <aside
-      className={`bg-[#690003] text-white flex flex-col justify-between transition-all duration-300 ${
+      className={`bg-[#690003] text-white flex flex-col justify-between h-screen sticky top-0 transition-all duration-300 ${
         isCollapsed ? 'w-20' : 'w-60'
       }`}
     >
@@ -83,7 +83,7 @@ export function Sidebar({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-3">
+      <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (

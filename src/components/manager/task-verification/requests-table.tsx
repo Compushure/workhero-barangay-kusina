@@ -1,7 +1,10 @@
 'use client';
 
-import { X, Check } from 'lucide-react';
+import { X, Check, MessageSquare } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -29,6 +32,8 @@ export function RequestsTable({
   isApproving = false,
   isRejecting = false,
 }: RequestsTableProps) {
+  const [remarkModalOpen, setRemarkModalOpen] = useState(false);
+  const [selectedRemark, setSelectedRemark] = useState<string>('');
   const formatDate = (date: Date | null | string) => {
     if (!date) return 'N/A';
     const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -52,44 +57,89 @@ export function RequestsTable({
       <Table>
         <TableHeader className="bg-[#690003]">
           <TableRow className="border-b border-border hover:bg-[#690003]">
-            <TableHead className="text-white font-semibold px-6 w-32">REQUEST DATE</TableHead>
-            <TableHead className="text-white font-semibold w-40 px-6">EMPLOYEE</TableHead>
-            <TableHead className="text-white font-semibold px-10 pl-15 w-56">TASK</TableHead>
-            <TableHead className="text-white font-semibold text-center pl-10 pr-25 w-10">
+            <TableHead className="text-white font-semibold px-4 w-[180px]">REQUEST DATE</TableHead>
+            <TableHead className="text-white font-semibold px-4 w-[200px]">EMPLOYEE</TableHead>
+            <TableHead className="text-white font-semibold px-4 w-[250px]">TASK</TableHead>
+            <TableHead className="text-white font-semibold text-center px-4 w-[120px]">
               COMPLETED
             </TableHead>
-            <TableHead className="text-white font-semibold text-center pr-10 w-24">
+            <TableHead className="text-white font-semibold text-center px-4 w-[140px]">
               TOTAL POINTS & XP
             </TableHead>
-            <TableHead className="text-white font-semibold text-center px-2 w-28">ACTION</TableHead>
+            <TableHead className="text-white font-semibold text-center px-4 w-[80px]">REMARK</TableHead>
+            <TableHead className="text-white font-semibold text-center px-4 w-[120px]">ACTION</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {requests.map((request) => {
+            const employeeName = request.assigned_to_name || 'N/A';
+            const employeeId = request.assigned_to_employee_id || 'N/A';
+            const taskName = request.category_name || 'N/A';
+            const hasRemark = request.remark && request.remark.trim() !== '';
+
             return (
               <TableRow
                 key={request.kpitask_id}
                 className="bg-[#FBF4E8] hover:bg-[#ffffff] transition-colors border-b border-border"
               >
-                <TableCell className="text-sm font-medium pl-6 pr-12">
+                <TableCell className="text-sm font-medium px-4 w-[180px]">
                   {formatDate(request.kpitask_completed_at || request.kpitask_created_at)}
                 </TableCell>
-                <TableCell className="px-6">
-                  <div className="text-sm font-medium">{request.assigned_to_name || 'N/A'}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {request.assigned_to_employee_id || 'N/A'}
-                  </div>
+                <TableCell className="px-4 w-[200px]">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <div className="text-sm font-medium truncate">{employeeName}</div>
+                        <div className="text-xs text-muted-foreground truncate">{employeeId}</div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div>
+                        <div className="font-medium">{employeeName}</div>
+                        <div className="text-xs">{employeeId}</div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
                 </TableCell>
-                <TableCell className="text-sm px-4 pl-15">
-                  {request.category_name || 'N/A'}
+                <TableCell className="text-sm px-4 w-[250px]">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="truncate">{taskName}</div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div className="max-w-xs">{taskName}</div>
+                    </TooltipContent>
+                  </Tooltip>
                 </TableCell>
-                <TableCell className="text-sm text-center pl-10 pr-25">
+                <TableCell className="text-sm text-center px-4 w-[120px]">
                   {request.completed_orders ?? 0} / {request.max_orders ?? 0}
                 </TableCell>
-                <TableCell className="text-sm text-center font-medium pr-10">
+                <TableCell className="text-sm text-center font-medium px-4 w-[140px]">
                   {request.category_points ?? 0} Pts/XP
                 </TableCell>
-                <TableCell className="text-center px-2">
+                <TableCell className="text-center px-4 w-[80px]">
+                  {hasRemark ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-[#690003] hover:bg-[#fbeaea]"
+                          onClick={() => {
+                            setSelectedRemark(request.remark || '');
+                            setRemarkModalOpen(true);
+                          }}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>View remark</TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-center px-4 w-[120px]">
                   <div className="flex items-center justify-center gap-2">
                     {isShowingActions ? (
                       <>
@@ -99,7 +149,7 @@ export function RequestsTable({
                           // need to pass extra params, request.category_points, request.assigned_to, request.remark and request.kpitask_id
                           onClick={() => onDeny(request.kpitask_id)}
                           disabled={isRejecting || isApproving}
-                          className="p-2 h-auto text-muted-foreground hover:text-red-600 cursor-pointer hover:bg-red-50 disabled:opacity-50"
+                          className="p-2 h-auto shrink-0 text-muted-foreground hover:text-red-600 cursor-pointer hover:bg-red-50 disabled:opacity-50"
                           aria-label="Deny request"
                         >
                           <X size={20} />
@@ -110,7 +160,7 @@ export function RequestsTable({
                           // need to pass extra params, request.category_points, request.assigned_to, request.remark and request.kpitask_id
                           onClick={() => onApprove(request.kpitask_id)}
                           disabled={isRejecting || isApproving}
-                          className="p-2 h-auto text-muted-foreground hover:text-green-600 cursor-pointer hover:bg-green-50 disabled:opacity-50"
+                          className="p-2 h-auto shrink-0 text-muted-foreground hover:text-green-600 cursor-pointer hover:bg-green-50 disabled:opacity-50"
                           aria-label="Approve request"
                         >
                           <Check size={20} />
@@ -119,12 +169,12 @@ export function RequestsTable({
                     ) : (
                       <>
                         {request.status === 'approved' && (
-                          <span className="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
+                          <span className="inline-flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap shrink-0">
                             Accepted
                           </span>
                         )}
                         {request.status === 'rejected' && (
-                          <span className="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">
+                          <span className="inline-flex items-center bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap shrink-0">
                             Denied
                           </span>
                         )}
@@ -144,6 +194,20 @@ export function RequestsTable({
           <p className="text-sm">No requests found</p>
         </div>
       )}
+
+      {/* Remark Modal */}
+      <Dialog open={remarkModalOpen} onOpenChange={setRemarkModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-[#690003]">Task Remark</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-[#5a2a2a] whitespace-pre-wrap wrap-break-word">
+              {selectedRemark}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
