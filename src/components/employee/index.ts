@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // export { Sidebar } from './sidebar';
 
 // Export all employee dashboard components
@@ -13,3 +14,17 @@ export { TasksList } from './tasks-list';
 export { StatsBar } from './stats-bar';
 export { DonateButton } from './donate-button';
 export { SortDropdown } from './sort-dropdown';
+=======
+export { Sidebar } from './sidebar';
+export {
+  TaskStatusBoard,
+  TaskStatusColumn,
+  TaskCard,
+  currentTasks,
+  onReviewTasks,
+  verifiedTasks,
+  deniedTasks,
+  mockTaskStatusBoard,
+} from './task-status';
+export type { TaskStatusItem, TaskStatusKind } from './task-status';
+>>>>>>> 809a729a4f2ea6fde7e66204ee67c7e88b3c21f1

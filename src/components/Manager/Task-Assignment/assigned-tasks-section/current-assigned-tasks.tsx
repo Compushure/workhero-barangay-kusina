@@ -10,7 +10,10 @@ import { EmployeeSortingBar } from './employee-sorting-bar';
 import ClearAllDialog from './dialogs/clear-all-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
 import { Pagination } from '@/components/manager/task-verification/pagination';
-import { useGetCurrentAssignedTasksPaginated, useGetCurrentAssignedEmployeesPaginated } from '@/hooks/tanstack/queries/managerAssignmentQueries';
+import {
+  useGetCurrentAssignedTasksPaginated,
+  useGetCurrentAssignedEmployeesPaginated,
+} from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export function CurrentAssignedTasks() {
@@ -20,11 +23,9 @@ export function CurrentAssignedTasks() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recently added');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  
-  // Debounce search to reduce query churn (900ms)
+
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
-  // Fetch data based on view mode
   const taskQuery = useGetCurrentAssignedTasksPaginated(
     page,
     4,
@@ -48,7 +49,6 @@ export function CurrentAssignedTasks() {
   const tasks = data?.tasks || [];
   const totalPages = data?.totalPages || 1;
 
-  // Reset to default sort and page when switching views
   const handleViewModeChange = (newMode: 'task' | 'employee') => {
     setViewMode(newMode);
     setSortBy('recently added');
@@ -56,13 +56,11 @@ export function CurrentAssignedTasks() {
     setSearchTerm('');
   };
 
-  // Reset page to 1 when sort changes
   const handleSortChange = (newSort: string) => {
     setSortBy(newSort);
     setPage(1);
   };
 
-  // Reset page to 1 when search changes
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
     setPage(1);
@@ -72,99 +70,107 @@ export function CurrentAssignedTasks() {
     setPage(newPage);
   };
 
-  // Memoize filtered tasks to prevent unnecessary re-renders
   const memoizedTasks = useMemo(() => tasks || [], [tasks]);
 
   return (
-    <div className="rounded-3xl bg-[#FBF4E8] p-8 shadow-sm/25 flex flex-col min-h-screen">
-      {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-[#690003]">Current Assigned Tasks</h2>
+    <div className="rounded-xl bg-[#FBF4E8] pl-4 pr-4 pt-4 shadow-sm/50 flex flex-col">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-5">
+        <h2 className="text-xl font-bold text-[#690003]">Current Assigned Tasks</h2>
 
         {/* View Toggle */}
-        <div className="flex gap-2 bg-white rounded-2xl p-1 border-2 border-gray-300">
+        <div className="flex gap-2 bg-white rounded-xl p-1 shadow-sm/25 mt-3 md:mt-0">
           <button
             onClick={() => handleViewModeChange('task')}
-            className={`flex w-44 justify-center items-center gap-2 py-2.5 rounded-xl text-base font-medium transition ${
+            className={`flex w-32 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out shadow-sm/15 ${
               viewMode === 'task' ? 'bg-[#690003] text-white' : 'text-gray-500 hover:bg-gray-200'
             }`}
           >
-            <ListTodo size={20} />
+            <ListTodo size={16} />
             Task View
           </button>
           <button
             onClick={() => handleViewModeChange('employee')}
-            className={`flex w-44 justify-center items-center gap-2 py-2.5 rounded-xl text-base font-medium transition ${
+            className={`flex w-32 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out shadow-sm/15 ${
               viewMode === 'employee'
                 ? 'bg-[#690003] text-white'
                 : 'text-gray-500 hover:bg-gray-200'
             }`}
           >
-            <Users size={20} />
+            <Users size={16} />
             Employee View
           </button>
         </div>
       </div>
 
-      {/* Search and Sort Bar */}
-      <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+      {/* Controls: Search, Sort, Clear */}
+      <div className="flex flex-col md:flex-row md:items-center justify-end gap-3 mb-5">
+        {/* Search */}
+        <div className="relative w-full md:w-90">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
             placeholder={viewMode === 'task' ? 'Search tasks...' : 'Search employees...'}
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-full bg-white focus:outline-none focus:border-[#690003]"
+            className="w-full pl-9 pr-3 py-2 rounded-full bg-white shadow-sm/25 text-sm focus:outline-none transition-all duration-500 ease-in-out focus:border focus:border-[#690003]"
           />
         </div>
 
-        {viewMode === 'task' ? (
-          <TaskSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
-        ) : (
-          <EmployeeSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
-        )}
+        {/* Sort Bar */}
+        <div className="">
+          {viewMode === 'task' ? (
+            <TaskSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
+          ) : (
+            <EmployeeSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
+          )}
+        </div>
 
+        {/* Clear All */}
         <Button
           onClick={() => setShowClearConfirm(true)}
           disabled={memoizedTasks.length === 0}
-          className="text-base py-5 bg-[#690003] hover:bg-[#8B0000] text-white disabled:opacity-50"
+          className="text-sm px-10 py-2 bg-[#690003] shadow-sm/25 hover:bg-[#af3b3f] cursor-pointer text-white disabled:opacity-50 transition-all duration-500 ease-in-out"
         >
           Clear All
         </Button>
       </div>
 
       {/* Task/Employee Lists */}
-      <div className="flex-1 space-y-6">
+      <div className={`${memoizedTasks.length === 0 ? 'grow-0' : 'flex-1'} space-y-4`}>
         {isLoading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#690003]"></div>
-            <p className="text-gray-500 text-lg mt-4">Loading assigned tasks...</p>
+          <div className="text-center py-10">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#690003] shadow-sm/25"></div>
+            <p className="text-gray-500 text-base mt-3">Loading assigned tasks...</p>
           </div>
         ) : isError ? (
-          <div className="text-center py-12">
-            <p className="text-red-500 text-lg">Error loading tasks. Please try again.</p>
+          <div className="text-center py-10">
+            <p className="text-red-500 text-base">Error loading tasks. Please try again.</p>
           </div>
         ) : memoizedTasks.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No tasks assigned yet.</p>
+          <div className="text-center py-6">
+            <p className="text-gray-500 text-base">No tasks assigned yet.</p>
           </div>
         ) : viewMode === 'task' ? (
           memoizedTasks.map((task: any) => <TaskViewCard key={task.id} task={task} />)
         ) : (
-          <EmployeeViewCard tasks={memoizedTasks} searchTerm={debouncedSearchTerm} sortBy={sortBy} />
+          <EmployeeViewCard
+            tasks={memoizedTasks}
+            searchTerm={debouncedSearchTerm}
+            sortBy={sortBy}
+          />
         )}
       </div>
 
       {/* Pagination */}
-      <div className="mt-auto pt-4">
-        <Pagination totalPages={totalPages} currentPage={page} onPageChange={handlePageChange} />
-      </div>
+      {memoizedTasks.length > 0 && (
+        <div className="mt-1 mb-4">
+          <Pagination totalPages={totalPages} currentPage={page} onPageChange={handlePageChange} />
+        </div>
+      )}
 
       {/* Clear Confirmation Dialog */}
-      {showClearConfirm && (
-        <ClearAllDialog setShowClearConfirm={setShowClearConfirm} />
-      )}
+      {showClearConfirm && <ClearAllDialog setShowClearConfirm={setShowClearConfirm} />}
     </div>
   );
 }
