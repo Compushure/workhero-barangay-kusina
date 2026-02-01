@@ -182,6 +182,7 @@ export function SelectTasksDialog({
 
           {/* Tasks Table */}
           <SelectTasksTable
+            isLoading={isLoading}
             filteredTasks={filteredTasks}
             toggleTask={toggleTask}
             updateMaxOrders={updateMaxOrders}

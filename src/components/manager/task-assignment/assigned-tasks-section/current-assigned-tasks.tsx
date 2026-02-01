@@ -15,6 +15,7 @@ import {
   useGetCurrentAssignedEmployeesPaginated,
 } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { useDebounce } from '@/hooks/useDebounce';
+import { SkeletonCard } from '../card-skeleton';
 
 export function CurrentAssignedTasks() {
   const { viewMode, setViewMode } = useTaskAssignment();
@@ -26,13 +27,7 @@ export function CurrentAssignedTasks() {
 
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
-  const taskQuery = useGetCurrentAssignedTasksPaginated(
-    page,
-    4,
-    sortBy,
-    debouncedSearchTerm,
-    true
-  );
+  const taskQuery = useGetCurrentAssignedTasksPaginated(page, 4, sortBy, debouncedSearchTerm, true);
 
   const employeeQuery = useGetCurrentAssignedEmployeesPaginated(
     page,
@@ -49,7 +44,8 @@ export function CurrentAssignedTasks() {
   const tasks = data?.tasks || [];
   const totalPages = data?.totalPages || 1;
 
-  const totalTasksCount = viewMode === 'task' ? taskQuery.data?.count : employeeQuery.data?.taskCount;
+  const totalTasksCount =
+    viewMode === 'task' ? taskQuery.data?.count : employeeQuery.data?.taskCount;
   const totalEmployeesCount =
     viewMode === 'employee' ? employeeQuery.data?.count : taskQuery.data?.employeeCount;
 
@@ -94,22 +90,22 @@ export function CurrentAssignedTasks() {
 
       {/* View Cards Number Display & Controls: Search, Sort, Clear */}
       <section className="flex items-center justify-between">
-        <div className='flex gap-4 text-lg font-bold text-[#690003] pl-2 w-3/10'>
+        <div className="flex gap-4 text-lg font-bold text-[#690003] pl-2 w-3/10">
           <h5 className="">
-              Tasks{' '}
-              <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
-                {totalTasksCount ?? 0}
-              </span>
+            Tasks{' '}
+            <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+              {totalTasksCount ?? 0}
+            </span>
           </h5>
           <h5 className="">
-              Employees{' '}
-              <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
-                {totalEmployeesCount ?? 0}
-              </span>
+            Employees{' '}
+            <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+              {totalEmployeesCount ?? 0}
+            </span>
           </h5>
         </div>
-        
-        <div className='flex gap-3 justify-end items-center w-7/10'>
+
+        <div className="flex gap-3 justify-end items-center w-7/10">
           {/* Search */}
           <div className="relative w-2/5">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -136,7 +132,9 @@ export function CurrentAssignedTasks() {
             <button
               onClick={() => handleViewModeChange('task')}
               className={`flex w-36 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out ${
-                viewMode === 'task' ? 'bg-[#690003] text-white shadow-sm/15' : 'text-gray-500 hover:bg-gray-200'
+                viewMode === 'task'
+                  ? 'bg-[#690003] text-white shadow-sm/15'
+                  : 'text-gray-500 hover:bg-gray-200'
               }`}
             >
               <ListTodo size={16} />
@@ -160,9 +158,9 @@ export function CurrentAssignedTasks() {
       {/* Task/Employee Lists */}
       <section className={`${memoizedTasks.length === 0 ? 'grow-0' : 'grow'} space-y-5 mt-5`}>
         {isLoading ? (
-          <div className="text-center py-10">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#690003] shadow-sm/25"></div>
-            <p className="text-gray-500 text-base mt-3">Loading assigned tasks...</p>
+          <div className="space-y-5 pb-8">
+            <SkeletonCard />
+            <SkeletonCard />
           </div>
         ) : isError ? (
           <div className="text-center py-10">

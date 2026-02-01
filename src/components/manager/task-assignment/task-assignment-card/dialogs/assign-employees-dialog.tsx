@@ -59,18 +59,6 @@ export function AssignEmployeesDialog({
     loadEmployees();
   }, []);
 
-  // Clean up selected employees when they become disabled due to task selection changes
-  useEffect(() => {
-    const activeSelectedEmployees = selectedEmployees.filter(
-      (emp) => !disabledEmployeeIds.has(emp.id)
-    );
-    
-    // Only update if there's a change (to avoid infinite loops)
-    if (activeSelectedEmployees.length !== selectedEmployees.length) {
-      onEmployeesChange(activeSelectedEmployees);
-    }
-  }, [disabledEmployeeIds, selectedEmployees.length, onEmployeesChange]);
-
   const filteredEmployees = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
     return employees.filter(
@@ -161,6 +149,7 @@ export function AssignEmployeesDialog({
 
           {/* Employees Table */}
           <AssignEmployeesTable
+            isLoading={isLoading}
             allFilteredSelected={allFilteredSelected}
             handleSelectAll={handleSelectAll}
             filteredEmployees={filteredEmployees}
@@ -174,7 +163,7 @@ export function AssignEmployeesDialog({
             <Button
               variant="outline"
               onClick={() => setOpen(false)}
-              className="px-12 border-gray-300 bg-zinc-50 hover:bg-[#690003] hover:text-zinc-50 cursor-pointer transition-all duration-500 ease-in-out"
+              className="px-12 border-gray-300 bg-zinc-50 hover:bg-[#690009] hover:text-zinc-50 cursor-pointer transition-all duration-500 ease-in-out"
             >
               Close
             </Button>
