@@ -390,20 +390,23 @@ export function ManagerPage() {
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-6 flex flex-col min-h-[calc(100vh-300px)]">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <div className="grid gap-4">
+            {[...Array(3)].map((_, i) => (
+              <WhiteCard key={i} className="p-4 sm:p-6 animate-pulse">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 space-y-3">
+                    <div className="h-4 bg-muted rounded w-32" />
+                    <div className="h-4 bg-muted rounded w-48" />
+                  </div>
+                  <div className="h-10 bg-muted rounded w-20" />
+                </div>
+              </WhiteCard>
+            ))}
           </div>
         ) : error ? (
           <WhiteCard className="p-8 sm:p-12 text-center">
             <p className="text-destructive mb-4">Failed to load users</p>
             <p className="text-sm text-muted-foreground">{error.message}</p>
-          </WhiteCard>
-        ) : isLoading ? (
-          <WhiteCard className="p-4">
-            <div className="flex items-center justify-center gap-3 py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              <span className="text-muted-foreground">Loading users...</span>
-            </div>
           </WhiteCard>
         ) : users.length === 0 ? (
           <WhiteCard className="p-8 sm:p-12 text-center">

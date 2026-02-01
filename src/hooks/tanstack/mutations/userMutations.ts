@@ -80,8 +80,9 @@ export function useUploadProfilePicture() {
           }
         });
       }
-      // Invalidate ALL user queries (including filtered ones) by using the base key
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      // Invalidate paginated lists to refresh all sorted views when user data changes
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       console.log('Cache invalidated for user:', variables.userid);
       // Toast is handled by action-handler
     },
@@ -185,9 +186,10 @@ export function useAddUser(): UseMutationResult<User, Error, AddUserInput, { pre
       return { previousQueries };
     },
     onSuccess: () => {
-      // Invalidate ALL user queries to fetch real data from server
-      // This replaces the temporary optimistic data with actual server data
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      // Invalidate paginated lists to fetch real data from server and maintain correct sort order
+      // This ensures the new user appears in the correct position based on current sorting
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       // Toast is handled by action-handler
     },
     onError: (_error, _variables, context) => {
@@ -283,8 +285,10 @@ export function useEditUser(): UseMutationResult<
       return { previousUsers };
     },
     onSuccess: () => {
-      // Invalidate ALL user queries to ensure server state is reflected
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      // Invalidate paginated lists to refresh all sorted views when user data changes
+      // This is critical for when a user's name changes - it affects sort order
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       // Toast is handled by action-handler
     },
     onError: (_error, _variables, context) => {
@@ -362,8 +366,9 @@ export function useDeleteUser(): UseMutationResult<
       return { previousUsers };
     },
     onSuccess: () => {
-      // Invalidate ALL user queries to ensure server state is reflected
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      // Invalidate paginated lists to remove deleted user from all sorted views
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       // Toast is handled by action-handler
     },
     onError: (_error, _variables, context) => {
