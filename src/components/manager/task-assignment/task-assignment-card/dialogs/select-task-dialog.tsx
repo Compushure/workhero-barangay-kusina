@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,7 +13,7 @@ import {
 import { Search, Plus, ChevronDown } from 'lucide-react';
 import type { AssignedTask, Task } from '@/types';
 import SelectTasksTable from './select-task-table';
-import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
+import { handleFetchTaskList, handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +39,7 @@ export function SelectTasksDialog({
   const [filterType, setFilterType] = useState('all');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalEmployees, setTotalEmployees] = useState(0);
   const [taskMaxOrders, setTaskMaxOrders] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
     selectedTask.forEach((taskId) => {
@@ -57,14 +58,18 @@ export function SelectTasksDialog({
     }
   }, [selectedTask]);
 
-  // Fetch tasks on mount
+  // Fetch tasks and employees on mount
   useEffect(() => {
-    async function loadTasks() {
-      const data = await handleFetchTaskList();
-      setTasks(data);
+    async function loadData() {
+      const [tasksData, employeesData] = await Promise.all([
+        handleFetchTaskList(),
+        handleFetchEmployeeList(),
+      ]);
+      setTasks(tasksData);
+      setTotalEmployees(employeesData.length);
       setIsLoading(false);
     }
-    loadTasks();
+    loadData();
   }, []);
 
   const filteredTasks = tasks.filter((task) => {
@@ -75,7 +80,39 @@ export function SelectTasksDialog({
   });
 
   const taskTypes = ['all', ...new Set(tasks.map((t) => t.type))];
-  const assignedTaskIds = new Set(assignedTasks.map((t) => t.taskId));
+
+  // Calculate which tasks have ALL employees assigned
+  const fullyAssignedTaskIds = useMemo(() => {
+    const assigned = new Set<string>();
+    if (totalEmployees > 0) {
+      // Group assignments by taskId and count unique employees
+      const taskEmployeeCounts = new Map<string, Set<string>>();
+      assignedTasks.forEach((assignment) => {
+        if (!taskEmployeeCounts.has(assignment.taskId)) {
+          taskEmployeeCounts.set(assignment.taskId, new Set());
+        }
+        assignment.assignedEmployees.forEach((emp) => {
+          taskEmployeeCounts.get(assignment.taskId)!.add(emp.id);
+        });
+      });
+
+      // Mark tasks as fully assigned if they have all employees
+      taskEmployeeCounts.forEach((employeeIds, taskId) => {
+        if (employeeIds.size >= totalEmployees) {
+          assigned.add(taskId);
+        }
+      });
+    }
+    return assigned;
+  }, [assignedTasks, totalEmployees]);
+
+  // Automatically deselect task if it becomes fully assigned (disabled)
+  useEffect(() => {
+    if (selectedTask.length > 0 && fullyAssignedTaskIds.has(selectedTask[0])) {
+      onTasksChange([], {});
+      setTaskMaxOrders({});
+    }
+  }, [fullyAssignedTaskIds, selectedTask, onTasksChange]);
 
   const currentFilterLabel = filterType === 'all' ? 'All Types' : filterType;
 
@@ -192,6 +229,7 @@ export function SelectTasksDialog({
             }))}
             taskMaxOrders={taskMaxOrders}
             setTasks={setTasks}
+            disabledTaskIds={fullyAssignedTaskIds}
           />
 
           {/* Dialog Footer */}

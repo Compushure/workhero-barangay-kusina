@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
@@ -49,13 +49,45 @@ export function TaskAssignmentCard() {
   const [showAssignConfirm, setShowAssignConfirm] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
+  // Calculate total employees count
+  const [totalEmployees, setTotalEmployees] = useState(0);
+
   useEffect(() => {
-    async function loadTasks() {
-      const tasks = await handleFetchTaskList();
+    async function loadData() {
+      const [tasks, employees] = await Promise.all([
+        handleFetchTaskList(),
+        import('@/action-handlers/manager-assignment').then((m) => m.handleFetchEmployeeList()),
+      ]);
       setAvailableTasks(tasks);
+      setTotalEmployees(employees.length);
     }
-    loadTasks();
+    loadData();
   }, []);
+
+  // Calculate if selected task is fully assigned (all employees assigned)
+  const isSelectedTaskFullyAssigned = useMemo(() => {
+    if (selectedTask.length === 0 || totalEmployees === 0) return false;
+
+    const taskId = selectedTask[0];
+    const taskEmployeeIds = new Set<string>();
+
+    assignedTasksForAssign.forEach((assignment) => {
+      if (assignment.taskId === taskId) {
+        assignment.assignedEmployees.forEach((emp) => {
+          taskEmployeeIds.add(emp.id);
+        });
+      }
+    });
+
+    return taskEmployeeIds.size >= totalEmployees;
+  }, [selectedTask, assignedTasksForAssign, totalEmployees]);
+
+  // Clear selected employees when selected task becomes fully assigned
+  useEffect(() => {
+    if (isSelectedTaskFullyAssigned && selectedEmployees.length > 0) {
+      setSelectedEmployees([]);
+    }
+  }, [isSelectedTaskFullyAssigned, selectedEmployees.length]);
 
   const handleTasksChange = (tasks: string[], maxRepeats?: Record<string, number>) => {
     setselectedTask(tasks);
@@ -157,7 +189,7 @@ export function TaskAssignmentCard() {
         >
           {isAssigning ? 'Assigning...' : 'Assign'}
         </Button>
-        
+
         <Button
           variant="outline"
           onClick={() => setShowClearConfirm(true)}
