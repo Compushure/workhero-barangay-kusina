@@ -76,7 +76,7 @@ export function SelectTasksDialog({
 
   const taskTypes = ['all', ...new Set(tasks.map((t) => t.type))];
   const assignedTaskIds = new Set(assignedTasks.map((t) => t.taskId));
-  
+
   const currentFilterLabel = filterType === 'all' ? 'All Types' : filterType;
 
   const toggleTask = (taskId: string) => {
@@ -132,7 +132,7 @@ export function SelectTasksDialog({
         className={`bg-zinc-50 shadow-sm/25 hover:bg-gray-100 flex items-center gap-16 min-w-50 justify-between cursor-pointer transition-all duration-500 ease-in-out
           ${selectedTask.length === 0 ? 'text-zinc-700' : 'text-[#690003]'}`}
       >
-        <span className='truncate'>{buttonLabel}</span>
+        <span className="truncate">{buttonLabel}</span>
         <Plus className="w-4 h-4 shrink-0" />
       </Button>
 
@@ -180,8 +180,6 @@ export function SelectTasksDialog({
             </DropdownMenu>
           </div>
 
-
-
           {/* Tasks Table */}
           <SelectTasksTable
             filteredTasks={filteredTasks}
@@ -192,6 +190,7 @@ export function SelectTasksDialog({
               maxOrders: taskMaxOrders[taskId] || 1,
             }))}
             taskMaxOrders={taskMaxOrders}
+            setTasks={setTasks}
           />
 
           {/* Dialog Footer */}
