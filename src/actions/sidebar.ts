@@ -26,7 +26,9 @@ export async function fetchInSessionUserInfo(): Promise<ServerActionResponse<Use
     // Fetch user details from the public_users table or users table
     const { data: userData, error: userError } = await supabase
       .from('user_attributes')
-      .select('user_id, user_name, user_email, role_type, user_date_added')
+      .select(
+        'user_id, user_name, user_email, role_type, user_date_added, employee_id, employment_status, contact_details, home_address, tin_id, sss_id, pagibig_id'
+      )
       .eq('user_id', userId)
       .single();
 
@@ -52,6 +54,13 @@ export async function fetchInSessionUserInfo(): Promise<ServerActionResponse<Use
       employeeType: userData.role_type || 'regular',
       date_added: new Date(userData.user_date_added),
       profilePictureUrl: profilePictureUrl,
+      employeeId: userData.employee_id || undefined,
+      employmentStatus: userData.employment_status || undefined,
+      contactNumber: userData.contact_details || undefined,
+      address: userData.home_address || undefined,
+      tin: userData.tin_id || undefined,
+      sss: userData.sss_id || undefined,
+      pagibig: userData.pagibig_id || undefined,
     };
 
     return {

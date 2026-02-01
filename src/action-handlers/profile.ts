@@ -1,0 +1,52 @@
+import { toast } from 'sonner';
+import { safeAction } from '@/lib/utils/safe-action';
+import { fetchUserProfileById, updateOwnProfile, uploadOwnProfilePicture } from '@/actions/profile';
+import type { UserWithExtras } from '@/types';
+
+/**
+ * Fetches user profile with toast notifications
+ */
+export async function fetchUserProfileByIdHandler(userId: string): Promise<UserWithExtras | null> {
+  const result = await safeAction(() => fetchUserProfileById(userId));
+
+  if (!result.success) {
+    toast.error(result.error);
+    return null;
+  }
+
+  return result.data?.data || null;
+}
+
+/**
+ * Updates user's own profile with toast notifications
+ */
+export async function updateOwnProfileHandler(profileData: {
+  name?: string;
+  contactNumber?: string;
+  address?: string;
+}) {
+  const result = await safeAction(() => updateOwnProfile(profileData));
+
+  if (!result.success) {
+    toast.error(result.error);
+    return null;
+  }
+
+  toast.success('Profile updated successfully');
+  return result.data;
+}
+
+/**
+ * Uploads profile picture with toast notifications
+ */
+export async function uploadOwnProfilePictureHandler(file: File) {
+  const result = await safeAction(() => uploadOwnProfilePicture(file));
+
+  if (!result.success) {
+    toast.error(result.error);
+    return null;
+  }
+
+  toast.success('Profile picture uploaded successfully');
+  return result.data;
+}
