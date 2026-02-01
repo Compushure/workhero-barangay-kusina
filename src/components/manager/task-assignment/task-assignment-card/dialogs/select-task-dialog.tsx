@@ -104,12 +104,7 @@ export function SelectTasksDialog({
     }
   };
 
-  const handleConfirm = () => {
-    setOpen(false);
-    setSearchTerm('');
-  };
-
-  const handleCancel = () => {
+  const handleClose = () => {
     setOpen(false);
     setSearchTerm('');
   };
@@ -200,20 +195,13 @@ export function SelectTasksDialog({
           />
 
           {/* Dialog Footer */}
-          <DialogFooter className="gap-3 flex flex-row">
-            <Button
-              onClick={handleConfirm}
-              disabled={selectedTask.length === 0}
-              className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50"
-            >
-              Confirm
-            </Button>
+          <DialogFooter className="flex flex-row">
             <Button
               variant="outline"
-              onClick={handleCancel}
-              className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+              onClick={handleClose}
+              className="px-12 border-gray-300 bg-zinc-50 hover:bg-[#690003] hover:text-zinc-50 cursor-pointer transition-all duration-500 ease-in-out"
             >
-              Cancel
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

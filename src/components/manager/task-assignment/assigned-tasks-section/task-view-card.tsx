@@ -12,6 +12,7 @@ import { useTaskAssignment } from '../task-assignment-page-context';
 import { useUpdateTaskAssignmentMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
 import TaskViewEmployeeBadges from './task-view-employee-badges';
+import { isTaskOverdue } from '@/utils/date-utils';
 
 interface TaskViewCardProps {
   task: AssignedTask;
@@ -150,9 +151,12 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
               <p className="text-sm text-gray-500 ml-2 leading-none">- {task.taskType}</p>
             </div>
 
-            <span className="text-sm font-medium text-zinc-500">
+            <p className="text-sm font-medium text-zinc-500">
               {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
-            </span>
+              {isTaskOverdue(task.dateRange.end) && 
+              <span className='bg-red-100 text-red-500 text-sm px-2 py-1 rounded-full ml-2'>Task is Overdue</span>
+              }
+            </p>
           </header>
 
           {/* Task max orders, fiesta points and XP */}

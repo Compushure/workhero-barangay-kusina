@@ -59,6 +59,18 @@ export function AssignEmployeesDialog({
     loadEmployees();
   }, []);
 
+  // Clean up selected employees when they become disabled due to task selection changes
+  useEffect(() => {
+    const activeSelectedEmployees = selectedEmployees.filter(
+      (emp) => !disabledEmployeeIds.has(emp.id)
+    );
+    
+    // Only update if there's a change (to avoid infinite loops)
+    if (activeSelectedEmployees.length !== selectedEmployees.length) {
+      onEmployeesChange(activeSelectedEmployees);
+    }
+  }, [disabledEmployeeIds, selectedEmployees.length, onEmployeesChange]);
+
   const filteredEmployees = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
     return employees.filter(
@@ -94,11 +106,6 @@ export function AssignEmployeesDialog({
       );
       onEmployeesChange([...selectedEmployees, ...newSelections]);
     }
-  };
-
-  const handleConfirm = () => {
-    setOpen(false);
-    setSearchTerm('');
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -165,16 +172,9 @@ export function AssignEmployeesDialog({
           {/* Dialog Footer */}
           <DialogFooter>
             <Button
-              onClick={handleConfirm}
-              disabled={selectedEmployees.length === 0}
-              className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50"
-            >
-              Confirm
-            </Button>
-            <Button
               variant="outline"
               onClick={() => setOpen(false)}
-              className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+              className="px-12 border-gray-300 bg-zinc-50 hover:bg-[#690003] hover:text-zinc-50 cursor-pointer transition-all duration-500 ease-in-out"
             >
               Close
             </Button>

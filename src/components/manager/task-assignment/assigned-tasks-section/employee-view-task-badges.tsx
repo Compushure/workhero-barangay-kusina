@@ -1,6 +1,7 @@
 import { AssignedEmployee, AssignedTask } from "@/types";
 import { ChevronDown, CircleCheck, CircleDashed, CircleX, Coins, Soup, Target, X } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
+import { isTaskOverdue } from "@/utils/date-utils";
 
 interface EmployeeViewTaskBadgesProps {
   employee: AssignedEmployee;
@@ -82,9 +83,7 @@ export default function EmployeeViewTaskBadges({
                         <StatusIcon icon={CircleX} className="bg-red-100 text-red-600"/>
                       }
                     
-                    <p className={`text-xs text-gray-500 
-                      ${new Date(new Date(task.dateRange.end).setHours(0, 0, 0, 0)).getTime() < new Date(new Date().setHours(0, 0, 0, 0)).getTime() ? 'text-red-700 font-semibold' : ''}
-                    `}>
+                    <p className={`text-xs text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}>
                       {formatDate(task.dateRange.end)}
                     </p>
                   </div>

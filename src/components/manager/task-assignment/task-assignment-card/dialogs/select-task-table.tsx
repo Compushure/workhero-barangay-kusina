@@ -24,8 +24,8 @@ function SelectTasksTable({
           <tr className='flex justify-baseline'>
             <th className="w-[6%] py-4"></th>
             <th className="w-[33.5%] py-4 text-left pl-4 text-sm font-bold">TASK</th>
-            <th className="w-[20%] py-4 text-center text-sm font-bold">POINTS</th>
-            <th className="w-[14.5%] py-4 text-center text-sm font-bold">XP</th>
+            <th className="w-[34.5%] py-4 text-center text-sm font-bold">POINTS & XP</th>
+            {/* <th className="w-[14.5%] py-4 text-center text-sm font-bold">XP</th> */}
             <th className="w-[23.5%] py-4 text-center text-sm font-bold">MAX ORDERS</th>
           </tr>
         </thead>
@@ -64,11 +64,10 @@ function SelectTasksTable({
                     />
                   </td>
                   <td className="w-[35%] px-4 py-3">
-                    <div className="font-medium text-gray-800">{task.name}</div>
-                    <div className="text-sm text-gray-500">{task.type}</div>
+                    <div className="font-medium text-zinc-800">{task.name}</div>
+                    <div className="text-sm text-zinc-500">{task.type}</div>
                   </td>
-                  <td className="w-[20%] p-4 text-black text-center">{task.points}pts</td>
-                  <td className="w-[15%] p-4 text-black text-center">{task.xp}</td>
+                  <td className="w-[35%] px-8 py-4 text-zinc-800 font-medium text-center">{task.points}</td>
                   <td className="w-[25%] p-4" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-center gap-2">
                       {task.isRepeatable ? (
