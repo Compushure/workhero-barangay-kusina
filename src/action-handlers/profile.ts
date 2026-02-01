@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { safeAction } from '@/lib/utils/safe-action';
-import { fetchUserProfileById, updateOwnProfile, uploadOwnProfilePicture } from '@/actions/profile';
+import { fetchUserProfileById, updateOwnProfile, uploadOwnProfilePicture, deleteOwnProfilePicture } from '@/actions/profile';
 import type { UserWithExtras } from '@/types';
 
 /**
@@ -49,4 +49,19 @@ export async function uploadOwnProfilePictureHandler(file: File) {
 
   toast.success('Profile picture uploaded successfully');
   return result.data;
+}
+
+/**
+ * Deletes profile picture with toast notifications
+ */
+export async function deleteOwnProfilePictureHandler() {
+  const result = await safeAction(() => deleteOwnProfilePicture());
+
+  if (!result.success) {
+    toast.error(result.error);
+    return false;
+  }
+
+  toast.success('Profile picture removed successfully');
+  return true;
 }

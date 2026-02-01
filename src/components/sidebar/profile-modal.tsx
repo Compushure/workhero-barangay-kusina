@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { User, X, ArrowRight } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import {
   Dialog,
@@ -12,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ProfileAvatar } from '@/components/shared/ProfileAvatar';
 import { UserWithExtras } from '@/types';
 
 interface ProfileModalProps {
@@ -21,15 +21,6 @@ interface ProfileModalProps {
 }
 
 export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
-  const [imageError, setImageError] = useState(false);
-
-  // Add cache-busting timestamp to image URL to force refresh when profile picture changes
-  const imageUrlWithCacheBust = useMemo(() => {
-    if (!user?.profilePictureUrl) return undefined;
-    const separator = user.profilePictureUrl.includes('?') ? '&' : '?';
-    return `${user.profilePictureUrl}${separator}t=${Date.now()}`;
-  }, [user?.profilePictureUrl]);
-
   if (!user) return null;
 
   return (
@@ -56,24 +47,13 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
         <div className="flex flex-col gap-6 py-2">
           {/* Profile Picture */}
           <div className="flex justify-center">
-            <div className="h-24 w-24 bg-[#f2e1c9] rounded-full flex items-center justify-center overflow-hidden border-4 border-[#730202]/10 transition-transform duration-300 hover:scale-105">
-              {imageUrlWithCacheBust && !imageError ? (
-                <img
-                  src={imageUrlWithCacheBust}
-                  alt={`${user.name} profile picture`}
-                  className="h-full w-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                  onError={() => setImageError(true)}
-                  onLoad={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                  style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
-                />
-              ) : (
-                <User className="h-12 w-12 text-[#730202]/40" />
-              )}
-            </div>
+            <ProfileAvatar
+              userId={user.id}
+              userName={user.name}
+              profilePictureUrl={user.profilePictureUrl}
+              size="lg"
+              className="bg-[#f2e1c9] transition-transform duration-300 hover:scale-105 border-[#730202]/10"
+            />
           </div>
 
           {/* Basic Information */}

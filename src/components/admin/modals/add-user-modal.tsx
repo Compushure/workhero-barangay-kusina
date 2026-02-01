@@ -255,15 +255,17 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 {/* Contact Number */}
                 <div className="space-y-2">
-                  <Label htmlFor="add-contact" className="text-foreground">
-                    Contact Number (Optional)
-                  </Label>
+                  <RequiredLabel htmlFor="add-contact" filled={!!watch('contactNumber')?.trim()}>
+                    Contact Number
+                  </RequiredLabel>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                     <Input
                       id="add-contact"
-                      placeholder="11 digits starting with 09"
-                      className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
+                      placeholder="09XX-XXX-XXXX format"
+                      className={`pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 ${
+                        !watch('contactNumber')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
+                      }`}
                       disabled={isPending}
                       {...register('contactNumber')}
                     />

@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
+import { ProfileAvatar } from '@/components/shared/ProfileAvatar';
+import { useProfileImage } from '@/hooks/useProfileImage';
 
 interface UserCardProps {
   user: UserWithExtras;
@@ -58,67 +60,14 @@ const globalImageVersions = new Map<string, number>();
 export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload }: UserCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isHoveringAvatar, setIsHoveringAvatar] = useState(false);
-  const [hasImage, setHasImage] = useState<boolean | null>(null); // null = checking, true/false = determined
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [imageKey, setImageKey] = useState<number>(() => globalImageVersions.get(user.id) || 0);
   const [showImageModal, setShowImageModal] = useState(false);
-
-  // Check if image exists in storage on mount and when user changes
-  React_useEffect(() => {
-    const checkImageExists = async () => {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase.storage
-          .from('employees')
-          .list(user.id, {
-            limit: 1,
-            search: 'profile.png',
-          });
-
-        if (error || !data || data.length === 0) {
-          setHasImage(false);
-        } else {
-          setHasImage(true);
-        }
-      } catch (error) {
-        console.error('Error checking image:', error);
-        setHasImage(false);
-      }
-    };
-
-    checkImageExists();
-
-    // Listen for profile image deletion events
-    const handleImageDeleted = (event: Event) => {
-      const customEvent = event as CustomEvent<{ userId: string; timestamp: number }>;
-      if (customEvent.detail.userId === user.id) {
-        console.log('Profile image deleted, re-checking storage for user:', user.id);
-        setHasImage(false);
-        checkImageExists();
-      }
-    };
-
-    window.addEventListener('profile-image-deleted', handleImageDeleted);
-
-    return () => {
-      window.removeEventListener('profile-image-deleted', handleImageDeleted);
-    };
-  }, [user.id]);
-
-  React_useEffect(() => {
-    const handler = (event: Event) => {
-      const detail = (event as CustomEvent<{ userId: string; timestamp: number }>).detail;
-      if (!detail || detail.userId !== user.id) return;
-      globalImageVersions.set(user.id, detail.timestamp);
-      setImageKey(detail.timestamp);
-      setHasImage(true);
-    };
-
-    window.addEventListener('profile-image-updated', handler);
-    return () => {
-      window.removeEventListener('profile-image-updated', handler);
-    };
-  }, [user.id]);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  
+  // Use optimized profile image hook
+  const { exists: hasImage, imageUrl, key: imageKey, refresh: refreshImage } = useProfileImage({
+    userId: user.id,
+    profilePictureUrl: user.profilePictureUrl,
+  });
 
   function handleAvatarClick(e: React.MouseEvent<HTMLDivElement>) {
     e.preventDefault();
@@ -148,18 +97,12 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
     // Optimistic preview
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
-    setHasImage(true);
-    
-    // Update global version and local state immediately
-    const newKey = Date.now();
-    globalImageVersions.set(user.id, newKey);
-    setImageKey(newKey);
-    setHasImage(true);
 
     // Clear preview after brief delay for new image to load
     setTimeout(() => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
       setPreviewUrl(null);
+      refreshImage(); // Refresh after upload completes
     }, 1500);
   }
 
@@ -195,10 +138,9 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={`${user.id}-${imageKey}`}
-                    src={`${getProfileUrl(user.id)}?t=${imageKey}`}
+                    src={imageUrl}
                     alt={`${user.name}'s profile`}
                     className="w-10 h-10 rounded-full object-cover"
-                    onError={() => setHasImage(false)}
                   />
                 ) : (
                   <span className="text-sm font-semibold text-primary">
@@ -406,10 +348,9 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
             {hasImage === true ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={`${getProfileUrl(user.id)}?t=${imageKey}`}
+                src={imageUrl}
                 alt={`${user.name}'s profile`}
                 className="max-w-full max-h-[70vh] rounded-lg object-contain"
-                onError={() => setHasImage(false)}
               />
             ) : (
               <div className="w-64 h-64 rounded-lg bg-primary/10 flex items-center justify-center">

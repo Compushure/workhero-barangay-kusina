@@ -112,6 +112,8 @@ export function ImageCropUpload({
     async function checkImageExists() {
       if (!userId || !currentImageUrl) {
         setImageExists(false);
+        // Clear preview when currentImageUrl is null (after deletion)
+        setCroppedPreview(null);
         return;
       }
 
@@ -311,7 +313,7 @@ export function ImageCropUpload({
     <>
       <div className="flex flex-col items-center gap-4">
         <Avatar className="w-24 h-24 border-2 border-border">
-          <AvatarImage src={croppedPreview || currentImageUrl} alt={userName} />
+          <AvatarImage src={croppedPreview || (currentImageUrl ? `${currentImageUrl}?t=${Date.now()}` : undefined)} alt={userName} />
           <AvatarFallback className="bg-primary/10 text-primary text-lg">
             {getInitials(userName)}
           </AvatarFallback>

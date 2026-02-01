@@ -1,6 +1,5 @@
 'use client';
 
-import { User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useMemo } from 'react';
 import { UserWithExtras } from '@/types';
@@ -23,6 +22,16 @@ export function ProfilePic({ user, onClick }: ProfilePicProps) {
     const separator = user.profilePictureUrl.includes('?') ? '&' : '?';
     return `${user.profilePictureUrl}${separator}t=${Date.now()}`;
   }, [user?.profilePictureUrl]);
+
+  // Get initials from user name
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   const handleProfileClick = () => {
     if (onClick) {
@@ -54,7 +63,9 @@ export function ProfilePic({ user, onClick }: ProfilePicProps) {
           </>
         ) : (
           <>
-            <User size={24} className="text-[#690003]" />
+            <span className="text-sm font-semibold text-[#730202] font-medium">
+              {user?.name ? getInitials(user.name) : '?'}
+            </span>
             {isHovered && (
               <div className="absolute inset-0 bg-gray-400/40 rounded-full transition-opacity duration-200" />
             )}

@@ -322,9 +322,16 @@ export function ManagerPage() {
 
             {/* Employee Type Filter */}
             <div className="space-y-2">
-              <Label htmlFor="filter-type">Employee Type</Label>
-              <Select value={employeeTypeFilter} onValueChange={handleEmployeeTypeFilterChange}>
-                <SelectTrigger id="filter-type">
+              <Label htmlFor="filter-type" className="flex items-center gap-2">
+                Employee Type
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+              </Label>
+              <Select 
+                value={employeeTypeFilter} 
+                onValueChange={handleEmployeeTypeFilterChange}
+                disabled={isLoading}
+              >
+                <SelectTrigger id="filter-type" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -338,12 +345,16 @@ export function ManagerPage() {
 
             {/* Employment Status Filter */}
             <div className="space-y-2">
-              <Label htmlFor="filter-status">Employment Status</Label>
+              <Label htmlFor="filter-status" className="flex items-center gap-2">
+                Employment Status
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+              </Label>
               <Select
                 value={employmentStatusFilter}
                 onValueChange={handleEmploymentStatusFilterChange}
+                disabled={isLoading}
               >
-                <SelectTrigger id="filter-status">
+                <SelectTrigger id="filter-status" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -356,9 +367,12 @@ export function ManagerPage() {
 
             {/* Sort */}
             <div className="space-y-2 lg:col-span-2">
-              <Label htmlFor="sort">Sort By</Label>
-              <Select value={sortBy} onValueChange={handleSortChange}>
-                <SelectTrigger id="sort">
+              <Label htmlFor="sort" className="flex items-center gap-2">
+                Sort By
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+              </Label>
+              <Select value={sortBy} onValueChange={handleSortChange} disabled={isLoading}>
+                <SelectTrigger id="sort" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -383,6 +397,13 @@ export function ManagerPage() {
           <WhiteCard className="p-8 sm:p-12 text-center">
             <p className="text-destructive mb-4">Failed to load users</p>
             <p className="text-sm text-muted-foreground">{error.message}</p>
+          </WhiteCard>
+        ) : isLoading ? (
+          <WhiteCard className="p-4">
+            <div className="flex items-center justify-center gap-3 py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <span className="text-muted-foreground">Loading users...</span>
+            </div>
           </WhiteCard>
         ) : users.length === 0 ? (
           <WhiteCard className="p-8 sm:p-12 text-center">
