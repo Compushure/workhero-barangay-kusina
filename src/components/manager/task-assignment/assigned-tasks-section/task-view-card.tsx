@@ -148,26 +148,31 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           <header className="flex flex-col gap-1.5">
             <div className="flex items-end">
               <h3 className="text-xl font-bold text-[#690003] leading-none">{task.taskName}</h3>
-              <p className="text-sm text-gray-500 ml-2 leading-none">- {task.taskType}</p>
+              <p className="text-sm text-gray-500 ml-2 leading-none">- {task.taskDescription}</p>
             </div>
 
             <p className="text-sm font-medium text-zinc-500">
               {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
-              {isTaskOverdue(task.dateRange.end) && 
-              <span className='bg-red-100 text-red-500 text-sm px-2 py-1 rounded-full ml-2'>Task is Overdue</span>
-              }
+              {isTaskOverdue(task.dateRange.end) && (
+                <span className="bg-red-100 text-red-500 text-sm px-2 py-1 rounded-full ml-2">
+                  Task is Overdue
+                </span>
+              )}
             </p>
           </header>
 
           {/* Task max orders, fiesta points and XP */}
           <div className="flex gap-4 text-zinc-500 items-baseline">
-            
             <div className="flex flex-col items-end">
               <div className="flex text-base font-medium items-end gap-1">
                 <Soup strokeWidth={1.5} className="size-7 mb-3.5" />
-                <p className='flex flex-col items-center'>
-                  <span className="inline-block font-semibold pb-1 leading-none">{task.maxOrders} max order/s</span>
-                  <span className="text-xs font-extralight text-zinc-400 leading-none">per employee</span>
+                <p className="flex flex-col items-center">
+                  <span className="inline-block font-semibold pb-1 leading-none">
+                    {task.maxOrders} max order/s
+                  </span>
+                  <span className="text-xs font-extralight text-zinc-400 leading-none">
+                    per employee
+                  </span>
                 </p>
               </div>
             </div>
@@ -187,7 +192,6 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
               <p className="text-xs font-extralight text-zinc-400 pl-3">per order</p>
             </div>
-            
           </div>
         </section>
 
