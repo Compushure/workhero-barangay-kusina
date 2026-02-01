@@ -12,9 +12,8 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ShoppingCart, Minus, Plus, Check, ImageIcon } from 'lucide-react';
-import { useCartStore } from '@/store/cartStore';
-import { useRewardCartActions } from '@/hooks/useRewardCartActions';
+import { Minus, Plus, ImageIcon, Loader2 } from 'lucide-react';
+import { useRedeemReward } from '@/hooks/tanstack/mutations/redemptionMutations';
 import { formatNumber } from '@/lib/format';
 import type { Reward } from '@/types';
 
@@ -26,38 +25,54 @@ interface RewardCardProps {
 
 export function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCardProps) {
   const [imageError, setImageError] = useState(false);
-  const [localQuantity, setLocalQuantity] = useState(1);
-  const { isInCart, getItemQuantity } = useCartStore();
+  const [quantity, setQuantity] = useState(1);
+  const redeemMutation = useRedeemReward();
 
-  const inCart = isInCart(reward.id);
-  const cartQuantity = getItemQuantity(reward.id);
   const maxQuantity = reward.redeemingLimit || 99;
-  const displayQuantity = inCart ? cartQuantity : localQuantity;
-  const totalCost = reward.pointsCost * displayQuantity;
+  const totalCost = reward.pointsCost * quantity;
   const canAfford = userPoints >= totalCost;
   const isOutOfStock = reward.quantity !== undefined && reward.quantity === 0;
-  const canAddToCart = canAfford && !hasPendingRequest && !isOutOfStock;
+  const canRedeem = canAfford && !hasPendingRequest && !isOutOfStock;
+  const isRedeeming = redeemMutation.isPending;
 
-  const {
-    handleAddToCart,
-    handleIncrementQuantity,
-    handleDecrementQuantity,
-    handleQuantityChange,
-    handleRemoveFromCart,
-  } = useRewardCartActions({
-    reward,
-    inCart,
-    cartQuantity,
-    localQuantity,
-    setLocalQuantity,
-  });
+  const handleIncrement = () => {
+    if (quantity < maxQuantity) {
+      setQuantity(quantity + 1);
+    }
+  };
+
+  const handleDecrement = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
+
+  const handleQuantityChange = (value: string) => {
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue >= 1 && numValue <= maxQuantity) {
+      setQuantity(numValue);
+    }
+  };
+
+  const handleRedeem = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (canRedeem && !isRedeeming) {
+      redeemMutation.mutate(
+        { rewardId: reward.id, quantity, rewardName: reward.name },
+        {
+          onSuccess: () => {
+            // Reset quantity to 1 after successful redemption
+            setQuantity(1);
+          },
+        }
+      );
+    }
+  };
 
   return (
-    <Card
-      className={`overflow-hidden border-[#690003]/20 hover:shadow-lg transition-shadow ${
-        inCart ? 'ring-2 ring-[#690003]/40' : ''
-      }`}
-    >
+    <Card className="overflow-hidden border-[#690003]/20 hover:shadow-lg transition-shadow">
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-3">
@@ -76,15 +91,14 @@ export function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCard
             <CardTitle className="text-xl text-gray-900">{reward.name}</CardTitle>
           </div>
           <div className="flex flex-col items-end gap-1">
-            {inCart && (
-              <Badge className="bg-gray-700 text-white text-xs">
-                <Check className="h-3 w-3 mr-1" />
-                In Cart
-              </Badge>
-            )}
             {isOutOfStock && (
               <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-300">
                 Out of Stock
+              </Badge>
+            )}
+            {hasPendingRequest && !isOutOfStock && (
+              <Badge className="bg-yellow-500 text-white text-xs">
+                Pending Approval
               </Badge>
             )}
           </div>
@@ -111,15 +125,13 @@ export function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCard
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-[#5a2a2a]">Quantity</label>
-            <div
-              className={`flex items-center gap-3 ${inCart ? 'pointer-events-none opacity-60' : ''}`}
-              aria-disabled={inCart}
-            >
+            <div className="flex items-center gap-3">
               <Button
+                type="button"
                 variant="outline"
                 size="icon"
-                onClick={handleDecrementQuantity}
-                disabled={displayQuantity <= 1 || isOutOfStock || inCart}
+                onClick={handleDecrement}
+                disabled={quantity <= 1 || isOutOfStock || isRedeeming}
                 className="h-9 w-9 border-[#690003] text-[#690003] hover:bg-[#fbeaea]"
               >
                 <Minus className="h-4 w-4" />
@@ -128,16 +140,17 @@ export function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCard
                 type="number"
                 min="1"
                 max={maxQuantity}
-                value={displayQuantity}
+                value={quantity}
                 onChange={(e) => handleQuantityChange(e.target.value)}
-                disabled={isOutOfStock || inCart}
+                disabled={isOutOfStock || isRedeeming}
                 className="h-9 w-16 text-center border-[#690003] focus-visible:ring-[#690003]"
               />
               <Button
+                type="button"
                 variant="outline"
                 size="icon"
-                onClick={handleIncrementQuantity}
-                disabled={displayQuantity >= maxQuantity || isOutOfStock || inCart}
+                onClick={handleIncrement}
+                disabled={quantity >= maxQuantity || isOutOfStock || isRedeeming}
                 className="h-9 w-9 border-[#690003] text-[#690003] hover:bg-[#fbeaea]"
               >
                 <Plus className="h-4 w-4" />
@@ -154,40 +167,31 @@ export function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCard
         </div>
       </CardContent>
       <CardFooter>
-        {inCart ? (
-          <div className="w-full flex gap-2">
-            <Button
-              onClick={handleRemoveFromCart}
-              variant="outline"
-              className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
-            >
-              Remove from Cart
-            </Button>
-          </div>
-        ) : (
-          <Button
-            onClick={handleAddToCart}
-            disabled={!canAddToCart}
-            className={`w-full ${
-              canAddToCart
-                ? 'bg-[#690003] hover:bg-[#8b0000] text-white'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            {isOutOfStock ? (
-              'Out of Stock'
-            ) : hasPendingRequest ? (
-              'Pending Approval'
-            ) : !canAfford ? (
-              'Insufficient Points'
-            ) : (
-              <>
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Add to Cart
-              </>
-            )}
-          </Button>
-        )}
+        <Button
+          type="button"
+          onClick={handleRedeem}
+          disabled={!canRedeem || isRedeeming}
+          className={`w-full ${
+            canRedeem && !isRedeeming
+              ? 'bg-[#690003] hover:bg-[#8b0000] text-white'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          {isRedeeming ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Redeeming...
+            </>
+          ) : isOutOfStock ? (
+            'Out of Stock'
+          ) : hasPendingRequest ? (
+            'Pending Approval'
+          ) : !canAfford ? (
+            'Insufficient Points'
+          ) : (
+            `Redeem (${formatNumber(totalCost)} pts)`
+          )}
+        </Button>
       </CardFooter>
     </Card>
   );

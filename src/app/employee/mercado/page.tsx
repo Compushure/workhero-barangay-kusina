@@ -1,13 +1,22 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
-import { CartDrawer, CartButton, RewardCard } from '@/components/employee';
+import { useState } from 'react';
+import { Loader2, FileText } from 'lucide-react';
+import { RewardCard } from '@/components/employee/mercado/reward-card';
+import { MyRequestsModal } from '@/components/employee/modals/my-requests-modal';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useMercadoPageData } from '@/hooks/useMercadoPageData';
 import { formatNumber } from '@/lib/format';
 
 export default function EmployeeMercadoPage() {
-  const { activeRewards, pendingRewardIds, userPoints, deductedPoints, isLoading, error } =
+  const [isMyRequestsOpen, setIsMyRequestsOpen] = useState(false);
+  const { activeRewards, pendingRequests, userPoints, deductedPoints, isLoading, error } =
     useMercadoPageData();
+
+  const pendingRewardIds = new Set(
+    (pendingRequests || []).map((request) => request.rewardId)
+  );
 
   if (isLoading) {
     return (
@@ -44,11 +53,23 @@ export default function EmployeeMercadoPage() {
             <div>
               <h1 className="text-3xl font-bold text-[#690003]">Mercado</h1>
               <p className="text-[#7a3d3d] mt-1">
-                Add rewards to your cart and submit your redemption request
+                Browse rewards and redeem items with your points
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <CartButton variant="inline" />
+              <Button
+                onClick={() => setIsMyRequestsOpen(true)}
+                variant="outline"
+                className="border-[#690003] text-[#690003] hover:bg-[#fbeaea] relative"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                My Requests
+                {pendingRequests && pendingRequests.length > 0 && (
+                  <Badge className="ml-2 bg-yellow-500 text-white text-xs px-1.5 py-0.5">
+                    {pendingRequests.length}
+                  </Badge>
+                )}
+              </Button>
               <div className="bg-white rounded-lg shadow-md h-9 px-4 border-2 border-[#690003] flex items-center gap-2">
                 <span className="text-xs text-[#7a3d3d] font-medium whitespace-nowrap">
                   Available Points
@@ -82,7 +103,7 @@ export default function EmployeeMercadoPage() {
         )}
       </div>
 
-      <CartDrawer userPoints={userPoints} deductedPoints={deductedPoints} />
+      <MyRequestsModal open={isMyRequestsOpen} onOpenChange={setIsMyRequestsOpen} />
     </div>
   );
 }

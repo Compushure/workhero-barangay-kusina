@@ -21,18 +21,13 @@ export function useMercadoPageData() {
 
   const activeRewards = useMemo(() => allRewards.filter((reward) => reward.isActive), [allRewards]);
 
-  const pendingRewardIds = useMemo(
-    () => new Set(pendingRequests.map((req) => req.rewardId)),
-    [pendingRequests]
-  );
-
   const userPoints = pointsData?.points ?? 0;
   const deductedPoints = pointsData?.deductedPoints ?? 0;
   const isLoading = rewardsLoading || pointsLoading || requestsLoading;
 
   return {
     activeRewards,
-    pendingRewardIds,
+    pendingRequests,
     userPoints,
     deductedPoints,
     isLoading,
