@@ -96,11 +96,6 @@ export function AssignEmployeesDialog({
     }
   };
 
-  const handleConfirm = () => {
-    setOpen(false);
-    setSearchTerm('');
-  };
-
   const handleOpenChange = (newOpen: boolean) => {
     if (!disabled) {
       if (!newOpen) {
@@ -115,10 +110,11 @@ export function AssignEmployeesDialog({
       <Button
         onClick={() => !disabled && setOpen(true)}
         disabled={disabled}
-        className="bg-white shadow-sm/25 text-black cursor-pointer transition-all duration-500 ease-in-out hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className={`bg-white shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out hover:bg-gray-100 flex items-center disabled:opacity-50 disabled:cursor-not-allowed
+          ${selectedEmployees.length === 0 ? 'text-zinc-700' : 'text-[#690003]'}`}
       >
-        <div className="flex items-center gap-2">
-          <span>{selectedEmployees.length} selected</span>
+        <div className="flex items-center gap-8">
+          <span>{selectedEmployees.length} employee/s selected</span>
           <Plus className="w-4 h-4" />
         </div>
       </Button>
@@ -153,6 +149,7 @@ export function AssignEmployeesDialog({
 
           {/* Employees Table */}
           <AssignEmployeesTable
+            isLoading={isLoading}
             allFilteredSelected={allFilteredSelected}
             handleSelectAll={handleSelectAll}
             filteredEmployees={filteredEmployees}
@@ -164,16 +161,9 @@ export function AssignEmployeesDialog({
           {/* Dialog Footer */}
           <DialogFooter>
             <Button
-              onClick={handleConfirm}
-              disabled={selectedEmployees.length === 0}
-              className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50"
-            >
-              Confirm
-            </Button>
-            <Button
               variant="outline"
               onClick={() => setOpen(false)}
-              className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+              className="px-12 border-gray-300 bg-zinc-50 hover:bg-[#690009] hover:text-zinc-50 cursor-pointer transition-all duration-500 ease-in-out"
             >
               Close
             </Button>
