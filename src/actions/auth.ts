@@ -211,8 +211,10 @@ export async function protectEmployeeRoute() {
 /**
  * Protects routes that require any authenticated session (all roles)
  * Used for routes like /profile/* that should be accessible to any logged-in user
+ * 
+ * @param restrictToUserId - Optional user ID to restrict access to (user can only access their own profile)
  */
-export async function protectSessionRoute() {
+export async function protectSessionRoute(restrictToUserId?: string) {
   const supabase = await createClient();
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
@@ -220,6 +222,18 @@ export async function protectSessionRoute() {
     console.log('No session found, redirecting to login');
     redirect('/error?status=401&cause=Unauthorized&recommendation=Please%20log%20in%20to%20access%20this%20page.');
     return;
+  }
+
+  // If restrictToUserId is provided, verify the session user matches
+  if (restrictToUserId) {
+    const sessionUserId = sessionData.session.user.id;
+    if (sessionUserId !== restrictToUserId) {
+      console.log('Access denied: User', sessionUserId, 'tried to access profile of', restrictToUserId);
+      redirect(
+        '/error?status=403&cause=Access%20Denied&recommendation=You%20can%20only%20view%20your%20own%20profile.'
+      );
+      return;
+    }
   }
 
   console.log('✓ Session access granted');
