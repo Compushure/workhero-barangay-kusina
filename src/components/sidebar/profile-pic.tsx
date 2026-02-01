@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useTransition } from 'react';
 import { UserWithExtras } from '@/types';
 import { ProfileModal } from './profile-modal';
 
@@ -15,6 +15,7 @@ export function ProfilePic({ user, onClick }: ProfilePicProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [hasImage, setHasImage] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   // Add cache-busting timestamp to image URL to force refresh when profile picture changes
   const imageUrlWithCacheBust = useMemo(() => {
@@ -43,11 +44,12 @@ export function ProfilePic({ user, onClick }: ProfilePicProps) {
 
   return (
     <div>
-      <div
+      <button
         onClick={handleProfileClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="relative w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 cursor-pointer transition-all duration-200 group"
+        disabled={isPending}
+        className="relative w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 cursor-pointer transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md disabled:hover:shadow-none"
       >
         {imageUrlWithCacheBust && hasImage ? (
           <>
@@ -57,7 +59,7 @@ export function ProfilePic({ user, onClick }: ProfilePicProps) {
               className="w-full h-full rounded-full object-cover"
               onError={() => setHasImage(false)}
             />
-            {isHovered && (
+            {isHovered && !isPending && (
               <div className="absolute inset-0 bg-gray-400/40 rounded-full transition-opacity duration-200" />
             )}
           </>
@@ -66,12 +68,12 @@ export function ProfilePic({ user, onClick }: ProfilePicProps) {
             <span className="text-sm font-semibold text-[#730202] font-medium">
               {user?.name ? getInitials(user.name) : '?'}
             </span>
-            {isHovered && (
+            {isHovered && !isPending && (
               <div className="absolute inset-0 bg-gray-400/40 rounded-full transition-opacity duration-200" />
             )}
           </>
         )}
-      </div>
+      </button>
       <ProfileModal open={modalOpen} onOpenChange={setModalOpen} user={user || null} />
     </div>
   );

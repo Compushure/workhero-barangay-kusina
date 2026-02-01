@@ -103,8 +103,8 @@ function ProfilePictureComponent({
           <button
             onClick={handleCameraClick}
             disabled={isLoading || isDeleting || !uploadAntiSpam.canExecute}
-            className="absolute bottom-0 right-0 bg-[#730202] text-white p-2 rounded-full shadow-lg hover:bg-[#8b0003] disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Upload profile picture"
+            className="absolute bottom-0 right-0 bg-[#730202] text-white p-2 rounded-full shadow-lg hover:bg-[#8b0003] hover:shadow-xl disabled:bg-gray-400 disabled:opacity-60 disabled:cursor-not-allowed active:scale-90 cursor-pointer disabled:active:scale-100 transition-all duration-200"
+            title={isLoading ? 'Uploading...' : 'Upload profile picture'}
           >
             <Camera className="h-5 w-5" />
           </button>

@@ -1,7 +1,8 @@
 'use client';
 
-import { X, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { X, ArrowRight, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -21,15 +22,26 @@ interface ProfileModalProps {
 }
 
 export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
   if (!user) return null;
 
+  const handleViewFullProfile = () => {
+    startTransition(() => {
+      onOpenChange(false);
+      router.push(`/profile/${user.id}`);
+    });
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={!isPending ? onOpenChange : undefined}>
       <DialogContent className="max-w-[95vw] sm:max-w-125 rounded-2xl p-4 sm:p-6 [&>button]:hidden">
         {/* Custom Close Button */}
         <button
           onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-4 rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#730202] focus:ring-offset-2 z-50"
+          disabled={isPending}
+          className="absolute right-4 top-4 rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#730202] focus:ring-offset-2 z-50 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <X className="h-5 w-5 text-[#730202]" />
           <span className="sr-only">Close</span>
@@ -86,15 +98,24 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
 
           {/* See Full Profile Button */}
           <div className="pt-4 border-t border-border">
-            <Link href={`/profile/${user.id}`} onClick={() => onOpenChange(false)}>
-              <Button
-                className="w-full bg-[#730202] hover:bg-[#8b0003] text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group"
-                size="lg"
-              >
-                <span>See Full Profile Details</span>
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </Button>
-            </Link>
+            <Button
+              onClick={handleViewFullProfile}
+              disabled={isPending}
+              className="w-full bg-[#730202] hover:bg-[#8b0003] disabled:bg-gray-400 disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100 group"
+              size="lg"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Loading...</span>
+                </>
+              ) : (
+                <>
+                  <span>See Full Profile Details</span>
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </DialogContent>

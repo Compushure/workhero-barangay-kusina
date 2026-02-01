@@ -117,8 +117,12 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
       <Card className="max-w-md mx-auto">
         <CardContent className="pt-6 text-center">
           <p className="text-lg font-semibold text-[#730202]">Profile not found</p>
-          <Button onClick={() => router.back()} className="mt-4">
-            Go Back
+          <Button 
+            onClick={() => startTransition(() => router.back())} 
+            disabled={isPending}
+            className="mt-4 cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            {isPending ? 'Going back...' : 'Go Back'}
           </Button>
         </CardContent>
       </Card>
@@ -128,7 +132,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <ProfileHeader onBack={() => router.back()} />
+      <ProfileHeader isPending={isPending} onBack={() => startTransition(() => router.back())} />
 
       {/* Profile Card */}
       <ProfileCard profile={profile}>
