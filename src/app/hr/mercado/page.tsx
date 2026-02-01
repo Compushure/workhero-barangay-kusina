@@ -26,10 +26,7 @@ export default function MercadoPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-<<<<<<< HEAD
-=======
   const [saveError, setSaveError] = useState<string>('');
->>>>>>> 575884ffcfbd91438aa85ef58b8d95123a6408fa
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [editingItem, setEditingItem] = useState<{

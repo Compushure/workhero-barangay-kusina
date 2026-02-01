@@ -125,11 +125,8 @@ export function RedemptionTable({ data, onApprove, onReject, status = 'pending' 
           const itemDisplay = `${quantity} x ${request.rewardName}`;
           const userPoints = request.userPoints || 0;
           const hasInsufficientPoints = userPoints < totalCost;
-<<<<<<< HEAD
-=======
           const hasRemarks = request.remarks && request.remarks.trim() !== '';
           const userName = request.userName || 'N/A';
->>>>>>> 575884ffcfbd91438aa85ef58b8d95123a6408fa
 
           return (
             <div
@@ -176,34 +173,6 @@ export function RedemptionTable({ data, onApprove, onReject, status = 'pending' 
               <div className="flex items-center">
                 <p className="text-sm font-medium text-[#5a2a2a]">{totalCost} Pts</p>
               </div>
-<<<<<<< HEAD
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-[#8b0000] hover:bg-[#8b0000] hover:text-white"
-                  onClick={() => handleDeclineClick(request.id)}
-                  disabled={declineMutation.isPending || acceptMutation.isPending}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-[#2d5016] hover:bg-[#2d5016] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={() => handleAcceptClick(request.id)}
-                  disabled={
-                    declineMutation.isPending || acceptMutation.isPending || hasInsufficientPoints
-                  }
-                  title={
-                    hasInsufficientPoints
-                      ? `Insufficient points: User has ${userPoints} but needs ${totalCost}`
-                      : 'Accept request'
-                  }
-                >
-                  <Check className="h-4 w-4" />
-                </Button>
-=======
               <div className="flex items-center justify-center">
                 {hasRemarks ? (
                   <Tooltip>
@@ -264,7 +233,6 @@ export function RedemptionTable({ data, onApprove, onReject, status = 'pending' 
                     {status === 'approved' ? 'Approved' : 'Rejected'}
                   </div>
                 )}
->>>>>>> 575884ffcfbd91438aa85ef58b8d95123a6408fa
               </div>
             </div>
           );
