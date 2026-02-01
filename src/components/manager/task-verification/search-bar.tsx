@@ -27,7 +27,7 @@ export function SearchBar({
         placeholder={placeholder}
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="pl-10 pr-4 py-2"
+        className="pl-10 pr-4 py-2 rounded-full shadow-sm/25 transition-all duration-500 ease-in-out"
       />
     </div>
   );

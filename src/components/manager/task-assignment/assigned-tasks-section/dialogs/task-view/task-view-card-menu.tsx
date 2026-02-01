@@ -2,7 +2,7 @@
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, MoreVertical } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
 
 interface TaskViewCardMenuProps {
   openPopover: boolean;

@@ -70,7 +70,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {employees.map((employee) => {
         const isExpanded = expandedEmployees.has(employee.id);
         const displayedTasks = isExpanded

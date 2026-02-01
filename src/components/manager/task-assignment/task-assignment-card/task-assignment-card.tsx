@@ -15,11 +15,26 @@ import {
   managerAssignmentKeys,
 } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 
+// Shadcn UI Dialog imports
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+
 export function TaskAssignmentCard() {
   const { assignTasks, assignedTasks } = useTaskAssignment();
   const queryClient = useQueryClient();
 
-  const assignedTasksQuery = useGetCurrentAssignedTasksPaginated(1, 1000, 'recently added', '', true);
+  const assignedTasksQuery = useGetCurrentAssignedTasksPaginated(
+    1,
+    1000,
+    'recently added',
+    '',
+    true
+  );
   const assignedTasksForAssign = assignedTasksQuery.data?.tasks ?? assignedTasks;
 
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
@@ -29,6 +44,10 @@ export function TaskAssignmentCard() {
   const [selectedDeadline, setSelectedDeadline] = useState<Date | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showTaskWarning, setShowTaskWarning] = useState(false);
+
+  // NEW STATES
+  const [showAssignConfirm, setShowAssignConfirm] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
 
   useEffect(() => {
     async function loadTasks() {
@@ -50,14 +69,8 @@ export function TaskAssignmentCard() {
 
   const handleAssign = async () => {
     if (selectedEmployees.length > 0 && selectedTask.length > 0 && selectedDeadline) {
-      // Your dialog logic currently supports single task selection
-      const taskId = selectedTask[0];
-      const employeeIds = selectedEmployees.map((emp) => emp.id);
-      const startDate = new Date().toISOString();
-      const endDate = selectedDeadline.toISOString();
-      const maxOrders = taskMaxRepeats[taskId] || 1;
+      setIsAssigning(true);
 
-      // Call the server action handler - this will update the context automatically
       await assignTasks({
         employees: selectedEmployees,
         tasks: selectedTask.map((id) => ({
@@ -67,11 +80,12 @@ export function TaskAssignmentCard() {
         deadline: selectedDeadline,
       });
 
-      // Ensure assignment lists refresh for disabled employee calculations
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
 
       handleClear();
+      setIsAssigning(false);
+      setShowAssignConfirm(false);
     }
   };
 
@@ -120,12 +134,11 @@ export function TaskAssignmentCard() {
           />
         </div>
 
-        {/* Set Deadline */}
         <DatePickerPopover deadline={selectedDeadline} onDeadlineChange={setSelectedDeadline} />
       </div>
 
       {showTaskWarning && (
-        <p className="text-red-600 text-sm mb-4 font-medium">
+        <p className="text-red-600 text-sm mb-4 font-medium transition-all duration-500 ease-in-out">
           Select a task first before assigning employees.
         </p>
       )}
@@ -133,13 +146,16 @@ export function TaskAssignmentCard() {
       {/* Action Buttons */}
       <div className="flex gap-3 justify-end mt-6">
         <Button
-          onClick={handleAssign}
+          onClick={() => setShowAssignConfirm(true)}
           disabled={
-            selectedEmployees.length === 0 || selectedTask.length === 0 || !selectedDeadline
+            isAssigning ||
+            selectedEmployees.length === 0 ||
+            selectedTask.length === 0 ||
+            !selectedDeadline
           }
           className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:shadow-sm/25 disabled:cursor-not-allowed px-12 shadow-sm/25"
         >
-          Assign
+          {isAssigning ? 'Assigning...' : 'Assign'}
         </Button>
         
         <Button
@@ -157,6 +173,36 @@ export function TaskAssignmentCard() {
         setShowClearConfirm={setShowClearConfirm}
         handleClear={handleClear}
       />
+
+      {/* Assign Confirmation Dialog */}
+      <Dialog open={showAssignConfirm} onOpenChange={setShowAssignConfirm}>
+        <DialogContent className="transition-all duration-500 ease-in-out">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-[#690003]">
+              Confirm Assignment
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-600 mb-4">
+            Are you sure you want to assign this task to the selected employees?
+          </p>
+          <DialogFooter className="flex gap-3 justify-end">
+            <Button
+              onClick={handleAssign}
+              disabled={isAssigning}
+              className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed px-8 shadow-sm/25"
+            >
+              {isAssigning ? 'Assigning...' : 'Confirm'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowAssignConfirm(false)}
+              className="text-black bg-white hover:bg-gray-100 px-8 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

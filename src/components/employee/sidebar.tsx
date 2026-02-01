@@ -12,7 +12,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogOutBtn } from '../sidebar/logout-btn';
 import { ProfilePic } from '../sidebar/profile-pic';
+import { RankWidget } from '../sidebar/rank-widget';
+import { ProfileModal } from '../sidebar/profile-modal';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
+import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
+import { useQuery } from '@tanstack/react-query';
+import { getEmployeeXP } from '@/actions/employees/get-xp';
 
 interface NavItem {
   key: string;
@@ -49,9 +54,27 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Fetch current session user
   const { data: user } = useGetSessionUser();
+
+  // Fetch employee rank
+  const { data: rankData, isLoading: isRankLoading } = useGetEmployeeRank();
+
+  // Fetch employee XP
+  const { data: xpResult } = useQuery({
+    queryKey: ['employeeXP'],
+    queryFn: async () => {
+      const result = await getEmployeeXP();
+      return result.data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const handleProfileClick = () => {
+    setShowProfileModal(true);
+  };
 
   return (
     <aside
@@ -102,15 +125,23 @@ export function Sidebar({
       {/* User Profile Section */}
       <div
         className={`border-t border-red-900 ${
-          isCollapsed ? 'flex justify-center items-center h-24' : 'p-4'
+          isCollapsed ? 'flex flex-col justify-center items-center gap-4 py-4' : 'p-4'
         }`}
       >
+        {/* Rank Widget */}
+        <RankWidget 
+          rankData={rankData ?? null} 
+          isLoading={isRankLoading} 
+          isCollapsed={isCollapsed}
+          totalXP={xpResult?.totalXP}
+        />
+
         <div
           className={`bg-white/10 rounded-full flex items-center ${
             isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
           }`}
         >
-          <ProfilePic user={user} />
+          <ProfilePic user={user} onClick={handleProfileClick} />
           {!isCollapsed && user && (
             <div className="min-w-0">
               <p className="font-semibold text-sm">{user.name}</p>
@@ -121,6 +152,13 @@ export function Sidebar({
 
         {!isCollapsed && <LogOutBtn />}
       </div>
+
+      {/* Profile Modal */}
+      <ProfileModal 
+        open={showProfileModal} 
+        onOpenChange={setShowProfileModal} 
+        user={user ?? null} 
+      />
     </aside>
   );
 }
