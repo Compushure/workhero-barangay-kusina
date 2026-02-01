@@ -73,7 +73,7 @@ export function CurrentAssignedTasks() {
   const memoizedTasks = useMemo(() => tasks || [], [tasks]);
 
   return (
-    <div className="rounded-3xl bg-[#FBF4E8] pl-6 pr-6 pt-6 shadow-sm/50 flex flex-col">
+    <div className="rounded-3xl bg-[#FBF4E8] pl-6 pr-6 pt-6 shadow-sm/50 flex flex-col w-full">
       {/* Header */}
       <div className="flex flex-row md:items-center justify-between mb-5">
         <h2 className="text-2xl font-bold text-[#690003]">Current Assigned Tasks</h2>
