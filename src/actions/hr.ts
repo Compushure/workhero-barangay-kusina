@@ -184,6 +184,19 @@ export async function getMyRedemptionRequestsAction(
 /**
  * Accept a redemption request
  * Updates status to 'approved' and deducts points from user
+ * Decrements reward quantity and automatically hides the reward if quantity reaches 0
+ * 
+ * Auto-hide behavior:
+ * - When a reward's quantity reaches 0 after approval, it is automatically marked as inactive (is_active = false)
+ * - Hidden rewards are not shown in the employee mercado view (filtered by isActive)
+ * - HR can still see hidden rewards in their mercado management page with a "Hidden" badge
+ * - HR can manually unhide rewards if stock is replenished
+ * 
+ * Auto-decline pending requests:
+ * - When quantity reaches 0, all other pending requests for that reward are automatically declined
+ * - Declined requests receive the remark "Item is out of stock"
+ * - This prevents employees from having pending requests for unavailable items
+ * 
  * @param requestId - The ID of the redemption request
  * @param remarks - Optional remarks for the approval
  * @returns ServerActionResponse indicating success or failure
@@ -216,7 +229,8 @@ export async function acceptRedemptionRequestAction(
         quantity,
         status,
         Reward:reward_id (
-          points_cost
+          points_cost,
+          quantity
         ),
         User:user_id (
           points
@@ -240,6 +254,16 @@ export async function acceptRedemptionRequestAction(
     const pointsCostPerItem = reward?.points_cost || 0;
     const totalPointsCost = pointsCostPerItem * quantity;
     const userPoints = user?.points || 0;
+    const rewardQuantity = reward?.quantity;
+
+    // Check if reward has quantity tracking and sufficient stock
+    if (rewardQuantity !== undefined && rewardQuantity !== null) {
+      if (rewardQuantity < quantity) {
+        return {
+          error: `Insufficient stock. Only ${rewardQuantity} items available but ${quantity} requested`,
+        };
+      }
+    }
 
     // Check if user has sufficient points
     if (userPoints < totalPointsCost) {
@@ -279,6 +303,54 @@ export async function acceptRedemptionRequestAction(
         .update({ status: 'pending', approved_by: null })
         .eq('id', requestId);
       return { error: 'Failed to deduct points. Request approval reverted.' };
+    }
+
+    // Decrement reward quantity if tracking is enabled
+    if (rewardQuantity !== undefined && rewardQuantity !== null) {
+      const newQuantity = rewardQuantity - quantity;
+      const shouldHide = newQuantity <= 0;
+
+      const { error: updateRewardError } = await supabase
+        .from('Reward')
+        .update({
+          quantity: newQuantity,
+          // Automatically hide reward when quantity reaches 0
+          is_active: shouldHide ? false : undefined,
+        })
+        .eq('id', request.reward_id);
+
+      if (updateRewardError) {
+        console.error('Error updating reward quantity:', updateRewardError);
+        // Try to revert the approval and points deduction
+        await supabase
+          .from('RewardRequest')
+          .update({ status: 'pending', approved_by: null })
+          .eq('id', requestId);
+        await supabase
+          .from('User')
+          .update({ points: userPoints })
+          .eq('id', request.user_id);
+        return { error: 'Failed to update reward quantity. Request approval reverted.' };
+      }
+
+      // If item is now out of stock, auto-decline all other pending requests for this reward
+      if (shouldHide) {
+        const { error: declineOthersError } = await supabase
+          .from('RewardRequest')
+          .update({
+            status: 'rejected',
+            approved_by: admin.id,
+            remarks: 'Item is out of stock',
+          })
+          .eq('reward_id', request.reward_id)
+          .eq('status', 'pending')
+          .neq('id', requestId); // Exclude the current request we just approved
+
+        if (declineOthersError) {
+          console.error('Error auto-declining pending requests:', declineOthersError);
+          // This is non-critical, so we log but don't fail the approval
+        }
+      }
     }
 
     return { error: null };
@@ -632,6 +704,11 @@ export async function editRewardAction(
       imageUrl: getRewardImageUrl(supabase, data.id),
     };
 
+    // Auto-hide if quantity was updated and reached 0
+    if (validatedData.quantity !== undefined) {
+      await autoHideRewardIfOutOfStock(id);
+    }
+
     return { error: null, data: reward };
   } catch (error) {
     console.error('Error in editRewardAction:', error);
@@ -704,6 +781,52 @@ export async function hideRewardAction(
     return {
       error: `An unexpected error occurred while ${isActive ? 'unhiding' : 'hiding'} the item`,
     };
+  }
+}
+
+/**
+ * Check and auto-hide a reward if its quantity reaches 0
+ * This can be called after any quantity update to ensure consistency
+ * @param rewardId - The ID of the reward to check
+ * @returns ServerActionResponse indicating success or failure
+ */
+export async function autoHideRewardIfOutOfStock(
+  rewardId: string
+): Promise<ServerActionResponse<void>> {
+  try {
+    const supabase = await createClient();
+
+    // Fetch current reward quantity
+    const { data: reward, error: fetchError } = await supabase
+      .from('Reward')
+      .select('quantity, is_active')
+      .eq('id', rewardId)
+      .single();
+
+    if (fetchError || !reward) {
+      return { error: 'Reward not found' };
+    }
+
+    // If quantity is tracked and reaches 0, hide the reward
+    if (reward.quantity !== undefined && reward.quantity !== null && reward.quantity <= 0 && reward.is_active) {
+      const { error: updateError } = await supabase
+        .from('Reward')
+        .update({ is_active: false })
+        .eq('id', rewardId);
+
+      if (updateError) {
+        console.error('Error auto-hiding reward:', updateError);
+        return { error: `Failed to auto-hide out-of-stock item: ${updateError.message}` };
+      }
+    }
+
+    return { error: null };
+  } catch (error) {
+    console.error('Error in autoHideRewardIfOutOfStock:', error);
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'An unexpected error occurred while checking reward stock' };
   }
 }
 

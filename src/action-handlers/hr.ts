@@ -7,6 +7,7 @@ import {
   hideRewardAction,
   createRedemptionRequestAction,
   uploadRewardPicture,
+  autoHideRewardIfOutOfStock,
 } from '@/actions/hr';
 import { safeAction } from '@/lib/utils/safe-action';
 import { toast } from 'sonner';
@@ -156,5 +157,19 @@ export async function handleUploadRewardPicture(
 
   toast.success(`Successfully updated ${rewardName ?? 'item'} picture`);
   return (result.data?.data as { publicUrl?: string })?.publicUrl ?? null;
+}
+
+// Action handler to check and auto-hide out-of-stock rewards
+export async function handleAutoHideRewardIfOutOfStock(
+  rewardId: string
+): Promise<boolean> {
+  const result = await safeAction(() => autoHideRewardIfOutOfStock(rewardId));
+
+  if (!result.success || result.data?.error) {
+    console.error('Auto-hide check failed:', result.error || result.data?.error);
+    return false;
+  }
+
+  return true;
 }
 

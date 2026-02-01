@@ -21,7 +21,12 @@ interface RedemptionTableProps {
   status?: string;
 }
 
-export function RedemptionTable({ data, onApprove, onReject, status = 'pending' }: RedemptionTableProps) {
+export function RedemptionTable({
+  data,
+  onApprove,
+  onReject,
+  status = 'pending',
+}: RedemptionTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
@@ -112,8 +117,12 @@ export function RedemptionTable({ data, onApprove, onReject, status = 'pending' 
           Requested Item/s
         </div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">Total Cost</div>
-        <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">Remarks</div>
-        <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">Action</div>
+        <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
+          Remarks
+        </div>
+        <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
+          Action
+        </div>
       </div>
 
       {/* Table Body */}
@@ -127,6 +136,7 @@ export function RedemptionTable({ data, onApprove, onReject, status = 'pending' 
           const hasInsufficientPoints = userPoints < totalCost;
           const hasRemarks = request.remarks && request.remarks.trim() !== '';
           const userName = request.userName || 'N/A';
+          const isOutOfStock = request.remarks === 'Item is out of stock';
 
           return (
             <div
@@ -180,7 +190,10 @@ export function RedemptionTable({ data, onApprove, onReject, status = 'pending' 
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-[#690003] hover:bg-[#fbeaea]"
+                        className={cn(
+                          'h-8 w-8 hover:bg-[#fbeaea]',
+                          isOutOfStock ? 'text-orange-600' : 'text-[#690003]'
+                        )}
                         onClick={() => {
                           setSelectedRemarks(request.remarks || '');
                           setRemarkModalOpen(true);
@@ -189,7 +202,9 @@ export function RedemptionTable({ data, onApprove, onReject, status = 'pending' 
                         <MessageSquare className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>View remarks</TooltipContent>
+                    <TooltipContent>
+                      {isOutOfStock ? 'Auto-declined: Out of stock' : 'View remarks'}
+                    </TooltipContent>
                   </Tooltip>
                 ) : (
                   <span className="text-xs text-muted-foreground">-</span>
@@ -213,7 +228,9 @@ export function RedemptionTable({ data, onApprove, onReject, status = 'pending' 
                       className="h-8 w-8 shrink-0 text-[#2d5016] hover:bg-[#2d5016] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => handleAcceptClick(request.id)}
                       disabled={
-                        declineMutation.isPending || acceptMutation.isPending || hasInsufficientPoints
+                        declineMutation.isPending ||
+                        acceptMutation.isPending ||
+                        hasInsufficientPoints
                       }
                       title={
                         hasInsufficientPoints
@@ -225,12 +242,20 @@ export function RedemptionTable({ data, onApprove, onReject, status = 'pending' 
                     </Button>
                   </>
                 ) : (
-                  <div className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 ${
-                    status === 'approved' 
-                      ? 'bg-green-100 text-green-700' 
-                      : 'bg-red-100 text-red-700'
-                  }`}>
-                    {status === 'approved' ? 'Approved' : 'Rejected'}
+                  <div
+                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 ${
+                      status === 'approved'
+                        ? 'bg-green-100 text-green-700'
+                        : isOutOfStock
+                          ? 'bg-orange-100 text-orange-700'
+                          : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {status === 'approved'
+                      ? 'Approved'
+                      : isOutOfStock
+                        ? 'Out of Stock'
+                        : 'Rejected'}
                   </div>
                 )}
               </div>
