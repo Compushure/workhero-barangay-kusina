@@ -47,7 +47,6 @@ export async function getRedemptionRequestsAction(
         approved_by,
         remarks,
         requested_at,
-        requested_items,
         User!RewardRequest_user_id_fkey (
           name,
           points
@@ -132,7 +131,6 @@ export async function getMyRedemptionRequestsAction(
         approved_by,
         remarks,
         requested_at,
-        requested_items,
         User!RewardRequest_user_id_fkey (
           name,
           points
@@ -170,7 +168,6 @@ export async function getMyRedemptionRequestsAction(
       quantity: item.quantity || 1,
       status: item.status,
       approvedBy: item.approved_by,
-      requestedItem: item.requested_items || undefined,
       remarks: item.remarks || undefined,
       requestedAt: item.requested_at,
     }));
@@ -475,14 +472,13 @@ export async function createRedemptionRequestAction(
       return { error: `Failed to deduct points: ${updatePointsError.message}` };
     }
 
-    // Insert redemption request with requested_items field
+    // Insert redemption request
     const { error: insertError } = await supabase.from('RewardRequest').insert({
       user_id: user.id,
       reward_id: rewardId,
       quantity: quantity,
       status: 'pending',
       requested_at: new Date().toISOString(),
-      requested_items: reward.name, // Store the reward name as requested_items
     });
 
     if (insertError) {

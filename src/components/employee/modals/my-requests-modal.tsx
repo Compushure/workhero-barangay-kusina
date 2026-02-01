@@ -118,7 +118,7 @@ export function MyRequestsModal({ open, onOpenChange }: MyRequestsModalProps) {
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex-1 min-w-0">
                 <h4 className="text-base font-semibold text-gray-900 truncate">
-                  {request.requestedItem || request.rewardName}
+                  {request.rewardName}
                 </h4>
                 <p className="text-xs text-gray-500 mt-1">
                   {format(new Date(request.requestedAt), 'MMM dd, yyyy • h:mm a')}
