@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { User, X, Eye, EyeOff } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { UserWithExtras } from '@/types';
@@ -35,7 +41,7 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] sm:max-w-[500px] rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto [&>button]:hidden">
+      <DialogContent className="max-w-[95vw] sm:max-w-125 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto [&>button]:hidden">
         {/* Custom Close Button */}
         <button
           onClick={() => onOpenChange(false)}
@@ -108,9 +114,11 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
             <div className="space-y-3">
               {user.employmentStatus && (
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-muted-foreground">Employment Status</label>
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Employment Status
+                  </label>
                   <div>
-                    <Badge 
+                    <Badge
                       variant={user.employmentStatus === 'regular' ? 'default' : 'secondary'}
                       className="font-semibold capitalize"
                     >
@@ -137,13 +145,17 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
               <div className="space-y-3">
                 {user.contactNumber && (
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium text-muted-foreground">Phone Number</label>
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Phone Number
+                    </label>
                     <p className="text-base font-semibold text-[#730202]">{user.contactNumber}</p>
                   </div>
                 )}
                 {user.address && (
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium text-muted-foreground">Home Address</label>
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Home Address
+                    </label>
                     <p className="text-base font-semibold text-[#730202]">{user.address}</p>
                   </div>
                 )}
@@ -164,11 +176,7 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
                   onClick={() => setShowUnmaskedIds(!showUnmaskedIds)}
                   className="h-8 px-2 text-[#730202] hover:bg-[#f2e1c9]"
                 >
-                  {showUnmaskedIds ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showUnmaskedIds ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   <span className="ml-1 text-xs">{showUnmaskedIds ? 'Hide' : 'Show'}</span>
                 </Button>
               </div>
