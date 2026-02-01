@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { WhiteCard } from '@/components/ui/white-card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Award as IdCard,
   BadgeCheck,
@@ -21,6 +22,7 @@ import {
   Edit2,
   UserIcon,
   Upload,
+  Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
@@ -29,7 +31,7 @@ interface UserCardProps {
   user: UserWithExtras;
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
-  onHandleProfilePictureUpload?: (userid: string, file: File, username: string) => Promise<boolean>;
+  onHandleProfilePictureUpload?: (userid: string, file: File, username: string) => Promise<void>;
 }
 
 const EMPLOYEE_TYPE_STYLES: Record<EmployeeTypeValue, string> = {
@@ -56,15 +58,72 @@ const globalImageVersions = new Map<string, number>();
 export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload }: UserCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isHoveringAvatar, setIsHoveringAvatar] = useState(false);
-  const [hasImage, setHasImage] = useState(true);
+  const [hasImage, setHasImage] = useState<boolean | null>(null); // null = checking, true/false = determined
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageKey, setImageKey] = useState<number>(() => globalImageVersions.get(user.id) || 0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showImageModal, setShowImageModal] = useState(false);
+
+  // Check if image exists in storage on mount and when user changes
+  React_useEffect(() => {
+    const checkImageExists = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase.storage
+          .from('employees')
+          .list(user.id, {
+            limit: 1,
+            search: 'profile.png',
+          });
+
+        if (error || !data || data.length === 0) {
+          setHasImage(false);
+        } else {
+          setHasImage(true);
+        }
+      } catch (error) {
+        console.error('Error checking image:', error);
+        setHasImage(false);
+      }
+    };
+
+    checkImageExists();
+
+    // Listen for profile image deletion events
+    const handleImageDeleted = (event: Event) => {
+      const customEvent = event as CustomEvent<{ userId: string; timestamp: number }>;
+      if (customEvent.detail.userId === user.id) {
+        console.log('Profile image deleted, re-checking storage for user:', user.id);
+        setHasImage(false);
+        checkImageExists();
+      }
+    };
+
+    window.addEventListener('profile-image-deleted', handleImageDeleted);
+
+    return () => {
+      window.removeEventListener('profile-image-deleted', handleImageDeleted);
+    };
+  }, [user.id]);
+
+  React_useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ userId: string; timestamp: number }>).detail;
+      if (!detail || detail.userId !== user.id) return;
+      globalImageVersions.set(user.id, detail.timestamp);
+      setImageKey(detail.timestamp);
+      setHasImage(true);
+    };
+
+    window.addEventListener('profile-image-updated', handler);
+    return () => {
+      window.removeEventListener('profile-image-updated', handler);
+    };
+  }, [user.id]);
 
   function handleAvatarClick(e: React.MouseEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
-    fileInputRef.current?.click();
+    setShowImageModal(true);
   }
 
   function getProfileUrl(userId: string) {
@@ -74,34 +133,34 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
     return data.publicUrl;
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  function getInitials(name: string): string {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  async function handleImageSelect(file: File) {
     console.log('Selected file:', file?.name);
     if (!file) return;
     // Optimistic preview
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
     setHasImage(true);
-    if (onHandleProfilePictureUpload) {
-      const success = await onHandleProfilePictureUpload(user.id, file, user.name);
-      if (success) {
-        // Update global version and local state immediately
-        const newKey = Date.now();
-        globalImageVersions.set(user.id, newKey);
-        setImageKey(newKey);
-        setHasImage(true);
+    
+    // Update global version and local state immediately
+    const newKey = Date.now();
+    globalImageVersions.set(user.id, newKey);
+    setImageKey(newKey);
+    setHasImage(true);
 
-        // Clear preview after brief delay for new image to load
-        setTimeout(() => {
-          if (objectUrl) URL.revokeObjectURL(objectUrl);
-          setPreviewUrl(null);
-        }, 1500);
-      } else {
-        if (objectUrl) URL.revokeObjectURL(objectUrl);
-        setPreviewUrl(null);
-        setHasImage(false);
-      }
-    }
+    // Clear preview after brief delay for new image to load
+    setTimeout(() => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      setPreviewUrl(null);
+    }, 1500);
   }
 
   const employmentStatus = user.employmentStatus || 'unknown';
@@ -115,11 +174,8 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
         <div className="w-full p-4 sm:p-6 flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
             <div
-              className="relative group cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering collapsible
-                handleAvatarClick(e);
-              }}
+              className="relative group cursor-zoom-in hover:opacity-90 transition-opacity"
+              onClick={handleAvatarClick}
               onMouseEnter={() => setIsHoveringAvatar(true)}
               onMouseLeave={() => setIsHoveringAvatar(false)}
             >
@@ -135,7 +191,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                     alt={`${user.name}'s profile (preview)`}
                     className="w-10 h-10 rounded-full object-cover"
                   />
-                ) : hasImage ? (
+                ) : hasImage === true ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={`${user.id}-${imageKey}`}
@@ -145,22 +201,18 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                     onError={() => setHasImage(false)}
                   />
                 ) : (
-                  <UserIcon className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-semibold text-primary">
+                    {getInitials(user.name)}
+                  </span>
                 )}
               </div>
               {isHoveringAvatar && (
-                <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center ">
-                  <Upload className="h-4 w-4 text-white" />
+                <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
+                  <Eye className="h-4 w-4 text-white" />
                 </div>
               )}
             </div>
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              hidden
-              onChange={handleFileChange}
-            />
+            
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <p className="font-semibold truncate">{user.name}</p>
@@ -343,6 +395,32 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
           </div>
         </CollapsibleContent>
       </WhiteCard>
+      
+      {/* Image Preview Modal */}
+      <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{user.name}&apos;s Profile Picture</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center p-4">
+            {hasImage === true ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={`${getProfileUrl(user.id)}?t=${imageKey}`}
+                alt={`${user.name}'s profile`}
+                className="max-w-full max-h-[70vh] rounded-lg object-contain"
+                onError={() => setHasImage(false)}
+              />
+            ) : (
+              <div className="w-64 h-64 rounded-lg bg-primary/10 flex items-center justify-center">
+                <span className="text-8xl font-semibold text-primary/60">
+                  {getInitials(user.name)}
+                </span>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Collapsible>
   );
 }

@@ -7,6 +7,7 @@ import {
   useEditUser,
   useDeleteUser,
   useUploadProfilePicture,
+  useDeleteProfilePicture,
 } from '@/hooks/tanstack/mutations/userMutations';
 import { useDebounce } from '@/hooks/useDebounce';
 import type {
@@ -88,6 +89,7 @@ export function ManagerPage() {
   const editUserMutation = useEditUser();
   const deleteUserMutation = useDeleteUser();
   const uploadProfilePictureMutation = useUploadProfilePicture();
+  const deleteProfilePictureMutation = useDeleteProfilePicture();
 
   // Modal state
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -96,18 +98,23 @@ export function ManagerPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const onHandleProfilePictureUpload = useCallback(
-    async (userid: string, file: File, username: string): Promise<boolean> => {
+    async (userid: string, file: File, username: string): Promise<void> => {
       const currentUser = users.find((u) => u.id === userid);
-      if (!currentUser) return false;
+      if (!currentUser) return;
       return new Promise((resolve) => {
         uploadProfilePictureMutation.mutate(
           { file, userid, username },
           {
             onSuccess: () => {
-              resolve(true);
+              window.dispatchEvent(
+                new CustomEvent('profile-image-updated', {
+                  detail: { userId: userid, timestamp: Date.now() },
+                })
+              );
+              resolve();
             },
             onError: () => {
-              resolve(false);
+              resolve();
             },
           }
         );
@@ -116,13 +123,46 @@ export function ManagerPage() {
     [users, uploadProfilePictureMutation]
   );
 
+  const onHandleProfilePictureClear = useCallback(
+    async (userid: string, username: string): Promise<void> => {
+      return new Promise((resolve) => {
+        deleteProfilePictureMutation.mutate(
+          { userId: userid, userName: username },
+          {
+            onSuccess: () => {
+              window.dispatchEvent(
+                new CustomEvent('profile-image-updated', {
+                  detail: { userId: userid, timestamp: Date.now() },
+                })
+              );
+              resolve();
+            },
+            onError: () => {
+              resolve();
+            },
+          }
+        );
+      });
+    },
+    [deleteProfilePictureMutation]
+  );
+
   // CRUD handlers using TanStack Query mutations
   const onAddUser = useCallback(
     async (data: AddUserInput): Promise<void> => {
-      addUserMutation.mutate(data, {
-        onSuccess: () => {
-          setAddModalOpen(false);
-        },
+      return new Promise((resolve, reject) => {
+        addUserMutation.mutate(data, {
+          onSuccess: async (newUser) => {
+            console.log('User created:', newUser?.id, newUser?.name);
+            // Profile picture can be added later by editing the user
+            setAddModalOpen(false);
+            resolve();
+          },
+          onError: (error) => {
+            console.error('User creation error:', error);
+            reject(error);
+          },
+        });
       });
     },
     [addUserMutation]
@@ -383,7 +423,11 @@ export function ManagerPage() {
       {/* Modals */}
       {addModalOpen && (
         <Suspense fallback={<div className="hidden" />}>
-          <AddUserModal open={addModalOpen} onOpenChange={setAddModalOpen} onAddUser={onAddUser} />
+          <AddUserModal
+            open={addModalOpen}
+            onOpenChange={setAddModalOpen}
+            onAddUser={onAddUser}
+          />
         </Suspense>
       )}
 
@@ -396,6 +440,8 @@ export function ManagerPage() {
                 onOpenChange={setEditModalOpen}
                 user={selectedUser}
                 onEditUser={onEditUser}
+                onImageUpload={onHandleProfilePictureUpload}
+                onImageClear={onHandleProfilePictureClear}
               />
             </Suspense>
           )}

@@ -16,6 +16,14 @@ import { addUserSchema, editUserSchema } from '@/zod/schemas';
 // ============================================
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3008';
 
+// Helper function to get public URL with cache busting
+function getProfileImageUrl(supabase: any, userId: string): string {
+  const baseUrl = supabase.storage.from('employees').getPublicUrl(`${userId}/profile.png`)
+    .data.publicUrl;
+  // Add cache-busting query parameter to force fresh image on every fetch
+  return `${baseUrl}?t=${Date.now()}`;
+}
+
 // ============================================
 // Route helpers
 // ============================================
@@ -195,12 +203,32 @@ export async function addUserAction(input: AddUserInput): Promise<ServerActionRe
     }),
   });
 
-  const { error, user } = await res.json();
+  const { error, user, userRow } = await res.json();
 
   if (error) {
     return { error: 'Failed to create user' + error };
   }
-  return { error: null, data: user };
+
+  // user is the auth user (has id, email)
+  // userRow is the database row (has all extended fields)
+  // Combine them to create complete User object
+  const completeUser: User = {
+    id: user?.id || userRow?.id,
+    name: userRow?.name || user?.user_metadata?.name || user?.email || '',
+    email: user?.email || '',
+    employeeType: userRow?.role_id ? 'regular' : 'regular', // role_id would need to be looked up
+    date_added: new Date(userRow?.date_added || new Date()),
+    createdAt: new Date(userRow?.date_added || new Date()),
+    employmentStatus: userRow?.employment_status || '',
+    contactNumber: userRow?.contact_details || '',
+    address: userRow?.home_address || '',
+    employeeId: userRow?.employee_id || '',
+    tin: userRow?.tin_id || '',
+    sss: userRow?.sss_id || '',
+    pagibig: userRow?.pagibig_id || '',
+  };
+
+  return { error: null, data: completeUser };
 }
 
 export async function editUserAction(
@@ -301,20 +329,41 @@ export async function deleteUserAction(userId: string): Promise<ServerActionResp
 
 export async function uploadProfilePicture(
   userId: string,
-  file: File
+  fileName: string
+): Promise<ServerActionResponse<{ publicUrl: string }>> {
+  // This action validates the upload and returns the public URL
+  // The actual upload happens client-side to avoid Next.js body size limits
+  const supabase = await createClient();
+  
+  // Verify the file exists in storage
+  const { data, error } = await supabase.storage
+    .from('employees')
+    .list(userId, {
+      limit: 1,
+      search: 'profile.png'
+    });
+
+  if (error || !data || data.length === 0) {
+    return { error: 'Profile picture verification failed' };
+  }
+  
+  // Return the public URL with cache busting
+  const publicUrl = getProfileImageUrl(supabase, userId);
+  return { error: null, data: { publicUrl } };
+}
+
+export async function deleteProfilePicture(
+  userId: string
 ): Promise<ServerActionResponse> {
   const supabase = await createClient();
   const { data, error } = await supabase.storage
     .from('employees')
-    .upload(`${userId}/profile.png`, file, {
-      cacheControl: '3600',
-      upsert: true,
-      contentType: (file as any)?.type || 'image/png',
-    });
+    .remove([`${userId}/profile.png`]);
 
   if (error) {
-    return { error: 'Failed to upload profile picture: ' + error.message };
+    return { error: 'Failed to delete profile picture: ' + error.message };
   }
+
   return { error: null, data: data };
 }
 
