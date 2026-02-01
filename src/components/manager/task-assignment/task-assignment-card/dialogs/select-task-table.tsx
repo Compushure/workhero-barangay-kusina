@@ -48,14 +48,24 @@ function SelectTasksTable({
       const success = await handleUpdateTaskPoints(taskId, newPoints);
 
       if (success) {
+        // Close editing mode first
+        setEditingTaskId(null);
+        setEditingPoints('');
+
         // Update the parent tasks state immediately for instant UI reflection
         setTasks((prevTasks) =>
           prevTasks.map((task) =>
             task.id === taskId ? { ...task, points: newPoints, xp: newPoints } : task
           )
         );
+      } else {
+        // If update failed, still close editing mode
+        setEditingTaskId(null);
+        setEditingPoints('');
       }
-
+    } catch (error) {
+      // Handle any unexpected errors
+      console.error('Error updating task points:', error);
       setEditingTaskId(null);
       setEditingPoints('');
     } finally {

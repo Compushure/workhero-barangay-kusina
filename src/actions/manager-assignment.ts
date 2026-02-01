@@ -16,7 +16,8 @@ export async function fetchTaskList(): Promise<ServerActionResponse<Task[]>> {
     const { data, error } = await supabase
       .from('KPICategory')
       .select('id, name, points, is_repeatable, type')
-      .order('type', { ascending: true });
+      .order('type', { ascending: true })
+      .order('name', { ascending: true });
 
     if (error) {
       console.error('Error fetching tasks:', error);
