@@ -94,6 +94,12 @@ export type EditUserInput = z.infer<typeof import('@/zod/schemas').editUserSchem
  */
 export type LoginInput = z.infer<typeof import('@/zod/schemas').loginSchema>;
 
+// ============================================
+// Attendance Types
+// ============================================
+
+export * from './attendance';
+
 /**
  * Type for adding a reward/mercado item
  * Inferred from addRewardSchema in @/zod/schemas
