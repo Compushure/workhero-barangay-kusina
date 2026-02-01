@@ -16,8 +16,8 @@ interface ProfilePageProps {
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
-  await protectSessionRoute();
   const { userid } = await params;
+  await protectSessionRoute(userid);
 
   return (
     <div className="min-h-screen bg-[#f2e1c9] p-6 animate-in fade-in duration-500">

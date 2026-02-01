@@ -23,7 +23,9 @@ export async function fetchInSessionUserInfo(): Promise<ServerActionResponse<Use
     const userId = sessionData.session.user.id;
     console.log('Fetching info for user ID:', userId);
 
-    // Fetch user details from the public_users table or users table
+    // Fetch user details from the user_attributes view
+    // View definition includes: user_id, user_name, user_email, role_type, user_date_added,
+    // employee_id, employment_status, contact_details, home_address, tin_id, sss_id, pagibig_id, etc.
     const { data: userData, error: userError } = await supabase
       .from('user_attributes')
       .select(
