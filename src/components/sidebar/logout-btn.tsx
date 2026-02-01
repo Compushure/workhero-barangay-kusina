@@ -2,15 +2,22 @@
 
 import { useRouter } from 'next/navigation';
 import { useTransition, memo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { handleSignOut } from '@/action-handlers/auth';
 import { toast } from 'sonner';
 
 export const LogOutBtn = memo(function LogOutBtn() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
+  
   const handleLogout = () => {
     startTransition(async () => {
       const { error } = await handleSignOut();
+      
+      // Clear all cached queries to prevent data leakage between users
+      queryClient.clear();
+      
       if (!error) {
         router.replace('/auth/login');
         router.refresh();
