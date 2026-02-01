@@ -45,9 +45,11 @@ export async function getRedemptionRequestsAction(
         quantity,
         status,
         approved_by,
+        remarks,
         requested_at,
         User!RewardRequest_user_id_fkey (
-          name
+          name,
+          points
         ),
         Reward!RewardRequest_reward_id_fkey (
           name,
@@ -74,12 +76,14 @@ export async function getRedemptionRequestsAction(
       id: item.id,
       userId: item.user_id,
       userName: item.User?.name || 'Unknown User',
+      userPoints: item.User?.points || 0,
       rewardId: item.reward_id,
       rewardName: item.Reward?.name || 'Unknown Reward',
       pointsCost: item.Reward?.points_cost || 0,
       quantity: item.quantity || 1,
       status: item.status,
       approvedBy: item.approved_by,
+      remarks: item.remarks || undefined,
       requestedAt: item.requested_at,
     }));
 
@@ -125,9 +129,11 @@ export async function getMyRedemptionRequestsAction(
         quantity,
         status,
         approved_by,
+        remarks,
         requested_at,
         User!RewardRequest_user_id_fkey (
-          name
+          name,
+          points
         ),
         Reward!RewardRequest_reward_id_fkey (
           name,
@@ -155,12 +161,14 @@ export async function getMyRedemptionRequestsAction(
       id: item.id,
       userId: item.user_id,
       userName: item.User?.name || 'Unknown User',
+      userPoints: item.User?.points || 0,
       rewardId: item.reward_id,
       rewardName: item.Reward?.name || 'Unknown Reward',
       pointsCost: item.Reward?.points_cost || 0,
       quantity: item.quantity || 1,
       status: item.status,
       approvedBy: item.approved_by,
+      remarks: item.remarks || undefined,
       requestedAt: item.requested_at,
     }));
 
@@ -234,12 +242,13 @@ export async function acceptRedemptionRequestAction(
     const totalPointsCost = pointsCostPerItem * quantity;
     const currentDeductedPoints = user?.deducted_points || 0;
 
-    // Update request status to approved
-    const { error: updateRequestError } = await supabaseAdmin
+    // Update request status to approved with optional remarks
+    const { error: updateRequestError } = await supabase
       .from('RewardRequest')
       .update({
         status: 'approved',
         approved_by: admin.id,
+        remarks: remarks || null,
       })
       .eq('id', requestId);
 
@@ -338,12 +347,13 @@ export async function declineRedemptionRequestAction(
     const currentPoints = user?.points || 0;
     const currentDeductedPoints = user?.deducted_points || 0;
 
-    // Update request status to rejected
-    const { error: updateError } = await supabaseAdmin
+    // Update request status to rejected with optional remarks
+    const { error: updateError } = await supabase
       .from('RewardRequest')
       .update({
         status: 'rejected',
         approved_by: admin.id,
+        remarks: remarks || null,
       })
       .eq('id', requestId);
 
