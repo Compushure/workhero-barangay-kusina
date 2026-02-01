@@ -39,13 +39,14 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
   }
 
   return (
-    <div className="flex justify-center items-center gap-2 mt-4">
+    <div className="flex justify-center items-center gap-2 my-6 scale-115">
       {/* Left arrow */}
       <Button
         variant="outline"
         size="sm"
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
+        className='hover:bg-[#690003] hover:text-zinc-50 not-disabled:shadow-sm/15'
       >
         <ChevronLeft size={16} />
       </Button>
@@ -62,6 +63,8 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
             variant={page === currentPage ? 'default' : 'outline'}
             size="sm"
             onClick={() => onPageChange(page as number)}
+            className={`hover:bg-[#690003] hover:text-zinc-50 transition-all ease-in-out shadow-sm/15
+              ${page === currentPage ? 'bg-[#690003] text-zinc-50' : 'hover:scale-110 hover:shadow-xs/25'}`}
           >
             {page}
           </Button>
@@ -74,6 +77,7 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
         size="sm"
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
+        className='hover:bg-[#690003] hover:text-zinc-50 not-disabled:shadow-sm/15'
       >
         <ChevronRight size={16} />
       </Button>

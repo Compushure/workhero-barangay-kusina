@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
 import { AssignedEmployee } from '@/types';
 
 interface EmployeeViewCardMenuProps {
@@ -21,10 +21,10 @@ function EmployeeViewCardMenu({
       open={openPopoverId === employee.id}
       onOpenChange={(open) => setOpenPopoverId(open ? employee.id : null)}
     >
-      <div className="flex w-fit">
+      <div className="flex w-fit h-full">
         <PopoverTrigger asChild>
           <button className="text-black hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer">
-            <MoreHorizontal className="size-6" />
+            <MoreVertical className="size-6" />
           </button>
         </PopoverTrigger>
       </div>
