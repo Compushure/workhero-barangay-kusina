@@ -57,21 +57,21 @@ export function MyRequestsModal({ open, onOpenChange }: MyRequestsModalProps) {
     switch (status) {
       case 'pending':
         return (
-          <Badge className="bg-yellow-500 text-white flex items-center gap-1 shrink-0">
+          <Badge className="flex items-center gap-1 shrink-0 rounded-full bg-yellow-100 hover:bg-yellow-100 text-yellow-700 px-3 py-1 text-xs font-semibold cursor-default">
             <Clock className="h-3 w-3" />
             <span className="hidden sm:inline">Pending</span>
           </Badge>
         );
       case 'approved':
         return (
-          <Badge className="bg-green-600 text-white flex items-center gap-1 shrink-0">
+          <Badge className="flex items-center gap-1 shrink-0 rounded-full bg-green-100 hover:bg-green-100 text-green-700 px-3 py-1 text-xs font-semibold cursor-default">
             <CheckCircle2 className="h-3 w-3" />
             <span className="hidden sm:inline">Approved</span>
           </Badge>
         );
       case 'rejected':
         return (
-          <Badge className="bg-red-600 text-white flex items-center gap-1 shrink-0">
+          <Badge className="flex items-center gap-1 shrink-0 rounded-full bg-red-100 hover:bg-red-100 text-red-700 px-3 py-1 text-xs font-semibold cursor-default">
             <XCircle className="h-3 w-3" />
             <span className="hidden sm:inline">Rejected</span>
           </Badge>
@@ -111,10 +111,7 @@ export function MyRequestsModal({ open, onOpenChange }: MyRequestsModalProps) {
     return (
       <div className="space-y-3 min-w-0">
         {requests.map((request) => (
-          <div
-            key={request.id}
-            className="border border-gray-200 rounded-lg p-4 hover:border-[#690003] hover:shadow-md transition-all bg-white min-w-0"
-          >
+          <div key={request.id} className="border border-gray-200 rounded-lg p-4 bg-white min-w-0">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex-1 min-w-0">
                 <h4 className="text-base font-semibold text-gray-900 truncate">
