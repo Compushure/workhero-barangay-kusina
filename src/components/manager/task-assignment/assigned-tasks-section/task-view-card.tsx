@@ -139,7 +139,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   return (
     <div
-      className={`flex items-center justify-between rounded-2xl bg-[#FAFAFA] p-6 gap-8 transition-all ease-in-out duration-150 
+      className={`flex items-center justify-between rounded-2xl bg-[#FAFAFA] p-6 gap-8 transition-all ease-in-out duration-400 
         ${expanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`}
     >
       <main className="flex flex-col w-full gap-5">

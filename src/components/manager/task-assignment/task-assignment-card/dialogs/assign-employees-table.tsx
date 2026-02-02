@@ -26,8 +26,8 @@ function AssignEmployeesTable({
     <div className="bg-white rounded-2xl border-2 border-gray-200 flex-1 flex flex-col overflow-auto">
       <table className="w-full">
         <thead className="bg-[#690003] border-b-2 border-gray-300">
-          <tr className="flex py-2 px-2 items-center">
-            <th className="p-2 flex w-[10%]">
+          <tr className="flex py-2 items-center">
+            <th className="w-13 p-2 flex justify-center items-center">
               <input
                 type="checkbox"
                 checked={allFilteredSelected}
@@ -35,8 +35,8 @@ function AssignEmployeesTable({
                 className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
               />
             </th>
-            <th className="w-[60%] px-2 text-left font-bold text-white">NAME</th>
-            <th className="w-[30%] px-5 text-left font-bold text-white">ID NO.</th>
+            <th className="w-67 px-2 text-left font-bold text-white">NAME</th>
+            <th className="w-30 px-2 text-left font-bold text-white">ID NO.</th>
           </tr>
         </thead>
       </table>
@@ -66,7 +66,7 @@ function AssignEmployeesTable({
                     }`}
                     onClick={() => !isDisabled && toggleEmployee(employee)}
                   >
-                    <td className="p-4 flex w-[10%]">
+                    <td className="p-4 flex w-13">
                       <div className="flex items-center">
                         <input
                           type="checkbox"
@@ -78,10 +78,10 @@ function AssignEmployeesTable({
                         />
                       </div>
                     </td>
-                    <td className="flex w-[60%] px-4 font-medium text-gray-800">
+                    <td className="flex w-67 px-2 font-medium text-gray-800">
                       {employee.name}
                     </td>
-                    <td className="flex w-[30%] px-4 text-gray-600">{employee.empId}</td>
+                    <td className="flex w-30 px-2 text-gray-600">{employee.empId}</td>
                   </tr>
                 );
               })}
