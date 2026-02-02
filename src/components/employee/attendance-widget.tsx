@@ -52,25 +52,18 @@ export default function AttendanceIcon() {
         <span className="text-xs text-muted-foreground">Reset in: {timeRemaining}</span>
       )}
 
-      {/* Pill background with overlapping icon */}
+      {/* Oval button with icon + count */}
       <button
         onClick={handleLoginToggle}
         disabled={hasLoggedInToday}
-        className="relative flex items-center focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {/* Pill background */}
-        <div className="bg-green-100 text-green-800 font-medium px-6 py-1 rounded-full text-sm">
-          {hasLoggedInToday ? `Logged #${loginCount}` : 'Log Attendance'}
-        </div>
-
-        {/* Overlapping icon */}
-        <div className="absolute -left-3">
-          {hasLoggedInToday ? (
-            <UserCheck className="w-6 h-6 text-green-500" />
-          ) : (
-            <LogIn className="w-6 h-6 text-gray-500" />
-          )}
-        </div>
+        {hasLoggedInToday ? (
+          <UserCheck className="w-5 h-5 text-green-500" />
+        ) : (
+          <LogIn className="w-5 h-5 text-gray-500" />
+        )}
+        <span className="text-sm font-medium text-gray-700">{loginCount}</span>
       </button>
     </div>
   );

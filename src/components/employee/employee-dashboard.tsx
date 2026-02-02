@@ -1,67 +1,82 @@
 'use client';
 
-import { Clock, FileText, User } from 'lucide-react';
-import PointsIcon from './points-widget';
-import AttendanceIcon from './attendance-widget';
-import LevelIcon from './level-widget';
+import HeaderHUD from './header-hud';
+import NavSection from './nav-section';
+import CookingSection from './cooking-section';
+import { RankWidget } from './rank-panel';
+import TasksTable from './tasks-table';
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function EmployeeDashboardClient() {
+  const tasks = [
+    {
+      title: "Client-Centered Metrics: Special Client Commendation",
+      progress: "0/5",
+      reward: "10 XP 100 Coins",
+      dueDate: "12/12/25",
+    },
+    {
+      title: "Name of Task Type: Internal Training",
+      progress: "0/5",
+      reward: "10 XP 100 Coins",
+      dueDate: "12/12/25",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Employee Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome to your personal employee dashboard. View your information and submit requests.
-          </p>
-        </div>
+    <div className="flex flex-col min-h-screen bg-[radial-gradient(circle,#FFFCF5_0%,#EFC18F_40%,#D68B5C_60%,#60203D_100%)]">
+      {/* Row 1: Header HUD */}
+      <header>
+        <HeaderHUD />
+      </header>
 
-        {/* Existing cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6">
-          <div className="p-6 border rounded-lg">
-            <div className="flex items-center gap-3 mb-2">
-              <User className="w-5 h-5 text-blue-500" />
-              <h3 className="font-semibold">My Profile</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              View and manage your personal information and profile details.
-            </p>
+      {/* Row 2: Nav (20%) + Cooking (60%) + Rank (20%) */}
+      <section className="relative flex gap-4 p-4 flex-none h-87">
+        {/* Background image layer only for Row 2 */}
+        <div
+          className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-60"
+          style={{ backgroundImage: `url('/window.png')` }}
+        />
+
+        {/* Foreground content */}
+        <div className="relative z-10 flex gap-4 w-full">
+          {/* Left column: 20% */}
+          <div className="w-[20%]">
+            <Card className="bg-transparent shadow-none border-none h-full">
+              <CardContent className="h-full">
+                <NavSection />
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="p-6 border rounded-lg">
-            <div className="flex items-center gap-3 mb-2">
-              <Clock className="w-5 h-5 text-green-500" />
-              <h3 className="font-semibold">Time & Attendance</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Track your work hours, attendance, and time-off requests.
-            </p>
+          {/* Middle column: 60% */}
+          <div className="w-[60%] flex">
+            <CookingSection className="w-full h-full" />
           </div>
 
-          <div className="p-6 border rounded-lg">
-            <div className="flex items-center gap-3 mb-2">
-              <FileText className="w-5 h-5 text-orange-500" />
-              <h3 className="font-semibold">My Documents</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Access your employment documents, contracts, and certifications.
-            </p>
+          {/* Right column: 20% */}
+          <div className="w-[20%]">
+            <Card className="bg-transparent shadow-none border-none h-full">
+              <CardContent className="h-full">
+                <RankWidget rankData={{ rank: 12 }} totalXP={250} />
+              </CardContent>
+            </Card>
           </div>
         </div>
+      </section>
 
-        {/* HUD-style widgets */}
-        <div className="flex items-center w-full">
-          {[
-            <PointsIcon key="points" />,
-            <LevelIcon key="level" />,
-            <AttendanceIcon key="attendance" />,
-          ].map((icon, i) => (
-            <div key={i} className="flex-1 flex justify-start">
-              {icon}
-            </div>
-          ))}
+      {/* Row 3: Tasks aligned under Cooking (center 60%) */}
+      <section className="flex gap-4 p-4">
+        <div className="w-[20%]"></div>
+        <div className="w-[60%]">
+          <Card className="bg-background shadow-none border-none">
+            <CardContent className="p-4">
+              <TasksTable tasks={tasks} />
+            </CardContent>
+          </Card>
         </div>
-      </div>
+        <div className="w-[20%]"></div>
+      </section>
     </div>
   );
 }
