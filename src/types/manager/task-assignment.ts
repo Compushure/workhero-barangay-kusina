@@ -27,6 +27,7 @@ export interface AssignedEmployee {
   tenure?: string;
   assignedTasks: AssignedTask[];
   completedOrders: number;
+  status?: string;
 }
 
 /**
@@ -36,7 +37,7 @@ export interface AssignedTask {
   id: string;
   taskId: string;
   taskName: string;
-  taskType: string;
+  taskDescription: string;
   isRepeatable: boolean;
   points: number;
   xp: number;
@@ -98,7 +99,7 @@ export interface SelectedFilters {
 //   id: string; // KPITask.id
 //   taskId: string; // KPICategory.id
 //   taskName: string; // KPICategory.name
-//   taskType: string; // KPICategory.type or description
+//   taskDescription: string; // KPICategory.type or description
 //   isRepeatable: boolean; // KPICategory.is_repeatable
 //   points: number; // KPICategory.points
 //   xp?: number; // optional

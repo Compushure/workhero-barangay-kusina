@@ -19,11 +19,11 @@ import type { AssignedTask } from '@/types';
 export const managerAssignmentKeys = {
   all: ['manager-assignments'] as const,
   tasks: () => [...managerAssignmentKeys.all, 'tasks'] as const,
-  taskList: (page: number, sortBy: string, searchTerm: string) =>
-    [...managerAssignmentKeys.tasks(), { page, sortBy, searchTerm }] as const,
+  taskList: (page: number, pageSize: number, sortBy: string, searchTerm: string) =>
+    [...managerAssignmentKeys.tasks(), { page, pageSize, sortBy, searchTerm }] as const,
   employees: () => [...managerAssignmentKeys.all, 'employees'] as const,
-  employeeList: (page: number, sortBy: string, searchTerm: string) =>
-    [...managerAssignmentKeys.employees(), { page, sortBy, searchTerm }] as const,
+  employeeList: (page: number, pageSize: number, sortBy: string, searchTerm: string) =>
+    [...managerAssignmentKeys.employees(), { page, pageSize, sortBy, searchTerm }] as const,
 };
 
 /**
@@ -42,11 +42,11 @@ export function useGetCurrentAssignedTasksPaginated(
   searchTerm: string = '',
   enabled: boolean = true
 ): UseQueryResult<
-  { tasks: AssignedTask[]; count: number; totalPages: number },
+  { tasks: AssignedTask[]; count: number; totalPages: number; employeeCount: number },
   Error
 > {
   return useQuery({
-    queryKey: managerAssignmentKeys.taskList(page, sortBy, searchTerm),
+    queryKey: managerAssignmentKeys.taskList(page, pageSize, sortBy, searchTerm),
     queryFn: async () => {
       return await handleFetchCurrentAssignedTasksPaginated(
         page,
@@ -61,7 +61,7 @@ export function useGetCurrentAssignedTasksPaginated(
     retry: 2,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<
-    { tasks: AssignedTask[]; count: number; totalPages: number },
+    { tasks: AssignedTask[]; count: number; totalPages: number; employeeCount: number },
     Error
   >;
 }
@@ -82,11 +82,11 @@ export function useGetCurrentAssignedEmployeesPaginated(
   searchTerm: string = '',
   enabled: boolean = true
 ): UseQueryResult<
-  { tasks: AssignedTask[]; count: number; totalPages: number },
+  { tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number },
   Error
 > {
   return useQuery({
-    queryKey: managerAssignmentKeys.employeeList(page, sortBy, searchTerm),
+    queryKey: managerAssignmentKeys.employeeList(page, pageSize, sortBy, searchTerm),
     queryFn: async () => {
       return await handleFetchCurrentAssignedEmployeesPaginated(
         page,
@@ -101,7 +101,7 @@ export function useGetCurrentAssignedEmployeesPaginated(
     retry: 2,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<
-    { tasks: AssignedTask[]; count: number; totalPages: number },
+    { tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number },
     Error
   >;
 }

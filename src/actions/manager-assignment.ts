@@ -16,7 +16,8 @@ export async function fetchTaskList(): Promise<ServerActionResponse<Task[]>> {
     const { data, error } = await supabase
       .from('KPICategory')
       .select('id, name, points, is_repeatable, type')
-      .order('type', { ascending: true });
+      .order('type', { ascending: true })
+      .order('name', { ascending: true });
 
     if (error) {
       console.error('Error fetching tasks:', error);
@@ -84,6 +85,51 @@ export async function fetchEmployeeList(): Promise<ServerActionResponse<Assigned
 }
 
 /**
+ * Update task points and XP in the KPICategory table
+ */
+export async function updateTaskPointsAndXP(
+  taskId: string,
+  points: number,
+  xp: number
+): Promise<ServerActionResponse<void>> {
+  try {
+    const supabase = await createClient();
+
+    // Validate inputs
+    if (!taskId) {
+      return { error: 'Task ID is required' };
+    }
+
+    if (points < 0 || xp < 0) {
+      return { error: 'Points and XP must be non-negative numbers' };
+    }
+
+    // Update the task in KPICategory table
+    const { error } = await supabase
+      .from('KPICategory')
+      .update({
+        points: points,
+        // Note: If you have a separate XP column in the future, update it here
+        // For now, assuming XP is derived from points or stored in the same column
+      })
+      .eq('id', taskId);
+
+    if (error) {
+      console.error('Error updating task points and XP:', error);
+      return { error: `Failed to update task: ${error.message}` };
+    }
+
+    return { error: null, data: undefined };
+  } catch (error) {
+    console.error('Error in updateTaskPointsAndXP:', error);
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'An unexpected error occurred while updating task points and XP' };
+  }
+}
+
+/**
  * Assign a task to employees and return the created assignment data
  */
 export async function addTaskAssignmentAction(
@@ -128,11 +174,14 @@ export async function addTaskAssignmentAction(
     if (checkError) throw checkError;
 
     // Identify who is already busy
-    const busyEmployeeIds = new Set(existing?.map(e => e.assigned_to) || []);
-    const validEmployeeIds = employeeIds.filter(id => !busyEmployeeIds.has(id));
+    const busyEmployeeIds = new Set(existing?.map((e) => e.assigned_to) || []);
+    const validEmployeeIds = employeeIds.filter((id) => !busyEmployeeIds.has(id));
 
     if (validEmployeeIds.length === 0) {
-      return { error: 'All selected employees are already assigned to an active instance of this task.', data: undefined };
+      return {
+        error: 'All selected employees are already assigned to an active instance of this task.',
+        data: undefined,
+      };
     }
 
     // Proceed with valid assignments only
@@ -157,27 +206,30 @@ export async function addTaskAssignmentAction(
     if (insertError) throw insertError;
 
     // Group assignments by task to create one AssignedTask with multiple employees
-    const taskGroups = new Map<string, {
-      id: string;
-      taskId: string;
-      taskName: string;
-      taskType: string;
-      isRepeatable: boolean;
-      points: number;
-      xp: number;
-      status?: string;
-      dateRange: {
-        start: string;
-        end: string;
-      };
-      maxOrders: number;
-      assignedEmployees: AssignedEmployee[];
-    }>();
+    const taskGroups = new Map<
+      string,
+      {
+        id: string;
+        taskId: string;
+        taskName: string;
+        taskDescription: string;
+        isRepeatable: boolean;
+        points: number;
+        xp: number;
+        status?: string;
+        dateRange: {
+          start: string;
+          end: string;
+        };
+        maxOrders: number;
+        assignedEmployees: AssignedEmployee[];
+      }
+    >();
 
     (insertedData || []).forEach((row) => {
       const employee = (employeeData as any[])?.find((emp: any) => emp.user_id === row.assigned_to);
       if (!employee) return; // Skip if employee data not found
-      
+
       const assignedEmployee: AssignedEmployee = {
         id: employee.user_id,
         name: employee.user_name || 'Unknown Employee',
@@ -187,7 +239,7 @@ export async function addTaskAssignmentAction(
       };
 
       const key = `${row.category_id}-${row.created_at}-${row.deadline_date}-${row.max_orders}`;
-      
+
       if (taskGroups.has(key)) {
         // Add employee to existing task group
         const existingTask = taskGroups.get(key)!;
@@ -198,7 +250,7 @@ export async function addTaskAssignmentAction(
           id: row.id, // Use the first assignment's ID as the group ID
           taskId: row.category_id,
           taskName: taskData.name,
-          taskType: taskData.type || 'General',
+          taskDescription: taskData.type || 'General',
           isRepeatable: taskData.is_repeatable,
           points: taskData.points,
           xp: taskData.points,

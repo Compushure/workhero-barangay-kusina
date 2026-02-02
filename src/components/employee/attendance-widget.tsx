@@ -1,12 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { UserCheck, LogIn } from 'lucide-react';
+import type { AttendanceConfig } from '@/types';
+import { useGetTodayAttendanceStatus, useTimeInAttendance, useTimeOutAttendance } from '@/hooks/tanstack';
+import { attendanceConfig } from '@/lib/attendance-config';
 
-function getNextResetTime(): Date {
+function parseTimeOnDate(base: Date, time: string): Date {
+  const [hours, minutes] = time.split(':').map((value) => Number(value));
+  const result = new Date(base);
+  result.setHours(hours, minutes, 0, 0);
+  return result;
+}
+
+function getNextResetTime(timeInAt: string): Date {
   const now = new Date();
-  const reset = new Date();
-  reset.setHours(7, 0, 0, 0);
+  const reset = parseTimeOnDate(now, timeInAt);
   if (now >= reset) reset.setDate(reset.getDate() + 1);
   return reset;
 }
@@ -19,52 +28,123 @@ function formatTimeRemaining(ms: number): string {
   return `${hours}:${minutes}:${seconds}`;
 }
 
-export default function AttendanceIcon() {
-  const [hasLoggedInToday, setHasLoggedInToday] = useState(false);
-  const [loginCount, setLoginCount] = useState<number>(0);
+interface AttendanceWidgetProps {
+  config?: Partial<AttendanceConfig>;
+}
+
+export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
+  const mergedConfig: AttendanceConfig = useMemo(
+    () => ({
+      timeInAt: config?.timeInAt ?? attendanceConfig.timeInAt,
+      timeOutAt: config?.timeOutAt ?? attendanceConfig.timeOutAt,
+      lateAfter: config?.lateAfter ?? config?.timeInAt ?? attendanceConfig.lateAfter,
+      overtimeAfter: config?.overtimeAfter ?? config?.timeOutAt ?? attendanceConfig.overtimeAfter,
+      autoTimeoutAt: config?.autoTimeoutAt ?? attendanceConfig.autoTimeoutAt,
+    }),
+    [config]
+  );
+
+  const { data: status } = useGetTodayAttendanceStatus(mergedConfig);
+  const timeInMutation = useTimeInAttendance(mergedConfig);
+  const timeOutMutation = useTimeOutAttendance(mergedConfig);
+
   const [timeRemaining, setTimeRemaining] = useState<string>('');
+  const [nowTime, setNowTime] = useState<Date>(new Date());
 
   useEffect(() => {
     const updateTimer = () => {
-      const nextReset = getNextResetTime();
-      const diff = nextReset.getTime() - new Date().getTime();
+      const now = new Date();
+      setNowTime(now);
+      const nextReset = getNextResetTime(mergedConfig.timeInAt);
+      const diff = nextReset.getTime() - now.getTime();
       setTimeRemaining(formatTimeRemaining(diff));
-      if (diff <= 0) setHasLoggedInToday(false);
     };
+
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [mergedConfig.timeInAt]);
 
-  const handleLoginToggle = () => {
-    if (!hasLoggedInToday) {
-      setHasLoggedInToday(true);
-      setLoginCount(prev => prev + 1);
+  const isBusy = timeInMutation.isPending || timeOutMutation.isPending;
+  const canTimeIn = status?.canTimeIn ?? false;
+  const canTimeOut = status?.canTimeOut ?? false;
+  const hasTimedOut = status?.hasTimedOut ?? false;
+  const timeOutAt = parseTimeOnDate(nowTime, mergedConfig.timeOutAt);
+  const overtimeAfter = parseTimeOnDate(nowTime, mergedConfig.overtimeAfter);
+
+  const warningText = canTimeOut
+    ? nowTime < timeOutAt
+      ? 'Timing out now will be marked as undertime.'
+      : nowTime >= overtimeAfter
+        ? 'Timing out now will be marked as overtime.'
+        : 'Timing out now will be marked on time.'
+    : hasTimedOut
+      ? status?.isUndertime
+        ? 'You were marked undertime.'
+        : status?.isOvertime
+          ? 'You were marked overtime.'
+          : 'You were marked on time.'
+      : undefined;
+
+  const buttonLabel = status?.isAbsent
+    ? 'Absent'
+    : canTimeIn
+    ? 'Time In'
+    : canTimeOut
+      ? 'Time Out'
+      : hasTimedOut
+        ? 'Timed Out'
+        : 'Attendance Locked';
+
+  const handleClick = () => {
+    if (canTimeIn) {
+      timeInMutation.mutate();
+      return;
+    }
+    if (canTimeOut) {
+      timeOutMutation.mutate(status?.logId);
     }
   };
 
   return (
     <div className="flex flex-col items-start gap-1">
-      {/* Top message OR timer */}
-      {!hasLoggedInToday ? (
-        <span className="text-xs font-semibold text-green-600">Login in here!</span>
-      ) : (
+      {status?.isAbsent ? (
+        <span className="text-xs font-semibold text-red-600">
+          Marked absent for today
+        </span>
+      ) : !status?.hasTimedIn ? (
+        <span className="text-xs font-semibold text-green-600">
+          {status?.message || 'Time in available soon'}
+        </span>
+      ) : hasTimedOut ? (
         <span className="text-xs text-muted-foreground">Reset in: {timeRemaining}</span>
+      ) : (
+        <span className="text-xs text-muted-foreground">Ready to time out</span>
       )}
 
-      {/* Oval button with icon + count */}
       <button
-        onClick={handleLoginToggle}
-        disabled={hasLoggedInToday}
-        className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+        onClick={handleClick}
+        disabled={isBusy || status?.isAbsent || (!canTimeIn && !canTimeOut)}
+        className="relative flex items-center cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {hasLoggedInToday ? (
-          <UserCheck className="w-5 h-5 text-green-500" />
-        ) : (
-          <LogIn className="w-5 h-5 text-gray-500" />
-        )}
-        <span className="text-sm font-medium text-gray-700">{loginCount}</span>
+        <div className="bg-green-100 text-green-800 font-medium px-6 py-1 rounded-full text-sm">
+          {buttonLabel}
+        </div>
+
+        <div className="absolute -left-3">
+          {canTimeOut || hasTimedOut ? (
+            <UserCheck className="w-6 h-6 text-green-500" />
+          ) : (
+            <LogIn className="w-6 h-6 text-gray-500" />
+          )}
+        </div>
       </button>
+
+      {warningText && (
+        <span className="text-[11px] text-[#7a3d3d]">
+          {warningText}
+        </span>
+      )}
     </div>
   );
 }
