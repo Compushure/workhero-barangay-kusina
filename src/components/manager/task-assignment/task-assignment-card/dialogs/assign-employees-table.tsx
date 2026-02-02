@@ -78,8 +78,11 @@ function AssignEmployeesTable({
                         />
                       </div>
                     </td>
-                    <td className="flex w-67 px-2 font-medium text-gray-800">
-                      {employee.name}
+                    <td className="flex flex-col w-67 px-2 font-medium text-gray-800">
+                      <span>{employee.name}</span>
+                      {isDisabled && (
+                        <span className="text-xs font-light text-gray-500">Already assigned</span>
+                      )}
                     </td>
                     <td className="flex w-30 px-2 text-gray-600">{employee.empId}</td>
                   </tr>
