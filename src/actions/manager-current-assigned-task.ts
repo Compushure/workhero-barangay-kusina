@@ -421,7 +421,7 @@ export async function clearAllTasks(): Promise<ServerActionResponse<boolean>> {
   const { error } = await supabase
     .from('KPITask')
     .delete()
-    .in('status', ['assigned', 'in review', 'rejected', 'approved']);
+    .in('status', ['assigned']);
 
   if (error) return { error: error.message, data: undefined };
   return { error: null, data: true };
@@ -436,7 +436,7 @@ export async function clearAllEmployeeTasks(
     .from('KPITask')
     .delete()
     .eq('assigned_to', employeeId)
-    .in('status', ['assigned', 'in review', 'rejected', 'approved']);
+    .in('status', ['assigned']);
 
   if (error) return { error: error.message, data: undefined };
   return { error: null, data: true };
