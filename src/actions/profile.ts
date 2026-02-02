@@ -185,3 +185,40 @@ export async function uploadOwnProfilePicture(
     };
   }
 }
+
+/**
+ * Deletes profile picture for current user
+ */
+export async function deleteOwnProfilePicture(): Promise<ServerActionResponse> {
+  try {
+    const supabase = await createClient();
+
+    // Get the authenticated user session
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session?.user) {
+      return {
+        error: 'No active session found',
+        data: undefined,
+      };
+    }
+
+    const userId = sessionData.session.user.id;
+
+    // Delete from storage
+    const { data, error } = await supabase.storage
+      .from('employees')
+      .remove([`${userId}/profile.png`]);
+
+    if (error) {
+      return { error: 'Failed to delete profile picture: ' + error.message };
+    }
+
+    return { error: null, data: data };
+  } catch (error) {
+    console.error('Error deleting profile picture:', error);
+    return {
+      error: 'An unexpected error occurred while deleting profile picture',
+      data: undefined,
+    };
+  }
+}
