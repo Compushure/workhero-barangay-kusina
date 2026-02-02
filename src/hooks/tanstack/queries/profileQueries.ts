@@ -43,7 +43,9 @@ export function useGetUserProfile(
       return await fetchUserProfileByIdHandler(userId);
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 1 * 60 * 1000, // 1 minute (reduced for faster invalidation detection)
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: 'always', // Always refetch to ensure fresh data when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 }

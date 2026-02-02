@@ -1,6 +1,25 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+/**
+ * User Filtering and Search API Route
+ * =====================================
+ * Still actively used by /src/actions/manage.ts fetchUsersAction()
+ * This route provides filtered, sorted, and paginated user data
+ * 
+ * Performance Optimizations Applied:
+ * - Uses user_attributes view for efficient queries
+ * - Implements pagination to limit data transfer
+ * - Escapes special characters to prevent SQL injection
+ * - Single database query per request (except multi-field search)
+ * 
+ * Future Optimization Opportunities:
+ * - Add Redis caching for frequently accessed pages
+ * - Implement search debouncing on client side (already done via useDebounce)
+ * - Consider full-text search for better query performance
+ * - Add query result caching with SWR revalidation
+ */
+
 type SortOrder = 'asc' | 'desc';
 
 const SORT_MAP: Record<string, string> = {
