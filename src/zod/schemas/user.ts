@@ -44,15 +44,27 @@ const pagibigSchema = z
   );
 
 /**
- * Philippine mobile number validation
+ * Philippine mobile number validation (optional - for edit)
  * Format: 11 digits starting with 09 (e.g., 09123456789)
  */
-const contactNumberSchema = z
+const contactNumberSchemaOptional = z
   .string()
   .optional()
   .refine(
     (val) => !val || /^09\d{9}$/.test(val.replace(/[^\d]/g, '')),
     'Contact number must be 11 digits starting with 09'
+  );
+
+/**
+ * Philippine mobile number validation (required - for add)
+ * Format: 11 digits starting with 09 (e.g., 09XX-XXX-XXXX)
+ */
+const contactNumberSchemaRequired = z
+  .string()
+  .min(1, 'Contact number is required')
+  .refine(
+    (val) => /^09\d{9}$/.test(val.replace(/[^\d]/g, '')),
+    'Contact number must be 11 digits starting with 09 (format: 09XX-XXX-XXXX)'
   );
 
 /**
@@ -66,7 +78,7 @@ export const addUserSchema = z.object({
   employeeType: EmployeeType,
   companyId: z.string().optional(),
   employeeId: z.string().optional(),
-  contactNumber: contactNumberSchema,
+  contactNumber: contactNumberSchemaRequired,
   address: z
     .string()
     .min(10, 'Address must be at least 10 characters')
@@ -90,7 +102,7 @@ export const editUserSchema = z.object({
     .refine((val) => !val || val.length >= 6, 'Password must be 6+ chars'),
   employeeType: z.enum(['superadmin', 'manager', 'hr', 'regular', 'no-change', '']).optional(),
   employmentStatus: z.enum(['', 'probational', 'regular', 'no-change']).optional(),
-  contactNumber: contactNumberSchema,
+  contactNumber: contactNumberSchemaOptional,
   address: z
     .string()
     .optional()

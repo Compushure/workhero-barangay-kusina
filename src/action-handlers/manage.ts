@@ -14,6 +14,7 @@ import {
   editUserAction,
   deleteUserAction,
   uploadProfilePicture,
+  deleteProfilePicture,
 } from '@/actions/manage';
 import { type User, type AddUserInput, type EditUserInput, type UserQueryParams, type PaginatedResponse } from '@/types';
 import { toast } from 'sonner';
@@ -62,21 +63,63 @@ export async function handleFetchUsersPaginated(
  * @param input - New user data
  * @returns Created user or null on error
  */
-export async function handleUploadProfilePicture(username: string, userId: string, file: File) {
-  const result = await safeAction(() => uploadProfilePicture(userId, file));
+export async function handleUploadProfilePicture(username: string, userId: string, file: File): Promise<string | null> {
+  try {
+    // Import Supabase client for direct upload
+    const { createClient } = await import('@/lib/supabase/client');
+    const supabase = createClient();
+    
+    // Upload directly to Supabase storage from client (avoids Next.js body size limit)
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('employees')
+      .upload(`${userId}/profile.png`, file, {
+        cacheControl: '3600',
+        upsert: true,
+        contentType: file.type || 'image/png',
+      });
+
+    if (uploadError) {
+      toast.error(`Failed to update ${username}'s profile picture: ` + uploadError.message);
+      return null;
+    }
+
+    // Verify upload with server action and get public URL
+    const result = await safeAction(() => uploadProfilePicture(userId, file.name));
+
+    if (!result.success) {
+      toast.error(`Failed to verify ${username}'s profile picture: ` + result.error);
+      return null;
+    }
+
+    if (result.data?.error) {
+      toast.error(result.data.error);
+      return null;
+    }
+
+    toast.success(`Successfully updated ${username}'s profile picture`);
+    return result.data?.data?.publicUrl ?? null;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    toast.error(`Failed to update ${username}'s profile picture: ` + errorMessage);
+    return null;
+  }
+}
+
+export async function handleDeleteProfilePicture(userId: string, userName: string) {
+  const result = await safeAction(() => deleteProfilePicture(userId));
 
   if (!result.success) {
-    toast.error(`Failed to update ${username}'s profile picture: ` + result.error);
-    return null;
+    toast.error(`Failed to remove ${userName}'s profile picture: ` + result.error);
+    return false;
   }
 
   if (result.data?.error) {
     toast.error(result.data.error);
-    return null;
+    return false;
   }
 
-  toast.success(`Successfully updated ${username}'s profile picture`);
-  return result.data?.data ?? null;
+  toast.success(`Successfully removed ${userName}'s profile picture`);
+  return true;
 }
 
 export async function handleAddUser(input: AddUserInput): Promise<User | null> {
