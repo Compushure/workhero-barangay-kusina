@@ -82,10 +82,10 @@ function SelectTasksTable({
       <table className="w-full">
         <thead className="bg-[#690003] text-white">
           <tr className="flex justify-baseline">
-            <th className="w-[6%] py-4"></th>
-            <th className="w-[33.5%] py-4 text-left pl-4 text-sm font-bold">TASK</th>
-            <th className="w-[34.5%] py-4 text-center text-sm font-bold">POINTS & XP</th>
-            <th className="w-[23.5%] py-4 text-center text-sm font-bold">MAX ORDERS</th>
+            <th className="w-12 py-4"></th>
+            <th className="w-75 py-4 text-left pl-4 text-sm font-bold">TASK</th>
+            <th className="w-70 py-4 text-center text-sm font-bold">POINTS & XP</th>
+            <th className="w-48 py-4 text-center text-sm font-bold">MAX ORDERS</th>
           </tr>
         </thead>
       </table>
@@ -124,7 +124,7 @@ function SelectTasksTable({
                     toggleTask(task.id);
                   }}
                 >
-                  <td className="w-[6%] p-4 text-center">
+                  <td className="w-12 p-4 text-center">
                     <input
                       type="radio"
                       checked={isSelected}
@@ -138,13 +138,13 @@ function SelectTasksTable({
                       onClick={(e) => e.stopPropagation()}
                     />
                   </td>
-                  <td className="w-[33.5%] px-4 py-3">
+                  <td className="w-75 px-4 py-3">
                     <div className="font-medium text-zinc-800">{task.name}</div>
                     <div className="text-sm text-zinc-500">{task.type}</div>
                   </td>
-                  <td className="w-[34.5%] group flex gap-2 items-center justify-center px-8 py-4 text-zinc-800 font-medium text-center">
+                  <td className="w-70 group flex gap-2 items-center justify-center px-8 py-4 text-zinc-800 font-medium text-center">
                     {editingTaskId === task.id ? (
-                      <div className="flex items-center gap-2 pl-5">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -176,7 +176,7 @@ function SelectTasksTable({
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 pl-10">
+                      <div className="flex items-center gap-2 pl-5">
                         <span className={`${isDisabled ? 'pr-7' : ''}`}>{task.points}</span>
                         {!isDisabled && (
                           <button
@@ -192,7 +192,7 @@ function SelectTasksTable({
                       </div>
                     )}
                   </td>
-                  <td className="w-[23.5%] p-4" onClick={(e) => e.stopPropagation()}>
+                  <td className="w-48 p-4" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-center gap-2">
                       {task.isRepeatable ? (
                         <>
