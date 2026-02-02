@@ -23,6 +23,7 @@ export interface RedemptionRequest {
   approvedByName?: string;
   remarks?: string;
   requestedAt: string;
+  requestedItem?: string; // The reward item name/description requested by the user
 }
 
 /**
