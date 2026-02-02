@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { User, X, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { X, ArrowRight, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ProfileAvatar } from '@/components/shared/ProfileAvatar';
 import { UserWithExtras } from '@/types';
 
 interface ProfileModalProps {
@@ -21,24 +22,26 @@ interface ProfileModalProps {
 }
 
 export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
-  const [imageError, setImageError] = useState(false);
-
-  // Add cache-busting timestamp to image URL to force refresh when profile picture changes
-  const imageUrlWithCacheBust = useMemo(() => {
-    if (!user?.profilePictureUrl) return undefined;
-    const separator = user.profilePictureUrl.includes('?') ? '&' : '?';
-    return `${user.profilePictureUrl}${separator}t=${Date.now()}`;
-  }, [user?.profilePictureUrl]);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   if (!user) return null;
 
+  const handleViewFullProfile = () => {
+    startTransition(() => {
+      onOpenChange(false);
+      router.push(`/profile/${user.id}`);
+    });
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={!isPending ? onOpenChange : undefined}>
       <DialogContent className="max-w-[95vw] sm:max-w-125 rounded-2xl p-4 sm:p-6 [&>button]:hidden">
         {/* Custom Close Button */}
         <button
           onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-4 rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#730202] focus:ring-offset-2 z-50"
+          disabled={isPending}
+          className="absolute right-4 top-4 rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#730202] focus:ring-offset-2 z-50 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <X className="h-5 w-5 text-[#730202]" />
           <span className="sr-only">Close</span>
@@ -56,24 +59,13 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
         <div className="flex flex-col gap-6 py-2">
           {/* Profile Picture */}
           <div className="flex justify-center">
-            <div className="h-24 w-24 bg-[#f2e1c9] rounded-full flex items-center justify-center overflow-hidden border-4 border-[#730202]/10 transition-transform duration-300 hover:scale-105">
-              {imageUrlWithCacheBust && !imageError ? (
-                <img
-                  src={imageUrlWithCacheBust}
-                  alt={`${user.name} profile picture`}
-                  className="h-full w-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                  onError={() => setImageError(true)}
-                  onLoad={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                  style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
-                />
-              ) : (
-                <User className="h-12 w-12 text-[#730202]/40" />
-              )}
-            </div>
+            <ProfileAvatar
+              userId={user.id}
+              userName={user.name}
+              profilePictureUrl={user.profilePictureUrl}
+              size="lg"
+              className="bg-[#f2e1c9] transition-transform duration-300 hover:scale-105 border-[#730202]/10"
+            />
           </div>
 
           {/* Basic Information */}
@@ -106,15 +98,24 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
 
           {/* See Full Profile Button */}
           <div className="pt-4 border-t border-border">
-            <Link href={`/profile/${user.id}`} onClick={() => onOpenChange(false)}>
-              <Button
-                className="w-full bg-[#730202] hover:bg-[#8b0003] text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group"
-                size="lg"
-              >
-                <span>See Full Profile Details</span>
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </Button>
-            </Link>
+            <Button
+              onClick={handleViewFullProfile}
+              disabled={isPending}
+              className="w-full bg-[#730202] hover:bg-[#8b0003] disabled:bg-gray-400 disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100 group"
+              size="lg"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Loading...</span>
+                </>
+              ) : (
+                <>
+                  <span>See Full Profile Details</span>
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </DialogContent>

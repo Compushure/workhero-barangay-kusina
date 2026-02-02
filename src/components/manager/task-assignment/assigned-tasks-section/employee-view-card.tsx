@@ -79,7 +79,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
         const hiddenCount = Math.max(0, employee.assignedTasks.length - 2);
 
         return (
-          <div className={`flex w-full items-start justify-between rounded-2xl bg-[#FAFAFA] p-6 transition-all ease-in-out duration-150 
+          <div className={`flex w-full items-start justify-between rounded-2xl bg-[#FAFAFA] p-6 transition-all ease-in-out duration-400 
           ${isExpanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`} key={employee.id}>
               {/* Employee Details */}
               <div className="flex flex-col w-[20%] min-w-0">
