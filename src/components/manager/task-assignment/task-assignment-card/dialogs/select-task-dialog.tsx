@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,10 +10,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, ChevronDown } from 'lucide-react';
 import type { AssignedTask, Task } from '@/types';
 import SelectTasksTable from './select-task-table';
-import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
+import { handleFetchTaskList, handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface SelectTasksDialogProps {
   selectedTask: string[];
@@ -33,6 +39,7 @@ export function SelectTasksDialog({
   const [filterType, setFilterType] = useState('all');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalEmployees, setTotalEmployees] = useState(0);
   const [taskMaxOrders, setTaskMaxOrders] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
     selectedTask.forEach((taskId) => {
@@ -51,14 +58,18 @@ export function SelectTasksDialog({
     }
   }, [selectedTask]);
 
-  // Fetch tasks on mount
+  // Fetch tasks and employees on mount
   useEffect(() => {
-    async function loadTasks() {
-      const data = await handleFetchTaskList();
-      setTasks(data);
+    async function loadData() {
+      const [tasksData, employeesData] = await Promise.all([
+        handleFetchTaskList(),
+        handleFetchEmployeeList(),
+      ]);
+      setTasks(tasksData);
+      setTotalEmployees(employeesData.length);
       setIsLoading(false);
     }
-    loadTasks();
+    loadData();
   }, []);
 
   const filteredTasks = tasks.filter((task) => {
@@ -69,7 +80,41 @@ export function SelectTasksDialog({
   });
 
   const taskTypes = ['all', ...new Set(tasks.map((t) => t.type))];
-  const assignedTaskIds = new Set(assignedTasks.map((t) => t.taskId));
+
+  // Calculate which tasks have ALL employees assigned
+  const fullyAssignedTaskIds = useMemo(() => {
+    const assigned = new Set<string>();
+    if (totalEmployees > 0) {
+      // Group assignments by taskId and count unique employees
+      const taskEmployeeCounts = new Map<string, Set<string>>();
+      assignedTasks.forEach((assignment) => {
+        if (!taskEmployeeCounts.has(assignment.taskId)) {
+          taskEmployeeCounts.set(assignment.taskId, new Set());
+        }
+        assignment.assignedEmployees.forEach((emp) => {
+          taskEmployeeCounts.get(assignment.taskId)!.add(emp.id);
+        });
+      });
+
+      // Mark tasks as fully assigned if they have all employees
+      taskEmployeeCounts.forEach((employeeIds, taskId) => {
+        if (employeeIds.size >= totalEmployees) {
+          assigned.add(taskId);
+        }
+      });
+    }
+    return assigned;
+  }, [assignedTasks, totalEmployees]);
+
+  // Automatically deselect task if it becomes fully assigned (disabled)
+  useEffect(() => {
+    if (selectedTask.length > 0 && fullyAssignedTaskIds.has(selectedTask[0])) {
+      onTasksChange([], {});
+      setTaskMaxOrders({});
+    }
+  }, [fullyAssignedTaskIds, selectedTask, onTasksChange]);
+
+  const currentFilterLabel = filterType === 'all' ? 'All Types' : filterType;
 
   const toggleTask = (taskId: string) => {
     if (selectedTask.includes(taskId)) {
@@ -96,12 +141,7 @@ export function SelectTasksDialog({
     }
   };
 
-  const handleConfirm = () => {
-    setOpen(false);
-    setSearchTerm('');
-  };
-
-  const handleCancel = () => {
+  const handleClose = () => {
     setOpen(false);
     setSearchTerm('');
   };
@@ -118,16 +158,16 @@ export function SelectTasksDialog({
     setSearchTerm(e.target.value);
   };
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    e.stopPropagation();
-    setFilterType(e.target.value);
+  const handleFilterChange = (value: string) => {
+    setFilterType(value);
   };
 
   return (
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="bg-white shadow-sm/25 text-black hover:bg-gray-100 flex items-center gap-2 min-w-50 justify-between cursor-pointer transition-all duration-500 ease-in-out"
+        className={`bg-zinc-50 shadow-sm/25 hover:bg-gray-100 flex items-center gap-16 min-w-50 justify-between cursor-pointer transition-all duration-500 ease-in-out
+          ${selectedTask.length === 0 ? 'text-zinc-700' : 'text-[#690003]'}`}
       >
         <span className="truncate">{buttonLabel}</span>
         <Plus className="w-4 h-4 shrink-0" />
@@ -136,48 +176,50 @@ export function SelectTasksDialog({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="bg-[#FBF4E8] max-w-full min-w-4xl max-h-[90vh] flex flex-col p-6">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[#690003]">Select Tasks</DialogTitle>
+            <DialogTitle className="text-2xl text-[#690003] text-left">Select Tasks</DialogTitle>
           </DialogHeader>
 
           {/* Search and Filter */}
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <div className="flex gap-4 mb-4 justify-center">
+            <div className="relative flex w-1/2">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search Task"
                 value={searchTerm}
                 onChange={handleSearchChange}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full pl-10 pr-4 py-3 rounded-full bg-white shadow-sm/25 focus:outline-none focus:border-[#690003] font-sans"
+                className="w-full pl-10 pr-4 py-2 rounded-full text-sm bg-white shadow-sm/25 focus:outline-none focus:border-[#690003]"
               />
             </div>
-            <select
-              value={filterType}
-              onChange={handleFilterChange}
-              onClick={(e) => e.stopPropagation()}
-              className="px-4 py-3 rounded-full bg-white shadow-sm/25 focus:outline-none focus:border-[#690003] font-sans  cursor-pointer transition-all duration-500 ease-in-out"
-            >
-              {taskTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type === 'all' ? 'All Types' : type}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Tasks Selected Badge */}
-          <div>
-            <h4 className="text-lg font-bold text-[#690003]">
-              Tasks Selected
-              <span className="bg-gray-200 px-2 py-1 rounded-full text-sm ml-2">
-                {selectedTask.length}
-              </span>
-            </h4>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="default"
+                  size="default"
+                  className="bg-white shadow-sm/25 hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-48 py-2 justify-between border border-gray-200"
+                >
+                  <span className="truncate">{currentFilterLabel}</span>
+                  <ChevronDown size={18} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {taskTypes.map((type) => (
+                  <DropdownMenuItem
+                    key={type}
+                    onClick={() => handleFilterChange(type)}
+                    className={`cursor-pointer transition-all duration-500 ease-in-out ${filterType === type ? 'bg-red-100' : ''}`}
+                  >
+                    {type === 'all' ? 'All Types' : type}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Tasks Table */}
           <SelectTasksTable
+            isLoading={isLoading}
             filteredTasks={filteredTasks}
             toggleTask={toggleTask}
             updateMaxOrders={updateMaxOrders}
@@ -186,20 +228,22 @@ export function SelectTasksDialog({
               maxOrders: taskMaxOrders[taskId] || 1,
             }))}
             taskMaxOrders={taskMaxOrders}
+            setTasks={setTasks}
+            disabledTaskIds={fullyAssignedTaskIds}
           />
 
           {/* Dialog Footer */}
-          <DialogFooter className="gap-3">
+          <DialogFooter className="flex flex-row">
             <Button
-              onClick={handleConfirm}
-              disabled={selectedTask.length === 0}
-              className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50"
+              variant="outline"
+              onClick={handleClose}
+              className="px-12 border-gray-300 bg-zinc-50 hover:bg-[#690003] hover:text-zinc-50 cursor-pointer transition-all duration-500 ease-in-out"
             >
-              Confirm
+              Close
             </Button>
             <Button
               variant="outline"
-              onClick={handleCancel}
+              onClick={handleClose}
               className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
             >
               Cancel

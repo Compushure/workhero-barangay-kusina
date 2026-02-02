@@ -2,11 +2,7 @@
 
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
-import {
-  handleFetchCurrentAssignedTasksPaginated, // ✅ updated import
-  handleDeleteTask,
-  handleClearAllTasks,
-} from '@/action-handlers/manager-current-assigned-task';
+import { handleDeleteTask, handleClearAllTasks } from '@/action-handlers/manager-current-assigned-task';
 import { handleAddTaskAssignment } from '@/action-handlers/manager-assignment';
 
 interface TaskAssignmentContextType {

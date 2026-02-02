@@ -23,6 +23,7 @@ interface VerificationRequestsPageProps {
 export function VerificationRequestsPage({ initialRequests }: VerificationRequestsPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('pending');
+  const [dateSortBy, setDateSortBy] = useState<'date-desc' | 'date-asc' | 'employee'>('date-desc');
   const [pendingPage, setPendingPage] = useState(1);
   const [remark, setRemark] = useState('');
   const [approvedPage, setApprovedPage] = useState(1);
@@ -100,19 +101,43 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const totalPages = getTotalPages;
   const currentPage = getCurrentPage;
 
-  // Filter requests based on search term (pagination already done server-side by status)
+  // Filter and sort requests based on search term and date/employee sorting
   const filteredRequests = useMemo(() => {
-    if (!searchTerm) {
-      return currentTasks;
+    let filtered = currentTasks;
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (req) =>
+          req.assigned_to_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          req.assigned_to_employee_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          req.category_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
-    return currentTasks.filter(
-      (req) =>
-        req.assigned_to_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.assigned_to_employee_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.category_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [currentTasks, searchTerm]);
+    // Apply date/employee sorting
+    return filtered.sort((a, b) => {
+      switch (dateSortBy) {
+        case 'date-desc': {
+          const dateA = new Date(a.kpitask_completed_at || a.kpitask_created_at || 0).getTime();
+          const dateB = new Date(b.kpitask_completed_at || b.kpitask_created_at || 0).getTime();
+          return dateB - dateA; // Newest first
+        }
+        case 'date-asc': {
+          const dateA = new Date(a.kpitask_completed_at || a.kpitask_created_at || 0).getTime();
+          const dateB = new Date(b.kpitask_completed_at || b.kpitask_created_at || 0).getTime();
+          return dateA - dateB; // Oldest first
+        }
+        case 'employee': {
+          const nameA = a.assigned_to_name || '';
+          const nameB = b.assigned_to_name || '';
+          return nameA.localeCompare(nameB); // Alphabetical by employee name
+        }
+        default:
+          return 0;
+      }
+    });
+  }, [currentTasks, searchTerm, dateSortBy]);
 
   const resetConfirmState = () => setConfirmAction({ type: null, id: null });
 
@@ -175,9 +200,18 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
 
       <div className="flex-1 flex flex-col">
-        <div className="flex items-center justify-end gap-4 mb-6">
+        <div className="flex items-center justify-end gap-2 mb-6">
           <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
           <SortButton sortBy={sortBy} onSortChange={setSortBy} />
+          <SortButton
+            sortBy={dateSortBy as any}
+            onSortChange={(value) => setDateSortBy(value as 'date-desc' | 'date-asc' | 'employee')}
+            options={[
+              { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
+              { value: 'date-asc' as any, label: 'Date (Oldest)' },
+              { value: 'employee' as any, label: 'Employee Name' },
+            ]}
+          />
         </div>
 
         <div className="flex-1 flex flex-col">

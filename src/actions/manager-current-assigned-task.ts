@@ -21,6 +21,7 @@ export async function fetchCurrentAssignedTasksPaginated(
     data: AssignedTask[];
     count: number;
     totalPages: number;
+    employeeCount: number;
   }>
 > {
   const supabase = await createClient();
@@ -60,10 +61,9 @@ export async function fetchCurrentAssignedTasksPaginated(
     .from('task_info_view')
     .select(
       'status, kpitask_id, category_id, category_name, category_description, category_points, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
-    )
-    .eq('status', 'assigned');
-    // Only include currently assigned tasks
-    
+    );
+  // .eq('status', 'assigned');
+  // Only include currently assigned tasks
 
   // Apply search filter if provided
   if (searchTerm && searchTerm.trim()) {
@@ -77,24 +77,27 @@ export async function fetchCurrentAssignedTasksPaginated(
   }
 
   // Group assignments by task first
-  const taskGroups = new Map<string, {
-    id: string;
-    taskId: string;
-    taskName: string;
-    taskType: string;
-    isRepeatable: boolean;
-    points: number;
-    xp: number;
-    status?: string;
-    dateRange: {
-      start: string;
-      end: string;
-    };
-    maxOrders: number;
-    pendingOrders?: number;
-    assignedEmployees: AssignedEmployee[];
-    sortKey: string; // For maintaining sort order
-  }>();
+  const taskGroups = new Map<
+    string,
+    {
+      id: string;
+      taskId: string;
+      taskName: string;
+      taskDescription: string;
+      isRepeatable: boolean;
+      points: number;
+      xp: number;
+      status?: string;
+      dateRange: {
+        start: string;
+        end: string;
+      };
+      maxOrders: number;
+      pendingOrders?: number;
+      assignedEmployees: AssignedEmployee[];
+      sortKey: string; // For maintaining sort order
+    }
+  >();
 
   (allSortedData ?? []).forEach((row: any) => {
     const employee: AssignedEmployee = {
@@ -103,10 +106,11 @@ export async function fetchCurrentAssignedTasksPaginated(
       empId: row.assigned_to_employee_id ?? '',
       assignedTasks: [],
       completedOrders: row.completed_orders ?? 0,
+      status: row.status || 'assigned',
     };
 
     const key = `${row.category_id}-${row.kpitask_created_at}-${row.k_deadline_date}-${row.max_orders}`;
-    
+
     if (taskGroups.has(key)) {
       const existingTask = taskGroups.get(key)!;
       existingTask.assignedEmployees.push(employee);
@@ -115,7 +119,7 @@ export async function fetchCurrentAssignedTasksPaginated(
         id: row.kpitask_id,
         taskId: row.category_id,
         taskName: row.category_name || 'Unnamed Task',
-        taskType: row.category_description || '',
+        taskDescription: row.category_description || '',
         isRepeatable: true,
         points: row.category_points,
         xp: row.category_points,
@@ -127,14 +131,22 @@ export async function fetchCurrentAssignedTasksPaginated(
         maxOrders: row.max_orders ?? 1,
         pendingOrders: row.pending_orders,
         assignedEmployees: [employee],
-        sortKey: row[orderByColumn] // Store the sort key
+        sortKey: row[orderByColumn], // Store the sort key
       });
     }
   });
 
   // Convert to array and maintain sort order
   const allTasks = Array.from(taskGroups.values());
-  
+
+  const uniqueEmployeeIds = new Set<string>();
+  allTasks.forEach((task) => {
+    (task.assignedEmployees ?? []).forEach((emp) => {
+      if (emp.id) uniqueEmployeeIds.add(emp.id);
+    });
+  });
+  const employeeCount = uniqueEmployeeIds.size;
+
   // Apply final sorting based on the sort key to maintain order
   allTasks.sort((a, b) => {
     const aVal = a.sortKey;
@@ -161,6 +173,7 @@ export async function fetchCurrentAssignedTasksPaginated(
       data: finalTasks,
       count: totalCount,
       totalPages,
+      employeeCount,
     },
   };
 }
@@ -183,6 +196,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
     data: AssignedTask[];
     count: number;
     totalPages: number;
+    taskCount: number;
   }>
 > {
   const supabase = await createClient();
@@ -220,13 +234,15 @@ export async function fetchCurrentAssignedEmployeesPaginated(
       'status, kpitask_id, category_id, category_name, category_description, category_points, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
     )
     // Only include employees with currently assigned tasks
-    .not('assigned_to', 'is', null)
-    .eq('status', 'assigned');
+    .not('assigned_to', 'is', null);
+  // .eq('status', 'assigned');
 
   // Apply search filter if provided (search by employee name or employee ID)
   if (searchTerm && searchTerm.trim()) {
     const trimmedSearch = searchTerm.trim();
-    query = query.or(`assigned_to_name.ilike.%${trimmedSearch}%,assigned_to_employee_id.ilike.%${trimmedSearch}%`);
+    query = query.or(
+      `assigned_to_name.ilike.%${trimmedSearch}%,assigned_to_employee_id.ilike.%${trimmedSearch}%`
+    );
   }
 
   const { data: allSortedData, error } = await query.order(orderByColumn, { ascending });
@@ -235,19 +251,31 @@ export async function fetchCurrentAssignedEmployeesPaginated(
     return { error: 'Failed to fetch assigned tasks: ' + error.message, data: undefined };
   }
 
+  const uniqueTaskKeys = new Set<string>();
+  (allSortedData ?? []).forEach((row: any) => {
+    if (!row.assigned_to) return;
+    uniqueTaskKeys.add(
+      `${row.category_id}-${row.kpitask_created_at}-${row.k_deadline_date}-${row.max_orders}`
+    );
+  });
+  const taskCount = uniqueTaskKeys.size;
+
   // Group assignments by employee to get their latest task date and sort key
-  const employeeGroups = new Map<string, {
-    id: string;
-    name: string;
-    empId: string;
-    latestDate: string;
-    sortKey: string;
-    assignments: any[]; // Store ALL assignments for this employee
-  }>();
-  
+  const employeeGroups = new Map<
+    string,
+    {
+      id: string;
+      name: string;
+      empId: string;
+      latestDate: string;
+      sortKey: string;
+      assignments: any[]; // Store ALL assignments for this employee
+    }
+  >();
+
   (allSortedData ?? []).forEach((row: any) => {
     const empId = row.assigned_to;
-    
+
     if (!employeeGroups.has(empId)) {
       employeeGroups.set(empId, {
         id: empId,
@@ -255,13 +283,13 @@ export async function fetchCurrentAssignedEmployeesPaginated(
         empId: row.assigned_to_employee_id || '',
         latestDate: row.kpitask_created_at,
         sortKey: row[orderByColumn],
-        assignments: []
+        assignments: [],
       });
     }
-    
+
     const group = employeeGroups.get(empId)!;
     group.assignments.push(row);
-    
+
     // Keep track of the latest date for sorting
     if (row.kpitask_created_at > group.latestDate) {
       group.latestDate = row.kpitask_created_at;
@@ -271,7 +299,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
 
   // Convert to array and maintain sort order
   const sortedEmployees = Array.from(employeeGroups.values());
-  
+
   // Apply final sorting based on the sort key to maintain order
   sortedEmployees.sort((a, b) => {
     const aVal = a.sortKey;
@@ -289,7 +317,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   // Calculate range for pagination based on SORTED employees
   const start = (page - 1) * pageSize;
   const end = start + pageSize - 1;
-  
+
   // Get the specific employees for this page from the SORTED list
   const employeesForPage = sortedEmployees.slice(start, end + 1);
 
@@ -300,6 +328,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
         data: [],
         count: totalCount,
         totalPages,
+        taskCount,
       },
     };
   }
@@ -307,22 +336,25 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   // Create the final result - one entry per employee with ALL their tasks
   const result: AssignedTask[] = employeesForPage.flatMap((employee) => {
     // Group this employee's assignments by task (category_id + created_at + deadline_date)
-    const taskGroups = new Map<string, {
-      taskKey: string;
-      categoryId: string;
-      categoryName: string;
-      categoryDescription: string;
-      categoryPoints: number;
-      maxOrders: number;
-      createdAt: string;
-      deadlineDate: string;
-      status: string;
-      assignments: any[];
-    }>();
+    const taskGroups = new Map<
+      string,
+      {
+        taskKey: string;
+        categoryId: string;
+        categoryName: string;
+        categoryDescription: string;
+        categoryPoints: number;
+        maxOrders: number;
+        createdAt: string;
+        deadlineDate: string;
+        status: string;
+        assignments: any[];
+      }
+    >();
 
     employee.assignments.forEach((assignment: any) => {
       const taskKey = `${assignment.category_id}_${assignment.kpitask_created_at}_${assignment.k_deadline_date}`;
-      
+
       if (!taskGroups.has(taskKey)) {
         taskGroups.set(taskKey, {
           taskKey,
@@ -334,10 +366,10 @@ export async function fetchCurrentAssignedEmployeesPaginated(
           createdAt: assignment.kpitask_created_at,
           deadlineDate: assignment.k_deadline_date,
           status: assignment.status || 'assigned',
-          assignments: []
+          assignments: [],
         });
       }
-      
+
       taskGroups.get(taskKey)!.assignments.push(assignment);
     });
 
@@ -349,13 +381,14 @@ export async function fetchCurrentAssignedEmployeesPaginated(
         empId: employee.empId,
         assignedTasks: [],
         completedOrders: taskGroup.assignments[0]?.completed_orders ?? 0,
+        status: taskGroup.status,
       };
 
       return {
         id: taskGroup.assignments[0]?.kpitask_id || taskGroup.taskKey,
         taskId: taskGroup.categoryId,
         taskName: taskGroup.categoryName,
-        taskType: taskGroup.categoryDescription,
+        taskDescription: taskGroup.categoryDescription,
         isRepeatable: true,
         points: taskGroup.categoryPoints,
         xp: taskGroup.categoryPoints,
@@ -377,6 +410,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
       data: result,
       count: totalCount,
       totalPages,
+      taskCount,
     },
   };
 }
@@ -387,20 +421,22 @@ export async function clearAllTasks(): Promise<ServerActionResponse<boolean>> {
   const { error } = await supabase
     .from('KPITask')
     .delete()
-    .in('status', ['assigned', 'in review', 'rejected', 'approved']);
+    .in('status', ['assigned']);
 
   if (error) return { error: error.message, data: undefined };
   return { error: null, data: true };
 }
 
-export async function clearAllEmployeeTasks(employeeId: string): Promise<ServerActionResponse<boolean>> {
+export async function clearAllEmployeeTasks(
+  employeeId: string
+): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
   // Delete all KPITask entries for a specific employee
   const { error } = await supabase
     .from('KPITask')
     .delete()
     .eq('assigned_to', employeeId)
-    .in('status', ['assigned', 'in review', 'rejected', 'approved']);
+    .in('status', ['assigned']);
 
   if (error) return { error: error.message, data: undefined };
   return { error: null, data: true };
@@ -452,14 +488,14 @@ export async function updateTaskAssignment(
 
     type TaskAssignment = { id: string; assigned_to: string };
     const existingEmployeeIds = new Set(
-      (existingAssignments as TaskAssignment[] || []).map(a => a.assigned_to)
+      ((existingAssignments as TaskAssignment[]) || []).map((a) => a.assigned_to)
     );
     const newEmployeeIds = new Set(employeeIds);
 
     // Remove employees not in the new list BEFORE updating
-    const employeesToRemove = (existingAssignments as TaskAssignment[] || [])
-      .filter(a => !newEmployeeIds.has(a.assigned_to))
-      .map(a => a.id);
+    const employeesToRemove = ((existingAssignments as TaskAssignment[]) || [])
+      .filter((a) => !newEmployeeIds.has(a.assigned_to))
+      .map((a) => a.id);
 
     if (employeesToRemove.length > 0) {
       const { error: deleteError } = await supabase
@@ -473,9 +509,9 @@ export async function updateTaskAssignment(
     }
 
     // Update max_orders and deadline for remaining assignments
-    const employeesToKeep = (existingAssignments as TaskAssignment[] || [])
-      .filter(a => newEmployeeIds.has(a.assigned_to))
-      .map(a => a.id);
+    const employeesToKeep = ((existingAssignments as TaskAssignment[]) || [])
+      .filter((a) => newEmployeeIds.has(a.assigned_to))
+      .map((a) => a.id);
 
     if (employeesToKeep.length > 0) {
       const { error: updateError } = await supabase
@@ -492,10 +528,10 @@ export async function updateTaskAssignment(
     }
 
     // Add new employees
-    const employeesToAdd = employeeIds.filter(empId => !existingEmployeeIds.has(empId));
+    const employeesToAdd = employeeIds.filter((empId) => !existingEmployeeIds.has(empId));
 
     if (employeesToAdd.length > 0) {
-      const newAssignments = employeesToAdd.map(empId => ({
+      const newAssignments = employeesToAdd.map((empId) => ({
         assigned_by: currentTask.assigned_by,
         assigned_to: empId,
         category_id: currentTask.category_id,
@@ -505,9 +541,7 @@ export async function updateTaskAssignment(
         max_orders: maxOrders,
       }));
 
-      const { error: insertError } = await supabase
-        .from('KPITask')
-        .insert(newAssignments);
+      const { error: insertError } = await supabase.from('KPITask').insert(newAssignments);
 
       if (insertError) {
         return { error: insertError.message, data: undefined };

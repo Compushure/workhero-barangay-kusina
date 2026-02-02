@@ -2,10 +2,10 @@
 
 import { useState, memo } from 'react';
 import type { AssignedTask, AssignedEmployee } from '@/types';
-import { ChevronDown, X } from 'lucide-react';
 import EmployeeViewCardMenu from './dialogs/employee-view/employee-view-card-menu';
 import ClearAllTasksDialog from './dialogs/employee-view/clear-all-tasks-dialog';
 import ClearTaskDialog from './dialogs/employee-view/clear-task-dialog';
+import EmployeeViewTaskBadges from './employee-view-task-badges';
 
 interface EmployeeViewCardProps {
   tasks: AssignedTask[];
@@ -61,7 +61,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
-    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+    return new Date(year, month - 1, day).toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -79,84 +79,35 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
         const hiddenCount = Math.max(0, employee.assignedTasks.length - 2);
 
         return (
-          <div key={employee.id} className="rounded-xl bg-[#FAFAFA] p-4 shadow-sm/25">
-            {/* Employee Details */}
-            <div className="flex justify-between items-start w-200px">
-              <div className="w-[25%]">
-                <h3 className="text-lg font-bold text-[#690003]">{employee.name}</h3>
-                <p className="text-sm text-gray-500">{employee.empId}</p>
+          <div className={`flex w-full items-start justify-between rounded-2xl bg-[#FAFAFA] p-6 transition-all ease-in-out duration-150 
+          ${isExpanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`} key={employee.id}>
+              {/* Employee Details */}
+              <div className="flex flex-col w-[20%] min-w-0">
+                <h3 className="text-lg font-bold text-[#690003] wrap-break-word">{employee.name}</h3>
+                <p className="text-sm text-gray-600">{employee.empId}</p>
                 {employee.tenure && <p className="text-sm text-gray-500">{employee.tenure}</p>}
               </div>
 
               {/* Assigned Tasks */}
-              <div className="flex flex-col w-190">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-md font-bold text-[#690003]">
-                    Current Tasks{' '}
-                    <span className="bg-gray-300 text-gray-700 px-2 py-1 rounded-full text-sm ml-2">
-                      {employee.assignedTasks.length}
-                    </span>
-                  </h4>
-                  {hiddenCount > 0 && (
-                    <button
-                      onClick={() => toggleEmployeeExpand(employee.id)}
-                      className="text-[#690003] text-sm font-medium flex items-center gap-1 hover:underline transition-all duration-500 ease-in-out cursor-pointer"
-                    >
-                      See All{' '}
-                      <ChevronDown
-                        className={`w-4 h-4 transition-all duration-500 ease-in-out cursor-pointer ${isExpanded ? 'rotate-180 transition-all duration-500 ease-in-out cursor-pointer' : ''}`}
-                      />
-                    </button>
-                  )}
-                </div>
-
-                {/* Task Badges */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {displayedTasks.map((task: AssignedTask) => {
-                    const taskEmployee = task.assignedEmployees?.find(
-                      (emp) => emp.id === employee.id
-                    );
-                    const completedOrders = taskEmployee?.completedOrders || 0;
-
-                    return (
-                      <div
-                        key={task.id}
-                        className="flex items-center gap-2 shadow-sm/25 bg-white px-4 pb-2 pt-1 rounded-lg border border-gray-300 h-full"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-black truncate mb-1">
-                            {task.taskName} ({completedOrders} / {task.maxOrders})
-                          </p>
-                          <p className="text-xs text-gray-500 mb-1">
-                            {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
-                          </p>
-                          <div className="flex gap-2 mt-1">
-                            <span className="text-xs text-black">{task.points}pts</span>
-                            <span className="text-xs text-black">XP {task.xp}</span>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() =>
-                            setShowRemoveConfirm({ taskId: task.id, empId: employee.id })
-                          }
-                          className="hover:scale-130 transition-all duration-500 ease-in-out text-red-500 cursor-pointer"
-                        >
-                          <X className="w-4 h-4 text-red-500" />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <EmployeeViewTaskBadges 
+                employee={employee}
+                hiddenCount={hiddenCount} 
+                isExpanded={isExpanded}
+                toggleEmployeeExpand={toggleEmployeeExpand} 
+                displayedTasks={displayedTasks}
+                formatDate={formatDate} 
+                setShowRemoveConfirm={setShowRemoveConfirm}
+              />
 
               {/* Clear All Assigned Tasks for Employee */}
-              <EmployeeViewCardMenu
-                openPopoverId={openPopoverId}
-                setOpenPopoverId={setOpenPopoverId}
-                employee={employee}
-                setShowClearConfirm={setShowClearConfirm}
-              />
-            </div>
+              <div className='flex w-fit justify-center'>
+                <EmployeeViewCardMenu
+                  openPopoverId={openPopoverId}
+                  setOpenPopoverId={setOpenPopoverId}
+                  employee={employee}
+                  setShowClearConfirm={setShowClearConfirm}
+                />
+              </div>
 
             {/* Unassign Task Dialog */}
             <ClearTaskDialog

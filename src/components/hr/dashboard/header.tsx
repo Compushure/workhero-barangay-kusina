@@ -10,6 +10,8 @@ interface HeaderSectionProps {
   onSearch?: (value: string) => void;
   onSort?: (value: string) => void;
   sortBy?: string;
+  statusFilter?: string;
+  onStatusChange?: (value: string) => void;
 }
 
 export function HeaderSection({
@@ -19,6 +21,8 @@ export function HeaderSection({
   onSearch,
   onSort,
   sortBy = 'date-desc',
+  statusFilter,
+  onStatusChange,
 }: HeaderSectionProps) {
   return (
     <div className="space-y-6">
@@ -36,6 +40,19 @@ export function HeaderSection({
           placeholder="Search by employee or items"
           width="w-[320px]"
         />
+        {/* Status Filter (if provided) */}
+        {statusFilter && onStatusChange && (
+          <SortButton
+            sortBy={statusFilter as any}
+            onSortChange={(value) => onStatusChange(value as string)}
+            options={[
+              { value: 'pending' as any, label: 'Pending Requests' },
+              { value: 'approved' as any, label: 'Approved Requests' },
+              { value: 'rejected' as any, label: 'Rejected Requests' },
+            ]}
+          />
+        )}
+        {/* Sort Dropdown */}
         <SortButton
           sortBy={sortBy as any}
           onSortChange={(value) => onSort?.(value)}

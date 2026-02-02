@@ -21,7 +21,7 @@ export default function TaskViewCardMenu({
     <Popover open={openPopover} onOpenChange={setOpenPopover}>
       <PopoverTrigger asChild>
         <button className="text-black hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer">
-          <MoreHorizontal className="w-5 h-5" />
+          {/* <MoreVertical className="size-6" /> */}
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-40 p-2" align="end">
