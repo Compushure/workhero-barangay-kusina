@@ -23,37 +23,44 @@ export default function LeaderboardCard({ player }: { player: Player }) {
   };
 
   return (
-    <div className="w-full max-w-sm bg-card rounded-3xl overflow-hidden shadow-sm border border-accent">
-      {/* Rank Badge */}
-      <div className="bg-[#E9C496] py-2 text-center font-bold text-[#6D1616] mt-4 mx-auto w-32 rounded-lg">
+    <div className="relative w-full max-w-sm mx-auto sm:mx-0 bg-card rounded-2xl sm:rounded-3xl overflow-visible shadow-sm border border-accent">
+      {/* Rank Badge - overlaps top of card like a ribbon/tab */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2 -top-3 z-10 w-28 sm:w-32 py-2 sm:py-2.5 bg-[#EBCBA8] text-center font-bold text-[#6F3F3A] rounded-t-lg rounded-b-xl text-sm sm:text-base"
+        style={{ boxShadow: '0 4px 6px -1px rgba(107, 63, 58, 0.15)' }}
+      >
         1st Rank
       </div>
 
-      <div className="p-8 flex flex-col items-center text-center">
+      <div className="pt-10 sm:pt-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
         {/* Profile Circle */}
-        <div className="relative w-40 h-40 rounded-full border-8 border-[#E9C496] flex items-center justify-center bg-white mb-6">
+        <div className="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full border-4 sm:border-6 lg:border-8 border-[#E9C496] flex items-center justify-center bg-white mb-4 sm:mb-6">
           <Avatar className="w-full h-full">
             <AvatarImage src={player.image ?? undefined} />
-            <AvatarFallback className="bg-transparent text-[#6D1616] text-4xl font-bold">
+            <AvatarFallback className="bg-transparent text-[#6D1616] text-2xl sm:text-3xl lg:text-4xl font-bold">
               {getInitials(player.name)}
             </AvatarFallback>
           </Avatar>
         </div>
 
         {/* Stars and Name */}
-        <div className="mb-8">
-          <div className="flex justify-center gap-1 text-[#6D1616] text-xl mb-1">
+        <div className="mb-4 sm:mb-6 lg:mb-8">
+          <div className="flex justify-center gap-1 text-[#6D1616] text-base sm:text-xl mb-1">
             <span>☆</span>
-            <span className="text-2xl">☆</span>
+            <span className="text-xl sm:text-2xl">☆</span>
             <span>☆</span>
           </div>
-          <h2 className="text-4xl font-bold text-[#6D1616]">{player.name}</h2>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#6D1616] wrap-break-word px-1">
+            {player.name}
+          </h2>
         </div>
 
         {/* Points Section */}
-        <div className="w-full border-t border-orange-200 pt-4">
-          <div className="text-5xl font-bold text-[#6D1616]">{player.points}</div>
-          <p className="text-[#6D1616] font-medium mt-1">Fiesta Points</p>
+        <div className="w-full border-t border-orange-200 pt-3 sm:pt-4">
+          <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#6D1616]">
+            {player.points}
+          </div>
+          <p className="text-[#6D1616] font-medium mt-1 text-sm sm:text-base">Fiesta Points</p>
         </div>
       </div>
     </div>

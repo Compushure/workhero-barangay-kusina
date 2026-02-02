@@ -12,23 +12,23 @@ export default async function LeaderboardPage() {
     return (
       <Suspense
         fallback={
-          <div className="p-8 bg-[#F3F3F3] min-h-screen">
-            <div className="max-w-6xl mx-auto text-center py-12">
+          <div className="p-4 sm:p-6 lg:p-8 bg-[#F3F3F3] min-h-screen">
+            <div className="max-w-6xl mx-auto text-center py-8 sm:py-12">
               <p className="text-gray-500 text-lg">Loading...</p>
             </div>
           </div>
         }
       >
-        <div className="p-8 bg-[#F3F3F3] min-h-screen">
+        <div className="p-4 sm:p-6 lg:p-8 bg-[#F3F3F3] min-h-screen">
           <div className="max-w-6xl mx-auto">
-            <div className="flex justify-between items-start mb-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-8">
               <div>
-                <h1 className="text-3xl font-bold text-[#6D1616]">Leaderboard Slide</h1>
-                <p className="text-gray-500">List of ranks for this week.</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-[#6D1616]">Leaderboard Slide</h1>
+                <p className="text-gray-500 text-sm sm:text-base">List of ranks for this week.</p>
               </div>
               <LeaderboardFilters />
             </div>
-            <div className="text-center py-12">
+            <div className="text-center py-8 sm:py-12">
               <p className="text-gray-500 text-lg">
                 {result.error || 'No leaderboard data available at the moment.'}
               </p>
@@ -52,25 +52,25 @@ export default async function LeaderboardPage() {
   return (
     <Suspense
       fallback={
-        <div className="p-8 bg-[#F3F3F3] min-h-screen">
-          <div className="max-w-6xl mx-auto text-center py-12">
+        <div className="p-4 sm:p-6 lg:p-8 bg-[#F3F3F3] min-h-screen">
+          <div className="max-w-6xl mx-auto text-center py-8 sm:py-12">
             <p className="text-gray-500 text-lg">Loading...</p>
           </div>
         </div>
       }
     >
-      <div className="p-8 bg-[#F3F3F3] min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 bg-[#F3F3F3] min-h-screen">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
-          <div className="flex justify-between items-start mb-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-[#6D1616]">Leaderboard Slide</h1>
-              <p className="text-gray-500">List of ranks for this week.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#6D1616]">Leaderboard Slide</h1>
+              <p className="text-gray-500 text-sm sm:text-base">List of ranks for this week.</p>
             </div>
             <LeaderboardFilters />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8 items-start">
             {/* 1st Place Highlight */}
             <div className="lg:col-span-4 flex justify-center">
               <LeaderboardCard player={topPlayer} />

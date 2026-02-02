@@ -18,10 +18,10 @@ export default function LeaderboardFilters() {
   const [timePeriod, setTimePeriod] = useState('weekly');
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
       {/* Category Filter */}
       <Select value={category} onValueChange={setCategory}>
-        <SelectTrigger className="w-40 bg-white border-[#E9C496] text-[#6D1616] font-medium rounded-lg hover:bg-[#F9F3E9] transition-colors">
+        <SelectTrigger className="w-full sm:w-40 bg-white border-[#E9C496] text-[#6D1616] font-medium rounded-lg hover:bg-[#F9F3E9] transition-colors">
           <SelectValue placeholder="Select category" />
         </SelectTrigger>
         <SelectContent className="bg-white border-[#E9C496]">
@@ -42,7 +42,7 @@ export default function LeaderboardFilters() {
 
       {/* Time Period Filter */}
       <Select value={timePeriod} onValueChange={setTimePeriod}>
-        <SelectTrigger className="w-40 bg-white border-[#E9C496] text-[#6D1616] font-medium rounded-lg hover:bg-[#F9F3E9] transition-colors">
+        <SelectTrigger className="w-full sm:w-40 bg-white border-[#E9C496] text-[#6D1616] font-medium rounded-lg hover:bg-[#F9F3E9] transition-colors">
           <SelectValue placeholder="Select period" />
         </SelectTrigger>
         <SelectContent className="bg-white border-[#E9C496]">

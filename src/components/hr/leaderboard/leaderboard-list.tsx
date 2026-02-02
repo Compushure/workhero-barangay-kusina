@@ -33,21 +33,26 @@ export default function LeaderboardList({ players }: LeaderboardListProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {players.map((player) => (
-        <div key={player.id || player.rank} className="flex items-center gap-4 group">
+        <div
+          key={player.id || player.rank}
+          className="flex items-center gap-2 sm:gap-4 group min-w-0"
+        >
           {/* Rank Number */}
-          <span className="text-lg font-bold text-primary w-12">{getRankSuffix(player.rank)}</span>
+          <span className="text-sm sm:text-lg font-bold text-primary shrink-0 w-8 sm:w-12">
+            {getRankSuffix(player.rank)}
+          </span>
 
           {/* Main Row Card */}
-          <div className="flex-1 flex items-center justify-between bg-[#F9F3E9] rounded-full pr-6 pl-2 py-2 shadow-sm border border-[#E9C496] transition-all hover:shadow-md">
-            <div className="flex items-center gap-4">
+          <div className="flex-1 min-w-0 flex items-center justify-between gap-2 bg-[#F9F3E9] rounded-full pr-3 pl-1.5 py-1.5 sm:pr-6 sm:pl-2 sm:py-2 shadow-sm border border-[#E9C496] transition-all hover:shadow-md">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
               {/* Avatar Circle */}
-              <div className="relative">
-                <div className="w-12 h-12 rounded-full border-2 border-[#E9C496] bg-white flex items-center justify-center overflow-hidden">
+              <div className="relative shrink-0">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full border-2 border-[#E9C496] bg-white flex items-center justify-center overflow-hidden">
                   <Avatar className="w-full h-full">
                     <AvatarImage src={player.image} />
-                    <AvatarFallback className="bg-transparent text-[#6D1616] font-semibold text-sm">
+                    <AvatarFallback className="bg-transparent text-[#6D1616] font-semibold text-xs sm:text-sm">
                       {getInitials(player.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -55,12 +60,18 @@ export default function LeaderboardList({ players }: LeaderboardListProps) {
               </div>
 
               {/* Employee Name */}
-              <span className="font-semibold text-[#6D1616]">{player.name}</span>
+              <span className="font-semibold text-[#6D1616] text-sm sm:text-base truncate">
+                {player.name}
+              </span>
             </div>
 
             {/* Points with coin icon */}
-            <div className="flex items-center gap-2 text-[#6D1616] font-bold">
-              <svg className="w-5 h-5 text-[#D4AF37]" fill="currentColor" viewBox="0 0 20 20">
+            <div className="flex items-center gap-1 sm:gap-2 text-[#6D1616] font-bold shrink-0 text-sm sm:text-base">
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5 text-[#D4AF37]"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                 <path
                   fillRule="evenodd"
