@@ -19,6 +19,96 @@ function getRewardImageUrl(supabase: any, rewardId: string): string {
   return `${baseUrl}?t=${Date.now()}`;
 }
 
+/**
+ * Helper function to auto-decline pending requests when stock is insufficient
+ * @param rewardId - The reward ID to check pending requests for
+ * @param availableQuantity - Current available quantity
+ * @param adminId - Admin ID for approval/rejection tracking
+ */
+async function autoDeclinePendingRequestsForReward(
+  rewardId: string,
+  availableQuantity: number,
+  adminId: string
+): Promise<void> {
+  try {
+    // Get all pending requests for this reward
+    const { data: pendingRequests, error: fetchError } = await supabaseAdmin
+      .from('RewardRequest')
+      .select(
+        `
+        id,
+        user_id,
+        quantity,
+        Reward:reward_id (
+          points_cost
+        ),
+        User:user_id (
+          points,
+          deducted_points
+        )
+      `
+      )
+      .eq('reward_id', rewardId)
+      .eq('status', 'pending')
+      .order('requested_at', { ascending: true });
+
+    if (fetchError || !pendingRequests || pendingRequests.length === 0) {
+      return;
+    }
+
+    // Process each pending request
+    for (const req of pendingRequests) {
+      const requestQuantity = req.quantity || 1;
+      const reward = Array.isArray(req.Reward) ? req.Reward[0] : req.Reward;
+      const user = Array.isArray(req.User) ? req.User[0] : req.User;
+      const pointsCostPerItem = reward?.points_cost || 0;
+      const totalPointsCost = pointsCostPerItem * requestQuantity;
+
+      let shouldDecline = false;
+      let declineRemark = '';
+
+      // Check if out of stock
+      if (availableQuantity <= 0) {
+        shouldDecline = true;
+        declineRemark = 'Out of stock';
+      }
+      // Check if not enough items
+      else if (requestQuantity > availableQuantity) {
+        shouldDecline = true;
+        declineRemark = 'Not enough items to redeem';
+      }
+
+      if (shouldDecline) {
+        // Update request status to rejected
+        await supabaseAdmin
+          .from('RewardRequest')
+          .update({
+            status: 'rejected',
+            approved_by: adminId,
+            remarks: declineRemark,
+          })
+          .eq('id', req.id);
+
+        // Return points to user
+        if (user) {
+          await supabaseAdmin
+            .from('User')
+            .update({
+              points: (user.points || 0) + totalPointsCost,
+              deducted_points: (user.deducted_points || 0) - totalPointsCost,
+            })
+            .eq('id', req.user_id);
+        }
+
+        console.log(`Auto-declined request ${req.id}: ${declineRemark}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error auto-declining pending requests:', error);
+    // Don't throw - this is a background cleanup task
+  }
+}
+
 // ============================================
 // Redemption Request Actions
 // ============================================
@@ -243,6 +333,67 @@ export async function acceptRedemptionRequestAction(
     const totalPointsCost = pointsCostPerItem * quantity;
     const currentDeductedPoints = user?.deducted_points || 0;
 
+    // Check current reward quantity before approval
+    const { data: currentReward, error: rewardCheckError } = await supabaseAdmin
+      .from('Reward')
+      .select('quantity')
+      .eq('id', request.reward_id)
+      .single();
+
+    if (rewardCheckError) {
+      console.error('Error fetching reward quantity:', rewardCheckError);
+      return { error: 'Failed to verify item availability' };
+    }
+
+    // Validate if enough stock is available
+    if (currentReward && currentReward.quantity !== null && currentReward.quantity !== undefined) {
+      if (currentReward.quantity <= 0) {
+        // Auto-decline if out of stock
+        await supabase
+          .from('RewardRequest')
+          .update({
+            status: 'rejected',
+            approved_by: admin.id,
+            remarks: 'Out of stock',
+          })
+          .eq('id', requestId);
+
+        // Return points to user
+        await supabaseAdmin
+          .from('User')
+          .update({
+            points: (user?.points || 0) + totalPointsCost,
+            deducted_points: currentDeductedPoints - totalPointsCost,
+          })
+          .eq('id', request.user_id);
+
+        return { error: 'Item is out of stock. Request has been automatically declined.' };
+      }
+
+      if (currentReward.quantity < quantity) {
+        // Auto-decline if not enough items
+        await supabase
+          .from('RewardRequest')
+          .update({
+            status: 'rejected',
+            approved_by: admin.id,
+            remarks: 'Not enough items to redeem',
+          })
+          .eq('id', requestId);
+
+        // Return points to user
+        await supabaseAdmin
+          .from('User')
+          .update({
+            points: (user?.points || 0) + totalPointsCost,
+            deducted_points: currentDeductedPoints - totalPointsCost,
+          })
+          .eq('id', request.user_id);
+
+        return { error: `Only ${currentReward.quantity} item(s) available. Request has been automatically declined.` };
+      }
+    }
+
     // Update request status to approved with optional remarks
     const { error: updateRequestError } = await supabase
       .from('RewardRequest')
@@ -256,6 +407,40 @@ export async function acceptRedemptionRequestAction(
     if (updateRequestError) {
       console.error('Error updating redemption request:', updateRequestError);
       return { error: `Failed to approve request: ${updateRequestError.message}` };
+    }
+
+    // Decrease reward quantity if it has a quantity limit
+    const { data: rewardAfterApproval, error: rewardFetchError } = await supabaseAdmin
+      .from('Reward')
+      .select('quantity')
+      .eq('id', request.reward_id)
+      .single();
+
+    if (rewardFetchError) {
+      console.error('Error fetching current reward quantity:', rewardFetchError);
+    } else if (rewardAfterApproval && rewardAfterApproval.quantity !== null && rewardAfterApproval.quantity !== undefined) {
+      const newQuantity = rewardAfterApproval.quantity - quantity;
+
+      // Update reward quantity and auto-hide if out of stock
+      const updateData: any = { quantity: Math.max(0, newQuantity) };
+
+      // If quantity reaches 0 or below, automatically hide the item
+      if (newQuantity <= 0) {
+        updateData.is_active = false;
+      }
+
+      const { error: updateQuantityError } = await supabaseAdmin
+        .from('Reward')
+        .update(updateData)
+        .eq('id', request.reward_id);
+
+      if (updateQuantityError) {
+        console.error('Error updating reward quantity:', updateQuantityError);
+        // Don't fail the request approval if quantity update fails
+      }
+
+      // Auto-decline other pending requests if stock is insufficient
+      await autoDeclinePendingRequestsForReward(request.reward_id, newQuantity, admin.id);
     }
 
     // Clear deducted points (admin client: User table not writable by authenticated)
@@ -521,19 +706,42 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
       return { error: `Failed to fetch items: ${error.message}` };
     }
 
+    // Fetch approved redemption counts for each reward
+    const { data: redemptionData } = await supabase
+      .from('RewardRequest')
+      .select('reward_id, quantity')
+      .eq('status', 'approved');
+
+    // Calculate total redeemed quantity per reward
+    const redeemedCounts = new Map<string, number>();
+    if (redemptionData) {
+      redemptionData.forEach((req: any) => {
+        const current = redeemedCounts.get(req.reward_id) || 0;
+        redeemedCounts.set(req.reward_id, current + (req.quantity || 1));
+      });
+    }
+
     // Transform database response to match Reward type
-    const rewards: Reward[] = (data || []).map((item) => ({
-      id: item.id,
-      name: item.name,
-      pointsCost: item.points_cost,
-      quantity: item.quantity,
-      redeemingLimit: item.redeeming_limit,
-      category: item.category,
-      isActive: item.is_active,
-      createdAt: item.created_at,
-      createdBy: item.created_by,
-      imageUrl: getRewardImageUrl(supabase, item.id),
-    }));
+    const rewards: Reward[] = (data || []).map((item) => {
+      const redeemedCount = redeemedCounts.get(item.id) || 0;
+      const hasQuantityLimit = item.quantity !== null && item.quantity !== undefined;
+
+      return {
+        id: item.id,
+        name: item.name,
+        pointsCost: item.points_cost,
+        quantity: item.quantity,
+        redeemingLimit: item.redeeming_limit,
+        category: item.category,
+        isActive: item.is_active,
+        createdAt: item.created_at,
+        createdBy: item.created_by,
+        imageUrl: getRewardImageUrl(supabase, item.id),
+        // Add computed properties for stock tracking
+        redeemedCount,
+        isOutOfStock: hasQuantityLimit && item.quantity <= 0,
+      };
+    });
 
     return { error: null, data: rewards };
   } catch (error) {
@@ -789,4 +997,184 @@ export async function uploadRewardPicture(
     error: null,
     data: { path: uploadResult?.path ?? null, publicUrl },
   };
+}
+
+/**
+ * Utility function to check and auto-hide out-of-stock rewards
+ * This runs through all rewards and marks items with quantity <= 0 as inactive
+ * Can be called manually or set up as a scheduled task
+ * @returns ServerActionResponse with count of items hidden
+ */
+export async function autoHideOutOfStockRewardsAction(): Promise<ServerActionResponse<{ hiddenCount: number }>> {
+  try {
+    const supabase = await createClient();
+
+    // Get all rewards with quantity tracking (quantity is not null)
+    const { data: rewards, error: fetchError } = await supabase
+      .from('Reward')
+      .select('id, quantity, is_active')
+      .not('quantity', 'is', null)
+      .lte('quantity', 0)
+      .eq('is_active', true);
+
+    if (fetchError) {
+      console.error('Error fetching out-of-stock rewards:', fetchError);
+      return { error: `Failed to check stock: ${fetchError.message}` };
+    }
+
+    if (!rewards || rewards.length === 0) {
+      return { error: null, data: { hiddenCount: 0 } };
+    }
+
+    // Update all out-of-stock items to inactive
+    const rewardIds = rewards.map(r => r.id);
+    const { error: updateError } = await supabase
+      .from('Reward')
+      .update({ is_active: false })
+      .in('id', rewardIds);
+
+    if (updateError) {
+      console.error('Error hiding out-of-stock rewards:', updateError);
+      return { error: `Failed to hide items: ${updateError.message}` };
+    }
+
+    return { error: null, data: { hiddenCount: rewards.length } };
+  } catch (error) {
+    console.error('Error in autoHideOutOfStockRewardsAction:', error);
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'An unexpected error occurred while checking stock' };
+  }
+}
+
+/**
+ * Utility function to check all pending redemption requests and auto-decline those with insufficient stock
+ * Useful for cleanup or can be run periodically
+ * @returns ServerActionResponse with count of requests declined
+ */
+export async function autoDeclineInsufficientStockRequestsAction(): Promise<ServerActionResponse<{ declinedCount: number }>> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user (admin) for tracking who declined
+    const {
+      data: { user: admin },
+      error: adminError,
+    } = await supabase.auth.getUser();
+
+    if (adminError || !admin) {
+      return { error: 'Unauthorized: Admin not authenticated' };
+    }
+
+    // Get all pending requests with their reward quantities
+    const { data: pendingRequests, error: fetchError } = await supabaseAdmin
+      .from('RewardRequest')
+      .select(
+        `
+        id,
+        user_id,
+        reward_id,
+        quantity,
+        Reward:reward_id (
+          quantity,
+          points_cost
+        ),
+        User:user_id (
+          points,
+          deducted_points
+        )
+      `
+      )
+      .eq('status', 'pending')
+      .order('requested_at', { ascending: true });
+
+    if (fetchError) {
+      console.error('Error fetching pending requests:', fetchError);
+      return { error: `Failed to fetch requests: ${fetchError.message}` };
+    }
+
+    if (!pendingRequests || pendingRequests.length === 0) {
+      return { error: null, data: { declinedCount: 0 } };
+    }
+
+    let declinedCount = 0;
+
+    // Group requests by reward to track running totals
+    const rewardQuantities = new Map<string, number>();
+
+    for (const req of pendingRequests) {
+      const requestQuantity = req.quantity || 1;
+      const reward = Array.isArray(req.Reward) ? req.Reward[0] : req.Reward;
+      const user = Array.isArray(req.User) ? req.User[0] : req.User;
+
+      // Skip if reward has no quantity limit
+      if (!reward || reward.quantity === null || reward.quantity === undefined) {
+        continue;
+      }
+
+      // Get current available quantity for this reward
+      let availableQuantity = rewardQuantities.get(req.reward_id);
+      if (availableQuantity === undefined) {
+        availableQuantity = reward.quantity;
+        rewardQuantities.set(req.reward_id, availableQuantity);
+      }
+
+      const pointsCostPerItem = reward.points_cost || 0;
+      const totalPointsCost = pointsCostPerItem * requestQuantity;
+
+      let shouldDecline = false;
+      let declineRemark = '';
+
+      // Check if out of stock
+      if (availableQuantity <= 0) {
+        shouldDecline = true;
+        declineRemark = 'Out of stock';
+      }
+      // Check if not enough items
+      else if (requestQuantity > availableQuantity) {
+        shouldDecline = true;
+        declineRemark = 'Not enough items to redeem';
+      }
+
+      if (shouldDecline) {
+        // Update request status to rejected
+        const { error: updateError } = await supabaseAdmin
+          .from('RewardRequest')
+          .update({
+            status: 'rejected',
+            approved_by: admin.id,
+            remarks: declineRemark,
+          })
+          .eq('id', req.id);
+
+        if (updateError) {
+          console.error(`Error declining request ${req.id}:`, updateError);
+          continue;
+        }
+
+        // Return points to user
+        if (user) {
+          await supabaseAdmin
+            .from('User')
+            .update({
+              points: (user.points || 0) + totalPointsCost,
+              deducted_points: (user.deducted_points || 0) - totalPointsCost,
+            })
+            .eq('id', req.user_id);
+        }
+
+        declinedCount++;
+        console.log(`Auto-declined request ${req.id}: ${declineRemark}`);
+      }
+    }
+
+    return { error: null, data: { declinedCount } };
+  } catch (error) {
+    console.error('Error in autoDeclineInsufficientStockRequestsAction:', error);
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'An unexpected error occurred while checking requests' };
+  }
 }
