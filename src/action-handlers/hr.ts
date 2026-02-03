@@ -157,4 +157,3 @@ export async function handleUploadRewardPicture(
   toast.success(`Successfully updated ${rewardName ?? 'item'} picture`);
   return (result.data?.data as { publicUrl?: string })?.publicUrl ?? null;
 }
-
