@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, memo, useCallback } from 'react';
-import { Pencil, ImageIcon, EyeOff } from 'lucide-react';
+import { Pencil, ImageIcon, EyeOff, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { HideRewardDialog } from './hide-items';
+import { isItemAvailableNow } from '@/utils/date-utils';
 
 interface MercadoItem {
   id: string;
@@ -20,6 +21,7 @@ interface MercadoItem {
   isActive?: boolean;
   imageUrl?: string;
   createdAt?: string;
+  availableDate?: string | Date | null;
 }
 
 interface MercadoCardProps {
@@ -79,6 +81,25 @@ export const MercadoCard = memo(function MercadoCard({
     onClick?.(item.id);
   }, [onClick, item.id]);
 
+  // Check if item is scheduled for future availability
+  const isScheduled = useMemo(() => {
+    return item.availableDate && !isItemAvailableNow(item.availableDate);
+  }, [item.availableDate]);
+
+  const availableDateText = useMemo(() => {
+    if (!item.availableDate) return null;
+    try {
+      const date = new Date(item.availableDate);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    } catch {
+      return null;
+    }
+  }, [item.availableDate]);
+
   return (
     <>
       <div
@@ -116,6 +137,15 @@ export const MercadoCard = memo(function MercadoCard({
         <div className="ml-4 flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-xl font-bold text-[#730202] truncate">{item.name}</h3>
+            {isScheduled && (
+              <Badge
+                variant="secondary"
+                className="bg-blue-100 text-blue-700 hover:bg-blue-100 text-xs"
+              >
+                <Calendar className="h-3 w-3 mr-1" />
+                {availableDateText}
+              </Badge>
+            )}
             {item.isActive === false && (
               <Badge
                 variant="secondary"

@@ -38,7 +38,7 @@ interface AddItemsModalProps {
     redeemingLimit: string;
     cost: number;
     availableDate?: Date | null;
-  }) => void;
+  }) => Promise<void>;
   saveError?: string;
   onErrorClear?: () => void;
 }

@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ImageIcon, X } from 'lucide-react';
+import { ImageIcon, X, Calendar } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { isItemAvailableNow } from '@/utils/date-utils';
 
 interface ViewItemModalProps {
   open: boolean;
@@ -18,6 +19,7 @@ interface ViewItemModalProps {
     isActive: boolean;
     imageUrl?: string;
     createdAt?: string;
+    availableDate?: string | Date | null;
   } | null;
 }
 
@@ -26,7 +28,7 @@ function formatNumber(num: number | undefined): string {
   return num.toLocaleString('en-US');
 }
 
-function formatDate(dateString: string | undefined): string {
+function formatDate(dateString: string | Date | null | undefined): string {
   if (!dateString) return 'N/A';
   try {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -43,6 +45,9 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
   if (!item) return null;
 
   const [imageError, setImageError] = useState(false);
+
+  // Check if item is scheduled for future
+  const isScheduled = item.availableDate && !isItemAvailableNow(item.availableDate);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -90,11 +95,19 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
               <p className="text-xl font-bold text-[#730202] break-all px-4 leading-tight">
                 {item.name}
               </p>
-              {!item.isActive && (
-                <Badge variant="secondary" className="bg-gray-200 text-gray-700 text-xs">
-                  Hidden
-                </Badge>
-              )}
+              <div className="flex items-center gap-2 flex-wrap justify-center">
+                {isScheduled && (
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-xs">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Available {formatDate(item.availableDate)}
+                  </Badge>
+                )}
+                {!item.isActive && (
+                  <Badge variant="secondary" className="bg-gray-200 text-gray-700 text-xs">
+                    Hidden
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
 

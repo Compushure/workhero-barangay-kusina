@@ -735,6 +735,7 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
         redeemingLimit: item.redeeming_limit,
         category: item.category,
         isActive: item.is_active,
+        availableDate: item.available_date,
         createdAt: item.created_at,
         createdBy: item.created_by,
         imageUrl: getRewardImageUrl(supabase, item.id),
@@ -787,6 +788,7 @@ export async function addRewardAction(
         redeeming_limit: validatedData.redeemingLimit,
         category: validatedData.category,
         is_active: validatedData.isActive,
+        available_date: validatedData.availableDate ? validatedData.availableDate.toISOString() : null,
       })
       .select()
       .single();
@@ -805,6 +807,7 @@ export async function addRewardAction(
       redeemingLimit: data.redeeming_limit,
       category: data.category,
       isActive: data.is_active,
+      availableDate: data.available_date,
       createdAt: data.created_at,
       createdBy: data.created_by,
       imageUrl: getRewardImageUrl(supabase, data.id),
@@ -872,6 +875,8 @@ export async function editRewardAction(
       updateData.redeeming_limit = validatedData.redeemingLimit;
     if (validatedData.category !== undefined) updateData.category = validatedData.category;
     if (validatedData.isActive !== undefined) updateData.is_active = validatedData.isActive;
+    if (validatedData.availableDate !== undefined)
+      updateData.available_date = validatedData.availableDate ? validatedData.availableDate.toISOString() : null;
 
     // Update reward in database
     const { data, error } = await supabase
@@ -895,6 +900,7 @@ export async function editRewardAction(
       redeemingLimit: data.redeeming_limit,
       category: data.category,
       isActive: data.is_active,
+      availableDate: data.available_date,
       createdAt: data.created_at,
       createdBy: data.created_by,
       imageUrl: getRewardImageUrl(supabase, data.id),

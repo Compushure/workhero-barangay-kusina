@@ -137,6 +137,7 @@ export interface Reward {
   redeemingLimit?: number;
   category?: string;
   isActive: boolean;
+  availableDate?: string | Date | null;
   createdAt?: string | Date;
   createdBy?: string;
   imageUrl?: string;
