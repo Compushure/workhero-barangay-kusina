@@ -311,6 +311,7 @@ export async function acceptRedemptionRequestAction(
           points_cost
         ),
         User:user_id (
+          points,
           deducted_points
         )
       `
@@ -978,25 +979,46 @@ export async function uploadRewardPicture(
   rewardId: string,
   file: File
 ): Promise<ServerActionResponse<{ path: string | null; publicUrl: string }>> {
-  const supabase = await createClient();
-  const { data: uploadResult, error } = await supabase.storage
-    .from('reward')
-    .upload(`${rewardId}/profile.png`, file, {
-      cacheControl: '0',
-      upsert: true,
-      contentType: (file as any)?.type || 'image/png',
-    });
+  try {
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      return { error: 'Image size must be less than 5MB' };
+    }
 
-  if (error) {
-    return { error: 'Failed to upload Reward picture: ' + error.message };
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      return { error: 'Only JPEG, PNG, and WebP images are allowed' };
+    }
+
+    const supabase = await createClient();
+    const { data: uploadResult, error } = await supabase.storage
+      .from('reward')
+      .upload(`${rewardId}/profile.png`, file, {
+        cacheControl: '0',
+        upsert: true,
+        contentType: file.type || 'image/png',
+      });
+
+    if (error) {
+      console.error('Supabase upload error:', error);
+      return { error: 'Failed to upload reward picture: ' + error.message };
+    }
+
+    const publicUrl = getRewardImageUrl(supabase, rewardId);
+
+    return {
+      error: null,
+      data: { path: uploadResult?.path ?? null, publicUrl },
+    };
+  } catch (error) {
+    console.error('Upload reward picture error:', error);
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'An unexpected error occurred while uploading the image' };
   }
-
-  const publicUrl = getRewardImageUrl(supabase, rewardId);
-
-  return {
-    error: null,
-    data: { path: uploadResult?.path ?? null, publicUrl },
-  };
 }
 
 /**
@@ -1116,8 +1138,10 @@ export async function autoDeclineInsufficientStockRequestsAction(): Promise<Serv
       // Get current available quantity for this reward
       let availableQuantity = rewardQuantities.get(req.reward_id);
       if (availableQuantity === undefined) {
-        availableQuantity = reward.quantity;
-        rewardQuantities.set(req.reward_id, availableQuantity);
+        availableQuantity = reward.quantity!;
+        if (availableQuantity !== undefined) {
+          rewardQuantities.set(req.reward_id, availableQuantity);
+        }
       }
 
       const pointsCostPerItem = reward.points_cost || 0;
@@ -1127,12 +1151,12 @@ export async function autoDeclineInsufficientStockRequestsAction(): Promise<Serv
       let declineRemark = '';
 
       // Check if out of stock
-      if (availableQuantity <= 0) {
+      if (availableQuantity !== undefined && availableQuantity <= 0) {
         shouldDecline = true;
         declineRemark = 'Out of stock';
       }
       // Check if not enough items
-      else if (requestQuantity > availableQuantity) {
+      else if (availableQuantity !== undefined && requestQuantity > availableQuantity) {
         shouldDecline = true;
         declineRemark = 'Not enough items to redeem';
       }

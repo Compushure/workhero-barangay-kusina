@@ -29,6 +29,8 @@ export function useDeclineRedemptionRequest() {
       // Invalidate redemption queries to refetch the list
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
+      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
     },
   });
 }
@@ -44,6 +46,8 @@ export function useAcceptRedemptionRequest() {
       // Invalidate redemption queries to refetch the list
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
+      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
     },
   });
 }
@@ -83,7 +87,7 @@ export function useAddReward() {
           return [...existing, newReward];
         });
       }
-      
+
       // Invalidate to ensure consistency, but don't force immediate refetch
       queryClient.invalidateQueries({ queryKey: rewardKeys.all, refetchType: 'none' });
     },

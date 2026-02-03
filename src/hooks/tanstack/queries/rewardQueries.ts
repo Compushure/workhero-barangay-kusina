@@ -27,9 +27,9 @@ export function useGetRewards() {
 
             return result.data || [];
         },
-        staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+        staleTime: 1 * 60 * 1000, // refresh data every 1 minute
         gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
-        refetchOnWindowFocus: false, // Don't refetch on window focus
-        refetchOnMount: false, // Don't refetch on mount if data is still fresh
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
     });
 }
