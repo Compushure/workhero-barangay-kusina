@@ -78,14 +78,31 @@ export function CurrentAssignedTasks() {
       <div className="flex flex-row md:items-center justify-between mb-5">
         <h2 className="text-2xl font-bold text-[#690003]">Current Assigned Tasks</h2>
 
-        {/* Clear All */}
-        <Button
-          onClick={() => setShowClearConfirm(true)}
-          disabled={memoizedTasks.length === 0}
-          className="text-sm px-10 py-2 bg-[#690003] shadow-sm/25 hover:bg-red-500 cursor-pointer text-white disabled:opacity-50 transition-all duration-500 ease-in-out"
-        >
-          Clear All
-        </Button>
+        {/* View Toggle */}
+          <div className="flex gap-2 bg-white rounded-xl p-1 mb-1 shadow-sm/25">
+            <button
+              onClick={() => handleViewModeChange('task')}
+              className={`flex w-32 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out ${
+                viewMode === 'task'
+                  ? 'bg-[#690003] text-white shadow-sm/15'
+                  : 'text-gray-500 hover:bg-gray-200'
+              }`}
+            >
+              <ListTodo size={16} />
+              Task View
+            </button>
+            <button
+              onClick={() => handleViewModeChange('employee')}
+              className={`flex w-33 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out ${
+                viewMode === 'employee'
+                  ? 'bg-[#690003] text-white shadow-sm/15'
+                  : 'text-gray-500 hover:bg-gray-200'
+              }`}
+            >
+              <Users size={16} />
+              Employee View
+            </button>
+          </div>
       </div>
 
       {/* View Cards Number Display & Controls: Search, Sort, Clear */}
@@ -127,31 +144,16 @@ export function CurrentAssignedTasks() {
             )}
           </div>
 
-          {/* View Toggle */}
-          <div className="flex gap-2 bg-white rounded-xl p-1 mb-1 shadow-sm/25">
-            <button
-              onClick={() => handleViewModeChange('task')}
-              className={`flex w-36 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out ${
-                viewMode === 'task'
-                  ? 'bg-[#690003] text-white shadow-sm/15'
-                  : 'text-gray-500 hover:bg-gray-200'
-              }`}
-            >
-              <ListTodo size={16} />
-              Task View
-            </button>
-            <button
-              onClick={() => handleViewModeChange('employee')}
-              className={`flex w-36 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out ${
-                viewMode === 'employee'
-                  ? 'bg-[#690003] text-white shadow-sm/15'
-                  : 'text-gray-500 hover:bg-gray-200'
-              }`}
-            >
-              <Users size={16} />
-              Employee View
-            </button>
-          </div>
+          {/* Clear All */}
+          <Button
+            onClick={() => setShowClearConfirm(true)}
+            disabled={memoizedTasks.length === 0}
+            className="text-sm px-10 py-2 bg-[#690003] shadow-sm/25 hover:bg-red-500 cursor-pointer text-white disabled:opacity-50 transition-all duration-500 ease-in-out"
+          >
+            Clear All
+          </Button>
+
+          
         </div>
       </section>
 

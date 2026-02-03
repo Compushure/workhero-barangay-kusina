@@ -131,9 +131,11 @@ export function useGetSessionUser(
       return result.data;
     },
     enabled: queryOptions.enabled !== false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 1 * 60 * 1000, // 1 minute (reduced to refresh more frequently)
     gcTime: 30 * 60 * 1000, // 30 minutes
-    retry: 1,
+    retry: 2,
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnMount: true, // Always refetch when component mounts to ensure fresh data
   }) as UseQueryResult<UserWithExtras | null, Error>;
 }
 

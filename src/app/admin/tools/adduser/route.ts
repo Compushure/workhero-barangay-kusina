@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
+/**
+ * DEPRECATED: Legacy API route for adding users
+ * ⚠️ This route is no longer used by the frontend.
+ * The app now uses server actions in /src/actions/manage.ts
+ * TODO: Remove this file after confirming no external dependencies
+ */
+
 export async function GET(req: NextRequest) {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.SUPABASE_URL) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
