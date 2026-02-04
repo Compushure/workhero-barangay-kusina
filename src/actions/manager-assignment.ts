@@ -15,7 +15,7 @@ export async function fetchTaskList(): Promise<ServerActionResponse<Task[]>> {
     // Adjust based on actual table structure
     const { data, error } = await supabase
       .from('KPICategory')
-      .select('id, name, points, is_repeatable, type')
+      .select('id, name, points, xp, is_repeatable, type')
       .order('type', { ascending: true })
       .order('name', { ascending: true });
 
@@ -31,7 +31,7 @@ export async function fetchTaskList(): Promise<ServerActionResponse<Task[]>> {
       type: item.type, // we can add task_type column in schema if we could, or just remove this data column entirely
       isRepeatable: item.is_repeatable,
       points: item.points,
-      xp: item.points,
+      xp: item.xp,
       maxOrders: 1,
     }));
 
@@ -87,10 +87,10 @@ export async function fetchEmployeeList(): Promise<ServerActionResponse<Assigned
 /**
  * Update task points and XP in the KPICategory table
  */
-export async function updateTaskPointsAndXP(
+export async function updateTaskPoints(
   taskId: string,
   points: number,
-  xp: number
+  // xp: number
 ): Promise<ServerActionResponse<void>> {
   try {
     const supabase = await createClient();
@@ -100,8 +100,8 @@ export async function updateTaskPointsAndXP(
       return { error: 'Task ID is required' };
     }
 
-    if (points < 0 || xp < 0) {
-      return { error: 'Points and XP must be non-negative numbers' };
+    if (points < 0) {
+      return { error: 'Points must be non-negative numbers' };
     }
 
     // Update the task in KPICategory table
@@ -115,17 +115,17 @@ export async function updateTaskPointsAndXP(
       .eq('id', taskId);
 
     if (error) {
-      console.error('Error updating task points and XP:', error);
+      console.error('Error updating task points:', error);
       return { error: `Failed to update task: ${error.message}` };
     }
 
     return { error: null, data: undefined };
   } catch (error) {
-    console.error('Error in updateTaskPointsAndXP:', error);
+    console.error('Error in updateTaskPoints:', error);
     if (error instanceof Error) {
       return { error: error.message };
     }
-    return { error: 'An unexpected error occurred while updating task points and XP' };
+    return { error: 'An unexpected error occurred while updating task points' };
   }
 }
 
@@ -145,7 +145,7 @@ export async function addTaskAssignmentAction(
     // First, get the task details from KPICategory
     const { data: taskData, error: taskError } = await supabase
       .from('KPICategory')
-      .select('id, name, type, is_repeatable, points')
+      .select('id, name, type, is_repeatable, points, xp')
       .eq('id', taskId)
       .single();
 
@@ -253,7 +253,7 @@ export async function addTaskAssignmentAction(
           taskDescription: taskData.type || 'General',
           isRepeatable: taskData.is_repeatable,
           points: taskData.points,
-          xp: taskData.points,
+          xp: taskData.xp,
           status: 'assigned',
           dateRange: {
             start: row.created_at,

@@ -60,7 +60,7 @@ function SelectTasksTable({
         // Update the parent tasks state immediately for instant UI reflection
         setTasks((prevTasks) =>
           prevTasks.map((task) =>
-            task.id === taskId ? { ...task, points: newPoints, xp: newPoints } : task
+            task.id === taskId ? { ...task, points: newPoints } : task
           )
         );
       } else {
@@ -84,7 +84,8 @@ function SelectTasksTable({
           <tr className="flex justify-baseline">
             <th className="w-12 py-4"></th>
             <th className="w-75 py-4 text-left pl-4 text-sm font-bold">TASK</th>
-            <th className="w-70 py-4 text-center text-sm font-bold">POINTS & XP</th>
+            <th className="w-35 py-4 text-center text-sm font-bold">FIESTA POINTS</th>
+            <th className="w-35 py-4 text-center text-sm font-bold">XP</th>
             <th className="w-48 py-4 text-center text-sm font-bold">MAX ORDERS</th>
           </tr>
         </thead>
@@ -124,7 +125,7 @@ function SelectTasksTable({
                     toggleTask(task.id);
                   }}
                 >
-                  <td className="w-12 p-4 text-center">
+                  <td className="w-12 p-4 text-center flex items-center">
                     <input
                       type="radio"
                       checked={isSelected}
@@ -142,7 +143,7 @@ function SelectTasksTable({
                     <div className="font-medium text-zinc-800">{task.name}</div>
                     <div className="text-sm text-zinc-500">{task.type}</div>
                   </td>
-                  <td className="w-70 group flex gap-2 items-center justify-center px-8 py-4 text-zinc-800 font-medium text-center">
+                  <td className="w-35 group flex gap-2 items-center justify-center px-8 py-4 text-zinc-800 font-medium text-center">
                     {editingTaskId === task.id ? (
                       <div className="flex items-center gap-2">
                         <button
@@ -161,7 +162,7 @@ function SelectTasksTable({
                           onChange={(e) => setEditingPoints(e.target.value)}
                           onClick={(e) => e.stopPropagation()}
                           className="remove-arrow w-16 text-center border border-gray-300 rounded px-2 py-1"
-                          min="0"
+                          min="1"
                           disabled={isUpdating}
                         />
                         <button
@@ -176,7 +177,7 @@ function SelectTasksTable({
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 pl-5">
+                      <div className="flex items-center gap-2 pl-6">
                         <span className={`${isDisabled ? 'pr-7' : ''}`}>{task.points}</span>
                         {!isDisabled && (
                           <button
@@ -192,10 +193,12 @@ function SelectTasksTable({
                       </div>
                     )}
                   </td>
-                  <td className="w-48 p-4" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-center gap-2">
+                  <td className='w-35 font-medium text-zinc-800 text-center flex items-center justify-center px-8 py-4'>
+                    <span>{task.xp}</span>
+                  </td>
+                  <td className="w-48 p-4 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
                       {task.isRepeatable ? (
-                        <>
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -225,11 +228,10 @@ function SelectTasksTable({
                           >
                             +
                           </button>
-                        </>
+                        </div>
                       ) : (
-                        <span className="text-black">1</span>
+                        <span className="text-zinc-800">1</span>
                       )}
-                    </div>
                   </td>
                 </tr>
               );

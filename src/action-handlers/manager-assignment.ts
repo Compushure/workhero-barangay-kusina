@@ -11,7 +11,7 @@ import {
   fetchTaskList,
   fetchEmployeeList,
   addTaskAssignmentAction,
-  updateTaskPointsAndXP
+  updateTaskPoints
 } from '@/actions/manager-assignment';
 import type { Task, AssignedEmployee, AssignedTask } from '@/types';
 import { toast } from 'sonner';
@@ -60,7 +60,7 @@ export async function handleUpdateTaskPoints(
   taskId: string,
   points: number
 ): Promise<boolean> {
-  const result = await safeAction(() => updateTaskPointsAndXP(taskId, points, points));
+  const result = await safeAction(() => updateTaskPoints(taskId, points));
 
   if (!result.success) {
     toast.error('Failed to update task points: ' + result.error);
