@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import AttendanceIcon from './attendance-widget'; // ✅ import it here
+import AttendanceIcon from './attendance-icon';
 
 export default function CookingSection({ className = '' }: { className?: string }) {
   return (
