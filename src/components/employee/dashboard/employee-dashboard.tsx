@@ -1,30 +1,34 @@
 'use client';
 
 import HeaderHUD from './header-hud';
-import NavSection from './nav-section';
+import NavSection from '../nav-section';
 import CookingSection from './cooking-section';
 import { RankWidget } from './rank-panel';
 import TasksTable from './tasks-table';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function EmployeeDashboardClient() {
   const tasks = [
     {
-      title: "Client-Centered Metrics: Special Client Commendation",
-      progress: "0/5",
-      reward: "10 XP 100 Coins",
-      dueDate: "12/12/25",
+      title: 'Client-Centered Metrics: Special Client Commendation',
+      progress: '0/5',
+      reward: '10 XP 100 Coins',
+      dueDate: '12/12/25',
     },
     {
-      title: "Name of Task Type: Internal Training",
-      progress: "0/5",
-      reward: "10 XP 100 Coins",
-      dueDate: "12/12/25",
+      title: 'Name of Task Type: Internal Training',
+      progress: '0/5',
+      reward: '10 XP 100 Coins',
+      dueDate: '12/12/25',
     },
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-[radial-gradient(circle,#FFFCF5_0%,#EFC18F_40%,#D68B5C_60%,#60203D_100%)]">
+    <div
+      // className="flex flex-col min-h-screen bg-bottom bg-repeat bg-contain"
+      // style={{ backgroundImage: "url('/w.png')" }}
+      className="flex flex-col min-h-screen bg-[radial-gradient(circle,#FFFCF5_0%,#EFC18F_40%,#D68B5C_60%,#60203D_100%)]"
+    >
       {/* Row 1: Header HUD */}
       <header>
         <HeaderHUD />

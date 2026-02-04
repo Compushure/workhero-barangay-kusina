@@ -4,7 +4,7 @@ import { User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useMemo } from 'react';
 import { UserWithExtras } from '@/types';
-import { ProfileModal } from './modals/profile-modal';
+import { ProfileModal } from '../modals/profile-modal';
 
 interface ProfilePicProps {
   user?: UserWithExtras | null;

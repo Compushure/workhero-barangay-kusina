@@ -23,11 +23,11 @@ export default function HeaderHUD() {
       </Card>
 
       {/* Right column: 20%, justify-end */}
-        <Card className="w-[20%] flex items-center justify-end p-4 bg-transparent shadow-none border-none">
-            <CardContent className="flex items-center justify-end">
-            <ProfilePic />
-            </CardContent>
-        </Card>
+      <Card className="w-[20%] flex items-center justify-end p-4 bg-transparent shadow-none border-none">
+        <CardContent className="flex items-center justify-end">
+          <ProfilePic />
+        </CardContent>
+      </Card>
     </div>
   );
 }
