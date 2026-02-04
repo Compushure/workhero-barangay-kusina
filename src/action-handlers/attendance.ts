@@ -5,6 +5,8 @@ import {
   getTodayAttendanceStatusAction,
   timeInAttendanceAction,
   timeOutAttendanceAction,
+  startBreakAction,
+  endBreakAction,
 } from '@/actions/attendance';
 import type { AttendanceConfig, AttendanceStatus } from '@/types';
 
@@ -60,5 +62,38 @@ export async function handleTimeOutAttendance(
   }
 
   toast.success('Timed out successfully');
+  return { error: null, data: result.data?.data };
+}
+
+export async function handleStartBreak(
+  config?: Partial<AttendanceConfig>
+): Promise<{ error: string | null; data?: AttendanceStatus }> {
+  const result = await safeAction(() => startBreakAction(config));
+
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error || 'Failed to start break');
+    return { error: result.error || result.data?.error || 'Failed to start break' };
+  }
+
+  toast.success('Break started successfully');
+  return { error: null, data: result.data?.data };
+}
+
+export async function handleEndBreak(
+  logId?: string,
+  config?: Partial<AttendanceConfig>
+): Promise<{ error: string | null; data?: AttendanceStatus }> {
+  const result = await safeAction(() => endBreakAction(logId, config));
+
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error || 'Failed to end break');
+    return { error: result.error || result.data?.error || 'Failed to end break' };
+  }
+
+  const message = result.data?.data?.isOverBreaktime
+    ? 'Break ended - exceeded recommended duration'
+    : 'Break ended successfully';
+  
+  toast.success(message);
   return { error: null, data: result.data?.data };
 }

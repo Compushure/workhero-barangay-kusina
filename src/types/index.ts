@@ -52,6 +52,7 @@ export interface User {
   sss?: string;
   pagibig?: string;
   createdAt?: Date;
+  profilePictureUrl?: string;
 }
 
 // ============================================

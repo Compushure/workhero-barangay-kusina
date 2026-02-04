@@ -241,6 +241,13 @@ export function SelectTasksDialog({
             >
               Close
             </Button>
+            <Button
+              variant="outline"
+              onClick={handleClose}
+              className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+            >
+              Cancel
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { AddUserInput, EmployeeTypeValue } from '@/types';
 import { addUserSchema } from '@/zod/schemas';
+import { RequiredLabel } from '@/components/admin/required-label';
 import {
   Dialog,
   DialogContent,
@@ -33,6 +34,12 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
   User,
   Mail,
   Lock,
@@ -45,6 +52,7 @@ import {
   BadgeCheck,
   Eye,
   EyeOff,
+  AlertCircle,
 } from 'lucide-react';
 
 type AddUserFormValues = AddUserInput;
@@ -62,7 +70,6 @@ const EMPLOYEE_TYPES = [
 ] as const;
 
 const EMPLOYMENT_STATUS_OPTIONS = [
-  { value: 'not-set', label: 'Not Set' },
   { value: 'probational', label: 'Probationary' },
   { value: 'regular', label: 'Regular' },
 ] as const;
@@ -77,15 +84,16 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
     watch,
     setValue,
     reset,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<AddUserFormValues>({
     resolver: zodResolver(addUserSchema) as any,
+    mode: 'onChange',
     defaultValues: {
       name: '',
       email: '',
       password: '',
       employeeType: 'regular',
-      employmentStatus: '',
+      employmentStatus: 'probational',
       companyId: 'Not implemented yet',
       employeeId: '',
       contactNumber: '',
@@ -124,21 +132,26 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
         <ScrollArea className="flex-1 overflow-y-auto">
           <div className="px-6 py-4">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" id="add-user-form">
-            {/* Basic Information */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-primary">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Collapsible Sections */}
+            <Accordion type="multiple" defaultValue={["basic", "employment", "address", "ids"]} className="space-y-4">
+              {/* Basic Information */}
+              <AccordionItem value="basic" className="border rounded-lg px-4">
+                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+                  Basic Information
+                </AccordionTrigger>
+                <AccordionContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                 {/* Full Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="add-name" className="text-foreground">
-                    Full Name *
-                  </Label>
+                  <RequiredLabel htmlFor="add-name" filled={!!watch('name')?.trim()}>Full Name</RequiredLabel>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                     <Input
                       id="add-name"
                       placeholder="At least 2 characters"
-                      className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
+                      className={`pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 ${
+                        !watch('name')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
+                      }`}
                       disabled={isPending}
                       {...register('name')}
                     />
@@ -148,16 +161,16 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="add-email" className="text-foreground">
-                    Email *
-                  </Label>
+                  <RequiredLabel htmlFor="add-email" filled={!!watch('email')?.trim()}>Email Address</RequiredLabel>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                     <Input
                       id="add-email"
                       type="email"
                       placeholder="Valid email address"
-                      className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
+                      className={`pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 ${
+                        !watch('email')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
+                      }`}
                       disabled={isPending}
                       {...register('email')}
                     />
@@ -209,16 +222,16 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 {/* Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="add-password" className="text-foreground">
-                    Password *
-                  </Label>
+                  <RequiredLabel htmlFor="add-password" filled={!!watch('password')?.trim()}>Password</RequiredLabel>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                     <Input
                       id="add-password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="At least 6 characters"
-                      className="pl-10 pr-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
+                      className={`pl-10 pr-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 ${
+                        !watch('password')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
+                      }`}
                       disabled={isPending}
                       {...register('password')}
                     />
@@ -242,15 +255,17 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 {/* Contact Number */}
                 <div className="space-y-2">
-                  <Label htmlFor="add-contact" className="text-foreground">
-                    Contact Number (Optional)
-                  </Label>
+                  <RequiredLabel htmlFor="add-contact" filled={!!watch('contactNumber')?.trim()}>
+                    Contact Number
+                  </RequiredLabel>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                     <Input
                       id="add-contact"
-                      placeholder="11 digits starting with 09"
-                      className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
+                      placeholder="09XX-XXX-XXXX format"
+                      className={`pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 ${
+                        !watch('contactNumber')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
+                      }`}
                       disabled={isPending}
                       {...register('contactNumber')}
                     />
@@ -260,17 +275,19 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                   )}
                 </div>
               </div>
-            </div>
+                </AccordionContent>
+              </AccordionItem>
 
             {/* Employment Details */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-primary">Employment Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AccordionItem value="employment" className="border rounded-lg px-4">
+                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+                  Employment Details
+                </AccordionTrigger>
+                <AccordionContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                 {/* Employee Type */}
                 <div className="space-y-2">
-                  <Label htmlFor="add-type" className="text-foreground">
-                    Employee Type *
-                  </Label>
+                  <RequiredLabel htmlFor="add-type" filled={!!watch('employeeType')}>Employee Type</RequiredLabel>
                   <Select
                     value={watch('employeeType') || 'regular'}
                     onValueChange={(value: EmployeeTypeValue) => setValue('employeeType', value)}
@@ -300,13 +317,11 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 {/* Employment Status */}
                 <div className="space-y-2">
-                  <Label htmlFor="add-status" className="text-foreground">
-                    Employment Status *
-                  </Label>
+                  <RequiredLabel htmlFor="add-status" filled={!!watch('employmentStatus')}>Employment Status</RequiredLabel>
                   <Select
-                    value={watch('employmentStatus') || 'not-set'}
+                    value={watch('employmentStatus') || 'probational'}
                     onValueChange={(value) =>
-                      setValue('employmentStatus', value === 'not-set' ? '' : (value as any))
+                      setValue('employmentStatus', value as 'probational' | 'regular', { shouldValidate: true })
                     }
                     disabled={isPending}
                   >
@@ -332,19 +347,25 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                   )}
                 </div>
               </div>
-            </div>
+                </AccordionContent>
+              </AccordionItem>
 
             {/* Address */}
-            <div className="space-y-2">
-              <Label htmlFor="add-address" className="text-foreground">
-                Home Address * (10-250 characters)
-              </Label>
+              <AccordionItem value="address" className="border rounded-lg px-4">
+                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+                  Home Address
+                </AccordionTrigger>
+                <AccordionContent>
+            <div className="space-y-2 pt-4">
+              <RequiredLabel htmlFor="add-address" filled={!!watch('address')?.trim()}>Address (10-250 characters)</RequiredLabel>
               <div className="relative">
                 <MapPin className="absolute left-3 top-3 h-4 w-4 text-primary" />
                 <Textarea
                   id="add-address"
                   placeholder="Complete address: Street, Barangay, City, Province (minimum 50 characters)"
-                  className="pl-10 min-h-20 resize-none border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
+                  className={`pl-10 min-h-20 resize-none border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 ${
+                    !watch('address')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
+                  }`}
                   disabled={isPending}
                   {...register('address')}
                 />
@@ -353,11 +374,16 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                 <p className="text-sm text-destructive">{errors.address.message}</p>
               )}
             </div>
+                </AccordionContent>
+              </AccordionItem>
 
             {/* Government IDs */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-primary">Philippine Government IDs</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <AccordionItem value="ids" className="border rounded-lg px-4">
+                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+                  Philippine Government IDs (Optional)
+                </AccordionTrigger>
+                <AccordionContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                 {/* TIN */}
                 <div className="space-y-2">
                   <Label htmlFor="add-tin" className="text-foreground">
@@ -370,6 +396,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       placeholder="9 digits"
                       className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
                       disabled={isPending}
+                      onInput={(e) => {
+                        const target = e.target as HTMLInputElement;
+                        target.value = target.value.replace(/\D/g, '');
+                      }}
                       {...register('tin')}
                     />
                   </div>
@@ -388,6 +418,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       placeholder="10 digits"
                       className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
                       disabled={isPending}
+                      onInput={(e) => {
+                        const target = e.target as HTMLInputElement;
+                        target.value = target.value.replace(/\D/g, '');
+                      }}
                       {...register('sss')}
                     />
                   </div>
@@ -406,6 +440,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       placeholder="12 digits"
                       className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
                       disabled={isPending}
+                      onInput={(e) => {
+                        const target = e.target as HTMLInputElement;
+                        target.value = target.value.replace(/\D/g, '');
+                      }}
                       {...register('pagibig')}
                     />
                   </div>
@@ -414,7 +452,9 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                   )}
                 </div>
               </div>
-            </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
             </form>
           </div>
         </ScrollArea>
@@ -425,8 +465,8 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
             <Button
               type="submit"
               form="add-user-form"
-              disabled={isPending}
-              className="flex-1 bg-primary cursor-pointer text-primary-foreground hover:bg-primary/90"
+              disabled={isPending || !isValid}
+              className="flex-1 bg-primary cursor-pointer text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending ? 'Adding...' : 'Add User'}
             </Button>

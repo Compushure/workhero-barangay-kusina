@@ -18,16 +18,9 @@ export function GovernmentIDs({ profile }: GovernmentIDsProps) {
     setShowUnmaskedIds(prev => !prev);
   }, []);
 
-  if (!profile.tin && !profile.sss && !profile.pagibig) {
-    return null;
-  }
-
   return (
-    <div className="pt-6 border-t border-border">
+    <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-[#730202] uppercase tracking-wide">
-          Government IDs
-        </h3>
         <Button
           variant="ghost"
           size="sm"
@@ -38,32 +31,37 @@ export function GovernmentIDs({ profile }: GovernmentIDsProps) {
           <span className="ml-2 text-xs">{showUnmaskedIds ? 'Hide' : 'Show'}</span>
         </Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {profile.tin && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-muted-foreground">TIN</Label>
-            <p className="text-base font-semibold text-[#730202] font-mono p-2 bg-white rounded-md break-all">
-              {showUnmaskedIds ? profile.tin : maskSensitiveId(profile.tin)}
-            </p>
-          </div>
-        )}
-        {profile.sss && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-muted-foreground">SSS</Label>
-            <p className="text-base font-semibold text-[#730202] font-mono p-2 bg-white rounded-md break-all">
-              {showUnmaskedIds ? profile.sss : maskSensitiveId(profile.sss)}
-            </p>
-          </div>
-        )}
-        {profile.pagibig && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-muted-foreground">Pag-IBIG</Label>
-            <p className="text-base font-semibold text-[#730202] font-mono p-2 bg-white rounded-md break-all">
-              {showUnmaskedIds ? profile.pagibig : maskSensitiveId(profile.pagibig)}
-            </p>
-          </div>
-        )}
-      </div>
+
+      {!profile.tin && !profile.sss && !profile.pagibig ? (
+        <p className="text-sm text-muted-foreground italic">No government IDs on file</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {profile.tin && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">TIN</Label>
+              <p className="text-base font-semibold text-[#730202] font-mono p-2 bg-white rounded-md break-all">
+                {showUnmaskedIds ? profile.tin : maskSensitiveId(profile.tin)}
+              </p>
+            </div>
+          )}
+          {profile.sss && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">SSS</Label>
+              <p className="text-base font-semibold text-[#730202] font-mono p-2 bg-white rounded-md break-all">
+                {showUnmaskedIds ? profile.sss : maskSensitiveId(profile.sss)}
+              </p>
+            </div>
+          )}
+          {profile.pagibig && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">Pag-IBIG</Label>
+              <p className="text-base font-semibold text-[#730202] font-mono p-2 bg-white rounded-md break-all">
+                {showUnmaskedIds ? profile.pagibig : maskSensitiveId(profile.pagibig)}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

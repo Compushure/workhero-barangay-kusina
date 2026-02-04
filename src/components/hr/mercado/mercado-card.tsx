@@ -125,6 +125,14 @@ export const MercadoCard = memo(function MercadoCard({
                 Hidden
               </Badge>
             )}
+            {item.quantity !== undefined && item.quantity === 0 && (
+              <Badge
+                variant="destructive"
+                className="bg-red-600 text-white hover:bg-red-600 text-xs"
+              >
+                Out of Stock
+              </Badge>
+            )}
           </div>
 
           <div className="flex items-center gap-4 mt-2">
@@ -132,7 +140,11 @@ export const MercadoCard = memo(function MercadoCard({
               {formattedPrice} pts
             </p>
             {formattedQuantity !== undefined && (
-              <p className="text-[#730202] text-sm opacity-70">| Available: {formattedQuantity}</p>
+              <p
+                className={`text-[#730202] text-sm ${item.quantity === 0 ? 'opacity-50 line-through' : 'opacity-70'}`}
+              >
+                | Available: {formattedQuantity}
+              </p>
             )}
           </div>
           {item.createdAt && (
@@ -143,9 +155,9 @@ export const MercadoCard = memo(function MercadoCard({
         <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="h-8 w-8 bg-white shadow-md hover:bg-[#690003] hover:text-white transition-all duration-200"
               >
                 <Pencil className="h-5 w-5" />
