@@ -41,7 +41,7 @@ const DeleteUserModal = lazy(() =>
 );
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import { UserPlus, LogOut, Loader2, Search, SlidersHorizontal } from 'lucide-react';
-import { handleSignOut } from '@/action-handlers/auth';
+import { handleSignOut } from '@/action-handlers/shared/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 

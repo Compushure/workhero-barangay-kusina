@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRedemptionRequestsAction, getMyRedemptionRequestsAction } from '@/actions/hr';
+import { getRedemptionRequestsAction } from '@/actions/hr/redemptions';
+import { getMyRedemptionRequestsAction } from '@/actions/employee/redemptions';
 import { RedemptionRequest } from '@/types';
 
 /**

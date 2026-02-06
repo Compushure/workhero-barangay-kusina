@@ -1,13 +1,15 @@
 import {
   handleAcceptRedemptionRequestAction,
   handleDeclineRedemptionRequestAction,
+} from '@/action-handlers/hr/redemptions';
+import {
   handleAddRewardAction,
   handleEditRewardAction,
   handleDeleteRewardAction,
   handleHideRewardAction,
-  handleCreateRedemptionRequestAction,
   handleUploadRewardPicture,
-} from '@/action-handlers/hr';
+} from '@/action-handlers/hr/rewards';
+import { handleCreateRedemptionRequestAction } from '@/action-handlers/employee/redemptions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AddRewardInput, EditRewardInput, Reward } from '@/types';
 import { rewardKeys } from '../queries/rewardQueries';

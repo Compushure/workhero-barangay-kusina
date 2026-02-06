@@ -1,4 +1,4 @@
-import { protectEmployeeRoute } from '@/actions/auth';
+import { protectEmployeeRoute } from '@/actions/shared/auth';
 import { Sidebar } from '@/components/employee/sidebar';
 
 export default async function EmployeeLayout({ children }: { children: React.ReactNode }) {

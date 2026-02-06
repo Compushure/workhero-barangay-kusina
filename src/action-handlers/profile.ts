@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { safeAction } from '@/lib/utils/safe-action';
-import { fetchUserProfileById, updateOwnProfile, uploadOwnProfilePicture, deleteOwnProfilePicture } from '@/actions/profile';
+import { fetchUserProfileById, updateOwnProfile, uploadOwnProfilePicture, deleteOwnProfilePicture } from '@/actions/shared/profile';
 import type { UserWithExtras } from '@/types';
 
 /**

@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { protectManagerRoute } from '@/actions/auth';
+import { protectManagerRoute } from '@/actions/shared/auth';
 import { BarChart3, Users, Target } from 'lucide-react';
 
 function LoadingFallback() {

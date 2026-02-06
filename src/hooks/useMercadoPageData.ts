@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useGetAvailableRewards } from '@/hooks/tanstack/queries/rewardQueries';
 import { useGetMyRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
-import { getEmployeePoints } from '@/actions/employees/get-points';
+import { getEmployeePoints } from '@/actions/employee/stats';
 
 export function useMercadoPageData() {
   // Use employee-specific query that filters by isActive AND availableDate

@@ -1,7 +1,7 @@
 'use client';
 
 import { safeAction } from '@/lib/utils/safe-action';
-import { fetchInSessionUserInfo } from '@/actions/sidebar';
+import { fetchInSessionUserInfo } from '@/actions/shared/sidebar';
 import { UserWithExtras } from '@/types';
 import { toast } from 'sonner';
 

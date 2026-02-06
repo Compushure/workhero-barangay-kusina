@@ -11,7 +11,7 @@ import {
   handleClearAllTasks,
   handleClearAllEmployeeTasks,
   handleUpdateTaskAssignment,
-} from '@/action-handlers/manager-current-assigned-task';
+} from '@/action-handlers/manager/assigned-tasks';
 import { managerAssignmentKeys } from '../queries/managerAssignmentQueries';
 
 /**

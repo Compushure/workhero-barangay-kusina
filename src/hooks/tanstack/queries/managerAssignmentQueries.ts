@@ -9,7 +9,7 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import {
   handleFetchCurrentAssignedTasksPaginated,
   handleFetchCurrentAssignedEmployeesPaginated,
-} from '@/action-handlers/manager-current-assigned-task';
+} from '@/action-handlers/manager/assigned-tasks';
 import type { AssignedTask } from '@/types';
 
 /**
