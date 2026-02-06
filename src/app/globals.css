@@ -4,11 +4,11 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #fff8f5; /* Soft warm beige */
-  --foreground: #5a2a2a; /* Deep reddish brown */
-  --card: #ffffff;
+  --background: #FBF4E8; /* Soft warm beige */
+  --foreground: #690003; /* Deep reddish brown */
+  --card: #fafafa;
   --card-foreground: #514937;
-  --popover: #ffffff;
+  --popover: #fafafa;
   --popover-foreground: #514937;
 
   /* Primary: Dark olive brown */

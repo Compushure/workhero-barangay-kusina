@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Coins, Pencil, RefreshCw, RefreshCwOff, Soup, Trash2 } from 'lucide-react';
 import type { TaskCategory } from '@/types/manager/task-editor';
 import {
   AlertDialog,
@@ -23,10 +23,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import TaskTableSkeleton from './task-table-skeleton';
 
 interface TaskCategoryTableProps {
   tasks: TaskCategory[];
   isLoading: boolean;
+  isError: boolean;
   onEdit: (task: TaskCategory) => void;
   onDelete: (taskId: string) => void;
   onToggleRepeatable: (taskId: string, isRepeatable: boolean) => void;
@@ -35,6 +37,7 @@ interface TaskCategoryTableProps {
 export default function TaskCategoryTable({
   tasks,
   isLoading,
+  isError,
   onEdit,
   onDelete,
   onToggleRepeatable,
@@ -55,114 +58,72 @@ export default function TaskCategoryTable({
     setTaskToDelete(null);
   };
 
-  if (isLoading) {
-    return (
-      <div className="bg-white rounded-2xl border-2 border-gray-300 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-[#690003] hover:bg-[#690003]">
-              <TableHead className="min-w-75 py-4 pl-5 text-left text-sm font-bold text-white">
-                TASK
-              </TableHead>
-              <TableHead className="w-32 text-center text-sm font-bold text-white">
-                POINTS
-              </TableHead>
-              <TableHead className="w-32 text-center text-sm font-bold text-white">XP</TableHead>
-              <TableHead className="w-40 text-center text-sm font-bold text-white">
-                REPEATABLE
-              </TableHead>
-              <TableHead className="w-32 text-center text-sm font-bold text-white">
-                ACTIONS
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <TableRow key={i}>
-                <TableCell>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                    <div className="h-3 bg-gray-100 rounded animate-pulse w-1/2"></div>
-                    <div className="h-3 bg-gray-100 rounded animate-pulse w-full"></div>
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse mx-auto w-12"></div>
-                </TableCell>
-                <TableCell className="text-center">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse mx-auto w-12"></div>
-                </TableCell>
-                <TableCell className="text-center">
-                  <div className="h-6 bg-gray-200 rounded-full animate-pulse mx-auto w-10"></div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex justify-center gap-2">
-                    <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    );
-  }
-
-  if (tasks.length === 0) {
-    return (
-      <div className="bg-white rounded-2xl border-2 border-gray-300 p-12 text-center">
-        <p className="text-gray-500 text-lg">No task categories found</p>
-        <p className="text-gray-400 text-sm mt-2">Click "Add New Category" to create one</p>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="bg-white rounded-2xl border-2 border-gray-300 overflow-hidden">
+      <div className="bg-[#FBF4E8] rounded-2xl border-2 border-gray-300 overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-[#690003] hover:bg-[#690003]">
-              <TableHead className="min-w-75 py-4 text-left text-sm font-bold text-white">
+              <TableHead className="min-w-64 pl-6 py-4 text-left text-sm font-bold text-card">
                 TASK
               </TableHead>
-              <TableHead className="w-32 text-center text-sm font-bold text-white">
+              <TableHead className="min-w-16 text-center text-sm font-bold text-card">
                 POINTS
               </TableHead>
-              <TableHead className="w-32 text-center text-sm font-bold text-white">XP</TableHead>
-              <TableHead className="w-40 text-center text-sm font-bold text-white">
+              <TableHead className="min-w-16 text-center text-sm font-bold text-card">
+                XP
+              </TableHead>
+              <TableHead className="min-w-20 text-center text-sm font-bold text-card">
                 REPEATABLE
               </TableHead>
-              <TableHead className="w-32 text-center text-sm font-bold text-white">
+              <TableHead className="min-w-32 text-center text-sm font-bold text-card">
                 ACTIONS
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tasks.map((task) => (
+            { isLoading ? (
+              <TaskTableSkeleton/>
+            ) : (
+            <>
+              {tasks.map((task) => (
               <TableRow key={task.id} className="hover:bg-gray-50 transition-colors">
-                <TableCell className="py-4">
-                  <div className="space-y-1">
-                    <div className="font-semibold text-zinc-800">{task.name}</div>
-                    <div className="text-sm text-zinc-500 font-medium">{task.type}</div>
-                    <div className="text-sm text-zinc-600">{task.description}</div>
+                <TableCell className="min-w-64 pl-6 py-4 align-middle">
+                  <div>
+                    <div className="font-semibold text-base text-red-950">{task.name}</div>
+                    <div className="text-sm text-amber-900">{task.description}</div>
+                    <div className="text-sm text-red-900 font-medium px-2 rounded-full bg-[#fdeac8] w-fit mt-2">{task.type}</div>
                   </div>
                 </TableCell>
-                <TableCell className="text-center font-medium text-zinc-800">
-                  {task.points}
-                </TableCell>
-                <TableCell className="text-center font-medium text-zinc-800">{task.xp}</TableCell>
-                <TableCell>
-                  <div className="flex justify-center">
-                    <Switch
-                      checked={task.isRepeatable}
-                      onCheckedChange={(checked) => onToggleRepeatable(task.id, checked)}
-                    />
+                <TableCell className="min-w-16 text-base text-center align-middle font-medium text-red-950">
+                  <div className="flex items-center justify-center gap-1">
+                    <Coins strokeWidth={1.75} className="size-6" />
+                    {task.points}
                   </div>
                 </TableCell>
-                <TableCell>
-                  <div className="flex justify-center gap-2">
+                <TableCell className="min-w-16 text-base text-center align-middle font-medium text-red-950">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="inline-block italic text-base leading-none">XP</span>
+                    {task.xp}
+                  </div>
+                </TableCell>
+                <TableCell className='min-w-20 text-center align-middle text-base'>
+                  <div className="flex justify-center items-center">
+                    {task.isRepeatable ? (
+                      <div className='flex items-center gap-1 text-red-950 font-medium'>
+                        <RefreshCw size={18}/>
+                        <span>Yes</span>
+                      </div>
+                    ) : (
+                      <div className='flex items-center gap-1.5 text-zinc-500'>
+                        <RefreshCwOff size={18}/>
+                        <span>No</span>
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className='min-w-32 text-center align-middle'>
+                  <div className="flex justify-center items-center gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -170,7 +131,7 @@ export default function TaskCategoryTable({
                       className="hover:bg-[#690003]/10 hover:text-[#690003] transition-colors"
                       title="Edit task"
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil className="size-5" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -179,19 +140,37 @@ export default function TaskCategoryTable({
                       className="hover:bg-red-50 hover:text-red-600 transition-colors"
                       title="Delete task"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="size-5" />
                     </Button>
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+              ))}
+            </>
+            )}
           </TableBody>
         </Table>
+
+        { isError && (
+          <div className="bg-background p-8 text-center">
+            <div className='text-5xl mb-4'>🙊</div>
+            <p className="text-zinc-500 text-xl">Woops! Kitchen Issue</p>
+            <p className="text-zinc-400 text-sm mt-2">Something wrong happened. Try again</p>
+          </div>
+        )}
+        
+        { !isLoading && tasks.length === 0 && (
+          <div className="bg-background p-8 text-center">
+            <div className='text-5xl mb-4'>🥣</div>
+            <p className="text-zinc-500 text-xl">No task categories found</p>
+            <p className="text-zinc-400 text-sm mt-2">Click "Add New Category" to create one</p>
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-white">
+        <AlertDialogContent className="bg-card">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Task Category?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -203,7 +182,7 @@ export default function TaskCategoryTable({
             <AlertDialogCancel onClick={() => setTaskToDelete(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-foreground hover:bg-red-700 text-card"
             >
               Delete
             </AlertDialogAction>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Search, ChevronDown } from 'lucide-react';
+import { Plus, Search, ArrowUpDown, ChefHat } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -45,7 +45,7 @@ export default function TaskEditorPage() {
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
   // Fetch tasks with debounced search and sort
-  const { data: tasks = [], isLoading } = useGetTaskCategories({
+  const { data: tasks = [], isLoading, isError } = useGetTaskCategories({
     search: debouncedSearchTerm,
     sort: sortOption,
   });
@@ -55,6 +55,7 @@ export default function TaskEditorPage() {
     sort: sortOption, // Keep sort for consistency but no search
   });
   const { data: existingTypes = [] } = useGetTaskTypes();
+
 
   // Mutations
   const addMutation = useAddTaskCategory();
@@ -138,16 +139,16 @@ export default function TaskEditorPage() {
         </div>
 
         {/* Search, Sort, and Add Button */}
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-4 items-center justify-end">
           {/* Search Input */}
-          <div className="relative flex flex-1">
+          <div className="relative flex">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search tasks..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 rounded-xl text-sm bg-white shadow-sm border border-gray-200 focus:outline-none focus:border-[#690003] transition-colors"
+              className="pl-10 pr-4 py-2 rounded-xl text-sm bg-white shadow-sm/50 border border-gray-200 focus:outline-none focus:border-[#690003] transition-colors"
             />
           </div>
 
@@ -157,10 +158,10 @@ export default function TaskEditorPage() {
               <Button
                 variant="default"
                 size="default"
-                className="bg-white shadow-sm hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 w-56 py-2 justify-between border border-gray-200"
+                className="bg-[#690003] hover:brightness-100 w-35 cursor-pointer rounded-full text-white shadow-sm/25 flex justify-between transition-all duration-500 ease-in-out"
               >
                 <span className="truncate">{currentSortLabel}</span>
-                <ChevronDown size={18} />
+                <ArrowUpDown size={18} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -181,16 +182,18 @@ export default function TaskEditorPage() {
           {/* Add New Category Button */}
           <Button
             onClick={handleOpenAddDialog}
-            className="h-11 px-6 rounded-xl bg-[#690003] hover:bg-[#690003]/90 text-zinc-50 font-semibold text-sm cursor-pointer transition-all duration-500 ease-in-out shrink-0"
+            className="px-6 py-2 rounded-full bg-[#690003] hover:brightness-100 text-zinc-50 font-semibold text-sm shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out shrink-0"
           >
+            <ChefHat size={18} />
             <span>Add New Category</span>
-            <Plus className="size-4" />
+            <Plus size={18} className='ml-4'/>
           </Button>
         </div>
 
         <TaskCategoryTable
           tasks={tasks}
           isLoading={isLoading}
+          isError={isError}
           onEdit={handleOpenEditDialog}
           onDelete={handleDelete}
           onToggleRepeatable={handleToggleRepeatable}

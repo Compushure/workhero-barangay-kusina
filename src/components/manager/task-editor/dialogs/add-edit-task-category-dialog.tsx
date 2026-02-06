@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Check, X } from 'lucide-react';
+import { Plus, Check, X, Soup } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import type { TaskCategory } from '@/types/manager/task-editor';
 import type { AddTaskInput } from '@/zod/schemas/task';
@@ -167,7 +167,7 @@ export default function AddEditTaskCategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
-      <DialogContent className="bg-[#f5e5dc] border-none max-w-[95vw] md:max-w-135 lg:max-w-150 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-background border-none max-w-[95vw] md:max-w-135 lg:max-w-150 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-[#5a2a2a] text-base sm:text-lg font-semibold">
@@ -185,26 +185,75 @@ export default function AddEditTaskCategoryDialog({
         )}
 
         <div className="space-y-4 mt-4">
-          {/* Task Name */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-[#5a2a2a]">
-              Task Name <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              placeholder="Enter task name"
-              value={taskName}
-              onChange={(e) => setTaskName(e.target.value)}
-              maxLength={255}
-              className={`bg-white border-[#e0cfcf] focus:border-[#690003] ${
-                taskName && !isTaskNameValid ? 'border-red-500' : ''
-              } ${isDuplicateName ? 'border-red-500' : ''}`}
-            />
-            <div className="flex justify-between text-xs">
-              <span className="text-[#7a3d3d]/70">
-                {taskName && !isTaskNameValid && 'Must be 2-255 characters'}
-                {isDuplicateName && 'Task name already exists'}
-              </span>
-              <span className="text-[#7a3d3d]/70">{taskName.length}/255</span>
+          <div className='flex gap-8'>
+            {/* Task Name */}
+            <div className="space-y-2 flex-1/2">
+              <Label className="text-sm font-medium text-[#5a2a2a]">
+                Task Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                placeholder="Enter task name"
+                value={taskName}
+                onChange={(e) => setTaskName(e.target.value)}
+                maxLength={255}
+                className={`bg-white border-[#e0cfcf] focus:border-[#690003] ${
+                  taskName && !isTaskNameValid ? 'border-red-500' : ''
+                } ${isDuplicateName ? 'border-red-500' : ''}`}
+              />
+              <div className="flex justify-between text-xs">
+                <span className="text-[#7a3d3d]/70">
+                  {taskName && !isTaskNameValid && 'Must be 2-255 characters'}
+                  {isDuplicateName && 'Task name already exists'}
+                </span>
+                <span className="text-[#7a3d3d]/70">{taskName.length}/255</span>
+              </div>
+            </div>
+
+            {/* Task Type with Dropdown */}
+            <div className="space-y-2 relative flex-1/2">
+              <Label className="text-sm font-medium text-[#5a2a2a]">
+                Type <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                placeholder="Enter or select task type"
+                value={taskType}
+                onChange={(e) => {
+                  setTaskType(e.target.value);
+                  setShowTypeDropdown(true);
+                }}
+                onFocus={() => setShowTypeDropdown(true)}
+                onBlur={() => {
+                  // Delay to allow click on dropdown item
+                  setTimeout(() => setShowTypeDropdown(false), 200);
+                }}
+                maxLength={255}
+                className={`bg-white border-[#e0cfcf] focus:border-[#690003] ${
+                  taskType && !isTypeValid ? 'border-red-500' : ''
+                }`}
+              />
+
+              {/* Dropdown for existing types */}
+              {showTypeDropdown && filteredTypes.length > 0 && taskType.trim() !== '' && (
+                <div className="absolute z-10 w-full bg-white border border-[#e0cfcf] rounded-lg shadow-lg max-h-40 overflow-y-auto mt-1">
+                  {filteredTypes.map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => handleTypeSelect(type)}
+                      className="w-full text-left px-4 py-2 hover:bg-[#fbeaea] transition-colors text-sm text-[#5a2a2a]"
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex justify-between text-xs">
+                <span className="text-[#7a3d3d]/70">
+                  {taskType && !isTypeValid && 'Must be 2-255 characters'}
+                </span>
+                <span className="text-[#7a3d3d]/70">{taskType.length}/255</span>
+              </div>
             </div>
           </div>
 
@@ -230,140 +279,98 @@ export default function AddEditTaskCategoryDialog({
             </div>
           </div>
 
-          {/* Task Type with Dropdown */}
-          <div className="space-y-2 relative">
-            <Label className="text-sm font-medium text-[#5a2a2a]">
-              Type <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              placeholder="Enter or select task type"
-              value={taskType}
-              onChange={(e) => {
-                setTaskType(e.target.value);
-                setShowTypeDropdown(true);
-              }}
-              onFocus={() => setShowTypeDropdown(true)}
-              onBlur={() => {
-                // Delay to allow click on dropdown item
-                setTimeout(() => setShowTypeDropdown(false), 200);
-              }}
-              maxLength={255}
-              className={`bg-white border-[#e0cfcf] focus:border-[#690003] ${
-                taskType && !isTypeValid ? 'border-red-500' : ''
-              }`}
-            />
 
-            {/* Dropdown for existing types */}
-            {showTypeDropdown && filteredTypes.length > 0 && taskType.trim() !== '' && (
-              <div className="absolute z-10 w-full bg-white border border-[#e0cfcf] rounded-lg shadow-lg max-h-40 overflow-y-auto mt-1">
-                {filteredTypes.map((type) => (
+          <section className='flex gap-8'>
+            {/* Points and XP Row */}
+            <div className="grid grid-cols-1 gap-4 flex-1/2">
+              {/* Points */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-[#5a2a2a]">
+                  Fiesta Points <span className="text-red-500">*</span>
+                </Label>
+                <div className="flex items-center gap-2">
                   <button
-                    key={type}
                     type="button"
-                    onClick={() => handleTypeSelect(type)}
-                    className="w-full text-left px-4 py-2 hover:bg-[#fbeaea] transition-colors text-sm text-[#5a2a2a]"
+                    onClick={() => setPoints(Math.max(1, points - 1))}
+                    disabled={points <= 1 || isLoading}
+                    className="bg-[#690003] text-white size-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
-                    {type}
+                    −
                   </button>
-                ))}
+                  <Input
+                    type="number"
+                    value={points}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 1;
+                      setPoints(Math.min(10000, Math.max(1, val)));
+                    }}
+                    min={1}
+                    max={10000}
+                    className="text-center bg-white border-[#e0cfcf] focus:border-[#690003] remove-arrow"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPoints(Math.min(10000, points + 1))}
+                    disabled={points >= 10000 || isLoading}
+                    className="bg-[#690003] text-white size-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  >
+                    +
+                  </button>
+                </div>
+                {!isPointsValid && (
+                  <p className="text-xs text-red-500">Must be between 1 and 10,000</p>
+                )}
               </div>
-            )}
 
-            <div className="flex justify-between text-xs">
-              <span className="text-[#7a3d3d]/70">
-                {taskType && !isTypeValid && 'Must be 2-255 characters'}
-              </span>
-              <span className="text-[#7a3d3d]/70">{taskType.length}/255</span>
-            </div>
-          </div>
-
-          {/* Points and XP Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Points */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#5a2a2a]">
-                Fiesta Points <span className="text-red-500">*</span>
-              </Label>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPoints(Math.max(1, points - 1))}
-                  disabled={points <= 1 || isLoading}
-                  className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                >
-                  −
-                </button>
-                <Input
-                  type="number"
-                  value={points}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value) || 1;
-                    setPoints(Math.min(10000, Math.max(1, val)));
-                  }}
-                  min={1}
-                  max={10000}
-                  className="text-center bg-white border-[#e0cfcf] focus:border-[#690003] remove-arrow"
-                />
-                <button
-                  type="button"
-                  onClick={() => setPoints(Math.min(10000, points + 1))}
-                  disabled={points >= 10000 || isLoading}
-                  className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                >
-                  +
-                </button>
+              {/* XP */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-[#5a2a2a]">
+                  XP <span className="text-red-500">*</span>
+                </Label>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setXp(Math.max(1, xp - 1))}
+                    disabled={xp <= 1 || isLoading}
+                    className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  >
+                    −
+                  </button>
+                  <Input
+                    type="number"
+                    value={xp}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 1;
+                      setXp(Math.min(5000, Math.max(1, val)));
+                    }}
+                    min={1}
+                    max={5000}
+                    className="text-center bg-white border-[#e0cfcf] focus:border-[#690003] remove-arrow"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setXp(Math.min(5000, xp + 1))}
+                    disabled={xp >= 5000 || isLoading}
+                    className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  >
+                    +
+                  </button>
+                </div>
+                {!isXpValid && <p className="text-xs text-red-500">Must be between 1 and 5,000</p>}
               </div>
-              {!isPointsValid && (
-                <p className="text-xs text-red-500">Must be between 1 and 10,000</p>
-              )}
             </div>
 
-            {/* XP */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#5a2a2a]">
-                XP <span className="text-red-500">*</span>
-              </Label>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setXp(Math.max(1, xp - 1))}
-                  disabled={xp <= 1 || isLoading}
-                  className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                >
-                  −
-                </button>
-                <Input
-                  type="number"
-                  value={xp}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value) || 1;
-                    setXp(Math.min(5000, Math.max(1, val)));
-                  }}
-                  min={1}
-                  max={5000}
-                  className="text-center bg-white border-[#e0cfcf] focus:border-[#690003] remove-arrow"
-                />
-                <button
-                  type="button"
-                  onClick={() => setXp(Math.min(5000, xp + 1))}
-                  disabled={xp >= 5000 || isLoading}
-                  className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                >
-                  +
-                </button>
+            {/* Is Repeatable Toggle */}
+            <div className="flex flex-col flex-1/2 items-center justify-between p-4 bg-white rounded-lg border border-[#e0cfcf]">
+              <div className="space-y-1">
+                <Label className="text-base font-medium text-[#5a2a2a]">Repeatable Task</Label>
+                <p className="text-sm text-[#7a3d3d]/70">Can this task be assigned with multiple orders?</p>
               </div>
-              {!isXpValid && <p className="text-xs text-red-500">Must be between 1 and 5,000</p>}
+              <Switch checked={isRepeatable} onCheckedChange={setIsRepeatable} disabled={isLoading} className='scale-150'>
+              </Switch>
+                    
             </div>
-          </div>
-
-          {/* Is Repeatable Toggle */}
-          <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-[#e0cfcf]">
-            <div className="space-y-1">
-              <Label className="text-sm font-medium text-[#5a2a2a]">Repeatable Task</Label>
-              <p className="text-xs text-[#7a3d3d]/70">Can this task be assigned with multiple orders?</p>
-            </div>
-            <Switch checked={isRepeatable} onCheckedChange={setIsRepeatable} disabled={isLoading} />
-          </div>
+          </section>
         </div>
 
         {/* Action Buttons */}
