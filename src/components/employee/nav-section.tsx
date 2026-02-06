@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
+import { useState } from 'react';
 
 export default function NavSection() {
-  const [active, setActive] = useState('dashboard');
-  const [hovered, setHovered] = useState<string | null>(null);
+  const pathname = usePathname();
   const router = useRouter();
+  const [hovered, setHovered] = useState<string | null>(null);
 
   const getIconClasses = (name: string) => {
-    const isActive = active === name;
+    const isActive = pathname.includes(name);
     const isHovered = hovered === name;
 
     if (isActive && !hovered) {
@@ -22,8 +22,7 @@ export default function NavSection() {
     return 'w-25 h-25'; // compact size
   };
 
-  const handleClick = (name: string, href: string) => {
-    setActive(name);
+  const handleClick = (href: string) => {
     router.push(href);
   };
 
@@ -36,7 +35,7 @@ export default function NavSection() {
           src="/kitchen.png"
           alt="Kitchen"
           className={`${getIconClasses('dashboard')} pixelated cursor-pointer transition-all duration-400 ease-in-out`}
-          onClick={() => handleClick('dashboard', '/employee/dashboard')}
+          onClick={() => handleClick('/employee/dashboard')}
           onMouseEnter={() => setHovered('dashboard')}
           onMouseLeave={() => setHovered(null)}
         />
@@ -46,7 +45,7 @@ export default function NavSection() {
           src="/book.png"
           alt="Notebook"
           className={`${getIconClasses('tasks')} pixelated cursor-pointer transition-all duration-400 ease-in-out`}
-          onClick={() => handleClick('tasks', '/employee/tasks')}
+          onClick={() => handleClick('/employee/tasks')}
           onMouseEnter={() => setHovered('tasks')}
           onMouseLeave={() => setHovered(null)}
         />
@@ -56,7 +55,7 @@ export default function NavSection() {
           src="/mercado.png"
           alt="Market"
           className={`${getIconClasses('mercado')} pixelated cursor-pointer transition-all duration-400 ease-in-out`}
-          onClick={() => handleClick('mercado', '/employee/mercado')}
+          onClick={() => handleClick('/employee/mercado')}
           onMouseEnter={() => setHovered('mercado')}
           onMouseLeave={() => setHovered(null)}
         />
