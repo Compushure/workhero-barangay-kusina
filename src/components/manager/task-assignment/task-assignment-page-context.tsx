@@ -2,8 +2,8 @@
 
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
-import { handleDeleteTask, handleClearAllTasks } from '@/action-handlers/manager-current-assigned-task';
-import { handleAddTaskAssignment } from '@/action-handlers/manager-assignment';
+import { handleDeleteTask, handleClearAllTasks } from '@/action-handlers/manager/assigned-tasks';
+import { handleAddTaskAssignment } from '@/action-handlers/manager/assignments';
 
 interface TaskAssignmentContextType {
   assignedTasks: AssignedTask[];

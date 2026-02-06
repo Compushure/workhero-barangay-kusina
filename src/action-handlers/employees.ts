@@ -1,6 +1,6 @@
 'use client';
 
-import { getEmployeeRank } from '@/actions/employees/get-rank';
+import { getEmployeeRank } from '@/actions/employee/stats';
 import type { EmployeeRank } from '@/types';
 import { toast } from 'sonner';
 

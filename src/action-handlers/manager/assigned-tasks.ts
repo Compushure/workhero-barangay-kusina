@@ -6,7 +6,7 @@ import {
   clearAllEmployeeTasks,
   deleteTask,
   updateTaskAssignment,
-} from '@/actions/manager-current-assigned-task';
+} from '@/actions/manager/assigned-tasks';
 import { toast } from 'sonner';
 import type { AssignedTask, ServerActionResponse } from '@/types';
 

@@ -7,7 +7,7 @@
 
 import { Suspense } from 'react';
 import { ManageClient } from '@/components/admin/manage-client';
-import { protectAdminRoute } from '@/actions/auth';
+import { protectAdminRoute } from '@/actions/shared/auth';
 
 function LoadingFallback() {
   return (

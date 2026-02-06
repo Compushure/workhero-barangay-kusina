@@ -17,7 +17,7 @@ import { ProfileModal } from '../sidebar/profile-modal';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
 import { useQuery } from '@tanstack/react-query';
-import { getEmployeeXP } from '@/actions/employees/get-xp';
+import { getEmployeeXP } from '@/actions/employee/stats';
 
 interface NavItem {
   key: string;

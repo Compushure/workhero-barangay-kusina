@@ -12,7 +12,7 @@ import {
   handleDeleteUser,
   handleUploadProfilePicture,
   handleDeleteProfilePicture,
-} from '@/action-handlers/manage';
+} from '@/action-handlers/superadmin/users';
 import type { User, AddUserInput, EditUserInput } from '@/types';
 import { userKeys } from '../queries/userQueries';
 

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { handleGetAttendanceConfig, handleGetTodayAttendanceStatus } from '@/action-handlers/attendance';
+import { handleGetAttendanceConfig, handleGetTodayAttendanceStatus } from '@/action-handlers/employee/attendance';
 import type { AttendanceConfig, AttendanceStatus } from '@/types';
 
 export const attendanceKeys = {

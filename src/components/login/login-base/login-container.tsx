@@ -5,10 +5,10 @@ import { LoginForm } from './login-form';
 import { LoginHero } from './login-hero';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { handleLoginSubmit } from '@/action-handlers/auth';
+import { handleLoginSubmit } from '@/action-handlers/shared/auth';
 import { toast } from 'sonner';
 import { handleUserRole } from '@/lib/utils/role-router';
-import { getUserRole } from '@/actions/auth';
+import { getUserRole } from '@/actions/shared/auth';
 
 export function LoginContainer() {
   const router = useRouter();

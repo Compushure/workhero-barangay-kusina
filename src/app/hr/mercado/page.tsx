@@ -7,7 +7,12 @@ import { Button } from '@/components/ui/button';
 import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
 import { MercadoSearchBar } from '@/components/hr/mercado/mercado-search-bar';
-import { MercadoSortToggle } from '@/components/hr/mercado/mercado-sort-toggle';
+import { MercadoSortToggle, SortOption } from '@/components/hr/mercado/mercado-sort-toggle';
+import {
+  MercadoFilterToggle,
+  StockFilter,
+  VisibilityFilter,
+} from '@/components/hr/mercado/mercado-filter-toggle';
 import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
 import { DeleteModal } from '@/components/hr/mercado/delete-modal';
 import { ViewItemModal } from '@/components/hr/mercado/view-item-modal';
@@ -28,7 +33,9 @@ export default function MercadoPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [saveError, setSaveError] = useState<string>('');
   const [search, setSearch] = useState('');
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [sortOrder, setSortOrder] = useState<SortOption>('newest');
+  const [stockFilter, setStockFilter] = useState<StockFilter>('all');
+  const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>('all');
   const [editingItem, setEditingItem] = useState<{
     id: string;
     name: string;
@@ -36,6 +43,7 @@ export default function MercadoPage() {
     quantity?: number;
     redeemingLimit?: number;
     imageUrl?: string;
+    availableDate?: Date | string | null;
   } | null>(null);
   const [deletingItem, setDeletingItem] = useState<{
     id: string;
@@ -50,6 +58,7 @@ export default function MercadoPage() {
     isActive: boolean;
     imageUrl?: string;
     createdAt?: string;
+    availableDate?: string | Date | null;
   } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
@@ -73,7 +82,32 @@ export default function MercadoPage() {
       );
     }
 
-    // Sort by date
+    // Filter by stock status
+    if (stockFilter !== 'all') {
+      filtered = filtered.filter((reward) => {
+        const hasQuantityLimit = reward.quantity !== null && reward.quantity !== undefined;
+        if (stockFilter === 'in-stock') {
+          return !hasQuantityLimit || (reward.quantity !== undefined && reward.quantity > 0);
+        } else if (stockFilter === 'out-of-stock') {
+          return hasQuantityLimit && reward.quantity !== undefined && reward.quantity <= 0;
+        }
+        return true;
+      });
+    }
+
+    // Filter by visibility
+    if (visibilityFilter !== 'all') {
+      filtered = filtered.filter((reward) => {
+        if (visibilityFilter === 'visible') {
+          return reward.isActive;
+        } else if (visibilityFilter === 'hidden') {
+          return !reward.isActive;
+        }
+        return true;
+      });
+    }
+
+    // Apply sorting (only date sorting)
     return [...filtered].sort((a, b) => {
       const dateA =
         a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt || 0).getTime();
@@ -81,7 +115,7 @@ export default function MercadoPage() {
         b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt || 0).getTime();
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
-  }, [allRewards, debouncedSearch, sortOrder]);
+  }, [allRewards, debouncedSearch, sortOrder, stockFilter, visibilityFilter]);
 
   // Pagination logic
   const totalPages = Math.ceil((rewards?.length || 0) / itemsPerPage);
@@ -95,7 +129,7 @@ export default function MercadoPage() {
   // Reset to page 1 when search or sort changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, sortOrder]);
+  }, [debouncedSearch, sortOrder, stockFilter, visibilityFilter]);
 
   // Sync viewing item with updated rewards when mutations complete
   useEffect(() => {
@@ -110,6 +144,7 @@ export default function MercadoPage() {
           redeemingLimit: updatedItem.redeemingLimit,
           isActive: updatedItem.isActive,
           imageUrl: updatedItem.imageUrl,
+          availableDate: updatedItem.availableDate,
           createdAt:
             updatedItem.createdAt instanceof Date
               ? updatedItem.createdAt.toISOString()
@@ -144,6 +179,7 @@ export default function MercadoPage() {
           quantity: item.quantity,
           redeemingLimit: item.redeemingLimit,
           imageUrl: item.imageUrl,
+          availableDate: item.availableDate,
         });
         setIsAddModalOpen(true);
       }
@@ -174,6 +210,7 @@ export default function MercadoPage() {
           redeemingLimit: item.redeemingLimit,
           isActive: item.isActive,
           imageUrl: item.imageUrl,
+          availableDate: item.availableDate,
           createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : item.createdAt,
         });
         setIsViewModalOpen(true);
@@ -218,6 +255,7 @@ export default function MercadoPage() {
       quantity: string;
       redeemingLimit: string;
       cost: number;
+      availableDate?: Date | null;
     }) => {
       // Clear previous error
       setSaveError('');
@@ -236,6 +274,7 @@ export default function MercadoPage() {
             pointsCost: data.cost,
             quantity: quantityNum,
             redeemingLimit: redeemingLimitNum,
+            availableDate: data.availableDate || null,
           },
         });
       } else {
@@ -246,6 +285,7 @@ export default function MercadoPage() {
           quantity: quantityNum,
           redeemingLimit: redeemingLimitNum,
           isActive: true,
+          availableDate: data.availableDate || null,
         });
         rewardId = createdReward?.id;
       }
@@ -257,7 +297,7 @@ export default function MercadoPage() {
           rewardName: data.name,
         });
       }
-      
+
       // Modal closes from within the modal component after successful save
       setEditingItem(null);
     },
@@ -286,6 +326,12 @@ export default function MercadoPage() {
               />
             </div>
             <MercadoSortToggle value={sortOrder} onChange={setSortOrder} />
+            <MercadoFilterToggle
+              stockFilter={stockFilter}
+              visibilityFilter={visibilityFilter}
+              onStockFilterChange={setStockFilter}
+              onVisibilityFilterChange={setVisibilityFilter}
+            />
             <Button
               onClick={() => setIsAddModalOpen(true)}
               className="h-11 px-6 rounded-xl bg-[#730202] hover:bg-[#730202]/90 text-white font-semibold text-base ml-auto"
@@ -312,6 +358,7 @@ export default function MercadoPage() {
                       quantity: item.quantity,
                       isActive: item.isActive,
                       imageUrl: item.imageUrl,
+                      availableDate: item.availableDate,
                       createdAt:
                         item.createdAt instanceof Date
                           ? item.createdAt.toISOString()

@@ -1,80 +1,20 @@
+/**
+ * HR Reward Management Action Handlers
+ * ====================================
+ * Client-side wrappers for HR reward CRUD operations.
+ * Handles UI feedback (toasts) and state management.
+ */
+
 import {
-  acceptRedemptionRequestAction,
-  declineRedemptionRequestAction,
   addRewardAction,
   editRewardAction,
   deleteRewardAction,
   hideRewardAction,
-  createRedemptionRequestAction,
   uploadRewardPicture,
-} from '@/actions/hr';
+} from '@/actions/hr/rewards';
 import { safeAction } from '@/lib/utils/safe-action';
 import { toast } from 'sonner';
 import { AddRewardInput, EditRewardInput, Reward } from '@/types';
-
-interface RedemptionRequestParams {
-  id: string;
-  remarks?: string;
-}
-
-// Action handler to decline a redemption request
-export async function handleDeclineRedemptionRequestAction(
-  params: RedemptionRequestParams
-): Promise<{ error: string | null }> {
-  const result = await safeAction(() =>
-    declineRedemptionRequestAction(params.id, params.remarks)
-  );
-
-  if (!result.success || result.data?.error) {
-    toast.error(`Failed to decline redemption request: ${result.error || result.data?.error}`);
-    return { error: result.error || result.data?.error || 'Unknown error' };
-  }
-
-  toast.success(
-    params.remarks
-      ? `Redemption request declined with remarks.`
-      : `Redemption request has been declined.`
-  );
-
-  return { error: null };
-}
-
-export async function handleAcceptRedemptionRequestAction(
-  params: RedemptionRequestParams
-): Promise<{ error: string | null }> {
-  const result = await safeAction(() =>
-    acceptRedemptionRequestAction(params.id, params.remarks)
-  );
-
-  if (!result.success || result.data?.error) {
-    toast.error(`Failed to accept redemption request: ${result.error || result.data?.error}`);
-    return { error: result.error || result.data?.error || 'Unknown error' };
-  }
-
-  toast.success(
-    params.remarks
-      ? `Redemption request accepted with remarks.`
-      : `Redemption request has been accepted.`
-  );
-
-  return { error: null };
-}
-
-// Action handler to create a new redemption request
-export async function handleCreateRedemptionRequestAction(
-  rewardId: string,
-  quantity: number
-): Promise<boolean> {
-  const result = await safeAction(() => createRedemptionRequestAction(rewardId, quantity));
-
-  if (!result.success || result.data?.error) {
-    toast.error(`Failed to create redemption request: ${result.error || result.data?.error}`);
-    return false;
-  }
-
-  toast.success('Redemption request submitted successfully');
-  return true;
-}
 
 // Action handler to add a new reward/mercado item
 export async function handleAddRewardAction(

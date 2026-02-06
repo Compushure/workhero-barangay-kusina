@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Pencil, Plus, X, Loader2, Camera } from 'lucide-react';
+import { Pencil, Plus, X, Loader2, Camera, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -13,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 interface AddItemsModalProps {
   open: boolean;
@@ -24,6 +28,7 @@ interface AddItemsModalProps {
     quantity?: number;
     redeemingLimit?: number;
     imageUrl?: string;
+    availableDate?: Date | string | null;
   } | null;
   onSave?: (data: {
     id?: string;
@@ -32,7 +37,8 @@ interface AddItemsModalProps {
     quantity: string;
     redeemingLimit: string;
     cost: number;
-  }) => void;
+    availableDate?: Date | null;
+  }) => Promise<void>;
   saveError?: string;
   onErrorClear?: () => void;
 }
@@ -50,10 +56,10 @@ const unformatNumber = (value: string): string => {
   return value.replace(/,/g, '');
 };
 
-export function AddItemsModal({ 
-  open, 
-  onOpenChange, 
-  editingItem, 
+export function AddItemsModal({
+  open,
+  onOpenChange,
+  editingItem,
   onSave,
   saveError = '',
   onErrorClear,
@@ -66,6 +72,7 @@ export function AddItemsModal({
   const [quantity, setQuantity] = useState('');
   const [itemCost, setItemCost] = useState('');
   const [redeemingLimit, setRedeemingLimit] = useState('');
+  const [availableDate, setAvailableDate] = useState<Date | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   // Populate form when editing
@@ -77,12 +84,19 @@ export function AddItemsModal({
       setRedeemingLimit(editingItem.redeemingLimit?.toString() || '');
       setExistingImageUrl(editingItem.imageUrl ? `${editingItem.imageUrl}?t=${Date.now()}` : '');
       setExistingImageError(false);
+      // Load available date if it exists
+      if (editingItem.availableDate) {
+        setAvailableDate(new Date(editingItem.availableDate));
+      } else {
+        setAvailableDate(undefined);
+      }
     } else {
       // Reset form when adding new
       setItemName('');
       setItemCost('');
       setQuantity('');
       setRedeemingLimit('');
+      setAvailableDate(undefined);
       setIconFile(null);
       setIconPreview('');
       setExistingImageUrl('');
@@ -95,13 +109,22 @@ export function AddItemsModal({
     if (saveError && onErrorClear) {
       onErrorClear();
     }
-  }, [itemName, quantity, itemCost, redeemingLimit, iconFile, saveError, onErrorClear]);
+  }, [
+    itemName,
+    quantity,
+    itemCost,
+    redeemingLimit,
+    availableDate,
+    iconFile,
+    saveError,
+    onErrorClear,
+  ]);
 
   // Check if any changes were made compared to original item
   const hasChanges = useMemo(() => {
     if (!editingItem) {
       // For new items, check if any field has value
-      return !!(itemName || itemCost || quantity || redeemingLimit || iconFile);
+      return !!(itemName || itemCost || quantity || redeemingLimit || iconFile || availableDate);
     }
 
     // For editing, compare with original values
@@ -115,8 +138,22 @@ export function AddItemsModal({
     const isLimitChanged = redeemingLimitNum !== editingItem.redeemingLimit;
     const isIconChanged = !!iconFile;
 
-    return isNameChanged || isCostChanged || isQuantityChanged || isLimitChanged || isIconChanged;
-  }, [editingItem, itemName, itemCost, quantity, redeemingLimit, iconFile]);
+    // Check if available date changed
+    const originalDate = editingItem.availableDate
+      ? new Date(editingItem.availableDate).getTime()
+      : null;
+    const currentDate = availableDate ? availableDate.getTime() : null;
+    const isDateChanged = originalDate !== currentDate;
+
+    return (
+      isNameChanged ||
+      isCostChanged ||
+      isQuantityChanged ||
+      isLimitChanged ||
+      isIconChanged ||
+      isDateChanged
+    );
+  }, [editingItem, itemName, itemCost, quantity, redeemingLimit, iconFile, availableDate]);
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -141,6 +178,7 @@ export function AddItemsModal({
           quantity: unformatNumber(quantity),
           redeemingLimit: unformatNumber(redeemingLimit),
           cost: parseFloat(unformatNumber(itemCost)),
+          availableDate: availableDate || null,
         });
         // Close modal on successful save
         handleClose();
@@ -162,6 +200,7 @@ export function AddItemsModal({
     setQuantity('');
     setRedeemingLimit('');
     setItemCost('');
+    setAvailableDate(undefined);
     setIsLoading(false);
     onOpenChange(false);
   };
@@ -235,7 +274,7 @@ export function AddItemsModal({
               htmlFor="icon-upload"
               className="w-full md:w-[160px] lg:w-[180px] h-[140px] md:h-[160px] lg:h-[180px] border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white mx-auto md:mx-0 relative overflow-hidden group"
               style={
-                (iconPreview || (editingItem && existingImageUrl && !existingImageError))
+                iconPreview || (editingItem && existingImageUrl && !existingImageError)
                   ? {
                       backgroundImage: `url('${iconPreview || existingImageUrl}')`,
                       backgroundSize: 'cover',
@@ -355,12 +394,12 @@ export function AddItemsModal({
               </p>
             )}
 
-            {/* Item Cost */}
-            <div className="space-y-2">
-              <Label htmlFor="item-cost" className="text-sm font-medium text-[#5a2a2a]">
-                Item Cost
-              </Label>
-              <div className="flex items-center gap-3">
+            {/* Item Cost and Available Date */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="item-cost" className="text-sm font-medium text-[#5a2a2a]">
+                  Item Cost
+                </Label>
                 <Input
                   id="item-cost"
                   type="text"
@@ -372,10 +411,57 @@ export function AddItemsModal({
                     }
                   }}
                   placeholder="Fiesta Points"
-                  className="w-120px bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
+                  className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
+                {unformatNumber(itemCost).length === 6}
               </div>
-              {unformatNumber(itemCost).length === 6}
+
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="available-date" className="text-sm font-medium text-[#5a2a2a]">
+                  Available Date
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="available-date"
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start bg-white border-[#e0cfcf] hover:bg-[#fbeaea] text-[#5a2a2a] font-normal',
+                        !availableDate && 'text-[#7a3d3d]/50'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {availableDate ? format(availableDate, 'MMM d, yyyy') : 'Select date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-white" align="end">
+                    <Calendar
+                      mode="single"
+                      selected={availableDate}
+                      onSelect={setAvailableDate}
+                      disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                      initialFocus
+                    />
+                    {availableDate && (
+                      <div className="p-3 border-t border-[#e0cfcf]">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setAvailableDate(undefined)}
+                          className="w-full bg-white text-[#690003] border-[#e0cfcf] hover:bg-[#fbeaea]"
+                        >
+                          Clear Date
+                        </Button>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+                {availableDate && (
+                  <p className="text-xs text-[#7a3d3d]/70 italic">
+                    Available from {format(availableDate, 'MMM d, yyyy')} onwards
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
