@@ -12,8 +12,7 @@ import {
 import AddEditTaskCategoryDialog from './dialogs/add-edit-task-category-dialog';
 import TaskCategoryTable from './task-category-table';
 import {
-  useGetTaskCategories,
-  useGetTaskTypes,
+  useGetTaskCategoriesPaginated,
   type TaskCategorySortOption,
 } from '@/hooks/tanstack/queries/managerEditorQueries';
 import {
@@ -22,6 +21,7 @@ import {
   useDeleteTaskCategory,
 } from '@/hooks/tanstack/mutations/managerEditorMutations';
 import { useDebounce } from '@/hooks/useDebounce';
+import { Pagination } from '@/components/manager/task-verification/pagination';
 import type { TaskCategory } from '@/types/manager/task-editor';
 import type { AddTaskInput } from '@/zod/schemas/task';
 
@@ -40,22 +40,38 @@ export default function TaskEditorPage() {
   const [saveError, setSaveError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState<TaskCategorySortOption>('type-name');
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   // Debounce search term like current-assigned-tasks (900ms)
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
   // Fetch tasks with debounced search and sort
-  const { data: tasks = [], isLoading, isError } = useGetTaskCategories({
-    search: debouncedSearchTerm,
-    sort: sortOption,
+  const { data: paginatedData, isLoading, isError } = useGetTaskCategoriesPaginated(
+    page,
+    pageSize,
+    sortOption,
+    debouncedSearchTerm
+  );
+
+  const tasks = paginatedData?.tasks || [];
+  const totalPages = paginatedData?.totalPages || 1;
+  const totalCount = paginatedData?.count || 0;
+
+  // Debug logging
+  console.log('Pagination Debug:', {
+    page,
+    pageSize,
+    sortOption,
+    debouncedSearchTerm,
+    paginatedData,
+    tasks: tasks.length,
+    totalPages,
+    totalCount
   });
 
   // Fetch all tasks without filters for duplicate checking
-  const { data: allTasks = [] } = useGetTaskCategories({
-    sort: sortOption, // Keep sort for consistency but no search
-  });
-  const { data: existingTypes = [] } = useGetTaskTypes();
-
+  const { data: allTasksData } = useGetTaskCategoriesPaginated(1, 1000, sortOption, '');
 
   // Mutations
   const addMutation = useAddTaskCategory();
@@ -63,7 +79,9 @@ export default function TaskEditorPage() {
   const deleteMutation = useDeleteTaskCategory();
 
   // Extract existing names for duplicate checking from ALL tasks
-  const existingNames = allTasks.map((task) => task.name);
+  const existingNames = Array.isArray(allTasksData) 
+    ? [] 
+    : (allTasksData?.tasks?.map((task: TaskCategory) => task.name) || []);
 
   const handleOpenAddDialog = () => {
     setEditingTask(null);
@@ -121,10 +139,16 @@ export default function TaskEditorPage() {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    setPage(1); // Reset to first page when searching
   };
 
   const handleSortChange = (value: TaskCategorySortOption) => {
     setSortOption(value);
+    setPage(1); // Reset to first page when sorting
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
   };
 
   const currentSortLabel =
@@ -199,6 +223,17 @@ export default function TaskEditorPage() {
           onToggleRepeatable={handleToggleRepeatable}
         />
 
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="my-6">
+            <Pagination 
+              totalPages={totalPages} 
+              currentPage={page} 
+              onPageChange={handlePageChange} 
+            />
+          </div>
+        )}
+
         <AddEditTaskCategoryDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
@@ -206,7 +241,6 @@ export default function TaskEditorPage() {
           onSave={handleSave}
           saveError={saveError}
           onErrorClear={handleErrorClear}
-          existingTypes={existingTypes}
           existingNames={existingNames}
         />
       </div>

@@ -5,43 +5,158 @@ import type { ServerActionResponse } from '@/types';
 import { TaskCategory } from '@/types/manager/task-editor';
 import { AddTaskInput, addTaskSchema, EditTaskInput, editTaskSchema } from '@/zod/schemas/task';
 
-// Action to get all task categories
-export async function fetchTaskCategories(): Promise<ServerActionResponse<TaskCategory[]>> {
-  try {
-    // Get Supabase client
-    const supabase = await createClient();
+/**
+ * Fetch paginated task categories
+ * @param page - Page number (1-indexed)
+ * @param pageSize - Number of items per page
+ * @param sortBy - Sort order option
+ * @param searchTerm - Optional search term for filtering tasks by name, description, or type
+ */
+export async function fetchTaskCategoriesPaginated(
+  page: number = 1,
+  pageSize: number = 10,
+  sortBy: string = 'type-name',
+  searchTerm: string = ''
+): Promise<
+  ServerActionResponse<{
+    data: TaskCategory[];
+    count: number;
+    totalPages: number;
+  }>
+> {
+  console.log('Server Action Called:', { page, pageSize, sortBy, searchTerm });
+  
+  const supabase = await createClient();
 
-    // Fetch all task categories
-    const { data, error } = await supabase
-      .from('KPICategory')
-      .select('*')
-      .order('type', { ascending: false })
-      .order('name', { ascending: false });
+  // Calculate range for pagination
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize - 1;
 
-    if (error) {
-      console.error('Error fetching task categories:', error);
-      return { error: `Failed to fetch task categories: ${error.message}` };
-    }
+  // Determine sort order for database query
+  let orderByColumn = 'type';
+  let ascending = false;
 
-    // Transform database response to match TaskCategory type
-    const taskCategories: TaskCategory[] = (data || []).map((item) => ({
-      id: item.id,
-      name: item.name,
-      type: item.type,
-      description: item.description,
-      isRepeatable: item.is_repeatable,
-      points: item.points,
-      xp: item.xp,
-    }));
-
-    return { error: null, data: taskCategories };
-  } catch (error) {
-    console.error('Error in getTaskCategoriesAction:', error);
-    if (error instanceof Error) {
-      return { error: error.message };
-    }
-    return { error: 'An unexpected error occurred while fetching task categories' };
+  switch (sortBy) {
+    case 'type-name':
+      // Sort by type first, then by name
+      orderByColumn = 'type';
+      ascending = true;
+      break;
+    case 'recently-created':
+      orderByColumn = 'created_at';
+      ascending = false;
+      break;
+    case 'points-desc':
+      orderByColumn = 'points';
+      ascending = false;
+      break;
+    case 'xp-desc':
+      orderByColumn = 'xp';
+      ascending = false;
+      break;
+    case 'repeatable-only':
+      // Filter for repeatable only, then sort by name
+      orderByColumn = 'name';
+      ascending = true;
+      break;
+    case 'non-repeatable-only':
+      // Filter for non-repeatable only, then sort by name
+      orderByColumn = 'name';
+      ascending = true;
+      break;
+    default:
+      orderByColumn = 'type';
+      ascending = true;
   }
+
+  // Start with base query
+  let query = supabase
+    .from('KPICategory')
+    .select('*');
+
+  // Apply search filter if provided
+  if (searchTerm && searchTerm.trim()) {
+    const trimmedSearch = searchTerm.trim();
+    query = query.or(
+      `name.ilike.%${trimmedSearch}%,description.ilike.%${trimmedSearch}%,type.ilike.%${trimmedSearch}%`
+    );
+  }
+
+  // Apply repeatable/non-repeatable filters
+  if (sortBy === 'repeatable-only') {
+    query = query.eq('is_repeatable', true);
+  } else if (sortBy === 'non-repeatable-only') {
+    query = query.eq('is_repeatable', false);
+  }
+
+  // Get total count first - need to create separate query for count
+  let countQuery = supabase.from('KPICategory').select('*', { count: 'exact', head: true });
+  
+  // Apply search filter to count query if provided
+  if (searchTerm && searchTerm.trim()) {
+    const trimmedSearch = searchTerm.trim();
+    countQuery = countQuery.or(
+      `name.ilike.%${trimmedSearch}%,description.ilike.%${trimmedSearch}%,type.ilike.%${trimmedSearch}%`
+    );
+  }
+  
+  // Apply repeatable/non-repeatable filters to count query
+  if (sortBy === 'repeatable-only') {
+    countQuery = countQuery.eq('is_repeatable', true);
+  } else if (sortBy === 'non-repeatable-only') {
+    countQuery = countQuery.eq('is_repeatable', false);
+  }
+  
+  const { count: totalCount, error: countError } = await countQuery;
+  
+  console.log('Count Query Result:', { totalCount, countError });
+  
+  if (countError) {
+    console.error('Count Error:', countError);
+    return { error: 'Failed to count task categories: ' + countError.message, data: undefined };
+  }
+
+  // Apply sorting and pagination
+  let orderedQuery = query.order(orderByColumn, { ascending });
+  
+  // For type-name sorting, we need to sort by type first, then by name
+  if (sortBy === 'type-name') {
+    orderedQuery = orderedQuery.order('name', { ascending: true });
+  }
+  
+  const { data, error } = await orderedQuery.range(start, end);
+
+  console.log('Data Query Result:', { data, error });
+
+  if (error) {
+    console.error('Data Error:', error);
+    return { error: `Failed to fetch task categories: ${error.message}` };
+  }
+
+  // Transform database response to match TaskCategory type
+  const taskCategories: TaskCategory[] = (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    description: item.description,
+    isRepeatable: item.is_repeatable,
+    points: item.points,
+    xp: item.xp,
+  }));
+
+  const totalPages = Math.ceil((totalCount || 0) / pageSize);
+
+  const response = {
+    error: null,
+    data: {
+      data: taskCategories,
+      count: totalCount || 0,
+      totalPages,
+    },
+  };
+  
+  console.log('Server Action Response:', response);
+  return response;
 }
 
 export async function addTaskCategory(input: AddTaskInput): Promise<ServerActionResponse<TaskCategory>> {
@@ -195,3 +310,42 @@ export async function deleteTaskCategory(id: string): Promise<ServerActionRespon
     return { error: 'An unexpected error occurred while deleting the task category' };
   }
 }
+
+// // Action to get all task categories
+// export async function fetchTaskCategories(): Promise<ServerActionResponse<TaskCategory[]>> {
+//   try {
+//     // Get Supabase client
+//     const supabase = await createClient();
+
+//     // Fetch all task categories
+//     const { data, error } = await supabase
+//       .from('KPICategory')
+//       .select('*')
+//       .order('type', { ascending: false })
+//       .order('name', { ascending: false });
+
+//     if (error) {
+//       console.error('Error fetching task categories:', error);
+//       return { error: `Failed to fetch task categories: ${error.message}` };
+//     }
+
+//     // Transform database response to match TaskCategory type
+//     const taskCategories: TaskCategory[] = (data || []).map((item) => ({
+//       id: item.id,
+//       name: item.name,
+//       type: item.type,
+//       description: item.description,
+//       isRepeatable: item.is_repeatable,
+//       points: item.points,
+//       xp: item.xp,
+//     }));
+
+//     return { error: null, data: taskCategories };
+//   } catch (error) {
+//     console.error('Error in getTaskCategoriesAction:', error);
+//     if (error instanceof Error) {
+//       return { error: error.message };
+//     }
+//     return { error: 'An unexpected error occurred while fetching task categories' };
+//   }
+// }

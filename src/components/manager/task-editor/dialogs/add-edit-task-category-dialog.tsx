@@ -282,7 +282,7 @@ export default function AddEditTaskCategoryDialog({
 
           <section className='flex gap-8'>
             {/* Points and XP Row */}
-            <div className="grid grid-cols-1 gap-4 flex-1/2">
+            <div className="grid grid-cols-1 gap-4 flex-1/2 mb-6">
               {/* Points */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-[#5a2a2a]">

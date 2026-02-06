@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -11,7 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Coins, Pencil, RefreshCw, RefreshCwOff, Soup, Trash2 } from 'lucide-react';
+import { Coins, Pencil, RefreshCw, RefreshCwOff, Trash2 } from 'lucide-react';
 import type { TaskCategory } from '@/types/manager/task-editor';
 import {
   AlertDialog,
@@ -64,19 +63,19 @@ export default function TaskCategoryTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-[#690003] hover:bg-[#690003]">
-              <TableHead className="min-w-64 pl-6 py-4 text-left text-sm font-bold text-card">
+              <TableHead className="min-w-96 max-w-96 w-96 pl-6 py-4 text-left text-sm font-bold text-card">
                 TASK
               </TableHead>
-              <TableHead className="min-w-16 text-center text-sm font-bold text-card">
+              <TableHead className="min-w-20 max-w-20 w-20 text-center text-sm font-bold text-card">
                 POINTS
               </TableHead>
-              <TableHead className="min-w-16 text-center text-sm font-bold text-card">
+              <TableHead className="min-w-20 max-w-20 w-20 text-center text-sm font-bold text-card">
                 XP
               </TableHead>
-              <TableHead className="min-w-20 text-center text-sm font-bold text-card">
+              <TableHead className="min-w-32 max-w-32 w-32 text-center text-sm font-bold text-card">
                 REPEATABLE
               </TableHead>
-              <TableHead className="min-w-32 text-center text-sm font-bold text-card">
+              <TableHead className="min-w-36 max-w-36 w-36 text-center text-sm font-bold text-card">
                 ACTIONS
               </TableHead>
             </TableRow>
@@ -88,26 +87,26 @@ export default function TaskCategoryTable({
             <>
               {tasks.map((task) => (
               <TableRow key={task.id} className="hover:bg-gray-50 transition-colors">
-                <TableCell className="min-w-64 pl-6 py-4 align-middle">
-                  <div>
-                    <div className="font-semibold text-base text-red-950">{task.name}</div>
-                    <div className="text-sm text-amber-900">{task.description}</div>
-                    <div className="text-sm text-red-900 font-medium px-2 rounded-full bg-[#fdeac8] w-fit mt-2">{task.type}</div>
+                <TableCell className="min-w-96 max-w-96 w-96 pl-6 py-4 align-middle">
+                  <div className="truncate">
+                    <div className="font-semibold text-base text-red-950 truncate">{task.name}</div>
+                    <div className="text-sm text-amber-900 truncate">{task.description}</div>
+                    <div className="text-sm text-red-900 font-medium px-2 rounded-full bg-[#fdeac8] w-fit mt-2 truncate">{task.type}</div>
                   </div>
                 </TableCell>
-                <TableCell className="min-w-16 text-base text-center align-middle font-medium text-red-950">
+                <TableCell className="min-w-20 max-w-20 w-20 text-base text-center align-middle font-medium text-red-950">
                   <div className="flex items-center justify-center gap-1">
                     <Coins strokeWidth={1.75} className="size-6" />
                     {task.points}
                   </div>
                 </TableCell>
-                <TableCell className="min-w-16 text-base text-center align-middle font-medium text-red-950">
+                <TableCell className="min-w-20 max-w-20 w-20 text-base text-center align-middle font-medium text-red-950">
                   <div className="flex items-center justify-center gap-2">
                     <span className="inline-block italic text-base leading-none">XP</span>
                     {task.xp}
                   </div>
                 </TableCell>
-                <TableCell className='min-w-20 text-center align-middle text-base'>
+                <TableCell className='min-w-32 max-w-32 w-32 text-center align-middle text-base'>
                   <div className="flex justify-center items-center">
                     {task.isRepeatable ? (
                       <div className='flex items-center gap-1 text-red-950 font-medium'>
@@ -122,7 +121,7 @@ export default function TaskCategoryTable({
                     )}
                   </div>
                 </TableCell>
-                <TableCell className='min-w-32 text-center align-middle'>
+                <TableCell className='min-w-36 max-w-36 w-36 text-center align-middle'>
                   <div className="flex justify-center items-center gap-2">
                     <Button
                       variant="ghost"
