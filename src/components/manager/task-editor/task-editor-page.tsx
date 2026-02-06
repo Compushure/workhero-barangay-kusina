@@ -1,6 +1,134 @@
+'use client';
 
+import { useState } from 'react';
+import { Plus, Search, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import AddEditTaskCategoryDialog from './dialogs/add-edit-task-category-dialog';
+import TaskCategoryTable from './task-category-table';
+import {
+  useGetTaskCategories,
+  useGetTaskTypes,
+  type TaskCategorySortOption,
+} from '@/hooks/tanstack/queries/managerEditorQueries';
+import {
+  useAddTaskCategory,
+  useEditTaskCategory,
+  useDeleteTaskCategory,
+} from '@/hooks/tanstack/mutations/managerEditorMutations';
+import { useDebounce } from '@/hooks/useDebounce';
+import type { TaskCategory } from '@/types/manager/task-editor';
+import type { AddTaskInput } from '@/zod/schemas/task';
+
+const SORT_OPTIONS: { value: TaskCategorySortOption; label: string }[] = [
+  { value: 'type-name', label: 'Type & Name' },
+  { value: 'recently-created', label: 'Recently Created' },
+  { value: 'points-desc', label: 'Points (High to Low)' },
+  { value: 'xp-desc', label: 'XP (High to Low)' },
+  { value: 'repeatable-only', label: 'Repeatable Only' },
+  { value: 'non-repeatable-only', label: 'Non-Repeatable Only' },
+];
 
 export default function TaskEditorPage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskCategory | null>(null);
+  const [saveError, setSaveError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState<TaskCategorySortOption>('type-name');
+
+  // Debounce search term like current-assigned-tasks (900ms)
+  const debouncedSearchTerm = useDebounce(searchTerm, 900);
+
+  // Fetch tasks with debounced search and sort
+  const { data: tasks = [], isLoading } = useGetTaskCategories({
+    search: debouncedSearchTerm,
+    sort: sortOption,
+  });
+
+  // Fetch all tasks without filters for duplicate checking
+  const { data: allTasks = [] } = useGetTaskCategories({
+    sort: sortOption, // Keep sort for consistency but no search
+  });
+  const { data: existingTypes = [] } = useGetTaskTypes();
+
+  // Mutations
+  const addMutation = useAddTaskCategory();
+  const editMutation = useEditTaskCategory();
+  const deleteMutation = useDeleteTaskCategory();
+
+  // Extract existing names for duplicate checking from ALL tasks
+  const existingNames = allTasks.map((task) => task.name);
+
+  const handleOpenAddDialog = () => {
+    setEditingTask(null);
+    setSaveError('');
+    setDialogOpen(true);
+  };
+
+  const handleOpenEditDialog = (task: TaskCategory) => {
+    setEditingTask(task);
+    setSaveError('');
+    setDialogOpen(true);
+  };
+
+  const handleSave = async (data: AddTaskInput) => {
+    try {
+      setSaveError('');
+
+      if (editingTask) {
+        // Edit existing task
+        await editMutation.mutateAsync({
+          id: editingTask.id,
+          input: data,
+        });
+      } else {
+        // Add new task
+        await addMutation.mutateAsync(data);
+      }
+
+      // Close dialog on success
+      setDialogOpen(false);
+      setEditingTask(null);
+    } catch (error) {
+      console.error('Error saving task:', error);
+      setSaveError(error instanceof Error ? error.message : 'Failed to save task category');
+      throw error; // Re-throw to prevent dialog from closing
+    }
+  };
+
+  const handleDelete = async (taskId: string) => {
+    await deleteMutation.mutateAsync(taskId);
+  };
+
+  const handleToggleRepeatable = async (taskId: string, isRepeatable: boolean) => {
+    await editMutation.mutateAsync({
+      id: taskId,
+      input: {
+        isRepeatable,
+      },
+    });
+  };
+
+  const handleErrorClear = () => {
+    setSaveError('');
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSortChange = (value: TaskCategorySortOption) => {
+    setSortOption(value);
+  };
+
+  const currentSortLabel =
+    SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Type & Name';
+
   return (
     <main className="w-full min-h-screen bg-zinc-50 p-10">
       <div className="mx-auto min-w-250 max-w-400 space-y-8">
@@ -9,6 +137,75 @@ export default function TaskEditorPage() {
           <p className="text-md text-gray-600">Add, Edit, Delete assignable tasks in this page.</p>
         </div>
 
+        {/* Search, Sort, and Add Button */}
+        <div className="flex gap-4 items-center">
+          {/* Search Input */}
+          <div className="relative flex flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full pl-10 pr-4 py-2 rounded-xl text-sm bg-white shadow-sm border border-gray-200 focus:outline-none focus:border-[#690003] transition-colors"
+            />
+          </div>
+
+          {/* Sort Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="default"
+                size="default"
+                className="bg-white shadow-sm hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 w-56 py-2 justify-between border border-gray-200"
+              >
+                <span className="truncate">{currentSortLabel}</span>
+                <ChevronDown size={18} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {SORT_OPTIONS.map((option) => (
+                <DropdownMenuItem
+                  key={option.value}
+                  onClick={() => handleSortChange(option.value)}
+                  className={`cursor-pointer transition-all duration-300 ease-in-out ${
+                    sortOption === option.value ? 'bg-red-100' : ''
+                  }`}
+                >
+                  {option.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Add New Category Button */}
+          <Button
+            onClick={handleOpenAddDialog}
+            className="h-11 px-6 rounded-xl bg-[#690003] hover:bg-[#690003]/90 text-zinc-50 font-semibold text-sm cursor-pointer transition-all duration-500 ease-in-out shrink-0"
+          >
+            <span>Add New Category</span>
+            <Plus className="size-4" />
+          </Button>
+        </div>
+
+        <TaskCategoryTable
+          tasks={tasks}
+          isLoading={isLoading}
+          onEdit={handleOpenEditDialog}
+          onDelete={handleDelete}
+          onToggleRepeatable={handleToggleRepeatable}
+        />
+
+        <AddEditTaskCategoryDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          editingTask={editingTask}
+          onSave={handleSave}
+          saveError={saveError}
+          onErrorClear={handleErrorClear}
+          existingTypes={existingTypes}
+          existingNames={existingNames}
+        />
       </div>
     </main>
   );

@@ -82,8 +82,8 @@ export function Sidebar({
             <Link
               key={item.key}
               href={item.href}
-              className={`w-full flex items-center justify-start gap-3 px-4 py-3 cursor-pointer rounded-full font-medium hover:transition-all duration-400 ease-in-out ${
-                isCollapsed ? 'px-2' : ''
+              className={`w-full flex items-center justify-start gap-3 py-3 cursor-pointer rounded-full font-medium hover:transition-all duration-400 ease-in-out ${
+                isCollapsed ? 'px-3.5' : 'px-4'
               } ${isActive ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
               title={isCollapsed ? item.label : ''}
             >

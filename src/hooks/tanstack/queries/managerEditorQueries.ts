@@ -54,7 +54,7 @@ function sortAndFilterCategories(
     filtered = filtered.filter(
       (cat) =>
         cat.name.toLowerCase().includes(searchLower) ||
-        cat.description.toLowerCase().includes(searchLower) ||
+        cat.description?.toLowerCase().includes(searchLower) ||
         cat.type.toLowerCase().includes(searchLower)
     );
   }
