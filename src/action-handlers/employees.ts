@@ -3,7 +3,7 @@
 import { getEmployeeRank } from '@/actions/employees/get-rank';
 import { getEmployeeXP } from '@/actions/employees/get-xp';
 import { getEmployeePoints } from '@/actions/employees/get-points';
-import type { Employee, EmployeePointsData, EmployeeRank, EmployeeXP } from '@/types';
+import type { EmployeePointsData, EmployeeRank, EmployeeXP } from '@/types';
 import { toast } from 'sonner';
 
 
@@ -16,9 +16,9 @@ import { toast } from 'sonner';
 export async function handleFetchEmployeeRank(): Promise<EmployeeRank | null> {
   const result = await getEmployeeRank();
 
-  if (result.error) {
+  if (!result.success) {
     toast.error('Failed to load rank', {
-      description: result.error,
+      description: result.error ?? 'Unknown error',
     });
     return null;
   }
@@ -35,18 +35,16 @@ export async function handleFetchEmployeeRank(): Promise<EmployeeRank | null> {
 
 export async function handleFetchEmployeeXP(): Promise<EmployeeXP | null> {
   const result = await getEmployeeXP();
-  
-  if (result.error) {
+
+  if (!result.success) {
     toast.error('Failed to load XP', {
-      description: result.error,
+      description: result.error ?? 'Unknown error',
     });
     return null;
   }
 
   if (!result.data) {
-    toast.error('Failed to load XP', {
-      description: 'No XP data available',
-    });
+    toast.error('No XP data available');
     return null;
   }
 
