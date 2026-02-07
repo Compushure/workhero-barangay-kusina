@@ -7,9 +7,18 @@
 /**
  * Employee XP data
  */
+// export type EmployeeXP = {
+//   currentXP: number;
+//   totalXP: number;
+// };
+
+/**
+ * Employee XP data with the unified level
+ */
 export type EmployeeXP = {
   currentXP: number;
   totalXP: number;
+  level: number;
 };
 
 /**
