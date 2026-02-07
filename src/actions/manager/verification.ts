@@ -176,7 +176,7 @@ export async function approveTaskAction(
   // First, get task details from the view to get category_points
   const { data: taskData, error: taskError } = await supabase
     .from('task_info_view')
-    .select('assigned_to, category_points, max_orders, completed_orders')
+    .select('assigned_to, category_points, category_xp, max_orders, completed_orders')
     .eq('kpitask_id', kpitask_id)
     .single();
 
@@ -193,7 +193,7 @@ export async function approveTaskAction(
   
      const { error: assignError } = await supabase
        .from('KPITask')
-       .update({ status: 'assigned', remark: reqmark , completed_orders: taskData.completed_orders + 1 })
+       .update({ status: 'assigned', remark: reqmark , completed_orders: taskData.completed_orders + 1 }) // need this to be completed + pending then pending will then be reset to 0 after the request has been approved
        .eq('id', kpitask_id);
 
       if (assignError) {

@@ -3,7 +3,7 @@
 import { UserWithExtras } from '@/types';
 import { LogOutBtn } from '@/components/sidebar/logout-btn';
 import { ProfilePic } from '@/components/sidebar/profile-pic';
-import { FileText, CheckCircle, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, CheckCircle, User, ChevronLeft, ChevronRight, SquarePen } from 'lucide-react';
 import { useState } from 'react';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import Link from 'next/link';
@@ -34,6 +34,12 @@ export function Sidebar({
       icon: <CheckCircle size={20} className="shrink-0" />,
       href: '/manager/dashboard/task-verification',
     },
+    {
+      key: 'editor',
+      label: 'Task Editor',
+      icon: <SquarePen size={20} className="shrink-0" />,
+      href: '/manager/dashboard/task-editor',
+    },
   ],
 }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -44,24 +50,24 @@ export function Sidebar({
 
   return (
     <aside
-      className={`bg-[#690003] text-white flex flex-col justify-between transition-all duration-500 ease-in-out ${
+      className={`bg-[#690003] text-white flex flex-col justify-between transition-all duration-400 ease-in-out ${
         isCollapsed ? 'w-20' : 'w-60'
       }`}
     >
       {/* Logo Section */}
       <div className="p-6 border-b border-red-900">
-        <div className="flex items-center justify-between gap-2 mb-2">
+        <div className={`flex items-center justify-between mb-2 ${isCollapsed ? 'gap-0' : 'gap-2'}`}>
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-1 hover:bg-red-900 cursor-pointer rounded-sm transition-colors flex items-center gap-2"
+            aria-label="Toggle sidebar"
+          >
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-white rounded flex items-center justify-center shrink-0">
               <span className="text-sm font-bold text-[#690003]">W</span>
             </div>
             {!isCollapsed && <h1 className="text-2xl font-bold whitespace-nowrap">WorkHero</h1>}
           </div>
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1 hover:bg-red-900 cursor-pointer rounded transition-colors"
-            aria-label="Toggle sidebar"
-          >
             {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
           </button>
         </div>
@@ -76,8 +82,8 @@ export function Sidebar({
             <Link
               key={item.key}
               href={item.href}
-              className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium hover:transition-all duration-500 ease-in-out justify-center ${
-                isCollapsed ? 'px-2' : ''
+              className={`w-full flex items-center justify-start gap-3 py-3 cursor-pointer rounded-full font-medium hover:transition-all duration-400 ease-in-out ${
+                isCollapsed ? 'px-3.5' : 'px-4'
               } ${isActive ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
               title={isCollapsed ? item.label : ''}
             >
