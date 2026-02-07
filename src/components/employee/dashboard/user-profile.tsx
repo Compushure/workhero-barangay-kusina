@@ -1,21 +1,22 @@
 'use client';
 
-import { User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { UserWithExtras } from '@/types';
-import { ProfileModal } from '../modals/profile-modal';
+import { ProfileModal } from '@/components/sidebar/profile-modal';
+import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 
-interface ProfilePicProps {
-  user?: UserWithExtras | null;
-  onClick?: () => void;
-}
-
-export function ProfilePic({ user, onClick }: ProfilePicProps) {
-  const router = useRouter();
+export function ProfilePic() {
   const [isHovered, setIsHovered] = useState(false);
   const [hasImage, setHasImage] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
+  // Fetch current session user
+  const { data: user } = useGetSessionUser();
+
+  // Reset hasImage when profilePictureUrl changes
+  useEffect(() => {
+    setHasImage(true);
+  }, [user?.profilePictureUrl]);
 
   // Add cache-busting timestamp to image URL to force refresh when profile picture changes
   const imageUrlWithCacheBust = useMemo(() => {
@@ -25,43 +26,62 @@ export function ProfilePic({ user, onClick }: ProfilePicProps) {
   }, [user?.profilePictureUrl]);
 
   const handleProfileClick = () => {
-    if (onClick) {
-      onClick();
-    } else if (user) {
-      setModalOpen(true);
+    if (user) {
+      setShowProfileModal(true);
     }
   };
 
+  // Compute initials: first letter of first two words, or first two letters of one word
+  const initials = (() => {
+    if (!user?.name) return 'U';
+    const parts = user.name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return parts[0].slice(0, 2).toUpperCase();
+  })();
+
   return (
-    <div>
+    <>
+      {/* Avatar Circle */}
       <div
+        className="cursor-pointer"
         onClick={handleProfileClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="relative w-14 h-14 bg-white rounded-full flex items-center justify-center shrink-0 cursor-pointer transition-all duration-200 group"
       >
-        {imageUrlWithCacheBust && hasImage ? (
-          <>
-            <img
-              src={imageUrlWithCacheBust}
-              alt={user?.name || 'User profile'}
-              className="w-full h-full rounded-full object-cover"
-              onError={() => setHasImage(false)}
-            />
-            {isHovered && (
-              <div className="absolute inset-0 bg-gray-400/40 rounded-full transition-opacity duration-200" />
-            )}
-          </>
-        ) : (
-          <>
-            <User size={24} className="text-[#690003]" />
-            {isHovered && (
-              <div className="absolute inset-0 bg-gray-400/40 rounded-full transition-opacity duration-200" />
-            )}
-          </>
-        )}
+        <div className="relative w-14 h-14 bg-white shadow-2xl rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ease-in-out group">
+          {imageUrlWithCacheBust && hasImage ? (
+            <>
+              <img
+                src={imageUrlWithCacheBust}
+                alt={user?.name || 'User profile'}
+                className="w-full h-full rounded-full object-cover"
+                onError={() => setHasImage(false)}
+              />
+              {isHovered && (
+                <div className="absolute inset-0 bg-gray-400/40 rounded-full transition-opacity duration-200" />
+              )}
+            </>
+          ) : (
+            <>
+              <span className="text-lg font-bold text-[#690003]">
+                {initials}
+              </span>
+              {isHovered && (
+                <div className="absolute inset-0 bg-gray-400/40 rounded-full transition-opacity duration-200" />
+              )}
+            </>
+          )}
+        </div>
       </div>
-      <ProfileModal open={modalOpen} onOpenChange={setModalOpen} user={user || null} />
-    </div>
+
+      {/* Profile Modal */}
+      <ProfileModal
+        open={showProfileModal}
+        onOpenChange={setShowProfileModal}
+        user={user ?? null}
+      />
+    </>
   );
 }
