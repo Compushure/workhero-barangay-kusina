@@ -1,0 +1,216 @@
+'use server';
+
+import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
+import type { ServerActionResponse } from '@/types';
+import type { TaskStatusItem } from '@/components/employee/task-status/types';
+
+export interface EmployeeTasksData {
+  currentTasks: TaskStatusItem[];
+  onReviewTasks: TaskStatusItem[];
+  verifiedTasks: TaskStatusItem[];
+  deniedTasks: TaskStatusItem[];
+}
+
+interface TaskInfoRow {
+  kpitask_id: string;
+  status: string | null;
+  points_claimed_at: string | null;
+  category_name: string | null;
+  category_description: string | null;
+  category_points: number | null;
+  category_xp: number | null;
+  k_deadline_date: string | null;
+  remark: string | null;
+  completed_orders: number | null;
+  max_orders: number | null;
+}
+
+function formatDueDate(iso: string | null): string {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: '2-digit',
+    });
+  } catch {
+    return '—';
+  }
+}
+
+function rowToTaskStatusItem(row: TaskInfoRow): TaskStatusItem {
+  const points = row.category_points ?? 0;
+  const xp = Number(row.category_xp ?? 0);
+  const completed = row.completed_orders ?? 0;
+  const max = row.max_orders ?? 1;
+  const name = row.category_name ?? 'Task';
+  const title = row.category_description?.trim() ? row.category_description : name;
+
+  return {
+    id: row.kpitask_id,
+    taskType: name,
+    title,
+    progressCurrent: completed,
+    progressMax: max,
+    points,
+    xp,
+    dueDate: formatDueDate(row.k_deadline_date),
+    ...(row.remark?.trim() ? { remark: row.remark.trim() } : {}),
+    claimedAt: row.points_claimed_at ?? undefined,
+    status: row.status ?? undefined,
+  };
+}
+
+export async function fetchEmployeeTasks(): Promise<
+  ServerActionResponse<EmployeeTasksData>
+> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: 'Not authenticated', data: undefined };
+  }
+
+  const { data: rows, error } = await supabase
+    .from('task_info_view')
+    .select(
+      'kpitask_id, status, points_claimed_at, category_name, category_description, category_points, category_xp, k_deadline_date, remark, completed_orders, max_orders'
+    )
+    .eq('assigned_to', user.id);
+
+  if (error) {
+    return { error: 'Failed to fetch tasks: ' + error.message, data: undefined };
+  }
+
+  const list = (rows ?? []) as TaskInfoRow[];
+  const currentTasks: TaskStatusItem[] = [];
+  const onReviewTasks: TaskStatusItem[] = [];
+  const verifiedTasks: TaskStatusItem[] = [];
+  const deniedTasks: TaskStatusItem[] = [];
+
+  for (const row of list) {
+    const item = rowToTaskStatusItem(row);
+    const status = (row.status ?? '').toLowerCase();
+
+    if (status === 'assigned') {
+      currentTasks.push(item);
+    } else if (status === 'in review') {
+      onReviewTasks.push(item);
+    } else if (status === 'approved') {
+      verifiedTasks.push(item);
+    } else if (status === 'rejected') {
+      deniedTasks.push(item);
+    }
+  }
+
+  return {
+    error: null,
+    data: {
+      currentTasks,
+      onReviewTasks,
+      verifiedTasks,
+      deniedTasks,
+    },
+  };
+}
+
+export interface ClaimTaskResult {
+  pointsAdded: number;
+  xpAdded: number;
+}
+
+export async function claimTaskPointsAndXP(
+  kpitaskId: string
+): Promise<ServerActionResponse<ClaimTaskResult>> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: 'Not authenticated', data: undefined };
+  }
+
+  const { data: task, error: taskError } = await supabase
+    .from('task_info_view')
+    .select('assigned_to, status, points_claimed_at, category_points, category_xp')
+    .eq('kpitask_id', kpitaskId)
+    .single();
+
+  if (taskError || !task) {
+    return { error: 'Task not found', data: undefined };
+  }
+
+  const assignedTo = (task as { assigned_to: string | null }).assigned_to;
+  const status = ((task as { status: string | null }).status ?? '').toLowerCase();
+  const pointsClaimedAt = (task as { points_claimed_at: string | null }).points_claimed_at;
+  const categoryPoints = (task as { category_points: number | null }).category_points ?? 0;
+  const categoryXp = Number((task as { category_xp: number | null }).category_xp ?? 0);
+
+  if (assignedTo !== user.id) {
+    return { error: 'You can only claim rewards for tasks assigned to you', data: undefined };
+  }
+  if (status !== 'approved') {
+    return { error: 'Only approved tasks can be claimed', data: undefined };
+  }
+  if (pointsClaimedAt != null) {
+    return { error: 'This task has already been claimed', data: undefined };
+  }
+
+  const { error: pointsError } = await supabase.rpc('increment_points_for_user', {
+    target_user_id: user.id,
+    amount: categoryPoints,
+  });
+
+  if (pointsError) {
+    return { error: 'Failed to add points: ' + pointsError.message, data: undefined };
+  }
+
+  const { data: userRow, error: userFetchError } = await supabase
+    .from('User')
+    .select('xp, level')
+    .eq('id', user.id)
+    .single();
+
+  if (userFetchError || userRow == null) {
+    return { error: 'Failed to fetch user for XP update', data: undefined };
+  }
+
+  const currentLevel = (userRow as { level: number | null }).level ?? 0;
+  const currentXp = (userRow as { xp: number | null }).xp ?? 0;
+  const totalXp = currentLevel * 100 + currentXp;
+  const newTotalXp = totalXp + categoryXp;
+  const newLevel = Math.floor(newTotalXp / 100);
+  const newXp = newTotalXp % 100;
+
+  const { error: xpUpdateError } = await supabaseAdmin
+    .from('User')
+    .update({ level: newLevel, xp: newXp })
+    .eq('id', user.id);
+
+  if (xpUpdateError) {
+    return { error: 'Failed to add XP: ' + xpUpdateError.message, data: undefined };
+  }
+
+  const { error: claimUpdateError } = await supabaseAdmin
+    .from('KPITask')
+    .update({ points_claimed_at: new Date().toISOString() })
+    .eq('id', kpitaskId);
+
+  if (claimUpdateError) {
+    return { error: 'Failed to mark task as claimed', data: undefined };
+  }
+
+  return {
+    error: null,
+    data: { pointsAdded: categoryPoints, xpAdded: categoryXp },
+  };
+}
