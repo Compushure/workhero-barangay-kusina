@@ -10,7 +10,7 @@ import {
   handleAddTaskCategory,
   handleEditTaskCategoryAction,
   handleDeleteTaskCategoryAction,
-} from '@/action-handlers/manager-editor';
+} from '@/action-handlers/manager/editor';
 import type { TaskCategory } from '@/types/manager/task-editor';
 import type { AddTaskInput, EditTaskInput } from '@/zod/schemas/task';
 import { taskCategoryKeys } from '../queries/managerEditorQueries';

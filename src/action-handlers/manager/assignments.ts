@@ -11,7 +11,7 @@ import {
   fetchTaskList,
   fetchEmployeeList,
   addTaskAssignmentAction,
-} from '@/actions/manager-assignment';
+} from '@/actions/manager/assignments';
 import type { Task, AssignedEmployee, AssignedTask } from '@/types';
 import { toast } from 'sonner';
 

@@ -6,7 +6,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { handleFetchTaskCategoriesPaginated } from '@/action-handlers/manager-editor';
+import { handleFetchTaskCategoriesPaginated } from '@/action-handlers/manager/editor';
 import type { TaskCategory } from '@/types/manager/task-editor';
 
 export type TaskCategorySortOption =
@@ -89,7 +89,7 @@ export function useGetTaskCategoriesPaginated(
       return await handleFetchTaskCategoriesPaginated(page, pageSize, sortBy, searchTerm);
     },
     enabled: queryOptions.enabled !== false,
-    staleTime: 10 * 1000, // 10 seconds - categories don't change frequently
+    staleTime: 5 * 1000, // 5 seconds - categories don't change frequently
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
     refetchOnWindowFocus: true,
