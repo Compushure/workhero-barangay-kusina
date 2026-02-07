@@ -60,7 +60,7 @@ export async function fetchCurrentAssignedTasksPaginated(
   let query = supabase
     .from('task_info_view')
     .select(
-      'status, kpitask_id, category_id, category_name, category_description, category_points, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
+      'status, kpitask_id, category_id, category_name, category_description, category_points, category_xp, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
     );
   // .eq('status', 'assigned');
   // Only include currently assigned tasks
@@ -122,7 +122,7 @@ export async function fetchCurrentAssignedTasksPaginated(
         taskDescription: row.category_description || '',
         isRepeatable: true,
         points: row.category_points,
-        xp: row.category_points,
+        xp: row.category_xp,
         status: row.status || 'assigned',
         dateRange: {
           start: row.kpitask_created_at,
@@ -231,7 +231,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   let query = supabase
     .from('task_info_view')
     .select(
-      'status, kpitask_id, category_id, category_name, category_description, category_points, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
+      'status, kpitask_id, category_id, category_name, category_description, category_points, category_xp, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
     )
     // Only include employees with currently assigned tasks
     .not('assigned_to', 'is', null);
@@ -344,6 +344,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
         categoryName: string;
         categoryDescription: string;
         categoryPoints: number;
+        categoryXP: number;
         maxOrders: number;
         createdAt: string;
         deadlineDate: string;
@@ -361,7 +362,8 @@ export async function fetchCurrentAssignedEmployeesPaginated(
           categoryId: assignment.category_id,
           categoryName: assignment.category_name || 'Unnamed Task',
           categoryDescription: assignment.category_description || '',
-          categoryPoints: assignment.category_points || 0,
+          categoryPoints: assignment.category_points || 1,
+          categoryXP: assignment.category_xp || 1,
           maxOrders: assignment.max_orders || 1,
           createdAt: assignment.kpitask_created_at,
           deadlineDate: assignment.k_deadline_date,
@@ -391,7 +393,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
         taskDescription: taskGroup.categoryDescription,
         isRepeatable: true,
         points: taskGroup.categoryPoints,
-        xp: taskGroup.categoryPoints,
+        xp: taskGroup.categoryXP,
         status: taskGroup.status,
         dateRange: {
           start: taskGroup.createdAt,
@@ -415,7 +417,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   };
 }
 
-export async function clearAllTasks(): Promise<ServerActionResponse<boolean>> {
+export async function clearAssignedTasks(): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
   // Delete all KPITask entries that are not in 'done' status (i.e., all active assignments)
   const { error } = await supabase

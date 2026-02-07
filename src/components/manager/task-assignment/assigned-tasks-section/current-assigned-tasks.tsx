@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Search, ListTodo, Users } from 'lucide-react';
+import { Search, ListTodo, Users, CircleDashed } from 'lucide-react';
 import { MemoizedTaskViewCard as TaskViewCard } from './task-view-card';
 import { MemoizedEmployeeViewCard as EmployeeViewCard } from './employee-view-card';
 import { TaskSortingBar } from './task-sorting-bar';
@@ -149,8 +149,10 @@ export function CurrentAssignedTasks() {
             onClick={() => setShowClearConfirm(true)}
             disabled={memoizedTasks.length === 0}
             className="text-sm px-10 py-2 bg-[#690003] shadow-sm/25 hover:bg-red-500 cursor-pointer text-white disabled:opacity-50 transition-all duration-500 ease-in-out"
+            title="Clear All Assigned Tasks"
           >
-            Clear All
+            <CircleDashed />
+            Clear Assigned
           </Button>
 
           

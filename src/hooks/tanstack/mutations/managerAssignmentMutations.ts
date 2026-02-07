@@ -8,7 +8,7 @@
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import {
   handleDeleteTask,
-  handleClearAllTasks,
+  handleClearAssignedTasks,
   handleClearAllEmployeeTasks,
   handleUpdateTaskAssignment,
 } from '@/action-handlers/manager/assigned-tasks';
@@ -43,10 +43,10 @@ export function useDeleteTaskMutation(): UseMutationResult<
 }
 
 /**
- * Mutation for clearing all task assignments
+ * Mutation for clearing all 'assigned' task assignments
  * Automatically invalidates all assignment queries on success
  */
-export function useClearAllTasksMutation(): UseMutationResult<
+export function useClearAssignedTasksMutation(): UseMutationResult<
   boolean,
   Error,
   void
@@ -55,7 +55,7 @@ export function useClearAllTasksMutation(): UseMutationResult<
 
   return useMutation({
     mutationFn: async () => {
-      return await handleClearAllTasks();
+      return await handleClearAssignedTasks();
     },
     onSuccess: () => {
       // Invalidate all assignment data
