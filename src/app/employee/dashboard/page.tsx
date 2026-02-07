@@ -1,11 +1,6 @@
 import { Suspense } from 'react';
-<<<<<<< HEAD
-import { protectEmployeeRoute } from '@/actions/auth';
-import EmployeeDashboardClient from '@/components/employee/dashboard/employee-dashboard';
-=======
 import { protectEmployeeRoute } from '@/actions/shared/auth';
-import EmployeeDashboardClient from '@/components/employee/employee-dashboard';
->>>>>>> 38c64158741778bd2e508317d1c1b2066239dfbb
+import EmployeeDashboardClient from '@/components/employee/dashboard/employee-dashboard';
 
 function LoadingFallback() {
   return (
