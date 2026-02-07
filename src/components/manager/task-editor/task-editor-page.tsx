@@ -13,6 +13,7 @@ import AddEditTaskCategoryDialog from './dialogs/add-edit-task-category-dialog';
 import TaskCategoryTable from './task-category-table';
 import {
   useGetTaskCategoriesPaginated,
+  useGetTaskTypes,
   type TaskCategorySortOption,
 } from '@/hooks/tanstack/queries/managerEditorQueries';
 import {
@@ -72,6 +73,8 @@ export default function TaskEditorPage() {
 
   // Fetch all tasks without filters for duplicate checking
   const { data: allTasksData } = useGetTaskCategoriesPaginated(1, 1000, sortOption, '');
+
+  const { data: existingTypes = [] } = useGetTaskTypes();
 
   // Mutations
   const addMutation = useAddTaskCategory();
@@ -162,6 +165,8 @@ export default function TaskEditorPage() {
           <p className="text-md text-gray-600">Add, Edit, Delete assignable tasks in this page.</p>
         </div>
 
+        
+
         {/* Search, Sort, and Add Button */}
         <div className="flex gap-4 items-center justify-end">
           {/* Search Input */}
@@ -242,6 +247,7 @@ export default function TaskEditorPage() {
           saveError={saveError}
           onErrorClear={handleErrorClear}
           existingNames={existingNames}
+          existingTypes={existingTypes}
         />
       </div>
     </main>

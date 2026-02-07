@@ -233,14 +233,14 @@ export default function AddEditTaskCategoryDialog({
               />
 
               {/* Dropdown for existing types */}
-              {showTypeDropdown && filteredTypes.length > 0 && taskType.trim() !== '' && (
+              {showTypeDropdown && filteredTypes.length > 0 && (
                 <div className="absolute z-10 w-full bg-white border border-[#e0cfcf] rounded-lg shadow-lg max-h-40 overflow-y-auto mt-1">
                   {filteredTypes.map((type) => (
                     <button
                       key={type}
                       type="button"
                       onClick={() => handleTypeSelect(type)}
-                      className="w-full text-left px-4 py-2 hover:bg-[#fbeaea] transition-colors text-sm text-[#5a2a2a]"
+                      className="w-full text-left px-4 py-2 hover:bg-[#fbeaea] transition-colors text-sm text-[#5a2a2a] border-none bg-transparent"
                     >
                       {type}
                     </button>

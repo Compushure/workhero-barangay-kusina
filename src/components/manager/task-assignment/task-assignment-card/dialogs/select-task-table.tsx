@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Task } from '@/types';
-import { Pencil, Check, X } from 'lucide-react';
+import { Pencil, Check, X, Coins } from 'lucide-react';
 import { handleUpdateTaskPoints } from '@/action-handlers/manager-assignment';
 import { SkeletonRow } from '../../card-skeleton';
 
@@ -84,7 +84,7 @@ function SelectTasksTable({
           <tr className="flex justify-baseline">
             <th className="w-12 py-4"></th>
             <th className="w-75 py-4 text-left pl-4 text-sm font-bold">TASK</th>
-            <th className="w-35 py-4 text-center text-sm font-bold">FIESTA POINTS</th>
+            <th className="w-35 py-4 text-center text-sm font-bold">POINTS</th>
             <th className="w-35 py-4 text-center text-sm font-bold">XP</th>
             <th className="w-48 py-4 text-center text-sm font-bold">MAX ORDERS</th>
           </tr>
@@ -144,57 +144,16 @@ function SelectTasksTable({
                     <div className="text-sm text-zinc-500">{task.type}</div>
                   </td>
                   <td className="w-35 group flex gap-2 items-center justify-center px-8 py-4 text-zinc-800 font-medium text-center">
-                    {editingTaskId === task.id ? (
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSavePoints(task.id);
-                          }}
-                          disabled={isUpdating}
-                          className="bg-[#690003] text-zinc-50 size-6 rounded flex items-center justify-center hover:bg-green-700 cursor-pointer transition-all duration-300 ease-in-out disabled:opacity-50"
-                        >
-                          <Check className="size-4" />
-                        </button>
-                        <input
-                          type="number"
-                          value={editingPoints}
-                          onChange={(e) => setEditingPoints(e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                          className="remove-arrow w-16 text-center border border-gray-300 rounded px-2 py-1"
-                          min="1"
-                          disabled={isUpdating}
-                        />
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCancelEditing();
-                          }}
-                          disabled={isUpdating}
-                          className="bg-[#690003] text-zinc-50 size-6 rounded flex items-center justify-center hover:bg-red-700 cursor-pointer transition-all duration-300 ease-in-out disabled:opacity-50"
-                        >
-                          <X className="size-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 pl-6">
-                        <span className={`${isDisabled ? 'pr-7' : ''}`}>{task.points}</span>
-                        {!isDisabled && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStartEditing(task.id, task.points);
-                            }}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer hover:text-[#690003]"
-                          >
-                            <Pencil className="size-5" />
-                          </button>
-                        )}
-                      </div>
-                    )}
+                    <div className="flex items-center justify-center gap-1">
+                      <Coins strokeWidth={1.75} className="size-6" />
+                      {task.points}
+                    </div>
                   </td>
                   <td className='w-35 font-medium text-zinc-800 text-center flex items-center justify-center px-8 py-4'>
-                    <span>{task.xp}</span>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="inline-block italic text-base leading-none">XP</span>
+                      {task.xp}
+                    </div>
                   </td>
                   <td className="w-48 p-4 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
                       {task.isRepeatable ? (

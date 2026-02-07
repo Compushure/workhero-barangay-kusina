@@ -15,4 +15,5 @@ export interface TaskCategory {
   isRepeatable: boolean;
   points: number;
   xp: number;
+  createdAt: string; // ISO date string
 }

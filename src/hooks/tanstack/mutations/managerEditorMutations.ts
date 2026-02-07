@@ -65,12 +65,21 @@ export function useAddTaskCategory(): UseMutationResult<
       }
     },
     onSuccess: (data) => {
-      // Optionally add optimistic update here if needed
-      // Currently relying on invalidation to refetch
+      // Update paginated cache with new category
+      if (data) {
+        queryClient.setQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''), (old: any) => {
+          if (!old) return { tasks: [], count: 0, totalPages: 0 };
+          return {
+            ...old,
+            tasks: old.tasks?.map((task: any) => task.id === data.id ? data : task),
+          };
+        });
+      }
     },
     onSettled: () => {
       // Invalidate all task category queries to refetch updated data
-      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.all });
+      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '') });
       // Also invalidate types cache
       queryClient.invalidateQueries({ queryKey: [...taskCategoryKeys.all, 'types'] });
     },
@@ -120,11 +129,13 @@ export function useEditTaskCategory(): UseMutationResult<
     onMutate: async ({ id, input }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: taskCategoryKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '') });
 
       // Snapshot previous value
       const previousCategories = queryClient.getQueryData<TaskCategory[]>(taskCategoryKeys.list());
+      const previousPaginatedData = queryClient.getQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''));
 
-      // Optimistically update the cache
+      // Optimistically update both list and paginated cache
       queryClient.setQueryData<TaskCategory[]>(taskCategoryKeys.list(), (old) => {
         if (!old) return old;
         return old.map((cat) =>
@@ -142,6 +153,29 @@ export function useEditTaskCategory(): UseMutationResult<
         );
       });
 
+      // Also update paginated data optimistically
+      if (previousPaginatedData) {
+        queryClient.setQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''), (old: any) => {
+          if (!old) return { tasks: [], count: 0, totalPages: 0 };
+          return {
+            ...old,
+            tasks: old.tasks?.map((task: any) =>
+              task.id === id
+                ? {
+                    ...task,
+                    name: input.name ?? task.name,
+                    type: input.type ?? task.type,
+                    description: input.description ?? task.description,
+                    isRepeatable: input.isRepeatable ?? task.isRepeatable,
+                    points: input.points ?? task.points,
+                    xp: input.xp ?? task.xp,
+                  }
+                : task
+            ),
+          };
+        });
+      }
+
       return { previousCategories };
     },
     onError: (error, { id, input }, context) => {
@@ -157,11 +191,23 @@ export function useEditTaskCategory(): UseMutationResult<
           if (!old) return old;
           return old.map((cat) => (cat.id === id ? data : cat));
         });
+
+        // Update paginated cache with server response
+        queryClient.setQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''), (old: any) => {
+          if (!old) return { tasks: [], count: 0, totalPages: 0 };
+          return {
+            ...old,
+            tasks: old.tasks?.map((task: any) =>
+              task.id === id ? data : task
+            ),
+          };
+        });
       }
     },
     onSettled: () => {
       // Invalidate all task category queries to refetch updated data
-      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.all });
+      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '') });
       // Also invalidate types cache in case type changed
       queryClient.invalidateQueries({ queryKey: [...taskCategoryKeys.all, 'types'] });
     },
@@ -205,15 +251,28 @@ export function useDeleteTaskCategory(): UseMutationResult<
     onMutate: async (id) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: taskCategoryKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '') });
 
       // Snapshot previous value
       const previousCategories = queryClient.getQueryData<TaskCategory[]>(taskCategoryKeys.list());
+      const previousPaginatedData = queryClient.getQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''));
 
-      // Optimistically remove from cache
+      // Optimistically remove from both caches
       queryClient.setQueryData<TaskCategory[]>(taskCategoryKeys.list(), (old) => {
         if (!old) return old;
         return old.filter((cat) => cat.id !== id);
       });
+
+      // Also remove from paginated cache optimistically
+      if (previousPaginatedData) {
+        queryClient.setQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''), (old: any) => {
+          if (!old) return { tasks: [], count: 0, totalPages: 0 };
+          return {
+            ...old,
+            tasks: old.tasks?.filter((task: any) => task.id !== id),
+          };
+        });
+      }
 
       return { previousCategories };
     },
@@ -228,7 +287,8 @@ export function useDeleteTaskCategory(): UseMutationResult<
     },
     onSettled: () => {
       // Invalidate all task category queries to refetch updated data
-      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.all });
+      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '') });
       // Also invalidate types cache in case this was the last of a type
       queryClient.invalidateQueries({ queryKey: [...taskCategoryKeys.all, 'types'] });
     },

@@ -142,6 +142,7 @@ export async function fetchTaskCategoriesPaginated(
     isRepeatable: item.is_repeatable,
     points: item.points,
     xp: item.xp,
+    createdAt: item.created_at,
   }));
 
   const totalPages = Math.ceil((totalCount || 0) / pageSize);
@@ -202,6 +203,7 @@ export async function addTaskCategory(input: AddTaskInput): Promise<ServerAction
         points: validatedData.points,
         xp: validatedData.xp,
         is_repeatable: validatedData.isRepeatable,
+        created_at: new Date().toISOString(),
       })
       .select()
       .single();
@@ -220,6 +222,7 @@ export async function addTaskCategory(input: AddTaskInput): Promise<ServerAction
       isRepeatable: data.is_repeatable,
       points: data.points,
       xp: data.xp,
+      createdAt: data.created_at,
     };
 
     return { error: null, data: taskCategory };
@@ -275,8 +278,8 @@ export async function editTaskCategory(id: string, input: EditTaskInput): Promis
       isRepeatable: data.is_repeatable,
       points: data.points,
       xp: data.xp,
+      createdAt: data.created_at,
     };
-
     return { error: null, data: taskCategory };
   } catch (error) {
     console.error('Error in editTaskCategoryAction:', error);
@@ -310,42 +313,3 @@ export async function deleteTaskCategory(id: string): Promise<ServerActionRespon
     return { error: 'An unexpected error occurred while deleting the task category' };
   }
 }
-
-// // Action to get all task categories
-// export async function fetchTaskCategories(): Promise<ServerActionResponse<TaskCategory[]>> {
-//   try {
-//     // Get Supabase client
-//     const supabase = await createClient();
-
-//     // Fetch all task categories
-//     const { data, error } = await supabase
-//       .from('KPICategory')
-//       .select('*')
-//       .order('type', { ascending: false })
-//       .order('name', { ascending: false });
-
-//     if (error) {
-//       console.error('Error fetching task categories:', error);
-//       return { error: `Failed to fetch task categories: ${error.message}` };
-//     }
-
-//     // Transform database response to match TaskCategory type
-//     const taskCategories: TaskCategory[] = (data || []).map((item) => ({
-//       id: item.id,
-//       name: item.name,
-//       type: item.type,
-//       description: item.description,
-//       isRepeatable: item.is_repeatable,
-//       points: item.points,
-//       xp: item.xp,
-//     }));
-
-//     return { error: null, data: taskCategories };
-//   } catch (error) {
-//     console.error('Error in getTaskCategoriesAction:', error);
-//     if (error instanceof Error) {
-//       return { error: error.message };
-//     }
-//     return { error: 'An unexpected error occurred while fetching task categories' };
-//   }
-// }

@@ -84,20 +84,3 @@ export async function handleDeleteTaskCategoryAction(
   toast.success('task category deleted successfully');
   return true;
 }
-
-
-// export async function handleFetchTaskCategories(): Promise<TaskCategory[]> {
-//   const result = await safeAction(() => fetchTaskCategories());
-
-//   if (!result.success) {
-//     toast.error('Failed to load task categories: ' + result.error);
-//     return [];
-//   }
-
-//   if (result.data?.error) {
-//     toast.error(result.data.error);
-//     return [];
-//   }
-
-//   return result.data?.data ?? [];
-// }
