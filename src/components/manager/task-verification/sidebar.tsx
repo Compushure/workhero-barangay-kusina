@@ -23,22 +23,27 @@ interface SidebarProps {
 }
 
 function SidebarUserProfile({ isCollapsed, disabled }: { isCollapsed: boolean; disabled: boolean }) {
-  const { data: user, isLoading } = useGetSessionUser();
+  const { data: user, isLoading, isFetching } = useGetSessionUser();
+  const isProfileLoading = isLoading || isFetching;
 
   return (
     <>
-      <ProfilePic user={user} disabled={disabled} isLoading={isLoading} />
+      <ProfilePic user={user} disabled={disabled} isLoading={isProfileLoading} />
       {!isCollapsed && (
         <div className="min-w-0">
-          {isLoading ? (
+          {isProfileLoading ? (
             <>
               <div className="h-4 w-20 bg-white/20 rounded animate-pulse" />
               <div className="h-3 w-28 bg-white/10 rounded mt-1 animate-pulse" />
             </>
           ) : (
             <>
-              <p className="font-semibold text-sm truncate">{user?.name || 'User'}</p>
-              <p className="text-xs text-red-200 truncate">{user?.email || ''}</p>
+              {user && (
+                <>
+                  <p className="font-semibold text-sm truncate">{user.name}</p>
+                  <p className="text-xs text-red-200 truncate">{user.email}</p>
+                </>
+              )}
             </>
           )}
         </div>
