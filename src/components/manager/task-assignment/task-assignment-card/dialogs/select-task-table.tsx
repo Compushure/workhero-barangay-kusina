@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { Task } from '@/types';
-import { Pencil, Check, X, Coins } from 'lucide-react';
-import { handleUpdateTaskPoints } from '@/action-handlers/manager-assignment';
+import { Coins } from 'lucide-react';
 import { SkeletonRow } from '../../card-skeleton';
 
 interface SelectTasksTableProps {
@@ -24,59 +22,8 @@ function SelectTasksTable({
   updateMaxOrders,
   selectedTaskInstance,
   taskMaxOrders,
-  setTasks,
   disabledTaskIds,
 }: SelectTasksTableProps) {
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [editingPoints, setEditingPoints] = useState<string>('');
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  const handleStartEditing = (taskId: string, currentPoints: number) => {
-    setEditingTaskId(taskId);
-    setEditingPoints(currentPoints.toString());
-  };
-
-  const handleCancelEditing = () => {
-    setEditingTaskId(null);
-    setEditingPoints('');
-  };
-
-  const handleSavePoints = async (taskId: string) => {
-    const newPoints = Number.parseInt(editingPoints) || 0;
-
-    if (newPoints < 0) {
-      return; // Don't allow negative points
-    }
-
-    setIsUpdating(true);
-    try {
-      const success = await handleUpdateTaskPoints(taskId, newPoints);
-
-      if (success) {
-        // Close editing mode first
-        setEditingTaskId(null);
-        setEditingPoints('');
-
-        // Update the parent tasks state immediately for instant UI reflection
-        setTasks((prevTasks) =>
-          prevTasks.map((task) =>
-            task.id === taskId ? { ...task, points: newPoints } : task
-          )
-        );
-      } else {
-        // If update failed, still close editing mode
-        setEditingTaskId(null);
-        setEditingPoints('');
-      }
-    } catch (error) {
-      // Handle any unexpected errors
-      console.error('Error updating task points:', error);
-      setEditingTaskId(null);
-      setEditingPoints('');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
   return (
     <div className="bg-white rounded-2xl border-2 border-gray-300 flex-1 flex flex-col overflow-auto">
       <table className="w-full">

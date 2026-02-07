@@ -11,7 +11,6 @@ import {
   fetchTaskList,
   fetchEmployeeList,
   addTaskAssignmentAction,
-  updateTaskPoints
 } from '@/actions/manager-assignment';
 import type { Task, AssignedEmployee, AssignedTask } from '@/types';
 import { toast } from 'sonner';
@@ -54,26 +53,6 @@ export async function handleFetchEmployeeList(): Promise<AssignedEmployee[]> {
   }
 
   return result.data?.data ?? [];
-}
-
-export async function handleUpdateTaskPoints(
-  taskId: string,
-  points: number
-): Promise<boolean> {
-  const result = await safeAction(() => updateTaskPoints(taskId, points));
-
-  if (!result.success) {
-    toast.error('Failed to update task points: ' + result.error);
-    return false;
-  }
-
-  if (result.data?.error) {
-    toast.error('Failed to update task points: ' + result.data.error);
-    return false;
-  }
-
-  toast.success('Task points updated successfully');
-  return true;
 }
 
 /**

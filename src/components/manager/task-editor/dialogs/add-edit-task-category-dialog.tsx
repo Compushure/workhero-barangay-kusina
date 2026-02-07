@@ -6,8 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Check, X, Soup } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
+import { Plus, Check } from 'lucide-react';
 import type { TaskCategory } from '@/types/manager/task-editor';
 import type { AddTaskInput } from '@/zod/schemas/task';
 

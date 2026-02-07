@@ -83,50 +83,6 @@ export async function fetchEmployeeList(): Promise<ServerActionResponse<Assigned
   }
 }
 
-/**
- * Update task points and XP in the KPICategory table
- */
-export async function updateTaskPoints(
-  taskId: string,
-  points: number,
-  // xp: number
-): Promise<ServerActionResponse<void>> {
-  try {
-    const supabase = await createClient();
-
-    // Validate inputs
-    if (!taskId) {
-      return { error: 'Task ID is required' };
-    }
-
-    if (points < 0) {
-      return { error: 'Points must be non-negative numbers' };
-    }
-
-    // Update the task in KPICategory table
-    const { error } = await supabase
-      .from('KPICategory')
-      .update({
-        points: points,
-        // Note: If you have a separate XP column in the future, update it here
-        // For now, assuming XP is derived from points or stored in the same column
-      })
-      .eq('id', taskId);
-
-    if (error) {
-      console.error('Error updating task points:', error);
-      return { error: `Failed to update task: ${error.message}` };
-    }
-
-    return { error: null, data: undefined };
-  } catch (error) {
-    console.error('Error in updateTaskPoints:', error);
-    if (error instanceof Error) {
-      return { error: error.message };
-    }
-    return { error: 'An unexpected error occurred while updating task points' };
-  }
-}
 
 /**
  * Assign a task to employees and return the created assignment data

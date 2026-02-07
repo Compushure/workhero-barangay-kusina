@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Search, ArrowUpDown, ChefHat } from 'lucide-react';
+import { Plus, Search, ArrowUpDown, ChefHat, ListTodo } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -165,59 +165,71 @@ export default function TaskEditorPage() {
           <p className="text-md text-gray-600">Add, Edit, Delete assignable tasks in this page.</p>
         </div>
 
-        
-
-        {/* Search, Sort, and Add Button */}
-        <div className="flex gap-4 items-center justify-end">
-          {/* Search Input */}
-          <div className="relative flex">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search tasks..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="pl-10 pr-4 py-2 rounded-xl text-sm bg-white shadow-sm/50 border border-gray-200 focus:outline-none focus:border-[#690003] transition-colors"
-            />
+        <section className='flex justify-between'>
+          {/* Task Categories Count Display */}
+          <div className="flex gap-4 text-lg font-bold text-[#690003] pl-2">
+            <h5 className="flex items-center gap-2">
+              <ListTodo size={20} />
+              Categories{' '}
+              <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+                {totalCount ?? 0}
+              </span>
+            </h5>
           </div>
 
-          {/* Sort Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="default"
-                size="default"
-                className="bg-[#690003] hover:brightness-100 w-35 cursor-pointer rounded-full text-white shadow-sm/25 flex justify-between transition-all duration-500 ease-in-out"
-              >
-                <span className="truncate">{currentSortLabel}</span>
-                <ArrowUpDown size={18} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {SORT_OPTIONS.map((option) => (
-                <DropdownMenuItem
-                  key={option.value}
-                  onClick={() => handleSortChange(option.value)}
-                  className={`cursor-pointer transition-all duration-300 ease-in-out ${
-                    sortOption === option.value ? 'bg-red-100' : ''
-                  }`}
-                >
-                  {option.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          
+          {/* Search, Sort, and Add Button */}
+          <div className="flex gap-4 items-center justify-end">
+            {/* Search Input */}
+            <div className="relative flex">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search tasks..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="pl-10 pr-4 py-2 rounded-xl text-sm bg-white shadow-sm/50 border border-gray-200 focus:outline-none focus:border-[#690003] transition-colors"
+              />
+            </div>
 
-          {/* Add New Category Button */}
-          <Button
-            onClick={handleOpenAddDialog}
-            className="px-6 py-2 rounded-full bg-[#690003] hover:brightness-100 text-zinc-50 font-semibold text-sm shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out shrink-0"
-          >
-            <ChefHat size={18} />
-            <span>Add New Category</span>
-            <Plus size={18} className='ml-4'/>
-          </Button>
-        </div>
+            {/* Sort Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="default"
+                  size="default"
+                  className="bg-[#690003] hover:brightness-100 w-35 cursor-pointer rounded-full text-white shadow-sm/25 flex justify-between transition-all duration-500 ease-in-out"
+                >
+                  <span className="truncate">{currentSortLabel}</span>
+                  <ArrowUpDown size={18} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {SORT_OPTIONS.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => handleSortChange(option.value)}
+                    className={`cursor-pointer transition-all duration-300 ease-in-out ${
+                      sortOption === option.value ? 'bg-red-100' : ''
+                    }`}
+                  >
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Add New Category Button */}
+            <Button
+              onClick={handleOpenAddDialog}
+              className="px-6 py-2 rounded-full bg-[#690003] hover:brightness-100 text-zinc-50 font-semibold text-sm shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out shrink-0"
+            >
+              <ChefHat size={18} />
+              <span>Add New Category</span>
+              <Plus size={18} className='ml-4'/>
+            </Button>
+          </div>
+        </section>
 
         <TaskCategoryTable
           tasks={tasks}
