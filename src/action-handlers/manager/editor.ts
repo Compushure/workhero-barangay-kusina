@@ -1,4 +1,4 @@
-import { addTaskCategory, deleteTaskCategory, editTaskCategory, fetchTaskCategoriesPaginated } from "@/actions/manager-editor";
+import { addTaskCategory, deleteTaskCategory, editTaskCategory, fetchTaskCategoriesPaginated } from "@/actions/manager/editor";
 import { safeAction } from "@/lib/utils/safe-action";
 import { TaskCategory } from "@/types/manager/task-editor";
 import { AddTaskInput, EditTaskInput } from "@/zod/schemas/task";
