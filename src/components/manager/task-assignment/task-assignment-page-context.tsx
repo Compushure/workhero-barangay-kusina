@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
-import { handleDeleteTask, handleClearAllTasks } from '@/action-handlers/manager-current-assigned-task';
+import { handleDeleteTask, handleClearAssignedTasks } from '@/action-handlers/manager-current-assigned-task';
 import { handleAddTaskAssignment } from '@/action-handlers/manager-assignment';
 
 interface TaskAssignmentContextType {
@@ -119,7 +119,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
   };
 
   const clearAll = async () => {
-    const success = await handleClearAllTasks();
+    const success = await handleClearAssignedTasks();
     if (success) setAssignedTasks([]);
   };
 
