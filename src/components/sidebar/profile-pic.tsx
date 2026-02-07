@@ -8,9 +8,10 @@ import { ProfileModal } from './profile-modal';
 interface ProfilePicProps {
   user?: UserWithExtras | null;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
-export function ProfilePic({ user, onClick }: ProfilePicProps) {
+export function ProfilePic({ user, onClick, disabled = false }: ProfilePicProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [hasImage, setHasImage] = useState(true);
@@ -35,6 +36,7 @@ export function ProfilePic({ user, onClick }: ProfilePicProps) {
   };
 
   const handleProfileClick = () => {
+    if (disabled) return;
     if (onClick) {
       onClick();
     } else if (user) {
@@ -48,7 +50,7 @@ export function ProfilePic({ user, onClick }: ProfilePicProps) {
         onClick={handleProfileClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        disabled={isPending}
+        disabled={isPending || disabled}
         className="relative w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 cursor-pointer transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md disabled:hover:shadow-none"
       >
         {imageUrlWithCacheBust && hasImage ? (
