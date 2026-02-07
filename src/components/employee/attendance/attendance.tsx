@@ -288,7 +288,7 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
         <>
           {isApproachingAbsent && (
             <span className="text-[11px] font-bold text-red-600">
-              🚨 URGENT: You will be marked ABSENT if you don't time in within {absentTimer}!
+              🚨 URGENT: You will be marked ABSENT if you don&apos;t time in within {absentTimer}!
             </span>
           )}
           {isCurrentlyLate && !isApproachingAbsent && (
