@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
@@ -9,7 +9,7 @@ import { DatePickerPopover } from './date-picker-popover';
 import type { AssignedEmployee, Task } from '@/types';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
-import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
+import { handleFetchTaskList } from '@/action-handlers/manager/assignments';
 import {
   useGetCurrentAssignedTasksPaginated,
   managerAssignmentKeys,
@@ -49,13 +49,45 @@ export function TaskAssignmentCard() {
   const [showAssignConfirm, setShowAssignConfirm] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
+  // Calculate total employees count
+  const [totalEmployees, setTotalEmployees] = useState(0);
+
   useEffect(() => {
-    async function loadTasks() {
-      const tasks = await handleFetchTaskList();
+    async function loadData() {
+      const [tasks, employees] = await Promise.all([
+        handleFetchTaskList(),
+        import('@/action-handlers/manager/assignments').then((m) => m.handleFetchEmployeeList()),
+      ]);
       setAvailableTasks(tasks);
+      setTotalEmployees(employees.length);
     }
-    loadTasks();
+    loadData();
   }, []);
+
+  // Calculate if selected task is fully assigned (all employees assigned)
+  const isSelectedTaskFullyAssigned = useMemo(() => {
+    if (selectedTask.length === 0 || totalEmployees === 0) return false;
+
+    const taskId = selectedTask[0];
+    const taskEmployeeIds = new Set<string>();
+
+    assignedTasksForAssign.forEach((assignment) => {
+      if (assignment.taskId === taskId) {
+        assignment.assignedEmployees.forEach((emp) => {
+          taskEmployeeIds.add(emp.id);
+        });
+      }
+    });
+
+    return taskEmployeeIds.size >= totalEmployees;
+  }, [selectedTask, assignedTasksForAssign, totalEmployees]);
+
+  // Clear selected employees when selected task becomes fully assigned
+  useEffect(() => {
+    if (isSelectedTaskFullyAssigned && selectedEmployees.length > 0) {
+      setSelectedEmployees([]);
+    }
+  }, [isSelectedTaskFullyAssigned, selectedEmployees.length]);
 
   const handleTasksChange = (tasks: string[], maxRepeats?: Record<string, number>) => {
     setselectedTask(tasks);
@@ -111,8 +143,8 @@ export function TaskAssignmentCard() {
   };
 
   return (
-    <div className="rounded-xl bg-[#FBF4E8] p-4 pt-2 shadow-sm/25 mb-5">
-      <h2 className="mb-3 text-xl font-bold text-[#690003]">Assign Employees for Task</h2>
+    <div className="rounded-3xl bg-[#FBF4E8] p-6 shadow-sm/25">
+      <h2 className="mb-8 text-2xl font-bold text-[#690003]">Assign Employees for Task</h2>
 
       <div className="flex flex-wrap gap-4 mb-2">
         <div className="min-w-50">
@@ -144,20 +176,7 @@ export function TaskAssignmentCard() {
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-3 justify-end">
-        <Button
-          variant="outline"
-          onClick={() => setShowClearConfirm(true)}
-          disabled={
-            isAssigning ||
-            selectedEmployees.length === 0 ||
-            selectedTask.length === 0 ||
-            !selectedDeadline
-          }
-          className="text-black bg-white hover:bg-gray-100 px-12 cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed shadow-sm/25"
-        >
-          Clear
-        </Button>
+      <div className="flex gap-3 justify-end mt-6">
         <Button
           onClick={() => setShowAssignConfirm(true)}
           disabled={
@@ -169,6 +188,14 @@ export function TaskAssignmentCard() {
           className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:shadow-sm/25 disabled:cursor-not-allowed px-12 shadow-sm/25"
         >
           {isAssigning ? 'Assigning...' : 'Assign'}
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={() => setShowClearConfirm(true)}
+          className="text-black bg-white hover:bg-gray-100 px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
+        >
+          Clear
         </Button>
       </div>
 

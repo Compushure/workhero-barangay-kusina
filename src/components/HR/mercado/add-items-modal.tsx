@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Pencil, Plus, X, Loader2 } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Pencil, Plus, X, Loader2, Camera, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -13,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 interface AddItemsModalProps {
   open: boolean;
@@ -23,6 +27,8 @@ interface AddItemsModalProps {
     cost: number;
     quantity?: number;
     redeemingLimit?: number;
+    imageUrl?: string;
+    availableDate?: Date | string | null;
   } | null;
   onSave?: (data: {
     id?: string;
@@ -31,7 +37,10 @@ interface AddItemsModalProps {
     quantity: string;
     redeemingLimit: string;
     cost: number;
-  }) => void;
+    availableDate?: Date | null;
+  }) => Promise<void>;
+  saveError?: string;
+  onErrorClear?: () => void;
 }
 
 // Format number with comma separators
@@ -47,13 +56,23 @@ const unformatNumber = (value: string): string => {
   return value.replace(/,/g, '');
 };
 
-export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddItemsModalProps) {
+export function AddItemsModal({
+  open,
+  onOpenChange,
+  editingItem,
+  onSave,
+  saveError = '',
+  onErrorClear,
+}: AddItemsModalProps) {
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconPreview, setIconPreview] = useState<string>('');
+  const [existingImageUrl, setExistingImageUrl] = useState<string>('');
+  const [existingImageError, setExistingImageError] = useState(false);
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [itemCost, setItemCost] = useState('');
   const [redeemingLimit, setRedeemingLimit] = useState('');
+  const [availableDate, setAvailableDate] = useState<Date | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   // Populate form when editing
@@ -63,16 +82,78 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
       setItemCost(editingItem.cost.toString());
       setQuantity(editingItem.quantity?.toString() || '');
       setRedeemingLimit(editingItem.redeemingLimit?.toString() || '');
+      setExistingImageUrl(editingItem.imageUrl ? `${editingItem.imageUrl}?t=${Date.now()}` : '');
+      setExistingImageError(false);
+      // Load available date if it exists
+      if (editingItem.availableDate) {
+        setAvailableDate(new Date(editingItem.availableDate));
+      } else {
+        setAvailableDate(undefined);
+      }
     } else {
       // Reset form when adding new
       setItemName('');
       setItemCost('');
       setQuantity('');
       setRedeemingLimit('');
+      setAvailableDate(undefined);
       setIconFile(null);
       setIconPreview('');
+      setExistingImageUrl('');
+      setExistingImageError(false);
     }
   }, [editingItem, open]);
+
+  // Clear error when user modifies form fields
+  useEffect(() => {
+    if (saveError && onErrorClear) {
+      onErrorClear();
+    }
+  }, [
+    itemName,
+    quantity,
+    itemCost,
+    redeemingLimit,
+    availableDate,
+    iconFile,
+    saveError,
+    onErrorClear,
+  ]);
+
+  // Check if any changes were made compared to original item
+  const hasChanges = useMemo(() => {
+    if (!editingItem) {
+      // For new items, check if any field has value
+      return !!(itemName || itemCost || quantity || redeemingLimit || iconFile || availableDate);
+    }
+
+    // For editing, compare with original values
+    const quantityNum = quantity ? parseInt(unformatNumber(quantity)) : undefined;
+    const redeemingLimitNum = redeemingLimit ? parseInt(unformatNumber(redeemingLimit)) : undefined;
+    const costNum = itemCost ? parseFloat(unformatNumber(itemCost)) : 0;
+
+    const isNameChanged = itemName !== editingItem.name;
+    const isCostChanged = costNum !== editingItem.cost;
+    const isQuantityChanged = quantityNum !== editingItem.quantity;
+    const isLimitChanged = redeemingLimitNum !== editingItem.redeemingLimit;
+    const isIconChanged = !!iconFile;
+
+    // Check if available date changed
+    const originalDate = editingItem.availableDate
+      ? new Date(editingItem.availableDate).getTime()
+      : null;
+    const currentDate = availableDate ? availableDate.getTime() : null;
+    const isDateChanged = originalDate !== currentDate;
+
+    return (
+      isNameChanged ||
+      isCostChanged ||
+      isQuantityChanged ||
+      isLimitChanged ||
+      isIconChanged ||
+      isDateChanged
+    );
+  }, [editingItem, itemName, itemCost, quantity, redeemingLimit, iconFile, availableDate]);
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -87,7 +168,7 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
   };
 
   const handleSave = async () => {
-    if (itemName && itemCost) {
+    if (itemName && itemCost && hasChanges) {
       setIsLoading(true);
       try {
         await onSave?.({
@@ -97,7 +178,9 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
           quantity: unformatNumber(quantity),
           redeemingLimit: unformatNumber(redeemingLimit),
           cost: parseFloat(unformatNumber(itemCost)),
+          availableDate: availableDate || null,
         });
+        // Close modal on successful save
         handleClose();
       } catch (error) {
         console.error('Error saving item:', error);
@@ -111,10 +194,13 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
     if (isLoading) return; // Prevent closing while loading
     setIconFile(null);
     setIconPreview('');
+    setExistingImageUrl('');
+    setExistingImageError(false);
     setItemName('');
     setQuantity('');
     setRedeemingLimit('');
     setItemCost('');
+    setAvailableDate(undefined);
     setIsLoading(false);
     onOpenChange(false);
   };
@@ -154,7 +240,8 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
     !redeemingLimit ||
     isRedeemingLimitInvalid() ||
     hasCharacterLimitErrors ||
-    isLoading;
+    isLoading ||
+    !hasChanges;
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
@@ -172,22 +259,50 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
           </div>
         </DialogHeader>
 
+        {/* Error Message */}
+        {saveError && (
+          <div className="bg-red-100 border border-red-300 rounded-lg p-3 text-red-700 text-sm">
+            {saveError}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-[160px_1fr] lg:grid-cols-[190px_1fr] gap-4 mt-4">
           {/* Icon Upload Section */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-[#5a2a2a]">Select Icon</Label>
             <label
               htmlFor="icon-upload"
-              className="w-full md:w-[160px] lg:w-[180px] h-[140px] md:h-[160px] lg:h-[180px] border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white mx-auto md:mx-0"
+              className="w-full md:w-[160px] lg:w-[180px] h-[140px] md:h-[160px] lg:h-[180px] border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white mx-auto md:mx-0 relative overflow-hidden group"
+              style={
+                iconPreview || (editingItem && existingImageUrl && !existingImageError)
+                  ? {
+                      backgroundImage: `url('${iconPreview || existingImageUrl}')`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      borderStyle: 'solid',
+                    }
+                  : undefined
+              }
             >
+              {/* Show new icon preview or existing image as background */}
               {iconPreview ? (
                 <img
                   src={iconPreview}
                   alt="Icon preview"
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-cover rounded-lg absolute inset-0"
                 />
+              ) : editingItem && existingImageUrl && !existingImageError ? (
+                // Existing image shown via background style, overlay info on top
+                <div className="absolute inset-0" />
               ) : (
                 <Plus className="h-8 w-8 text-[#7a3d3d]" />
+              )}
+
+              {/* Camera icon overlay when there's an image (new or existing) */}
+              {(iconPreview || (editingItem && existingImageUrl && !existingImageError)) && (
+                <div className="absolute top-1 right-1 bg-[#690003] rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="h-4 w-4 text-white" />
+                </div>
               )}
             </label>
             <input
@@ -279,12 +394,12 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
               </p>
             )}
 
-            {/* Item Cost */}
-            <div className="space-y-2">
-              <Label htmlFor="item-cost" className="text-sm font-medium text-[#5a2a2a]">
-                Item Cost
-              </Label>
-              <div className="flex items-center gap-3">
+            {/* Item Cost and Available Date */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="item-cost" className="text-sm font-medium text-[#5a2a2a]">
+                  Item Cost
+                </Label>
                 <Input
                   id="item-cost"
                   type="text"
@@ -296,10 +411,57 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
                     }
                   }}
                   placeholder="Fiesta Points"
-                  className="w-120px bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
+                  className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
                 />
+                {unformatNumber(itemCost).length === 6}
               </div>
-              {unformatNumber(itemCost).length === 6}
+
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="available-date" className="text-sm font-medium text-[#5a2a2a]">
+                  Available Date
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="available-date"
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start bg-white border-[#e0cfcf] hover:bg-[#fbeaea] text-[#5a2a2a] font-normal',
+                        !availableDate && 'text-[#7a3d3d]/50'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {availableDate ? format(availableDate, 'MMM d, yyyy') : 'Select date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-white" align="end">
+                    <Calendar
+                      mode="single"
+                      selected={availableDate}
+                      onSelect={setAvailableDate}
+                      disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                      initialFocus
+                    />
+                    {availableDate && (
+                      <div className="p-3 border-t border-[#e0cfcf]">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setAvailableDate(undefined)}
+                          className="w-full bg-white text-[#690003] border-[#e0cfcf] hover:bg-[#fbeaea]"
+                        >
+                          Clear Date
+                        </Button>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+                {availableDate && (
+                  <p className="text-xs text-[#7a3d3d]/70 italic">
+                    Available from {format(availableDate, 'MMM d, yyyy')} onwards
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -329,6 +491,13 @@ export function AddItemsModal({ open, onOpenChange, editingItem, onSave }: AddIt
             )}
           </Button>
         </div>
+
+        {/* Helper message when editing but no changes made */}
+        {editingItem && !hasChanges && !saveError && (
+          <p className="text-xs text-[#7a3d3d]/70 text-center mt-2 italic">
+            Make changes to enable save
+          </p>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -3,6 +3,9 @@ import './globals.css';
 import { AuthProvider } from '@/lib/auth-context';
 import { QueryProvider } from '@/lib/providers/query-provider';
 import { Toaster } from 'sonner';
+import { Roboto } from 'next/font/google';
+
+const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'] });
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -15,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={roboto.className}>
       <body className="antialiased">
         <QueryProvider>
           {/* Remove later on when adding real auth  */}

@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 // export { Sidebar } from './sidebar';
 
 // Export all employee dashboard components
@@ -15,6 +16,9 @@ export { StatsBar } from './stats-bar';
 export { DonateButton } from './donate-button';
 export { SortDropdown } from './sort-dropdown';
 =======
+=======
+export { RewardCard } from './mercado';
+>>>>>>> eddaf2864718a3f06c802f9b5a43d147ce185aee
 export { Sidebar } from './sidebar';
 export {
   TaskStatusBoard,

@@ -11,7 +11,8 @@ import {
   handleEditUser,
   handleDeleteUser,
   handleUploadProfilePicture,
-} from '@/action-handlers/manage';
+  handleDeleteProfilePicture,
+} from '@/action-handlers/superadmin/users';
 import type { User, AddUserInput, EditUserInput } from '@/types';
 import { userKeys } from '../queries/userQueries';
 
@@ -39,19 +40,78 @@ import { userKeys } from '../queries/userQueries';
  */
 export function useUploadProfilePicture() {
   const queryClient = useQueryClient();
-  return useMutation<void, Error, { file: File; userid: string; username: string }>({
-    mutationFn: async ({ file, userid, username }): Promise<void> => {
-      // Use action-handler which includes safeAction wrapper and toast handling
-      await handleUploadProfilePicture(username, userid, file);
+  return useMutation<string | null, Error, { file: File; userid: string; username: string }>({
+    mutationFn: async ({ file, userid, username }): Promise<string | null> => {
+      // Use action-handler which returns the public URL
+      return await handleUploadProfilePicture(username, userid, file);
     },
-    onSuccess: () => {
-      // Invalidate ALL user queries (including filtered ones) by using the base key
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+    onSuccess: (publicUrl, variables) => {
+      console.log('Upload successful:', variables.userid, publicUrl);
+      if (publicUrl) {
+        // Update the cache with the new profilePictureUrl
+        const queryCache = queryClient.getQueryCache();
+        const userQueries = queryCache.findAll({ queryKey: userKeys.all });
+
+        userQueries.forEach((query) => {
+          if (Array.isArray(query.state.data)) {
+            // Regular list query
+            queryClient.setQueryData(query.queryKey, (oldData: User[] | undefined) => {
+              if (!oldData) return oldData;
+              return oldData.map((user) =>
+                user.id === variables.userid
+                  ? { ...user, profilePictureUrl: publicUrl }
+                  : user
+              );
+            });
+          } else if (query.state.data && typeof query.state.data === 'object' && 'data' in query.state.data) {
+            // Paginated query
+            type PaginatedUsers = { data: User[]; count?: number };
+            queryClient.setQueryData(query.queryKey, (oldData: PaginatedUsers | undefined) => {
+              if (!oldData?.data) return oldData;
+              return {
+                ...oldData,
+                data: oldData.data.map((user) =>
+                  user.id === variables.userid
+                    ? { ...user, profilePictureUrl: publicUrl }
+                    : user
+                ),
+              };
+            });
+          }
+        });
+      }
+      // Invalidate paginated lists to refresh all sorted views when user data changes
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      console.log('Cache invalidated for user:', variables.userid);
       // Toast is handled by action-handler
     },
     onError: (_error) => {
+      console.error('Upload mutation error:', _error);
       // Rollback optimistic update on error
       // Error toast is handled by action-handler
+    },
+  });
+}
+
+export function useDeleteProfilePicture() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, { userId: string; userName: string }>({
+    mutationFn: async ({ userId, userName }): Promise<void> => {
+      const success = await handleDeleteProfilePicture(userId, userName);
+      if (!success) {
+        throw new Error('Failed to delete profile picture');
+      }
+    },
+    onSuccess: (_, { userId }) => {
+      // Invalidate all user queries to refresh user lists
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      // Dispatch custom event to trigger storage re-check in user-card
+      window.dispatchEvent(
+        new CustomEvent('profile-image-deleted', {
+          detail: { userId, timestamp: Date.now() },
+        })
+      );
     },
   });
 }
@@ -93,6 +153,7 @@ export function useAddUser(): UseMutationResult<User, Error, AddUserInput, { pre
         sss: input.sss || '',
         pagibig: input.pagibig || '',
         companyId: input.companyId || '',
+        profilePictureUrl: undefined, // Will be updated after actual server response
       };
 
       // Update ALL cached user queries optimistically
@@ -125,9 +186,10 @@ export function useAddUser(): UseMutationResult<User, Error, AddUserInput, { pre
       return { previousQueries };
     },
     onSuccess: () => {
-      // Invalidate ALL user queries to fetch real data from server
-      // This replaces the temporary optimistic data with actual server data
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      // Invalidate paginated lists to fetch real data from server and maintain correct sort order
+      // This ensures the new user appears in the correct position based on current sorting
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       // Toast is handled by action-handler
     },
     onError: (_error, _variables, context) => {
@@ -223,8 +285,10 @@ export function useEditUser(): UseMutationResult<
       return { previousUsers };
     },
     onSuccess: () => {
-      // Invalidate ALL user queries to ensure server state is reflected
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      // Invalidate paginated lists to refresh all sorted views when user data changes
+      // This is critical for when a user's name changes - it affects sort order
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       // Toast is handled by action-handler
     },
     onError: (_error, _variables, context) => {
@@ -302,8 +366,9 @@ export function useDeleteUser(): UseMutationResult<
       return { previousUsers };
     },
     onSuccess: () => {
-      // Invalidate ALL user queries to ensure server state is reflected
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      // Invalidate paginated lists to remove deleted user from all sorted views
+      queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       // Toast is handled by action-handler
     },
     onError: (_error, _variables, context) => {

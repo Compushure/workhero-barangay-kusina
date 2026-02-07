@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
+/**
+ * Password Change API Route
+ * Still actively used by /src/actions/manage.ts changeuserPassword()
+ * Consider migrating to a direct server action in the future
+ */
+
 export async function GET(req: NextRequest) {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.SUPABASE_URL) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

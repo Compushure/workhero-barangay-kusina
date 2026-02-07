@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, memo, useCallback } from 'react';
-import { MoreHorizontal, ImageIcon, EyeOff } from 'lucide-react';
+import { Pencil, ImageIcon, EyeOff, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { HideRewardDialog } from './hide-items';
+import { isItemAvailableNow } from '@/utils/date-utils';
 
 interface MercadoItem {
   id: string;
@@ -20,6 +21,7 @@ interface MercadoItem {
   isActive?: boolean;
   imageUrl?: string;
   createdAt?: string;
+  availableDate?: string | Date | null;
 }
 
 interface MercadoCardProps {
@@ -79,6 +81,25 @@ export const MercadoCard = memo(function MercadoCard({
     onClick?.(item.id);
   }, [onClick, item.id]);
 
+  // Check if item is scheduled for future availability
+  const isScheduled = useMemo(() => {
+    return item.availableDate && !isItemAvailableNow(item.availableDate);
+  }, [item.availableDate]);
+
+  const availableDateText = useMemo(() => {
+    if (!item.availableDate) return null;
+    try {
+      const date = new Date(item.availableDate);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    } catch {
+      return null;
+    }
+  }, [item.availableDate]);
+
   return (
     <>
       <div
@@ -116,6 +137,15 @@ export const MercadoCard = memo(function MercadoCard({
         <div className="ml-4 flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-xl font-bold text-[#730202] truncate">{item.name}</h3>
+            {isScheduled && (
+              <Badge
+                variant="secondary"
+                className="bg-blue-100 text-blue-700 hover:bg-blue-100 text-xs"
+              >
+                <Calendar className="h-3 w-3 mr-1" />
+                {availableDateText}
+              </Badge>
+            )}
             {item.isActive === false && (
               <Badge
                 variant="secondary"
@@ -125,6 +155,14 @@ export const MercadoCard = memo(function MercadoCard({
                 Hidden
               </Badge>
             )}
+            {item.quantity !== undefined && item.quantity === 0 && (
+              <Badge
+                variant="destructive"
+                className="bg-red-600 text-white hover:bg-red-600 text-xs"
+              >
+                Out of Stock
+              </Badge>
+            )}
           </div>
 
           <div className="flex items-center gap-4 mt-2">
@@ -132,23 +170,27 @@ export const MercadoCard = memo(function MercadoCard({
               {formattedPrice} pts
             </p>
             {formattedQuantity !== undefined && (
-              <p className="text-[#730202] text-sm opacity-70">
+              <p
+                className={`text-[#730202] text-sm ${item.quantity === 0 ? 'opacity-50 line-through' : 'opacity-70'}`}
+              >
                 | Available: {formattedQuantity}
               </p>
             )}
           </div>
           {item.createdAt && (
-            <p className="text-[#730202]/50 text-xs mt-1">
-              Created: {formatDate(item.createdAt)}
-            </p>
+            <p className="text-[#730202]/50 text-xs mt-1">Created: {formatDate(item.createdAt)}</p>
           )}
         </div>
 
-        <div className="absolute top-4 right-4" onClick={(e) => e.stopPropagation()}>
+        <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[#f2e1c9]">
-                <MoreHorizontal className="h-5 w-5 text-[#730202]" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 bg-white shadow-md hover:bg-[#690003] hover:text-white transition-all duration-200"
+              >
+                <Pencil className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32 rounded-xl">

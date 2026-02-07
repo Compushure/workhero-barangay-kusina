@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { parseISO, format } from 'date-fns';
 import type { AssignedTask, AssignedEmployee } from '@/types';
-import { ChevronDown, X } from 'lucide-react';
+import { Coins, Soup } from 'lucide-react';
 import TaskViewCardMenu from './dialogs/task-view/task-view-card-menu';
 import EditTaskDialog from './dialogs/task-view/edit-task-dialog';
 import DeleteTaskDialog from './dialogs/task-view/delete-task-dialog';
 import UnassignEmployeeDialog from './dialogs/task-view/unassign-employee-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
 import { useUpdateTaskAssignmentMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
-import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
+import TaskViewEmployeeBadges from './task-view-employee-badges';
+import { isTaskOverdue } from '@/utils/date-utils';
 
 interface TaskViewCardProps {
   task: AssignedTask;
@@ -30,16 +32,46 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   );
   const [openPopover, setOpenPopover] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
   const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const badgesContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     handleFetchEmployeeList().then(setEmployees);
   }, []);
 
-  const displayedEmployees = expanded
-    ? (task.assignedEmployees ?? [])
-    : (task.assignedEmployees ?? []).slice(0, 4);
-  const hiddenCount = Math.max(0, (task.assignedEmployees ?? []).length - 4);
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (badgesContainerRef.current) {
+        // Temporarily remove the height restriction to check natural overflow
+        const originalClasses = badgesContainerRef.current.className;
+        badgesContainerRef.current.className = badgesContainerRef.current.className.replace(
+          'max-h-12 overflow-hidden',
+          ''
+        );
+
+        const scrollHeight = badgesContainerRef.current.scrollHeight;
+        const clientHeight = badgesContainerRef.current.clientHeight;
+        const hasNaturalOverflow = scrollHeight > clientHeight;
+
+        // Restore original classes
+        badgesContainerRef.current.className = originalClasses;
+
+        setHasOverflow(hasNaturalOverflow);
+      }
+    };
+
+    checkOverflow();
+
+    const resizeObserver = new ResizeObserver(checkOverflow);
+    if (badgesContainerRef.current) {
+      resizeObserver.observe(badgesContainerRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, [task.assignedEmployees]);
+
+  const displayedEmployees = task.assignedEmployees ?? [];
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
@@ -106,26 +138,76 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   };
 
   return (
-    <div className="rounded-xl bg-[#FAFAFA] p-4 shadow-sm/25">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1 ">
-          <div className="flex items-center gap-3">
-            <h3 className="text-lg font-bold text-[#690003]">{task.taskName}</h3>
-          </div>
-          <p className="text-sm text-gray-500 mb-2">{task.taskType}</p>
-          <div className="flex gap-6 text-sm text-black">
-            <span>
-              {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
-            </span>
-            <span>Max Orders: {task.maxOrders}</span>
-            <span className="flex items-center gap-2">
-              <span>{task.points} pts</span>
-              <span>XP {task.xp}</span>
-            </span>
-          </div>
-        </div>
+    <div
+      className={`flex items-center justify-between rounded-2xl bg-[#FAFAFA] p-6 gap-8 transition-all ease-in-out duration-400 
+        ${expanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`}
+    >
+      <main className="flex flex-col w-full gap-5">
+        <section className="flex justify-between">
+          {/* Task name, description, and date range */}
+          <header className="flex flex-col gap-1.5">
+            <div className="flex items-end">
+              <h3 className="text-xl font-bold text-[#690003] leading-none">{task.taskName}</h3>
+              <p className="text-sm text-gray-500 ml-2 leading-none">- {task.taskDescription}</p>
+            </div>
 
+            <p className="text-sm font-medium text-zinc-500">
+              {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
+              {isTaskOverdue(task.dateRange.end) && (
+                <span className="bg-red-100 text-red-500 text-sm px-2 py-1 rounded-full ml-2">
+                  Task is Overdue
+                </span>
+              )}
+            </p>
+          </header>
+
+          {/* Task max orders, fiesta points and XP */}
+          <div className="flex gap-4 text-zinc-500 items-baseline">
+            <div className="flex flex-col items-end">
+              <div className="flex text-base font-medium items-end gap-1">
+                <Soup strokeWidth={1.5} className="size-7 mb-3.5" />
+                <p className="flex flex-col items-center">
+                  <span className="inline-block font-semibold pb-1 leading-none">
+                    {task.maxOrders} max order/s
+                  </span>
+                  <span className="text-xs font-extralight text-zinc-400 leading-none">
+                    per employee
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center">
+              <div className="flex items-end gap-2">
+                <p className="flex gap-1 items-end text-xl font-medium leading-none">
+                  <Coins strokeWidth={1.75} className="size-6" />
+                  <span className="inline-block font-semibold pb-0.5">{task.points}</span>
+                </p>
+
+                <p className="flex gap-1.5 items-end font-medium pb-0.5">
+                  <span className="inline-block italic text-lg leading-none">XP</span>
+                  <span className="inline-block font-semibold text-xl leading-none">{task.xp}</span>
+                </p>
+              </div>
+
+              <p className="text-xs font-extralight text-zinc-400 pl-3">per order</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Assigned To Section */}
+        <TaskViewEmployeeBadges
+          task={task}
+          hasOverflow={hasOverflow}
+          expanded={expanded}
+          setExpanded={setExpanded}
+          badgesContainerRef={badgesContainerRef}
+          displayedEmployees={displayedEmployees}
+          setShowRemoveConfirm={setShowRemoveConfirm}
+        />
+      </main>
+
+      <div className="flex">
         <TaskViewCardMenu
           openPopover={openPopover}
           setOpenPopover={setOpenPopover}
@@ -134,74 +216,34 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         />
       </div>
 
-      {/* Assigned To Section */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-lg font-bold text-[#690003]">
-            Assigned to{' '}
-            <span className="bg-gray-300 text-gray-700 w-7 h-6 px-1 rounded-full text-sm ml-1.5 inline-flex items-center justify-center">
-              {(task.assignedEmployees ?? []).length}
-            </span>
-          </h4>
-          {hiddenCount > 0 && (
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="text-[#690003] font-medium flex items-center gap-1 hover:underline"
-            >
-              See All{' '}
-              <ChevronDown className={`w-4 h-4 transition ${expanded ? 'rotate-180' : ''}`} />
-            </button>
-          )}
-        </div>
+      {/* Unassign Employee Dialog */}
+      <UnassignEmployeeDialog
+        showRemoveConfirm={showRemoveConfirm}
+        setShowRemoveConfirm={setShowRemoveConfirm}
+        task={task}
+      />
 
-        {/* Employee Assigned Badges */}
-        <div className="flex flex-wrap gap-3">
-          {(displayedEmployees ?? []).map((emp) => (
-            <div
-              key={emp.id}
-              className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border-2 border-gray-300"
-            >
-              <span className="font-medium text-sm text-black">{emp.name}</span>
-              <span className="text-gray-500 font-light text-sm">{emp.empId}</span>
-              <button
-                onClick={() => setShowRemoveConfirm(emp.id)}
-                className="text-gray-400 hover:text-red-500 ml-2 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130"
-              >
-                <X className="w-4 h-4 text-red-500" />
-              </button>
-            </div>
-          ))}
-        </div>
+      {/* Delete Task Dialog */}
+      <DeleteTaskDialog
+        showDeleteConfirm={showDeleteConfirm}
+        setShowDeleteConfirm={setShowDeleteConfirm}
+        task={task}
+      />
 
-        {/* Unassign Employee Dialog */}
-        <UnassignEmployeeDialog
-          showRemoveConfirm={showRemoveConfirm}
-          setShowRemoveConfirm={setShowRemoveConfirm}
-          task={task}
-        />
-
-        {/* Delete Task Dialog */}
-        <DeleteTaskDialog
-          showDeleteConfirm={showDeleteConfirm}
-          setShowDeleteConfirm={setShowDeleteConfirm}
-          task={task}
-        />
-
-        {/* Edit Task Dialog */}
-        <EditTaskDialog
-          showEditDialog={showEditDialog}
-          handleCancelEdit={handleCancelEdit}
-          handleEditTask={handleEditTask}
-          isProcessing={updateTaskMutation.isPending}
-          task={task}
-          editMaxOrders={editMaxOrders}
-          setEditMaxOrders={setEditMaxOrders}
-          editDueDate={editDueDate}
-          setEditDueDate={setEditDueDate}
-          editAssignedEmployees={editAssignedEmployees}
-          toggleEmployee={toggleEmployee}
-        />
-      </div>
+      {/* Edit Task Dialog */}
+      <EditTaskDialog
+        showEditDialog={showEditDialog}
+        handleCancelEdit={handleCancelEdit}
+        handleEditTask={handleEditTask}
+        isProcessing={updateTaskMutation.isPending}
+        task={task}
+        editMaxOrders={editMaxOrders}
+        setEditMaxOrders={setEditMaxOrders}
+        editDueDate={editDueDate}
+        setEditDueDate={setEditDueDate}
+        editAssignedEmployees={editAssignedEmployees}
+        toggleEmployee={toggleEmployee}
+      />
     </div>
   );
 }

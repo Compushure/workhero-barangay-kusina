@@ -15,37 +15,47 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
 
   const pages: (number | string)[] = [];
 
-  // Always show first page
-  pages.push(1);
-
-  // Ellipsis before current if not near start
-  if (currentPage > 2) {
-    pages.push('...');
+  // Always show first 4 pages
+  const firstPages = Math.min(4, totalPages);
+  for (let i = 1; i <= firstPages; i++) {
+    pages.push(i);
   }
 
-  // Current page (if not first or last)
-  if (currentPage !== 1 && currentPage !== totalPages) {
-    pages.push(currentPage);
+  // Show ellipsis if there are more pages beyond first 4
+  if (totalPages > 8) {
+    // If current page is not in first 4 or last 4, show ellipsis and current page
+    if (currentPage > 4 && currentPage <= totalPages - 4) {
+      pages.push('...');
+      pages.push(currentPage);
+      pages.push('...');
+    } else if (currentPage > 4) {
+      // Current page is beyond first 4, show ellipsis after first 4
+      pages.push('...');
+    }
   }
 
-  // Ellipsis after current if not near end
-  if (currentPage < totalPages - 1) {
-    pages.push('...');
-  }
-
-  // Always show last page
-  if (totalPages > 1) {
-    pages.push(totalPages);
+  // Always show last 4 pages (or fewer if total pages is less)
+  const lastPages = Math.min(4, totalPages - firstPages);
+  if (lastPages > 0) {
+    // Add ellipsis if needed
+    if (totalPages > 8 && currentPage <= totalPages - 4) {
+      pages.push('...');
+    }
+    // Add last 4 pages
+    for (let i = totalPages - lastPages + 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
   }
 
   return (
-    <div className="flex justify-center items-center gap-2 mt-4">
+    <div className="flex justify-center items-center gap-2 my-6 scale-115">
       {/* Left arrow */}
       <Button
         variant="outline"
         size="sm"
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
+        className='hover:bg-[#690003] hover:text-zinc-50 not-disabled:shadow-sm/15'
       >
         <ChevronLeft size={16} />
       </Button>
@@ -62,6 +72,8 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
             variant={page === currentPage ? 'default' : 'outline'}
             size="sm"
             onClick={() => onPageChange(page as number)}
+            className={`hover:bg-[#690003] hover:text-zinc-50 transition-all ease-in-out shadow-sm/15
+              ${page === currentPage ? 'bg-[#690003] text-zinc-50' : 'hover:scale-110 hover:shadow-xs/25'}`}
           >
             {page}
           </Button>
@@ -74,6 +86,7 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
         size="sm"
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
+        className='hover:bg-[#690003] hover:text-zinc-50 not-disabled:shadow-sm/15'
       >
         <ChevronRight size={16} />
       </Button>

@@ -52,6 +52,7 @@ export interface User {
   sss?: string;
   pagibig?: string;
   createdAt?: Date;
+  profilePictureUrl?: string;
 }
 
 // ============================================
@@ -94,6 +95,12 @@ export type EditUserInput = z.infer<typeof import('@/zod/schemas').editUserSchem
  */
 export type LoginInput = z.infer<typeof import('@/zod/schemas').loginSchema>;
 
+// ============================================
+// Attendance Types
+// ============================================
+
+export * from './attendance';
+
 /**
  * Type for adding a reward/mercado item
  * Inferred from addRewardSchema in @/zod/schemas
@@ -130,9 +137,13 @@ export interface Reward {
   redeemingLimit?: number;
   category?: string;
   isActive: boolean;
+  availableDate?: string | Date | null;
   createdAt?: string | Date;
   createdBy?: string;
   imageUrl?: string;
+  // Stock tracking properties
+  redeemedCount?: number; // Total number of items redeemed
+  isOutOfStock?: boolean; // Whether the item is out of stock (quantity <= 0)
 }
 
 // ============================================

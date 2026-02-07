@@ -1,14 +1,17 @@
-import { StatsBar } from './stats-bar';
-import { MOCK_EMPLOYEE_STATS } from './constants';
+// components/employee/task-status/header.tsx
 
-/**
- * HeaderSection - Server Component
- * Top header row with coins, XP, and profile
- */
-export async function HeaderSection() {
+interface HeaderProps {
+  title: string;
+  description: string;
+}
+
+export function Header({ title, description }: HeaderProps) {
   return (
-    <div className="rounded-2xl bg-linear-to-b from-amber-100 via-orange-100 to-red-100 px-6 py-4 shadow-lg">
-      <StatsBar stats={MOCK_EMPLOYEE_STATS} />
+    <div className="max-w-400 mx-auto w-full">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">{title}</h1>
+        <p className="text-muted-foreground mt-1">{description}</p>
+      </div>
     </div>
   );
 }

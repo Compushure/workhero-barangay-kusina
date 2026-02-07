@@ -13,7 +13,7 @@ import { createContext, useContext, useState, useCallback, type ReactNode } from
 import {
   handleLoginSubmit,
   // handleLogout as handleLogoutAction,
-} from '@/action-handlers/auth';
+} from '@/action-handlers/shared/auth';
 // TODO: Import Supabase client when ready
 // import { createClient } from "@/lib/supabase/client"
 

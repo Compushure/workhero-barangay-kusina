@@ -7,6 +7,7 @@ import {
   useEditUser,
   useDeleteUser,
   useUploadProfilePicture,
+  useDeleteProfilePicture,
 } from '@/hooks/tanstack/mutations/userMutations';
 import { useDebounce } from '@/hooks/useDebounce';
 import type {
@@ -40,7 +41,7 @@ const DeleteUserModal = lazy(() =>
 );
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import { UserPlus, LogOut, Loader2, Search, SlidersHorizontal } from 'lucide-react';
-import { handleSignOut } from '@/action-handlers/auth';
+import { handleSignOut } from '@/action-handlers/shared/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -88,6 +89,7 @@ export function ManagerPage() {
   const editUserMutation = useEditUser();
   const deleteUserMutation = useDeleteUser();
   const uploadProfilePictureMutation = useUploadProfilePicture();
+  const deleteProfilePictureMutation = useDeleteProfilePicture();
 
   // Modal state
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -96,18 +98,23 @@ export function ManagerPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const onHandleProfilePictureUpload = useCallback(
-    async (userid: string, file: File, username: string): Promise<boolean> => {
+    async (userid: string, file: File, username: string): Promise<void> => {
       const currentUser = users.find((u) => u.id === userid);
-      if (!currentUser) return false;
+      if (!currentUser) return;
       return new Promise((resolve) => {
         uploadProfilePictureMutation.mutate(
           { file, userid, username },
           {
             onSuccess: () => {
-              resolve(true);
+              window.dispatchEvent(
+                new CustomEvent('profile-image-updated', {
+                  detail: { userId: userid, timestamp: Date.now() },
+                })
+              );
+              resolve();
             },
             onError: () => {
-              resolve(false);
+              resolve();
             },
           }
         );
@@ -116,13 +123,46 @@ export function ManagerPage() {
     [users, uploadProfilePictureMutation]
   );
 
+  const onHandleProfilePictureClear = useCallback(
+    async (userid: string, username: string): Promise<void> => {
+      return new Promise((resolve) => {
+        deleteProfilePictureMutation.mutate(
+          { userId: userid, userName: username },
+          {
+            onSuccess: () => {
+              window.dispatchEvent(
+                new CustomEvent('profile-image-updated', {
+                  detail: { userId: userid, timestamp: Date.now() },
+                })
+              );
+              resolve();
+            },
+            onError: () => {
+              resolve();
+            },
+          }
+        );
+      });
+    },
+    [deleteProfilePictureMutation]
+  );
+
   // CRUD handlers using TanStack Query mutations
   const onAddUser = useCallback(
     async (data: AddUserInput): Promise<void> => {
-      addUserMutation.mutate(data, {
-        onSuccess: () => {
-          setAddModalOpen(false);
-        },
+      return new Promise((resolve, reject) => {
+        addUserMutation.mutate(data, {
+          onSuccess: async (newUser) => {
+            console.log('User created:', newUser?.id, newUser?.name);
+            // Profile picture can be added later by editing the user
+            setAddModalOpen(false);
+            resolve();
+          },
+          onError: (error) => {
+            console.error('User creation error:', error);
+            reject(error);
+          },
+        });
       });
     },
     [addUserMutation]
@@ -282,9 +322,16 @@ export function ManagerPage() {
 
             {/* Employee Type Filter */}
             <div className="space-y-2">
-              <Label htmlFor="filter-type">Employee Type</Label>
-              <Select value={employeeTypeFilter} onValueChange={handleEmployeeTypeFilterChange}>
-                <SelectTrigger id="filter-type">
+              <Label htmlFor="filter-type" className="flex items-center gap-2">
+                Employee Type
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+              </Label>
+              <Select 
+                value={employeeTypeFilter} 
+                onValueChange={handleEmployeeTypeFilterChange}
+                disabled={isLoading}
+              >
+                <SelectTrigger id="filter-type" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -298,12 +345,16 @@ export function ManagerPage() {
 
             {/* Employment Status Filter */}
             <div className="space-y-2">
-              <Label htmlFor="filter-status">Employment Status</Label>
+              <Label htmlFor="filter-status" className="flex items-center gap-2">
+                Employment Status
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+              </Label>
               <Select
                 value={employmentStatusFilter}
                 onValueChange={handleEmploymentStatusFilterChange}
+                disabled={isLoading}
               >
-                <SelectTrigger id="filter-status">
+                <SelectTrigger id="filter-status" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -316,9 +367,12 @@ export function ManagerPage() {
 
             {/* Sort */}
             <div className="space-y-2 lg:col-span-2">
-              <Label htmlFor="sort">Sort By</Label>
-              <Select value={sortBy} onValueChange={handleSortChange}>
-                <SelectTrigger id="sort">
+              <Label htmlFor="sort" className="flex items-center gap-2">
+                Sort By
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+              </Label>
+              <Select value={sortBy} onValueChange={handleSortChange} disabled={isLoading}>
+                <SelectTrigger id="sort" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -336,8 +390,18 @@ export function ManagerPage() {
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-6 flex flex-col min-h-[calc(100vh-300px)]">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <div className="grid gap-4">
+            {[...Array(3)].map((_, i) => (
+              <WhiteCard key={i} className="p-4 sm:p-6 animate-pulse">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 space-y-3">
+                    <div className="h-4 bg-muted rounded w-32" />
+                    <div className="h-4 bg-muted rounded w-48" />
+                  </div>
+                  <div className="h-10 bg-muted rounded w-20" />
+                </div>
+              </WhiteCard>
+            ))}
           </div>
         ) : error ? (
           <WhiteCard className="p-8 sm:p-12 text-center">
@@ -383,7 +447,11 @@ export function ManagerPage() {
       {/* Modals */}
       {addModalOpen && (
         <Suspense fallback={<div className="hidden" />}>
-          <AddUserModal open={addModalOpen} onOpenChange={setAddModalOpen} onAddUser={onAddUser} />
+          <AddUserModal
+            open={addModalOpen}
+            onOpenChange={setAddModalOpen}
+            onAddUser={onAddUser}
+          />
         </Suspense>
       )}
 
@@ -396,6 +464,8 @@ export function ManagerPage() {
                 onOpenChange={setEditModalOpen}
                 user={selectedUser}
                 onEditUser={onEditUser}
+                onImageUpload={onHandleProfilePictureUpload}
+                onImageClear={onHandleProfilePictureClear}
               />
             </Suspense>
           )}
