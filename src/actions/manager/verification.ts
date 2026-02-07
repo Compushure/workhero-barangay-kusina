@@ -211,17 +211,6 @@ export async function approveTaskAction(
 
   }
 
-  // Update user points
-  const { error: pointsError } = await supabase.rpc('increment_points_for_user', {
-    target_user_id: taskData.assigned_to,
-    amount: taskData.category_points,
-  });
-
-
-  if (pointsError) {
-    return { error: 'Failed to update user points: ' + pointsError.message, data: undefined };
-  }
-
   // Get the updated task from the view to return
   const { data: updatedTask, error: fetchError } = await supabase
     .from('task_info_view')
