@@ -247,7 +247,7 @@ export async function signOutAction(): Promise<ServerActionResponse> {
   } = await supabase.auth.getSession();
 
   if (!session || sessionError) {
-    return { error: 'Error verifying user session' };
+    return { error: null };
   }
 
   const { error } = await supabase.auth.signOut();
