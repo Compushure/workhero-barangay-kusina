@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/manager/task-verification/page-header';
 import { SearchBar } from '@/components/manager/task-verification/search-bar';
 import { SortButton } from '@/components/manager/task-verification/sort-button';
 import { RequestsTable } from '@/components/manager/task-verification/requests-table';
+import { RequestsTableSkeleton } from '@/components/manager/task-verification/requests-table-skeleton';
 import type { VerificationRequest, SortOption } from '@/types';
 import { ConfirmationDialog } from '@/components/manager/task-verification/confirmation-modal';
 import { Pagination } from '@/components/manager/task-verification/pagination';
@@ -217,7 +218,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
         <div className="flex-1 flex flex-col">
           {(isLoadingPending || isLoadingApproved || isLoadingDenied) &&
           filteredRequests.length === 0 ? (
-            <div className="text-center py-12">Loading tasks...</div>
+            <RequestsTableSkeleton />
           ) : (
             <RequestsTable
               requests={filteredRequests}

@@ -89,17 +89,7 @@ export function RewardRequestsContent() {
           statusFilter={statusFilter}
           onStatusChange={handleStatusChange}
         />
-        {filteredRequests.length === 0 ? (
-          <div className="flex items-center justify-center h-64 bg-white rounded-lg shadow-md">
-            <p className="text-[#5a2a2a]">
-              {searchTerm
-                ? 'No redemption requests match your search.'
-                : `No ${statusFilter} redemption requests.`}
-            </p>
-          </div>
-        ) : (
-          <RedemptionTable data={filteredRequests} status={statusFilter} />
-        )}
+        <RedemptionTable data={filteredRequests} status={statusFilter} />
       </div>
     </div>
   );
