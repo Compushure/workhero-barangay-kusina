@@ -6,7 +6,7 @@ import {
   handleTimeOutAttendance,
   handleStartBreak,
   handleEndBreak,
-} from '@/action-handlers/attendance';
+} from '@/action-handlers/employee/attendance';
 
 export function useTimeInAttendance(config?: Partial<AttendanceConfig>) {
   const queryClient = useQueryClient();

@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { VerificationRequestsPage } from '@/components/manager/task-verification/verification-request-page';
-import { fetchTasksToReview } from '@/actions/manager';
 import { CookingPot } from 'lucide-react';
+import { fetchTasksToReview } from '@/actions/manager/verification';
 
 export default async function TaskVerification() {
   const { data, error } = await fetchTasksToReview();

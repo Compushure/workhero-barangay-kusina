@@ -1,5 +1,5 @@
 import React from 'react';
-import { protectAdminRoute } from '@/actions/auth';
+import { protectAdminRoute } from '@/actions/shared/auth';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {

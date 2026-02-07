@@ -11,7 +11,7 @@ import { DatePickerPopover } from '../../../task-assignment-card/date-picker-pop
 import { Button } from '@/components/ui/button';
 import { AssignedTask, AssignedEmployee } from '@/types';
 import { useEffect, useMemo, useState } from 'react';
-import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import { useGetCurrentAssignedTasksPaginated } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { Coins, Search } from 'lucide-react';
 

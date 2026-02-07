@@ -5,7 +5,7 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { handleDeleteProfilePicture } from '@/action-handlers/manage-delete-profile';
+import { handleDeleteProfilePicture } from '@/action-handlers/superadmin/users';
 import { userKeys } from '../queries/userQueries';
 
 /**

@@ -10,7 +10,7 @@ import DeleteTaskDialog from './dialogs/task-view/delete-task-dialog';
 import UnassignEmployeeDialog from './dialogs/task-view/unassign-employee-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
 import { useUpdateTaskAssignmentMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
-import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import TaskViewEmployeeBadges from './task-view-employee-badges';
 import { isTaskOverdue } from '@/utils/date-utils';
 
