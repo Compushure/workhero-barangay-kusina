@@ -62,7 +62,7 @@ export default function EmployeeDashboardClient() {
           <div className="w-[20%]">
             <Card className="bg-transparent shadow-none border-none h-full">
               <CardContent className="h-full">
-                <RankWidget rankData={{ rank: 12 }} totalXP={250} />
+                <RankWidget rankData={{ rank: 12, totalEmployees: 100 }} totalXP={250} />
               </CardContent>
             </Card>
           </div>

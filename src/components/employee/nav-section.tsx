@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { useState } from 'react';
+import HoverBubble from './hover-bubble';
 
 export default function NavSection() {
   const pathname = usePathname();
@@ -26,39 +27,53 @@ export default function NavSection() {
     router.push(href);
   };
 
+  const hoverMessages: Record<string, string> = {
+    dashboard: 'Want to visit your kitchen?',
+    tasks: 'Explore kitchen tasks!',
+    mercado: 'Redeem your rewards here!',
+  };
+
   return (
-    <Card className="mt-10 h-full flex flex-col bg-transparent shadow-none border-none">
-      <CardContent className="flex flex-col gap-6 mt-4 w-full p-0 items-start">
-        
+    <Card className="h-full flex flex-col bg-transparent shadow-none border-none">
+      <CardContent className="flex flex-col w-full p-0 items-start gap-6">
         {/* Dashboard */}
-        <img
-          src="/kitchen.png"
-          alt="Kitchen"
-          className={`${getIconClasses('dashboard')} pixelated cursor-pointer transition-all duration-400 ease-in-out`}
-          onClick={() => handleClick('/employee/dashboard')}
-          onMouseEnter={() => setHovered('dashboard')}
-          onMouseLeave={() => setHovered(null)}
-        />
+        <div className="relative flex items-center">
+          <img
+            src="/kitchen.png"
+            alt="Kitchen"
+            className={`${getIconClasses('dashboard')} pixelated cursor-pointer transition-all duration-300 ease-in-out`}
+            onClick={() => handleClick('/employee/dashboard')}
+            onMouseEnter={() => setHovered('dashboard')}
+            onMouseLeave={() => setHovered(null)}
+          />
+          <HoverBubble show={hovered === 'dashboard'} message={hoverMessages.dashboard} />
+        </div>
 
         {/* All Tasks */}
-        <img
-          src="/book.png"
-          alt="Notebook"
-          className={`${getIconClasses('tasks')} pixelated cursor-pointer transition-all duration-400 ease-in-out`}
-          onClick={() => handleClick('/employee/tasks')}
-          onMouseEnter={() => setHovered('tasks')}
-          onMouseLeave={() => setHovered(null)}
-        />
+        <div className="relative flex items-center">
+          <img
+            src="/book.png"
+            alt="Notebook"
+            className={`${getIconClasses('tasks')} pixelated cursor-pointer transition-all duration-300 ease-in-out`}
+            onClick={() => handleClick('/employee/tasks')}
+            onMouseEnter={() => setHovered('tasks')}
+            onMouseLeave={() => setHovered(null)}
+          />
+          <HoverBubble show={hovered === 'tasks'} message={hoverMessages.tasks} />
+        </div>
 
         {/* Mercado */}
-        <img
-          src="/mercado.png"
-          alt="Market"
-          className={`${getIconClasses('mercado')} pixelated cursor-pointer transition-all duration-400 ease-in-out`}
-          onClick={() => handleClick('/employee/mercado')}
-          onMouseEnter={() => setHovered('mercado')}
-          onMouseLeave={() => setHovered(null)}
-        />
+        <div className="relative flex items-center">
+          <img
+            src="/mercado.png"
+            alt="Market"
+            className={`${getIconClasses('mercado')} pixelated cursor-pointer transition-all duration-300 ease-in-out`}
+            onClick={() => handleClick('/employee/mercado')}
+            onMouseEnter={() => setHovered('mercado')}
+            onMouseLeave={() => setHovered(null)}
+          />
+          <HoverBubble show={hovered === 'mercado'} message={hoverMessages.mercado} />
+        </div>
       </CardContent>
     </Card>
   );

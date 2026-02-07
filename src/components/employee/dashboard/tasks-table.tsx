@@ -1,25 +1,20 @@
 'use client';
 
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 
 interface Task {
   title: string;
-  progress: string;
-  reward: string;
-  dueDate: string;
+  category?: string;
+  progress: string;   // e.g. "0/5"
+  points: string;     // e.g. "10"
+  xp: string;         // e.g. "100"
+  dueDate: string;    // e.g. "12/12/25"
 }
 
 export default function TasksTable({ tasks }: { tasks: Task[] }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col h-44 gap-4">
+      {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="font-semibold">Tasks</h2>
         <Button variant="outline" size="sm">
@@ -27,26 +22,41 @@ export default function TasksTable({ tasks }: { tasks: Task[] }) {
         </Button>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[40%]">Task</TableHead>
-            <TableHead>Progress</TableHead>
-            <TableHead>Reward</TableHead>
-            <TableHead>Due Date</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+      {/* Scrollable card list inside fixed container */}
+      <div className="flex-1 overflow-y-auto border rounded-lg bg-gray-50 p-4">
+        <div className="flex flex-col gap-2">
           {tasks.map((task, i) => (
-            <TableRow key={i}>
-              <TableCell className="font-medium">{task.title}</TableCell>
-              <TableCell>{task.progress}</TableCell>
-              <TableCell>{task.reward}</TableCell>
-              <TableCell>{task.dueDate}</TableCell>
-            </TableRow>
+            <div
+              key={i}
+              className="bg-white rounded-xl shadow-md p-4 flex items-center justify-between border border-gray-200"
+            >
+              {/* Category + Title */}
+              <div className="flex flex-col">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">
+                  {task.category || 'Name of Task Type'}
+                </p>
+                <h3 className="font-semibold text-base">{task.title}</h3>
+              </div>
+
+              {/* Progress */}
+              <p className="text-sm text-gray-700">{task.progress}</p>
+
+              {/* Rewards */}
+              <div className="flex items-center gap-3 text-sm text-gray-700">
+                <span className="flex items-center gap-1">
+                  🔁 <span>{task.points}</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  ⭐ <span>{task.xp} XP</span>
+                </span>
+              </div>
+
+              {/* Due Date */}
+              <p className="text-xs text-gray-500">DUE: {task.dueDate}</p>
+            </div>
           ))}
-        </TableBody>
-      </Table>
+        </div>
+      </div>
     </div>
   );
 }
