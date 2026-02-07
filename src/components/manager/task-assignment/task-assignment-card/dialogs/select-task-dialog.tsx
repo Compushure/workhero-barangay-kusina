@@ -13,7 +13,7 @@ import {
 import { Search, Plus, ChevronDown } from 'lucide-react';
 import type { AssignedTask, Task } from '@/types';
 import SelectTasksTable from './select-task-table';
-import { handleFetchTaskList, handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import { handleFetchTaskList, handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -240,13 +240,6 @@ export function SelectTasksDialog({
               className="px-12 border-gray-300 bg-zinc-50 hover:bg-[#690003] hover:text-zinc-50 cursor-pointer transition-all duration-500 ease-in-out"
             >
               Close
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
-            >
-              Cancel
             </Button>
           </DialogFooter>
         </DialogContent>

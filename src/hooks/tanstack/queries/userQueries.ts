@@ -7,8 +7,8 @@
  */
 
 import { useQuery, keepPreviousData, type UseQueryResult } from '@tanstack/react-query';
-import { handleFetchUsers, handleFetchUsersPaginated } from '@/action-handlers/manage';
-import { handleFetchSessionUser } from '@/action-handlers/sidebar';
+import { handleFetchUsers, handleFetchUsersPaginated } from '@/action-handlers/superadmin/users';
+import { handleFetchSessionUser } from '@/action-handlers/shared/sidebar';
 import type { User, UserQueryParams, UserWithExtras, PaginatedResponse } from '@/types';
 
 /**

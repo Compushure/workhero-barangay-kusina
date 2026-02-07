@@ -1,4 +1,4 @@
-import { protectManagerRoute } from '@/actions/auth';
+import { protectManagerRoute } from '@/actions/shared/auth';
 import { Sidebar } from '@/components/manager/task-verification/sidebar';
 import React from 'react';
 

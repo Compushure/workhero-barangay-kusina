@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useGetRewards } from '@/hooks/tanstack/queries/rewardQueries';
+import { useGetAvailableRewards } from '@/hooks/tanstack/queries/rewardQueries';
 import { useGetMyRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
-import { getEmployeePoints } from '@/actions/employees/get-points';
+import { getEmployeePoints } from '@/actions/employee/stats';
 
 export function useMercadoPageData() {
-  const { data: allRewards = [], isLoading: rewardsLoading, error: rewardsError } = useGetRewards();
+  // Use employee-specific query that filters by isActive AND availableDate
+  const { data: activeRewards = [], isLoading: rewardsLoading, error: rewardsError } = useGetAvailableRewards();
   const { data: pendingRequests = [], isLoading: requestsLoading } =
     useGetMyRedemptionRequests('pending');
   const { data: pointsData, isLoading: pointsLoading } = useQuery({
@@ -19,8 +20,7 @@ export function useMercadoPageData() {
     },
   });
 
-  const activeRewards = useMemo(() => allRewards.filter((reward) => reward.isActive), [allRewards]);
-
+  // No need to filter rewards anymore - useGetAvailableRewards handles all filtering
   const userPoints = pointsData?.points ?? 0;
   const deductedPoints = pointsData?.deductedPoints ?? 0;
   const isLoading = rewardsLoading || pointsLoading || requestsLoading;

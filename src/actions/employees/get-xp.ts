@@ -19,7 +19,7 @@ export async function getEmployeeXP(): Promise<ActionResult<EmployeeXP>> {
 
     const { data, error } = await supabase
       .from('user_attributes')
-      .select('xp, user_level')
+      .select('xp, user_level, total_xp')
       .eq('user_id', user.id)
       .single();
 
@@ -31,13 +31,16 @@ export async function getEmployeeXP(): Promise<ActionResult<EmployeeXP>> {
       throw new Error('User XP data not found');
     }
 
-    const currentXP = data.xp ?? 0;
-    const level = data.user_level ?? 0;
-    const totalXP = level * 100 + currentXP;
+    // const currentXP = data.xp ?? 0;
+    // const level = data.user_level ?? 0;
+    // const totalXP = level * 100 + currentXP;
 
     return {
-      currentXP,
-      totalXP,
+      // currentXP,
+      // totalXP,
+      currentXP: data.xp ?? 0, 
+      totalXP: data.total_xp ?? 0, 
+      level: data.user_level ?? 0,
     };
   });
 }

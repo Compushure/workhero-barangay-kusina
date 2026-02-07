@@ -6,7 +6,7 @@
  * Suspense boundary is handled by ProfilePageClient internally.
  */
 
-import { protectSessionRoute } from '@/actions/auth';
+import { protectSessionRoute } from '@/actions/shared/auth';
 import { ProfilePageClient } from '@/components/profile/profile-page-client';
 
 interface ProfilePageProps {

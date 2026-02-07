@@ -11,7 +11,7 @@ import { DatePickerPopover } from '../../../task-assignment-card/date-picker-pop
 import { Button } from '@/components/ui/button';
 import { AssignedTask, AssignedEmployee } from '@/types';
 import { useEffect, useMemo, useState } from 'react';
-import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import { useGetCurrentAssignedTasksPaginated } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { Coins, Search } from 'lucide-react';
 
@@ -222,13 +222,6 @@ export default function EditTaskDialog({
         </div>
 
         <DialogFooter className="shrink-0">
-          <Button
-            onClick={handleEditTask}
-            disabled={editAssignedEmployees.length === 0 || isProcessing}
-            className="bg-[#690003] hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
-          >
-            {isProcessing ? 'Saving...' : 'Confirm'}
-          </Button>
           <Button
             onClick={handleEditTask}
             disabled={editAssignedEmployees.length === 0 || isProcessing}
