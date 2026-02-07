@@ -37,9 +37,9 @@ export function RankWidget({ isCollapsed }: RankWidgetProps) {
   if (isRankLoading || isXpLoading) {
     if (isCollapsed) {
       return (
-        <div className="bg-[#690003] border-2 border-white rounded-full h-16 w-16 mx-auto flex items-center justify-center mb-4">
+        <div className="bg-white/10 rounded-full h-16 w-16 mx-auto flex items-center justify-center mb-4">
           <div className="animate-pulse">
-            <Trophy size={20} className="text-white/50" />
+            <Trophy size={20} className="text-yellow-300" />
           </div>
         </div>
       );
@@ -48,8 +48,8 @@ export function RankWidget({ isCollapsed }: RankWidgetProps) {
     return (
       <div className="bg-white/10 rounded-lg p-4 mb-4 animate-pulse">
         <div className="flex items-center gap-3 mb-2">
-          <div className="bg-[#690003] border-2 border-white rounded-full p-2 shrink-0">
-            <Trophy size={20} className="text-white/50" />
+          <div className="bg-white/20 rounded-full p-2 shrink-0">
+            <Trophy size={20} className="text-yellow-300" />
           </div>
           <div className="flex items-baseline gap-2">
             <div className="h-7 w-12 bg-white/20 rounded"></div>
@@ -71,7 +71,7 @@ export function RankWidget({ isCollapsed }: RankWidgetProps) {
     // Compact circle view
     return (
       <div
-        className="bg-[#690003] border-2 border-white rounded-full h-16 w-16 mx-auto flex flex-col items-center justify-center mb-4 transition-all duration-200"
+        className="bg-white/10 rounded-full h-16 w-16 mx-auto flex flex-col items-center justify-center mb-4 transition-all duration-200"
         title={`Personal Rank #${rank} - ${totalXP} XP`}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
