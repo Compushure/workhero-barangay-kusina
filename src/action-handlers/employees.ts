@@ -1,9 +1,14 @@
 'use client';
 
+<<<<<<< HEAD
 import { getEmployeeRank } from '@/actions/employees/get-rank';
 import { getEmployeeXP } from '@/actions/employees/get-xp';
 import { getEmployeePoints } from '@/actions/employees/get-points';
 import type { EmployeePointsData, EmployeeRank, EmployeeXP } from '@/types';
+=======
+import { getEmployeeRank } from '@/actions/employee/stats';
+import type { EmployeeRank } from '@/types';
+>>>>>>> 38c64158741778bd2e508317d1c1b2066239dfbb
 import { toast } from 'sonner';
 
 

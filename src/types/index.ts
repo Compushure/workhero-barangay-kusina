@@ -137,9 +137,13 @@ export interface Reward {
   redeemingLimit?: number;
   category?: string;
   isActive: boolean;
+  availableDate?: string | Date | null;
   createdAt?: string | Date;
   createdBy?: string;
   imageUrl?: string;
+  // Stock tracking properties
+  redeemedCount?: number; // Total number of items redeemed
+  isOutOfStock?: boolean; // Whether the item is out of stock (quantity <= 0)
 }
 
 // ============================================

@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { VerificationRequestsPage } from '@/components/manager/task-verification/verification-request-page';
-import { fetchTasksToReview } from '@/actions/manager';
+import { fetchTasksToReview } from '@/actions/manager/verification';
 
 export default async function TaskVerification() {
   const { data, error } = await fetchTasksToReview();

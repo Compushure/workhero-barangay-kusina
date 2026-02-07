@@ -118,7 +118,7 @@ export default function AttendanceConfigEditor() {
       type: 'action',
       category: 'config',
       message: 'Configuration updated successfully',
-      data: tempConfig as Record<string, unknown>,
+      data: tempConfig as unknown as Record<string, unknown>,
     });
   };
 

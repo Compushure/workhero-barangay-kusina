@@ -9,7 +9,7 @@ import { DatePickerPopover } from './date-picker-popover';
 import type { AssignedEmployee, Task } from '@/types';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
-import { handleFetchTaskList } from '@/action-handlers/manager-assignment';
+import { handleFetchTaskList } from '@/action-handlers/manager/assignments';
 import {
   useGetCurrentAssignedTasksPaginated,
   managerAssignmentKeys,
@@ -56,7 +56,7 @@ export function TaskAssignmentCard() {
     async function loadData() {
       const [tasks, employees] = await Promise.all([
         handleFetchTaskList(),
-        import('@/action-handlers/manager-assignment').then((m) => m.handleFetchEmployeeList()),
+        import('@/action-handlers/manager/assignments').then((m) => m.handleFetchEmployeeList()),
       ]);
       setAvailableTasks(tasks);
       setTotalEmployees(employees.length);

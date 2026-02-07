@@ -10,7 +10,7 @@ import {
   updateOwnProfileHandler,
   uploadOwnProfilePictureHandler,
   deleteOwnProfilePictureHandler,
-} from '@/action-handlers/profile';
+} from '@/action-handlers/shared/profile';
 import { profileKeys } from '../queries/profileQueries';
 import { userKeys } from '../queries/userQueries';
 
