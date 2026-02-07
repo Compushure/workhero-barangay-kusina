@@ -7,7 +7,7 @@ import {
   timeOutAttendanceAction,
   startBreakAction,
   endBreakAction,
-} from '@/actions/attendance';
+} from '@/actions/employee/attendance';
 import type { AttendanceConfig, AttendanceStatus } from '@/types';
 
 export async function handleGetAttendanceConfig(): Promise<{

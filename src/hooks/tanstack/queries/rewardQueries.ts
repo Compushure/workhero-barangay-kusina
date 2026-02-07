@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRewardsAction } from '@/actions/hr';
+import { getRewardsAction } from '@/actions/hr/rewards';
 import { Reward } from '@/types';
 import { isItemAvailableNow } from '@/utils/date-utils';
 

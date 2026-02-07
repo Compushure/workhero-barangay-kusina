@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { handleCreateRedemptionRequestAction } from '@/action-handlers/hr';
+import { handleCreateRedemptionRequestAction } from '@/action-handlers/employee/redemptions';
 import { redemptionKeys } from '../queries/redemptionQueries';
 
 /**

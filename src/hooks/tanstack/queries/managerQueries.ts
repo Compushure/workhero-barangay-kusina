@@ -13,7 +13,7 @@ import {
   handleFetchTasksToReviewPaginated,
   handleFetchApprovedTasksPaginated,
   handleFetchDeniedTasksPaginated,
-} from '@/action-handlers/manager';
+} from '@/action-handlers/manager/verification';
 import type { VerificationRequest, PaginatedResponse } from '@/types';
 
 /**

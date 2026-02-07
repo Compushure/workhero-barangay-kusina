@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Task } from '@/types';
 import { Pencil, Check, X } from 'lucide-react';
-import { handleUpdateTaskPoints } from '@/action-handlers/manager-assignment';
+import { handleUpdateTaskPoints } from '@/action-handlers/manager/assignments';
 import { SkeletonRow } from '../../card-skeleton';
 
 interface SelectTasksTableProps {

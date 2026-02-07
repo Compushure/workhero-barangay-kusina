@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
-import { handleLoginSubmit } from '@/action-handlers/auth';
+import { handleLoginSubmit } from '@/action-handlers/shared/auth';
 import { useRouter } from 'next/navigation';
-import { getUserRole } from '@/actions/auth';
+import { getUserRole } from '@/actions/shared/auth';
 import { handleUserRole } from '@/lib/utils/role-router';
 
 export function LoginForm() {

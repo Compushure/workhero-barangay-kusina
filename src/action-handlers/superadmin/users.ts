@@ -15,7 +15,7 @@ import {
   deleteUserAction,
   uploadProfilePicture,
   deleteProfilePicture,
-} from '@/actions/manage';
+} from '@/actions/superadmin/users';
 import { type User, type AddUserInput, type EditUserInput, type UserQueryParams, type PaginatedResponse } from '@/types';
 import { toast } from 'sonner';
 

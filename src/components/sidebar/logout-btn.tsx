@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useTransition, memo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { handleSignOut } from '@/action-handlers/auth';
+import { handleSignOut } from '@/action-handlers/shared/auth';
 import { toast } from 'sonner';
 
 export const LogOutBtn = memo(function LogOutBtn() {
