@@ -11,3 +11,8 @@ export type EditPointsInput = {
   userId: string;
   pointsToAdd: number;
 };
+
+export interface EmployeePointsData {
+  points: number;
+  deductedPoints: number;
+}
