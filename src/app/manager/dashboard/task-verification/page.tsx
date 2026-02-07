@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { VerificationRequestsPage } from '@/components/manager/task-verification/verification-request-page';
 import { fetchTasksToReview } from '@/actions/manager';
+import { CookingPot } from 'lucide-react';
 
 export default async function TaskVerification() {
   const { data, error } = await fetchTasksToReview();
@@ -13,7 +14,12 @@ export default async function TaskVerification() {
   }
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+      <div className='h-full w-full justify-center items-center flex flex-col gap-1'>
+        <CookingPot className='animate-bounce size-10'/>
+        <span>Loading Requests from Emmployees...</span>
+      </div>
+    }>
       <VerificationRequestsPage initialRequests={initialRequests} />
     </Suspense>
   );
