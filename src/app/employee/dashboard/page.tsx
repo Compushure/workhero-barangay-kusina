@@ -16,7 +16,7 @@ function LoadingFallback() {
 export default async function EmployeeDashboard() {
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <EmployeeDashboardContent />
+      <EmployeeDashboardClient />
     </Suspense>
   );
 }

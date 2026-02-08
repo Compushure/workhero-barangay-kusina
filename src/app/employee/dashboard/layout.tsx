@@ -1,11 +1,7 @@
-import React from "react"
-import { SidebarNavigation } from '@/src/components/employee/sidebar-navigation';
+import React from 'react';
+import { SidebarNavigation } from '@/components/employee/sidebar-navigation';
 
-export default async function EmployeeLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function EmployeeLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <aside className="w-1/4">
