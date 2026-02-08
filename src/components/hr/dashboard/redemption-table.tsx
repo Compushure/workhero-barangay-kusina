@@ -127,7 +127,20 @@ export function RedemptionTable({
 
       {/* Table Body */}
       <div className="divide-y divide-border bg-[#fff8f5]">
-        {paginatedData.map((request) => {
+        {paginatedData.length === 0 ? (
+          <div className="flex items-center justify-center px-6 py-12 text-[#5a2a2a]">
+            <p className="text-sm">
+              {status === 'pending'
+                ? 'No pending redemption requests.'
+                : status === 'approved'
+                  ? 'No approved redemption requests.'
+                  : status === 'rejected'
+                    ? 'No rejected redemption requests.'
+                    : 'No redemption requests found.'}
+            </p>
+          </div>
+        ) : (
+          paginatedData.map((request) => {
           const { dateStr, timeStr } = formatDateTime(request.requestedAt);
           const quantity = request.quantity || 1;
           const totalCost = request.pointsCost * quantity;
@@ -261,7 +274,8 @@ export function RedemptionTable({
               </div>
             </div>
           );
-        })}
+        })
+        )}
       </div>
 
       {/* Pagination */}
