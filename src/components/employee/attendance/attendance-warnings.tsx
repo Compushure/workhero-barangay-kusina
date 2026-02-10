@@ -1,6 +1,8 @@
 // app/attendance/AttendanceWarnings.tsx
 'use client';
 
+import PixelBadge from './warning-badges';
+
 interface Props {
   status: any;
   warningText?: string;
@@ -29,45 +31,41 @@ export default function AttendanceWarnings({
   hasTimedOut,
 }: Props) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       {!status?.hasTimedIn && !status?.isAbsent && (
         <>
           {isApproachingAbsent && (
-            <span className="text-[11px] font-bold text-red-600">
+            <PixelBadge color="red">
               🚨 URGENT: You will be marked ABSENT if you don&apos;t time in within {absentTimer}!
-            </span>
+            </PixelBadge>
           )}
           {isCurrentlyLate && !isApproachingAbsent && (
-            <span className="text-[11px] font-medium text-orange-600">
+            <PixelBadge color="orange">
               ⚠️ Late arrival detected. Time in immediately to minimize impact on your record.
-            </span>
+            </PixelBadge>
           )}
-          {status?.canTimeIn && nowTime < (lateAfter ?? nowTime) && !isCurrentlyLate && (
-            <span className="text-[11px] text-yellow-700">
+          {status?.canTimeIn && lateAfter && nowTime < lateAfter && !isCurrentlyLate && (
+            <PixelBadge color="blue">
               ℹ️ Time in within {lateTimer} to be marked on-time.
-            </span>
+            </PixelBadge>
           )}
         </>
       )}
 
       {warningText && (
-        <span className="text-[11px] text-[#7a3d3d]">{warningText}</span>
+        <PixelBadge color="yellow">{warningText}</PixelBadge>
       )}
 
       {breakWarningText && (
-        <span
-          className={`text-[11px] font-medium ${
-            isCurrentlyOverBreak ? 'text-red-600' : 'text-orange-600'
-          }`}
-        >
+        <PixelBadge color={isCurrentlyOverBreak ? 'red' : 'orange'}>
           {breakWarningText}
-        </span>
+        </PixelBadge>
       )}
 
       {status?.hasTimedIn && status?.isLate && !hasTimedOut && (
-        <span className="text-[11px] text-orange-600">
+        <PixelBadge color="orange">
           📋 Note: You were marked late for today.
-        </span>
+        </PixelBadge>
       )}
     </div>
   );

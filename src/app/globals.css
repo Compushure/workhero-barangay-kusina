@@ -156,11 +156,19 @@
   body {
     @apply bg-background text-foreground;
   }
+}
 
-  .pixelated {
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-  }
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.pixel-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}
+.pixel-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000;
 }
 
 .remove-arrow::-webkit-inner-spin-button,

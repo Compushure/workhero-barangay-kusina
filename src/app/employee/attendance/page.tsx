@@ -1,13 +1,17 @@
 // app/attendance/page.tsx
-import AttendanceIcon from "@/components/employee/attendance/attendance";
-import { attendanceConfig } from "@/lib/attendance-config";
+import AttendanceDesign from "@/components/employee/attendance/attendance-designs";
+import { Suspense } from "react";
+import { CookingPot } from "lucide-react";
 
 export default function AttendancePage() {
-  // This is a server component: no hooks, no client state.
-  // It can fetch server-side data or enforce auth before rendering.
   return (
-    <div className="p-6">
-      <AttendanceIcon config={attendanceConfig} />
-    </div>
+    <Suspense fallback={
+      <div className='h-full w-full justify-center items-center flex flex-col gap-1'>
+        <CookingPot className='animate-bounce size-10'/>
+        <span>Loading Attendance Dashboard...</span>
+      </div>
+    }>
+      <AttendanceDesign />
+    </Suspense>
   );
 }

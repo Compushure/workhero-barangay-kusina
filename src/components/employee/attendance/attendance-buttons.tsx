@@ -1,64 +1,75 @@
-'use client';
-
-import { Button } from "@/components/ui/button";
-import { UserCheck, LogIn, Coffee } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { LogIn, Coffee, CupSoda, LogOut } from 'lucide-react';
+import ChefLoading from './time-in-animation';
 
 interface Props {
   status: any;
   isBusy: boolean;
-  handleClick: (action: "timein" | "timeout") => void;
-  handleBreakClick: (action: "startbreak" | "endbreak") => void;
+  isTimeInLoading: boolean;
+  handleClick: (action: 'timein' | 'timeout') => void;
+  handleBreakClick: (action: 'startbreak' | 'endbreak') => void;
 }
 
 export default function AttendanceButtons({
   status,
   isBusy,
+  isTimeInLoading,
   handleClick,
   handleBreakClick,
 }: Props) {
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="flex flex-col items-center gap-4">
       {/* Time In */}
       <Button
-        onClick={() => handleClick("timein")}
+        onClick={() => handleClick('timein')}
         disabled={isBusy || status?.isAbsent || !status?.canTimeIn}
-        variant="outline"
-        className="flex items-center gap-2 px-6 py-2 rounded-full disabled:opacity-50"
+        className="w-64 flex items-center justify-center gap-3 px-4 py-4
+                   border-4 border-black bg-green-300 text-black 
+                   shadow-[4px_4px_0px_#000] disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <LogIn className="w-5 h-5 text-gray-500" />
-        <span>Time In</span>
+        {isTimeInLoading ? (
+          <ChefLoading />
+        ) : (
+          <>
+            <LogIn className="w-5 h-5 text-black" />
+            <span>Time In</span>
+          </>
+        )}
       </Button>
 
       {/* Time Out */}
       <Button
-        onClick={() => handleClick("timeout")}
+        onClick={() => handleClick('timeout')}
         disabled={isBusy || status?.isAbsent || !status?.canTimeOut}
-        variant="outline"
-        className="flex items-center gap-2 px-6 py-2 rounded-full disabled:opacity-50"
+        className="w-64 flex items-center justify-center gap-3 px-4 py-4
+                   border-4 border-black bg-red-300 text-black 
+                   shadow-[4px_4px_0px_#000] disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <UserCheck className="w-5 h-5 text-green-500" />
+        <LogOut className="w-5 h-5 text-black" />
         <span>Time Out</span>
       </Button>
 
       {/* Start Break */}
       <Button
-        onClick={() => handleBreakClick("startbreak")}
+        onClick={() => handleBreakClick('startbreak')}
         disabled={isBusy || !status?.canStartBreak}
-        variant="outline"
-        className="flex items-center gap-2 px-6 py-2 rounded-full disabled:opacity-50"
+        className="w-64 flex items-center justify-center gap-3 px-4 py-4 
+                   border-4 border-black bg-blue-300 text-black 
+                   shadow-[4px_4px_0px_#000] disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <Coffee className="w-5 h-5 text-blue-500" />
+        <CupSoda className="w-5 h-5 text-black" />
         <span>Start Break</span>
       </Button>
 
       {/* End Break */}
       <Button
-        onClick={() => handleBreakClick("endbreak")}
+        onClick={() => handleBreakClick('endbreak')}
         disabled={isBusy || !status?.canEndBreak}
-        variant="outline"
-        className="flex items-center gap-2 px-6 py-2 rounded-full disabled:opacity-50"
+        className="w-64 flex items-center justify-center gap-3 px-4 py-4 
+                   border-4 border-black bg-orange-300 text-black 
+                   shadow-[4px_4px_0px_#000] disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <Coffee className="w-5 h-5 text-orange-500" />
+        <Coffee className="w-5 h-5 text-black" />
         <span>End Break</span>
       </Button>
     </div>

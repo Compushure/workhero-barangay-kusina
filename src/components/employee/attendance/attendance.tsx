@@ -36,10 +36,22 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
     () => ({
       timeInAt: configOverrides?.timeInAt ?? config?.timeInAt ?? attendanceConfig.timeInAt,
       timeOutAt: configOverrides?.timeOutAt ?? config?.timeOutAt ?? attendanceConfig.timeOutAt,
-      lateAfter: configOverrides?.lateAfter ?? config?.lateAfter ?? config?.timeInAt ?? attendanceConfig.lateAfter,
-      overtimeAfter: configOverrides?.overtimeAfter ?? config?.overtimeAfter ?? config?.timeOutAt ?? attendanceConfig.overtimeAfter,
-      autoTimeoutAt: configOverrides?.autoTimeoutAt ?? config?.autoTimeoutAt ?? attendanceConfig.autoTimeoutAt,
-      breaktime_duration: configOverrides?.breaktime_duration ?? config?.breaktime_duration ?? attendanceConfig.breaktime_duration,
+      lateAfter:
+        configOverrides?.lateAfter ??
+        config?.lateAfter ??
+        config?.timeInAt ??
+        attendanceConfig.lateAfter,
+      overtimeAfter:
+        configOverrides?.overtimeAfter ??
+        config?.overtimeAfter ??
+        config?.timeOutAt ??
+        attendanceConfig.overtimeAfter,
+      autoTimeoutAt:
+        configOverrides?.autoTimeoutAt ?? config?.autoTimeoutAt ?? attendanceConfig.autoTimeoutAt,
+      breaktime_duration:
+        configOverrides?.breaktime_duration ??
+        config?.breaktime_duration ??
+        attendanceConfig.breaktime_duration,
     }),
     [config, configOverrides]
   );
@@ -55,6 +67,8 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
   const [lateTimer, setLateTimer] = useState<string>('');
   const [absentTimer, setAbsentTimer] = useState<string>('');
   const [nowTime, setNowTime] = useState<Date>(new Date());
+
+  const [isTimeInLoading, setIsTimeInLoading] = useState(false);
 
   const canTimeIn = status?.canTimeIn ?? false;
   const canTimeOut = status?.canTimeOut ?? false;
@@ -146,30 +160,33 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
       : undefined;
 
   // Updated handlers to accept action type
-  const handleClick = (action: "timein" | "timeout") => {
-    if (action === "timein" && canTimeIn) {
-      addLog({ type: "action", category: "timein", message: "Attempting to time in" });
-      timeInMutation.mutate();
+  const handleClick = (action: 'timein' | 'timeout') => {
+    if (action === 'timein' && canTimeIn) {
+      setIsTimeInLoading(true);
+      addLog({ type: 'action', category: 'timein', message: 'Attempting to time in' });
+      timeInMutation.mutate(undefined, { onSettled: () => setIsTimeInLoading(false) });
     }
-    if (action === "timeout" && canTimeOut) {
-      addLog({ type: "action", category: "timeout", message: "Attempting to time out" });
+    if (action === 'timeout' && canTimeOut) {
+      addLog({ type: 'action', category: 'timeout', message: 'Attempting to time out' });
       timeOutMutation.mutate(status?.logId);
     }
   };
 
-  const handleBreakClick = (action: "startbreak" | "endbreak") => {
-    if (action === "startbreak" && status?.canStartBreak) {
-      addLog({ type: "action", category: "break", message: "Starting break" });
+  const handleBreakClick = (action: 'startbreak' | 'endbreak') => {
+    if (action === 'startbreak' && status?.canStartBreak) {
+      addLog({ type: 'action', category: 'break', message: 'Starting break' });
       startBreakMutation.mutate();
     }
-    if (action === "endbreak" && status?.canEndBreak) {
-      addLog({ type: "action", category: "break", message: "Ending break" });
+    if (action === 'endbreak' && status?.canEndBreak) {
+      addLog({ type: 'action', category: 'break', message: 'Ending break' });
       endBreakMutation.mutate(status?.logId);
     }
   };
 
   return (
-    <div className="flex flex-col gap-3 p-4 rounded-lg border bg-white shadow-sm">
+    <div
+      className="flex flex-col gap-8 mt-12"
+    >
       <StatusIndicator
         status={status}
         nowTime={nowTime}
@@ -188,6 +205,7 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
       <AttendanceButtons
         status={status}
         isBusy={isBusy}
+        isTimeInLoading={isTimeInLoading}
         handleClick={handleClick}
         handleBreakClick={handleBreakClick}
       />

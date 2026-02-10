@@ -1,24 +1,44 @@
 // app/attendance/AttendanceDesign.tsx
 'use client';
+import { Press_Start_2P } from 'next/font/google';
 
-import AttendanceIcon from "./attendance";
+const pressStart2P = Press_Start_2P({
+  weight: '400', // only one weight available
+  subsets: ['latin'],
+});
+
+import AttendanceIcon from './attendance';
 
 export default function AttendanceDesign() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <div className="p-6 rounded-xl shadow-lg border bg-white animate-fadeIn">
-        {/* Decorative header */}
-        <h2 className="text-lg font-bold text-center mb-4 animate-slideDown">
-          Attendance Dashboard
-        </h2>
+    <div
+      // className={`flex min-h-screen items-center justify-center bg-cover bg-center pixelated ${pressStart2P.className}`}
+      // style={{ backgroundImage: "url('/attendance-bg.png')" }} // image in public folder
+      className={`flex min-h-screen items-center justify-center bg-[#6b2d00] pixelated ${pressStart2P.className}`}
+    >
+      <div className="relative flex flex-col items-center">
+        {/* Overlapping header box */}
+        <div
+          className="absolute -top-10 px-6 py-6
+                        border-4 border-black bg-orange-300
+                        shadow-[6px_6px_0px_#000] animate-fadeIn text-center"
+        >
+          <h2 className="text-base text-black">ATTENDANCE MENU</h2>
+        </div>
 
-        {/* Import the functional AttendanceIcon */}
-        <AttendanceIcon />
+        {/* Main panel */}
+        <div
+          className="p-6 border-4 border-black bg-orange-200
+                        shadow-[6px_6px_0px_#000] animate-fadeIn flex flex-col items-center"
+        >
+          {/* Import the functional AttendanceIcon */}
+          <AttendanceIcon />
 
-        {/* Decorative footer */}
-        <p className="text-xs text-muted-foreground text-center mt-4 animate-fadeUp">
-          ⏰ Stay on track with your work hours
-        </p>
+          {/* Decorative footer */}
+          <p className="text-xs text-center mt-8 animate-fadeUp">
+            Stay on track with your work hours.
+          </p>
+        </div>
       </div>
     </div>
   );

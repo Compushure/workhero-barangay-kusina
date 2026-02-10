@@ -31,7 +31,7 @@ export default function StatusIndicator({
   isOnBreak,
 }: Props) {
   return (
-    <div className="flex flex-col items-start gap-1 text-xs">
+    <div className="flex flex-col items-center gap-1 text-xs">
       {status?.isAbsent ? (
         <span className="font-semibold text-red-600 animate-pulse">
           ❌ Marked absent for today
@@ -55,7 +55,7 @@ export default function StatusIndicator({
           </span>
         )
       ) : hasTimedOut ? (
-        <span className="text-muted-foreground">Reset in: {timeRemaining}</span>
+        <span className="text-green-600">Reset in: {timeRemaining}</span>
       ) : isOnBreak ? (
         <span
           className={`font-semibold ${
@@ -65,7 +65,7 @@ export default function StatusIndicator({
           {isCurrentlyOverBreak ? '🚨 Over break time!' : 'On break'}
         </span>
       ) : (
-        <span className="text-muted-foreground">Ready to time out</span>
+        <span className="text-green-600">Ready to time out</span>
       )}
     </div>
   );
