@@ -1,4 +1,4 @@
-import { HeaderSection } from './header';
+// import { HeaderSection } from './header';
 import { DashboardLayout } from './layout';
 import { SidebarNavigation } from './sidebar-navigation';
 import { RankingCard } from './ranking-card';
@@ -18,7 +18,7 @@ export async function EmployeeDashboardPage() {
   return (
     <div className="min-h-screen space-y-6 bg-linear-to-b from-amber-100 via-orange-100 to-red-100 p-6">
       {/* Top Row: Header Stats */}
-      <HeaderSection />
+      {/* <HeaderSection /> */}
 
       {/* Main Dashboard Layout */}
       <DashboardLayout

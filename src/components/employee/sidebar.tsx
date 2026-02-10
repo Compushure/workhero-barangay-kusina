@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 'use client';
 
 import {
@@ -178,4 +176,3 @@ export function Sidebar({
     </aside>
   );
 }
->>>>>>> eddaf2864718a3f06c802f9b5a43d147ce185aee
