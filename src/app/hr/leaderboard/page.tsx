@@ -13,7 +13,7 @@ export default async function LeaderboardPage() {
     return (
       <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
         <div className="p-8 bg-[#F3F3F3] min-h-screen">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-8">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#6D1616]">Leaderboard Slide</h1>
@@ -45,7 +45,7 @@ export default async function LeaderboardPage() {
   return (
     <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
       <div className="p-8 bg-[#F3F3F3] min-h-screen">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-8">
             <div>
@@ -57,12 +57,12 @@ export default async function LeaderboardPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8 items-start">
             {/* 1st Place Highlight */}
-            <div className="lg:col-span-4 flex justify-center">
+            <div className="lg:col-span-3 flex justify-center">
               <LeaderboardCard player={topPlayer} />
             </div>
 
-            {/* Scrollable List for 2nd - 10th */}
-            <div className="lg:col-span-8">
+            {/* List for 2nd - 10th: no max-height or overflow so all 9 ranks are visible without a scrollbar */}
+            <div className="lg:col-span-9 min-w-0 lg:ml-16 overflow-visible min-h-0">
               <LeaderboardList players={others} />
             </div>
           </div>
