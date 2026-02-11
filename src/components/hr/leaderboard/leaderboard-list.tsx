@@ -1,4 +1,7 @@
+'use client';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Sparkles } from 'lucide-react';
 
 interface Player {
@@ -65,10 +68,17 @@ export default function LeaderboardList({ players }: LeaderboardListProps) {
           </div>
 
           {/* Performance Score (sparkles icon) */}
-          <div className="flex items-center gap-1 sm:gap-2 text-[#6D1616] font-bold shrink-0 text-base sm:text-lg">
-            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
-            <span>{player.performanceScore}</span>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1 sm:gap-2 text-[#6D1616] font-bold shrink-0 text-base sm:text-lg cursor-help">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
+                <span>{player.performanceScore}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="left" sideOffset={8} className="max-w-xs">
+              Performance Score = number of approved tasks × total points earned (lifetime).
+            </TooltipContent>
+          </Tooltip>
         </div>
       ))}
     </div>

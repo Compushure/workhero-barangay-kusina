@@ -1,4 +1,7 @@
+'use client';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Player {
   name: string;
@@ -56,12 +59,19 @@ export default function LeaderboardCard({ player }: { player: Player }) {
         </div>
 
         {/* Performance Score Section */}
-        <div className="w-full border-t border-orange-200 pt-3 sm:pt-4 lg:pt-5">
-          <div className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-[#6D1616]">
-            {player.performanceScore}
-          </div>
-          <p className="text-[#6D1616] font-medium mt-1 text-sm sm:text-base">Performance Score</p>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="w-full border-t border-orange-200 pt-3 sm:pt-4 lg:pt-5 cursor-help">
+              <div className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-[#6D1616]">
+                {player.performanceScore}
+              </div>
+              <p className="text-[#6D1616] font-medium mt-1 text-sm sm:text-base">Performance Score</p>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" sideOffset={8} className="max-w-xs">
+          Performance Score = number of approved tasks × total points earned (lifetime).
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

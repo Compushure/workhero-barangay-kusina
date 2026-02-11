@@ -1,4 +1,4 @@
-import LeaderboardCard from '@/components/hr/leaderboard/leaderboard-card';
+import LeaderboardCard from '@/components/hr/leaderboard/leaderboard-top-one-card';
 import LeaderboardList from '@/components/hr/leaderboard/leaderboard-list';
 import LeaderboardFilters from '@/components/hr/leaderboard/leaderboard-filters';
 import { getTopPlayers } from '@/actions/hr/leaderboard';
