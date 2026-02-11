@@ -24,22 +24,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import BadgeTableSkeleton from './badge-table-skeleton';
-
-export interface Badge {
-  id: string;
-  name: string;
-  description: string | null;
-  points: number;
-  award_at_interval: string;
-  img_link: string | null;
-  conditions: Array<{
-    id: string;
-    requirement_type: string;
-    requirement_operator: string;
-    requirement_attrb_id: string | null;
-    requirement_attrb_value: number;
-  }>;
-}
+import type { Badge, BadgeOption, BadgeInterval } from '@/types/manager/badge-editor';
 
 interface BadgeTableProps {
   badges: Badge[];
@@ -47,6 +32,9 @@ interface BadgeTableProps {
   isError: boolean;
   onEdit: (badge: Badge) => void;
   onDelete: (badgeId: string) => void;
+  taskOptions?: BadgeOption[];
+  attributeOptions?: BadgeOption[];
+  attendanceOptions?: BadgeOption[];
 }
 
 export default function BadgeTable({
@@ -55,7 +43,14 @@ export default function BadgeTable({
   isError,
   onEdit,
   onDelete,
+  taskOptions = [],
+  attributeOptions = [],
+  attendanceOptions = [],
 }: BadgeTableProps) {
+  const formatIntervalLabel = (value: BadgeInterval) => {
+    if (value === 'none') return 'Manual';
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  };
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [badgeToDelete, setBadgeToDelete] = useState<Badge | null>(null);
   const [expandedBadgeId, setExpandedBadgeId] = useState<string | null>(null);
@@ -131,9 +126,7 @@ export default function BadgeTable({
                               {badge.description || 'No description'}
                             </div>
                             <div className="text-xs text-red-900 font-medium px-2 rounded-full bg-[#fdeac8] w-fit mt-2">
-                              {badge.award_at_interval === 'none'
-                                ? 'Manual'
-                                : badge.award_at_interval}
+                              {formatIntervalLabel(badge.award_at_interval)}
                             </div>
                           </div>
                         </div>
@@ -145,8 +138,8 @@ export default function BadgeTable({
                         </div>
                       </TableCell>
                       <TableCell className="min-w-32 max-w-32 w-32 text-center align-middle text-sm">
-                        <div className="text-red-950 font-medium capitalize">
-                          {badge.award_at_interval === 'none' ? 'Manual' : badge.award_at_interval}
+                        <div className="text-red-950 font-medium">
+                          {formatIntervalLabel(badge.award_at_interval)}
                         </div>
                       </TableCell>
                       <TableCell className="min-w-24 max-w-24 w-24 text-center align-middle text-sm">
@@ -196,52 +189,30 @@ export default function BadgeTable({
                             <h4 className="font-semibold text-sm text-[#690003]">Conditions:</h4>
                             <div className="max-h-64 overflow-y-auto border border-[#e0cfcf] rounded-lg bg-white divide-y divide-[#e0cfcf]">
                               {badge.conditions.map((condition, idx) => {
-                                const MOCK_TASKS = [
-                                  { id: 'task-1', name: 'Complete Project' },
-                                  { id: 'task-2', name: 'Submit Report' },
-                                  { id: 'task-3', name: 'Review Code' },
-                                  { id: 'task-4', name: 'Write Documentation' },
-                                  { id: 'task-5', name: 'Example Task' },
-                                ];
-                                const MOCK_ATTRIBUTES = [
-                                  { id: 'attr-points', name: 'Points' },
-                                  { id: 'attr-xp', name: 'Experience Points' },
-                                  { id: 'attr-level', name: 'Level' },
-                                ];
-                                const MOCK_ATTENDANCE = [
-                                  { id: 'absence', name: 'Absences' },
-                                  { id: 'late', name: 'Lates' },
-                                  { id: 'overtime', name: 'Overtimes' },
-                                  { id: 'undertime', name: 'Undertimes' },
-                                ];
-
                                 const getSpecificName = () => {
                                   if (condition.requirement_type === 'task') {
                                     return (
-                                      MOCK_TASKS.find(
+                                      taskOptions.find(
                                         (t) => t.id === condition.requirement_attrb_id
-                                      )?.name || 'Unknown Task'
+                                      )?.name || condition.requirement_attrb_id || 'Unknown Task'
                                     );
                                   } else if (condition.requirement_type === 'attribute') {
                                     return (
-                                      MOCK_ATTRIBUTES.find(
+                                      attributeOptions.find(
                                         (a) => a.id === condition.requirement_attrb_id
-                                      )?.name || 'Unknown Attribute'
+                                      )?.name || condition.requirement_attrb_id || 'Unknown Attribute'
                                     );
                                   } else if (condition.requirement_type === 'attendance') {
                                     return (
-                                      MOCK_ATTENDANCE.find(
+                                      attendanceOptions.find(
                                         (a) => a.id === condition.requirement_attrb_id
-                                      )?.name || 'Unknown Type'
+                                      )?.name || condition.requirement_attrb_id || 'Unknown Type'
                                     );
                                   }
                                   return 'Unknown';
                                 };
 
                                 const getConditionText = () => {
-                                  const typeLabel =
-                                    condition.requirement_type.charAt(0).toUpperCase() +
-                                    condition.requirement_type.slice(1);
                                   const specificName = getSpecificName();
 
                                   if (condition.requirement_type === 'task') {
@@ -317,7 +288,7 @@ export default function BadgeTable({
           <div className="bg-background p-8 text-center">
             <div className="text-5xl mb-4">🏆</div>
             <p className="text-zinc-500 text-xl">No badges found</p>
-            <p className="text-zinc-400 text-sm mt-2">Click "Add New Badge" to create one</p>
+            <p className="text-zinc-400 text-sm mt-2">Click &quot;Add New Badge&quot; to create one</p>
           </div>
         )}
       </div>
@@ -328,7 +299,7 @@ export default function BadgeTable({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Badge?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{badgeToDelete?.name}"? This action cannot be undone
+              Are you sure you want to delete &quot;{badgeToDelete?.name}&quot;? This action cannot be undone
               and will remove this badge and all its conditions from the system.
             </AlertDialogDescription>
           </AlertDialogHeader>

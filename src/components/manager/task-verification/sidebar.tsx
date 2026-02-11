@@ -2,7 +2,7 @@
 
 import { LogOutBtn } from '@/components/sidebar/logout-btn';
 import { ProfilePic } from '@/components/sidebar/profile-pic';
-import { FileText, CheckCircle, ChevronLeft, ChevronRight, SquarePen } from 'lucide-react';
+import { FileText, CheckCircle, ChevronLeft, ChevronRight, SquarePen, Award } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import Link from 'next/link';
@@ -71,6 +71,12 @@ export function Sidebar({
       label: 'Task Editor',
       icon: <SquarePen size={20} className="shrink-0" />,
       href: '/manager/dashboard/task-editor',
+    },
+    {
+      key: 'badge-editor',
+      label: 'Badge Editor',
+      icon: <Award size={20} className="shrink-0" />,
+      href: '/manager/dashboard/badge-editor',
     },
   ],
 }: SidebarProps) {

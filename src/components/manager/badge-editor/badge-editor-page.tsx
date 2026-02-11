@@ -12,9 +12,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AddEditBadgeDialog, { type BadgeFormData } from './dialogs/add-edit-badge-dialog';
-import BadgeTable, { type Badge } from './badge-table';
+import BadgeTable from './badge-table';
 import { useDebounce } from '../../../hooks/useDebounce';
 import {Pagination} from '../task-verification/pagination';
+import type { Badge } from '@/types/manager/badge-editor';
+import {
+  useAddBadge,
+  useDeleteBadgeImage,
+  useDeleteBadge,
+  useEditBadge,
+  useGetBadgeAttendanceOptions,
+  useGetBadgeAttributeOptions,
+  useGetBadgeTaskOptions,
+  useGetBadges,
+  useUploadBadgeImage,
+} from '@/hooks/tanstack';
 
 type BadgeSortOption =
   | 'name-asc'
@@ -31,84 +43,23 @@ const SORT_OPTIONS: { value: BadgeSortOption; label: string }[] = [
   { value: 'conditional-only', label: 'Conditional Only' },
 ];
 
-// MOCK DATA - Replace with real API calls
-let MOCK_BADGES: Badge[] = [
-  {
-    id: '1',
-    name: 'Task Master',
-    description: 'Complete specific tasks and reach experience',
-    points: 100,
-    award_at_interval: 'none',
-    img_link: 'https://images.unsplash.com/photo-1578042360781-b645b814e7e1?w=100&h=100&fit=crop',
-    conditions: [
-      {
-        id: 'c1',
-        requirement_type: 'task',
-        requirement_operator: '>=',
-        requirement_attrb_id: 'task-1',
-        requirement_attrb_value: 10,
-      },
-      {
-        id: 'c1b',
-        requirement_type: 'attribute',
-        requirement_operator: '>=',
-        requirement_attrb_id: 'attr-xp',
-        requirement_attrb_value: 1000,
-      },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Point Collector',
-    description: 'Reach specific points',
-    points: 50,
-    award_at_interval: 'weekly',
-    img_link: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=100&h=100&fit=crop',
-    conditions: [
-      {
-        id: 'c2',
-        requirement_type: 'attribute',
-        requirement_operator: '>=',
-        requirement_attrb_id: 'attr-points',
-        requirement_attrb_value: 500,
-      },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Perfect Attendance',
-    description: 'Perfect attendance tracking',
-    points: 75,
-    award_at_interval: 'none',
-    img_link: null,
-    conditions: [
-      {
-        id: 'c3',
-        requirement_type: 'attendance',
-        requirement_operator: '=',
-        requirement_attrb_id: 'absence',
-        requirement_attrb_value: 0,
-      },
-      {
-        id: 'c3b',
-        requirement_type: 'attendance',
-        requirement_operator: '=',
-        requirement_attrb_id: 'late',
-        requirement_attrb_value: 0,
-      },
-    ],
-  },
-];
-
 export function BadgeEditorPage() {
-  const [badges, setBadges] = useState<Badge[]>(MOCK_BADGES);
+  const { data: badges = [], isLoading, isFetching, isError } = useGetBadges();
+  const { data: taskOptions = [] } = useGetBadgeTaskOptions();
+  const { data: attributeOptions = [] } = useGetBadgeAttributeOptions();
+  const { data: attendanceOptions = [] } = useGetBadgeAttendanceOptions();
+  const addBadge = useAddBadge();
+  const editBadge = useEditBadge();
+  const deleteBadge = useDeleteBadge();
+  const uploadBadgeImage = useUploadBadgeImage();
+  const deleteBadgeImage = useDeleteBadgeImage();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
   const [saveError, setSaveError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState<BadgeSortOption>('name-asc');
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 8;
 
   // Debounce search term
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
@@ -164,28 +115,68 @@ export function BadgeEditorPage() {
     try {
       setSaveError('');
 
-      // TODO: Replace with actual API call
-      console.log('Saving badge:', data);
+      const hasImageChange = !!data.imageFile || !!data.clearImage;
+
+      const badgePayload = {
+        name: data.name,
+        description: data.description,
+        points: data.points,
+        award_at_interval: data.award_at_interval,
+        img_link: data.img_link,
+        conditions: data.conditions,
+      };
 
       if (editingBadge) {
-        // Update existing badge
-        setBadges(
-          badges.map((b) =>
-            b.id === editingBadge.id
-              ? {
-                  id: b.id,
-                  ...data,
-                }
-              : b
-          )
-        );
+        const result = await editBadge.mutateAsync({
+          id: editingBadge.id,
+          input: badgePayload,
+          suppressToast: hasImageChange,
+        });
+        if (!result) {
+          const message = 'Failed to update badge';
+          setSaveError(message);
+          throw new Error(message);
+        }
+
+        if (data.clearImage) {
+          const cleared = await deleteBadgeImage.mutateAsync(editingBadge.id);
+          if (!cleared) {
+            const message = 'Failed to remove badge image';
+            setSaveError(message);
+            throw new Error(message);
+          }
+        }
+
+        if (data.imageFile) {
+          const uploadedUrl = await uploadBadgeImage.mutateAsync({
+            badgeId: editingBadge.id,
+            file: data.imageFile,
+          });
+          if (!uploadedUrl) {
+            const message = 'Failed to upload badge image';
+            setSaveError(message);
+            throw new Error(message);
+          }
+        }
       } else {
-        // Add new badge
-        const newBadge: Badge = {
-          id: `badge-${Date.now()}`,
-          ...data,
-        };
-        setBadges([...badges, newBadge]);
+        const result = await addBadge.mutateAsync(badgePayload);
+        if (!result) {
+          const message = 'Failed to add badge';
+          setSaveError(message);
+          throw new Error(message);
+        }
+
+        if (data.imageFile) {
+          const uploadedUrl = await uploadBadgeImage.mutateAsync({
+            badgeId: result.id,
+            file: data.imageFile,
+          });
+          if (!uploadedUrl) {
+            const message = 'Failed to upload badge image';
+            setSaveError(message);
+            throw new Error(message);
+          }
+        }
       }
 
       // Close dialog on success
@@ -201,12 +192,10 @@ export function BadgeEditorPage() {
 
   const handleDelete = async (badgeId: string) => {
     try {
-      // TODO: Replace with actual API call
-      console.log('Deleting badge:', badgeId);
-
-      // Delete badge from state
-      setBadges(badges.filter((b) => b.id !== badgeId));
-      setPage(1); // Reset to first page after deletion
+      const result = await deleteBadge.mutateAsync(badgeId);
+      if (result) {
+        setPage(1); // Reset to first page after deletion
+      }
     } catch (error) {
       console.error('Error deleting badge:', error);
     }
@@ -308,10 +297,13 @@ export function BadgeEditorPage() {
 
         <BadgeTable
           badges={paginatedBadges}
-          isLoading={false}
-          isError={false}
+          isLoading={isLoading || isFetching}
+          isError={isError}
           onEdit={handleOpenEditDialog}
           onDelete={handleDelete}
+          taskOptions={taskOptions}
+          attributeOptions={attributeOptions}
+          attendanceOptions={attendanceOptions}
         />
 
         {/* Pagination */}
@@ -333,6 +325,9 @@ export function BadgeEditorPage() {
           saveError={saveError}
           onErrorClear={handleErrorClear}
           existingNames={existingNames}
+          taskOptions={taskOptions}
+          attributeOptions={attributeOptions}
+          attendanceOptions={attendanceOptions}
         />
       </div>
     </main>

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Plus, Check, Trash2, Plus as PlusIcon } from 'lucide-react';
+import { Plus, Check, Trash2, Plus as PlusIcon, ChevronDown, ChevronUp, ImageUp, X } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -14,21 +14,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-export interface BadgeCondition {
-  id: string;
-  requirement_type: string; // 'task', 'attribute', 'attendance'
-  requirement_operator: string;
-  requirement_attrb_id: string | null; // task_id, attribute_type, or attendance_type
-  requirement_attrb_value: number;
-}
+import type { BadgeCondition, BadgeOption, BadgeInterval } from '@/types/manager/badge-editor';
 
 export interface BadgeFormData {
   name: string;
   description: string;
   points: number;
-  award_at_interval: string;
+  award_at_interval: BadgeInterval;
   img_link: string | null;
   conditions: BadgeCondition[];
+  imageFile?: File | null;
+  clearImage?: boolean;
 }
 
 interface AddEditBadgeDialogProps {
@@ -47,33 +43,20 @@ interface AddEditBadgeDialogProps {
   saveError?: string;
   onErrorClear?: () => void;
   existingNames?: string[];
+  taskOptions?: BadgeOption[];
+  attributeOptions?: BadgeOption[];
+  attendanceOptions?: BadgeOption[];
 }
 
 const REQUIREMENT_TYPES = ['task', 'attribute', 'attendance'];
 const OPERATORS = ['=', '>', '<', '>=', '<=', '!='];
-const INTERVALS = ['none', 'daily', 'weekly', 'monthly', 'yearly'];
-
-// MOCK DATA - Replace with actual API calls
-const MOCK_TASKS = [
-  { id: 'task-1', name: 'Complete Project' },
-  { id: 'task-2', name: 'Submit Report' },
-  { id: 'task-3', name: 'Review Code' },
-  { id: 'task-4', name: 'Write Documentation' },
-  { id: 'task-5', name: 'Example Task' },
-];
-
-const MOCK_ATTRIBUTES = [
-  { id: 'attr-points', name: 'Points' },
-  { id: 'attr-xp', name: 'Experience Points' },
-  { id: 'attr-level', name: 'Level' },
-];
-
-const MOCK_ATTENDANCE_TYPES = [
-  { id: 'absence', name: 'Absences' },
-  { id: 'late', name: 'Lates' },
-  { id: 'overtime', name: 'Overtimes' },
-  { id: 'undertime', name: 'Undertimes' },
-];
+const INTERVALS: BadgeInterval[] = ['none', 'daily', 'monthly', 'yearly'];
+const INTERVAL_LABELS: Record<BadgeInterval, string> = {
+  none: 'Manual',
+  daily: 'Daily',
+  monthly: 'Monthly',
+  yearly: 'Yearly',
+};
 
 export default function AddEditBadgeDialog({
   open,
@@ -83,14 +66,22 @@ export default function AddEditBadgeDialog({
   saveError = '',
   onErrorClear,
   existingNames = [],
+  taskOptions = [],
+  attributeOptions = [],
+  attendanceOptions = [],
 }: AddEditBadgeDialogProps) {
   const [badgeName, setBadgeName] = useState('');
   const [badgeDescription, setBadgeDescription] = useState('');
   const [points, setPoints] = useState(10);
-  const [awardAtInterval, setAwardAtInterval] = useState('none');
+  const [awardAtInterval, setAwardAtInterval] = useState<BadgeInterval>('none');
   const [imgLink, setImgLink] = useState<string | null>(null);
   const [conditions, setConditions] = useState<BadgeCondition[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [clearImage, setClearImage] = useState(false);
+  const [expandedConditions, setExpandedConditions] = useState<Record<string, boolean>>({});
+  const [isConditionsCollapsed, setIsConditionsCollapsed] = useState(false);
 
   // Populate form when editing
   useEffect(() => {
@@ -101,6 +92,11 @@ export default function AddEditBadgeDialog({
       setAwardAtInterval(editingBadge.award_at_interval);
       setImgLink(editingBadge.img_link || null);
       setConditions(editingBadge.conditions);
+      setImageFile(null);
+      setImagePreviewUrl(null);
+      setClearImage(false);
+      setExpandedConditions({});
+      setIsConditionsCollapsed(false);
     } else {
       // Reset form when adding new
       setBadgeName('');
@@ -109,6 +105,11 @@ export default function AddEditBadgeDialog({
       setAwardAtInterval('none');
       setImgLink(null);
       setConditions([]);
+      setImageFile(null);
+      setImagePreviewUrl(null);
+      setClearImage(false);
+      setExpandedConditions({});
+      setIsConditionsCollapsed(false);
     }
   }, [editingBadge, open]);
 
@@ -117,7 +118,7 @@ export default function AddEditBadgeDialog({
     if (saveError && onErrorClear) {
       onErrorClear();
     }
-  }, [badgeName, badgeDescription, points, awardAtInterval, saveError, onErrorClear]);
+  }, [badgeName, badgeDescription, points, awardAtInterval, imgLink, imageFile, clearImage, conditions, saveError, onErrorClear]);
 
   // Check if any changes were made compared to original badge
   const hasChanges = useMemo(() => {
@@ -131,9 +132,11 @@ export default function AddEditBadgeDialog({
       points !== editingBadge.points ||
       awardAtInterval !== editingBadge.award_at_interval ||
       imgLink !== editingBadge.img_link ||
-      JSON.stringify(conditions) !== JSON.stringify(editingBadge.conditions)
+      JSON.stringify(conditions) !== JSON.stringify(editingBadge.conditions) ||
+      clearImage ||
+      !!imageFile
     );
-  }, [editingBadge, badgeName, badgeDescription, points, awardAtInterval, imgLink, conditions]);
+  }, [editingBadge, badgeName, badgeDescription, points, awardAtInterval, imgLink, imageFile, clearImage, conditions]);
 
   const handleSave = async () => {
     if (!isFormValid || !hasChanges) return;
@@ -147,6 +150,8 @@ export default function AddEditBadgeDialog({
         award_at_interval: awardAtInterval,
         img_link: imgLink,
         conditions,
+        imageFile,
+        clearImage,
       });
       handleClose();
     } catch (error) {
@@ -158,6 +163,9 @@ export default function AddEditBadgeDialog({
 
   const handleClose = () => {
     if (isLoading) return;
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl);
+    }
     setBadgeName('');
     setBadgeDescription('');
     setPoints(10);
@@ -165,6 +173,11 @@ export default function AddEditBadgeDialog({
     setImgLink(null);
     setConditions([]);
     setIsLoading(false);
+    setImageFile(null);
+    setImagePreviewUrl(null);
+    setClearImage(false);
+    setExpandedConditions({});
+    setIsConditionsCollapsed(false);
     onOpenChange(false);
   };
 
@@ -197,11 +210,21 @@ export default function AddEditBadgeDialog({
 
   // Add a new empty condition
   const handleAddCondition = () => {
+    const initialType: BadgeCondition['requirement_type'] = taskOptions.length
+      ? 'task'
+      : attributeOptions.length
+        ? 'attribute'
+        : 'attendance';
+    const initialId = initialType === 'task'
+      ? taskOptions[0]?.id
+      : initialType === 'attribute'
+        ? attributeOptions[0]?.id
+        : attendanceOptions[0]?.id;
     const newCondition: BadgeCondition = {
       id: `temp-${Date.now()}`,
-      requirement_type: 'task',
+      requirement_type: initialType,
       requirement_operator: '=',
-      requirement_attrb_id: MOCK_TASKS[0]?.id || null,
+      requirement_attrb_id: initialId || null,
       requirement_attrb_value: 1,
     };
     setConditions([...conditions, newCondition]);
@@ -214,14 +237,63 @@ export default function AddEditBadgeDialog({
 
   // Update a condition
   const handleUpdateCondition = (id: string, field: keyof BadgeCondition, value: any) => {
-    setConditions(
-      conditions.map((c) => (c.id === id ? { ...c, [field]: value } : c))
+    setConditions((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
+  };
+
+  const handleConditionTypeChange = (id: string, value: BadgeCondition['requirement_type']) => {
+    const newId =
+      value === 'task'
+        ? taskOptions[0]?.id
+        : value === 'attribute'
+          ? attributeOptions[0]?.id
+          : attendanceOptions[0]?.id;
+
+    setConditions((prev) =>
+      prev.map((c) =>
+        c.id === id
+          ? {
+              ...c,
+              requirement_type: value,
+              requirement_attrb_id: newId || null,
+            }
+          : c
+      )
     );
   };
 
+  const handleToggleCondition = (id: string) => {
+    setExpandedConditions((prev) => ({
+      ...prev,
+      [id]: !(prev[id] ?? true),
+    }));
+  };
+
+  const handleImageChange = (file: File | null) => {
+    if (!file) return;
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl);
+    }
+    const previewUrl = URL.createObjectURL(file);
+    setImagePreviewUrl(previewUrl);
+    setImageFile(file);
+    setClearImage(false);
+  };
+
+  const handleClearImage = () => {
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl);
+    }
+    setImagePreviewUrl(null);
+    setImageFile(null);
+    setImgLink(null);
+    setClearImage(true);
+  };
+
+  const currentImageUrl = clearImage ? null : imagePreviewUrl || imgLink;
+
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
-      <DialogContent className="bg-background border-none max-w-[95vw] md:max-w-2xl lg:max-w-3xl rounded-2xl p-4 sm:p-6 max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-background border-none max-w-[92vw] md:max-w-xl lg:max-w-2xl rounded-2xl p-4 sm:p-5 max-h-[85vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-[#5a2a2a] text-base sm:text-lg font-semibold">
@@ -240,7 +312,7 @@ export default function AddEditBadgeDialog({
 
         <div className="space-y-6 mt-4">
           {/* Badge Name and Points Row */}
-          <div className="flex gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2 flex-1">
               <Label className="text-sm font-medium text-[#5a2a2a]">
                 Badge Name <span className="text-red-500">*</span>
@@ -323,27 +395,54 @@ export default function AddEditBadgeDialog({
           {/* Badge Icon */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-[#5a2a2a]">Badge Icon</Label>
-            <div className="flex gap-4 items-start">
-              <div className="flex-1 space-y-2">
-                <Input
-                  placeholder="Enter image URL (e.g., https://example.com/badge.png)"
-                  value={imgLink || ''}
-                  onChange={(e) => setImgLink(e.target.value || null)}
-                  className="bg-white border-[#e0cfcf] focus:border-[#690003]"
-                />
-                <p className="text-xs text-gray-500">Enter a URL to an image file or leave empty for default placeholder</p>
-              </div>
-              {/* Icon Preview */}
-              <div className="flex-shrink-0 w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-[#e0cfcf]">
-                {imgLink ? (
-                  <img 
-                    src={imgLink || "/placeholder.svg"} 
-                    alt="Badge icon preview"
-                    className="w-full h-full object-cover"
-                    onError={() => console.log('[v0] Image failed to load')}
-                  />
+            <div className="flex flex-col md:flex-row gap-4 items-start">
+              <label
+                htmlFor="badge-icon-upload"
+                className="w-full md:w-40 h-32 border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white relative overflow-hidden group"
+                style={
+                  currentImageUrl
+                    ? {
+                        backgroundImage: `url('${currentImageUrl}')`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        borderStyle: 'solid',
+                      }
+                    : undefined
+                }
+              >
+                {currentImageUrl ? (
+                  <div className="absolute inset-0" />
                 ) : (
-                  <span className="text-2xl text-gray-400">?</span>
+                  <ImageUp className="h-6 w-6 text-[#7a3d3d]" />
+                )}
+                {currentImageUrl && (
+                  <div className="absolute top-1 right-1 bg-[#690003] rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ImageUp className="h-3 w-3 text-white" />
+                  </div>
+                )}
+              </label>
+              <input
+                id="badge-icon-upload"
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
+                className="hidden"
+              />
+              <div className="flex-1 space-y-2">
+                <p className="text-xs text-gray-500">
+                  Upload a badge icon (JPG, PNG, WebP). Max 5MB.
+                </p>
+                {currentImageUrl && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearImage}
+                    className="border-[#690003] text-[#690003] hover:bg-[#fbeaea] bg-transparent"
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Remove Image
+                  </Button>
                 )}
               </div>
             </div>
@@ -359,17 +458,31 @@ export default function AddEditBadgeDialog({
               <SelectContent>
                 {INTERVALS.map((interval) => (
                   <SelectItem key={interval} value={interval}>
-                    {interval === 'none' ? 'Manual' : interval.charAt(0).toUpperCase() + interval.slice(1)}
+                    {INTERVAL_LABELS[interval as BadgeInterval]}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <p className="text-xs text-gray-500">
+              Controls how often this badge is evaluated. Manual means the badge is only assigned by a manager.
+            </p>
           </div>
 
           {/* Conditions Section */}
           <div className="space-y-4 border-t-2 border-[#e0cfcf] pt-4">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-bold text-[#5a2a2a]">Conditions</Label>
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-bold text-[#5a2a2a]">Conditions</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsConditionsCollapsed((prev) => !prev)}
+                  className="h-8 w-8 text-[#690003] hover:bg-[#690003]/10"
+                >
+                  {isConditionsCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                </Button>
+              </div>
               <Button
                 type="button"
                 onClick={handleAddCondition}
@@ -382,207 +495,243 @@ export default function AddEditBadgeDialog({
               </Button>
             </div>
 
-            {conditions.length === 0 ? (
+            {isConditionsCollapsed && (
+              <p className="text-xs text-gray-500">
+                Conditions are collapsed. Expand to view or edit.
+              </p>
+            )}
+
+            {!isConditionsCollapsed && conditions.length === 0 ? (
               <div className="bg-white rounded-lg p-4 border border-[#e0cfcf] text-center text-gray-500">
                 <p className="text-sm">No conditions - Badge will be awarded manually</p>
               </div>
-            ) : (
+            ) : !isConditionsCollapsed ? (
               <div className="border border-[#e0cfcf] rounded-lg overflow-hidden bg-white">
                 <div className="max-h-96 overflow-y-auto space-y-0 divide-y divide-[#e0cfcf]">
-                  {conditions.map((condition, idx) => (
-                    <div
-                      key={condition.id}
-                      className="p-4 space-y-3 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-[#5a2a2a]">Condition {idx + 1}</span>
-                        <Button
-                          type="button"
-                          onClick={() => handleRemoveCondition(condition.id)}
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
-                        >
-                          <Trash2 size={16} />
-                        </Button>
+                  {conditions.map((condition, idx) => {
+                    const isExpanded = expandedConditions[condition.id] ?? true;
+
+                    return (
+                      <div
+                        key={condition.id}
+                        className="p-4 space-y-3 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-[#5a2a2a]">
+                            Condition {idx + 1}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              type="button"
+                              onClick={() => handleToggleCondition(condition.id)}
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 hover:bg-[#690003]/10 text-[#690003]"
+                            >
+                              {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={() => handleRemoveCondition(condition.id)}
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {isExpanded && (
+                          <div className="space-y-3">
+                            {/* Requirement Type */}
+                            <div className="space-y-1">
+                              <Label className="text-xs font-medium text-[#5a2a2a]">Type</Label>
+                              <Select
+                                value={condition.requirement_type}
+                                onValueChange={(value) =>
+                                  handleConditionTypeChange(
+                                    condition.id,
+                                    value as BadgeCondition['requirement_type']
+                                  )
+                                }
+                              >
+                                <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {REQUIREMENT_TYPES.map((type) => (
+                                    <SelectItem key={type} value={type}>
+                                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Select the type of requirement to check
+                              </p>
+                            </div>
+
+                            {/* Specific Item Selector (Task/Attribute/Attendance) */}
+                            {condition.requirement_type === 'task' && (
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium text-[#5a2a2a]">Specific Task</Label>
+                                <Select
+                                  value={condition.requirement_attrb_id || ''}
+                                  onValueChange={(value) =>
+                                    handleUpdateCondition(condition.id, 'requirement_attrb_id', value)
+                                  }
+                                >
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {taskOptions.map((task) => (
+                                      <SelectItem key={task.id} value={task.id}>
+                                        {task.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+
+                            {condition.requirement_type === 'attribute' && (
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium text-[#5a2a2a]">
+                                  Specific Attribute
+                                </Label>
+                                <Select
+                                  value={condition.requirement_attrb_id || ''}
+                                  onValueChange={(value) =>
+                                    handleUpdateCondition(condition.id, 'requirement_attrb_id', value)
+                                  }
+                                >
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {attributeOptions.map((attr) => (
+                                      <SelectItem key={attr.id} value={attr.id}>
+                                        {attr.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+
+                            {condition.requirement_type === 'attendance' && (
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium text-[#5a2a2a]">Attendance Type</Label>
+                                <Select
+                                  value={condition.requirement_attrb_id || ''}
+                                  onValueChange={(value) =>
+                                    handleUpdateCondition(condition.id, 'requirement_attrb_id', value)
+                                  }
+                                >
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {attendanceOptions.map((att) => (
+                                      <SelectItem key={att.id} value={att.id}>
+                                        {att.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+
+                            {/* Human Readable Preview */}
+                            <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                              <p className="text-xs text-blue-900 leading-relaxed">
+                                {condition.requirement_type === 'task' && (
+                                  <>
+                                    When the Task{' '}
+                                    <span className="font-semibold">
+                                      &quot;{taskOptions.find(t => t.id === condition.requirement_attrb_id)?.name || 'N/A'}&quot;
+                                    </span>{' '}
+                                    is <span className="font-semibold">{condition.requirement_operator}</span>{' '}
+                                    <span className="font-semibold">{condition.requirement_attrb_value}</span>
+                                  </>
+                                )}
+                                {condition.requirement_type === 'attribute' && (
+                                  <>
+                                    When User{' '}
+                                    <span className="font-semibold">
+                                      {attributeOptions.find(a => a.id === condition.requirement_attrb_id)?.name || 'N/A'}
+                                    </span>{' '}
+                                    attribute is{' '}
+                                    <span className="font-semibold">{condition.requirement_operator}</span>{' '}
+                                    <span className="font-semibold">{condition.requirement_attrb_value}</span>
+                                  </>
+                                )}
+                                {condition.requirement_type === 'attendance' && (
+                                  <>
+                                    When the Attendance Value{' '}
+                                    <span className="font-semibold">
+                                      {attendanceOptions.find(a => a.id === condition.requirement_attrb_id)?.name || 'N/A'}
+                                    </span>{' '}
+                                    is <span className="font-semibold">{condition.requirement_operator}</span>{' '}
+                                    <span className="font-semibold">{condition.requirement_attrb_value}</span>
+                                  </>
+                                )}
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-2">
+                              {/* Operator */}
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium text-[#5a2a2a]">Condition</Label>
+                                <Select
+                                  value={condition.requirement_operator}
+                                  onValueChange={(value) =>
+                                    handleUpdateCondition(condition.id, 'requirement_operator', value)
+                                  }
+                                >
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {OPERATORS.map((op) => (
+                                      <SelectItem key={op} value={op}>
+                                        {op}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Attribute Value */}
+                              <div className="col-span-2 space-y-1">
+                                <Label className="text-xs font-medium text-[#5a2a2a]">Count Value</Label>
+                                <Input
+                                  type="number"
+                                  value={condition.requirement_attrb_value}
+                                  onChange={(e) =>
+                                    handleUpdateCondition(
+                                      condition.id,
+                                      'requirement_attrb_value',
+                                      parseInt(e.target.value) || 0
+                                    )
+                                  }
+                                  min={0}
+                                  max={10000}
+                                  className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm"
+                                  placeholder="e.g., 5"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
-
-                    <div className="space-y-3">
-                      {/* Requirement Type */}
-                      <div className="space-y-1">
-                        <Label className="text-xs font-medium text-[#5a2a2a]">Type</Label>
-                        <Select
-                          value={condition.requirement_type}
-                          onValueChange={(value) => {
-                            // Reset attrb_id when type changes
-                            const newId = 
-                              value === 'task' ? MOCK_TASKS[0]?.id :
-                              value === 'attribute' ? MOCK_ATTRIBUTES[0]?.id :
-                              MOCK_ATTENDANCE_TYPES[0]?.id;
-                            handleUpdateCondition(condition.id, 'requirement_type', value);
-                            handleUpdateCondition(condition.id, 'requirement_attrb_id', newId || null);
-                          }}
-                        >
-                          <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {REQUIREMENT_TYPES.map((type) => (
-                              <SelectItem key={type} value={type}>
-                                {type.charAt(0).toUpperCase() + type.slice(1)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-gray-500 mt-1">Select the type of requirement to check</p>
-                      </div>
-
-                      {/* Specific Item Selector (Task/Attribute/Attendance) */}
-                      {condition.requirement_type === 'task' && (
-                        <div className="space-y-1">
-                          <Label className="text-xs font-medium text-[#5a2a2a]">Specific Task</Label>
-                          <Select
-                            value={condition.requirement_attrb_id || ''}
-                            onValueChange={(value) =>
-                              handleUpdateCondition(condition.id, 'requirement_attrb_id', value)
-                            }
-                          >
-                            <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {MOCK_TASKS.map((task) => (
-                                <SelectItem key={task.id} value={task.id}>
-                                  {task.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-
-                      {condition.requirement_type === 'attribute' && (
-                        <div className="space-y-1">
-                          <Label className="text-xs font-medium text-[#5a2a2a]">Specific Attribute</Label>
-                          <Select
-                            value={condition.requirement_attrb_id || ''}
-                            onValueChange={(value) =>
-                              handleUpdateCondition(condition.id, 'requirement_attrb_id', value)
-                            }
-                          >
-                            <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {MOCK_ATTRIBUTES.map((attr) => (
-                                <SelectItem key={attr.id} value={attr.id}>
-                                  {attr.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-
-                      {condition.requirement_type === 'attendance' && (
-                        <div className="space-y-1">
-                          <Label className="text-xs font-medium text-[#5a2a2a]">Attendance Type</Label>
-                          <Select
-                            value={condition.requirement_attrb_id || ''}
-                            onValueChange={(value) =>
-                              handleUpdateCondition(condition.id, 'requirement_attrb_id', value)
-                            }
-                          >
-                            <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {MOCK_ATTENDANCE_TYPES.map((att) => (
-                                <SelectItem key={att.id} value={att.id}>
-                                  {att.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-
-                      {/* Human Readable Preview */}
-                      <div className="bg-blue-50 border border-blue-200 rounded p-3">
-                        <p className="text-xs text-blue-900 leading-relaxed">
-                          {condition.requirement_type === 'task' && (
-                            <>
-                              When the Task <span className="font-semibold">'{MOCK_TASKS.find(t => t.id === condition.requirement_attrb_id)?.name || 'N/A'}'</span> is{' '}
-                              <span className="font-semibold">{condition.requirement_operator}</span>{' '}
-                              <span className="font-semibold">{condition.requirement_attrb_value}</span>
-                            </>
-                          )}
-                          {condition.requirement_type === 'attribute' && (
-                            <>
-                              When User <span className="font-semibold">{MOCK_ATTRIBUTES.find(a => a.id === condition.requirement_attrb_id)?.name || 'N/A'}</span> attribute is{' '}
-                              <span className="font-semibold">{condition.requirement_operator}</span>{' '}
-                              <span className="font-semibold">{condition.requirement_attrb_value}</span>
-                            </>
-                          )}
-                          {condition.requirement_type === 'attendance' && (
-                            <>
-                              When the Attendance Value <span className="font-semibold">{MOCK_ATTENDANCE_TYPES.find(a => a.id === condition.requirement_attrb_id)?.name || 'N/A'}</span> is{' '}
-                              <span className="font-semibold">{condition.requirement_operator}</span>{' '}
-                              <span className="font-semibold">{condition.requirement_attrb_value}</span>
-                            </>
-                          )}
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-2">
-                        {/* Operator */}
-                        <div className="space-y-1">
-                          <Label className="text-xs font-medium text-[#5a2a2a]">Condition</Label>
-                          <Select
-                            value={condition.requirement_operator}
-                            onValueChange={(value) =>
-                              handleUpdateCondition(condition.id, 'requirement_operator', value)
-                            }
-                          >
-                            <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {OPERATORS.map((op) => (
-                                <SelectItem key={op} value={op}>
-                                  {op}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {/* Attribute Value */}
-                        <div className="col-span-2 space-y-1">
-                          <Label className="text-xs font-medium text-[#5a2a2a]">Count Value</Label>
-                          <Input
-                            type="number"
-                            value={condition.requirement_attrb_value}
-                            onChange={(e) =>
-                              handleUpdateCondition(
-                                condition.id,
-                                'requirement_attrb_value',
-                                parseInt(e.target.value) || 0
-                              )
-                            }
-                            min={0}
-                            max={10000}
-                            className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm"
-                            placeholder="e.g., 5"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
