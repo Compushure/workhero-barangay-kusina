@@ -10,12 +10,15 @@ import {
   ShoppingCart,
   Trophy,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogOutBtn } from '../sidebar/logout-btn';
 import { ProfilePic } from '../sidebar/profile-pic';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
+import { NavigationDisplay } from '@/components/manager/navigation-display';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useNavigationStore } from '@/store/navigationStore';
 
 interface NavItem {
   key: string;
@@ -26,6 +29,42 @@ interface NavItem {
 
 interface SidebarProps {
   navItems?: NavItem[];
+}
+
+function SidebarUserProfile({
+  isCollapsed,
+  disabled,
+}: {
+  isCollapsed: boolean;
+  disabled: boolean;
+}) {
+  const { data: user, isLoading, isFetching } = useGetSessionUser();
+  const isProfileLoading = isLoading || isFetching;
+
+  return (
+    <>
+      <ProfilePic user={user} disabled={disabled} isLoading={isProfileLoading} />
+      {!isCollapsed && (
+        <div className="min-w-0">
+          {isProfileLoading ? (
+            <>
+              <div className="h-4 w-20 bg-white/20 rounded animate-pulse" />
+              <div className="h-3 w-28 bg-white/10 rounded mt-1 animate-pulse" />
+            </>
+          ) : (
+            <>
+              {user && (
+                <>
+                  <p className="font-semibold text-sm truncate">{user.name}</p>
+                  <p className="text-xs text-red-200 truncate">{user.email}</p>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </>
+  );
 }
 
 export function Sidebar({
@@ -52,13 +91,26 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+  const { startNavigation, stopNavigation, isNavigating, isLoggingOut } = useNavigationStore();
 
-  // Fetch current session user
-  const { data: user } = useGetSessionUser();
+  const isUiDisabled = isNavigating || isLoggingOut;
+
+  useEffect(() => {
+    if (pendingHref && pathname === pendingHref) {
+      setPendingHref(null);
+      stopNavigation();
+      return;
+    }
+
+    if (!pendingHref && isNavigating) {
+      stopNavigation();
+    }
+  }, [pathname, pendingHref, isNavigating, stopNavigation]);
 
   return (
     <aside
-      className={`bg-[#690003] text-white flex flex-col justify-between h-screen sticky top-0 transition-all duration-300 ${
+      className={`bg-[#690003] text-white flex flex-col justify-between h-screen sticky top-0 transition-all duration-300 overflow-hidden ${
         isCollapsed ? 'w-20' : 'w-60'
       }`}
     >
@@ -83,21 +135,56 @@ export function Sidebar({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto">
+      <nav className="flex-1 px-4 py-6 space-y-3 overflow-hidden">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
+          const isNavigatingItem = pendingHref === item.href;
+          const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
           return (
-            <Link
-              key={item.key}
-              href={item.href}
-              className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all ${
-                isCollapsed ? 'justify-center px-2' : 'justify-start'
-              } ${isActive ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'}`}
-              title={isCollapsed ? item.label : ''}
-            >
-              {item.icon}
-              {!isCollapsed && item.label}
-            </Link>
+            <Tooltip key={item.key}>
+              <TooltipTrigger asChild>
+                <Link
+                  href={item.href}
+                  onClick={() => {
+                    if (pathname !== item.href) {
+                      setPendingHref(item.href);
+                      startNavigation();
+                    }
+                  }}
+                  aria-disabled={isDisabled}
+                  className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all ${
+                    isCollapsed ? 'justify-center px-2' : 'justify-start'
+                  } ${isActive ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'} ${
+                    isDisabled ? 'opacity-50 pointer-events-none' : ''
+                  }`}
+                >
+                  {isCollapsed ? (
+                    isNavigatingItem ? (
+                      <NavigationDisplay
+                        isNavigating={isNavigatingItem}
+                        className="inline-flex items-center justify-center"
+                        iconClassName="size-5 animate-spin text-red-200"
+                      />
+                    ) : (
+                      item.icon
+                    )
+                  ) : (
+                    item.icon
+                  )}
+                  {!isCollapsed && <span>{item.label}</span>}
+                  {!isCollapsed && (
+                    <NavigationDisplay
+                      isNavigating={isNavigatingItem}
+                      className="ml-auto inline-flex items-center justify-center"
+                      iconClassName="size-4 animate-spin text-red-200"
+                    />
+                  )}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={8}>
+                {item.label}
+              </TooltipContent>
+            </Tooltip>
           );
         })}
       </nav>
@@ -113,13 +200,7 @@ export function Sidebar({
             isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
           }`}
         >
-          <ProfilePic user={user} />
-          {!isCollapsed && user && (
-            <div className="min-w-0">
-              <p className="font-semibold text-sm truncate">{user.name} </p>
-              <p className="text-xs text-red-200 truncate">{user.email}</p>
-            </div>
-          )}
+          <SidebarUserProfile isCollapsed={isCollapsed} disabled={isUiDisabled} />
         </div>
 
         {!isCollapsed && <LogOutBtn />}

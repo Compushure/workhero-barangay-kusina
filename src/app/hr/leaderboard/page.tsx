@@ -3,6 +3,7 @@ import LeaderboardList from '@/components/hr/leaderboard/leaderboard-list';
 import LeaderboardFilters from '@/components/hr/leaderboard/leaderboard-filters';
 import { getTopPlayers } from '@/actions/hr/leaderboard';
 import { Suspense } from 'react';
+import { MarketSuspense } from '@/components/shared/market-suspense';
 
 export default async function LeaderboardPage() {
   const result = await getTopPlayers();
@@ -10,15 +11,7 @@ export default async function LeaderboardPage() {
   // Handle error or empty data
   if (result.error || !result.data || result.data.length === 0) {
     return (
-      <Suspense
-        fallback={
-          <div className="p-8 bg-[#F3F3F3] min-h-screen">
-            <div className="max-w-6xl mx-auto text-center py-12">
-              <p className="text-gray-500 text-lg">Loading...</p>
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
         <div className="p-8 bg-[#F3F3F3] min-h-screen">
           <div className="max-w-6xl mx-auto">
             <div className="flex justify-between items-start mb-8">
@@ -50,15 +43,7 @@ export default async function LeaderboardPage() {
   const others = playersWithRank.slice(1);
 
   return (
-    <Suspense
-      fallback={
-        <div className="p-8 bg-[#F3F3F3] min-h-screen">
-          <div className="max-w-6xl mx-auto text-center py-12">
-            <p className="text-gray-500 text-lg">Loading...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
       <div className="p-8 bg-[#F3F3F3] min-h-screen">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
