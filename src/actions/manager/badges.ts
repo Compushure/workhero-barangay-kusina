@@ -33,6 +33,7 @@ function normalizeConditions(raw: unknown): BadgeCondition[] {
     requirement_attrb_id: condition.requirement_attrb_id ?? null,
     requirement_attrb_value: Number(condition.requirement_attrb_value ?? 0),
     requirement_interval: condition.requirement_interval ?? 'none',
+    logic_type: condition.logic_type ?? 'and',
   }));
 }
 
@@ -202,6 +203,7 @@ export async function addBadge(input: unknown): Promise<ServerActionResponse<Bad
       requirement_interval: 'none',
       requirement_attrb_id: condition.requirement_attrb_id,
       requirement_attrb_value: condition.requirement_attrb_value,
+      logic_type: condition.logic_type,
     }));
 
     const { data: requirementRows, error: requirementError } = await supabase
@@ -220,6 +222,7 @@ export async function addBadge(input: unknown): Promise<ServerActionResponse<Bad
       requirement_attrb_id: row.requirement_attrb_id,
       requirement_attrb_value: row.requirement_attrb_value,
       requirement_interval: row.requirement_interval ?? 'none',
+      logic_type: row.logic_type ?? 'and',
     }));
   }
 
@@ -276,6 +279,7 @@ export async function editBadge(id: string, input: unknown): Promise<ServerActio
       requirement_interval: 'none',
       requirement_attrb_id: condition.requirement_attrb_id,
       requirement_attrb_value: condition.requirement_attrb_value,
+      logic_type: condition.logic_type,
     }));
 
     const { data: requirementRows, error: requirementError } = await supabase
@@ -294,6 +298,7 @@ export async function editBadge(id: string, input: unknown): Promise<ServerActio
       requirement_attrb_id: row.requirement_attrb_id,
       requirement_attrb_value: row.requirement_attrb_value,
       requirement_interval: row.requirement_interval ?? 'none',
+      logic_type: row.logic_type ?? 'and',
     }));
   }
 

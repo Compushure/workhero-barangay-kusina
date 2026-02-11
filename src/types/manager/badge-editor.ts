@@ -7,6 +7,7 @@
 export type BadgeRequirementType = 'task' | 'attribute' | 'attendance';
 export type BadgeOperator = '=' | '>' | '<' | '>=' | '<=' | '!=';
 export type BadgeInterval = 'none' | 'daily' | 'monthly' | 'yearly';
+export type BadgeLogicType = 'and' | 'or';
 
 export interface BadgeCondition {
   id: string;
@@ -15,6 +16,7 @@ export interface BadgeCondition {
   requirement_attrb_id: string | null;
   requirement_attrb_value: number;
   requirement_interval?: BadgeInterval;
+  logic_type: BadgeLogicType;
 }
 
 export interface Badge {

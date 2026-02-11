@@ -9,13 +9,15 @@ import { z } from 'zod';
 export const badgeRequirementTypeSchema = z.enum(['task', 'attribute', 'attendance']);
 export const badgeOperatorSchema = z.enum(['=', '>', '<', '>=', '<=', '!=']);
 export const badgeIntervalSchema = z.enum(['none', 'daily', 'monthly', 'yearly']);
+export const badgeLogicTypeSchema = z.enum(['and', 'or']);
 
 export const badgeConditionSchema = z.object({
   id: z.string().optional(),
   requirement_type: badgeRequirementTypeSchema,
   requirement_operator: badgeOperatorSchema,
-  requirement_attrb_id: z.string().min(1, 'Requirement attribute is required'),
+  requirement_attrb_id: z.string().min(1, 'Requirement attribute is required').nullable(),
   requirement_attrb_value: z.number().int().min(0, 'Count value must be 0 or higher'),
+  logic_type: badgeLogicTypeSchema.default('and'),
 });
 
 export const addBadgeSchema = z.object({

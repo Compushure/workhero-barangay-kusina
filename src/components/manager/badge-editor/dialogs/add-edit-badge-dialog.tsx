@@ -89,7 +89,7 @@ export default function AddEditBadgeDialog({
       setBadgeName(editingBadge.name);
       setBadgeDescription(editingBadge.description || '');
       setPoints(editingBadge.points);
-      setAwardAtInterval(editingBadge.award_at_interval);
+      setAwardAtInterval(editingBadge.award_at_interval as BadgeInterval);
       setImgLink(editingBadge.img_link || null);
       setConditions(editingBadge.conditions);
       setImageFile(null);
@@ -226,6 +226,7 @@ export default function AddEditBadgeDialog({
       requirement_operator: '=',
       requirement_attrb_id: initialId || null,
       requirement_attrb_value: 1,
+      logic_type: 'and',
     };
     setConditions([...conditions, newCondition]);
   };
@@ -368,6 +369,7 @@ export default function AddEditBadgeDialog({
                   +
                 </button>
               </div>
+              <p className="text-xs text-gray-500">Points awarded to user when badge is earned</p>
               {!isPointsValid && <p className="text-xs text-red-500">Must be between 1 and 10,000</p>}
             </div>
           </div>
@@ -451,7 +453,7 @@ export default function AddEditBadgeDialog({
           {/* Award Interval */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-[#5a2a2a]">Award Interval</Label>
-            <Select value={awardAtInterval} onValueChange={setAwardAtInterval}>
+            <Select value={awardAtInterval} onValueChange={(value) => setAwardAtInterval(value as BadgeInterval)}>
               <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003]">
                 <SelectValue placeholder="Select interval" />
               </SelectTrigger>
@@ -495,6 +497,16 @@ export default function AddEditBadgeDialog({
               </Button>
             </div>
 
+            {/* Logic Type Explanation */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
+              <p className="text-xs text-blue-900 font-semibold">Understanding Condition Logic:</p>
+              <div className="space-y-1 text-xs text-blue-800">
+                <p><span className="font-bold">AND (*)</span> - Mandatory condition. All AND conditions must be met.</p>
+                <p><span className="font-bold">OR (+)</span> - Optional condition. At least one OR condition must be met (if any OR exists).</p>
+                <p className="italic mt-1">Example: 2 AND conditions + 1 OR condition = All 2 ANDs must be met + the 1 OR must be met.</p>
+              </div>
+            </div>
+
             {isConditionsCollapsed && (
               <p className="text-xs text-gray-500">
                 Conditions are collapsed. Expand to view or edit.
@@ -517,9 +529,18 @@ export default function AddEditBadgeDialog({
                         className="p-4 space-y-3 hover:bg-gray-50 transition-colors"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-[#5a2a2a]">
-                            Condition {idx + 1}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-[#5a2a2a]">
+                              Condition {idx + 1}
+                            </span>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                              condition.logic_type === 'and' 
+                                ? 'bg-purple-100 text-purple-700' 
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {condition.logic_type === 'and' ? '* AND' : '+ OR'}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-1">
                             <Button
                               type="button"
@@ -544,38 +565,64 @@ export default function AddEditBadgeDialog({
 
                         {isExpanded && (
                           <div className="space-y-3">
-                            {/* Requirement Type */}
-                            <div className="space-y-1">
-                              <Label className="text-xs font-medium text-[#5a2a2a]">Type</Label>
-                              <Select
-                                value={condition.requirement_type}
-                                onValueChange={(value) =>
-                                  handleConditionTypeChange(
-                                    condition.id,
-                                    value as BadgeCondition['requirement_type']
-                                  )
-                                }
-                              >
-                                <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {REQUIREMENT_TYPES.map((type) => (
-                                    <SelectItem key={type} value={type}>
-                                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <p className="text-xs text-gray-500 mt-1">
-                                Select the type of requirement to check
-                              </p>
+                            <div className="grid grid-cols-2 gap-3">
+                              {/* Logic Type */}
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium text-[#5a2a2a]">Logic Type</Label>
+                                <Select
+                                  value={condition.logic_type}
+                                  onValueChange={(value) =>
+                                    handleUpdateCondition(condition.id, 'logic_type', value)
+                                  }
+                                >
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="and">* AND (Required)</SelectItem>
+                                    <SelectItem value="or">+ OR (Optional)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <p className="text-xs text-gray-500">
+                                  {condition.logic_type === 'and' 
+                                    ? 'Mandatory: Must be met' 
+                                    : 'Optional: At least one OR must be met'}
+                                </p>
+                              </div>
+
+                              {/* Requirement Type */}
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium text-[#5a2a2a]">Type</Label>
+                                <Select
+                                  value={condition.requirement_type}
+                                  onValueChange={(value) =>
+                                    handleConditionTypeChange(
+                                      condition.id,
+                                      value as BadgeCondition['requirement_type']
+                                    )
+                                  }
+                                >
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {REQUIREMENT_TYPES.map((type) => (
+                                      <SelectItem key={type} value={type}>
+                                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Category to check
+                                </p>
+                              </div>
                             </div>
 
                             {/* Specific Item Selector (Task/Attribute/Attendance) */}
                             {condition.requirement_type === 'task' && (
                               <div className="space-y-1">
-                                <Label className="text-xs font-medium text-[#5a2a2a]">Specific Task</Label>
+                                <Label className="text-xs font-medium text-[#5a2a2a]">Task Category</Label>
                                 <Select
                                   value={condition.requirement_attrb_id || ''}
                                   onValueChange={(value) =>
@@ -593,13 +640,14 @@ export default function AddEditBadgeDialog({
                                     ))}
                                   </SelectContent>
                                 </Select>
+                                <p className="text-xs text-gray-500">The task category to check completed orders for</p>
                               </div>
                             )}
 
                             {condition.requirement_type === 'attribute' && (
                               <div className="space-y-1">
                                 <Label className="text-xs font-medium text-[#5a2a2a]">
-                                  Specific Attribute
+                                  User Attribute
                                 </Label>
                                 <Select
                                   value={condition.requirement_attrb_id || ''}
@@ -618,6 +666,7 @@ export default function AddEditBadgeDialog({
                                     ))}
                                   </SelectContent>
                                 </Select>
+                                <p className="text-xs text-gray-500">The user stat/attribute to check</p>
                               </div>
                             )}
 
@@ -640,6 +689,7 @@ export default function AddEditBadgeDialog({
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
+                                <p className="text-xs text-gray-500">The attendance flag to check</p>
                                 </Select>
                               </div>
                             )}
@@ -649,7 +699,7 @@ export default function AddEditBadgeDialog({
                               <p className="text-xs text-blue-900 leading-relaxed">
                                 {condition.requirement_type === 'task' && (
                                   <>
-                                    When the Task{' '}
+                                    <span className="font-semibold">[{condition.logic_type.toUpperCase()}]</span> When completed orders for{' '}
                                     <span className="font-semibold">
                                       &quot;{taskOptions.find(t => t.id === condition.requirement_attrb_id)?.name || 'N/A'}&quot;
                                     </span>{' '}
@@ -659,18 +709,18 @@ export default function AddEditBadgeDialog({
                                 )}
                                 {condition.requirement_type === 'attribute' && (
                                   <>
-                                    When User{' '}
+                                    <span className="font-semibold">[{condition.logic_type.toUpperCase()}]</span> When user&apos;s{' '}
                                     <span className="font-semibold">
                                       {attributeOptions.find(a => a.id === condition.requirement_attrb_id)?.name || 'N/A'}
                                     </span>{' '}
-                                    attribute is{' '}
+                                    is{' '}
                                     <span className="font-semibold">{condition.requirement_operator}</span>{' '}
                                     <span className="font-semibold">{condition.requirement_attrb_value}</span>
                                   </>
                                 )}
                                 {condition.requirement_type === 'attendance' && (
                                   <>
-                                    When the Attendance Value{' '}
+                                    <span className="font-semibold">[{condition.logic_type.toUpperCase()}]</span> When attendance count for{' '}
                                     <span className="font-semibold">
                                       {attendanceOptions.find(a => a.id === condition.requirement_attrb_id)?.name || 'N/A'}
                                     </span>{' '}
@@ -684,7 +734,7 @@ export default function AddEditBadgeDialog({
                             <div className="grid grid-cols-3 gap-2">
                               {/* Operator */}
                               <div className="space-y-1">
-                                <Label className="text-xs font-medium text-[#5a2a2a]">Condition</Label>
+                                <Label className="text-xs font-medium text-[#5a2a2a]">Operator</Label>
                                 <Select
                                   value={condition.requirement_operator}
                                   onValueChange={(value) =>
@@ -706,7 +756,7 @@ export default function AddEditBadgeDialog({
 
                               {/* Attribute Value */}
                               <div className="col-span-2 space-y-1">
-                                <Label className="text-xs font-medium text-[#5a2a2a]">Count Value</Label>
+                                <Label className="text-xs font-medium text-[#5a2a2a]">Target Value</Label>
                                 <Input
                                   type="number"
                                   value={condition.requirement_attrb_value}
@@ -722,6 +772,7 @@ export default function AddEditBadgeDialog({
                                   className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm"
                                   placeholder="e.g., 5"
                                 />
+                                <p className="text-xs text-gray-500">The number to compare against</p>
                               </div>
                             </div>
                           </div>
