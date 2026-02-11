@@ -1,13 +1,15 @@
 import {
   handleAcceptRedemptionRequestAction,
   handleDeclineRedemptionRequestAction,
+} from '@/action-handlers/hr/redemptions';
+import {
   handleAddRewardAction,
   handleEditRewardAction,
   handleDeleteRewardAction,
   handleHideRewardAction,
-  handleCreateRedemptionRequestAction,
   handleUploadRewardPicture,
-} from '@/action-handlers/hr';
+} from '@/action-handlers/hr/rewards';
+import { handleCreateRedemptionRequestAction } from '@/action-handlers/employee/redemptions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AddRewardInput, EditRewardInput, Reward } from '@/types';
 import { rewardKeys } from '../queries/rewardQueries';
@@ -29,6 +31,8 @@ export function useDeclineRedemptionRequest() {
       // Invalidate redemption queries to refetch the list
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
+      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
     },
   });
 }
@@ -44,6 +48,8 @@ export function useAcceptRedemptionRequest() {
       // Invalidate redemption queries to refetch the list
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
+      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
     },
   });
 }
@@ -83,7 +89,7 @@ export function useAddReward() {
           return [...existing, newReward];
         });
       }
-      
+
       // Invalidate to ensure consistency, but don't force immediate refetch
       queryClient.invalidateQueries({ queryKey: rewardKeys.all, refetchType: 'none' });
     },

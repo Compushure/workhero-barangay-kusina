@@ -1,9 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
-import { handleDeleteTask, handleClearAllTasks } from '@/action-handlers/manager-current-assigned-task';
-import { handleAddTaskAssignment } from '@/action-handlers/manager-assignment';
+import { handleDeleteTask, handleClearAssignedTasks } from '@/action-handlers/manager/assigned-tasks';
+import { handleAddTaskAssignment } from '@/action-handlers/manager/assignments';
+import { useManagerAssignmentStore } from '@/store/managerAssignmentStore';
 
 interface TaskAssignmentContextType {
   assignedTasks: AssignedTask[];
@@ -30,7 +31,12 @@ interface TaskAssignmentContextType {
 const TaskAssignmentContext = createContext<TaskAssignmentContextType | undefined>(undefined);
 
 export function TaskAssignmentProvider({ children }: { children: React.ReactNode }) {
-  const [assignedTasks, setAssignedTasks] = useState<AssignedTask[]>([]);
+  const {
+    assignedTasks,
+    setAssignedTasks,
+    updateAssignedTasks,
+    appendAssignedTasks,
+  } = useManagerAssignmentStore();
   const [viewMode, setViewMode] = useState<'task' | 'employee'>('task');
 
   // ✅ Pagination state
@@ -60,7 +66,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
 
         // Add the new assignments to local state for immediate UI update
         if (newAssignments.length > 0) {
-          setAssignedTasks(prev => [...prev, ...newAssignments]);
+          appendAssignedTasks(newAssignments);
         }
       }
     } catch (error) {
@@ -74,7 +80,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
     
     if (success) {
       // Only update local state if server deletion succeeded
-      setAssignedTasks((prev) =>
+      updateAssignedTasks((prev) =>
         prev
           .map((task) =>
             task.id === taskId
@@ -92,7 +98,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
   const deleteTask = async (taskId: string) => {
     const success = await handleDeleteTask(taskId);
     if (success) {
-      setAssignedTasks((prev) => prev.filter((task) => task.id !== taskId));
+      updateAssignedTasks((prev) => prev.filter((task) => task.id !== taskId));
     }
   };
 
@@ -102,7 +108,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
     newDueDate: string,
     newEmployees: AssignedEmployee[]
   ) => {
-    setAssignedTasks((prev) =>
+    updateAssignedTasks((prev) =>
       prev
         .map((task) =>
           task.id === taskId
@@ -119,12 +125,12 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
   };
 
   const clearAll = async () => {
-    const success = await handleClearAllTasks();
+    const success = await handleClearAssignedTasks();
     if (success) setAssignedTasks([]);
   };
 
   const clearAllEmployeeTasks = (employeeId: string) => {
-    setAssignedTasks((prev) =>
+    updateAssignedTasks((prev) =>
       prev
         .map((task) => ({
           ...task,
@@ -151,7 +157,15 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
       totalPages,
       setTotalPages,
     }),
-    [assignedTasks, viewMode, page, totalPages]
+    [
+      assignedTasks,
+      viewMode,
+      page,
+      totalPages,
+      setAssignedTasks,
+      updateAssignedTasks,
+      appendAssignedTasks,
+    ]
   );
 
   return <TaskAssignmentContext.Provider value={value}>{children}</TaskAssignmentContext.Provider>;

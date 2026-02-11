@@ -6,16 +6,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
-import { handleLoginSubmit } from '@/action-handlers/auth';
+import { handleLoginSubmit } from '@/action-handlers/shared/auth';
 import { useRouter } from 'next/navigation';
-import { getUserRole } from '@/actions/auth';
+import { getUserRole } from '@/actions/shared/auth';
 import { handleUserRole } from '@/lib/utils/role-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { userKeys } from '@/hooks/tanstack/queries/userQueries';
 
 export function LoginForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const queryClient = useQueryClient();
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,6 +34,9 @@ export function LoginForm() {
         });
         return;
       }
+
+      await queryClient.invalidateQueries({ queryKey: userKeys.session() });
+      await queryClient.refetchQueries({ queryKey: userKeys.session() });
       await handleUserRole({ router, setError, getUserRole });
     });
   };

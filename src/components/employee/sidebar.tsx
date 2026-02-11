@@ -17,7 +17,7 @@ import { ProfileModal } from '../sidebar/profile-modal';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
 import { useQuery } from '@tanstack/react-query';
-import { getEmployeeXP } from '@/actions/employees/get-xp';
+import { getEmployeeXP } from '@/actions/employee/stats';
 
 interface NavItem {
   key: string;
@@ -57,7 +57,8 @@ export function Sidebar({
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Fetch current session user
-  const { data: user } = useGetSessionUser();
+  const { data: user, isLoading: isUserLoading, isFetching: isUserFetching } = useGetSessionUser();
+  const isProfileLoading = isUserLoading || isUserFetching;
 
   // Fetch employee rank
   const { data: rankData, isLoading: isRankLoading } = useGetEmployeeRank();
@@ -141,11 +142,24 @@ export function Sidebar({
             isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
           }`}
         >
-          <ProfilePic user={user} onClick={handleProfileClick} />
-          {!isCollapsed && user && (
+          <ProfilePic user={user} onClick={handleProfileClick} isLoading={isProfileLoading} />
+          {!isCollapsed && (
             <div className="min-w-0">
-              <p className="font-semibold text-sm">{user.name}</p>
-              <p className="text-xs text-red-200 truncate">{user.email}</p>
+              {isProfileLoading ? (
+                <>
+                  <div className="h-4 w-20 bg-white/20 rounded animate-pulse" />
+                  <div className="h-3 w-28 bg-white/10 rounded mt-1 animate-pulse" />
+                </>
+              ) : (
+                <>
+                  {user && (
+                    <>
+                      <p className="font-semibold text-sm truncate">{user.name}</p>
+                      <p className="text-xs text-red-200 truncate">{user.email}</p>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>

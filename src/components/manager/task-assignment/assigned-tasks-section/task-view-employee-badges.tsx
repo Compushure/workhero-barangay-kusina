@@ -69,6 +69,7 @@ export default function TaskViewEmployeeBadges({
             <button
               onClick={() => setShowRemoveConfirm(emp.id)}
               className="ml-2 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130"
+              title="Unassign Employee"
             >
               <X className="size-3.5 text-[#690003] hover:text-red-500" />
             </button>

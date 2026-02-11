@@ -12,7 +12,7 @@ import {
 import { Search, Plus } from 'lucide-react';
 import type { AssignedEmployee, AssignedTask } from '@/types';
 import AssignEmployeesTable from './assign-employees-table';
-import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 
 interface AssignEmployeesDialogProps {
   selectedEmployees: AssignedEmployee[];

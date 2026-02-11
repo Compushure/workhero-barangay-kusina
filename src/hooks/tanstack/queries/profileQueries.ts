@@ -5,7 +5,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { fetchUserProfileByIdHandler } from '@/action-handlers/profile';
+import { fetchUserProfileByIdHandler } from '@/action-handlers/shared/profile';
 import type { UserWithExtras } from '@/types';
 
 /**

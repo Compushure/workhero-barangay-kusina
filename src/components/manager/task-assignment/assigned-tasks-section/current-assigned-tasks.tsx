@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Search, ListTodo, Users } from 'lucide-react';
+import { Search, ListTodo, Users, CircleDashed } from 'lucide-react';
 import { MemoizedTaskViewCard as TaskViewCard } from './task-view-card';
 import { MemoizedEmployeeViewCard as EmployeeViewCard } from './employee-view-card';
 import { TaskSortingBar } from './task-sorting-bar';
@@ -16,9 +16,11 @@ import {
 } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { useDebounce } from '@/hooks/useDebounce';
 import { SkeletonCard } from '../card-skeleton';
+import { useManagerAssignmentStore } from '@/store/managerAssignmentStore';
 
 export function CurrentAssignedTasks() {
   const { viewMode, setViewMode } = useTaskAssignment();
+  const { assignedTasks, hydrateFromServer, isOptimistic } = useManagerAssignmentStore();
 
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +43,24 @@ export function CurrentAssignedTasks() {
   const isError = viewMode === 'task' ? taskQuery.isError : employeeQuery.isError;
   const data = viewMode === 'task' ? taskQuery.data : employeeQuery.data;
 
-  const tasks = data?.tasks || [];
+  useEffect(() => {
+    if (data?.tasks) {
+      hydrateFromServer(data.tasks);
+      return;
+    }
+
+    if (!isOptimistic && !isLoading) {
+      hydrateFromServer([]);
+    }
+  }, [data?.tasks, hydrateFromServer, isOptimistic, isLoading]);
+
+  const safeAssignedTasks = Array.isArray(assignedTasks) ? assignedTasks : [];
+  const fallbackTasks = Array.isArray(data?.tasks) ? data?.tasks : [];
+  const tasks = isOptimistic
+    ? safeAssignedTasks
+    : safeAssignedTasks.length > 0
+      ? safeAssignedTasks
+      : fallbackTasks;
   const totalPages = data?.totalPages || 1;
 
   const totalTasksCount =
@@ -149,8 +168,10 @@ export function CurrentAssignedTasks() {
             onClick={() => setShowClearConfirm(true)}
             disabled={memoizedTasks.length === 0}
             className="text-sm px-10 py-2 bg-[#690003] shadow-sm/25 hover:bg-red-500 cursor-pointer text-white disabled:opacity-50 transition-all duration-500 ease-in-out"
+            title="Clear All Assigned Tasks"
           >
-            Clear All
+            <CircleDashed />
+            Clear Assigned
           </Button>
 
           

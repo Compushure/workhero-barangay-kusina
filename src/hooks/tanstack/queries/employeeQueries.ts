@@ -6,7 +6,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { handleFetchEmployeeRank } from '@/action-handlers/employees';
+import { handleFetchEmployeeRank } from '@/action-handlers/employee/stats';
 import type { EmployeeRank } from '@/types';
 
 /**

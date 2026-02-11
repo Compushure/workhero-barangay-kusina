@@ -5,15 +5,18 @@ import { LoginForm } from './login-form';
 import { LoginHero } from './login-hero';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { handleLoginSubmit } from '@/action-handlers/auth';
+import { handleLoginSubmit } from '@/action-handlers/shared/auth';
 import { toast } from 'sonner';
 import { handleUserRole } from '@/lib/utils/role-router';
-import { getUserRole } from '@/actions/auth';
+import { getUserRole } from '@/actions/shared/auth';
+import { useQueryClient } from '@tanstack/react-query';
+import { userKeys } from '@/hooks/tanstack/queries/userQueries';
 
 export function LoginContainer() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (email: string, password: string) => {
     setError(null);
@@ -31,6 +34,9 @@ export function LoginContainer() {
         });
         return;
       }
+
+      await queryClient.invalidateQueries({ queryKey: userKeys.session() });
+      await queryClient.refetchQueries({ queryKey: userKeys.session() });
 
       // Get user role after successful login
       await handleUserRole({ router, setError, getUserRole });

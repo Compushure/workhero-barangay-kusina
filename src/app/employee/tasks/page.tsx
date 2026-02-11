@@ -1,14 +1,29 @@
-'use client';
+import { TaskStatusBoard } from '@/components/employee/task-status';
+import { fetchEmployeeTasks } from '@/actions/employee/tasks';
 
-import {
-  TaskStatusBoard,
-  currentTasks,
-  onReviewTasks,
-  verifiedTasks,
-  deniedTasks,
-} from '@/components/employee/task-status';
+export default async function EmployeeTasksPage() {
+  const { error, data } = await fetchEmployeeTasks();
 
-export default function EmployeeTasksPage() {
+  if (error) {
+    return (
+      <div className="min-h-screen p-8">
+        <div className="max-w-[1600px] mx-auto w-full">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">Tasks</h1>
+            <p className="text-destructive mt-1">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const {
+    currentTasks = [],
+    onReviewTasks = [],
+    verifiedTasks = [],
+    deniedTasks = [],
+  } = data ?? {};
+
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-[1600px] mx-auto w-full">
@@ -28,3 +43,4 @@ export default function EmployeeTasksPage() {
     </div>
   );
 }
+

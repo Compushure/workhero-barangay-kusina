@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Check, MessageSquare } from 'lucide-react';
+import { X, Check, MessageSquare, Coins, Soup } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -57,17 +57,20 @@ export function RequestsTable({
       <Table>
         <TableHeader className="bg-[#690003]">
           <TableRow className="border-b border-border hover:bg-[#690003]">
-            <TableHead className="text-white font-semibold px-4 w-[180px]">REQUEST DATE</TableHead>
-            <TableHead className="text-white font-semibold px-4 w-[200px]">EMPLOYEE</TableHead>
-            <TableHead className="text-white font-semibold px-4 w-[250px]">TASK</TableHead>
-            <TableHead className="text-white font-semibold text-center px-4 w-[120px]">
+            <TableHead className="text-card font-semibold px-4 w-45">REQUEST DATE</TableHead>
+            <TableHead className="text-card font-semibold px-4 w-50">EMPLOYEE</TableHead>
+            <TableHead className="text-card font-semibold px-4 w-64">TASK</TableHead>
+            <TableHead className="text-card font-semibold text-center px-4 w-40">
               COMPLETED
             </TableHead>
-            <TableHead className="text-white font-semibold text-center px-4 w-[140px]">
-              TOTAL POINTS & XP
+            <TableHead className="text-card font-semibold text-center px-4 w-15">
+              POINTS
             </TableHead>
-            <TableHead className="text-white font-semibold text-center px-4 w-[80px]">REMARK</TableHead>
-            <TableHead className="text-white font-semibold text-center px-4 w-[120px]">ACTION</TableHead>
+            <TableHead className="text-card font-semibold text-center px-4 w-15">
+              XP
+            </TableHead>
+            <TableHead className="text-card font-semibold text-center px-4 w-20">REMARK</TableHead>
+            <TableHead className="text-card font-semibold text-center px-4 w-30">ACTION</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -82,10 +85,10 @@ export function RequestsTable({
                 key={request.kpitask_id}
                 className="bg-[#FBF4E8] hover:bg-[#ffffff] transition-colors border-b border-border"
               >
-                <TableCell className="text-sm font-medium px-4 w-[180px]">
+                <TableCell className="text-sm font-medium px-4 w-45">
                   {formatDate(request.kpitask_completed_at || request.kpitask_created_at)}
                 </TableCell>
-                <TableCell className="px-4 w-[200px]">
+                <TableCell className="px-4 w-50">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
@@ -101,7 +104,7 @@ export function RequestsTable({
                     </TooltipContent>
                   </Tooltip>
                 </TableCell>
-                <TableCell className="text-sm px-4 w-[250px]">
+                <TableCell className="text-sm px-4 w-64">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="truncate">{taskName}</div>
@@ -111,11 +114,24 @@ export function RequestsTable({
                     </TooltipContent>
                   </Tooltip>
                 </TableCell>
-                <TableCell className="text-sm text-center px-4 w-[120px]">
-                  {request.completed_orders ?? 0} / {request.max_orders ?? 0}
+                <TableCell className="text-sm text-center px-4 w-30">
+                  <div className="flex items-center justify-center gap-1 font-medium">
+                    <Soup strokeWidth={1.75} className="size-5 mr-1"/>
+                    {request.completed_orders ?? 0} / {request.max_orders ?? 0}
+                  </div>
+                  
                 </TableCell>
-                <TableCell className="text-sm text-center font-medium px-4 w-[140px]">
-                  {request.category_points ?? 0} Pts/XP
+                <TableCell className="text-sm text-center font-medium px-4 w-15">
+                  <div className="flex items-center justify-center gap-1">
+                    <Coins strokeWidth={1.75} className="size-6" />
+                    {request.category_points ?? 0}
+                  </div>
+                </TableCell>
+                <TableCell className="text-sm text-center font-medium px-4 w-15">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="inline-block italic text-base leading-none">XP</span>
+                    {request.category_xp ?? 0}
+                  </div>
                 </TableCell>
                 <TableCell className="text-center px-4 w-[80px]">
                   {hasRemark ? (
@@ -147,23 +163,23 @@ export function RequestsTable({
                           variant="ghost"
                           size="sm"
                           // need to pass extra params, request.category_points, request.assigned_to, request.remark and request.kpitask_id
-                          onClick={() => onDeny(request.kpitask_id)}
-                          disabled={isRejecting || isApproving}
-                          className="p-2 h-auto shrink-0 text-muted-foreground hover:text-red-600 cursor-pointer hover:bg-red-50 disabled:opacity-50"
-                          aria-label="Deny request"
-                        >
-                          <X size={20} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          // need to pass extra params, request.category_points, request.assigned_to, request.remark and request.kpitask_id
                           onClick={() => onApprove(request.kpitask_id)}
                           disabled={isRejecting || isApproving}
                           className="p-2 h-auto shrink-0 text-muted-foreground hover:text-green-600 cursor-pointer hover:bg-green-50 disabled:opacity-50"
                           aria-label="Approve request"
                         >
                           <Check size={20} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          // need to pass extra params, request.category_points, request.assigned_to, request.remark and request.kpitask_id
+                          onClick={() => onDeny(request.kpitask_id)}
+                          disabled={isRejecting || isApproving}
+                          className="p-2 h-auto shrink-0 text-muted-foreground hover:text-red-600 cursor-pointer hover:bg-red-50 disabled:opacity-50"
+                          aria-label="Deny request"
+                        >
+                          <X size={20} />
                         </Button>
                       </>
                     ) : (

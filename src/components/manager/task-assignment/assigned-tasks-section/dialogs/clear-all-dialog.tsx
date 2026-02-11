@@ -7,17 +7,17 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useClearAllTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
+import { useClearAssignedTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 import { OctagonAlert } from 'lucide-react';
 
 interface ClearAllDialogProps {
   setShowClearConfirm: (show: boolean) => void;
 }
 
-function ClearAllDialog({ setShowClearConfirm }: ClearAllDialogProps) {
-  const clearAllMutation = useClearAllTasksMutation();
+function ClearAllAssignedDialog({ setShowClearConfirm }: ClearAllDialogProps) {
+  const clearAllMutation = useClearAssignedTasksMutation();
 
-  const handleClearAll = async () => {
+  const handleClearAllAssigned = async () => {
     clearAllMutation.mutate(undefined, {
       onSuccess: () => {
         setShowClearConfirm(false);
@@ -34,15 +34,15 @@ function ClearAllDialog({ setShowClearConfirm }: ClearAllDialogProps) {
               <OctagonAlert strokeWidth={2.5}/>
               Danger Zone
             </span>
-            <span>Clear All Assignments?</span>
+            <span>Clear All Assigned Assignments?</span>
           </DialogTitle>
           <DialogDescription className="text-gray-600">
-            This will unassign all tasks from all employees. This action cannot be undone. Proceed with caution
+            This will unassign all tasks with 'Assigned' status from all employees. This action cannot be undone. Proceed with caution
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex gap-4 justify-end">
           <Button
-            onClick={handleClearAll}
+            onClick={handleClearAllAssigned}
             disabled={clearAllMutation.isPending}
             className="bg-red-700 hover:bg-red-500 text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
@@ -62,4 +62,4 @@ function ClearAllDialog({ setShowClearConfirm }: ClearAllDialogProps) {
   );
 }
 
-export default ClearAllDialog;
+export default ClearAllAssignedDialog;
