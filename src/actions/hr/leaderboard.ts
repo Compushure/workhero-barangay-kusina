@@ -5,20 +5,19 @@ import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
 import type { LeaderboardPlayer } from '@/types';
 
 /**
- * Fetches the top 10 players ordered by points in descending order
- * Only includes regular employees (excludes admin, manager, hr, and superadmin roles)
- * Used by the leaderboard page to display rankings
+ * Fetches the top 10 players ordered by performance_score in descending order.
+ * Performance score = (count of approved KPITask) × (sum of KPICategory.points for those tasks).
+ * Only includes regular employees (excludes admin, manager, hr, and superadmin roles).
  */
 export async function getTopPlayers(): Promise<ActionResult<LeaderboardPlayer[]>> {
   return safeAction(async () => {
     const supabase = await createClient();
 
-    // Fetch top 10 regular employees from user_attributes view ordered by points
     const { data, error } = await supabase
       .from('user_attributes')
-      .select('user_id, user_name, points, role_type')
+      .select('user_id, user_name, performance_score, role_type')
       .eq('role_type', 'regular')
-      .order('points', { ascending: false })
+      .order('performance_score', { ascending: false })
       .limit(10);
 
     if (error) {
@@ -29,9 +28,7 @@ export async function getTopPlayers(): Promise<ActionResult<LeaderboardPlayer[]>
       return [];
     }
 
-    // Map data with profile picture URLs (synchronous generation)
     const players: LeaderboardPlayer[] = data.map((user) => {
-      // Get the public URL synchronously without awaiting
       const { data: storageData } = supabase.storage
         .from('employees')
         .getPublicUrl(`${user.user_id}/profile.png`);
@@ -39,7 +36,7 @@ export async function getTopPlayers(): Promise<ActionResult<LeaderboardPlayer[]>
       return {
         id: user.user_id,
         name: user.user_name || 'Unknown User',
-        points: user.points ?? 0,
+        performanceScore: Number(user.performance_score ?? 0),
         image: storageData?.publicUrl ?? null,
       };
     });

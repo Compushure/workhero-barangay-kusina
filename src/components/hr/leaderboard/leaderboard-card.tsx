@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Player {
   name: string;
-  points: number;
+  performanceScore: number;
   image?: string | null;
   id?: string;
   rank?: number;
@@ -55,12 +55,12 @@ export default function LeaderboardCard({ player }: { player: Player }) {
           </h2>
         </div>
 
-        {/* Points Section */}
+        {/* Performance Score Section */}
         <div className="w-full border-t border-orange-200 pt-3 sm:pt-4 lg:pt-5">
           <div className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-[#6D1616]">
-            {player.points}
+            {player.performanceScore}
           </div>
-          <p className="text-[#6D1616] font-medium mt-1 text-sm sm:text-base">Fiesta Points</p>
+          <p className="text-[#6D1616] font-medium mt-1 text-sm sm:text-base">Performance Score</p>
         </div>
       </div>
     </div>

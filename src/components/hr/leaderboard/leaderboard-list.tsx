@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 interface Player {
   rank: number;
   name: string;
-  points: number;
+  performanceScore: number;
   image?: string;
   id?: string;
 }
@@ -63,7 +63,7 @@ export default function LeaderboardList({ players }: LeaderboardListProps) {
             </span>
           </div>
 
-          {/* Points with coin icon */}
+          {/* Performance Score with coin icon */}
           <div className="flex items-center gap-1 sm:gap-2 text-[#6D1616] font-bold shrink-0 text-base sm:text-lg">
             <svg
               className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]"
@@ -77,7 +77,7 @@ export default function LeaderboardList({ players }: LeaderboardListProps) {
                 clipRule="evenodd"
               />
             </svg>
-            <span>{player.points} pts</span>
+            <span>{player.performanceScore}</span>
           </div>
         </div>
       ))}
