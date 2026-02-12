@@ -18,12 +18,15 @@ export function useAssignManualBadgeToUser(): UseMutationResult<
   return useMutation({
     mutationFn: async ({ badgeId, userId }: { badgeId: string; userId: string }) =>
       handleAssignManualBadgeToUser(badgeId, userId),
-    onSettled: () => {
+    onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.users() });
       queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.manualBadges() });
       queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.allBadges() });
       // Invalidate ALL employee badge queries to refresh badge displays everywhere
       queryClient.invalidateQueries({ queryKey: employeeKeys.badges() });
+      if (variables?.userId) {
+        queryClient.invalidateQueries({ queryKey: employeeKeys.userBadges(variables.userId) });
+      }
     },
   });
 }

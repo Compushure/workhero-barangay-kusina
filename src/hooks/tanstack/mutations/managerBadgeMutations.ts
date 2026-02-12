@@ -15,6 +15,15 @@ import {
   handleUploadBadgeImage,
 } from '@/action-handlers/manager/badges';
 import { badgeKeys } from '../queries/managerBadgeQueries';
+import { badgeAssignmentKeys } from '../queries/managerBadgeAssignmentQueries';
+import { employeeKeys } from '../queries/employeeQueries';
+
+function invalidateBadgeCaches(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: badgeKeys.lists() });
+  queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.manualBadges() });
+  queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.allBadges() });
+  queryClient.invalidateQueries({ queryKey: employeeKeys.badges() });
+}
 
 export function useAddBadge(): UseMutationResult<Badge | null, Error, AddBadgeInput> {
   const queryClient = useQueryClient();
@@ -22,7 +31,7 @@ export function useAddBadge(): UseMutationResult<Badge | null, Error, AddBadgeIn
   return useMutation({
     mutationFn: async (input: AddBadgeInput) => handleAddBadge(input),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: badgeKeys.lists() });
+      invalidateBadgeCaches(queryClient);
     },
   });
 }
@@ -38,7 +47,7 @@ export function useEditBadge(): UseMutationResult<
     mutationFn: async ({ id, input, suppressToast }: { id: string; input: EditBadgeInput; suppressToast?: boolean }) =>
       handleEditBadge(id, input, { suppressToast }),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: badgeKeys.lists() });
+      invalidateBadgeCaches(queryClient);
     },
   });
 }
@@ -49,7 +58,7 @@ export function useDeleteBadge(): UseMutationResult<boolean, Error, string> {
   return useMutation({
     mutationFn: async (id: string) => handleDeleteBadge(id),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: badgeKeys.lists() });
+      invalidateBadgeCaches(queryClient);
     },
   });
 }
@@ -62,7 +71,7 @@ export function useUploadBadgeImage() {
       return await handleUploadBadgeImage(badgeId, file);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: badgeKeys.lists() });
+      invalidateBadgeCaches(queryClient);
     },
   });
 }
@@ -75,7 +84,7 @@ export function useDeleteBadgeImage() {
       return await handleDeleteBadgeImage(badgeId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: badgeKeys.lists() });
+      invalidateBadgeCaches(queryClient);
     },
   });
 }

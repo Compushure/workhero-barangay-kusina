@@ -4,6 +4,7 @@ import { memo, useState } from 'react';
 import { useGetUserBadges } from '@/hooks/tanstack/queries/employeeQueries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 
 const BADGES_PER_PAGE = 5;
@@ -65,41 +66,65 @@ function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
         <div className="flex-1 overflow-hidden">
           <div className="flex gap-3 transition-transform duration-300">
             {currentBadges.map((badge) => (
-              <div
-                key={badge.userbadge_id}
-                className="flex-shrink-0 w-28 h-32 flex flex-col items-center justify-start p-2 rounded-lg border-2 border-[#730202]/10 hover:border-[#730202]/30 transition-colors bg-[#730202]/5 hover:bg-[#730202]/10 cursor-pointer"
-              >
-                {/* Badge Image */}
-                {badge.img_link ? (
-                  <div className="relative h-16 w-16 rounded-lg overflow-hidden mb-2 flex-shrink-0">
-                    <img
-                      src={badge.img_link}
-                      alt={badge.badge_name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="h-16 w-16 rounded-lg bg-[#730202]/20 flex items-center justify-center mb-2 flex-shrink-0">
-                    <Trophy className="h-8 w-8 text-[#730202]" />
-                  </div>
-                )}
+              <Tooltip key={badge.userbadge_id}>
+                <TooltipTrigger asChild>
+                  <div className="flex-shrink-0 w-28 h-32 flex flex-col items-center justify-start p-2 rounded-lg border-2 border-[#730202]/10 hover:border-[#730202]/30 transition-colors bg-[#730202]/5 hover:bg-[#730202]/10 cursor-pointer">
+                    {/* Badge Image */}
+                    {badge.img_link ? (
+                      <div className="relative h-16 w-16 rounded-lg overflow-hidden mb-2 flex-shrink-0">
+                        <img
+                          src={badge.img_link}
+                          alt={badge.badge_name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-16 w-16 rounded-lg bg-[#730202]/20 flex items-center justify-center mb-2 flex-shrink-0">
+                        <Trophy className="h-8 w-8 text-[#730202]" />
+                      </div>
+                    )}
 
-                {/* Badge Info */}
-                <div className="w-full text-center flex-1 flex flex-col justify-between min-h-12">
-                  <div>
-                    <h4 className="text-xs font-bold text-[#730202] line-clamp-2 mb-1">
-                      {badge.badge_name}
-                    </h4>
+                    {/* Badge Info */}
+                    <div className="w-full text-center flex-1 flex flex-col justify-between min-h-16">
+                      <div>
+                        <h4 className="text-xs font-bold text-[#730202] line-clamp-2 mb-1">
+                          {badge.badge_name}
+                        </h4>
+                        {badge.badge_description && (
+                          <p className="text-[10px] text-muted-foreground/80 line-clamp-2">
+                            {badge.badge_description}
+                          </p>
+                        )}
+                      </div>
+                      <p className="text-[10px] font-semibold text-muted-foreground mt-1">
+                        {new Date(badge.date_acquired).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: '2-digit',
+                        })}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-[10px] text-muted-foreground/70 mt-1">
-                    {new Date(badge.date_acquired).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: '2-digit',
-                    })}
-                  </p>
-                </div>
-              </div>
+                </TooltipTrigger>
+                <TooltipContent className="bg-black text-white max-w-56">
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-white">
+                      {badge.badge_name || 'Badge'}
+                    </p>
+                    {badge.badge_description && (
+                      <p className="text-[11px] text-white/80">{badge.badge_description}</p>
+                    )}
+                    <p className="text-[11px] text-white/80">
+                      Acquired:{' '}
+                      {new Date(badge.date_acquired).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             ))}
           </div>
         </div>

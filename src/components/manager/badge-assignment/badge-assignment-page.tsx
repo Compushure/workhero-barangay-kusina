@@ -16,6 +16,7 @@ import AllBadgesModal from './dialogs/all-badges-modal';
 import { Pagination } from '../task-verification/pagination';
 import { useDebounce } from '@/hooks/useDebounce';
 import { toast } from 'sonner';
+import { AwardSuspense } from '@/components/shared/award-suspense';
 import type { BadgeAssignmentUser, BadgeSummary } from '@/types/manager/badge-assignment';
 import {
   useGetAllBadges,
@@ -65,6 +66,7 @@ export default function BadgeAssignmentPage() {
   const manualBadges = manualBadgesQuery.data ?? [];
   const allBadges = allBadgesQuery.data ?? [];
   const users = usersQuery.data ?? [];
+  const isQuickAssignLoading = manualBadgesQuery.isLoading || usersQuery.isLoading;
 
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
@@ -315,8 +317,8 @@ export default function BadgeAssignmentPage() {
           {activeTab === 'users' ? (
             <>
               {usersQuery.isLoading ? (
-                <div className="bg-[#f2e1c9] rounded-lg p-12 border border-[#f2e1c9] text-center">
-                  <p className="text-gray-500 text-lg">Loading users...</p>
+                <div className="bg-[#f2e1c9] rounded-lg p-6 border border-[#f2e1c9]">
+                  <AwardSuspense label="Loading users..." />
                 </div>
               ) : filteredUsers.length === 0 ? (
                 <div className="bg-[#f2e1c9] rounded-lg p-12 border border-[#f2e1c9] text-center">
@@ -343,14 +345,20 @@ export default function BadgeAssignmentPage() {
               )}
             </>
           ) : (
-            <QuickAssignmentPanel
-              badges={paginatedBadges}
-              badgePage={badgePage}
-              totalBadgePages={totalBadgePages}
-              onBadgePageChange={setBadgePage}
-              users={users}
-              onAwardBadge={handleAwardBadge}
-            />
+            isQuickAssignLoading ? (
+              <div className="bg-[#f2e1c9] rounded-lg p-6 border border-[#f2e1c9]">
+                <AwardSuspense label="Loading badges..." />
+              </div>
+            ) : (
+              <QuickAssignmentPanel
+                badges={paginatedBadges}
+                badgePage={badgePage}
+                totalBadgePages={totalBadgePages}
+                onBadgePageChange={setBadgePage}
+                users={users}
+                onAwardBadge={handleAwardBadge}
+              />
+            )
           )}
         </section>
       </div>

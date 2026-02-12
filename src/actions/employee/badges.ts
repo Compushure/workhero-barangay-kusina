@@ -8,21 +8,31 @@ export interface UserBadge {
   badge_name: string;
   userbadge_id: string;
   points?: number;
+  badge_points?: number;
   img_link?: string | null;
   badge_img_link?: string | null;
+  badge_description?: string | null;
   awarded_by_name: string | null;
   date_acquired: string;
 }
 
 function normalizeBadgeImageLink(badge: UserBadge): UserBadge {
   const imgLink = badge.img_link ?? badge.badge_img_link ?? null;
+  const points = badge.points ?? badge.badge_points;
   if (imgLink === badge.img_link) {
-    return badge;
+    if (points === badge.points) {
+      return badge;
+    }
+    return {
+      ...badge,
+      points,
+    };
   }
 
   return {
     ...badge,
     img_link: imgLink,
+    points,
   };
 }
 

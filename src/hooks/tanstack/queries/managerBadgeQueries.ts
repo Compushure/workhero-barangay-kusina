@@ -29,7 +29,7 @@ export function useGetBadges(
     queryKey: badgeKeys.list(),
     queryFn: async () => handleFetchBadges(),
     enabled: queryOptions.enabled !== false,
-    staleTime: 10 * 1000,
+    staleTime: 60 * 1000,
     gcTime: 5 * 60 * 1000,
     retry: 2,
     refetchOnWindowFocus: true,

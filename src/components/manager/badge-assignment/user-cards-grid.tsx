@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { HelpCircle } from 'lucide-react';
 
@@ -13,6 +14,7 @@ interface UserCardsGridProps {
 }
 
 export default function UserCardsGrid({ users, badges, onAwardClick, onViewAllBadges }: UserCardsGridProps) {
+  const [brokenAvatars, setBrokenAvatars] = useState<Record<string, boolean>>({});
   const getBadgeById = (badgeId: string) => badges.find((b) => b.id === badgeId);
 
   const getInitials = (name: string) => {
@@ -40,11 +42,17 @@ export default function UserCardsGrid({ users, badges, onAwardClick, onViewAllBa
               {/* Avatar and User Info */}
               <div className="shrink-0 flex items-center gap-3 min-w-48">
                 {/* Avatar */}
-                {user.profilePictureUrl ? (
+                {user.profilePictureUrl && !brokenAvatars[user.id] ? (
                   <img
                     src={user.profilePictureUrl}
                     alt={user.name}
                     className="w-12 h-12 rounded-full object-cover border-2 border-[#e0cfcf]"
+                    onError={() =>
+                      setBrokenAvatars((prev) => ({
+                        ...prev,
+                        [user.id]: true,
+                      }))
+                    }
                   />
                 ) : (
                   <div className="w-12 h-12 rounded-full bg-linear-to-br from-[#690003] to-[#8b5a5a] flex items-center justify-center text-white font-bold text-sm border-2 border-[#e0cfcf]">

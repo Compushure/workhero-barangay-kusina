@@ -133,7 +133,13 @@ export function Sidebar({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-3 overflow-hidden">
+      <nav
+        className={`flex-1 px-4 py-6 space-y-3 ${
+          isCollapsed
+            ? 'overflow-hidden'
+            : 'overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
+        }`}
+      >
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const isNavigatingItem = pendingHref === item.href;

@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import AddEditBadgeDialog, { type BadgeFormData } from './dialogs/add-edit-badge-dialog';
 import BadgeTable from './badge-table';
+import { BadgeFilterToggle, type BadgeFilterMode } from './badge-filter-toggle';
 import { useDebounce } from '../../../hooks/useDebounce';
 import {Pagination} from '../task-verification/pagination';
 import type { Badge } from '@/types/manager/badge-editor';
@@ -31,16 +32,14 @@ import {
 type BadgeSortOption =
   | 'name-asc'
   | 'points-desc'
-  | 'recently-created'
-  | 'manual-only'
-  | 'conditional-only';
+  | 'created-desc'
+  | 'created-asc';
 
 const SORT_OPTIONS: { value: BadgeSortOption; label: string }[] = [
   { value: 'name-asc', label: 'Name (A-Z)' },
   { value: 'points-desc', label: 'Points (High to Low)' },
-  { value: 'recently-created', label: 'Recently Created' },
-  { value: 'manual-only', label: 'Manual Only' },
-  { value: 'conditional-only', label: 'Conditional Only' },
+  { value: 'created-desc', label: 'Recently Created' },
+  { value: 'created-asc', label: 'Oldest Created' },
 ];
 
 export function BadgeEditorPage() {
@@ -58,6 +57,7 @@ export function BadgeEditorPage() {
   const [saveError, setSaveError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState<BadgeSortOption>('name-asc');
+  const [filterMode, setFilterMode] = useState<BadgeFilterMode>('all');
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
@@ -73,6 +73,14 @@ export function BadgeEditorPage() {
     );
   });
 
+  if (filterMode === 'manual') {
+    filteredBadges = filteredBadges.filter((badge) => badge.conditions.length === 0);
+  }
+
+  if (filterMode === 'conditional') {
+    filteredBadges = filteredBadges.filter((badge) => badge.conditions.length > 0);
+  }
+
   // Apply sorting
   filteredBadges = [...filteredBadges].sort((a, b) => {
     switch (sortOption) {
@@ -80,12 +88,18 @@ export function BadgeEditorPage() {
         return a.name.localeCompare(b.name);
       case 'points-desc':
         return b.points - a.points;
-      case 'recently-created':
-        return b.id.localeCompare(a.id);
-      case 'manual-only':
-        return a.conditions.length - b.conditions.length;
-      case 'conditional-only':
-        return b.conditions.length - a.conditions.length;
+      case 'created-desc': {
+        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+        if (!aTime && !bTime) return a.name.localeCompare(b.name);
+        return bTime - aTime;
+      }
+      case 'created-asc': {
+        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+        if (!aTime && !bTime) return a.name.localeCompare(b.name);
+        return aTime - bTime;
+      }
       default:
         return 0;
     }
@@ -215,6 +229,11 @@ export function BadgeEditorPage() {
     setPage(1);
   };
 
+  const handleFilterChange = (value: BadgeFilterMode) => {
+    setFilterMode(value);
+    setPage(1);
+  };
+
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
@@ -255,6 +274,11 @@ export function BadgeEditorPage() {
                 className="pl-10 pr-4 py-2 rounded-xl text-sm bg-white shadow-sm/50 border border-gray-200 focus:outline-none focus:border-[#690003] transition-colors"
               />
             </div>
+
+            <BadgeFilterToggle
+              filterMode={filterMode}
+              onFilterChange={handleFilterChange}
+            />
 
             {/* Sort Dropdown */}
             <DropdownMenu>

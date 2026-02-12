@@ -26,6 +26,8 @@ export interface Badge {
   points: number;
   award_at_interval: BadgeInterval;
   img_link: string | null;
+  created_at?: string | null;
+  created_by_name?: string | null;
   conditions: BadgeCondition[];
 }
 

@@ -56,6 +56,8 @@ export async function fetchBadges(): Promise<ServerActionResponse<Badge[]>> {
     points: row.badge_points,
     img_link: row.badge_img_link,
     award_at_interval: row.badge_award_at_interval ?? 'none',
+    created_at: row.badge_created_at ?? row.created_at ?? null,
+    created_by_name: row.badge_created_by_name ?? row.created_by_name ?? null,
     conditions: normalizeConditions(row.conditions),
   }));
 

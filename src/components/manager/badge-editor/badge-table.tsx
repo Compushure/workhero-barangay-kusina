@@ -51,6 +51,17 @@ export default function BadgeTable({
     if (value === 'none') return 'Manual';
     return value.charAt(0).toUpperCase() + value.slice(1);
   };
+
+  const formatCreatedDate = (value?: string | null) => {
+    if (!value) return 'Unknown date';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Unknown date';
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [badgeToDelete, setBadgeToDelete] = useState<Badge | null>(null);
   const [expandedBadgeId, setExpandedBadgeId] = useState<string | null>(null);
@@ -127,6 +138,12 @@ export default function BadgeTable({
                             </div>
                             <div className="text-xs text-red-900 font-medium px-2 rounded-full bg-[#fdeac8] w-fit mt-2">
                               {formatIntervalLabel(badge.award_at_interval)}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-2">
+                              <span className="font-semibold">Created:</span> {formatCreatedDate(badge.created_at)}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              <span className="font-semibold">By:</span> {badge.created_by_name || 'System Default'}
                             </div>
                           </div>
                         </div>
