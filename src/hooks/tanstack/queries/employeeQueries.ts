@@ -7,7 +7,9 @@
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { handleFetchEmployeeRank } from '@/action-handlers/employee/stats';
+import { fetchUserBadgesHandler } from '@/action-handlers/employee/badges';
 import type { EmployeeRank } from '@/types';
+import type { UserBadge } from '@/actions/employee/badges';
 
 /**
  * Query key factory for employee-related queries
@@ -23,6 +25,8 @@ import type { EmployeeRank } from '@/types';
 export const employeeKeys = {
   all: ['employees'] as const,
   rank: () => [...employeeKeys.all, 'rank'] as const,
+  badges: () => [...employeeKeys.all, 'badges'] as const,
+  userBadges: (userId: string) => [...employeeKeys.badges(), userId] as const,
 };
 
 /**
@@ -59,4 +63,45 @@ export function useGetEmployeeRank(
     retry: 1, // Retry once on failure
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   }) as UseQueryResult<EmployeeRank | null, Error>;
+}
+
+/**
+ * Fetches all badges earned by a specific user
+ * Returns badges in reverse chronological order (newest first)
+ *
+ * @param userId - The ID of the user to fetch badges for
+ * @returns Query result with UserBadge[] data, loading state, and error handling
+ *
+ * @example
+ * ```tsx
+ * function UserBadges({ userId }: { userId: string }) {
+ *   const { data: badges, isLoading } = useGetUserBadges(userId)
+ *
+ *   if (isLoading) return <Skeleton />
+ *   if (!badges?.length) return <div>No badges earned yet</div>
+ *
+ *   return (
+ *     <div>
+ *       {badges.map(badge => (
+ *         <BadgeCard key={badge.badge_id} badge={badge} />
+ *       ))}
+ *     </div>
+ *   )
+ * }
+ * ```
+ */
+export function useGetUserBadges(
+  userId: string
+): UseQueryResult<UserBadge[] | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.userBadges(userId),
+    queryFn: async () => {
+      return await fetchUserBadgesHandler(userId);
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<UserBadge[] | null, Error>;
 }

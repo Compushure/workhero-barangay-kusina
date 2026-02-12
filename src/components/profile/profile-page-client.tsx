@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ProfileHeader } from './profile-header';
 import { ProfilePicture } from './profile-picture';
 import { ProfileCard } from './profile-card';
+import { RecentBadges } from './recent-badges';
 import { ImageCropUpload } from '@/components/admin/image-crop-upload';
 import { useGetUserProfile } from '@/hooks/tanstack/queries/profileQueries';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
@@ -118,7 +119,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
         <CardContent className="pt-6 text-center">
           <p className="text-lg font-semibold text-[#730202]">Profile not found</p>
           <Button 
-            onClick={() => startTransition(() => router.back())} 
+            onClick={() => router.back()} 
             disabled={isPending}
             className="mt-4 cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
@@ -129,25 +130,40 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
     );
   }
 
+  const handleBackClick = () => {
+    // Simple router.back() without startTransition 
+    router.back();
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <ProfileHeader isPending={isPending} onBack={() => startTransition(() => router.back())} />
+      <ProfileHeader isPending={isPending} onBack={handleBackClick} />
 
       {/* Profile Card */}
       <ProfileCard profile={profile}>
-        {/* Profile Picture Display & Controls */}
-        <ProfilePicture
-          profilePictureUrl={profile?.profilePictureUrl}
-          userName={profile?.name || 'User'}
-          userId={userId}
-          isOwnProfile={isOwnProfile}
-          isLoading={uploadPicture.isPending || isPending}
-          isDeleting={deletePicture.isPending}
-          onFileChange={handleFileChange}
-          onDelete={handleDeletePicture}
-          onOpenCropDialog={() => setShowCropDialog(true)}
-        />
+        {/* Profile Picture and Recent Badges Section */}
+        <div className="flex flex-col md:flex-row gap-12 mb-6 justify-center md:justify-start items-start md:items-start">
+          {/* Profile Picture Display & Controls - Centered */}
+          <div className="flex justify-center md:justify-start flex-shrink-0">
+            <ProfilePicture
+              profilePictureUrl={profile?.profilePictureUrl}
+              userName={profile?.name || 'User'}
+              userId={userId}
+              isOwnProfile={isOwnProfile}
+              isLoading={uploadPicture.isPending || isPending}
+              isDeleting={deletePicture.isPending}
+              onFileChange={handleFileChange}
+              onDelete={handleDeletePicture}
+              onOpenCropDialog={() => setShowCropDialog(true)}
+            />
+          </div>
+          
+          {/* Recent Badges Display - Smaller badges */}
+          <div className="flex justify-center md:justify-start">
+            <RecentBadges userId={userId} showLabel={true} maxBadges={2} />
+          </div>
+        </div>
       </ProfileCard>
 
       {/* Image Crop Upload Modal Dialog */}
