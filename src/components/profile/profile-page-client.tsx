@@ -160,7 +160,13 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
           </div>
           
           {/* Recent Badges Display - Smaller badges */}
-          <div className="flex justify-center md:justify-start">
+          <div className="flex flex-col items-center md:items-start gap-1">
+            <div className="text-center md:text-left">
+              <p className="text-base font-semibold text-[#730202]">{profile.name}</p>
+              {profile.employeeId && (
+                <p className="text-xs text-muted-foreground">{profile.employeeId}</p>
+              )}
+            </div>
             <RecentBadges userId={userId} showLabel={true} maxBadges={2} />
           </div>
         </div>
