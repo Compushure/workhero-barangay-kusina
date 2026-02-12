@@ -125,6 +125,94 @@ export interface ClaimTaskResult {
   xpAdded: number;
 }
 
+export interface SubmitVerificationResult {
+  success: boolean;
+  pendingOrdersSubmitted: number;
+}
+
+export async function submitTaskVerification(
+  kpitaskId: string,
+  pendingOrders: number
+): Promise<ServerActionResponse<SubmitVerificationResult>> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: 'Not authenticated', data: undefined };
+  }
+
+  // Validate input
+  if (pendingOrders <= 0) {
+    return { error: 'Pending orders must be greater than 0', data: undefined };
+  }
+
+  // Fetch task details with current progress
+  const { data: task, error: taskError } = await supabase
+    .from('task_info_view')
+    .select('assigned_to, status, completed_orders, max_orders, points_claimed_at')
+    .eq('kpitask_id', kpitaskId)
+    .single();
+
+  if (taskError || !task) {
+    return { error: 'Task not found', data: undefined };
+  }
+
+  const assignedTo = (task as { assigned_to: string | null }).assigned_to;
+  const status = ((task as { status: string | null }).status ?? '').toLowerCase();
+  const completedOrders = (task as { completed_orders: number | null }).completed_orders ?? 0;
+  const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
+  const pointsClaimedAt = (task as { points_claimed_at: string | null }).points_claimed_at;
+
+  // Validation checks
+  if (assignedTo !== user.id) {
+    return { error: 'You can only submit verification for tasks assigned to you', data: undefined };
+  }
+
+  if (status !== 'assigned') {
+    return { error: 'Only assigned tasks can be submitted for verification', data: undefined };
+  }
+
+  if (pointsClaimedAt != null) {
+    return { error: 'This task has already been claimed', data: undefined };
+  }
+
+  // Calculate remaining orders that can be submitted
+  const remainingOrders = maxOrders - completedOrders;
+  
+  if (pendingOrders > remainingOrders) {
+    return { 
+      error: `Cannot submit ${pendingOrders} orders. Only ${remainingOrders} orders remaining (max: ${maxOrders}, completed: ${completedOrders})`, 
+      data: undefined 
+    };
+  }
+
+  // Update task status to 'in review' and set pending orders
+  const { error: updateError } = await supabase
+    .from('KPITask')
+    .update({ 
+      status: 'in review',
+      pending_orders: pendingOrders 
+    })
+    .eq('id', kpitaskId)
+    .eq('assigned_to', user.id);
+
+  if (updateError) {
+    return { error: 'Failed to submit task for verification: ' + updateError.message, data: undefined };
+  }
+
+  return {
+    error: null,
+    data: { 
+      success: true, 
+      pendingOrdersSubmitted: pendingOrders 
+    },
+  };
+}
+
 export async function claimTaskPointsAndXP(
   kpitaskId: string
 ): Promise<ServerActionResponse<ClaimTaskResult>> {
@@ -141,7 +229,7 @@ export async function claimTaskPointsAndXP(
 
   const { data: task, error: taskError } = await supabase
     .from('task_info_view')
-    .select('assigned_to, status, points_claimed_at, category_points, category_xp')
+    .select('assigned_to, status, points_claimed_at, category_points, category_xp, completed_orders, max_orders')
     .eq('kpitask_id', kpitaskId)
     .single();
 
@@ -154,6 +242,8 @@ export async function claimTaskPointsAndXP(
   const pointsClaimedAt = (task as { points_claimed_at: string | null }).points_claimed_at;
   const categoryPoints = (task as { category_points: number | null }).category_points ?? 0;
   const categoryXp = Number((task as { category_xp: number | null }).category_xp ?? 0);
+  const completedOrders = (task as { completed_orders: number | null }).completed_orders ?? 0;
+  const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
 
   if (assignedTo !== user.id) {
     return { error: 'You can only claim rewards for tasks assigned to you', data: undefined };
@@ -202,7 +292,11 @@ export async function claimTaskPointsAndXP(
 
   const { error: claimUpdateError } = await supabaseAdmin
     .from('KPITask')
-    .update({ points_claimed_at: new Date().toISOString() })
+    .update({ 
+      points_claimed_at: new Date().toISOString(),
+      // Update status back to assigned if there are remaining orders
+      status: completedOrders < maxOrders ? 'assigned' : 'approved'
+    })
     .eq('id', kpitaskId);
 
   if (claimUpdateError) {

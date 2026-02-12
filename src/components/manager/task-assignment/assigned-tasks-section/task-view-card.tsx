@@ -26,7 +26,9 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editMaxOrders, setEditMaxOrders] = useState(task.maxOrders);
-  const [editDueDate, setEditDueDate] = useState<Date>(() => parseISO(task.dateRange.end));
+  const [editDueDate, setEditDueDate] = useState<Date>(() => 
+    task.dateRange.end ? parseISO(task.dateRange.end) : new Date()
+  );
   const [editAssignedEmployees, setEditAssignedEmployees] = useState<string[]>(
     (task.assignedEmployees ?? []).map((e) => e.id)
   );
@@ -96,6 +98,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         empId: backendEmp?.empId || '',
         tenure: backendEmp?.tenure,
         assignedTasks: [],
+        pendingOrders: 0,
         completedOrders: 0,
       };
     });
@@ -118,7 +121,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   const handleOpenEditDialog = () => {
     setEditMaxOrders(task.maxOrders);
-    setEditDueDate(parseISO(task.dateRange.end));
+    setEditDueDate(task.dateRange.end ? parseISO(task.dateRange.end) : new Date());
     setEditAssignedEmployees((task.assignedEmployees ?? []).map((e) => e.id));
     setShowEditDialog(true);
     setOpenPopover(false);
@@ -126,7 +129,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   const handleCancelEdit = () => {
     setEditMaxOrders(task.maxOrders);
-    setEditDueDate(parseISO(task.dateRange.end));
+    setEditDueDate(task.dateRange.end ? parseISO(task.dateRange.end) : new Date());
     setEditAssignedEmployees((task.assignedEmployees ?? []).map((e) => e.id));
     setShowEditDialog(false);
   };

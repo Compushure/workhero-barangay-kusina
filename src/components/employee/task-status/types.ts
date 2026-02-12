@@ -21,6 +21,6 @@ export interface TaskStatusItem {
 
 export type TaskStatusKind =
   | 'Current'
-  | 'On Review'
-  | 'Verified'
-  | 'Denied Approval';
+  | 'In Review'
+  | 'Approved'
+  | 'Rejected';

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Sparkles, ChevronDown, Loader2 } from 'lucide-react';
+import { Sparkles, ChevronDown, Loader2, Coins } from 'lucide-react';
 import { claimTaskPointsAndXP } from '@/actions/employee/tasks';
 import type { TaskStatusItem } from './types';
 
@@ -53,9 +53,9 @@ export function TaskCard({ task }: TaskCardProps) {
         <CardContent className="p-0 flex flex-col gap-3 sm:gap-5">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-5">
             <div className="flex flex-col gap-2 min-w-0 flex-1">
-              <span className="inline-flex w-fit rounded-full bg-muted text-muted-foreground px-3 py-1 text-xs sm:text-sm font-semibold leading-tight">
+              {/* <span className="inline-flex w-fit rounded-full bg-muted text-muted-foreground px-3 py-1 text-xs sm:text-sm font-semibold leading-tight">
                 {task.taskType}
-              </span>
+              </span> */}
               <p className="text-sm sm:text-base font-semibold leading-snug wrap-break-word">
                 {task.title}
               </p>
@@ -67,7 +67,7 @@ export function TaskCard({ task }: TaskCardProps) {
                 </span>
                 <div className="flex items-center gap-2.5">
                   <span className="flex items-center gap-2 text-sm sm:text-base font-bold tabular-nums">
-                    <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" aria-hidden />
+                    <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" aria-hidden />
                     {task.points}
                   </span>
                   <span className="text-sm sm:text-base font-normal">
@@ -121,7 +121,7 @@ export function TaskCard({ task }: TaskCardProps) {
                   Points
                 </span>
                 <p className="text-sm font-medium mt-1 flex items-center gap-1.5">
-                  <Sparkles className="h-4 w-4 text-muted-foreground" aria-hidden />
+                  <Coins className="h-4 w-4 text-muted-foreground" aria-hidden />
                   {task.points}
                 </p>
               </div>

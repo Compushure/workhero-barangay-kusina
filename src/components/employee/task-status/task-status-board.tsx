@@ -76,17 +76,17 @@ export function TaskStatusBoard({
             <TaskCard key={task.id} task={task} />
           ))}
         </TaskStatusColumn>
-        <TaskStatusColumn status="On Review">
+        <TaskStatusColumn status="In Review">
           {onReview.map((task) => (
             <TaskCard key={task.id} task={task} />
           ))}
         </TaskStatusColumn>
-        <TaskStatusColumn status="Verified">
+        <TaskStatusColumn status="Approved">
           {verified.map((task) => (
             <TaskCard key={task.id} task={task} />
           ))}
         </TaskStatusColumn>
-        <TaskStatusColumn status="Denied Approval">
+        <TaskStatusColumn status="Rejected">
           {denied.map((task) => (
             <TaskCard key={task.id} task={task} />
           ))}

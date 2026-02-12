@@ -105,6 +105,7 @@ export async function fetchCurrentAssignedTasksPaginated(
       name: row.assigned_to_name ?? '',
       empId: row.assigned_to_employee_id ?? '',
       assignedTasks: [],
+      pendingOrders: row.pending_orders ?? 0,
       completedOrders: row.completed_orders ?? 0,
       status: row.status || 'assigned',
     };
@@ -345,6 +346,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
         categoryDescription: string;
         categoryPoints: number;
         categoryXP: number;
+        pendingOrders: number;
         maxOrders: number;
         createdAt: string;
         deadlineDate: string;
@@ -364,6 +366,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
           categoryDescription: assignment.category_description || '',
           categoryPoints: assignment.category_points || 1,
           categoryXP: assignment.category_xp || 1,
+          pendingOrders: assignment.pending_orders || 0,
           maxOrders: assignment.max_orders || 1,
           createdAt: assignment.kpitask_created_at,
           deadlineDate: assignment.k_deadline_date,
@@ -382,6 +385,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
         name: employee.name,
         empId: employee.empId,
         assignedTasks: [],
+        pendingOrders: taskGroup.assignments[0]?.pending_orders ?? 0,
         completedOrders: taskGroup.assignments[0]?.completed_orders ?? 0,
         status: taskGroup.status,
       };

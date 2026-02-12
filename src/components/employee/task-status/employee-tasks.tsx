@@ -8,7 +8,7 @@ import {
   deniedTasks,
 } from '@/components/employee/task-status';
 
-export function EmployeeTasksMain() {
+export function TasksPage() {
   return (
     <div className="min-h-screen p-8 flex flex-col gap-8">
       {/* Row 1: Header */}
