@@ -29,13 +29,22 @@ export default function LeaderboardFilters({ currentPeriod = 'current' }: Leader
   return (
     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
       {/* Category Filter - Only Overall is functional */}
-      <Select value="overall" disabled>
+      <Select>
         <SelectTrigger className="w-full sm:w-40 bg-white border-[#E9C496] text-[#6D1616] font-medium rounded-lg hover:bg-[#F9F3E9] transition-colors">
           <SelectValue placeholder="Select category" />
         </SelectTrigger>
         <SelectContent className="bg-white border-[#E9C496]">
           <SelectItem value="overall" className="text-[#6D1616] cursor-pointer hover:bg-[#F9F3E9]">
             Overall
+          </SelectItem>
+          <SelectItem
+            value="department"
+            className="text-[#6D1616] cursor-pointer hover:bg-[#F9F3E9]"
+          >
+            Department
+          </SelectItem>
+          <SelectItem value="position" className="text-[#6D1616] cursor-pointer hover:bg-[#F9F3E9]">
+            Position
           </SelectItem>
         </SelectContent>
       </Select>
