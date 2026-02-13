@@ -14,12 +14,16 @@ export default function EmployeeDashboardClient() {
       progress: '0/5',
       reward: '10 XP 100 Coins',
       dueDate: '12/12/25',
+      points: '100',
+      xp: '10',
     },
     {
       title: 'Name of Task Type: Internal Training',
       progress: '0/5',
       reward: '10 XP 100 Coins',
       dueDate: '12/12/25',
+      points: '100',
+      xp: '10',
     },
   ];
 
@@ -62,7 +66,7 @@ export default function EmployeeDashboardClient() {
           <div className="w-[20%]">
             <Card className="bg-transparent shadow-none border-none h-full">
               <CardContent className="h-full">
-                <RankWidget rankData={{ rank: 12, totalEmployees: 100 }} totalXP={250} />
+                <RankWidget />
               </CardContent>
             </Card>
           </div>

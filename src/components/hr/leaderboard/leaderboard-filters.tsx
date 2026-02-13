@@ -7,20 +7,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+interface LeaderboardFiltersProps {
+  currentPeriod?: 'current' | 'weekly' | 'monthly' | 'yearly';
+}
 
 /**
  * LeaderboardFilters: Dropdown filters for leaderboard view.
- * Includes category filter (Overall/Department/Position) and time period filter (Weekly/Monthly/Yearly).
+ * Includes category filter (Overall only - Department/Position disabled until schema supports them)
+ * and time period filter (Current/Weekly/Monthly/Yearly).
+ * Uses URL params for state management to enable bookmarkable filters.
  */
-export default function LeaderboardFilters() {
-  const [category, setCategory] = useState('overall');
-  const [timePeriod, setTimePeriod] = useState('weekly');
+export default function LeaderboardFilters({ currentPeriod = 'current' }: LeaderboardFiltersProps) {
+  const router = useRouter();
+
+  const handlePeriodChange = (value: string) => {
+    router.push(`/hr/leaderboard?period=${value}`);
+  };
 
   return (
     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
-      {/* Category Filter */}
-      <Select value={category} onValueChange={setCategory}>
+      {/* Category Filter - Only Overall is functional */}
+      <Select value="overall" disabled>
         <SelectTrigger className="w-full sm:w-40 bg-white border-[#E9C496] text-[#6D1616] font-medium rounded-lg hover:bg-[#F9F3E9] transition-colors">
           <SelectValue placeholder="Select category" />
         </SelectTrigger>
@@ -28,24 +37,18 @@ export default function LeaderboardFilters() {
           <SelectItem value="overall" className="text-[#6D1616] cursor-pointer hover:bg-[#F9F3E9]">
             Overall
           </SelectItem>
-          <SelectItem
-            value="department"
-            className="text-[#6D1616] cursor-pointer hover:bg-[#F9F3E9]"
-          >
-            Department
-          </SelectItem>
-          <SelectItem value="position" className="text-[#6D1616] cursor-pointer hover:bg-[#F9F3E9]">
-            Position
-          </SelectItem>
         </SelectContent>
       </Select>
 
       {/* Time Period Filter */}
-      <Select value={timePeriod} onValueChange={setTimePeriod}>
+      <Select value={currentPeriod} onValueChange={handlePeriodChange}>
         <SelectTrigger className="w-full sm:w-40 bg-white border-[#E9C496] text-[#6D1616] font-medium rounded-lg hover:bg-[#F9F3E9] transition-colors">
           <SelectValue placeholder="Select period" />
         </SelectTrigger>
         <SelectContent className="bg-white border-[#E9C496]">
+          <SelectItem value="current" className="text-[#6D1616] cursor-pointer hover:bg-[#F9F3E9]">
+            Current
+          </SelectItem>
           <SelectItem value="weekly" className="text-[#6D1616] cursor-pointer hover:bg-[#F9F3E9]">
             Weekly
           </SelectItem>

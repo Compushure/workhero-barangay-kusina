@@ -39,7 +39,7 @@ export async function getTopPlayers(): Promise<ActionResult<LeaderboardPlayer[]>
       return {
         id: user.user_id,
         name: user.user_name || 'Unknown User',
-        points: user.points ?? 0,
+        performanceScore: user.points ?? 0, // Using points as performance score for employee view
         image: storageData?.publicUrl ?? null,
       };
     });

@@ -5,8 +5,34 @@ import { getTopPlayers } from '@/actions/hr/leaderboard';
 import { Suspense } from 'react';
 import { MarketSuspense } from '@/components/shared/market-suspense';
 
-export default async function LeaderboardPage() {
-  const result = await getTopPlayers();
+interface LeaderboardPageProps {
+  searchParams: Promise<{ period?: string }>;
+}
+
+/**
+ * Get description text based on time period filter
+ */
+function getPeriodDescription(period?: string): string {
+  switch (period) {
+    case 'current':
+      return 'All-time cumulative Top 10 performers.';
+    case 'weekly':
+      return 'Snapshot of Top 10 as of end of last week.';
+    case 'monthly':
+      return 'Snapshot of Top 10 as of end of last month.';
+    case 'yearly':
+      return 'Snapshot of Top 10 as of end of last year.';
+    default:
+      return 'All-time cumulative Top 10 performers.';
+  }
+}
+
+export default async function LeaderboardPage({ searchParams }: LeaderboardPageProps) {
+  const params = await searchParams;
+  const period = params.period as 'current' | 'weekly' | 'monthly' | 'yearly' | undefined;
+
+  const result = await getTopPlayers(period);
+  const description = getPeriodDescription(period);
 
   // Handle error or empty data
   if (result.error || !result.data || result.data.length === 0) {
@@ -17,9 +43,9 @@ export default async function LeaderboardPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-8">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#6D1616]">Leaderboard Slide</h1>
-                <p className="text-gray-500 text-sm sm:text-base">List of ranks for this week.</p>
+                <p className="text-gray-500 text-sm sm:text-base">{description}</p>
               </div>
-              <LeaderboardFilters />
+              <LeaderboardFilters currentPeriod={period} />
             </div>
             <div className="text-center py-8 sm:py-12">
               <p className="text-gray-500 text-lg">
@@ -50,9 +76,9 @@ export default async function LeaderboardPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-8">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-[#6D1616]">Leaderboard Slide</h1>
-              <p className="text-gray-500 text-sm sm:text-base">List of ranks for this week.</p>
+              <p className="text-gray-500 text-sm sm:text-base">{description}</p>
             </div>
-            <LeaderboardFilters />
+            <LeaderboardFilters currentPeriod={period} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8 items-start">
