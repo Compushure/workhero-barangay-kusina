@@ -7,7 +7,7 @@ interface RankWidgetProps {
   rankData: EmployeeRank | null;
   isLoading?: boolean;
   isCollapsed?: boolean;
-  totalXP?: number;
+  performanceScore?: number;
 }
 
 /**
@@ -15,7 +15,7 @@ interface RankWidgetProps {
  * Displays employee's rank among all regular employees
  * Responsive to sidebar collapsed state
  */
-export function RankWidget({ rankData, isLoading, isCollapsed, totalXP }: RankWidgetProps) {
+export function RankWidget({ rankData, isLoading, isCollapsed, performanceScore }: RankWidgetProps) {
   // Loading state
   if (isLoading) {
     if (isCollapsed) {
@@ -56,7 +56,7 @@ export function RankWidget({ rankData, isLoading, isCollapsed, totalXP }: RankWi
     return (
       <div
         className="bg-white/10 rounded-lg h-16 w-16 mx-auto flex flex-col items-center justify-center mb-4"
-        title={`Personal Rank #${rank} - ${totalXP || 0} Total XP`}
+        title={`Personal Rank #${rank} - ${ performanceScore ?? 0} Performance Score`}
       >
         <Trophy size={16} className="text-yellow-300 mb-1" />
         <span className="text-xs font-bold text-white">#{rank}</span>
@@ -77,7 +77,7 @@ export function RankWidget({ rankData, isLoading, isCollapsed, totalXP }: RankWi
         </div>
       </div>
       <p className="text-xs text-red-200">
-        Total Points and XP earned: <span className="text-white font-semibold">{totalXP || 0}</span>
+        Performance Score: <span className="text-white font-semibold">{ performanceScore || 0}</span>
       </p>
     </div>
   );
