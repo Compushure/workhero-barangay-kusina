@@ -9,7 +9,7 @@ interface EmployeeViewTaskBadgesProps {
   isExpanded: boolean;
   toggleEmployeeExpand: (empId: string) => void;
   displayedTasks: AssignedTask[];
-  formatDate: (dateString: string) => string;
+  formatDate: (dateString: string | null) => string;
   setShowRemoveConfirm: Dispatch<SetStateAction<{
       taskId: string;
       empId: string;
