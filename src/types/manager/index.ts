@@ -5,4 +5,6 @@
  */
 
 export * from './task-assignment';
+export * from './task-editor';
 export * from './task-verification';
+export * from './badge-editor';

@@ -9,10 +9,11 @@ const MANILA_TIMEZONE = 'Asia/Manila';
 
 /**
  * Checks if a task is overdue based on its end date
- * @param endDate - The end date of the task
+ * @param endDate - The end date of the task (can be null)
  * @returns boolean - true if the task is overdue, false otherwise
  */
-export function isTaskOverdue(endDate: string): boolean {
+export function isTaskOverdue(endDate: string | null): boolean {
+  if (!endDate) return false;
   const taskEnd = new Date(new Date(endDate).setHours(0, 0, 0, 0));
   const today = new Date(new Date().setHours(0, 0, 0, 0));
   return taskEnd.getTime() < today.getTime();
