@@ -8,11 +8,13 @@
 // Query hooks
 export * from './queries/userQueries';
 export * from './queries/managerQueries';
+export * from './queries/managerBadgeQueries';
 export * from './queries/rewardQueries';
 export * from './queries/attendanceQueries';
 
 // Mutation hooks
 export * from './mutations/userMutations';
 export * from './mutations/managerMutations';
+export * from './mutations/managerBadgeMutations';
 export * from './mutations/hrMutations';
 export * from './mutations/attendanceMutations';
