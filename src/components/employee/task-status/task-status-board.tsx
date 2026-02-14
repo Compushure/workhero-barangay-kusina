@@ -12,7 +12,7 @@ import { TaskStatusColumn } from './task-status-column';
 import { TaskCard } from './task-card';
 import type { TaskStatusItem } from './types';
 
-type SortOption = 'due-date' | 'points' | 'title';
+type SortOption = 'due-date' | 'points' | 'name';
 
 function sortTasks(tasks: TaskStatusItem[], sortBy: SortOption): TaskStatusItem[] {
   const copy = [...tasks];
@@ -21,8 +21,8 @@ function sortTasks(tasks: TaskStatusItem[], sortBy: SortOption): TaskStatusItem[
       return copy.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
     case 'points':
       return copy.sort((a, b) => b.points - a.points);
-    case 'title':
-      return copy.sort((a, b) => a.title.localeCompare(b.title));
+    case 'name':
+      return copy.sort((a, b) => a.name.localeCompare(b.name));
     default:
       return copy;
   }
@@ -54,11 +54,11 @@ export function TaskStatusBoard({
   );
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 w-full min-w-0 overflow-hidden">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+    <div className="flex flex-col gap-6 w-full min-w-150 overflow-hidden">
+      <div className="flex flex-row items-center justify-end gap-2">
         <span className="text-sm text-muted-foreground">Sort by</span>
         <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="w-45">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
@@ -70,7 +70,7 @@ export function TaskStatusBoard({
       </div>
 
       {/* Single column on small screens; 2x2 grid on lg and up (Current | On Review, Verified | Denied Approval) */}
-      <div className="grid grid-cols-1 lg:grid-cols-[repeat(2,minmax(0,1fr))] gap-6 sm:gap-8 w-full min-w-0">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 w-full min-w-0">
         <TaskStatusColumn status="Current">
           {current.map((task) => (
             <TaskCard key={task.id} task={task} />

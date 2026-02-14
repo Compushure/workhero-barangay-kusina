@@ -9,6 +9,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import {
   handleSubmitTaskVerification,
   handleClaimTaskPointsAndXP,
+  handleRedoTask,
 } from '@/action-handlers/employee/tasks';
 import type { SubmitVerificationResult, ClaimTaskResult } from '@/actions/employee/tasks';
 import { employeeTasksKeys } from '../queries/employeeTasksQueries';
@@ -39,11 +40,12 @@ export function useSubmitTaskVerification(): UseMutationResult<
 }
 
 /**
- * Mutation for claiming task points and XP
- * Automatically invalidates tasks cache on success to reflect the claimed status
+ * Mutation for redoing a rejected task
+ * Moves the task back to 'assigned' status so it can be resubmitted
+ * Automatically invalidates tasks cache on success to reflect the status change
  */
-export function useClaimTaskPoints(): UseMutationResult<
-  ClaimTaskResult | null,
+export function useRedoTask(): UseMutationResult<
+  boolean | null,
   Error,
   string
 > {
@@ -51,7 +53,32 @@ export function useClaimTaskPoints(): UseMutationResult<
 
   return useMutation({
     mutationFn: async (kpitaskId: string) => {
-      return await handleClaimTaskPointsAndXP(kpitaskId);
+      return await handleRedoTask(kpitaskId);
+    },
+    onSuccess: () => {
+      // Invalidate tasks cache to reflect the status change
+      queryClient.invalidateQueries({ queryKey: employeeTasksKeys.lists() });
+    },
+    onError: (error) => {
+      console.error('Failed to redo task:', error);
+    },
+  });
+}
+
+/**
+ * Mutation for claiming task points and XP
+ * Automatically invalidates tasks cache on success to reflect the claimed status
+ */
+export function useClaimTaskPoints(): UseMutationResult<
+  ClaimTaskResult | null,
+  Error,
+  { kpitaskId: string; taskName: string; completedOrders: number; maxOrders: number }
+> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ kpitaskId, taskName, completedOrders, maxOrders }) => {
+      return await handleClaimTaskPointsAndXP(kpitaskId, taskName, completedOrders, maxOrders);
     },
     onSuccess: () => {
       // Invalidate tasks cache to reflect the claimed status

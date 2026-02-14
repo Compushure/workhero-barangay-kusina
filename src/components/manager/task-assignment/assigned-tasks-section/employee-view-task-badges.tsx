@@ -62,7 +62,7 @@ export default function EmployeeViewTaskBadges({
               <span className={`text-xs`}>
                 {task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : 'Unknown'}
               </span>
-              {pendingOrders !== 0 && <span className="text-sm leading-0 font-semibold text-amber-500">{pendingOrders}</span>}
+              {pendingOrders !== 0 && task.status === 'in-review' && <span className="text-sm leading-0 font-semibold text-amber-500">{pendingOrders}</span>}
             </p>
           );
 

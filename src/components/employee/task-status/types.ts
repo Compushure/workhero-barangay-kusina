@@ -4,10 +4,11 @@
 
 export interface TaskStatusItem {
   id: string;
-  taskType: string;
-  title: string;
-  progressCurrent: number;
-  progressMax: number;
+  name: string;
+  description: string;
+  completedOrders: number;
+  maxOrders: number;
+  claimedOrders: number;
   points: number;
   xp: number;
   dueDate: string;

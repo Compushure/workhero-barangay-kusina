@@ -23,6 +23,7 @@ interface TaskInfoRow {
   k_deadline_date: string | null;
   remark: string | null;
   completed_orders: number | null;
+  pending_orders: number | null;
   max_orders: number | null;
 }
 
@@ -43,17 +44,19 @@ function formatDueDate(iso: string | null): string {
 function rowToTaskStatusItem(row: TaskInfoRow): TaskStatusItem {
   const points = row.category_points ?? 0;
   const xp = Number(row.category_xp ?? 0);
-  const completed = row.completed_orders ?? 0;
-  const max = row.max_orders ?? 1;
+  const completedOrders = row.completed_orders ?? 0;
+  const maxOrders = row.max_orders ?? 1;
   const name = row.category_name ?? 'Task';
-  const title = row.category_description?.trim() ? row.category_description : name;
+  const description = row.category_description?.trim() ? row.category_description : name;
+  const claimedOrders = (row.completed_orders ?? 0) - (row.pending_orders ?? 0);
 
   return {
     id: row.kpitask_id,
-    taskType: name,
-    title,
-    progressCurrent: completed,
-    progressMax: max,
+    name,
+    description,
+    completedOrders,
+    maxOrders,
+    claimedOrders: claimedOrders,
     points,
     xp,
     dueDate: formatDueDate(row.k_deadline_date),
@@ -80,7 +83,7 @@ export async function fetchEmployeeTasks(): Promise<
   const { data: rows, error } = await supabase
     .from('task_info_view')
     .select(
-      'kpitask_id, status, points_claimed_at, category_name, category_description, category_points, category_xp, k_deadline_date, remark, completed_orders, max_orders'
+      'kpitask_id, status, points_claimed_at, category_name, category_description, category_points, category_xp, k_deadline_date, remark, completed_orders, pending_orders, max_orders'
     )
     .eq('assigned_to', user.id);
 
@@ -153,7 +156,7 @@ export async function submitTaskVerification(
   // Fetch task details with current progress
   const { data: task, error: taskError } = await supabase
     .from('task_info_view')
-    .select('assigned_to, status, completed_orders, max_orders, points_claimed_at')
+    .select('assigned_to, status, completed_orders, pending_orders, max_orders, points_claimed_at')
     .eq('kpitask_id', kpitaskId)
     .single();
 
@@ -174,10 +177,6 @@ export async function submitTaskVerification(
 
   if (status !== 'assigned') {
     return { error: 'Only assigned tasks can be submitted for verification', data: undefined };
-  }
-
-  if (pointsClaimedAt != null) {
-    return { error: 'This task has already been claimed', data: undefined };
   }
 
   // Calculate remaining orders that can be submitted
@@ -208,8 +207,65 @@ export async function submitTaskVerification(
     error: null,
     data: { 
       success: true, 
-      pendingOrdersSubmitted: pendingOrders 
+      pendingOrdersSubmitted: pendingOrders,
     },
+  };
+}
+
+export async function redoTask(
+  kpitaskId: string
+): Promise<ServerActionResponse<boolean>> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: 'Not authenticated', data: undefined };
+  }
+
+  // Fetch task details to verify ownership and status
+  const { data: task, error: taskError } = await supabase
+    .from('task_info_view')
+    .select('assigned_to, status')
+    .eq('kpitask_id', kpitaskId)
+    .single();
+
+  if (taskError || !task) {
+    return { error: 'Task not found', data: undefined };
+  }
+
+  const assignedTo = (task as { assigned_to: string | null }).assigned_to;
+  const status = ((task as { status: string | null }).status ?? '').toLowerCase();
+
+  // Validation checks
+  if (assignedTo !== user.id) {
+    return { error: 'You can only redo tasks assigned to you', data: undefined };
+  }
+
+  if (status !== 'rejected') {
+    return { error: 'Only rejected tasks can be redone', data: undefined };
+  }
+
+  // Update task status back to 'assigned'
+  const { error: updateError } = await supabase
+    .from('KPITask')
+    .update({ 
+      status: 'assigned',
+      pending_orders: null 
+    })
+    .eq('id', kpitaskId)
+    .eq('assigned_to', user.id);
+
+  if (updateError) {
+    return { error: 'Failed to redo task: ' + updateError.message, data: undefined };
+  }
+
+  return {
+    error: null,
+    data: true,
   };
 }
 
@@ -229,7 +285,7 @@ export async function claimTaskPointsAndXP(
 
   const { data: task, error: taskError } = await supabase
     .from('task_info_view')
-    .select('assigned_to, status, points_claimed_at, category_points, category_xp, completed_orders, max_orders')
+    .select('assigned_to, status, points_claimed_at, category_points, category_xp, completed_orders, pending_orders, max_orders')
     .eq('kpitask_id', kpitaskId)
     .single();
 
@@ -244,6 +300,7 @@ export async function claimTaskPointsAndXP(
   const categoryXp = Number((task as { category_xp: number | null }).category_xp ?? 0);
   const completedOrders = (task as { completed_orders: number | null }).completed_orders ?? 0;
   const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
+  const pendingOrders = (task as { pending_orders: number | null }).pending_orders ?? 0;
 
   if (assignedTo !== user.id) {
     return { error: 'You can only claim rewards for tasks assigned to you', data: undefined };
@@ -251,8 +308,10 @@ export async function claimTaskPointsAndXP(
   if (status !== 'approved') {
     return { error: 'Only approved tasks can be claimed', data: undefined };
   }
-  if (pointsClaimedAt != null) {
-    return { error: 'This task has already been claimed', data: undefined };
+
+  // Check if there are unclaimed completed orders
+  if (pendingOrders === 0 && completedOrders === maxOrders) {
+    return { error: 'No completed orders available to claim', data: undefined };
   }
 
   const { error: pointsError } = await supabase.rpc('increment_points_for_user', {
@@ -294,8 +353,10 @@ export async function claimTaskPointsAndXP(
     .from('KPITask')
     .update({ 
       points_claimed_at: new Date().toISOString(),
-      // Update status back to assigned if there are remaining orders
-      status: completedOrders < maxOrders ? 'assigned' : 'approved'
+      // Update status back to assigned if there are remaining orders after this claim
+      status: (completedOrders + pendingOrders) < maxOrders ? 'assigned' : 'approved',
+      completed_orders: completedOrders + pendingOrders, 
+      pending_orders: 0,
     })
     .eq('id', kpitaskId);
 

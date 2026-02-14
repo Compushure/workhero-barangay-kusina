@@ -192,7 +192,10 @@ export async function approveTaskAction(
   if ((taskData.max_orders > taskData.completed_orders + 1) && (taskData.pending_orders <= taskData.max_orders - taskData.completed_orders)) {
     const { error: assignError } = await supabase
       .from('KPITask')
-      .update({ status: 'approved', remark: reqmark , completed_orders: taskData.completed_orders + taskData.pending_orders }) // need this to be completed + pending then pending will then be reset to 0 after the request has been approved
+      .update({ 
+        status: 'approved', 
+        remark: reqmark ,
+      }) // need this to be completed + pending then pending will then be reset to 0 after the request has been approved
       .eq('id', kpitask_id);
 
     if (assignError) {
@@ -234,7 +237,7 @@ export async function rejectTaskAction(
   // Update the task status and remark
   const { error: updateError } = await supabase
     .from('KPITask')
-    .update({ status: 'rejected', remark: reqmark })
+    .update({ status: 'rejected', remark: reqmark, pending_orders: 0 })
     .eq('id', kpitask_id.trim());
 
   if (updateError) {
