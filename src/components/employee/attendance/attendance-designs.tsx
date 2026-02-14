@@ -12,9 +12,9 @@ import AttendanceIcon from './attendance';
 export default function AttendanceDesign() {
   return (
     <div
-      // className={`flex min-h-screen items-center justify-center bg-cover bg-center pixelated ${pressStart2P.className}`}
-      // style={{ backgroundImage: "url('/attendance-bg.png')" }} // image in public folder
-      className={`flex min-h-screen items-center justify-center bg-[#6b2d00] pixelated ${pressStart2P.className}`}
+      className={`flex min-h-screen items-center justify-center bg-cover bg-center pixelated ${pressStart2P.className}`}
+      style={{ backgroundImage: "url('/bgbg.jpg')" }} // image in public folder
+      // className={`flex min-h-screen items-center justify-center bg-[#6b2d00] pixelated ${pressStart2P.className}`}
     >
       <div className="relative flex flex-col items-center">
         {/* Overlapping header box */}
