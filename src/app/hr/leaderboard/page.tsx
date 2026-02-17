@@ -69,6 +69,18 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
   const prevPeriod = getAdjacentPeriod(period, 'prev');
   const nextPeriod = getAdjacentPeriod(period, 'next');
 
+  // Get empty state message based on period
+  const getEmptyMessage = () => {
+    if (period === 'weekly') {
+      return "The weekly rankings haven't been released yet. Check back later!";
+    } else if (period === 'monthly') {
+      return "The monthly rankings haven't been released yet. Check back later!";
+    } else if (period === 'yearly') {
+      return "The yearly rankings haven't been released yet. Check back later!";
+    }
+    return result.error || 'No leaderboard data available at the moment.';
+  };
+
   // Handle error or empty data
   if (result.error || !result.data || result.data.length === 0) {
     return (
@@ -95,19 +107,17 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
                   {periodLabel}
                 </span>
                 <Link 
-                  href={`/hr/leaderboard?period=${nextPeriod}`}
+                 href={`/hr/leaderboard?period=${nextPeriod}`}
                   className="p-1.5 sm:p-2 hover:bg-[#F9F3E9] rounded-full transition-colors"
                 >
                   <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-[#6D1616]" />
                 </Link>
               </div>
-              
-              <p className="text-gray-500 text-sm sm:text-base text-center mt-2">{description}</p>
             </div>
 
             <div className="text-center py-8 sm:py-12">
               <p className="text-gray-500 text-lg">
-                {result.error || 'No leaderboard data available at the moment.'}
+                {getEmptyMessage()}
               </p>
             </div>
           </div>
