@@ -185,7 +185,7 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
 
   return (
     <div
-      className="flex flex-col gap-8 mt-12"
+      className="flex flex-col gap-4"
     >
       <StatusIndicator
         status={status}
@@ -210,7 +210,7 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
         handleBreakClick={handleBreakClick}
       />
 
-      <AttendanceWarnings
+      {/* <AttendanceWarnings
         status={status}
         warningText={warningText}
         breakWarningText={breakWarningText}
@@ -222,7 +222,7 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
         lateAfter={lateAfter}
         isCurrentlyOverBreak={isCurrentlyOverBreak}
         hasTimedOut={hasTimedOut}
-      />
+      /> */}
 
       {/* Developer Test Panel */}
       <AttendanceTestPanel status={status} />

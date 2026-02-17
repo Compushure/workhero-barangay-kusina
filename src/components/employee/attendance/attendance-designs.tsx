@@ -1,44 +1,68 @@
-// app/attendance/AttendanceDesign.tsx
 'use client';
-import { Press_Start_2P } from 'next/font/google';
-
-const pressStart2P = Press_Start_2P({
-  weight: '400', // only one weight available
-  subsets: ['latin'],
-});
 
 import AttendanceIcon from './attendance';
+import { useState } from 'react';
+import LevelIcon from '../dashboard/level-widget';
+import { RankWidget } from '../dashboard/rank-panel';
+import { ProfilePic } from '../dashboard/user-profile';
+import AttendanceLogs from './attendance-logs';
+import type { AttendanceLog } from './attendance-logs';
 
 export default function AttendanceDesign() {
+  const [nowTime] = useState<Date>(new Date());
+
+  const sampleLogs: AttendanceLog[] = [
+    { action: 'timeout', time: new Date().toISOString(), note: 'Working undertime!' },
+    { action: 'endbreak', time: new Date().toISOString() },
+    { action: 'startbreak', time: new Date().toISOString() },
+    { action: 'timein', time: new Date().toISOString(), note: 'Late punch in!' },
+  ];
+
   return (
     <div
-      className={`flex min-h-screen items-center justify-center bg-cover bg-center pixelated ${pressStart2P.className}`}
-      style={{ backgroundImage: "url('/bgbg.jpg')" }} // image in public folder
-      // className={`flex min-h-screen items-center justify-center bg-[#6b2d00] pixelated ${pressStart2P.className}`}
+      className={`flex font-jersey tracking-widest min-h-screen items-center justify-center bg-cover bg-center pixelated relative`}
     >
-      <div className="relative flex flex-col items-center">
-        {/* Overlapping header box */}
-        <div
-          className="absolute -top-10 px-6 py-6
-                        border-4 border-black bg-orange-300
-                        shadow-[6px_6px_0px_#000] animate-fadeIn text-center"
-        >
-          <h2 className="text-base text-black">ATTENDANCE MENU</h2>
-        </div>
+      {/* Background */}
+      <div className="absolute inset-0 -z-10">
+        <img
+          src="/assets/att.png"
+          alt="Attendance background"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-[#0e0d0c]/30"></div>
+      </div>
 
-        {/* Main panel */}
-        <div
-          className="p-6 border-4 border-black bg-orange-200
-                        shadow-[6px_6px_0px_#000] animate-fadeIn flex flex-col items-center"
-        >
-          {/* Import the functional AttendanceIcon */}
-          <AttendanceIcon />
+      {/* Top‑left: Profile + Level */}
+      <div className="absolute top-4 left-4 flex flex-row items-center gap-6">
+        <ProfilePic />
+        <LevelIcon />
+      </div>
 
-          {/* Decorative footer */}
-          <p className="text-xs text-center mt-8 animate-fadeUp">
-            Stay on track with your work hours.
-          </p>
-        </div>
+      {/* Top‑right: Weekly / Rank */}
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        <RankWidget />
+      </div>
+
+      {/* Main card */}
+      <div className="relative flex mt-10 bg-[#E8DBBF] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[8px_8px_0px_#000] shadow-[#3017008e] animate-fadeIn">
+        {/* Header */}
+        <h1 className="font-jersey text-3xl text-[#252525d8] text-center mb-1">⏰ Punch Station</h1>
+        <p className="font-jersey text-xl text-[#474747d8] text-center text-parchment-foreground/70">
+          {nowTime.toLocaleString('en-US', {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true,
+          })}
+        </p>
+
+        {/* Functional Component Slot */}
+        <AttendanceIcon />
+
+        {/* Logs always visible */}
+        <AttendanceLogs logs={sampleLogs} />
       </div>
     </div>
   );

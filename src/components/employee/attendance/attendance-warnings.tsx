@@ -1,4 +1,3 @@
-// app/attendance/AttendanceWarnings.tsx
 'use client';
 
 import PixelBadge from './warning-badges';

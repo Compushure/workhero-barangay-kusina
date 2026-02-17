@@ -1,4 +1,3 @@
-// app/attendance/StatusIndicator.tsx
 'use client';
 
 interface Props {
@@ -31,7 +30,7 @@ export default function StatusIndicator({
   isOnBreak,
 }: Props) {
   return (
-    <div className="flex flex-col items-center gap-1 text-xs">
+    <div className="flex flex-col items-center gap-1 text-xl">
       {status?.isAbsent ? (
         <span className="font-semibold text-red-600 animate-pulse">
           ❌ Marked absent for today
