@@ -269,6 +269,17 @@ export default function AddEditBadgeDialog({
     }));
   };
 
+  const operatorTextMap: Record<string, string> = {
+    '=': 'is equal to',
+    '>': 'is greater than',
+    '<': 'is less than',
+    '>=': 'is greater than or equal to',
+    '<=': 'is less than or equal to',
+    '!=': 'is not equal to',
+  };
+
+  const getOperatorText = (value: string) => operatorTextMap[value] || value;
+
   const handleImageChange = (file: File | null) => {
     if (!file) return;
     if (imagePreviewUrl) {
@@ -703,7 +714,7 @@ export default function AddEditBadgeDialog({
                                     <span className="font-semibold">
                                       &quot;{taskOptions.find(t => t.id === condition.requirement_attrb_id)?.name || 'N/A'}&quot;
                                     </span>{' '}
-                                    is <span className="font-semibold">{condition.requirement_operator}</span>{' '}
+                                    {getOperatorText(condition.requirement_operator)}{' '}
                                     <span className="font-semibold">{condition.requirement_attrb_value}</span>
                                   </>
                                 )}
@@ -713,8 +724,7 @@ export default function AddEditBadgeDialog({
                                     <span className="font-semibold">
                                       {attributeOptions.find(a => a.id === condition.requirement_attrb_id)?.name || 'N/A'}
                                     </span>{' '}
-                                    is{' '}
-                                    <span className="font-semibold">{condition.requirement_operator}</span>{' '}
+                                    {getOperatorText(condition.requirement_operator)}{' '}
                                     <span className="font-semibold">{condition.requirement_attrb_value}</span>
                                   </>
                                 )}
@@ -724,7 +734,7 @@ export default function AddEditBadgeDialog({
                                     <span className="font-semibold">
                                       {attendanceOptions.find(a => a.id === condition.requirement_attrb_id)?.name || 'N/A'}
                                     </span>{' '}
-                                    is <span className="font-semibold">{condition.requirement_operator}</span>{' '}
+                                    {getOperatorText(condition.requirement_operator)}{' '}
                                     <span className="font-semibold">{condition.requirement_attrb_value}</span>
                                   </>
                                 )}

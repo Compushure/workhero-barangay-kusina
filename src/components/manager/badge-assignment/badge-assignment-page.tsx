@@ -18,6 +18,9 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { toast } from 'sonner';
 import { AwardSuspense } from '@/components/shared/award-suspense';
 import type { BadgeAssignmentUser, BadgeSummary } from '@/types/manager/badge-assignment';
+import { useQueryClient } from '@tanstack/react-query';
+import { badgeAssignmentKeys } from '@/hooks/tanstack/queries/managerBadgeAssignmentQueries';
+import BadgeAwardDebugPanel from './test/badge-award-debug-panel';
 import {
   useGetAllBadges,
   useGetBadgeAssignmentUsers,
@@ -57,6 +60,7 @@ export default function BadgeAssignmentPage() {
   const [selectedUser, setSelectedUser] = useState<BadgeAssignmentUser | null>(null);
   const [allBadgesModalOpen, setAllBadgesModalOpen] = useState(false);
   const [selectedUserForAllBadges, setSelectedUserForAllBadges] = useState<BadgeAssignmentUser | null>(null);
+  const queryClient = useQueryClient();
 
   const manualBadgesQuery = useGetManualBadges();
   const allBadgesQuery = useGetAllBadges();
@@ -171,6 +175,7 @@ export default function BadgeAssignmentPage() {
       {
         onSuccess: () => {
           setDialogOpen(false);
+          queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.debug() });
         },
       }
     );
@@ -379,6 +384,7 @@ export default function BadgeAssignmentPage() {
         user={selectedUserForAllBadges}
         badges={allBadges}
       />
+      <BadgeAwardDebugPanel />
     </main>
   );
 }
