@@ -1,63 +1,103 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import type { SupabaseClient, PostgrestError } from '@supabase/supabase-js';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
-import type { LeaderboardPlayer } from '@/types';
+import type {
+  LeaderboardPlayer,
+  UserAttributesRow,
+  UserCollectedBadgesRow,
+  LeaderboardAsOfRow,
+} from '@/types';
 import type { UserBadge } from '@/actions/employee/badges';
-
-type TimePeriod = 'weekly' | 'monthly' | 'yearly';
+import {
+  normalizeBadgeImageLink,
+  enrichBadgesWithImages,
+  sortAndLimitBadges,
+} from '@/lib/utils/badge-utils';
+import { getCutoffForPeriod, type TimePeriod } from '@/lib/utils/time-period-utils';
 
 /**
- * Normalize badge image link by checking both img_link and badge_img_link fields
+ * Helper Functions
  */
-function normalizeBadgeImageLink(badge: UserBadge): UserBadge {
-  const imgLink = badge.img_link ?? badge.badge_img_link ?? null;
-  const points = badge.points ?? badge.badge_points;
-  
-  return {
-    ...badge,
-    img_link: imgLink,
-    points,
-  };
+
+/**
+ * Fetch and enrich badges for multiple users
+ * @param userIds - Array of user IDs to fetch badges for
+ * @param supabase - Supabase client instance
+ * @param limit - Maximum number of badges to return per user (default: 3)
+ * @returns Map of user ID to their badges
+ */
+async function fetchAndEnrichBadgesForUsers(
+  userIds: string[],
+  supabase: SupabaseClient,
+  limit: number = 3
+): Promise<Map<string, UserBadge[]>> {
+  const badgesByUserId = new Map<string, UserBadge[]>();
+
+  // Fetch all badges for these users in a single query
+  const { data: badgeData, error: badgeError } = await supabase
+    .from('user_collected_badges_view')
+    .select('awarded_to_id, collected_badges')
+    .in('awarded_to_id', userIds);
+
+  if (badgeError || !badgeData) {
+    return badgesByUserId;
+  }
+
+  // Process badges for each user
+  const badgeRows = badgeData as UserCollectedBadgesRow[];
+  for (const row of badgeRows) {
+    const badges = (row.collected_badges || []) as UserBadge[];
+    
+    // Normalize all badges
+    let normalizedBadges = badges.map(normalizeBadgeImageLink);
+    
+    // Enrich with missing images
+    normalizedBadges = await enrichBadgesWithImages(normalizedBadges, supabase);
+    
+    // Sort by date and limit
+    const sortedBadges = sortAndLimitBadges(normalizedBadges, limit);
+    
+    badgesByUserId.set(row.awarded_to_id, sortedBadges);
+  }
+
+  return badgesByUserId;
 }
 
 /**
- * Compute cutoff timestamp for a given time period.
- * Returns the end of the previous completed period.
- * - weekly: end of last week (Sunday 23:59:59)
- * - monthly: end of last month
- * - yearly: end of last year
+ * Get player profile image URL from storage
+ * @param userId - User ID to get profile image for
+ * @param supabase - Supabase client instance
+ * @returns Public URL for the profile image, or null if not found
  */
-function getCutoffForPeriod(period: TimePeriod): string {
-  const now = new Date();
-  let cutoff: Date;
+function getPlayerProfileImageUrl(userId: string, supabase: SupabaseClient): string | null {
+  const { data: storageData } = supabase.storage
+    .from('employees')
+    .getPublicUrl(`${userId}/profile.png`);
 
-  switch (period) {
-    case 'weekly': {
-      // Get start of current week (Monday), then subtract 1 second to get end of previous week
-      const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Days since last Monday
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - daysToMonday);
-      startOfWeek.setHours(0, 0, 0, 0);
-      cutoff = new Date(startOfWeek.getTime() - 1000); // Subtract 1 second to get end of previous week
-      break;
-    }
-    case 'monthly': {
-      // Get first day of current month, then subtract 1 second to get end of previous month
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      cutoff = new Date(firstDayOfMonth.getTime() - 1000);
-      break;
-    }
-    case 'yearly': {
-      // Get first day of current year, then subtract 1 second to get end of previous year
-      const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
-      cutoff = new Date(firstDayOfYear.getTime() - 1000);
-      break;
-    }
-  }
+  return storageData?.publicUrl ?? null;
+}
 
-  return cutoff.toISOString();
+/**
+ * Map database rows to LeaderboardPlayer objects
+ * @param data - Array of user attribute rows from database
+ * @param badgesByUserId - Map of user ID to their badges
+ * @param supabase - Supabase client instance
+ * @returns Array of LeaderboardPlayer objects
+ */
+function mapToLeaderboardPlayers(
+  data: UserAttributesRow[] | LeaderboardAsOfRow[],
+  badgesByUserId: Map<string, UserBadge[]>,
+  supabase: SupabaseClient
+): LeaderboardPlayer[] {
+  return data.map((user) => ({
+    id: user.user_id,
+    name: user.user_name || 'Unknown User',
+    performanceScore: Number(user.performance_score ?? 0),
+    image: getPlayerProfileImageUrl(user.user_id, supabase),
+    badges: badgesByUserId.get(user.user_id) || [],
+  }));
 }
 
 /**
@@ -75,14 +115,15 @@ export async function getTopPlayers(
   return safeAction(async () => {
     const supabase = await createClient();
 
-    let data: any[] | null;
-    let error: any;
+    // Fetch leaderboard data based on time period
+    let data: UserAttributesRow[] | LeaderboardAsOfRow[] | null;
+    let error: PostgrestError | null;
 
     if (timePeriod && timePeriod !== 'current') {
       // Use RPC function for period-based snapshot
       const cutoff = getCutoffForPeriod(timePeriod);
       const result = await supabase.rpc('get_leaderboard_as_of', { p_cutoff: cutoff });
-      data = result.data;
+      data = result.data as LeaderboardAsOfRow[] | null;
       error = result.error;
     } else {
       // Use current view for all-time cumulative (default or 'current')
@@ -92,7 +133,7 @@ export async function getTopPlayers(
         .eq('role_type', 'regular')
         .order('performance_score', { ascending: false })
         .limit(10);
-      data = result.data;
+      data = result.data as UserAttributesRow[] | null;
       error = result.error;
     }
 
@@ -104,101 +145,12 @@ export async function getTopPlayers(
       return [];
     }
 
-    // Extract all user IDs for batch badge fetching
+    // Fetch and enrich badges for all users
     const userIds = data.map((user) => user.user_id);
+    const badgesByUserId = await fetchAndEnrichBadgesForUsers(userIds, supabase);
 
-    // Fetch all badges for these users in a single query
-    const { data: badgeData, error: badgeError } = await supabase
-      .from('user_collected_badges_view')
-      .select('awarded_to_id, collected_badges')
-      .in('awarded_to_id', userIds);
-
-    // Create a map of user_id -> badges for quick lookup
-    const badgesByUserId = new Map<string, UserBadge[]>();
-    if (!badgeError && badgeData) {
-      // First, normalize all badges and collect them
-      let allBadges: UserBadge[] = [];
-      const tempBadgesByUserId = new Map<string, UserBadge[]>();
-      
-      for (const row of badgeData) {
-        const badges = (row.collected_badges || []) as UserBadge[];
-        const normalizedBadges = badges.map(normalizeBadgeImageLink);
-        tempBadgesByUserId.set(row.awarded_to_id, normalizedBadges);
-        allBadges = allBadges.concat(normalizedBadges);
-      }
-
-      // Find badges that still don't have images after normalization
-      const missingImageIds = allBadges
-        .filter((badge) => !badge.img_link && badge.badge_id)
-        .map((badge) => badge.badge_id);
-
-      // If there are badges with missing images, fetch them from Badges table
-      if (missingImageIds.length > 0) {
-        const { data: badgeRows, error: badgeImageError } = await supabase
-          .from('Badges')
-          .select('id, img_link')
-          .in('id', missingImageIds);
-
-        if (!badgeImageError && badgeRows) {
-          const badgeImageMap = new Map(
-            badgeRows.map((row: any) => [row.id, row.img_link ?? null])
-          );
-
-          // Update badges with fetched images
-          for (const [userId, badges] of tempBadgesByUserId.entries()) {
-            const updatedBadges = badges.map((badge) => {
-              if (badge.img_link) return badge;
-              return {
-                ...badge,
-                img_link: badgeImageMap.get(badge.badge_id) ?? null,
-              };
-            });
-            
-            // Sort by date_acquired descending (most recent first) and limit to 3
-            const sortedBadges = updatedBadges
-              .sort(
-                (a, b) => new Date(b.date_acquired).getTime() - new Date(a.date_acquired).getTime()
-              )
-              .slice(0, 3);
-            badgesByUserId.set(userId, sortedBadges);
-          }
-        } else {
-          // If badge image fetch failed, just use the normalized badges
-          for (const [userId, badges] of tempBadgesByUserId.entries()) {
-            const sortedBadges = badges
-              .sort(
-                (a, b) => new Date(b.date_acquired).getTime() - new Date(a.date_acquired).getTime()
-              )
-              .slice(0, 3);
-            badgesByUserId.set(userId, sortedBadges);
-          }
-        }
-      } else {
-        // No missing images, just sort and use normalized badges
-        for (const [userId, badges] of tempBadgesByUserId.entries()) {
-          const sortedBadges = badges
-            .sort(
-              (a, b) => new Date(b.date_acquired).getTime() - new Date(a.date_acquired).getTime()
-            )
-            .slice(0, 3);
-          badgesByUserId.set(userId, sortedBadges);
-        }
-      }
-    }
-
-    const players: LeaderboardPlayer[] = data.map((user) => {
-      const { data: storageData } = supabase.storage
-        .from('employees')
-        .getPublicUrl(`${user.user_id}/profile.png`);
-
-      return {
-        id: user.user_id,
-        name: user.user_name || 'Unknown User',
-        performanceScore: Number(user.performance_score ?? 0),
-        image: storageData?.publicUrl ?? null,
-        badges: badgesByUserId.get(user.user_id) || [],
-      };
-    });
+    // Map database rows to LeaderboardPlayer objects
+    const players = mapToLeaderboardPlayers(data, badgesByUserId, supabase);
 
     return players;
   });
