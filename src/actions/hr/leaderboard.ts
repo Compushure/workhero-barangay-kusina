@@ -154,27 +154,33 @@ export async function getTopPlayers(
               };
             });
             
-            // Sort by date_acquired descending (most recent first)
-            const sortedBadges = updatedBadges.sort(
-              (a, b) => new Date(b.date_acquired).getTime() - new Date(a.date_acquired).getTime()
-            );
+            // Sort by date_acquired descending (most recent first) and limit to 3
+            const sortedBadges = updatedBadges
+              .sort(
+                (a, b) => new Date(b.date_acquired).getTime() - new Date(a.date_acquired).getTime()
+              )
+              .slice(0, 3);
             badgesByUserId.set(userId, sortedBadges);
           }
         } else {
           // If badge image fetch failed, just use the normalized badges
           for (const [userId, badges] of tempBadgesByUserId.entries()) {
-            const sortedBadges = badges.sort(
-              (a, b) => new Date(b.date_acquired).getTime() - new Date(a.date_acquired).getTime()
-            );
+            const sortedBadges = badges
+              .sort(
+                (a, b) => new Date(b.date_acquired).getTime() - new Date(a.date_acquired).getTime()
+              )
+              .slice(0, 3);
             badgesByUserId.set(userId, sortedBadges);
           }
         }
       } else {
         // No missing images, just sort and use normalized badges
         for (const [userId, badges] of tempBadgesByUserId.entries()) {
-          const sortedBadges = badges.sort(
-            (a, b) => new Date(b.date_acquired).getTime() - new Date(a.date_acquired).getTime()
-          );
+          const sortedBadges = badges
+            .sort(
+              (a, b) => new Date(b.date_acquired).getTime() - new Date(a.date_acquired).getTime()
+            )
+            .slice(0, 3);
           badgesByUserId.set(userId, sortedBadges);
         }
       }
