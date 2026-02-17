@@ -4,10 +4,11 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { BadgeAssignmentUser, BadgeSummary } from '@/types/manager/badge-assignment';
+import type { BadgeAssignmentUser, BadgeSummary, BadgeAwardDebugEntry } from '@/types/manager/badge-assignment';
 import {
   handleFetchAllBadges,
   handleFetchBadgeAssignmentUsers,
+  handleFetchBadgeAwardDebugEntries,
   handleFetchManualBadges,
 } from '@/action-handlers/manager/badge-assignment';
 
@@ -17,6 +18,7 @@ export const badgeAssignmentKeys = {
   manualBadges: () => [...badgeAssignmentKeys.badges(), 'manual'] as const,
   allBadges: () => [...badgeAssignmentKeys.badges(), 'all'] as const,
   users: () => [...badgeAssignmentKeys.all, 'users'] as const,
+  debug: () => [...badgeAssignmentKeys.all, 'debug'] as const,
 };
 
 export function useGetManualBadges(
@@ -59,4 +61,18 @@ export function useGetBadgeAssignmentUsers(
     retry: 2,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<BadgeAssignmentUser[], Error>;
+}
+
+export function useGetBadgeAwardDebugEntries(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<BadgeAwardDebugEntry[], Error> {
+  return useQuery({
+    queryKey: badgeAssignmentKeys.debug(),
+    queryFn: async () => handleFetchBadgeAwardDebugEntries(),
+    enabled: queryOptions.enabled !== false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<BadgeAwardDebugEntry[], Error>;
 }
