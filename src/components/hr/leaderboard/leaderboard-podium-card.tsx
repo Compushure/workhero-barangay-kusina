@@ -3,6 +3,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { Trophy } from 'lucide-react';
+import type { UserBadge } from '@/actions/employee/badges';
 
 interface Player {
   name: string;
@@ -10,6 +12,7 @@ interface Player {
   image?: string | null;
   id?: string;
   rank: number;
+  badges: UserBadge[];
 }
 
 /**
@@ -35,6 +38,11 @@ export default function LeaderboardPodiumCard({ player }: { player: Player }) {
 
   // Position #1 is larger
   const isFirstPlace = player.rank === 1;
+
+  // Show latest 4 badges + count indicator
+  const maxBadgesToShow = 4;
+  const visibleBadges = player.badges?.slice(0, maxBadgesToShow) || [];
+  const remainingBadges = Math.max(0, (player.badges?.length || 0) - maxBadgesToShow);
 
   return (
     <div
@@ -92,6 +100,72 @@ export default function LeaderboardPodiumCard({ player }: { player: Player }) {
             {player.name}
           </h2>
         </div>
+
+        {/* Badges Section */}
+        {player.badges && player.badges.length > 0 && (
+          <div className="mb-3 sm:mb-4 w-full">
+            <div className="flex gap-1.5 sm:gap-2 justify-center flex-wrap">
+              {visibleBadges.map((badge) => (
+                <Tooltip key={badge.userbadge_id}>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={cn(
+                        'relative rounded-full overflow-hidden border-2 border-[#730202]/20 hover:border-[#730202] transition-colors cursor-help',
+                        isFirstPlace ? 'h-10 w-10 sm:h-12 sm:w-12' : 'h-8 w-8 sm:h-10 sm:w-10'
+                      )}
+                    >
+                      {badge.img_link ? (
+                        <img
+                          src={badge.img_link}
+                          alt={badge.badge_name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-[#730202]/10 flex items-center justify-center">
+                          <Trophy
+                            className={cn(
+                              'text-[#730202]',
+                              isFirstPlace ? 'h-5 w-5 sm:h-6 sm:w-6' : 'h-4 w-4 sm:h-5 sm:w-5'
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={8} className="bg-black/80 text-white">
+                    <div className="space-y-0.5">
+                      <p className="font-semibold text-xs">{badge.badge_name}</p>
+                      <p className="text-gray-300 text-[10px]">
+                        {new Date(badge.date_acquired).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+              
+              {/* "+X more" indicator */}
+              {remainingBadges > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={cn(
+                        'relative rounded-full overflow-hidden border-2 border-[#730202]/40 bg-[#730202]/5 flex items-center justify-center cursor-help',
+                        isFirstPlace ? 'h-10 w-10 sm:h-12 sm:w-12' : 'h-8 w-8 sm:h-10 sm:w-10'
+                      )}
+                    >
+                      <span className="text-[#730202] font-bold text-xs">
+                        +{remainingBadges}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={8} className="bg-black/80 text-white">
+                    <p className="text-xs">{remainingBadges} more badge{remainingBadges > 1 ? 's' : ''}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Performance Score Section */}
         <Tooltip>

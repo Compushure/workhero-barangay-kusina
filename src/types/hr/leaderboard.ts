@@ -4,6 +4,8 @@
  * Types related to employee leaderboards and rankings
  */
 
+import type { UserBadge } from '@/actions/employee/badges';
+
 /**
  * Leaderboard player interface
  * Represents a player on the leaderboard with ranking info
@@ -13,6 +15,7 @@ export interface LeaderboardPlayer {
   name: string;
   performanceScore: number;
   image: string | null;
+  badges: UserBadge[];
 }
 
 /**

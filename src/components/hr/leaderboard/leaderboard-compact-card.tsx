@@ -2,6 +2,8 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Trophy } from 'lucide-react';
+import type { UserBadge } from '@/actions/employee/badges';
 
 interface Player {
   name: string;
@@ -9,6 +11,7 @@ interface Player {
   image?: string | null;
   id?: string;
   rank: number;
+  badges: UserBadge[];
 }
 
 /**
@@ -29,6 +32,11 @@ export default function LeaderboardCompactCard({ player }: { player: Player }) {
     if (rank === 3) return '3rd';
     return `${rank}th`;
   };
+
+  // Show latest 4 badges + count indicator
+  const maxBadgesToShow = 4;
+  const visibleBadges = player.badges?.slice(0, maxBadgesToShow) || [];
+  const remainingBadges = Math.max(0, (player.badges?.length || 0) - maxBadgesToShow);
 
   return (
     <div className="relative shrink-0 w-40 sm:w-48 bg-card rounded-2xl overflow-visible shadow-sm border border-accent transition-all hover:shadow-md">
@@ -56,6 +64,57 @@ export default function LeaderboardCompactCard({ player }: { player: Player }) {
             {player.name}
           </h3>
         </div>
+
+        {/* Badges Section */}
+        {player.badges && player.badges.length > 0 && (
+          <div className="mb-2 w-full">
+            <div className="flex gap-1 justify-center flex-wrap">
+              {visibleBadges.map((badge) => (
+                <Tooltip key={badge.userbadge_id}>
+                  <TooltipTrigger asChild>
+                    <div className="relative h-7 w-7 sm:h-8 sm:w-8 rounded-full overflow-hidden border-2 border-[#730202]/20 hover:border-[#730202] transition-colors cursor-help">
+                      {badge.img_link ? (
+                        <img
+                          src={badge.img_link}
+                          alt={badge.badge_name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-[#730202]/10 flex items-center justify-center">
+                          <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#730202]" />
+                        </div>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={8} className="bg-black/80 text-white">
+                    <div className="space-y-0.5">
+                      <p className="font-semibold text-xs">{badge.badge_name}</p>
+                      <p className="text-gray-300 text-[10px]">
+                        {new Date(badge.date_acquired).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+              
+              {/* "+X more" indicator */}
+              {remainingBadges > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="relative h-7 w-7 sm:h-8 sm:w-8 rounded-full overflow-hidden border-2 border-[#730202]/40 bg-[#730202]/5 flex items-center justify-center cursor-help">
+                      <span className="text-[#730202] font-bold text-[10px]">
+                        +{remainingBadges}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={8} className="bg-black/80 text-white">
+                    <p className="text-xs">{remainingBadges} more badge{remainingBadges > 1 ? 's' : ''}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Performance Score Section */}
         <Tooltip>
