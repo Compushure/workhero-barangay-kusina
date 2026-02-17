@@ -2,11 +2,12 @@
 
 import AttendanceIcon from './attendance';
 import { useState } from 'react';
-import LevelIcon from '../dashboard/level-widget';
 import { RankWidget } from '../dashboard/rank-panel';
-import { ProfilePic } from '../dashboard/user-profile';
 import AttendanceLogs from './attendance-logs';
 import type { AttendanceLog } from './attendance-logs';
+import XPProgressAndPoints from './xp-points';
+import ProfileAndLevel from './profile-level';
+import { LogOutBtn } from './logout';
 
 export default function AttendanceDesign() {
   const [nowTime] = useState<Date>(new Date());
@@ -34,14 +35,19 @@ export default function AttendanceDesign() {
 
       {/* Top‑left: Profile + Level */}
       <div className="absolute top-4 left-4 flex flex-row items-center gap-6">
-        <ProfilePic />
-        <LevelIcon />
+        <ProfileAndLevel />
+        <XPProgressAndPoints />
       </div>
 
       {/* Top‑right: Weekly / Rank */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
         <RankWidget />
       </div>
+
+      {/* Bottom‑left: Logout door icon */}
+      {/* <div className="absolute bottom-50 left-4">
+        <LogOutBtn />
+      </div> */}
 
       {/* Main card */}
       <div className="relative flex mt-10 bg-[#E8DBBF] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[8px_8px_0px_#000] shadow-[#3017008e] animate-fadeIn">
