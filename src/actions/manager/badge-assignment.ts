@@ -143,16 +143,31 @@ export async function assignManualBadgeToUser(
 
   // Award points to the user if badge has points
   if (badgeRow.points && badgeRow.points > 0) {
-    const { error: updateError } = await supabaseAdmin
-      .from('User')
-      .update(undefined) // Don't update anything directly, let triggers handle it
-      .eq('id', userId);
+    const { error: pointsError } = await supabaseAdmin.rpc('increment_points_for_user', {
+      target_user_id: userId,
+      amount: badgeRow.points,
+    });
 
-    // Points should be updated by the trigger on UserBadges insert
-    // But we can verify the update completed
-    if (updateError) {
-      console.error('Warning: Could not verify points update, but badge was awarded:', updateError);
-      // Still return success since the badge was awarded
+    if (pointsError) {
+      const { data: userRow, error: userFetchError } = await supabaseAdmin
+        .from('User')
+        .select('points')
+        .eq('id', userId)
+        .single();
+
+      if (userFetchError || !userRow) {
+        return { error: 'Failed to add points after awarding badge' };
+      }
+
+      const currentPoints = (userRow as { points: number | null }).points ?? 0;
+      const { error: manualUpdateError } = await supabaseAdmin
+        .from('User')
+        .update({ points: currentPoints + badgeRow.points })
+        .eq('id', userId);
+
+      if (manualUpdateError) {
+        return { error: 'Failed to add points after awarding badge' };
+      }
     }
   }
 

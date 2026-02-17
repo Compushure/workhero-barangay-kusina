@@ -231,13 +231,24 @@ export default function BadgeTable({
 
                                 const getConditionText = () => {
                                   const specificName = getSpecificName();
+                                  const operatorTextMap: Record<string, string> = {
+                                    '=': 'is equal to',
+                                    '>': 'is greater than',
+                                    '<': 'is less than',
+                                    '>=': 'is greater than or equal to',
+                                    '<=': 'is less than or equal to',
+                                    '!=': 'is not equal to',
+                                  };
+                                  const operatorText =
+                                    operatorTextMap[condition.requirement_operator] ||
+                                    condition.requirement_operator;
 
                                   if (condition.requirement_type === 'task') {
-                                    return `When the Task '${specificName}' is ${condition.requirement_operator} ${condition.requirement_attrb_value}`;
+                                    return `When the Task '${specificName}' ${operatorText} ${condition.requirement_attrb_value}`;
                                   } else if (condition.requirement_type === 'attribute') {
-                                    return `When User ${specificName} attribute is ${condition.requirement_operator} ${condition.requirement_attrb_value}`;
+                                    return `When User ${specificName} attribute ${operatorText} ${condition.requirement_attrb_value}`;
                                   } else if (condition.requirement_type === 'attendance') {
-                                    return `When Attendance Value ${specificName} is ${condition.requirement_operator} ${condition.requirement_attrb_value}`;
+                                    return `When Attendance Value ${specificName} ${operatorText} ${condition.requirement_attrb_value}`;
                                   }
                                   return 'Condition';
                                 };
