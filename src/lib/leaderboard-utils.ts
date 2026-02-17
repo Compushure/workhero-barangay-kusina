@@ -49,3 +49,83 @@ export function getEmptyMessage(period: Period, error?: string | null): string {
     PERIOD_CONFIG[period].emptyMessage || error || 'No leaderboard data available at the moment.'
   );
 }
+
+/**
+ * Calculate the next release date for each period type
+ */
+export function getNextReleaseDate(period: Period): Date | null {
+  if (period === 'current') return null;
+
+  const now = new Date();
+  let nextDate: Date;
+
+  switch (period) {
+    case 'weekly':
+      // Next Monday
+      nextDate = new Date(now);
+      const dayOfWeek = nextDate.getDay();
+      const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+      nextDate.setDate(nextDate.getDate() + daysUntilMonday);
+      nextDate.setHours(0, 0, 0, 0);
+      break;
+
+    case 'monthly':
+      // First day of next month
+      nextDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      nextDate.setHours(0, 0, 0, 0);
+      break;
+
+    case 'yearly':
+      // January 1st of next year
+      nextDate = new Date(now.getFullYear() + 1, 0, 1);
+      nextDate.setHours(0, 0, 0, 0);
+      break;
+
+    default:
+      return null;
+  }
+
+  return nextDate;
+}
+
+/**
+ * Format a date for display in the empty state
+ */
+export function formatNextReleaseDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+/**
+ * Get schedule information for HR admin view
+ */
+export function getScheduleInfo(period: Period): {
+  frequency: string;
+  nextUpdate: string | null;
+} | null {
+  const nextDate = getNextReleaseDate(period);
+
+  switch (period) {
+    case 'weekly':
+      return {
+        frequency: 'Every Monday',
+        nextUpdate: nextDate ? formatNextReleaseDate(nextDate) : null,
+      };
+    case 'monthly':
+      return {
+        frequency: '1st of each month',
+        nextUpdate: nextDate ? formatNextReleaseDate(nextDate) : null,
+      };
+    case 'yearly':
+      return {
+        frequency: 'January 1st',
+        nextUpdate: nextDate ? formatNextReleaseDate(nextDate) : null,
+      };
+    default:
+      return null;
+  }
+}

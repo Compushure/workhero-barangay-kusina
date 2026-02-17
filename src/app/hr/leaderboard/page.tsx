@@ -4,6 +4,7 @@ import { MarketSuspense } from '@/components/shared/market-suspense';
 import HallOfFameHeader from '@/components/hr/leaderboard/hall-of-fame-header';
 import PodiumGrid from '@/components/hr/leaderboard/podium-grid';
 import RemainingPlayersGrid from '@/components/hr/leaderboard/remaining-players-grid';
+import EmptyStateAdminCard from '@/components/hr/leaderboard/empty-state-admin-card';
 import {
   PERIOD_CONFIG,
   getAdjacentPeriod,
@@ -26,6 +27,8 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
 
   // Handle error or empty data
   if (result.error || !result.data || result.data.length === 0) {
+    const emptyMessage = getEmptyMessage(period, result.error);
+
     return (
       <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
         <div className="p-4 sm:p-8 bg-[#F3F3F3] min-h-screen">
@@ -36,9 +39,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
               nextPeriod={nextPeriod}
             />
 
-            <div className="text-center py-8 sm:py-12">
-              <p className="text-gray-500 text-lg">{getEmptyMessage(period, result.error)}</p>
-            </div>
+            <EmptyStateAdminCard period={period} message={emptyMessage} />
           </div>
         </div>
       </Suspense>
