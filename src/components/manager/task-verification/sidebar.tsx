@@ -2,7 +2,7 @@
 
 import { LogOutBtn } from '@/components/sidebar/logout-btn';
 import { ProfilePic } from '@/components/sidebar/profile-pic';
-import { FileText, CheckCircle, ChevronLeft, ChevronRight, SquarePen } from 'lucide-react';
+import { FileText, CheckCircle, ChevronLeft, ChevronRight, SquarePen, Award, Medal } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import Link from 'next/link';
@@ -72,6 +72,18 @@ export function Sidebar({
       icon: <SquarePen size={20} className="shrink-0" />,
       href: '/manager/dashboard/task-editor',
     },
+    {
+      key: 'badge-assignment',
+      label: 'Badge Assignment',
+      icon: <Medal size={20} className="shrink-0" />,
+      href: '/manager/dashboard/badge-assignment',
+    },
+    {
+      key: 'badge-editor',
+      label: 'Badge Editor',
+      icon: <Award size={20} className="shrink-0" />,
+      href: '/manager/dashboard/badge-editor',
+    },
   ],
 }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -121,7 +133,13 @@ export function Sidebar({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-3 overflow-hidden">
+      <nav
+        className={`flex-1 px-4 py-6 space-y-3 ${
+          isCollapsed
+            ? 'overflow-hidden'
+            : 'overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
+        }`}
+      >
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const isNavigatingItem = pendingHref === item.href;
