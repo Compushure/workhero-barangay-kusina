@@ -3,26 +3,39 @@
 import AttendanceIcon from './attendance';
 import { useState } from 'react';
 import { RankWidget } from '../dashboard/rank-panel';
-import AttendanceLogs from './attendance-logs';
-import type { AttendanceLog } from './attendance-logs';
+import AttendanceLogs, { AttendanceLog } from './attendance-logs';
 import XPProgressAndPoints from './xp-points';
 import ProfileAndLevel from './profile-level';
-import { LogOutBtn } from './logout';
+import DashboardRedirectButton from './kitchen-redirection';
 
 export default function AttendanceDesign() {
-  const [nowTime] = useState<Date>(new Date());
+  const [logs, setLogs] = useState<AttendanceLog[]>([]);
+  const [status, setStatus] = useState<any>({});
 
-  const sampleLogs: AttendanceLog[] = [
-    { action: 'timeout', time: new Date().toISOString(), note: 'Working undertime!' },
-    { action: 'endbreak', time: new Date().toISOString() },
-    { action: 'startbreak', time: new Date().toISOString() },
-    { action: 'timein', time: new Date().toISOString(), note: 'Late punch in!' },
-  ];
+  // Helper to add a log entry with current timestamp
+  const addLog = (action: AttendanceLog['action'], note?: string) => {
+    setLogs((prev) => [
+      ...prev,
+      { action, time: new Date().toISOString(), note },
+    ]);
+
+    // Update status flags based on action
+    if (action === 'timein') {
+      setStatus({ hasTimedIn: true, isOnBreak: false, hasTimedOut: false });
+    }
+    if (action === 'startbreak') {
+      setStatus((prev: any) => ({ ...prev, isOnBreak: true }));
+    }
+    if (action === 'endbreak') {
+      setStatus((prev: any) => ({ ...prev, isOnBreak: false }));
+    }
+    if (action === 'timeout') {
+      setStatus({ hasTimedIn: true, isOnBreak: false, hasTimedOut: true });
+    }
+  };
 
   return (
-    <div
-      className={`flex font-jersey tracking-widest min-h-screen items-center justify-center bg-cover bg-center pixelated relative`}
-    >
+    <div className="flex font-jersey tracking-widest min-h-screen items-center justify-center bg-cover bg-center pixelated relative">
       {/* Background */}
       <div className="absolute inset-0 -z-10">
         <img
@@ -44,31 +57,32 @@ export default function AttendanceDesign() {
         <RankWidget />
       </div>
 
-      {/* Bottom‑left: Logout door icon */}
-      {/* <div className="absolute bottom-50 left-4">
-        <LogOutBtn />
-      </div> */}
+      {/* Center column: main card + dashboard button */}
+      <div className="flex flex-col items-center gap-4 mt-10">
+        {/* Main card */}
+        <div className="relative flex bg-[#E8DBBF] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[8px_8px_0px_#000] shadow-[#3017008e] animate-fadeIn">
+          {/* Header */}
+          <h1 className="font-jersey text-3xl text-[#252525d8] text-center mb-1">⏰ Punch Station</h1>
+          <p className="font-jersey text-xl text-[#474747d8] text-center text-parchment-foreground/70">
+            {new Date().toLocaleString('en-US', {
+              weekday: 'long',
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: true,
+            })}
+          </p>
 
-      {/* Main card */}
-      <div className="relative flex mt-10 bg-[#E8DBBF] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[8px_8px_0px_#000] shadow-[#3017008e] animate-fadeIn">
-        {/* Header */}
-        <h1 className="font-jersey text-3xl text-[#252525d8] text-center mb-1">⏰ Punch Station</h1>
-        <p className="font-jersey text-xl text-[#474747d8] text-center text-parchment-foreground/70">
-          {nowTime.toLocaleString('en-US', {
-            weekday: 'long',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: true,
-          })}
-        </p>
+          {/* Functional Component Slot */}
+          <AttendanceIcon config={{}} addLog={addLog} />
 
-        {/* Functional Component Slot */}
-        <AttendanceIcon />
+          {/* Logs always visible */}
+          <AttendanceLogs logs={logs} />
+        </div>
 
-        {/* Logs always visible */}
-        <AttendanceLogs logs={sampleLogs} />
+        {/* Dashboard Redirect Button directly under the card */}
+        <DashboardRedirectButton status={status} />
       </div>
     </div>
   );

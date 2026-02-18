@@ -10,8 +10,6 @@ import {
   useEndBreak,
 } from '@/hooks/tanstack';
 import { attendanceConfig } from '@/lib/attendance-config';
-import { useAttendanceTestStore } from '@/store/attendanceTestStore';
-import AttendanceTestPanel from '@/components/attendance/test/AttendanceTestPanel';
 
 import {
   parseTimeOnDate,
@@ -23,37 +21,25 @@ import {
 
 import StatusIndicator from './status-indicator';
 import AttendanceButtons from './attendance-buttons';
-import AttendanceWarnings from './attendance-warnings';
+import AttendanceWarnings from './attendance-warnings'; // ✅ restored import
+import type { AttendanceLog } from './attendance-logs';
 
 interface AttendanceWidgetProps {
   config?: Partial<AttendanceConfig>;
+  addLog: (action: AttendanceLog['action'], note?: string) => void;
 }
 
-export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
-  const { configOverrides, addLog } = useAttendanceTestStore();
-
+export default function AttendanceIcon({ config, addLog }: AttendanceWidgetProps) {
   const mergedConfig: AttendanceConfig = useMemo(
     () => ({
-      timeInAt: configOverrides?.timeInAt ?? config?.timeInAt ?? attendanceConfig.timeInAt,
-      timeOutAt: configOverrides?.timeOutAt ?? config?.timeOutAt ?? attendanceConfig.timeOutAt,
-      lateAfter:
-        configOverrides?.lateAfter ??
-        config?.lateAfter ??
-        config?.timeInAt ??
-        attendanceConfig.lateAfter,
-      overtimeAfter:
-        configOverrides?.overtimeAfter ??
-        config?.overtimeAfter ??
-        config?.timeOutAt ??
-        attendanceConfig.overtimeAfter,
-      autoTimeoutAt:
-        configOverrides?.autoTimeoutAt ?? config?.autoTimeoutAt ?? attendanceConfig.autoTimeoutAt,
-      breaktime_duration:
-        configOverrides?.breaktime_duration ??
-        config?.breaktime_duration ??
-        attendanceConfig.breaktime_duration,
+      timeInAt: config?.timeInAt ?? attendanceConfig.timeInAt,
+      timeOutAt: config?.timeOutAt ?? attendanceConfig.timeOutAt,
+      lateAfter: config?.lateAfter ?? attendanceConfig.lateAfter,
+      overtimeAfter: config?.overtimeAfter ?? attendanceConfig.overtimeAfter,
+      autoTimeoutAt: config?.autoTimeoutAt ?? attendanceConfig.autoTimeoutAt,
+      breaktime_duration: config?.breaktime_duration ?? attendanceConfig.breaktime_duration,
     }),
-    [config, configOverrides]
+    [config]
   );
 
   const { data: status } = useGetTodayAttendanceStatus(mergedConfig);
@@ -117,7 +103,6 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
   const lateAfter = parseTimeOnDate(nowTime, mergedConfig.lateAfter);
   const timeOutAt = parseTimeOnDate(nowTime, mergedConfig.timeOutAt);
   const overtimeAfter = parseTimeOnDate(nowTime, mergedConfig.overtimeAfter);
-  const autoTimeoutAt = parseTimeOnDate(nowTime, mergedConfig.autoTimeoutAt);
 
   const isCurrentlyOverBreak = useMemo(() => {
     if (!isOnBreak || !status?.breakStartTime) return false;
@@ -130,12 +115,6 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
     if (status?.hasTimedIn || status?.isAbsent) return false;
     return nowTime > lateAfter && canTimeIn;
   }, [nowTime, lateAfter, status?.hasTimedIn, status?.isAbsent, canTimeIn]);
-
-  const isApproachingAbsent = useMemo(() => {
-    if (status?.hasTimedIn || status?.isAbsent) return false;
-    const timeUntilAbsent = autoTimeoutAt.getTime() - nowTime.getTime();
-    return timeUntilAbsent > 0 && timeUntilAbsent <= 30 * 60 * 1000;
-  }, [nowTime, autoTimeoutAt, status?.hasTimedIn, status?.isAbsent]);
 
   const warningText = canTimeOut
     ? nowTime < timeOutAt
@@ -153,40 +132,35 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
 
   const breakWarningText = isOnBreak
     ? isCurrentlyOverBreak
-      ? `⚠️ Break exceeded by ${breakTimer}. This may reduce your on-job hours.`
+      ? `⚠️ Break exceeded by ${breakTimer}.`
       : `Break time remaining: ${breakTimer}`
-    : status?.isOverBreaktime
-      ? 'Break exceeded recommended duration. Your on-job hours may be affected.'
-      : undefined;
+    : undefined;
 
-  // Updated handlers to accept action type
   const handleClick = (action: 'timein' | 'timeout') => {
     if (action === 'timein' && canTimeIn) {
       setIsTimeInLoading(true);
-      addLog({ type: 'action', category: 'timein', message: 'Attempting to time in' });
+      addLog('timein');
       timeInMutation.mutate(undefined, { onSettled: () => setIsTimeInLoading(false) });
     }
     if (action === 'timeout' && canTimeOut) {
-      addLog({ type: 'action', category: 'timeout', message: 'Attempting to time out' });
+      addLog('timeout', warningText);
       timeOutMutation.mutate(status?.logId);
     }
   };
 
   const handleBreakClick = (action: 'startbreak' | 'endbreak') => {
     if (action === 'startbreak' && status?.canStartBreak) {
-      addLog({ type: 'action', category: 'break', message: 'Starting break' });
+      addLog('startbreak');
       startBreakMutation.mutate();
     }
     if (action === 'endbreak' && status?.canEndBreak) {
-      addLog({ type: 'action', category: 'break', message: 'Ending break' });
+      addLog('endbreak');
       endBreakMutation.mutate(status?.logId);
     }
   };
 
   return (
-    <div
-      className="flex flex-col gap-4"
-    >
+    <div className="flex flex-col gap-4">
       <StatusIndicator
         status={status}
         nowTime={nowTime}
@@ -195,19 +169,11 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
         timeRemaining={timeRemaining}
         breakTimer={breakTimer}
         isCurrentlyLate={isCurrentlyLate}
-        isApproachingAbsent={isApproachingAbsent}
+        isApproachingAbsent={false}
         isCurrentlyOverBreak={isCurrentlyOverBreak}
         lateAfter={lateAfter}
         hasTimedOut={hasTimedOut}
         isOnBreak={isOnBreak}
-      />
-
-      <AttendanceButtons
-        status={status}
-        isBusy={isBusy}
-        isTimeInLoading={isTimeInLoading}
-        handleClick={handleClick}
-        handleBreakClick={handleBreakClick}
       />
 
       {/* <AttendanceWarnings
@@ -215,7 +181,7 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
         warningText={warningText}
         breakWarningText={breakWarningText}
         isCurrentlyLate={isCurrentlyLate}
-        isApproachingAbsent={isApproachingAbsent}
+        isApproachingAbsent={false}
         lateTimer={lateTimer}
         absentTimer={absentTimer}
         nowTime={nowTime}
@@ -224,8 +190,13 @@ export default function AttendanceIcon({ config }: AttendanceWidgetProps) {
         hasTimedOut={hasTimedOut}
       /> */}
 
-      {/* Developer Test Panel */}
-      <AttendanceTestPanel status={status} />
+      <AttendanceButtons
+        status={status}
+        isBusy={isBusy}
+        isTimeInLoading={isTimeInLoading}
+        handleClick={handleClick}
+        handleBreakClick={handleBreakClick}
+      />
     </div>
   );
 }
