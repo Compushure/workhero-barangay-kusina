@@ -168,24 +168,17 @@ export default function LeaderboardPodiumCard({ player }: { player: Player }) {
         )}
 
         {/* Performance Score Section */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="w-full border-t border-orange-200 pt-2 sm:pt-3 cursor-help">
-              <div
-                className={cn(
-                  'font-bold text-[#6D1616]',
-                  isFirstPlace ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'
-                )}
-              >
-                {player.performanceScore}
-              </div>
-              <p className="text-[#6D1616] font-medium mt-1 text-xs sm:text-sm">Performance Score</p>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="top" sideOffset={8} className="max-w-xs">
-            Performance Score = number of approved tasks × total points earned (lifetime).
-          </TooltipContent>
-        </Tooltip>
+        <div className="w-full border-t border-orange-200 pt-2 sm:pt-3">
+          <div
+            className={cn(
+              'font-bold text-[#6D1616]',
+              isFirstPlace ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'
+            )}
+          >
+            {player.performanceScore}
+          </div>
+          <p className="text-[#6D1616] font-medium mt-1 text-xs sm:text-sm">Performance Score</p>
+        </div>
       </div>
     </div>
   );

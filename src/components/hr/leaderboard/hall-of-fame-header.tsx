@@ -71,7 +71,7 @@ export default function HallOfFameHeader({
           </TooltipTrigger>
           <TooltipContent side="bottom" className="max-w-xs">
             <p className="text-xs">
-              Performance Score is calculated from completed and approved tasks.
+              Performance Score is calculated from number of completed and approved tasks × total points earned (lifetime).
               Complete more tasks to climb the rankings!
             </p>
           </TooltipContent>

@@ -117,17 +117,10 @@ export default function LeaderboardCompactCard({ player }: { player: Player }) {
         )}
 
         {/* Performance Score Section */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="w-full border-t border-orange-200 pt-2 cursor-help">
-              <div className="text-xl sm:text-2xl font-bold text-[#6D1616]">{player.performanceScore}</div>
-              <p className="text-[#6D1616] font-medium text-xs">Performance Score</p>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="top" sideOffset={8} className="max-w-xs">
-            Performance Score = number of approved tasks × total points earned (lifetime).
-          </TooltipContent>
-        </Tooltip>
+        <div className="w-full border-t border-orange-200 pt-2">
+          <div className="text-xl sm:text-2xl font-bold text-[#6D1616]">{player.performanceScore}</div>
+          <p className="text-[#6D1616] font-medium text-xs">Performance Score</p>
+        </div>
       </div>
     </div>
   );
