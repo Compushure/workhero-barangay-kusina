@@ -35,6 +35,8 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
           <div className="max-w-7xl mx-auto">
             <HallOfFameHeader
               periodLabel={config.label}
+              period={period}
+              userCount={0}
               prevPeriod={prevPeriod}
               nextPeriod={nextPeriod}
             />
@@ -54,6 +56,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
 
   const top3 = playersWithRank.slice(0, 3);
   const remaining = playersWithRank.slice(3);
+  const userCount = playersWithRank.length;
 
   return (
     <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
@@ -61,7 +64,8 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
         <div className="max-w-7xl mx-auto">
           <HallOfFameHeader
             periodLabel={config.label}
-            description={config.description}
+            period={period}
+            userCount={userCount}
             prevPeriod={prevPeriod}
             nextPeriod={nextPeriod}
           />

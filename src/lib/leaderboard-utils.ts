@@ -129,3 +129,47 @@ export function getScheduleInfo(period: Period): {
       return null;
   }
 }
+
+/**
+ * Get dynamic description based on actual user count
+ * @param period - The time period filter
+ * @param userCount - Number of users in the leaderboard
+ * @returns Dynamic description text
+ */
+export function getDynamicDescription(period: Period, userCount: number): string {
+  const baseConfig = PERIOD_CONFIG[period];
+  
+  if (userCount === 0) {
+    return baseConfig.description;
+  }
+  
+  // Replace "Top 10" with dynamic count
+  const countText = userCount === 10 ? 'Top 10' : `Top ${userCount}`;
+  
+  if (period === 'current') {
+    return `All-time cumulative ${countText} performers.`;
+  }
+  
+  return `Snapshot of ${countText} as of end of last ${period === 'weekly' ? 'week' : period === 'monthly' ? 'month' : 'year'}.`;
+}
+
+/**
+ * Get participation message when user count is less than 10
+ * @param userCount - Number of users in the leaderboard
+ * @param period - The time period filter
+ * @returns Participation message or null if count >= 10
+ */
+export function getParticipationMessage(userCount: number, period: Period): string | null {
+  if (userCount >= 10) {
+    return null;
+  }
+  
+  if (userCount === 0) {
+    return null;
+  }
+  
+  const remaining = 10 - userCount;
+  const periodText = period === 'current' ? 'Complete tasks to join the Hall of Fame!' : 'Keep up the great work!';
+  
+  return `${userCount} ${userCount === 1 ? 'employee' : 'employees'} currently ranked. ${periodText}`;
+}

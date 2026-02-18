@@ -1,12 +1,18 @@
 'use client';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Info } from 'lucide-react';
 import Link from 'next/link';
-import type { Period } from '@/lib/leaderboard-utils';
+import { getDynamicDescription, getParticipationMessage, type Period } from '@/lib/leaderboard-utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface HallOfFameHeaderProps {
   periodLabel: string;
-  description?: string;
+  period: Period;
+  userCount: number;
   prevPeriod: Period;
   nextPeriod: Period;
 }
@@ -16,10 +22,13 @@ interface HallOfFameHeaderProps {
  */
 export default function HallOfFameHeader({
   periodLabel,
-  description,
+  period,
+  userCount,
   prevPeriod,
   nextPeriod,
 }: HallOfFameHeaderProps) {
+  const description = getDynamicDescription(period, userCount);
+  const participationMessage = getParticipationMessage(userCount, period);
   return (
     <div className="flex flex-col items-center mb-6 sm:mb-8">
       <div className="flex items-center gap-3 sm:gap-4 mb-2">
@@ -49,8 +58,31 @@ export default function HallOfFameHeader({
         </Link>
       </div>
 
-      {description && (
-        <p className="text-gray-500 text-sm sm:text-base text-center mt-2">{description}</p>
+      {/* Description with info tooltip */}
+      <div className="flex items-center gap-2 mt-2">
+        {description && (
+          <p className="text-gray-500 text-sm sm:text-base text-center">{description}</p>
+        )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button className="text-gray-400 hover:text-gray-600 transition-colors">
+              <Info className="w-4 h-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p className="text-xs">
+              Performance Score is calculated from completed and approved tasks.
+              Complete more tasks to climb the rankings!
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      {/* Participation message when <10 users */}
+      {participationMessage && (
+        <p className="text-[#6D1616] text-sm font-medium text-center mt-1.5 bg-[#F9F3E9] px-4 py-2 rounded-lg inline-block">
+          {participationMessage}
+        </p>
       )}
     </div>
   );
