@@ -37,18 +37,32 @@ export async function editUserPoints({
       throw new Error('User ID is required');
     }
 
-    // Use admin client for manager operations
-    // Update User table - database trigger handles increment
+    // Fetch current points and total_points_earned so we can increment both
+    const { data: userData, error: fetchUserError } = await supabaseAdmin
+      .from('User')
+      .select('points, total_points_earned')
+      .eq('id', userId)
+      .single();
+
+    if (fetchUserError || !userData) {
+      throw new Error('User not found');
+    }
+
+    const currentPoints = Number(userData.points ?? 0);
+    const currentTotalEarned = Number(userData.total_points_earned ?? 0);
+
     const { error: updateError } = await supabaseAdmin
       .from('User')
-      .update({ points: pointsToAdd })
+      .update({
+        points: currentPoints + pointsToAdd,
+        total_points_earned: currentTotalEarned + pointsToAdd,
+      })
       .eq('id', userId);
 
     if (updateError) {
       throw new Error(`Failed to update points: ${updateError.message}`);
     }
 
-    // Query user_attributes view to get final points value
     const { data, error: fetchError } = await supabaseAdmin
       .from('user_attributes')
       .select('points')
