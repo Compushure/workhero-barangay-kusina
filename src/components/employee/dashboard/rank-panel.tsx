@@ -1,11 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Trophy } from 'lucide-react';
+import { Trophy, HelpCircle } from 'lucide-react';
 import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
 import { useQuery } from '@tanstack/react-query';
-import { getEmployeeXP } from '@/actions/employee/stats';
+import { getEmployeePerformanceScore } from '@/actions/employee/stats';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import type { EmployeeRank } from '@/types';
+
+const PERFORMANCE_SCORE_TOOLTIP =
+  'Performance Score = (number of approved tasks) × (total points earned from those tasks). Used for leaderboard ranking.';
 
 interface RankWidgetProps {
   isCollapsed?: boolean;
@@ -13,7 +17,7 @@ interface RankWidgetProps {
 
 /**
  * Main Rank Widget Renderer
- * Fetches employee rank + XP and displays them consistently
+ * Fetches employee rank + performance score (points) and displays them consistently
  */
 export function RankWidget({ isCollapsed }: RankWidgetProps) {
   const [hovered, setHovered] = useState(false);
@@ -21,20 +25,20 @@ export function RankWidget({ isCollapsed }: RankWidgetProps) {
   // Fetch employee rank
   const { data: rankData, isLoading: isRankLoading } = useGetEmployeeRank();
 
-  // Fetch employee XP
-  const { data: xpResult, isLoading: isXpLoading } = useQuery({
-    queryKey: ['employeeXP'],
+  // Fetch performance score (approved task count × total_points_earned from user_attributes)
+  const { data: performanceScoreResult, isLoading: isPerformanceScoreLoading } = useQuery({
+    queryKey: ['employeePerformanceScore'],
     queryFn: async () => {
-      const result = await getEmployeeXP();
+      const result = await getEmployeePerformanceScore();
       return result.data;
     },
     staleTime: 5 * 60 * 1000,
   });
 
-  const totalXP = xpResult?.totalXP ?? 0;
+  const performanceScore = performanceScoreResult ?? 0;
 
   // Loading state
-  if (isRankLoading || isXpLoading) {
+  if (isRankLoading || isPerformanceScoreLoading) {
     if (isCollapsed) {
       return (
         <div className="bg-white/10 rounded-full h-16 w-16 mx-auto flex items-center justify-center mb-4">
@@ -72,7 +76,7 @@ export function RankWidget({ isCollapsed }: RankWidgetProps) {
     return (
       <div
         className="bg-white/10 rounded-full h-16 w-16 mx-auto flex flex-col items-center justify-center mb-4 transition-all duration-200"
-        title={`Personal Rank #${rank} - ${totalXP} XP`}
+        title={`Personal Rank #${rank} - ${performanceScore} Performance Score.`}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
@@ -97,9 +101,22 @@ export function RankWidget({ isCollapsed }: RankWidgetProps) {
           <span className="text-xl text-red-200">Rank</span>
         </div>
       </div>
-      <p className="text-xs text-red-200">
-        Total Points and XP earned:{' '}
-        <span className="text-white font-semibold">{totalXP}</span>
+      <p className="text-s text-red-200 flex items-center gap-1.5">
+        Performance Score: <span className="text-white font-semibold">{performanceScore}</span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex text-red-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded"
+              aria-label="How is performance score calculated?"
+            >
+              <HelpCircle size={14} className="shrink-0" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[240px]">
+            {PERFORMANCE_SCORE_TOOLTIP}
+          </TooltipContent>
+        </Tooltip>
       </p>
     </div>
   );

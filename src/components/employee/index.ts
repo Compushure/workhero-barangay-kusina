@@ -5,7 +5,7 @@
 export { EmployeeDashboardPage } from './page';
 export { DashboardLayout } from './layout';
 export { NotificationBanner } from './notification-banner';
-export { SidebarNavigation } from './sidebar-navigation';
+export { Sidebar } from './sidebar';
 export { RankingCard } from './ranking-card';
 export { CookingContent } from './cooking-content';
 export { TasksList } from './tasks-list';

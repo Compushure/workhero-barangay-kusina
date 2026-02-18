@@ -33,3 +33,17 @@ export interface BadgeAssignmentUser {
   badge_ids: string[];
   collected_badges: CollectedBadge[];
 }
+
+export interface BadgeAwardDebugEntry {
+  id: string;
+  badge_id: string;
+  badge_name: string;
+  badge_points: number;
+  awarded_to_id: string;
+  awarded_to_name: string;
+  employee_id: string | null;
+  awarded_by_id: string | null;
+  awarded_by_name: string | null;
+  user_points: number;
+  date_acquired: string;
+}

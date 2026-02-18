@@ -1,5 +1,4 @@
 import { protectEmployeeRoute } from '@/actions/shared/auth';
-import { Sidebar } from '@/components/employee/sidebar';
 import { LogOutBtn } from '@/components/sidebar/logout-btn';
 
 

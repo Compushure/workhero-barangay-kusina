@@ -161,6 +161,11 @@
     image-rendering: pixelated;
     image-rendering: crisp-edges;
   }
+
+  .pixelated-text {
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+    letter-spacing: 0.05em;
+  }
 }
 
 .remove-arrow::-webkit-inner-spin-button,

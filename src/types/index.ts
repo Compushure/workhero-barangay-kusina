@@ -150,6 +150,7 @@ export interface Reward {
   category?: string;
   isActive: boolean;
   availableDate?: string | Date | null;
+  availableMonth?: number; // 1-12 for January-December, null/undefined for all months
   createdAt?: string | Date;
   createdBy?: string;
   imageUrl?: string;
