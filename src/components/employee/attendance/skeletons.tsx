@@ -41,7 +41,19 @@ export function ProfileLevelSkeleton() {
   );
 }
 
-export function RankWidgetSkeleton() {
+import { Trophy } from 'lucide-react';
+
+export function RankWidgetSkeleton({ isCollapsed = false }: { isCollapsed?: boolean }) {
+  if (isCollapsed) {
+    return (
+      <div className="bg-[#765332] border-3 border-[#47331F] rounded-full h-16 w-16 mx-auto flex items-center justify-center mb-4">
+        <div className="animate-pulse">
+          <Trophy size={20} className="text-yellow-500" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#765332] border-3 border-[#47331F] rounded-lg p-4 mb-4">
       {/* Header skeleton */}
@@ -56,12 +68,12 @@ export function RankWidgetSkeleton() {
         <div className="w-10 h-10 bg-[#d9b77a] animate-pulse rounded-full" />
         <div className="flex flex-col gap-1">
           <div className="w-20 h-5 bg-[#d9b77a] animate-pulse rounded" />
+          <div className="w-12 h-4 bg-[#d9b77a] animate-pulse rounded" />
         </div>
       </div>
 
-      {/* XP line skeleton */}
+      {/* Performance score skeleton */}
       <div className="w-32 h-4 bg-[#d9b77a] animate-pulse rounded" />
     </div>
   );
 }
-
