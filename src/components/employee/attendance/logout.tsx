@@ -62,24 +62,33 @@ export const LogOutBtn = memo(function LogOutBtn() {
   return (
     <div
       onClick={handleLogout}
-      className={`cursor-pointer inline-flex items-center justify-center transition-all duration-300 
+      className={`inline-flex items-center bg-[#765332] border-3 border-[#47331F] rounded-lg shadow-md p-2 cursor-pointer transition-all duration-300 
         ${isPending || isNavigating || isLoggingOut ? 'opacity-60 cursor-not-allowed' : 'hover:scale-105'}
       `}
     >
-      {isLoggingOut ? (
-        <span className="inline-flex items-center gap-2 text-[#690003] font-semibold">
-          <span>Goodbye</span>
-          <span ref={waveRef} className="inline-flex items-center">
-            <Hand className="size-4" />
+      {/* Icon / Goodbye text */}
+      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#E89C30] border-2 border-[#47331F] shrink-0 mr-3 overflow-hidden">
+        {isLoggingOut ? (
+          <span ref={waveRef} className="inline-flex items-center text-[#690003]">
+            <Hand className="size-6" />
           </span>
-        </span>
-      ) : (
-        <img
-          src="/assets/door1.png"
-          alt="Logout door"
-          className="w-30 h-30"
-        />
-      )}
+        ) : (
+          <img
+            src="/assets/door.png"
+            alt="Logout door"
+            className="w-full h-full object-contain"
+          />
+        )}
+      </div>
+
+      {/* Label */}
+      <div className="flex flex-col">
+        {isLoggingOut ? (
+          <span className="text-xl font-jersey text-[#F5E8D6]">Goodbye</span>
+        ) : (
+          <span className="text-xl font-jersey text-[#F5E8D6]">Logout</span>
+        )}
+      </div>
     </div>
   );
 });
