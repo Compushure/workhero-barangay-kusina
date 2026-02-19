@@ -4,6 +4,7 @@
  * This file contains all employee stat getter functions:
  * - getEmployeeLevel: Fetches the current employee's level
  * - getEmployeePoints: Fetches points and deducted points
+ * - getEmployeePerformanceScore: Fetches performance_score (approved task count × total_points_earned)
  * - getEmployeeRank: Fetches rank among all employees
  * - getEmployeeXP: Fetches current and total XP
  */
@@ -85,6 +86,41 @@ export async function getEmployeePoints(): Promise<ActionResult<EmployeePointsDa
 }
 
 /**
+ * Fetches the current employee's performance score from user_attributes.
+ * performance_score = (count of approved KPITask) × total_points_earned (used for leaderboard ranking).
+ */
+export async function getEmployeePerformanceScore(): Promise<ActionResult<number>> {
+  return safeAction(async () => {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data, error } = await supabase
+      .from('user_attributes')
+      .select('performance_score')
+      .eq('user_id', user.id)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to fetch performance score: ${error.message}`);
+    }
+
+    if (!data) {
+      return 0;
+    }
+
+    return Number(data.performance_score ?? 0);
+  });
+}
+
+/**
  * Fetches the current employee's rank among all regular employees
  * Uses the get_employee_rank RPC function which calculates rank using window functions
  * 
@@ -118,10 +154,13 @@ export async function getEmployeeRank(): Promise<ActionResult<EmployeeRank>> {
     }
 
     const rankData = data[0];
+    // RPC returns employee_rank and total_employees
+    const rank = rankData.employee_rank ?? rankData.rank;
+    const totalEmployees = rankData.total_employees;
 
     return {
-      rank: Number(rankData.rank),
-      totalEmployees: Number(rankData.total_employees),
+      rank: Number(rank),
+      totalEmployees: Number(totalEmployees),
     };
   });
 }
@@ -160,6 +199,7 @@ export async function getEmployeeXP(): Promise<ActionResult<EmployeeXP>> {
     return {
       currentXP,
       totalXP,
+      level,
     };
   });
 }
