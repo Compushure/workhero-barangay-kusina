@@ -2,7 +2,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ChevronDown, Coins, Loader2 } from "lucide-react";
 import { TaskStatusItem } from "./types";
 import { SetStateAction, useState } from "react";
-import { useRouter } from 'next/navigation';
 import { useSubmitTaskVerification, useClaimTaskPoints, useRedoTask } from "@/hooks/tanstack/mutations/employeeTasksMutations";
 
 interface TaskCardDialogProps {
@@ -59,12 +58,12 @@ export default function TaskCardDialog({task, modalOpen, setModalOpen} : TaskCar
         }
       }}
     >
-      <DialogContent className="w-full max-w-[calc(100vw-2rem)] sm:max-w-md min-w-0 overflow-hidden">
-        <DialogHeader className="flex flex-col gap-2 text-left min-w-0">
-          <DialogTitle className="inline-flex w-fit max-w-full text-lg font-semibold leading-tight truncate">
+      <DialogContent className="w-full max-w-[calc(100vw-2rem)] sm:max-w-md min-w-0 overflow-hidden rounded-2xl bg-linear-0 from-[#F5DDBC] to-background to-25%">
+        <DialogHeader className="flex flex-col gap-1 text-left min-w-0">
+          <DialogTitle className="inline-flex w-fit max-w-full text-xl font-semibold leading-tight truncate">
             {task.name}
           </DialogTitle>
-          <DialogDescription className="pr-8 min-w-0 wrap-break-word text-base">{task.description}</DialogDescription>
+          <DialogDescription className="pr-8 min-w-0 wrap-break-word text-base text-muted-foreground">{task.description}</DialogDescription>
         </DialogHeader>
         
         <div className="flex flex-col gap-4 text-left min-w-0 overflow-hidden">
@@ -134,25 +133,50 @@ export default function TaskCardDialog({task, modalOpen, setModalOpen} : TaskCar
                   <label className="text-sm font-medium text-foreground">
                     Orders to Submit
                   </label>
-                  <div className="mt-1">
+                  <div className="mt-1 flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const remainingOrders = task.maxOrders - task.completedOrders;
+                        setPendingOrders(prev => Math.max(1, prev - 1));
+                      }}
+                      className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
+                    >
+                      −
+                    </button>
                     <input
                       type="number"
                       min="1"
                       max={task.maxOrders - task.completedOrders}
                       value={pendingOrders}
-                      onChange={(e) => setPendingOrders(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      onChange={(e) => {
+                        const remainingOrders = task.maxOrders - task.completedOrders;
+                        const newValue = parseInt(e.target.value) || 1;
+                        setPendingOrders(Math.max(1, Math.min(newValue, remainingOrders)));
+                      }}
+                      className="w-20 remove-arrow rounded-md border border-gray-300 bg-card px-3 py-2 text-sm text-center ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Remaining: {task.maxOrders - task.completedOrders} orders
-                    </p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const remainingOrders = task.maxOrders - task.completedOrders;
+                        setPendingOrders(prev => Math.min(remainingOrders, prev + 1));
+                      }}
+                      className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
+                    >
+                      +
+                    </button>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Remaining: {task.maxOrders - task.completedOrders} orders
+                  </p>
                 </div>
-                <button
+                <div className="flex justify-end">
+                  <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitMutation.isPending}
-                  className="inline-flex items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                  className="inline-flex items-center gap-2 rounded-md bg-foreground text-primary-foreground px-4 py-2 text-sm font-medium shadow-sm hover:bg-primary transition-colors disabled:opacity-50 disabled:pointer-events-none"
                 >
                   {submitMutation.isPending ? (
                     <>
@@ -163,6 +187,8 @@ export default function TaskCardDialog({task, modalOpen, setModalOpen} : TaskCar
                     'Submit for Verification'
                   )}
                 </button>
+
+                </div>
               </div>
             </div>
           ) : null}

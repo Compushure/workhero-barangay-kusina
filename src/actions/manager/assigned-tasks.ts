@@ -13,7 +13,7 @@ import type { AssignedTask, AssignedEmployee } from '@/types';
  */
 export async function fetchCurrentAssignedTasksPaginated(
   page: number = 1,
-  pageSize: number = 4,
+  pageSize: number = 10,
   sortBy: string = 'recently added',
   searchTerm: string = ''
 ): Promise<
