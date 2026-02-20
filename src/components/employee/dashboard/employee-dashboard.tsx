@@ -12,7 +12,8 @@ export default function EmployeeDashboardClient() {
     {
       title: 'Client-Centered Metrics: Special Client Commendation',
       progress: '0/5',
-      reward: '10 XP 100 Coins',
+      points: '100',
+      xp: '10',
       dueDate: '12/12/25',
       points: '100',
       xp: '10',
@@ -20,7 +21,8 @@ export default function EmployeeDashboardClient() {
     {
       title: 'Name of Task Type: Internal Training',
       progress: '0/5',
-      reward: '10 XP 100 Coins',
+      points: '100',
+      xp: '10',
       dueDate: '12/12/25',
       points: '100',
       xp: '10',

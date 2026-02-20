@@ -115,8 +115,8 @@ export function RequestsTable({
                   </Tooltip>
                 </TableCell>
                 <TableCell className="text-sm text-center px-4 w-30">
-                  <div className="flex items-center justify-center gap-1 font-medium">
-                    <Soup strokeWidth={1.75} className="size-5 mr-1"/>
+                  <div className="flex items-center justify-left gap-1 font-medium">
+                    <Soup strokeWidth={1.75} className="size-5 ml-10 mr-1"/>
                     {request.completed_orders ?? 0} / {request.max_orders ?? 0}
                   </div>
                   

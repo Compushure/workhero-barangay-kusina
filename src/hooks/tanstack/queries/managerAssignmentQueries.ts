@@ -37,7 +37,7 @@ export const managerAssignmentKeys = {
  */
 export function useGetCurrentAssignedTasksPaginated(
   page: number = 1,
-  pageSize: number = 4,
+  pageSize: number = 10,
   sortBy: string = 'recently added',
   searchTerm: string = '',
   enabled: boolean = true
