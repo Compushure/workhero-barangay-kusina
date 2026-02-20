@@ -41,6 +41,7 @@ export function useGetRewards() {
  * Filters by:
  * - isActive: true (visible to employees)
  * - availableDate: null OR <= current date in Manila timezone
+ * - OR has availableMonth set (for monthly stalls)
  * 
  * Used exclusively by employee pages to show only currently available items
  */
@@ -56,12 +57,35 @@ export function useGetAvailableRewards() {
 
             const allRewards = result.data || [];
 
+            console.log('📊 Rewards from database:', allRewards.length);
+            console.log('📊 Rewards by month:', allRewards.reduce((acc, r) => {
+                if (r.availableMonth) {
+                    acc[r.availableMonth] = (acc[r.availableMonth] || 0) + 1;
+                }
+                return acc;
+            }, {} as Record<number, number>));
+
             // Filter rewards that are:
             // 1. Active (isActive: true)
             // 2. Available now (or no availability date set)
+            // 3. OR has a specific month assigned (for monthly stalls)
             const availableRewards = allRewards.filter((reward) => {
-                return reward.isActive && isItemAvailableNow(reward.availableDate);
+                if (!reward.isActive) return false;
+                
+                // If reward has a specific month assigned, include it (for monthly stalls)
+                if (reward.availableMonth) return true;
+                
+                // Otherwise check date-based availability
+                return isItemAvailableNow(reward.availableDate);
             });
+
+            console.log('✅ Available rewards after filtering:', availableRewards.length);
+            console.log('✅ Available by month:', availableRewards.reduce((acc, r) => {
+                if (r.availableMonth) {
+                    acc[r.availableMonth] = (acc[r.availableMonth] || 0) + 1;
+                }
+                return acc;
+            }, {} as Record<number, number>));
 
             return availableRewards;
         },

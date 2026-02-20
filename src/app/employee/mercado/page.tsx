@@ -23,10 +23,30 @@ export default function EmployeeMercadoPage() {
 
   const pendingRewardIds = new Set((pendingRequests || []).map((request) => request.rewardId));
 
+  // Debug logging to check data flow
+  useEffect(() => {
+    console.log('=== MERCADO DEBUG ===');
+    console.log('Total active rewards:', activeRewards.length);
+    console.log(
+      'Active rewards with months:',
+      activeRewards.map((r) => ({
+        name: r.name,
+        availableMonth: r.availableMonth,
+        isActive: r.isActive,
+      }))
+    );
+  }, [activeRewards]);
+
   // Filter rewards by selected month
   const filteredRewards = useMemo(() => {
     if (!selectedMonth) return [];
-    return activeRewards.filter((reward) => reward.availableMonth === selectedMonth);
+    const filtered = activeRewards.filter((reward) => reward.availableMonth === selectedMonth);
+    console.log(`Filtering for month ${selectedMonth}:`, filtered.length, 'items found');
+    console.log(
+      'Filtered items:',
+      filtered.map((r) => r.name)
+    );
+    return filtered;
   }, [activeRewards, selectedMonth]);
 
   // Open modal when a month is selected
@@ -57,7 +77,6 @@ export default function EmployeeMercadoPage() {
       <div className="mx-auto max-w-7xl space-y-8">
         {/* Navigation back to dashboard */}
         <BackToNavigation />
-
         {/* Header with pixel art icon */}
         <MercadoHeader
           title="Mercado"
@@ -85,25 +104,19 @@ export default function EmployeeMercadoPage() {
             </>
           }
         />
-
-        {/* Mercado Stalls Layout - Gamified with pixel art */}
+        {/* Mercado Stalls Layout Gamified with pixel art */} -
         <div className="bg-linear-to-b from-[#fef5f1] to-[#fff8f5] rounded-xl p-8 shadow-inner border-2 border-[#690003]/10">
           <div className="text-center mb-8 space-y-3">
-            {/* Pixel art decorative border */}
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-8 h-1 bg-[#690003]" />
-              <img src="/book.png" alt="Decoration" className="w-6 h-6 pixelated" />
-              <div className="w-8 h-1 bg-[#690003]" />
-            </div>
-            <h2 className="text-2xl font-bold text-[#690003] mb-2">Monthly Market Stalls</h2>
+            <h2 className="text-2xl font-bold text-[#690003] mb-2">Monthly Mercado</h2>
             <p className="text-[#7a3d3d]">
               🏪 New stalls unlock each month! Click on unlocked stalls to discover special rewards.
             </p>
-            <p className="text-xs text-[#7a3d3d]/80">
-              🔒 Future months are locked until they arrive
-            </p>
           </div>
-          <MercadoStallsLayout onMonthSelect={setSelectedMonth} selectedMonth={selectedMonth} />
+          <MercadoStallsLayout
+            onMonthSelect={setSelectedMonth}
+            selectedMonth={selectedMonth}
+            rewards={activeRewards}
+          />
         </div>
       </div>
 

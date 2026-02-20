@@ -43,7 +43,7 @@ export default function MercadoPage() {
     quantity?: number;
     redeemingLimit?: number;
     imageUrl?: string;
-    availableDate?: Date | string | null;
+    availableMonth?: number;
   } | null>(null);
   const [deletingItem, setDeletingItem] = useState<{
     id: string;
@@ -58,7 +58,7 @@ export default function MercadoPage() {
     isActive: boolean;
     imageUrl?: string;
     createdAt?: string;
-    availableDate?: string | Date | null;
+    availableMonth?: number;
   } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
@@ -144,7 +144,7 @@ export default function MercadoPage() {
           redeemingLimit: updatedItem.redeemingLimit,
           isActive: updatedItem.isActive,
           imageUrl: updatedItem.imageUrl,
-          availableDate: updatedItem.availableDate,
+          availableMonth: updatedItem.availableMonth,
           createdAt:
             updatedItem.createdAt instanceof Date
               ? updatedItem.createdAt.toISOString()
@@ -179,7 +179,7 @@ export default function MercadoPage() {
           quantity: item.quantity,
           redeemingLimit: item.redeemingLimit,
           imageUrl: item.imageUrl,
-          availableDate: item.availableDate,
+          availableMonth: item.availableMonth,
         });
         setIsAddModalOpen(true);
       }
@@ -210,7 +210,7 @@ export default function MercadoPage() {
           redeemingLimit: item.redeemingLimit,
           isActive: item.isActive,
           imageUrl: item.imageUrl,
-          availableDate: item.availableDate,
+          availableMonth: item.availableMonth,
           createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : item.createdAt,
         });
         setIsViewModalOpen(true);
@@ -255,7 +255,7 @@ export default function MercadoPage() {
       quantity: string;
       redeemingLimit: string;
       cost: number;
-      availableDate?: Date | null;
+      availableMonth?: number | null;
     }) => {
       // Clear previous error
       setSaveError('');
@@ -274,7 +274,7 @@ export default function MercadoPage() {
             pointsCost: data.cost,
             quantity: quantityNum,
             redeemingLimit: redeemingLimitNum,
-            availableDate: data.availableDate || null,
+            availableMonth: data.availableMonth || null,
           },
         });
       } else {
@@ -285,7 +285,7 @@ export default function MercadoPage() {
           quantity: quantityNum,
           redeemingLimit: redeemingLimitNum,
           isActive: true,
-          availableDate: data.availableDate || null,
+          availableMonth: data.availableMonth || null,
         });
         rewardId = createdReward?.id;
       }

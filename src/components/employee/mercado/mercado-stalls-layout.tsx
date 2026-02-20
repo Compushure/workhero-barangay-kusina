@@ -11,10 +11,12 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { X } from 'lucide-react';
+import type { Reward } from '@/types';
 
 interface MercadoStallsLayoutProps {
   onMonthSelect: (month: number | null) => void;
   selectedMonth?: number | null;
+  rewards?: Reward[];
 }
 
 // Mapping of months to stall images
@@ -43,9 +45,21 @@ const MONTH_GROUPS = [
 export function MercadoStallsLayout({
   onMonthSelect,
   selectedMonth: controlledSelectedMonth,
+  rewards = [],
 }: MercadoStallsLayoutProps) {
   // Use controlled prop if provided, otherwise manage internal state
   const selectedMonth = controlledSelectedMonth !== undefined ? controlledSelectedMonth : null;
+
+  // Calculate items per month
+  const itemsPerMonth = rewards.reduce(
+    (acc, reward) => {
+      if (reward.availableMonth) {
+        acc[reward.availableMonth] = (acc[reward.availableMonth] || 0) + 1;
+      }
+      return acc;
+    },
+    {} as Record<number, number>
+  );
 
   const handleStallClick = (month: number) => {
     // Don't allow selecting locked months
@@ -102,6 +116,7 @@ export function MercadoStallsLayout({
                       isSelected={selectedMonth === month}
                       isLocked={!isMonthUnlocked(month)}
                       onClick={() => handleStallClick(month)}
+                      itemCount={itemsPerMonth[month] || 0}
                     />
                   ))}
                 </div>

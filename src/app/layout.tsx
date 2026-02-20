@@ -18,10 +18,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={roboto.className}>
-      <body className="antialiased">
+    <html lang="en" className={roboto.className} suppressHydrationWarning>
+      <body className="bg-background text-foreground" suppressHydrationWarning>
         <QueryProvider>
-          {/* Remove later on when adding real auth  */}
           <AuthProvider>{children}</AuthProvider>
           <Toaster position="bottom-right" richColors />
         </QueryProvider>

@@ -72,14 +72,23 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
         category: item.category,
         isActive: item.is_active,
         availableDate: item.available_date,
+        availableMonth: item.available_month, 
+        monthName: item.month_name, 
         createdAt: item.created_at,
         createdBy: item.created_by,
         imageUrl: getRewardImageUrl(supabase, item.id),
-        // Add computed properties for stock tracking
         redeemedCount,
         isOutOfStock: hasQuantityLimit && item.quantity <= 0,
       };
     });
+
+    console.log('🔵 getRewardsAction - Total rewards from DB:', rewards.length);
+    console.log('🔵 Items with availableMonth:', rewards.filter(r => r.availableMonth).map(r => ({
+      name: r.name,
+      availableMonth: r.availableMonth,
+      isActive: r.isActive
+    })));
+    console.log('🔵 Items with isActive=true:', rewards.filter(r => r.isActive).length);
 
     return { error: null, data: rewards };
   } catch (error) {
@@ -130,6 +139,7 @@ export async function addRewardAction(
         category: validatedData.category,
         is_active: validatedData.isActive,
         available_date: validatedData.availableDate ? validatedData.availableDate.toISOString() : null,
+        available_month: validatedData.availableMonth,
       })
       .select()
       .single();
@@ -149,6 +159,8 @@ export async function addRewardAction(
       category: data.category,
       isActive: data.is_active,
       availableDate: data.available_date,
+      availableMonth: data.available_month,
+      monthName: data.month_name, // Auto-populated by database trigger
       createdAt: data.created_at,
       createdBy: data.created_by,
       imageUrl: getRewardImageUrl(supabase, data.id),
@@ -225,6 +237,8 @@ export async function editRewardAction(
     if (validatedData.isActive !== undefined) updateData.is_active = validatedData.isActive;
     if (validatedData.availableDate !== undefined)
       updateData.available_date = validatedData.availableDate ? validatedData.availableDate.toISOString() : null;
+    if (validatedData.availableMonth !== undefined)
+      updateData.available_month = validatedData.availableMonth;
 
     // Update reward in database
     const { data, error } = await supabase
@@ -249,6 +263,8 @@ export async function editRewardAction(
       category: data.category,
       isActive: data.is_active,
       availableDate: data.available_date,
+      availableMonth: data.available_month,
+      monthName: data.month_name, // Auto-populated by database trigger
       createdAt: data.created_at,
       createdBy: data.created_by,
       imageUrl: getRewardImageUrl(supabase, data.id),

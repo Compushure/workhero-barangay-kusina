@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { Lock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface MercadoStallProps {
   month: number; // 1-12 for January-December
@@ -10,6 +11,7 @@ interface MercadoStallProps {
   isSelected: boolean;
   isLocked?: boolean;
   onClick: () => void;
+  itemCount?: number; // Number of items available in this stall
 }
 
 const MONTH_NAMES = [
@@ -33,6 +35,7 @@ export function MercadoStall({
   isSelected,
   isLocked = false,
   onClick,
+  itemCount = 0,
 }: MercadoStallProps) {
   const monthName = MONTH_NAMES[month - 1];
 
@@ -48,23 +51,13 @@ export function MercadoStall({
       disabled={isLocked}
       className={cn(
         'relative group transition-all duration-300 ease-in-out',
-        isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:scale-105 hover:z-10',
+        isLocked ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-105 hover:z-10',
         isSelected && !isLocked && 'scale-110 z-20'
       )}
     >
       {/* Stall Image */}
-      <div className="relative w-full aspect-square">
+      <div className={cn('relative w-full aspect-square', isLocked && 'blur-sm grayscale')}>
         <Image src={imageUrl} alt={`${monthName} Stall`} fill className="object-contain" priority />
-
-        {/* Locked Overlay */}
-        {isLocked && (
-          <div className="absolute inset-0 bg-gray-900/60 flex items-center justify-center rounded-lg backdrop-blur-sm">
-            <div className="text-center space-y-2">
-              <Lock className="h-8 w-8 text-white mx-auto animate-pulse" />
-              <p className="text-xs text-white font-bold">Coming Soon!</p>
-            </div>
-          </div>
-        )}
 
         {/* Hover/Selected Overlay (only if not locked) */}
         {!isLocked && (
@@ -77,6 +70,25 @@ export function MercadoStall({
           />
         )}
       </div>
+
+      {/* Locked Overlay */}
+      {isLocked && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center space-y-2 bg-white/90 px-4 py-3 rounded-lg shadow-lg">
+            <Lock className="h-8 w-8 text-gray-600 mx-auto animate-pulse" />
+            <p className="text-xs text-gray-700 font-bold">Coming Soon!</p>
+          </div>
+        </div>
+      )}
+
+      {/* Item Count Badge (only if unlocked and has items) */}
+      {!isLocked && itemCount > 0 && (
+        <div className="absolute -top-2 -right-2 z-30">
+          <Badge className="bg-[#690003] text-white px-2 py-1 text-xs font-bold shadow-lg border-2 border-white">
+            {itemCount} {itemCount === 1 ? 'Item' : 'Items'}
+          </Badge>
+        </div>
+      )}
 
       {/* Month Label */}
       <div
