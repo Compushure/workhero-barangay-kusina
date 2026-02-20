@@ -12,14 +12,12 @@
   --popover-foreground: #514937;
 
   /* Primary: Dark olive brown */
-  --primary-foreground: #ffffff;
+  --primary-foreground: #fafafa;
   --primary: #a83232;
-  --primary-foreground: #ffffff;
 
   /* Secondary: Bright chili red */
-  --secondary-foreground: #ffffff;
+  --secondary-foreground: #fafafa;
   --secondary: #d94f4f; /* Bright chili red */
-  --secondary-foreground: #ffffff;
 
   /* Accent: Light beige */
   /* --accent: #f2d0a7;

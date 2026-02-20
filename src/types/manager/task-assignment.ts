@@ -26,6 +26,7 @@ export interface AssignedEmployee {
   empId: string;
   tenure?: string;
   assignedTasks: AssignedTask[];
+  pendingOrders: number;
   completedOrders: number;
   status?: string;
 }

@@ -15,7 +15,7 @@ import type { AssignedTask, ServerActionResponse } from '@/types';
  */
 export async function handleFetchCurrentAssignedTasksPaginated(
   page: number = 1,
-  pageSize: number = 4,
+  pageSize: number = 10,
   sortBy: string = 'recently added',
   searchTerm: string = ''
 ): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number; employeeCount: number }> {
