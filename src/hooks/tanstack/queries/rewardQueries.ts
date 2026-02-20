@@ -15,7 +15,7 @@ export const rewardKeys = {
 
 /**
  * Hook to fetch all rewards/mercado items
- * Optimized with caching for better performance
+ * Used by HR to manage all rewards
  */
 export function useGetRewards() {
     return useQuery<Reward[], Error>({
@@ -29,7 +29,7 @@ export function useGetRewards() {
 
             return result.data || [];
         },
-        staleTime: 1 * 60 * 1000, // refresh data every 1 minute
+        staleTime: 30 * 1000, // Consider data stale after 30 seconds
         gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
         refetchOnWindowFocus: true,
         refetchOnMount: true,
@@ -89,9 +89,10 @@ export function useGetAvailableRewards() {
 
             return availableRewards;
         },
-        staleTime: 1 * 60 * 1000, // refresh data every 1 minute
-        gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+        staleTime: 10 * 1000, // Consider data stale after 10 seconds for employees
+        gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
         refetchOnWindowFocus: true,
         refetchOnMount: true,
+        refetchInterval: 30 * 1000, // Poll every 30 seconds for real-time updates
     });
 }

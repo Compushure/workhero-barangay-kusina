@@ -47,7 +47,6 @@ export function MercadoStallsLayout({
   selectedMonth: controlledSelectedMonth,
   rewards = [],
 }: MercadoStallsLayoutProps) {
-  // Use controlled prop if provided, otherwise manage internal state
   const selectedMonth = controlledSelectedMonth !== undefined ? controlledSelectedMonth : null;
 
   // Calculate items per month
@@ -95,7 +94,7 @@ export function MercadoStallsLayout({
         </div>
       )}
 
-      {/* Stalls Carousel - Shows 4 stalls at a time */}
+      {/* Stalls Carousel*/}
       <div className="relative px-16">
         <Carousel
           opts={{

@@ -2,6 +2,16 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Minus, Plus, ImageIcon, Loader2 } from 'lucide-react';
 import { useRedeemReward } from '@/hooks/tanstack/mutations/redemptionMutations';
 import { formatNumber } from '@/lib/format';
@@ -25,6 +35,16 @@ export function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCard
   const canRedeem = canAfford && !hasPendingRequest && !isOutOfStock;
   const isRedeeming = redeemMutation.isPending;
 
+  // Debug: Log when component mounts with reward data
+  // useEffect(() => {
+  //   console.log('✅ RewardCard rendered:', {
+  //     name: reward.name,
+  //     pointsCost: reward.pointsCost,
+  //     quantity: reward.quantity,
+  //     isActive: reward.isActive,
+  //   });
+  // }, [reward]);
+
   const handleIncrement = () => {
     if (quantity < maxQuantity) {
       setQuantity(quantity + 1);
@@ -34,6 +54,13 @@ export function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCard
   const handleDecrement = () => {
     if (quantity > 1) {
       setQuantity(quantity - 1);
+    }
+  };
+
+  const handleQuantityChange = (value: string) => {
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue >= 1 && numValue <= maxQuantity) {
+      setQuantity(numValue);
     }
   };
 
@@ -55,104 +82,125 @@ export function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCard
   };
 
   return (
-    <div className="bg-[#3d2817] rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow border-2 border-[#2a1a10]">
-      {/* Image Section - Centered */}
-      <div className="bg-[#2a1a10] rounded-lg p-8 mb-4 flex items-center justify-center min-h-45">
-        {reward.imageUrl && !imageError ? (
-          <img
-            src={reward.imageUrl}
-            alt={reward.name}
-            className="max-h-37.5 max-w-full object-contain"
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <div className="text-6xl"></div>
-        )}
-      </div>
-
-      {/* Item Name */}
-      <h3 className="text-white font-bold text-lg mb-2 text-center pixelated-text">
-        {reward.name}
-      </h3>
-
-      {/* Description/Category */}
-      {reward.category && (
-        <p className="text-[#c9a882] text-sm mb-4 text-center">{reward.category}</p>
-      )}
-
-      {/* Points and Stock Info */}
-      <div className="flex items-center justify-between mb-2 text-sm">
-        <span className="text-[#ffd700]">★ {formatNumber(reward.pointsCost)} pts each</span>
-        {reward.quantity !== null && reward.quantity !== undefined && (
-          <span className="text-[#ffd700]">★ Stock: {reward.quantity}</span>
-        )}
-      </div>
-
-      {/* Max per order and Total */}
-      <div className="flex items-center justify-between mb-4 text-sm text-[#c9a882]">
-        <span>Max per order: {reward.redeemingLimit || 'Unlimited'}</span>
-        <span>Total: {quantity}</span>
-      </div>
-
-      {/* Quantity Selector */}
-      <div className="flex items-center justify-center gap-4 mb-4">
-        <button
-          type="button"
-          onClick={handleDecrement}
-          disabled={quantity <= 1 || isOutOfStock || isRedeeming}
-          className="bg-[#5a3d2a] hover:bg-[#6b4d3a] disabled:bg-[#3d2817] disabled:opacity-50 text-white rounded-lg w-10 h-10 flex items-center justify-center transition-colors border border-[#2a1a10]"
-        >
-          <Minus className="h-5 w-5" />
-        </button>
-        <div className="bg-[#2a1a10] text-white font-bold text-xl rounded-lg w-12 h-10 flex items-center justify-center border border-[#1a0f08]">
-          {quantity}
+    <Card className="overflow-hidden border-[#690003]/20 hover:shadow-lg transition-shadow">
+      <CardHeader>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+              {reward.imageUrl && !imageError ? (
+                <img
+                  src={reward.imageUrl}
+                  alt={reward.name}
+                  className="h-full w-full object-cover"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <ImageIcon className="h-5 w-5 text-gray-400" />
+              )}
+            </div>
+            <CardTitle className="text-xl text-gray-900">{reward.name}</CardTitle>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            {isOutOfStock && (
+              <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-300">
+                Out of Stock
+              </Badge>
+            )}
+            {hasPendingRequest && !isOutOfStock && (
+              <Badge className="bg-yellow-500 text-white text-xs">Pending Approval</Badge>
+            )}
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={handleIncrement}
-          disabled={quantity >= maxQuantity || isOutOfStock || isRedeeming}
-          className="bg-[#5a3d2a] hover:bg-[#6b4d3a] disabled:bg-[#3d2817] disabled:opacity-50 text-white rounded-lg w-10 h-10 flex items-center justify-center transition-colors border border-[#2a1a10]"
-        >
-          <Plus className="h-5 w-5" />
-        </button>
-      </div>
-
-      {/* Order Button */}
-      <Button
-        type="button"
-        onClick={handleRedeem}
-        disabled={!canRedeem || isRedeeming}
-        className={`w-full h-12 rounded-lg font-bold text-base transition-all ${
-          canRedeem && !isRedeeming
-            ? 'bg-[#e8a857] hover:bg-[#f5b967] text-[#2a1a10] border-2 border-[#b88a44]'
-            : 'bg-gray-400 text-gray-600 cursor-not-allowed border-2 border-gray-500'
-        }`}
-      >
-        {isRedeeming ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Ordering...
-          </>
-        ) : isOutOfStock ? (
-          '❌ Out of Stock'
-        ) : hasPendingRequest ? (
-          '⏳ Pending Approval'
-        ) : !canAfford ? (
-          '💰 Insufficient Points'
-        ) : (
-          `🛒 Order (${formatNumber(totalCost)} pts)`
+        {reward.category && (
+          <CardDescription className="text-gray-600">{reward.category}</CardDescription>
         )}
-      </Button>
+      </CardHeader>
+      <CardContent className="pt-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-[#7a3d3d]">Cost per item</span>
+            <span className="text-lg font-bold text-[#690003]">
+              {formatNumber(reward.pointsCost)} <span className="text-sm font-normal">pts</span>
+            </span>
+          </div>
 
-      {/* Status Badge if needed */}
-      {(isOutOfStock || hasPendingRequest) && (
-        <div className="mt-3 text-center text-xs">
-          {isOutOfStock && <span className="text-red-400">● Out of Stock</span>}
-          {hasPendingRequest && !isOutOfStock && (
-            <span className="text-yellow-400">● Pending Approval</span>
+          {reward.redeemingLimit && reward.redeemingLimit > 0 && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-[#7a3d3d]">Limit per request</span>
+              <span className="text-sm font-medium text-[#5a2a2a]">{reward.redeemingLimit}</span>
+            </div>
           )}
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[#5a2a2a]">Quantity</label>
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleDecrement}
+                disabled={quantity <= 1 || isOutOfStock || isRedeeming}
+                className="h-9 w-9 border-[#690003] text-[#690003] hover:bg-[#fbeaea]"
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <Input
+                type="number"
+                min="1"
+                max={maxQuantity}
+                value={quantity}
+                onChange={(e) => handleQuantityChange(e.target.value)}
+                disabled={isOutOfStock || isRedeeming}
+                className="h-9 w-16 text-center border-[#690003] focus-visible:ring-[#690003]"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleIncrement}
+                disabled={quantity >= maxQuantity || isOutOfStock || isRedeeming}
+                className="h-9 w-9 border-[#690003] text-[#690003] hover:bg-[#fbeaea]"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-[#690003]/10">
+            <span className="text-sm font-medium text-[#7a3d3d]">Total Cost</span>
+            <span className="text-2xl font-bold text-[#690003]">
+              {formatNumber(totalCost)} <span className="text-sm font-normal">pts</span>
+            </span>
+          </div>
         </div>
-      )}
-    </div>
+      </CardContent>
+      <CardFooter>
+        <Button
+          type="button"
+          onClick={handleRedeem}
+          disabled={!canRedeem || isRedeeming}
+          className={`w-full ${
+            canRedeem && !isRedeeming
+              ? 'bg-[#690003] hover:bg-[#8b0000] text-white'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          {isRedeeming ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Redeeming...
+            </>
+          ) : isOutOfStock ? (
+            'Out of Stock'
+          ) : hasPendingRequest ? (
+            'Pending Approval'
+          ) : !canAfford ? (
+            'Insufficient Points'
+          ) : (
+            `Redeem (${formatNumber(totalCost)} pts)`
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }

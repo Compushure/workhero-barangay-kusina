@@ -56,19 +56,14 @@ export function MercadoStall({
       )}
     >
       {/* Stall Image */}
-      <div className={cn('relative w-full aspect-square', isLocked && 'blur-sm grayscale')}>
-        <Image src={imageUrl} alt={`${monthName} Stall`} fill className="object-contain" priority />
-
-        {/* Hover/Selected Overlay (only if not locked) */}
-        {!isLocked && (
-          <div
-            className={cn(
-              'absolute inset-0 bg-[#690003]/0 transition-all duration-300',
-              'group-hover:bg-[#690003]/10',
-              isSelected && 'bg-[#690003]/20 ring-4 ring-[#690003] rounded-lg'
-            )}
-          />
+      <div
+        className={cn(
+          'relative w-full aspect-square',
+          isLocked && 'blur-sm grayscale',
+          isSelected && !isLocked && 'ring-4 ring-[#690003] rounded-lg'
         )}
+      >
+        <Image src={imageUrl} alt={`${monthName} Stall`} fill className="object-contain" priority />
       </div>
 
       {/* Locked Overlay */}
