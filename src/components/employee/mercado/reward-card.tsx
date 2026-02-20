@@ -1,20 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, memo } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Minus, Plus, ImageIcon, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Coins, Package, CheckCircle2, Clock, XCircle } from 'lucide-react';
 import { useRedeemReward } from '@/hooks/tanstack/mutations/redemptionMutations';
-import { formatNumber } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import type { Reward } from '@/types';
 
 interface RewardCardProps {
@@ -23,184 +16,150 @@ interface RewardCardProps {
   hasPendingRequest: boolean;
 }
 
-export function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCardProps) {
+export const RewardCard = memo(function RewardCard({
+  reward,
+  userPoints,
+  hasPendingRequest,
+}: RewardCardProps) {
   const [imageError, setImageError] = useState(false);
-  const [quantity, setQuantity] = useState(1);
   const redeemMutation = useRedeemReward();
 
-  const maxQuantity = reward.redeemingLimit || 99;
-  const totalCost = reward.pointsCost * quantity;
-  const canAfford = userPoints >= totalCost;
-  const isOutOfStock = reward.quantity !== undefined && reward.quantity === 0;
-  const canRedeem = canAfford && !hasPendingRequest && !isOutOfStock;
-  const isRedeeming = redeemMutation.isPending;
+  // Calculate if user can afford this reward
+  const canAfford = useMemo(() => userPoints >= reward.pointsCost, [userPoints, reward.pointsCost]);
 
-  // Debug: Log when component mounts with reward data
-  // useEffect(() => {
-  //   console.log('✅ RewardCard rendered:', {
-  //     name: reward.name,
-  //     pointsCost: reward.pointsCost,
-  //     quantity: reward.quantity,
-  //     isActive: reward.isActive,
-  //   });
-  // }, [reward]);
+  // Check if item is out of stock
+  const isOutOfStock = useMemo(() => {
+    return reward.quantity !== undefined && reward.quantity !== null && reward.quantity <= 0;
+  }, [reward.quantity]);
 
-  const handleIncrement = () => {
-    if (quantity < maxQuantity) {
-      setQuantity(quantity + 1);
-    }
-  };
+  // Determine if redeem button should be disabled
+  const isDisabled = useMemo(() => {
+    return !canAfford || isOutOfStock || hasPendingRequest || redeemMutation.isPending;
+  }, [canAfford, isOutOfStock, hasPendingRequest, redeemMutation.isPending]);
 
-  const handleDecrement = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-    }
-  };
+  const handleRedeem = async () => {
+    if (isDisabled) return;
 
-  const handleQuantityChange = (value: string) => {
-    const numValue = parseInt(value);
-    if (!isNaN(numValue) && numValue >= 1 && numValue <= maxQuantity) {
-      setQuantity(numValue);
-    }
-  };
-
-  const handleRedeem = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (canRedeem && !isRedeeming) {
-      redeemMutation.mutate(
-        { rewardId: reward.id, quantity, rewardName: reward.name },
-        {
-          onSuccess: () => {
-            // Reset quantity to 1 after successful redemption
-            setQuantity(1);
-          },
-        }
-      );
+    try {
+      await redeemMutation.mutateAsync({
+        rewardId: reward.id,
+        quantity: 1,
+        rewardName: reward.name,
+      });
+    } catch (error) {
+      console.error('Failed to redeem reward:', error);
     }
   };
 
   return (
-    <Card className="overflow-hidden border-[#690003]/20 hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
-              {reward.imageUrl && !imageError ? (
-                <img
-                  src={reward.imageUrl}
-                  alt={reward.name}
-                  className="h-full w-full object-cover"
-                  onError={() => setImageError(true)}
-                />
-              ) : (
-                <ImageIcon className="h-5 w-5 text-gray-400" />
-              )}
+    <Card className="group relative overflow-hidden bg-white border-2 border-[#e0cfcf] hover:border-[#a83232] transition-all duration-300 hover:shadow-xl">
+      <CardContent className="p-4">
+        {/* Image Container */}
+        <div className="relative aspect-square w-full mb-4 bg-linear-to-br from-[#fff8f5] to-[#fef5f1] rounded-xl overflow-hidden">
+          {reward.imageUrl && !imageError ? (
+            <Image
+              src={reward.imageUrl}
+              alt={reward.name}
+              fill
+              className="object-cover pixelated transition-transform duration-300 group-hover:scale-110"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Package className="h-16 w-16 text-[#a83232]/20" />
             </div>
-            <CardTitle className="text-xl text-gray-900">{reward.name}</CardTitle>
-          </div>
-          <div className="flex flex-col items-end gap-1">
+          )}
+
+          {/* Status Badges */}
+          <div className="absolute top-2 right-2 flex flex-col gap-2">
+            {hasPendingRequest && (
+              <Badge className="bg-amber-500 text-white hover:bg-amber-500 shadow-lg">
+                <Clock className="h-3 w-3 mr-1" />
+                Pending
+              </Badge>
+            )}
             {isOutOfStock && (
-              <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-300">
+              <Badge className="bg-red-600 text-white hover:bg-red-600 shadow-lg">
+                <XCircle className="h-3 w-3 mr-1" />
                 Out of Stock
               </Badge>
             )}
-            {hasPendingRequest && !isOutOfStock && (
-              <Badge className="bg-yellow-500 text-white text-xs">Pending Approval</Badge>
-            )}
-          </div>
-        </div>
-        {reward.category && (
-          <CardDescription className="text-gray-600">{reward.category}</CardDescription>
-        )}
-      </CardHeader>
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-[#7a3d3d]">Cost per item</span>
-            <span className="text-lg font-bold text-[#690003]">
-              {formatNumber(reward.pointsCost)} <span className="text-sm font-normal">pts</span>
-            </span>
           </div>
 
-          {reward.redeemingLimit && reward.redeemingLimit > 0 && (
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-[#7a3d3d]">Limit per request</span>
-              <span className="text-sm font-medium text-[#5a2a2a]">{reward.redeemingLimit}</span>
+          {/* Quantity Badge */}
+          {reward.quantity !== undefined && reward.quantity !== null && reward.quantity > 0 && (
+            <div className="absolute bottom-2 left-2">
+              <Badge variant="secondary" className="bg-white/90 text-[#5a2a2a] shadow-md">
+                <Package className="h-3 w-3 mr-1" />
+                {reward.quantity} left
+              </Badge>
             </div>
           )}
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-[#5a2a2a]">Quantity</label>
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={handleDecrement}
-                disabled={quantity <= 1 || isOutOfStock || isRedeeming}
-                className="h-9 w-9 border-[#690003] text-[#690003] hover:bg-[#fbeaea]"
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <Input
-                type="number"
-                min="1"
-                max={maxQuantity}
-                value={quantity}
-                onChange={(e) => handleQuantityChange(e.target.value)}
-                disabled={isOutOfStock || isRedeeming}
-                className="h-9 w-16 text-center border-[#690003] focus-visible:ring-[#690003]"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={handleIncrement}
-                disabled={quantity >= maxQuantity || isOutOfStock || isRedeeming}
-                className="h-9 w-9 border-[#690003] text-[#690003] hover:bg-[#fbeaea]"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-2 border-t border-[#690003]/10">
-            <span className="text-sm font-medium text-[#7a3d3d]">Total Cost</span>
-            <span className="text-2xl font-bold text-[#690003]">
-              {formatNumber(totalCost)} <span className="text-sm font-normal">pts</span>
-            </span>
-          </div>
         </div>
+
+        {/* Reward Name */}
+        <h3 className="text-lg font-bold text-[#690003] mb-2 line-clamp-2 min-h-14 pixelated-text">
+          {reward.name}
+        </h3>
+
+        {/* Points Cost */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Coins className="h-5 w-5 text-amber-600" />
+            <span className="text-xl font-bold text-[#a83232]">
+              {reward.pointsCost.toLocaleString()}
+            </span>
+            <span className="text-sm text-[#7a3d3d]">pts</span>
+          </div>
+
+          {/* Affordability Indicator */}
+          {canAfford ? (
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+          ) : (
+            <XCircle className="h-5 w-5 text-red-500" />
+          )}
+        </div>
+
+        {/* Redemption Limit */}
+        {reward.redeemingLimit && (
+          <p className="text-xs text-[#7a3d3d] mb-2">Limit: {reward.redeemingLimit} per month</p>
+        )}
       </CardContent>
-      <CardFooter>
+
+      <CardFooter className="p-4 pt-0">
         <Button
-          type="button"
           onClick={handleRedeem}
-          disabled={!canRedeem || isRedeeming}
-          className={`w-full ${
-            canRedeem && !isRedeeming
-              ? 'bg-[#690003] hover:bg-[#8b0000] text-white'
+          disabled={isDisabled}
+          className={cn(
+            'w-full font-bold transition-all duration-300',
+            canAfford && !isOutOfStock && !hasPendingRequest
+              ? 'bg-[#a83232] hover:bg-[#8b0000] text-white shadow-lg hover:shadow-xl'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
+          )}
         >
-          {isRedeeming ? (
+          {redeemMutation.isPending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
               Redeeming...
             </>
+          ) : hasPendingRequest ? (
+            'Already Requested'
           ) : isOutOfStock ? (
             'Out of Stock'
-          ) : hasPendingRequest ? (
-            'Pending Approval'
           ) : !canAfford ? (
-            'Insufficient Points'
+            `Need ${(reward.pointsCost - userPoints).toLocaleString()} more pts`
           ) : (
-            `Redeem (${formatNumber(totalCost)} pts)`
+            <>
+              <Package className="h-4 w-4 mr-2" />
+              Redeem Now
+            </>
           )}
         </Button>
       </CardFooter>
+
+      {/* Shimmer Effect on Hover */}
+      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
     </Card>
   );
-}
+});
