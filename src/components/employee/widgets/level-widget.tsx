@@ -1,22 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { handleFetchEmployeeXP } from '@/action-handlers/employees';
-import type { EmployeeXP } from '@/types';
 import { useGetEmployeeXP } from '@/hooks/tanstack';
 
 export default function LevelIcon() {
   const { data, error, isLoading } = useGetEmployeeXP();
 
-  // const [xpData, setXpData] = useState<EmployeeXP | null>(null);
-
-  // useEffect(() => {
-  //   async function fetchXP() {
-  //     const data = await handleFetchEmployeeXP();
-  //     setXpData(data);
-  //   }
-  //   fetchXP();
-  // }, []);
 
   // While loading, show placeholders
   const level = data?.level ?? 0;

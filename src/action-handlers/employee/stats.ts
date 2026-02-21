@@ -26,6 +26,13 @@ export async function handleFetchEmployeeLevel(): Promise<number | null> {
     toast.error('Failed to load level data');
     return null;
   }
+
+  if (!result.data) {
+    toast.error('Failed to load level data', {
+      description: 'No rank data available',
+    });
+    return null;
+  }
   
   return result.data;
 }

@@ -9,29 +9,29 @@ import HeaderHUD from '../dashboard/header-hud';
 export function TasksPage() {
   const { data, error, isLoading } = useGetEmployeeTasks();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen p-8 flex flex-col gap-8">
-        <div className="flex items-center justify-center flex-1">
-          <div className="text-lg">Loading tasks...</div>
-        </div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen p-8 flex flex-col gap-8">
+  //       <div className="flex items-center justify-center flex-1">
+  //         <div className="text-lg">Loading tasks...</div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
-  if (error) {
-    return (
-      <div className="min-h-screen p-8 flex flex-col gap-8">
-        <Header
-          title="Tasks"
-          description="View your tasks by status: Current, On Review, Verified, or Denied Approval."
-        />
-        <div className="flex items-center justify-center flex-1">
-          <div className="text-lg text-destructive">Error: {error.message}</div>
-        </div>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="min-h-screen p-8 flex flex-col gap-8">
+  //       <Header
+  //         title="Tasks"
+  //         description="View your tasks by status: Current, On Review, Verified, or Denied Approval."
+  //       />
+  //       <div className="flex items-center justify-center flex-1">
+  //         <div className="text-lg text-destructive">Error: {error.message}</div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   const {
     currentTasks = [],
@@ -62,9 +62,9 @@ export function TasksPage() {
         <div className="flex-1 min-w-0 p-4">
           <TaskStatusBoard
             currentTasks={currentTasks}
-            onReviewTasks={onReviewTasks}
+            inReviewTasks={onReviewTasks}
             verifiedTasks={verifiedTasks}
-            deniedTasks={deniedTasks}
+            rejectedTasks={deniedTasks}
           />
         </div>
       </div>

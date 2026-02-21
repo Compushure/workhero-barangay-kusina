@@ -31,27 +31,27 @@ function sortTasks(tasks: TaskStatusItem[], sortBy: SortOption): TaskStatusItem[
 
 interface TaskStatusBoardProps {
   currentTasks?: TaskStatusItem[];
-  onReviewTasks?: TaskStatusItem[];
+  inReviewTasks?: TaskStatusItem[];
   verifiedTasks?: TaskStatusItem[];
-  deniedTasks?: TaskStatusItem[];
+  rejectedTasks?: TaskStatusItem[];
 }
 
 export function TaskStatusBoard({
   currentTasks = [],
-  onReviewTasks = [],
+  inReviewTasks = [],
   verifiedTasks = [],
-  deniedTasks = [],
+  rejectedTasks = [],
 }: TaskStatusBoardProps) {
   const [sortBy, setSortBy] = useState<SortOption>('due-date');
 
   const [current, onReview, verified, denied] = useMemo(
     () => [
       sortTasks(currentTasks, sortBy),
-      sortTasks(onReviewTasks, sortBy),
+      sortTasks(inReviewTasks, sortBy),
       sortTasks(verifiedTasks, sortBy),
-      sortTasks(deniedTasks, sortBy),
+      sortTasks(rejectedTasks, sortBy),
     ],
-    [currentTasks, onReviewTasks, verifiedTasks, deniedTasks, sortBy]
+    [currentTasks, inReviewTasks, verifiedTasks, rejectedTasks, sortBy]
   );
 
   return (
