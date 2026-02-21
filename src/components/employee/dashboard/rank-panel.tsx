@@ -1,54 +1,54 @@
 'use client';
 
 import { useState } from 'react';
-import { Trophy, HelpCircle } from 'lucide-react';
+import { Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
-import { useQuery } from '@tanstack/react-query';
-import { getEmployeePerformanceScore } from '@/actions/employee/stats';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import type { EmployeeRank } from '@/types';
+import type { TimePeriod } from '@/lib/utils/time-period-utils';
 
 const PERFORMANCE_SCORE_TOOLTIP =
   'Performance Score = (number of approved tasks) × (total points earned from those tasks). Used for leaderboard ranking.';
 
-interface RankWidgetProps {
-  isCollapsed?: boolean;
-}
+// Period display labels
+const PERIOD_LABELS: Record<TimePeriod | 'current', string> = {
+  current: 'Current',
+  weekly: 'Weekly',
+  monthly: 'Monthly',
+  yearly: 'Yearly',
+};
+
+// Period order for navigation
+const PERIODS: (TimePeriod | 'current')[] = ['current', 'weekly', 'monthly', 'yearly'];
 
 /**
  * Main Rank Widget Renderer
  * Fetches employee rank + performance score (points) and displays them consistently
+ * Supports time-period filtering (Current/Weekly/Monthly/Yearly)
  */
-export function RankWidget({ isCollapsed }: RankWidgetProps) {
-  const [hovered, setHovered] = useState(false);
+export function RankWidget() {
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod | 'current'>('current');
 
-  // Fetch employee rank
-  const { data: rankData, isLoading: isRankLoading } = useGetEmployeeRank();
+  // Fetch employee rank and performance score for selected period
+  const { data: rankData, isLoading: isRankLoading } = useGetEmployeeRank(selectedPeriod);
 
-  // Fetch performance score (approved task count × total_points_earned from user_attributes)
-  const { data: performanceScoreResult, isLoading: isPerformanceScoreLoading } = useQuery({
-    queryKey: ['employeePerformanceScore'],
-    queryFn: async () => {
-      const result = await getEmployeePerformanceScore();
-      return result.data;
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+  // Navigation handlers
+  const goToPreviousPeriod = () => {
+    const currentIndex = PERIODS.indexOf(selectedPeriod);
+    const previousIndex = currentIndex > 0 ? currentIndex - 1 : PERIODS.length - 1;
+    setSelectedPeriod(PERIODS[previousIndex]);
+  };
 
-  const performanceScore = performanceScoreResult ?? 0;
+  const goToNextPeriod = () => {
+    const currentIndex = PERIODS.indexOf(selectedPeriod);
+    const nextIndex = currentIndex < PERIODS.length - 1 ? currentIndex + 1 : 0;
+    setSelectedPeriod(PERIODS[nextIndex]);
+  };
+
+  // Extract performance score from rank data (period-specific)
+  const performanceScore = rankData?.performanceScore ?? 0;
 
   // Loading state
-  if (isRankLoading || isPerformanceScoreLoading) {
-    if (isCollapsed) {
-      return (
-        <div className="bg-white/10 rounded-full h-16 w-16 mx-auto flex items-center justify-center mb-4">
-          <div className="animate-pulse">
-            <Trophy size={20} className="text-yellow-300" />
-          </div>
-        </div>
-      );
-    }
-
+  if (isRankLoading) {
     return (
       <div className="bg-white/10 rounded-lg p-4 mb-4 animate-pulse">
         <div className="flex items-center gap-3 mb-2">
@@ -69,55 +69,70 @@ export function RankWidget({ isCollapsed }: RankWidgetProps) {
     return null;
   }
 
-  const { rank } = rankData as EmployeeRank;
+  const { rank } = rankData;
 
-  if (isCollapsed) {
-    // Compact circle view
-    return (
-      <div
-        className="bg-white/10 rounded-full h-16 w-16 mx-auto flex flex-col items-center justify-center mb-4 transition-all duration-200"
-        title={`Personal Rank #${rank} - ${performanceScore} Performance Score.`}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+  // Navigation component (reused in all states)
+  const navigationControls = (
+    <div className="flex items-center justify-center gap-2 mb-2">
+      <button
+        onClick={goToPreviousPeriod}
+        className="bg-white/20 hover:bg-white/30 text-white rounded-lg p-1.5 transition-colors"
+        aria-label="Previous period"
       >
-        <Trophy size={16} className="text-white mb-1" />
-        <span className="text-xs font-bold text-white">#{rank}</span>
-        {hovered && (
-          <div className="absolute inset-0 bg-gray-400/40 rounded-full transition-opacity duration-200" />
-        )}
+        <ChevronLeft size={14} />
+      </button>
+      <div className="min-w-20 text-center ">
+        <span className="text-base font-medium text-white">{PERIOD_LABELS[selectedPeriod]}</span>
       </div>
-    );
-  }
+      <button
+        onClick={goToNextPeriod}
+        className="bg-white/20 hover:bg-white/30 text-white rounded-lg p-1.5 transition-colors"
+        aria-label="Next period"
+      >
+        <ChevronRight size={14} />
+      </button>
+    </div>
+  );
 
-  // Expanded card view
   return (
-    <div className="bg-white/10 rounded-lg p-4 mb-4">
-      <div className="flex items-center gap-3 mb-2">
-        <div className="bg-white/20 rounded-full p-2 shrink-0 flex items-center justify-center">
-          <Trophy size={20} className="text-yellow-300" />
+    <div className="bg-white/10 rounded-lg p-3 mb-4">
+      {navigationControls}
+
+      {/* Conditional content based on performance score */}
+      {performanceScore === 0 ? (
+        <div className="flex items-center justify-center py-4">
+          <span className="text-sm text-red-200/70 italic">Not available yet</span>
         </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-white">#{rank}</span>
-          <span className="text-xl text-red-200">Rank</span>
+      ) : (
+        <div className="flex items-center gap-4">
+          {/* Left: Rank Section */}
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 rounded-full p-2">
+              <Trophy size={20} className="text-yellow-300" />
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-bold text-white">#{rank}</span>
+              <span className="text-sm text-red-200">Rank</span>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="h-12 border-l-2 border-white/40"></div>
+
+          {/* Right: Performance Score Section */}
+          <div className="flex flex-col items-center flex-1">
+            <span className="text-xs text-red-200 whitespace-nowrap mb-1">Performance Score</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-xl font-bold text-white cursor-help">{performanceScore}</span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-60">
+                {PERFORMANCE_SCORE_TOOLTIP}
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
-      </div>
-      <p className="text-s text-red-200 flex items-center gap-1.5">
-        Performance Score: <span className="text-white font-semibold">{performanceScore}</span>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              className="inline-flex text-red-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded"
-              aria-label="How is performance score calculated?"
-            >
-              <HelpCircle size={14} className="shrink-0" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-[240px]">
-            {PERFORMANCE_SCORE_TOOLTIP}
-          </TooltipContent>
-        </Tooltip>
-      </p>
+      )}
     </div>
   );
 }

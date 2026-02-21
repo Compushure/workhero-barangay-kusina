@@ -6,9 +6,10 @@
 
 /**
  * Employee rank data
- * Contains the employee's rank among all regular employees and total count
+ * Contains the employee's rank, performance score, and total count
  */
 export type EmployeeRank = {
   rank: number;
+  performanceScore: number;
   totalEmployees: number;
 };

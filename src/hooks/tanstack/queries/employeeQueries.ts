@@ -10,6 +10,7 @@ import { handleFetchEmployeeRank } from '@/action-handlers/employee/stats';
 import { fetchUserBadgesHandler } from '@/action-handlers/employee/badges';
 import type { EmployeeRank } from '@/types';
 import type { UserBadge } from '@/actions/employee/badges';
+import type { TimePeriod } from '@/lib/utils/time-period-utils';
 
 /**
  * Query key factory for employee-related queries
@@ -24,37 +25,40 @@ import type { UserBadge } from '@/actions/employee/badges';
  */
 export const employeeKeys = {
   all: ['employees'] as const,
-  rank: () => [...employeeKeys.all, 'rank'] as const,
+  rank: (period?: TimePeriod | 'current') => 
+    period ? [...employeeKeys.all, 'rank', period] as const : [...employeeKeys.all, 'rank'] as const,
   badges: () => [...employeeKeys.all, 'badges'] as const,
   userBadges: (userId: string) => [...employeeKeys.badges(), userId] as const,
 };
 
 /**
  * Fetches the current employee's rank among all regular employees
- * Uses RPC function that calculates rank efficiently with window functions
+ * Supports time period filtering for historical rankings
  *
+ * @param period - Time period filter (current/weekly/monthly/yearly)
  * @param options - Query options (enabled, staleTime, etc.)
  * @returns Query result with EmployeeRank data, loading state, and error handling
  *
  * @example
  * ```tsx
  * function RankWidget() {
- *   const { data: rankData, isLoading, error } = useGetEmployeeRank()
+ *   const { data: rankData, isLoading, error } = useGetEmployeeRank('current')
  *
  *   if (isLoading) return <Skeleton />
  *   if (error || !rankData) return null
  *
- *   return <div>Rank #{rankData.rank} of {rankData.totalEmployees}</div>
+ *   return <div>Rank #{rankData.rank} - Score: {rankData.performanceScore}</div>
  * }
  * ```
  */
 export function useGetEmployeeRank(
+  period: TimePeriod | 'current' = 'current',
   queryOptions: { enabled?: boolean } = {}
 ): UseQueryResult<EmployeeRank | null, Error> {
   return useQuery({
-    queryKey: employeeKeys.rank(),
+    queryKey: employeeKeys.rank(period),
     queryFn: async () => {
-      const result = await handleFetchEmployeeRank();
+      const result = await handleFetchEmployeeRank(period);
       return result;
     },
     enabled: queryOptions.enabled !== false,

@@ -15,6 +15,7 @@ import {
 } from '@/actions/employee/stats';
 import { toast } from 'sonner';
 import type { EmployeeRank, EmployeeXP } from '@/types';
+import type { TimePeriod } from '@/lib/utils/time-period-utils';
 
 /**
  * Fetches the current employee's level
@@ -48,10 +49,13 @@ export async function handleFetchEmployeePoints(): Promise<EmployeePointsData | 
 
 /**
  * Fetches the current employee's rank among all employees
+ * @param period - Time period filter (current/weekly/monthly/yearly)
  * @returns Promise with rank data or null on error
  */
-export async function handleFetchEmployeeRank(): Promise<EmployeeRank | null> {
-  const result = await getEmployeeRank();
+export async function handleFetchEmployeeRank(
+  period: TimePeriod | 'current' = 'current'
+): Promise<EmployeeRank | null> {
+  const result = await getEmployeeRank(period);
   
   if (!result.success) {
     toast.error('Failed to load rank data');
