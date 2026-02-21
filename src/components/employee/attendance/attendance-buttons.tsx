@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Coffee, CupSoda, LogOut } from 'lucide-react';
+import DutyLabel from './duty-label';
 
 interface Props {
   status: any;
@@ -20,14 +20,14 @@ export default function AttendanceButtons({
 }: Props) {
   return (
     <div className="flex flex-col items-center gap-4 w-full">
+      {/* Duty status label */}
+      <DutyLabel status={status} />
+
       {/* Already Timed Out */}
       {status?.hasTimedOut && (
         <div className="text-center">
-          <span className="text-xl px-2 py-1 rounded-full inline-block bg-red-200 text-red-700 border border-red-400">
-            ⚫ Clocked Out
-          </span>
-          <p className="mt-8 text-[#808080d8] text-sm">
-            You&apos;ve clocked out for today. See you again tomorrow!👋
+          <p className="mt-2 text-[#808080d8] text-sm">
+            You&apos;ve clocked out for today. See you again tomorrow! 👋
           </p>
         </div>
       )}

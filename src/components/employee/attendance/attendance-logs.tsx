@@ -68,7 +68,7 @@ export default function AttendanceLogs({ logs = [] }: AttendanceLogsProps) {
 
               {/* Warning note */}
               {log.note && (
-                <span className="text-xs text-red-500 mt-1">⚠️ {log.note}</span>
+                <span className="text-xs text-red-500 mt-1"> {log.note}</span>
               )}
             </div>
           );

@@ -61,7 +61,9 @@ export default function StatusIndicator({
             isCurrentlyOverBreak ? 'text-red-600 animate-pulse' : 'text-orange-600'
           }`}
         >
-          {isCurrentlyOverBreak ? '🚨 Over break time!' : 'On break'}
+          {isCurrentlyOverBreak
+            ? `Break Time Remaining: ${breakTimer}`
+            : `🚨 Over Break Time!: ${breakTimer}`}
         </span>
       ) : (
         <span className="text-green-600">Ready to time out</span>
