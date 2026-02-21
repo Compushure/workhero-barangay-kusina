@@ -12,6 +12,7 @@ import { TaskStatusSection } from './task-status-section';
 import { TaskCard } from './task-card';
 import type { TaskStatusItem } from './types';
 import { Header } from '../header';
+import { useGetEmployeeTasks } from '@/hooks/tanstack/employee';
 
 type SortOption = 'due-date' | 'points' | 'name';
 
@@ -42,6 +43,8 @@ export function TaskStatusBoard({
   verifiedTasks = [],
   rejectedTasks = [],
 }: TaskStatusBoardProps) {
+  const { error } = useGetEmployeeTasks();
+
   const [sortBy, setSortBy] = useState<SortOption>('due-date');
 
   const [current, onReview, verified, denied] = useMemo(
@@ -78,28 +81,34 @@ export function TaskStatusBoard({
       </div>
 
       {/* Single Section on small screens; 2x2 grid on lg and up (Current | On Review, Verified | Denied Approval) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full min-w-0">
-        <TaskStatusSection status="Current" task={current}>
-          {current.map((task) => (
-            <TaskCard key={task.id} task={task} />
-          ))}
-        </TaskStatusSection>
-        <TaskStatusSection status="In Review" task={onReview}>
-          {onReview.map((task) => (
-            <TaskCard key={task.id} task={task} />
-          ))}
-        </TaskStatusSection>
-        <TaskStatusSection status="Approved" task={verified}>
-          {verified.map((task) => (
-            <TaskCard key={task.id} task={task} />
-          ))}
-        </TaskStatusSection>
-        <TaskStatusSection status="Rejected" task={denied}>
-          {denied.map((task) => (
-            <TaskCard key={task.id} task={task} />
-          ))}
-        </TaskStatusSection>
-      </div>
+        {error ? (
+          <div className='w-full h-48 flex flex-col items-center justify-center'>
+            <span className='text-lg'>Error loading tasks. Please try again</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full min-w-0">
+          <TaskStatusSection status="Current" task={current}>
+            {current.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </TaskStatusSection>
+          <TaskStatusSection status="In Review" task={onReview}>
+            {onReview.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </TaskStatusSection>
+          <TaskStatusSection status="Approved" task={verified}>
+            {verified.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </TaskStatusSection>
+          <TaskStatusSection status="Rejected" task={denied}>
+            {denied.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </TaskStatusSection>
+          </div>
+        )}
     </div>
   );
 }

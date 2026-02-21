@@ -4,6 +4,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type { TaskStatusItem, TaskStatusKind } from './types';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
+import { useGetEmployeeTasks } from '@/hooks/tanstack/employee';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TaskStatusSectionProps {
   status: TaskStatusKind;
@@ -12,6 +14,8 @@ interface TaskStatusSectionProps {
 }
 
 export function TaskStatusSection({ status, task, children }: TaskStatusSectionProps) {
+  const { error, isLoading } = useGetEmployeeTasks();
+  
   return (
     <div className="flex flex-col gap-3 min-w-0 w-full">
       <header className="flex w-full justify-between px-2">
@@ -39,7 +43,16 @@ export function TaskStatusSection({ status, task, children }: TaskStatusSectionP
       {/* Exactly 3 task cards visible; 4+ tasks scroll vertically */}
       <div className="bg-[#2D061D]/35 border rounded-xl shadow-sm h-80 flex flex-col min-h-0 overflow-hidden w-full inset-shadow-sm/25">
         <ScrollArea className="flex-1 min-h-0">
-          <div className="flex flex-col gap-4 items-center p-4">{children}</div>
+          <div className="flex flex-col gap-4 items-center p-4">
+            {isLoading ? (
+              <>
+              <Skeleton className="w-full h-20 rounded-[1.1875rem] bg-background" />
+              <Skeleton className="w-full h-20 rounded-[1.1875rem] bg-background" />
+              </>
+            ) : (
+              <>{children}</>
+            )}
+          </div>
         </ScrollArea>
       </div>
     </div>
