@@ -1,37 +1,20 @@
 'use client';
 
 import AttendanceIcon from './attendance';
-import { useState } from 'react';
 import { RankWidget } from '../dashboard/rank-panel';
-import AttendanceLogs, { AttendanceLog } from './attendance-logs';
 import XPProgressAndPoints from './xp-points';
 import ProfileAndLevel from './profile-level';
 import DashboardRedirectButton from './kitchen-redirection';
+import { useGetTodayAttendanceStatus } from '@/hooks/tanstack';
 
 export default function AttendanceDesign() {
-  const [logs, setLogs] = useState<AttendanceLog[]>([]);
-  const [status, setStatus] = useState<any>({});
+  const { data: status } = useGetTodayAttendanceStatus();
 
-  // Helper to add a log entry with current timestamp
-  const addLog = (action: AttendanceLog['action'], note?: string) => {
-    setLogs((prev) => [
-      ...prev,
-      { action, time: new Date().toISOString(), note },
-    ]);
-
-    // Update status flags based on action
-    if (action === 'timein') {
-      setStatus({ hasTimedIn: true, isOnBreak: false, hasTimedOut: false });
-    }
-    if (action === 'startbreak') {
-      setStatus((prev: any) => ({ ...prev, isOnBreak: true }));
-    }
-    if (action === 'endbreak') {
-      setStatus((prev: any) => ({ ...prev, isOnBreak: false }));
-    }
-    if (action === 'timeout') {
-      setStatus({ hasTimedIn: true, isOnBreak: false, hasTimedOut: true });
-    }
+  // ✅ Normalize status for DashboardRedirectButton
+  const redirectStatus = {
+    hasTimedIn: status?.hasTimedIn ?? false,
+    isOnBreak: status?.isOnBreak ?? false,
+    hasTimedOut: status?.hasTimedOut ?? false,
   };
 
   return (
@@ -60,7 +43,7 @@ export default function AttendanceDesign() {
       {/* Center column: main card + dashboard button */}
       <div className="flex flex-col items-center gap-4 mt-10">
         {/* Main card */}
-        <div className="relative flex bg-[#E8DBBF] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[8px_8px_0px_#000] shadow-[#3017008e] animate-fadeIn">
+        <div className="relative flex bg-[#E8DBBF] border-3 border-[#47331F] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[6px_6px_0px_#000] shadow-[#47331F]/50 animate-fadeIn">
           {/* Header */}
           <h1 className="font-jersey text-3xl text-[#252525d8] text-center mb-1">⏰ Punch Station</h1>
           <p className="font-jersey text-xl text-[#474747d8] text-center text-parchment-foreground/70">
@@ -74,15 +57,12 @@ export default function AttendanceDesign() {
             })}
           </p>
 
-          {/* Functional Component Slot */}
-          <AttendanceIcon config={{}} addLog={addLog} />
-
-          {/* Logs always visible */}
-          <AttendanceLogs logs={logs} />
+          {/* Attendance controls */}
+          <AttendanceIcon config={{}} />
         </div>
 
         {/* Dashboard Redirect Button directly under the card */}
-        <DashboardRedirectButton status={status} />
+        <DashboardRedirectButton status={redirectStatus} />
       </div>
     </div>
   );

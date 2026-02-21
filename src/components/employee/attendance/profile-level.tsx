@@ -65,7 +65,7 @@ export default function ProfileLevelCard() {
               onError={() => setHasImage(false)}
             />
           ) : (
-            <span className="text-base font-bold text-[#690003]">{initials}</span>
+            <span className="text-base text-[#F5E8D6]">{initials}</span>
           )}
         </div>
 
