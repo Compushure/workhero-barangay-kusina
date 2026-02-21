@@ -98,6 +98,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         empId: backendEmp?.empId || '',
         tenure: backendEmp?.tenure,
         assignedTasks: [],
+        pendingOrders: 0,
         completedOrders: 0,
       };
     });
