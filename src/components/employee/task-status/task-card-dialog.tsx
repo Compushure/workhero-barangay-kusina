@@ -5,12 +5,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Calendar, ChevronDown, Coins, Loader2, Soup } from 'lucide-react';
+import { Calendar, ChefHat, ChevronDown, Coins, Loader2, Soup } from 'lucide-react';
 import { TaskStatusItem } from './types';
 import { SetStateAction, useState } from 'react';
 import {
   useSubmitTaskVerification,
-  useClaimTaskPoints,
+  useClaimTaskPointsandXP,
   useRedoTask,
 } from '@/hooks/tanstack/mutations/employeeTasksMutations';
 import { formatDate, isTaskOverdue } from '@/utils/date-utils';
@@ -26,7 +26,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
   const [pendingOrders, setPendingOrders] = useState(1);
 
   const submitMutation = useSubmitTaskVerification();
-  const claimMutation = useClaimTaskPoints();
+  const claimMutation = useClaimTaskPointsandXP();
   const redoMutation = useRedoTask();
 
   const canClaim =
@@ -188,9 +188,10 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                 className="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-md bg-primary-foreground text-foreground text-sm font-medium shadow hover:bg-foreground hover:text-primary-foreground hover:underline hover:scale-101 transition-all ease-in-out duration-400 delay-75 px-3 py-1.5"
                 aria-expanded={remarkOpen}
               >
+                <ChefHat className='size-5'/>
                 {remarkOpen ? 'close remark' : 'view remark'}
                 <ChevronDown
-                  className={`h-4 w-4 shrink-0 transition-transform duration-150 delay-75 ease-in-out ${remarkOpen ? 'rotate-180' : ''}`}
+                  className={`size-4 shrink-0 transition-transform duration-150 delay-75 ease-in-out ${remarkOpen ? 'rotate-180' : ''}`}
                   aria-hidden
                 />
               </button>
@@ -227,7 +228,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
 
           {/* Approved! - Claim points section */}
           {canClaim ? (
-            <div className="pt-2 flex justify-end">
+            <div className="pt-2 flex flex-col items-end">
               <button
                 type="button"
                 onClick={handleClaim}
@@ -243,10 +244,14 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                   'Claim Points & XP'
                 )}
               </button>
+              <p className="text-sm text-muted-foreground pt-2 text-center w-full">
+                Verification request for {pendingOrders} order/s has been approved!
+              </p>
             </div>
           ) : isFullyCompletedAndClaimed ? (
-            <p className="text-sm text-muted-foreground pt-2 text-right">
-              Points and XP have already been claimed.
+            <p className="text-sm text-muted-foreground pt-2 text-center flex flex-col">
+              <span>All orders are complete! </span>
+              <span>Points and XP have already been claimed.</span>
             </p>
           ) : null}
 

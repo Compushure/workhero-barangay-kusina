@@ -3,21 +3,24 @@
 import { useEffect, useState } from 'react';
 import { handleFetchEmployeeXP } from '@/action-handlers/employees';
 import type { EmployeeXP } from '@/types';
+import { useGetEmployeeXP } from '@/hooks/tanstack';
 
 export default function LevelIcon() {
-  const [xpData, setXpData] = useState<EmployeeXP | null>(null);
+  const { data, error, isLoading } = useGetEmployeeXP();
 
-  useEffect(() => {
-    async function fetchXP() {
-      const data = await handleFetchEmployeeXP();
-      setXpData(data);
-    }
-    fetchXP();
-  }, []);
+  // const [xpData, setXpData] = useState<EmployeeXP | null>(null);
+
+  // useEffect(() => {
+  //   async function fetchXP() {
+  //     const data = await handleFetchEmployeeXP();
+  //     setXpData(data);
+  //   }
+  //   fetchXP();
+  // }, []);
 
   // While loading, show placeholders
-  const level = xpData?.level ?? 0;
-  const currentXP = xpData?.currentXP ?? 0;
+  const level = data?.level ?? 0;
+  const currentXP = data?.currentXP ?? 0;
   // const totalXP = xpData?.totalXP ?? 0;
 
   // For progress bar, you need max XP per level.
