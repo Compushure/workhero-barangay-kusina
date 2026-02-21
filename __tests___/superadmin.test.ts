@@ -1,10 +1,12 @@
 /**
+ * ⚠️REMEMBER TO BE CAREFUL WITH INTEGRATION TESTING!!!!
+ * ‼️‼️PLEASE - if possible comment out nyo danay until ma set up ang test db
  * SuperAdmin User Management Tests
  * ===================================
  * Comprehensive test suite for user creation, editing, and deletion.
  * Tests both happy paths (success scenarios) and sad paths (error scenarios).
  * 
- * Test Coverage:
+ * Test Coverage: ()
  * - User creation with validation
  * - Email duplicate prevention
  * - User editing with partial updates
