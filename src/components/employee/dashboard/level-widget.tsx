@@ -36,7 +36,7 @@ export default function LevelIcon() {
         {/* Responsive XP bar */}
         <div className="h-5 bg-white border-4 border-[#9d3411] rounded-full overflow-hidden min-w-120 max-w-2xl">
           <div
-            className="h-full bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"
+            className="h-full bg-linear-to-r from-yellow-400 to-orange-500 rounded-full"
             style={{ width: `${(currentXP / maxXp) * 100}%` }}
           />
         </div>
