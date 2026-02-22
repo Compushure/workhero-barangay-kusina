@@ -1,5 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAvailableRewardsByMonthAction, getRewardsAction } from '@/actions/hr/rewards';
+import {
+    handleGetAvailableRewardsByMonthAction,
+    handleGetRewardsAction,
+} from '@/action-handlers/hr/rewards';
 import { Reward } from '@/types';
 import { isItemAvailableNow } from '@/utils/date-utils';
 
@@ -22,13 +25,7 @@ export function useGetRewards() {
     return useQuery<Reward[], Error>({
         queryKey: rewardKeys.list(),
         queryFn: async () => {
-            const result = await getRewardsAction();
-
-            if (result.error) {
-                throw new Error(result.error);
-            }
-
-            return result.data || [];
+            return await handleGetRewardsAction();
         },
         staleTime: 30 * 1000, // Consider data stale after 30 seconds
         gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
@@ -51,13 +48,7 @@ export function useGetAvailableRewards(options?: { enabled?: boolean }) {
         queryKey: rewardKeys.available(),
         enabled: options?.enabled ?? true,
         queryFn: async () => {
-            const result = await getRewardsAction();
-
-            if (result.error) {
-                throw new Error(result.error);
-            }
-
-            const allRewards = result.data || [];
+            const allRewards = await handleGetRewardsAction();
 
             console.log('📊 Rewards from database:', allRewards.length);
             console.log('📊 Rewards by month:', allRewards.reduce((acc, r) => {
@@ -108,13 +99,7 @@ export function useGetAvailableRewardsByMonth(month: number | null) {
         queryKey: month ? rewardKeys.availableByMonth(month) : [...rewardKeys.available(), 'month', 'none'],
         enabled: typeof month === 'number' && month >= 1 && month <= 12,
         queryFn: async () => {
-            const result = await getAvailableRewardsByMonthAction(month as number);
-
-            if (result.error) {
-                throw new Error(result.error);
-            }
-
-            return result.data || [];
+            return await handleGetAvailableRewardsByMonthAction(month as number);
         },
         staleTime: 10 * 1000,
         gcTime: 5 * 60 * 1000,
