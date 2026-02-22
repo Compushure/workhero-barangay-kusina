@@ -50,23 +50,19 @@ export function RankWidget() {
   // Loading state
   if (isRankLoading) {
     return (
-      <div className="bg-white/10 rounded-lg p-4 mb-4 animate-pulse">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="bg-white/20 rounded-full p-2 shrink-0">
-            <Trophy size={20} className="text-yellow-300" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <div className="h-7 w-12 bg-white/20 rounded"></div>
-            <div className="h-3 w-10 bg-white/20 rounded"></div>
-          </div>
+      <div className="bg-[#765332] border-3 border-[#47331F] rounded-lg p-4 mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <button onClick={handlePrev}>
+            <ChevronLeft className="text-[#9E9985] w-5 h-5" />
+          </button>
+          <span className="text-yellow-500 capitalize">{currentView}</span>
+          <button onClick={handleNext}>
+            <ChevronRight className="text-[#9E9985] w-5 h-5" />
+          </button>
         </div>
-        <div className="h-3 w-full bg-white/20 rounded"></div>
+        <p className="text-sm text-[#F5E8D6]">Not available yet</p>
       </div>
     );
-  }
-
-  if (!rankData) {
-    return null;
   }
 
   const { rank } = rankData;

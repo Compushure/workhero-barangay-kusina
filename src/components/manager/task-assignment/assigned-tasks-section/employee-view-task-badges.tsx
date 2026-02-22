@@ -54,15 +54,13 @@ export default function EmployeeViewTaskBadges({
             (emp) => emp.id === employee.id
           );
           const completedOrders = taskEmployee?.completedOrders || 0;
-          const pendingOrders = taskEmployee?.pendingOrders || 0
           // Reusable StatusIcon component
           const StatusIcon = ({ icon: Icon, className = "",  }: { icon: any; className?: string;}) => (
-            <p className={`flex items-center gap-1 ${className} px-2 py-1 rounded-full`}>
+            <p className={`flex gap-1 ${className} px-2 py-1 rounded-full`}>
               <Icon strokeWidth={2.5} className={`size-4`} />
               <span className={`text-xs`}>
                 {task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : 'Unknown'}
               </span>
-              {pendingOrders !== 0 && task.status === 'in-review' && <span className="text-sm leading-0 font-semibold text-amber-500">{pendingOrders}</span>}
             </p>
           );
 

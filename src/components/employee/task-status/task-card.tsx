@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Coins, Clock, Soup } from 'lucide-react';
+import { Coins, Soup, Calendar } from 'lucide-react';
 import type { TaskStatusItem } from './types';
 import TaskCardDialog from './task-card-dialog';
-import { isTaskOverdue } from '@/utils/date-utils';
+import { formatDate, isTaskOverdue } from '@/utils/date-utils';
 
 
 interface TaskCardProps {
@@ -33,15 +33,15 @@ export function TaskCard({ task }: TaskCardProps) {
       <CardContent className={`p-0 flex flex-col gap-3 sm:gap-5`}>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-5">
           <div className="flex flex-col gap-1 min-w-0 flex-1">
-            <p className={`text-lg font-medium leading-snug wrap-break-word ${task.status === 'approved' && task.completedOrders === task.maxOrders ? 'text-foreground/50 line-through' : ''}`}>
+            <p className={`text-lg font-medium leading-snug wrap-break-word ${task.status === 'approved' && task.completedOrders === task.maxOrders ? 'text-title/50 line-through' : 'text-title'}`}>
               {task.name}
             </p>
-            <span className={`flex gap-2 items-center text-sm font-semibold ${isTaskOverdue(task.dueDate) ? 'text-red-700' : ''}`}>
-              <Clock className='size-4 stroke-3'/>
-              {task.dueDate}
+            <span className={`flex gap-2 items-center text-sm font-medium ${isTaskOverdue(task.dueDate) ? 'text-red-700' : ''}`}>
+              <Calendar strokeWidth={2.75} className='size-4'/>
+              {formatDate(task.dueDate)}
             </span>
           </div>
-          <div className="flex flex-col items-start sm:items-end shrink-0 text-left sm:text-right gap-1.5 w-full sm:w-auto sm:min-w-[120px] border-t pt-3 sm:border-0 sm:pt-0">
+          <div className="flex flex-col items-start sm:items-end shrink-0 text-left sm:text-right gap-1.5 w-full sm:w-auto sm:min-w-30 border-t pt-3 sm:border-0 sm:pt-0">
             
             <span className="flex text-base font-semibold tabular-nums">
               <Soup strokeWidth={1.75} className="size-5 mr-1" />
