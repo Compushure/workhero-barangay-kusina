@@ -14,6 +14,8 @@
   --popover: #fafafa;
   --popover-foreground: #514937;
 
+  --title: #1b1b1b;
+
   /* Primary: Dark olive brown */
   --primary-foreground: #fafafa;
   --primary: #a83232;
@@ -133,6 +135,7 @@
   --color-success-foreground: var(--success-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-title: var(--title);
 }
 
 .admin-theme {

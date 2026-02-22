@@ -13,12 +13,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
-import type { EmployeeRank, EmployeeXP } from '@/types';
-
-export interface EmployeePointsData {
-  points: number;
-  deductedPoints: number;
-}
+import type { EmployeeRank, EmployeeXP, EmployeePointsData } from '@/types';
 
 export async function getEmployeeLevel(): Promise<ActionResult<number>> {
   return safeAction(async () => {

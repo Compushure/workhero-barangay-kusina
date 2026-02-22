@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { handleFetchEmployeeXP } from '@/action-handlers/employees';
+import { handleFetchEmployeeXP } from '@/action-handlers/employee/stats';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import type { EmployeeXP } from '@/types';
 import { ProfileLevelSkeleton } from './skeletons';

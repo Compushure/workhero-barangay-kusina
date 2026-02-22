@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { handleFetchEmployeeXP, handleFetchEmployeePoints } from '@/action-handlers/employees';
+import { handleFetchEmployeeXP, handleFetchEmployeePoints } from '@/action-handlers/employee/stats';
 import type { EmployeeXP, EmployeePointsData } from '@/types';
 import { XPProgressSkeleton } from './skeletons';
 
