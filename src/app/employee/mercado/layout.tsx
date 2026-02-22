@@ -48,17 +48,17 @@ const QUICK_NAV_ITEMS: QuickNavItem[] = [
 ];
 
 const MONTH_STALLS: MonthStall[] = [
-  { month: 1, image: '/mercado/market_02.1.png' },
-  { month: 2, image: '/mercado/market_02.2.png' },
-  { month: 3, image: '/mercado/market_02.3.png' },
-  { month: 4, image: '/mercado/market_02.4.png' },
+  { month: 1, image: '/mercado/market_02.8.png' },
+  { month: 2, image: '/mercado/bakery_01.png' },
+  { month: 3, image: '/mercado/market_02.5.png' },
+  { month: 4, image: '/mercado/bakery_04.png' },
   { month: 5, image: '/mercado/market_02.5.png' },
-  { month: 6, image: '/mercado/market_02.6.png' },
+  { month: 6, image: '/mercado/bakery_05.png' },
   { month: 7, image: '/mercado/market_02.7.png' },
-  { month: 8, image: '/mercado/market_02.8.png' },
-  { month: 9, image: '/mercado/bakery_01.png' },
+  { month: 8, image: '/mercado/bakery_02.png' },
+  { month: 9, image: '/mercado/market_02.8.png' },
   { month: 10, image: '/mercado/bakery_02.png' },
-  { month: 11, image: '/mercado/bakery_03.png' },
+  { month: 11, image: '/mercado/market_02.5.png' },
   { month: 12, image: '/mercado/bakery_04.png' },
 ];
 

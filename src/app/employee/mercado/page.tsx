@@ -11,7 +11,8 @@ export default function MercadoPage() {
   const { pendingRequests, userPoints, deductedPoints, isLoading } = useMercadoPageData({
     includeRewards: false,
   });
-  const { data: monthRewards = [] } = useGetAvailableRewardsByMonth(selectedMonth);
+  const { data: monthRewards = [], isLoading: monthRewardsLoading } =
+    useGetAvailableRewardsByMonth(selectedMonth);
 
   // Get pending reward IDs
   const pendingRewardIds = useMemo(() => {
@@ -27,6 +28,7 @@ export default function MercadoPage() {
         onOpenChange={(open) => !open && setSelectedMonth(null)}
         month={selectedMonth}
         rewards={monthRewards}
+        isLoading={monthRewardsLoading}
         userPoints={availablePoints}
         pendingRewardIds={pendingRewardIds}
       />

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useMemo, memo } from 'react';
+import { useState, useMemo, useEffect, memo } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Coins, Package, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Coins, Package, CheckCircle2, Clock, XCircle, Minus, Plus } from 'lucide-react';
 import { useRedeemReward } from '@/hooks/tanstack/mutations/redemptionMutations';
 import { cn } from '@/lib/utils';
 import type { Reward } from '@/types';
@@ -22,20 +22,50 @@ export const RewardCard = memo(function RewardCard({
   hasPendingRequest,
 }: RewardCardProps) {
   const [imageError, setImageError] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const redeemMutation = useRedeemReward();
 
-  // Calculate if user can afford this reward
-  const canAfford = useMemo(() => userPoints >= reward.pointsCost, [userPoints, reward.pointsCost]);
-
-  // Check if item is out of stock
   const isOutOfStock = useMemo(() => {
     return reward.quantity !== undefined && reward.quantity !== null && reward.quantity <= 0;
   }, [reward.quantity]);
 
-  // Determine if redeem button should be disabled
+  const maxByLimit =
+    reward.redeemingLimit && reward.redeemingLimit > 0 ? reward.redeemingLimit : Infinity;
+  const maxByStock = reward.quantity && reward.quantity > 0 ? reward.quantity : Infinity;
+  const maxByPoints = reward.pointsCost > 0 ? Math.floor(userPoints / reward.pointsCost) : 0;
+
+  const maxSelectable = useMemo(() => {
+    if (isOutOfStock) return 0;
+
+    const boundedByPoints = maxByPoints === 0 ? Infinity : maxByPoints;
+    const value = Math.min(maxByLimit, maxByStock, boundedByPoints);
+
+    if (!Number.isFinite(value)) return 99;
+    return Math.max(0, value);
+  }, [isOutOfStock, maxByLimit, maxByStock, maxByPoints]);
+
+  useEffect(() => {
+    if (maxSelectable <= 0) {
+      setQuantity(1);
+      return;
+    }
+
+    setQuantity((previous) => Math.min(Math.max(1, previous), maxSelectable));
+  }, [maxSelectable]);
+
+  const totalPoints = quantity * reward.pointsCost;
+  const canAfford = useMemo(() => userPoints >= totalPoints, [userPoints, totalPoints]);
+  const pointLabel = (value: number) => (value === 1 ? 'pt' : 'pts');
+
   const isDisabled = useMemo(() => {
-    return !canAfford || isOutOfStock || hasPendingRequest || redeemMutation.isPending;
-  }, [canAfford, isOutOfStock, hasPendingRequest, redeemMutation.isPending]);
+    return (
+      !canAfford ||
+      isOutOfStock ||
+      hasPendingRequest ||
+      redeemMutation.isPending ||
+      maxSelectable <= 0
+    );
+  }, [canAfford, isOutOfStock, hasPendingRequest, redeemMutation.isPending, maxSelectable]);
 
   const handleRedeem = async () => {
     if (isDisabled) return;
@@ -43,7 +73,7 @@ export const RewardCard = memo(function RewardCard({
     try {
       await redeemMutation.mutateAsync({
         rewardId: reward.id,
-        quantity: 1,
+        quantity,
         rewardName: reward.name,
       });
     } catch (error) {
@@ -52,116 +82,128 @@ export const RewardCard = memo(function RewardCard({
   };
 
   return (
-    <Card className="group relative overflow-hidden bg-white border-2 border-[#e0cfcf] hover:border-[#a83232] transition-all duration-300 hover:shadow-xl h-full min-h-96 flex flex-col rounded-2xl">
-      <CardContent className="p-4 flex-1 flex flex-col">
-        {/* Image Container */}
-        <div className="relative aspect-square w-full mb-4 bg-linear-to-br from-[#fff8f5] to-[#fef5f1] rounded-2xl overflow-hidden">
+    <Card className="group relative overflow-hidden bg-[#eadbc1] border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-80 min-w-0 flex flex-col rounded-lg">
+      <CardContent className="p-0 flex-1 flex flex-col">
+        <div className="relative h-28 w-full overflow-hidden bg-[#dfcfb3] border-b border-[#8a6844]/20">
           {reward.imageUrl && !imageError ? (
             <Image
               src={reward.imageUrl}
               alt={reward.name}
               fill
-              className="object-cover pixelated transition-transform duration-300 group-hover:scale-110"
+              className="object-contain p-2 pixelated"
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               onError={() => setImageError(true)}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Package className="h-16 w-16 text-[#a83232]/20" />
+              <Package className="h-10 w-10 text-[#8a6844]/60" />
             </div>
           )}
 
-          {/* Status Badges */}
-          <div className="absolute top-2 right-2 flex flex-col gap-2">
+          <div className="absolute top-2 right-2 flex flex-col gap-1">
             {hasPendingRequest && (
-              <Badge className="bg-amber-500 text-white hover:bg-amber-500 shadow-lg">
+              <Badge className="bg-[#c68a2e] text-white hover:bg-[#c68a2e] text-[9px] px-1.5 py-0">
                 <Clock className="h-3 w-3 mr-1" />
                 Pending
               </Badge>
             )}
             {isOutOfStock && (
-              <Badge className="bg-red-600 text-white hover:bg-red-600 shadow-lg">
+              <Badge className="bg-[#a84b3e] text-white hover:bg-[#a84b3e] text-[9px] px-1.5 py-0">
                 <XCircle className="h-3 w-3 mr-1" />
                 Out of Stock
               </Badge>
             )}
           </div>
-
-          {/* Quantity Badge */}
-          {reward.quantity !== undefined && reward.quantity !== null && reward.quantity > 0 && (
-            <div className="absolute bottom-2 left-2">
-              <Badge variant="secondary" className="bg-white/90 text-[#5a2a2a] shadow-md">
-                <Package className="h-3 w-3 mr-1" />
-                {reward.quantity} left
-              </Badge>
-            </div>
-          )}
         </div>
 
-        {/* Reward Name */}
-        <h3 className="text-lg font-bold text-[#690003] mb-2 line-clamp-2 min-h-14 pixelated-text">
-          {reward.name}
-        </h3>
+        <div className="px-3 py-2 flex-1 flex flex-col gap-1.5 min-w-0 text-[#4f3a26]">
+          <h3 className="text-xl sm:text-2xl leading-none font-bold text-[#3b2615] line-clamp-1 pixelated-text min-w-0 text-center">
+            {reward.name}
+          </h3>
+          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs sm:text-sm min-w-0 text-center place-items-center">
+            <span className="text-[#6b4d2f] font-semibold truncate text-center">Price:</span>
+            <span className="text-[#6b4d2f] font-semibold truncate text-center">Stock:</span>
 
-        {/* Points Cost */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Coins className="h-5 w-5 text-amber-600" />
-            <span className="text-xl font-bold text-[#a83232]">
-              {reward.pointsCost.toLocaleString()}
+            <span className="text-[#a56d1f] font-semibold truncate text-center">
+              {reward.pointsCost.toLocaleString()} {pointLabel(reward.pointsCost)}
             </span>
-            <span className="text-sm text-[#7a3d3d]">pts</span>
+            <span className="text-[#8f6435] font-semibold truncate text-center">
+              {reward.quantity ?? 'Unlimited'}
+            </span>
           </div>
 
-          {/* Affordability Indicator */}
-          {canAfford ? (
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-          ) : (
-            <XCircle className="h-5 w-5 text-red-500" />
-          )}
-        </div>
+          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs sm:text-sm min-w-0 text-center place-items-center">
+            <span className="text-[#6b5a46] font-medium truncate text-center">Limit:</span>
+            <span className="text-[#6b5a46] font-medium truncate text-center">Total:</span>
 
-        {/* Redemption Limit */}
-        <div className="min-h-5">
-          {reward.redeemingLimit && (
-            <p className="text-xs text-[#7a3d3d] mb-2">Limit: {reward.redeemingLimit} per month</p>
-          )}
+            <span className="text-[#5d4a34] font-semibold truncate text-center">
+              {reward.redeemingLimit ?? 1}
+            </span>
+            <span className="text-[#6f4f31] font-semibold truncate text-center">
+              {totalPoints.toLocaleString()}
+            </span>
+          </div>
+
+          <div className="mt-0.5 flex items-center justify-center gap-2.5">
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              onClick={() => setQuantity((previous) => Math.max(1, previous - 1))}
+              disabled={quantity <= 1 || isDisabled}
+              className="h-8 w-8 rounded-md bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <span className="min-w-5 text-center text-sm font-bold text-[#3f2614]">{quantity}</span>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              onClick={() => setQuantity((previous) => Math.min(maxSelectable, previous + 1))}
+              disabled={quantity >= maxSelectable || isDisabled}
+              className="h-8 w-8 rounded-md bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-2.5 pt-0 min-w-0">
         <Button
           onClick={handleRedeem}
           disabled={isDisabled}
           className={cn(
-            'w-full h-10 text-sm font-bold transition-all duration-300',
+            'w-full h-11 text-sm font-bold transition-all duration-200 border-b-4 border-[#6d472a] min-w-0',
             canAfford && !isOutOfStock && !hasPendingRequest
-              ? 'bg-[#a83232] hover:bg-[#8b0000] text-white shadow-lg hover:shadow-xl'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              ? 'bg-[#d6962f] hover:bg-[#c18425] text-[#22160d]'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed border-b-0'
           )}
         >
           {redeemMutation.isPending ? (
             <>
-              <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-              Redeeming...
+              <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" />
+              Ordering...
             </>
           ) : hasPendingRequest ? (
             'Already Requested'
           ) : isOutOfStock ? (
             'Out of Stock'
           ) : !canAfford ? (
-            `Need ${(reward.pointsCost - userPoints).toLocaleString()} more pts`
+            <span className="inline-flex items-center gap-1 min-w-0 truncate">
+              Need {(totalPoints - userPoints).toLocaleString()} more <Coins className="h-3 w-3" />
+            </span>
           ) : (
-            <>
-              <Package className="h-4 w-4 mr-2" />
-              Redeem Now
-            </>
+            <span className="inline-flex items-center gap-1 min-w-0 truncate">
+              <Package className="h-3.5 w-3.5 mr-1" />
+              Order ({totalPoints.toLocaleString()} <Coins className="h-3 w-3" />)
+            </span>
           )}
         </Button>
       </CardFooter>
 
-      {/* Shimmer Effect on Hover */}
-      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-[#6f5338]/15 rounded-xl" />
     </Card>
   );
 });

@@ -14,9 +14,7 @@ export function isMonthUnlocked(month: number): boolean {
   return month <= currentMonth;
 }
 
-/**
- * Get the current month number (1-12)
- */
+
 export function getCurrentMonth(): number {
   return new Date().getMonth() + 1;
 }
