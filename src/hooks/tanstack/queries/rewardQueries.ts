@@ -7,7 +7,7 @@ import { Reward } from '@/types';
 import { isItemAvailableNow } from '@/utils/date-utils';
 
 /**
- * Query keys for reward-related queries
+ *reward-related queries
  */
 export const rewardKeys = {
     all: ['rewards'] as const,
