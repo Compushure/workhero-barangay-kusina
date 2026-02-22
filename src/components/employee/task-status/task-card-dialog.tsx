@@ -83,11 +83,15 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
         </DialogHeader>
 
         {/* <div className="flex flex-col gap-4 text-left min-w-0 overflow-hidden"> */}
-          <section className='flex py-1 border-b border-border justify-between px-6'>
+          <section className='flex py-1 border-b border-border justify-between px-6 gap-6'>
             {/* Rewards and Progress Section */}
-            <div className="flex flex-col justify-baseline items-around gap-4">
+            <div className="flex flex-col justify-baseline items-around gap-6">
               {/* Points and XP */}
               <div className="flex flex-col gap-1">
+                <p className="text-center items-center flex gap-1 leading-0 justify-center">
+                  <span className='text-zinc-600 font-medium text-xs'>REWARDS</span>
+                  <span className='text-zinc-500 font-extralight text-xs'>( per order )</span>
+                </p>
                 <div className="flex items-end justify-center gap-4 text-muted-foreground">
                   <p className="flex gap-1 items-end text-lg font-medium leading-none">
                     <Coins strokeWidth={1.75} className="size-5" />
@@ -99,55 +103,54 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                     <span className="inline-block font-semibold text-lg leading-none">{task.xp}</span>
                   </p>
                 </div>
-                <p className="text-xs font-extralight text-zinc-500 text-center">( per order )</p>
               </div>
 
               {/* Orders to Submit Section */}
-                <div className={`flex flex-col items-center ${canSubmit ? '' : 'opacity-50 pointer-events-none'}`}>
-                  <label className="text-sm font-medium text-foreground block mb-2">
-                    Orders to Submit
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPendingOrders((prev) => Math.max(1, prev - 1));
-                      }}
-                      disabled={!canSubmit}
-                      className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
-                    >
-                      −
-                    </button>
-                    <input
-                      type="number"
-                      min="1"
-                      max={task.maxOrders - task.completedOrders}
-                      value={pendingOrders}
-                      onChange={(e) => {
-                        const remainingOrders = task.maxOrders - task.completedOrders;
-                        const newValue = parseInt(e.target.value) || 1;
-                        setPendingOrders(Math.max(1, Math.min(newValue, remainingOrders)));
-                      }}
-                      disabled={!canSubmit}
-                      className="w-20 remove-arrow rounded-md border border-gray-300 bg-card px-2 py-1 text-base text-center ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const remainingOrders = task.maxOrders - task.completedOrders;
-                        setPendingOrders((prev) => Math.min(remainingOrders, prev + 1));
-                      }}
-                      disabled={!canSubmit}
-                      className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
-                    >
-                      +
-                    </button>
-                  </div>
-
-                  <p className={`text-xs text-muted-foreground mt-1 ${task.status === 'assigned' ? '' : 'opacity-0'}`}>
-                    Remaining: {task.maxOrders - task.completedOrders} orders
-                  </p>
+              <div className={`flex flex-col items-center ${canSubmit ? '' : 'opacity-50 pointer-events-none'}`}>
+                <label className="text-sm font-medium text-foreground block mb-2">
+                  Orders to Submit
+                </label>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPendingOrders((prev) => Math.max(1, prev - 1));
+                    }}
+                    disabled={!canSubmit}
+                    className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    max={task.maxOrders - task.completedOrders}
+                    value={pendingOrders}
+                    onChange={(e) => {
+                      const remainingOrders = task.maxOrders - task.completedOrders;
+                      const newValue = parseInt(e.target.value) || 1;
+                      setPendingOrders(Math.max(1, Math.min(newValue, remainingOrders)));
+                    }}
+                    disabled={!canSubmit}
+                    className="w-20 remove-arrow rounded-md border border-gray-300 bg-card px-2 py-1 inset-shadow-xs/20 text-base text-center ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const remainingOrders = task.maxOrders - task.completedOrders;
+                      setPendingOrders((prev) => Math.min(remainingOrders, prev + 1));
+                    }}
+                    disabled={!canSubmit}
+                    className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+                  >
+                    +
+                  </button>
                 </div>
+
+                <p className={`text-xs text-muted-foreground mt-1 ${task.status === 'assigned' ? '' : 'opacity-0'}`}>
+                  Remaining: {task.maxOrders - task.completedOrders} orders
+                </p>
+              </div>
             </div>
 
 
@@ -156,27 +159,32 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                 <span className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
                   DUE DATE
                 </span>
-                <p className={`flex items-center gap-1.5 text-base font-medium ${isTaskOverdue(task.dueDate) ? 'text-red-700' : ''}`}>
-                  <Calendar strokeWidth={2.5} className='size-4 text-muted-foreground'/>
+                <p className={`flex items-center gap-1.5 text-base font-medium ${isTaskOverdue(task.dueDate) ? 'text-red-700' : 'text-muted-foreground'}`}>
+                  <Calendar strokeWidth={2.5} className='size-4'/>
                   {formatDate(task.dueDate)}
                 </p>
               </div>
 
               {/* Progress */}
-              <div className="flex flex-col text-base font-medium items-end gap-1 pb-4">
-                <span className="text-xs text-center font-extralight text-zinc-600 leading-none w-full">
+              <div className="flex flex-col text-base font-medium items-center gap-1">
+                <span className="text-xs text-center font-medium text-zinc-600 leading-none w-full">
                   PROGRESS
                 </span>
                 <p className="flex items-center gap-2 text-muted-foreground">
                   <Soup strokeWidth={1.75} className="size-6" />
-                  <span className="inline-block font-semibold leading-0 mt-1">
+                  <span className="inline-block font-medium leading-0 mt-1">
                     {task.completedOrders} / {task.maxOrders} Orders
                   </span>
                 </p>
+                <div className="h-3 bg-primary-foreground inset-shadow-sm/15 border-2 border-muted-foreground rounded-full overflow-hidden w-36 mt-1">
+                  <div
+                    className="h-full bg-linear-to-r from-yellow-400 to-orange-500 rounded-full shadow-sm/50"
+                    style={{ width: `${(task.completedOrders / task.maxOrders) * 100}%` }}
+                  />
+                </div>
               </div>
             </div>
           </section>
-
 
 
           {/* Approved/Rejected - View Manager Remark */}
@@ -197,7 +205,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
               </button>
               {remarkOpen ? (
                 <div className="w-full min-w-0 rounded-lg border border-border bg-white px-3 py-2.5 shadow-sm overflow-hidden inset-shadow-xs/25 tramsition-all duration-500 delay-75 ease-in-out">
-                  <p className="text-sm text-foreground leading-relaxed wrap-break-word break-all">
+                  <p className="text-sm text-foreground leading-relaxed wrap-break-word break-none">
                     {task.remark}
                   </p>
                 </div>
