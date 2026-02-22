@@ -39,7 +39,7 @@ export default function NavSection() {
         {/* Dashboard */}
         <div className="relative flex items-center">
           <img
-            src="/kitchen.png"
+            src="/assets/kitchen.png"
             alt="Kitchen"
             className={`${getIconClasses('dashboard')} pixelated cursor-pointer transition-all duration-300 ease-in-out`}
             onClick={() => handleClick('/employee/dashboard')}
@@ -52,7 +52,7 @@ export default function NavSection() {
         {/* All Tasks */}
         <div className="relative flex items-center">
           <img
-            src="/book.png"
+            src="/assets/book.png"
             alt="Notebook"
             className={`${getIconClasses('tasks')} pixelated cursor-pointer transition-all duration-300 ease-in-out`}
             onClick={() => handleClick('/employee/tasks')}
@@ -65,7 +65,7 @@ export default function NavSection() {
         {/* Mercado */}
         <div className="relative flex items-center">
           <img
-            src="/mercado.png"
+            src="/assets/mercado.png"
             alt="Market"
             className={`${getIconClasses('mercado')} pixelated cursor-pointer transition-all duration-300 ease-in-out`}
             onClick={() => handleClick('/employee/mercado')}
