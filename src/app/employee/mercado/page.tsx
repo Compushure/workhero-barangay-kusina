@@ -1,20 +1,17 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useMercadoContext } from './mercado-context';
+import { useMercadoContext } from '../../../components/employee/mercado/mercado-context';
 import { useMercadoPageData } from '@/hooks/useMercadoPageData';
 import { MonthlyRewardsModal } from '@/components/employee/modals/monthly-rewards-modal';
+import { useGetAvailableRewardsByMonth } from '@/hooks/tanstack/queries/rewardQueries';
 
 export default function MercadoPage() {
   const { selectedMonth, setSelectedMonth } = useMercadoContext();
-  const { activeRewards, pendingRequests, userPoints, deductedPoints, isLoading } =
-    useMercadoPageData();
-
-  // Filter rewards by selected month
-  const monthRewards = useMemo(() => {
-    if (!selectedMonth) return [];
-    return activeRewards.filter((reward) => reward.availableMonth === selectedMonth);
-  }, [activeRewards, selectedMonth]);
+  const { pendingRequests, userPoints, deductedPoints, isLoading } = useMercadoPageData({
+    includeRewards: false,
+  });
+  const { data: monthRewards = [] } = useGetAvailableRewardsByMonth(selectedMonth);
 
   // Get pending reward IDs
   const pendingRewardIds = useMemo(() => {

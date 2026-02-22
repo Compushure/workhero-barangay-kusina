@@ -150,8 +150,8 @@ export interface Reward {
   category?: string;
   isActive: boolean;
   availableDate?: string | Date | null;
-  availableMonth?: number; // 1-12 for January-December, null/undefined for all months
-  monthName?: string; // Month name (e.g., "January", "February") auto-populated from availableDate
+  availableMonth?: number; 
+  monthName?: string; // Month name 
   createdAt?: string | Date;
   createdBy?: string;
   imageUrl?: string;
@@ -160,14 +160,7 @@ export interface Reward {
   isOutOfStock?: boolean; // Whether the item is out of stock (quantity <= 0)
 }
 
-// ============================================
-// User Extended Type
-// ============================================
 
-/**
- * UserWithExtras extends the base User interface with additional fields
- * Used throughout the application for comprehensive user data display
- */
 export type UserWithExtras = User & {
   employeeId?: string;
   companyId?: string;

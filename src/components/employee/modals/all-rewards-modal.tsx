@@ -21,6 +21,10 @@ interface AllRewardsModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const MODAL_CONTENT_CLASS =
+  'bg-[#f5e5dc] border-none w-screen max-w-screen max-h-[86vh] rounded-2xl p-0 flex flex-col overflow-hidden';
+const MODAL_GRID_CLASS = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6';
+
 export function AllRewardsModal({ open, onOpenChange }: AllRewardsModalProps) {
   // Fetch ALL rewards (not just available ones - we'll filter client-side)
   const { data: allRewards = [], isLoading: rewardsLoading, error: rewardsError } = useGetRewards();
@@ -140,13 +144,13 @@ export function AllRewardsModal({ open, onOpenChange }: AllRewardsModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[85vh] p-0 bg-[#fff8f5]">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b-2 border-[#690003]/20 bg-linear-to-r from-[#fef5f1] to-[#fff8f5]">
-          <DialogTitle className="text-2xl font-bold text-[#690003] flex items-center gap-3">
-            <ShoppingBag className="h-7 w-7 text-[#690003]" />
+      <DialogContent className={MODAL_CONTENT_CLASS}>
+        <DialogHeader className="p-6 pb-4 border-b border-[#730202]/10 space-y-1">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-[#5a2a2a] flex items-center gap-3">
+            <ShoppingBag className="h-6 w-6 text-[#730202]" />
             <span>All Available Rewards</span>
           </DialogTitle>
-          <DialogDescription className="text-[#7a3d3d] font-medium">
+          <DialogDescription className="text-[#7a3d3d]">
             {isLoading ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -156,7 +160,7 @@ export function AllRewardsModal({ open, onOpenChange }: AllRewardsModalProps) {
               <span className="flex items-center gap-2">
                 <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 {activeRewards.length} {activeRewards.length === 1 ? 'reward' : 'rewards'} available
-                • Your points: <span className="font-bold text-[#690003]">{userPoints}</span> pts
+                • Your points: <span className="font-bold text-[#5a2a2a]">{userPoints}</span> pts
               </span>
             ) : (
               <span className="flex items-center gap-2">
@@ -167,7 +171,7 @@ export function AllRewardsModal({ open, onOpenChange }: AllRewardsModalProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="h-[calc(85vh-120px)]">
+        <ScrollArea className="h-[calc(86vh-120px)] bg-[#730202]/5">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center min-h-100 text-center px-6 py-8">
               <Loader2 className="h-16 w-16 text-[#690003] animate-spin mb-4" />
@@ -200,7 +204,7 @@ export function AllRewardsModal({ open, onOpenChange }: AllRewardsModalProps) {
               )}
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 p-6">
+            <div className={MODAL_GRID_CLASS}>
               {activeRewards.map((reward) => (
                 <RewardCard
                   key={reward.id}

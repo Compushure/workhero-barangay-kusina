@@ -52,10 +52,10 @@ export const RewardCard = memo(function RewardCard({
   };
 
   return (
-    <Card className="group relative overflow-hidden bg-white border-2 border-[#e0cfcf] hover:border-[#a83232] transition-all duration-300 hover:shadow-xl">
-      <CardContent className="p-4">
+    <Card className="group relative overflow-hidden bg-white border-2 border-[#e0cfcf] hover:border-[#a83232] transition-all duration-300 hover:shadow-xl h-full min-h-96 flex flex-col rounded-2xl">
+      <CardContent className="p-4 flex-1 flex flex-col">
         {/* Image Container */}
-        <div className="relative aspect-square w-full mb-4 bg-linear-to-br from-[#fff8f5] to-[#fef5f1] rounded-xl overflow-hidden">
+        <div className="relative aspect-square w-full mb-4 bg-linear-to-br from-[#fff8f5] to-[#fef5f1] rounded-2xl overflow-hidden">
           {reward.imageUrl && !imageError ? (
             <Image
               src={reward.imageUrl}
@@ -122,9 +122,11 @@ export const RewardCard = memo(function RewardCard({
         </div>
 
         {/* Redemption Limit */}
-        {reward.redeemingLimit && (
-          <p className="text-xs text-[#7a3d3d] mb-2">Limit: {reward.redeemingLimit} per month</p>
-        )}
+        <div className="min-h-5">
+          {reward.redeemingLimit && (
+            <p className="text-xs text-[#7a3d3d] mb-2">Limit: {reward.redeemingLimit} per month</p>
+          )}
+        </div>
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
@@ -132,7 +134,7 @@ export const RewardCard = memo(function RewardCard({
           onClick={handleRedeem}
           disabled={isDisabled}
           className={cn(
-            'w-full font-bold transition-all duration-300',
+            'w-full h-10 text-sm font-bold transition-all duration-300',
             canAfford && !isOutOfStock && !hasPendingRequest
               ? 'bg-[#a83232] hover:bg-[#8b0000] text-white shadow-lg hover:shadow-xl'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'

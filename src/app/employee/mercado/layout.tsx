@@ -5,7 +5,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { MercadoProvider, useMercadoContext } from './mercado-context';
+import {
+  MercadoProvider,
+  useMercadoContext,
+} from '../../../components/employee/mercado/mercado-context';
 import { useMercadoPageData } from '@/hooks/useMercadoPageData';
 import { Coins } from 'lucide-react';
 
@@ -235,7 +238,6 @@ function MercadoLayoutContent({ children }: MercadoLayoutProps) {
         </button>
       </div>
 
-      {/* Children Content (Modal overlays, etc.) */}
       <div className="relative z-50">{children}</div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRewardsAction } from '@/actions/hr/rewards';
+import { getAvailableRewardsByMonthAction, getRewardsAction } from '@/actions/hr/rewards';
 import { Reward } from '@/types';
 import { isItemAvailableNow } from '@/utils/date-utils';
 
@@ -11,6 +11,7 @@ export const rewardKeys = {
     lists: () => [...rewardKeys.all, 'list'] as const,
     list: () => [...rewardKeys.lists()] as const,
     available: () => [...rewardKeys.all, 'available'] as const,
+    availableByMonth: (month: number) => [...rewardKeys.available(), 'month', month] as const,
 };
 
 /**
@@ -45,9 +46,10 @@ export function useGetRewards() {
  * 
  * Used exclusively by employee pages to show only currently available items
  */
-export function useGetAvailableRewards() {
+export function useGetAvailableRewards(options?: { enabled?: boolean }) {
     return useQuery<Reward[], Error>({
         queryKey: rewardKeys.available(),
+        enabled: options?.enabled ?? true,
         queryFn: async () => {
             const result = await getRewardsAction();
 
@@ -94,5 +96,29 @@ export function useGetAvailableRewards() {
         refetchOnWindowFocus: true,
         refetchOnMount: true,
         refetchInterval: 30 * 1000, // Poll every 30 seconds for real-time updates
+    });
+}
+
+/**
+ * Hook to fetch available rewards for a specific month (1-12)
+ * Used by employee Mercado modal to fetch cards assigned to the selected month
+ */
+export function useGetAvailableRewardsByMonth(month: number | null) {
+    return useQuery<Reward[], Error>({
+        queryKey: month ? rewardKeys.availableByMonth(month) : [...rewardKeys.available(), 'month', 'none'],
+        enabled: typeof month === 'number' && month >= 1 && month <= 12,
+        queryFn: async () => {
+            const result = await getAvailableRewardsByMonthAction(month as number);
+
+            if (result.error) {
+                throw new Error(result.error);
+            }
+
+            return result.data || [];
+        },
+        staleTime: 10 * 1000,
+        gcTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
     });
 }
