@@ -29,7 +29,7 @@ export function CurrentAssignedTasks() {
 
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
-  const taskQuery = useGetCurrentAssignedTasksPaginated(page, 10, sortBy, debouncedSearchTerm, true);
+  const taskQuery = useGetCurrentAssignedTasksPaginated(page, 4, sortBy, debouncedSearchTerm, true);
 
   const employeeQuery = useGetCurrentAssignedEmployeesPaginated(
     page,

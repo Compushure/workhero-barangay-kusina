@@ -27,19 +27,19 @@ interface TaskInfoRow {
   max_orders: number | null;
 }
 
-function formatDueDate(iso: string | null): string {
-  if (!iso) return '—';
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: '2-digit',
-    });
-  } catch {
-    return '—';
-  }
-}
+// function formatDueDate(iso: string | null): string {
+//   if (!iso) return '—';
+//   try {
+//     const d = new Date(iso);
+//     return d.toLocaleDateString('en-US', {
+//       month: '2-digit',
+//       day: '2-digit',
+//       year: '2-digit',
+//     });
+//   } catch {
+//     return '—';
+//   }
+// }
 
 function rowToTaskStatusItem(row: TaskInfoRow): TaskStatusItem {
   const points = row.category_points ?? 0;
@@ -59,7 +59,8 @@ function rowToTaskStatusItem(row: TaskInfoRow): TaskStatusItem {
     claimedOrders: claimedOrders,
     points,
     xp,
-    dueDate: formatDueDate(row.k_deadline_date),
+    dueDate: row.k_deadline_date ?? 'No date',
+    // dueDate: formatDueDate(row.k_deadline_date),
     ...(row.remark?.trim() ? { remark: row.remark.trim() } : {}),
     claimedAt: row.points_claimed_at ?? undefined,
     status: row.status ?? undefined,

@@ -1,6 +1,6 @@
 'use client';
 
-import HeaderHUD from './header-hud';
+import HeaderHUD from '../widgets/header-hud';
 import NavSection from '../nav-section';
 import CookingSection from './cooking-section';
 import { RankWidget } from './rank-panel';

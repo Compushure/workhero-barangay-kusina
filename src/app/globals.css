@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
+
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -10,6 +13,8 @@
   --card-foreground: #514937;
   --popover: #fafafa;
   --popover-foreground: #514937;
+
+  --title: #1b1b1b;
 
   /* Primary: Dark olive brown */
   --primary-foreground: #fafafa;
@@ -79,7 +84,20 @@
   --sidebar-ring: #a83232;
 }
 
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
 @theme inline {
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-jersey: 'Jersey 10', monospace;
   --font-sans: 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
@@ -117,6 +135,7 @@
   --color-success-foreground: var(--success-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-title: var(--title);
 }
 
 .admin-theme {
@@ -154,16 +173,19 @@
   body {
     @apply bg-background text-foreground;
   }
+}
 
-  .pixelated {
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-  }
-
-  .pixelated-text {
-    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
-    letter-spacing: 0.05em;
-  }
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.pixel-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}
+.pixel-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000;
 }
 
 .remove-arrow::-webkit-inner-spin-button,
@@ -173,4 +195,17 @@
 }
 .remove-arrow {
   -moz-appearance: textfield;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
 }

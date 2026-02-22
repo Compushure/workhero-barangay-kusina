@@ -1,0 +1,71 @@
+'use client';
+
+import PixelBadge from './warning-badges';
+
+interface Props {
+  status: any;
+  warningText?: string;
+  breakWarningText?: string;
+  isCurrentlyLate?: boolean;
+  isApproachingAbsent?: boolean;
+  lateTimer: string;
+  absentTimer: string;
+  nowTime: Date;
+  lateAfter?: Date;
+  isCurrentlyOverBreak?: boolean;
+  hasTimedOut?: boolean;
+}
+
+export default function AttendanceWarnings({
+  status,
+  warningText,
+  breakWarningText,
+  isCurrentlyLate,
+  isApproachingAbsent,
+  lateTimer,
+  absentTimer,
+  nowTime,
+  lateAfter,
+  isCurrentlyOverBreak,
+  hasTimedOut,
+}: Props) {
+  return (
+    <div className="flex flex-col gap-2">
+      {!status?.hasTimedIn && !status?.isAbsent && (
+        <>
+          {isApproachingAbsent && (
+            <PixelBadge color="red">
+              🚨 URGENT: You will be marked ABSENT if you don&apos;t time in within {absentTimer}!
+            </PixelBadge>
+          )}
+          {isCurrentlyLate && !isApproachingAbsent && (
+            <PixelBadge color="orange">
+              ⚠️ Late arrival detected. Time in immediately to minimize impact on your record.
+            </PixelBadge>
+          )}
+          {status?.canTimeIn && lateAfter && nowTime < lateAfter && !isCurrentlyLate && (
+            <PixelBadge color="blue">
+              ℹ️ Time in within {lateTimer} to be marked on-time.
+            </PixelBadge>
+          )}
+        </>
+      )}
+
+      {warningText && (
+        <PixelBadge color="yellow">{warningText}</PixelBadge>
+      )}
+
+      {breakWarningText && (
+        <PixelBadge color={isCurrentlyOverBreak ? 'red' : 'orange'}>
+          {breakWarningText}
+        </PixelBadge>
+      )}
+
+      {status?.hasTimedIn && status?.isLate && !hasTimedOut && (
+        <PixelBadge color="orange">
+          📋 Note: You were marked late for today.
+        </PixelBadge>
+      )}
+    </div>
+  );
+}
