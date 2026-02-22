@@ -40,7 +40,7 @@ export default function AttendanceLogs({ logs = [] }: AttendanceLogsProps) {
   return (
     <div className="mt-4 w-full max-h-56 overflow-y-auto space-y-3 bg-[#E8DBBF] rounded">
       {filteredLogs.length === 0 ? (
-        <p className="text-md text-gray-500 text-center">🚫 No logs yet</p>
+        <p className="text-md text-gray-700 text-center">🚫 No logs yet</p>
       ) : (
         filteredLogs.map((log, idx) => {
           const { icon, label } = getLogDisplay(log.action);

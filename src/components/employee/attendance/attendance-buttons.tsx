@@ -26,7 +26,7 @@ export default function AttendanceButtons({
       {/* Already Timed Out */}
       {status?.hasTimedOut && (
         <div className="text-center">
-          <p className="mt-2 text-[#808080d8] text-sm">
+          <p className="mt-2 text-[#4d4d4dd8] text-lg">
             You&apos;ve clocked out for today. See you again tomorrow! 👋
           </p>
         </div>
