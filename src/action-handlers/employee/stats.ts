@@ -11,10 +11,9 @@ import {
   getEmployeePoints,
   getEmployeeRank,
   getEmployeeXP,
-  type EmployeePointsData,
 } from '@/actions/employee/stats';
 import { toast } from 'sonner';
-import type { EmployeeRank, EmployeeXP } from '@/types';
+import type { EmployeeRank, EmployeeXP, EmployeePointsData } from '@/types';
 
 /**
  * Fetches the current employee's level
@@ -25,6 +24,13 @@ export async function handleFetchEmployeeLevel(): Promise<number | null> {
   
   if (!result.success) {
     toast.error('Failed to load level data');
+    return null;
+  }
+
+  if (!result.data) {
+    toast.error('Failed to load level data', {
+      description: 'No rank data available',
+    });
     return null;
   }
   
@@ -38,11 +44,20 @@ export async function handleFetchEmployeeLevel(): Promise<number | null> {
 export async function handleFetchEmployeePoints(): Promise<EmployeePointsData | null> {
   const result = await getEmployeePoints();
   
-  if (!result.success) {
-    toast.error('Failed to load points data');
+  if (result.error) {
+    toast.error('Failed to load points', {
+      description: result.error,
+    });
     return null;
   }
-  
+
+  if (!result.data) {
+    toast.error('Failed to load points', {
+      description: 'No points data available',
+    });
+    return null;
+  }
+
   return result.data;
 }
 
@@ -52,12 +67,21 @@ export async function handleFetchEmployeePoints(): Promise<EmployeePointsData | 
  */
 export async function handleFetchEmployeeRank(): Promise<EmployeeRank | null> {
   const result = await getEmployeeRank();
-  
+
   if (!result.success) {
-    toast.error('Failed to load rank data');
+    toast.error('Failed to load rank', {
+      description: result.error ?? 'Unknown error',
+    });
     return null;
   }
-  
+
+  if (!result.data) {
+    toast.error('Failed to load rank', {
+      description: 'No rank data available',
+    });
+    return null;
+  }
+
   return result.data;
 }
 
@@ -67,11 +91,18 @@ export async function handleFetchEmployeeRank(): Promise<EmployeeRank | null> {
  */
 export async function handleFetchEmployeeXP(): Promise<EmployeeXP | null> {
   const result = await getEmployeeXP();
-  
+
   if (!result.success) {
-    toast.error('Failed to load XP data');
+    toast.error('Failed to load XP', {
+      description: result.error ?? 'Unknown error',
+    });
     return null;
   }
-  
+
+  if (!result.data) {
+    toast.error('No XP data available');
+    return null;
+  }
+
   return result.data;
 }
