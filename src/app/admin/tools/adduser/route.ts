@@ -39,6 +39,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'email and password required' }, { status: 400 });
     }
 
+    // Check if user with this email already exists
+    const { data: existingUser, error: lookupError } = await supabaseAdmin
+      .from('User')
+      .select('id, email')
+      .eq('email', email)
+      .limit(1)
+      .maybeSingle();
+
+    if (lookupError) {
+      return NextResponse.json(
+        { error: 'Failed to verify email availability: ' + lookupError.message },
+        { status: 500 }
+      );
+    }
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: `A user with email "${email}" already exists` },
+        { status: 400 }
+      );
+    }
+
     // Create auth user
     const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
