@@ -51,10 +51,10 @@ export default function AttendanceLogs({ logs = [] }: AttendanceLogsProps) {
             >
               {/* Top row: Icon + Label + Timestamp */}
               <div className="flex justify-between items-center">
-                <span className="text-sm flex items-center gap-2">
+                <span className="text-lg flex items-center gap-2">
                   {icon} {label}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-sm text-gray-500">
                   {new Date(log.time).toLocaleTimeString([], {
                     hour: 'numeric',
                     minute: '2-digit',
@@ -68,7 +68,7 @@ export default function AttendanceLogs({ logs = [] }: AttendanceLogsProps) {
 
               {/* Warning note */}
               {log.note && (
-                <span className="text-xs text-red-500 mt-1"> {log.note}</span>
+                <span className="text-md text-red-500 mt-1"> {log.note}</span>
               )}
             </div>
           );
