@@ -3,7 +3,7 @@
 import { useGetEmployeeXP } from '@/hooks/tanstack';
 
 export default function LevelIcon() {
-  const { data, error, isLoading } = useGetEmployeeXP();
+  const { data } = useGetEmployeeXP();
 
 
   // While loading, show placeholders
