@@ -6,15 +6,11 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import {
-  handleFetchEmployeeRank,
-  handleFetchEmployeeLevel,
-  handleFetchEmployeePoints,
-  handleFetchEmployeeXP,
-} from '@/action-handlers/employee/stats';
+import { handleFetchEmployeeRank, handleFetchEmployeePoints, handleFetchEmployeeXP } from '@/action-handlers/employee/stats';
 import { fetchUserBadgesHandler } from '@/action-handlers/employee/badges';
-import type { EmployeeRank, EmployeeXP, EmployeePointsData } from '@/types';
+import type { EmployeeRank, EmployeePointsData, EmployeeXP } from '@/types';
 import type { UserBadge } from '@/actions/employee/badges';
+import type { TimePeriod } from '@/lib/utils/time-period-utils';
 
 /**
  * Query key factory for employee-related queries
@@ -29,40 +25,42 @@ import type { UserBadge } from '@/actions/employee/badges';
  */
 export const employeeKeys = {
   all: ['employees'] as const,
-  level: () => [...employeeKeys.all, 'level'] as const,
+  rank: (period?: TimePeriod | 'current') => 
+    period ? [...employeeKeys.all, 'rank', period] as const : [...employeeKeys.all, 'rank'] as const,
   points: () => [...employeeKeys.all, 'points'] as const,
   xp: () => [...employeeKeys.all, 'xp'] as const,
-  rank: () => [...employeeKeys.all, 'rank'] as const,
   badges: () => [...employeeKeys.all, 'badges'] as const,
   userBadges: (userId: string) => [...employeeKeys.badges(), userId] as const,
 };
 
 /**
  * Fetches the current employee's rank among all regular employees
- * Uses RPC function that calculates rank efficiently with window functions
+ * Supports time period filtering for historical rankings
  *
+ * @param period - Time period filter (current/weekly/monthly/yearly)
  * @param options - Query options (enabled, staleTime, etc.)
  * @returns Query result with EmployeeRank data, loading state, and error handling
  *
  * @example
  * ```tsx
  * function RankWidget() {
- *   const { data: rankData, isLoading, error } = useGetEmployeeRank()
+ *   const { data: rankData, isLoading, error } = useGetEmployeeRank('current')
  *
  *   if (isLoading) return <Skeleton />
  *   if (error || !rankData) return null
  *
- *   return <div>Rank #{rankData.rank} of {rankData.totalEmployees}</div>
+ *   return <div>Rank #{rankData.rank} - Score: {rankData.performanceScore}</div>
  * }
  * ```
  */
 export function useGetEmployeeRank(
+  period: TimePeriod | 'current' = 'current',
   queryOptions: { enabled?: boolean } = {}
 ): UseQueryResult<EmployeeRank | null, Error> {
   return useQuery({
-    queryKey: employeeKeys.rank(),
+    queryKey: employeeKeys.rank(period),
     queryFn: async () => {
-      const result = await handleFetchEmployeeRank();
+      const result = await handleFetchEmployeeRank(period);
       return result;
     },
     enabled: queryOptions.enabled !== false,
@@ -71,6 +69,68 @@ export function useGetEmployeeRank(
     retry: 1, // Retry once on failure
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   }) as UseQueryResult<EmployeeRank | null, Error>;
+}
+
+/**
+ * Fetches the current employee's points data (earned and deducted)
+ * Returns total points and deducted points for rewards redemption
+ *
+ * @returns Query result with EmployeePointsData, loading state, and error handling
+ *
+ * @example
+ * ```tsx
+ * function PointsWidget() {
+ *   const { data, isLoading, error } = useGetEmployeePoints()
+ *
+ *   if (isLoading) return <Skeleton />
+ *   if (error || !data) return null
+ *
+ *   return <div>Available Points: {data.points - data.deductedPoints}</div>
+ * }
+ * ```
+ */
+export function useGetEmployeePoints(): UseQueryResult<EmployeePointsData | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.points(),
+    queryFn: async () => {
+      return await handleFetchEmployeePoints();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<EmployeePointsData | null, Error>;
+}
+
+/**
+ * Fetches the current employee's XP data (current XP, total XP, and level)
+ * Returns experience points and level information
+ *
+ * @returns Query result with EmployeeXP data, loading state, and error handling
+ *
+ * @example
+ * ```tsx
+ * function LevelWidget() {
+ *   const { data, isLoading, error } = useGetEmployeeXP()
+ *
+ *   if (isLoading) return <Skeleton />
+ *   if (error || !data) return null
+ *
+ *   return <div>Level {data.level} - XP: {data.currentXP}/{data.totalXP}</div>
+ * }
+ * ```
+ */
+export function useGetEmployeeXP(): UseQueryResult<EmployeeXP | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.xp(),
+    queryFn: async () => {
+      return await handleFetchEmployeeXP();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<EmployeeXP | null, Error>;
 }
 
 /**
@@ -112,72 +172,4 @@ export function useGetUserBadges(
     retry: 1,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<UserBadge[] | null, Error>;
-}
-
-/**
- * Fetches the current employee's level
- * @param options - Query options (enabled, staleTime, etc.)
- * @returns Query result with level number or null on error
- */
-export function useGetEmployeeLevel(
-  queryOptions: { enabled?: boolean } = {}
-): UseQueryResult<number | null, Error> {
-  return useQuery({
-    queryKey: employeeKeys.level(),
-    queryFn: async () => {
-      const result = await handleFetchEmployeeLevel();
-      return result;
-    },
-    enabled: queryOptions.enabled !== false,
-    staleTime: 2 * 60 * 1000, // 2 minutes - level changes frequently
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: 2,
-    refetchOnWindowFocus: true,
-  }) as UseQueryResult<number | null, Error>;
-}
-
-/**
- * Fetches the current employee's points data
- * Includes both earned points and deducted points
- * @param options - Query options (enabled, staleTime, etc.)
- * @returns Query result with EmployeePointsData or null on error
- */
-export function useGetEmployeePoints(
-  queryOptions: { enabled?: boolean } = {}
-): UseQueryResult<EmployeePointsData | null, Error> {
-  return useQuery({
-    queryKey: employeeKeys.points(),
-    queryFn: async () => {
-      const result = await handleFetchEmployeePoints();
-      return result;
-    },
-    enabled: queryOptions.enabled !== false,
-    staleTime: 1 * 60 * 1000, // 1 minute - points change frequently
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
-    refetchOnWindowFocus: true,
-  }) as UseQueryResult<EmployeePointsData | null, Error>;
-}
-
-/**
- * Fetches the current employee's XP data
- * Includes current level progress and total XP
- * @param options - Query options (enabled, staleTime, etc.)
- * @returns Query result with EmployeeXP or null on error
- */
-export function useGetEmployeeXP(
-  queryOptions: { enabled?: boolean } = {}
-): UseQueryResult<EmployeeXP | null, Error> {
-  return useQuery({
-    queryKey: employeeKeys.xp(),
-    queryFn: async () => {
-      const result = await handleFetchEmployeeXP();
-      return result;
-    },
-    enabled: queryOptions.enabled !== false,
-    staleTime: 2 * 60 * 1000, // 2 minutes - XP changes frequently
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: 2,
-    refetchOnWindowFocus: true,
-  }) as UseQueryResult<EmployeeXP | null, Error>;
 }

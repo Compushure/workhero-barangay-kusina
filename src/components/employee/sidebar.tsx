@@ -128,6 +128,7 @@ export function Sidebar({
           rankData={rankData ?? null}
           isLoading={isRankLoading}
           isCollapsed={isCollapsed}
+          performanceScore={rankData?.performanceScore}
         />
 
         <div
