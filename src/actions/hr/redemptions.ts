@@ -97,9 +97,7 @@ async function autoDeclinePendingRequestsForReward(
   }
 }
 
-// ============================================
-// HR Redemption Processing Actions
-// ============================================
+
 
 /**
  * Get all redemption requests with joined User and Reward data
@@ -200,7 +198,7 @@ export async function acceptRedemptionRequestAction(
       return { error: 'Unauthorized: Admin not authenticated' };
     }
 
-    // Fetch the redemption request with user and reward details (admin client: User join not readable by authenticated)
+    // Fetch the redemption request with user and reward details 
     const { data: request, error: fetchError } = await supabaseAdmin
       .from('RewardRequest')
       .select(
@@ -262,7 +260,7 @@ export async function acceptRedemptionRequestAction(
           })
           .eq('id', requestId);
 
-        // Return points to user
+        // Return points to user if declined
         await supabaseAdmin
           .from('User')
           .update({
@@ -457,7 +455,7 @@ export async function declineRedemptionRequestAction(
       .from('User')
       .update({
         points: currentPoints + totalPointsCost,
-        deducted_points: currentDeductedPoints - totalPointsCost,
+        deducted_points: Math.max(0, currentDeductedPoints - totalPointsCost),
       })
       .eq('id', request.user_id);
 
@@ -469,6 +467,61 @@ export async function declineRedemptionRequestAction(
         .update({ status: 'pending', approved_by: null })
         .eq('id', requestId);
       return { error: 'Failed to return points. Request rejection reverted.' };
+    }
+
+    // Restore reward stock for declined requests when quantity is tracked
+    const { data: rewardData, error: rewardFetchError } = await supabaseAdmin
+      .from('Reward')
+      .select('quantity, is_active')
+      .eq('id', request.reward_id)
+      .single();
+
+    if (rewardFetchError) {
+      console.error('Error fetching reward for stock restore:', rewardFetchError);
+      await supabaseAdmin
+        .from('RewardRequest')
+        .update({ status: 'pending', approved_by: null })
+        .eq('id', requestId);
+      await supabaseAdmin
+        .from('User')
+        .update({
+          points: currentPoints,
+          deducted_points: currentDeductedPoints,
+        })
+        .eq('id', request.user_id);
+      return { error: 'Failed to restore stock. Request rejection reverted.' };
+    }
+
+    if (rewardData && rewardData.quantity !== null && rewardData.quantity !== undefined) {
+      const restoredQuantity = rewardData.quantity + quantity;
+      const stockUpdate: { quantity: number; is_active?: boolean } = {
+        quantity: restoredQuantity,
+      };
+
+      if (!rewardData.is_active && restoredQuantity > 0) {
+        stockUpdate.is_active = true;
+      }
+
+      const { error: restoreStockError } = await supabaseAdmin
+        .from('Reward')
+        .update(stockUpdate)
+        .eq('id', request.reward_id);
+
+      if (restoreStockError) {
+        console.error('Error restoring reward stock:', restoreStockError);
+        await supabaseAdmin
+          .from('RewardRequest')
+          .update({ status: 'pending', approved_by: null })
+          .eq('id', requestId);
+        await supabaseAdmin
+          .from('User')
+          .update({
+            points: currentPoints,
+            deducted_points: currentDeductedPoints,
+          })
+          .eq('id', request.user_id);
+        return { error: 'Failed to restore stock. Request rejection reverted.' };
+      }
     }
 
     return { error: null };

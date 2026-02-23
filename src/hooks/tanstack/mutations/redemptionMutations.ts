@@ -1,11 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { handleCreateRedemptionRequestAction } from '@/action-handlers/employee/redemptions';
 import { redemptionKeys } from '../queries/redemptionQueries';
+import { rewardKeys } from '../queries/rewardQueries';
 
-/**
- * Mutation hook for direct redemption of a reward item.
- * Creates a redemption request immediately when user clicks Redeem button.
- */
+// creates a mutation hook for redeeming a reward. It calls the action handler to create a redemption request and then invalidates relevant queries to refresh data.
 export function useRedeemReward() {
   const queryClient = useQueryClient();
 
@@ -23,6 +21,9 @@ export function useRedeemReward() {
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
       queryClient.invalidateQueries({ queryKey: ['employeePoints'] });
+      // Invalidate rewards to update quantities after redemption
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
       
       // Toast is already shown in handleCreateRedemptionRequestAction
     },

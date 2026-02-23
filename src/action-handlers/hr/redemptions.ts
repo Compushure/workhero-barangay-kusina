@@ -1,20 +1,33 @@
 /**
  * HR Redemption Processing Action Handlers
- * ========================================
  * Client-side wrappers for HR redemption request processing.
  * Handles UI feedback (toasts) for approve/decline actions.
  */
 
 import {
   acceptRedemptionRequestAction,
+  getRedemptionRequestsAction,
   declineRedemptionRequestAction,
 } from '@/actions/hr/redemptions';
 import { safeAction } from '@/lib/utils/safe-action';
 import { toast } from 'sonner';
+import type { RedemptionRequest } from '@/types';
 
 interface RedemptionRequestParams {
   id: string;
   remarks?: string;
+}
+
+export async function handleGetRedemptionRequestsAction(
+  status?: string
+): Promise<RedemptionRequest[]> {
+  const result = await safeAction(() => getRedemptionRequestsAction(status));
+
+  if (!result.success || result.data?.error) {
+    throw new Error(result.error || result.data?.error || 'Failed to fetch redemption requests');
+  }
+
+  return result.data?.data ?? [];
 }
 
 // Action handler to decline a redemption request
