@@ -64,10 +64,9 @@ export default function EmployeeDashboardClient() {
             <CookingSection className="w-full h-full" />
           </div>
 
-          {/* Right column: 20% */}
-          <div className="w-[20%]">
-            <Card className="bg-transparent shadow-none border-none h-full">
-              <CardContent className="h-full">
+          <div className="w-[20%] min-w-[280px] flex items-start justify-start">
+            <Card className="bg-transparent shadow-none border-none">
+              <CardContent className="p-0">
                 <RankWidget />
               </CardContent>
             </Card>

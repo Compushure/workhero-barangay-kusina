@@ -47,31 +47,11 @@ export function RankWidget() {
   // Extract performance score from rank data (period-specific)
   const performanceScore = rankData?.performanceScore ?? 0;
 
-  // Loading state
-  if (isRankLoading) {
-    return (
-      <div className="bg-white/10 rounded-lg p-4 mb-4 animate-pulse">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="bg-white/20 rounded-full p-2 shrink-0">
-            <Trophy size={20} className="text-yellow-300" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <div className="h-7 w-12 bg-white/20 rounded"></div>
-            <div className="h-3 w-10 bg-white/20 rounded"></div>
-          </div>
-        </div>
-        <div className="h-3 w-full bg-white/20 rounded"></div>
-      </div>
-    );
-  }
+  // Match XP progress card: bg-[#765332], border-[#47331F], shadow-md
+  const cardClassName =
+    'bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-3 mb-4 w-[280px] min-h-[120px] shrink-0 font-jersey tracking-widest';
 
-  if (!rankData) {
-    return null;
-  }
-
-  const { rank } = rankData;
-
-  // Navigation component (reused in all states)
+  // Navigation component (reused in loading + filled states)
   const navigationControls = (
     <div className="flex items-center justify-center gap-2 mb-2">
       <button
@@ -82,7 +62,9 @@ export function RankWidget() {
         <ChevronLeft size={14} />
       </button>
       <div className="min-w-20 text-center ">
-        <span className="text-base font-medium text-white">{PERIOD_LABELS[selectedPeriod]}</span>
+        <span className="text-base font-medium text-yellow-500">
+          {PERIOD_LABELS[selectedPeriod]}
+        </span>
       </div>
       <button
         onClick={goToNextPeriod}
@@ -94,45 +76,81 @@ export function RankWidget() {
     </div>
   );
 
+  if (isRankLoading) {
+    return (
+      <div className={`${cardClassName} animate-pulse`}>
+        {navigationControls}
+        <div className="flex items-center gap-3">
+          {/* Trophy + rank skeleton */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="h-9 w-9 bg-white/20 rounded-full shrink-0" aria-hidden />
+            <div className="flex items-baseline gap-1.5">
+              <div className="h-7 w-10 bg-white/20 rounded" aria-hidden />
+              <div className="h-3.5 w-8 bg-white/20 rounded" aria-hidden />
+            </div>
+          </div>
+          <div className="h-12 border-l-2 border-white/40 shrink-0" />
+          {/* Performance score skeleton */}
+          <div className="flex flex-col items-center flex-1 min-w-0 pl-2">
+            <div className="h-3 w-24 bg-white/20 rounded mb-1" aria-hidden />
+            <div className="h-6 w-12 bg-white/20 rounded" aria-hidden />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!rankData) {
+    return null;
+  }
+
+  const { rank } = rankData;
+
+  // Empty state: period selector + "Not available yet" only (same card size as filled/loading)
+  if (performanceScore === 0) {
+    return (
+      <div className={`${cardClassName} flex flex-col`}>
+        {navigationControls}
+        <div className="flex flex-col items-center justify-center min-h-[52px] py-2">
+          <span className="text-sm text-white italic">Not available yet</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Filled state: rank + performance score
   return (
-    <div className="bg-white/10 rounded-lg p-3 mb-4">
+    <div className={cardClassName}>
       {navigationControls}
 
-      {/* Conditional content based on performance score */}
-      {performanceScore === 0 ? (
-        <div className="flex items-center justify-center py-4">
-          <span className="text-sm text-red-200/70 italic">Not available yet</span>
-        </div>
-      ) : (
-        <div className="flex items-center gap-4">
-          {/* Left: Rank Section */}
-          <div className="flex items-center gap-3">
-            <div className="bg-white/20 rounded-full p-2">
-              <Trophy size={20} className="text-yellow-300" />
-            </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-bold text-white">#{rank}</span>
-              <span className="text-sm text-red-200">Rank</span>
-            </div>
+      <div className="flex items-center gap-3">
+        {/* Left: Rank Section */}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="bg-white/20 rounded-full p-2">
+            <Trophy size={20} className="text-yellow-300" />
           </div>
-
-          {/* Divider */}
-          <div className="h-12 border-l-2 border-white/40"></div>
-
-          {/* Right: Performance Score Section */}
-          <div className="flex flex-col items-center flex-1">
-            <span className="text-xs text-red-200 whitespace-nowrap mb-1">Performance Score</span>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="text-xl font-bold text-white cursor-help">{performanceScore}</span>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-60">
-                {PERFORMANCE_SCORE_TOOLTIP}
-              </TooltipContent>
-            </Tooltip>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-2xl font-bold text-white">#{rank}</span>
+            <span className="text-sm text-white">Rank</span>
           </div>
         </div>
-      )}
+
+        {/* Divider */}
+        <div className="h-12 border-l-2 border-white/40 shrink-0" />
+
+        {/* Right: Performance Score Section */}
+        <div className="flex flex-col items-center flex-1 min-w-0 pl-2">
+          <span className="text-xs text-white whitespace-nowrap mb-1">Performance Score</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xl font-bold text-white cursor-help">{performanceScore}</span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-60">
+              {PERFORMANCE_SCORE_TOOLTIP}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </div>
     </div>
   );
 }
