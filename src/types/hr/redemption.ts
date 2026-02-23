@@ -13,6 +13,7 @@ export interface RedemptionRequest {
   id: string;
   userId: string;
   userName: string;
+  userPoints?: number;
   rewardId: string;
   rewardName: string;
   pointsCost: number;
@@ -20,7 +21,9 @@ export interface RedemptionRequest {
   status: 'pending' | 'approved' | 'rejected';
   approvedBy?: string;
   approvedByName?: string;
+  remarks?: string;
   requestedAt: string;
+  requestedItem?: string; // The reward item name/description requested by the user
 }
 
 /**

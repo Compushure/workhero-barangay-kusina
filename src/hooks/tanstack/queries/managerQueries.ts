@@ -13,7 +13,7 @@ import {
   handleFetchTasksToReviewPaginated,
   handleFetchApprovedTasksPaginated,
   handleFetchDeniedTasksPaginated,
-} from '@/action-handlers/manager';
+} from '@/action-handlers/manager/verification';
 import type { VerificationRequest, PaginatedResponse } from '@/types';
 
 /**
@@ -67,8 +67,8 @@ export function useGetTasksToReview(
       return tasks;
     },
     enabled: queryOptions.enabled !== false,
-    staleTime: 30 * 1000, // 30 seconds - tasks change frequently
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 20 * 1000, // 20 seconds - tasks change frequently
+    gcTime: 5 * 60 * 1000, // 5 minutesx
     retry: 2,
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   }) as UseQueryResult<VerificationRequest[], Error>;
@@ -92,7 +92,7 @@ export function useGetTasksToReviewPaginated(
       return response;
     },
     enabled: queryOptions.enabled !== false && page >= 1,
-    staleTime: 30 * 1000,
+    staleTime: 20 * 1000,
     gcTime: 5 * 60 * 1000,
     retry: 2,
     refetchOnWindowFocus: true,
@@ -140,7 +140,7 @@ export function useGetApprovedTasksPaginated(
       return response;
     },
     enabled: queryOptions.enabled !== false && page >= 1,
-    staleTime: 30 * 1000,
+    staleTime: 20 * 1000,
     gcTime: 5 * 60 * 1000,
     retry: 2,
     refetchOnWindowFocus: true,
@@ -188,7 +188,7 @@ export function useGetDeniedTasksPaginated(
       return response;
     },
     enabled: queryOptions.enabled !== false && page >= 1,
-    staleTime: 30 * 1000,
+    staleTime: 20 * 1000,
     gcTime: 5 * 60 * 1000,
     retry: 2,
     refetchOnWindowFocus: true,

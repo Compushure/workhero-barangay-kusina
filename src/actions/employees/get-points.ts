@@ -2,8 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
+import type { EmployeePointsData } from '@/types';
 
-export async function getEmployeePoints(): Promise<ActionResult<number>> {
+export async function getEmployeePoints(): Promise<ActionResult<EmployeePointsData>> {
   return safeAction(async () => {
     const supabase = await createClient();
 
@@ -18,7 +19,7 @@ export async function getEmployeePoints(): Promise<ActionResult<number>> {
 
     const { data, error } = await supabase
       .from('user_attributes')
-      .select('points')
+      .select('points, deducted_points')
       .eq('user_id', user.id)
       .single();
 
@@ -30,6 +31,9 @@ export async function getEmployeePoints(): Promise<ActionResult<number>> {
       throw new Error('User points data not found');
     }
 
-    return data.points ?? 0;
+    return {
+      points: data.points ?? 0,
+      deductedPoints: data.deducted_points ?? 0,
+    };
   });
 }

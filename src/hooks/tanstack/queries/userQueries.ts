@@ -6,9 +6,9 @@
  * Handles search, filtering, sorting, and pagination efficiently.
  */
 
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { handleFetchUsers, handleFetchUsersPaginated } from '@/action-handlers/manage';
-import { handleFetchSessionUser } from '@/action-handlers/sidebar';
+import { useQuery, keepPreviousData, type UseQueryResult } from '@tanstack/react-query';
+import { handleFetchUsers, handleFetchUsersPaginated } from '@/action-handlers/superadmin/users';
+import { handleFetchSessionUser } from '@/action-handlers/shared/sidebar';
 import type { User, UserQueryParams, UserWithExtras, PaginatedResponse } from '@/types';
 
 /**
@@ -131,9 +131,11 @@ export function useGetSessionUser(
       return result.data;
     },
     enabled: queryOptions.enabled !== false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000,
     gcTime: 30 * 60 * 1000, // 30 minutes
-    retry: 1,
+    retry: 2,
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnMount: 'always',
   }) as UseQueryResult<UserWithExtras | null, Error>;
 }
 
@@ -196,9 +198,10 @@ export function useGetUsersPaginated(
       return result;
     },
     enabled: queryOptions.enabled !== false && page >= 1,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes to reduce refetches
+    gcTime: 15 * 60 * 1000, // 15 minutes cache retention
     retry: 1,
+    placeholderData: keepPreviousData, // keep previous page/filter data to avoid blank states
   }) as UseQueryResult<PaginatedResponse<User>, Error>;
 }
 

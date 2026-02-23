@@ -1,19 +1,11 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth-context';
 import { QueryProvider } from '@/lib/providers/query-provider';
 import { Toaster } from 'sonner';
+import { Roboto } from 'next/font/google';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
+const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'] });
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -26,8 +18,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="en" className={roboto.className}>
+      <body className="antialiased">
         <QueryProvider>
           {/* Remove later on when adding real auth  */}
           <AuthProvider>{children}</AuthProvider>

@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
+/**
+ * DEPRECATED: Legacy API route for adding users
+ * ⚠️ This route is no longer used by the frontend.
+ * The app now uses server actions in /src/actions/manage.ts
+ * TODO: Remove this file after confirming no external dependencies
+ */
+
 export async function GET(req: NextRequest) {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.SUPABASE_URL) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -30,6 +37,28 @@ export async function POST(req: Request) {
 
     if (!email || !password) {
       return NextResponse.json({ error: 'email and password required' }, { status: 400 });
+    }
+
+    // Check if user with this email already exists
+    const { data: existingUser, error: lookupError } = await supabaseAdmin
+      .from('User')
+      .select('id, email')
+      .eq('email', email)
+      .limit(1)
+      .maybeSingle();
+
+    if (lookupError) {
+      return NextResponse.json(
+        { error: 'Failed to verify email availability: ' + lookupError.message },
+        { status: 500 }
+      );
+    }
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: `A user with email "${email}" already exists` },
+        { status: 400 }
+      );
     }
 
     // Create auth user

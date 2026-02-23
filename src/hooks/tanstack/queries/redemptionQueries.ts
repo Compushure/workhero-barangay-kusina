@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRedemptionRequestsAction, getMyRedemptionRequestsAction } from '@/actions/hr';
+import { getRedemptionRequestsAction } from '@/actions/hr/redemptions';
+import { getMyRedemptionRequestsAction } from '@/actions/employee/redemptions';
 import { RedemptionRequest } from '@/types';
 
 /**
@@ -29,6 +30,10 @@ export function useGetRedemptionRequests(status?: string) {
 
       return result.data || [];
     },
+    staleTime: 2 * 60 * 1000, // Consider data fresh for 2 minutes (more frequent for pending requests)
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: status === 'pending', // Only refetch on focus for pending requests
+    refetchInterval: status === 'pending' ? 2000 : false, // Auto-refetch every 2s for pending
   });
 }
 
@@ -48,5 +53,8 @@ export function useGetMyRedemptionRequests(status?: string) {
 
       return result.data || [];
     },
+    staleTime: 2 * 60 * 1000, // Consider data fresh for 2 minutes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: status === 'pending', // Only refetch on focus for pending
   });
 }

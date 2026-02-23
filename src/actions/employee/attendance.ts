@@ -1,0 +1,534 @@
+'use server';
+
+import { createClient } from '@/lib/supabase/server';
+import type { ServerActionResponse } from '@/lib/utils/safe-action';
+import type { AttendanceConfig, AttendanceLog, AttendanceStatus } from '@/types';
+import { attendanceConfig } from '@/lib/attendance-config';
+
+function normalizeConfig(config?: Partial<AttendanceConfig>): AttendanceConfig {
+  return {
+    timeInAt: config?.timeInAt ?? attendanceConfig.timeInAt,
+    timeOutAt: config?.timeOutAt ?? attendanceConfig.timeOutAt,
+    lateAfter: config?.lateAfter ?? config?.timeInAt ?? attendanceConfig.lateAfter,
+    overtimeAfter: config?.overtimeAfter ?? config?.timeOutAt ?? attendanceConfig.overtimeAfter,
+    autoTimeoutAt: config?.autoTimeoutAt ?? attendanceConfig.autoTimeoutAt,
+    breaktime_duration: config?.breaktime_duration ?? attendanceConfig.breaktime_duration,
+  };
+}
+
+function parseTimeOnDate(base: Date, time: string): Date {
+  const [hours, minutes] = time.split(':').map((v) => Number(v));
+  const result = new Date(base);
+  result.setHours(hours, minutes, 0, 0);
+  return result;
+}
+
+function getDayRange(base: Date): { start: Date; end: Date } {
+  const start = new Date(base);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(base);
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
+}
+
+function isOpenLog(log: AttendanceLog): boolean {
+  const timeIn = new Date(log.timein_time).getTime();
+  const timeOut = new Date(log.timeout_time).getTime();
+  return (log.no_timeout ?? false) === false && timeOut === timeIn;
+}
+
+function isOnBreak(log: AttendanceLog): boolean {
+  return !!log.breaktime_start && !log.breaktime_end;
+}
+
+function calculateBreakDuration(breakStart: string, breakEnd: string): number {
+  const start = new Date(breakStart).getTime();
+  const end = new Date(breakEnd).getTime();
+  return end - start; // milliseconds
+}
+
+function parseDurationToMs(duration: string): number {
+  const [hours, minutes] = duration.split(':').map((v) => Number(v));
+  return (hours * 60 + minutes) * 60 * 1000; // milliseconds
+}
+
+async function getTodayLog(employeeId: string): Promise<AttendanceLog | null> {
+  const supabase = await createClient();
+  const now = new Date();
+  const { start, end } = getDayRange(now);
+
+  const { data, error } = await supabase
+    .from('AttendanceLog')
+    .select('*')
+    .eq('employee_id', employeeId)
+    .gte('timein_time', start.toISOString())
+    .lte('timein_time', end.toISOString())
+    .order('timein_time', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching today attendance log:', error);
+    return null;
+  }
+
+  return data as AttendanceLog | null;
+}
+
+export async function getAttendanceConfigAction(): Promise<ServerActionResponse<AttendanceConfig>> {
+  return { error: null, data: attendanceConfig };
+}
+
+export async function getTodayAttendanceStatusAction(
+  config?: Partial<AttendanceConfig>
+): Promise<ServerActionResponse<AttendanceStatus>> {
+  try {
+    const supabase = await createClient();
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session?.user) {
+      return { error: 'No active session found' };
+    }
+
+    const employeeId = sessionData.session.user.id;
+    const now = new Date();
+    const normalized = normalizeConfig(config);
+
+    const timeInAt = parseTimeOnDate(now, normalized.timeInAt);
+    const timeOutAt = parseTimeOnDate(now, normalized.timeOutAt);
+    const lateAfter = parseTimeOnDate(now, normalized.lateAfter);
+    const overtimeAfter = parseTimeOnDate(now, normalized.overtimeAfter);
+    const autoTimeoutAt = parseTimeOnDate(now, normalized.autoTimeoutAt);
+
+    let log = await getTodayLog(employeeId);
+
+    // Auto-mark absent if past overtimeAfter with no time-in
+    if (!log && now >= overtimeAfter) {
+      const { data: absent, error: absentError } = await supabase
+        .from('AttendanceLog')
+        .insert({
+          timein_time: overtimeAfter.toISOString(),
+          timeout_time: overtimeAfter.toISOString(),
+          is_ontime: false,
+          employee_id: employeeId,
+          is_overtime: false,
+          is_absent: true,
+          no_timeout: false,
+          is_undertime: false,
+        })
+        .select('*')
+        .single();
+
+      if (!absentError && absent) {
+        log = absent as AttendanceLog;
+      }
+    }
+
+    // Auto-mark absent if on break past timeOutAt
+    if (log && isOnBreak(log) && now >= timeOutAt) {
+      const { data: updated, error: updateError } = await supabase
+        .from('AttendanceLog')
+        .update({
+          is_absent: true,
+          over_breaktime: true,
+        })
+        .eq('id', log.id)
+        .select('*')
+        .single();
+
+      if (!updateError && updated) {
+        log = updated as AttendanceLog;
+      }
+    }
+
+    // Auto-timeout if open log past autoTimeoutAt
+    if (log && isOpenLog(log) && !isOnBreak(log) && now >= autoTimeoutAt) {
+      const isOvertime = autoTimeoutAt > overtimeAfter;
+      const isUndertime = autoTimeoutAt < timeOutAt;
+      const { data: updated, error: updateError } = await supabase
+        .from('AttendanceLog')
+        .update({
+          timeout_time: autoTimeoutAt.toISOString(),
+          no_timeout: true,
+          is_overtime: isOvertime,
+          is_undertime: isUndertime,
+        })
+        .eq('id', log.id)
+        .select('*')
+        .single();
+
+      if (!updateError && updated) {
+        log = updated as AttendanceLog;
+      }
+    }
+
+    const isAbsent = log?.is_absent ?? false;
+    const hasTimedIn = !!log && !isAbsent;
+    const open = log ? isOpenLog(log) : false;
+    const hasTimedOut = hasTimedIn && !open;
+    const onBreak = log ? isOnBreak(log) : false;
+
+    const canTimeIn = !hasTimedIn && !isAbsent && now >= timeInAt && now <= autoTimeoutAt;
+    const canTimeOut = hasTimedIn && open && !onBreak;
+    const canStartBreak = hasTimedIn && !hasTimedOut && !onBreak && !log?.breaktime_end;
+    const canEndBreak = hasTimedIn && onBreak;
+
+    const status: AttendanceStatus = {
+      logId: log?.id,
+      timeInTime: log?.timein_time ? (typeof log.timein_time === 'string' ? log.timein_time : log.timein_time.toISOString()) : undefined,
+      timeOutTime: hasTimedOut ? (log?.timeout_time ? (typeof log.timeout_time === 'string' ? log.timeout_time : log.timeout_time.toISOString()) : undefined) : undefined,
+      hasTimedIn,
+      hasTimedOut,
+      canTimeIn,
+      canTimeOut,
+      isLate: log ? !(log.is_ontime ?? true) : undefined,
+      isOvertime: log ? log.is_overtime ?? undefined : undefined,
+      isUndertime: log ? log.is_undertime ?? undefined : undefined,
+      noTimeout: log ? log.no_timeout ?? undefined : undefined,
+      isAbsent,
+      breakStartTime: log?.breaktime_start ? (typeof log.breaktime_start === 'string' ? log.breaktime_start : log.breaktime_start.toISOString()) : undefined,
+      breakEndTime: log?.breaktime_end ? (typeof log.breaktime_end === 'string' ? log.breaktime_end : log.breaktime_end.toISOString()) : undefined,
+      isOnBreak: onBreak,
+      canStartBreak,
+      canEndBreak,
+      isOverBreaktime: log?.over_breaktime ?? undefined,
+      message: !hasTimedIn
+        ? now < timeInAt
+          ? `Time in starts at ${normalized.timeInAt}`
+          : now > autoTimeoutAt
+            ? 'Time in closed for today'
+            : 'Ready to time in'
+        : onBreak
+          ? 'On break - end break to continue'
+          : hasTimedOut
+            ? 'Already timed out'
+            : 'Ready to time out',
+    };
+
+    return { error: null, data: status };
+  } catch (error) {
+    console.error('Error in getTodayAttendanceStatusAction:', error);
+    return { error: 'Failed to fetch attendance status' };
+  }
+}
+
+export async function timeInAttendanceAction(
+  config?: Partial<AttendanceConfig>
+): Promise<ServerActionResponse<AttendanceStatus>> {
+  try {
+    const supabase = await createClient();
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session?.user) {
+      return { error: 'No active session found' };
+    }
+
+    const employeeId = sessionData.session.user.id;
+    const now = new Date();
+    const normalized = normalizeConfig(config);
+
+    const timeInAt = parseTimeOnDate(now, normalized.timeInAt);
+    const lateAfter = parseTimeOnDate(now, normalized.lateAfter);
+    const autoTimeoutAt = parseTimeOnDate(now, normalized.autoTimeoutAt);
+
+    if (now < timeInAt) {
+      return { error: `Time in starts at ${normalized.timeInAt}` };
+    }
+
+    if (now > autoTimeoutAt) {
+      return { error: 'Time in is closed for today' };
+    }
+
+    const existing = await getTodayLog(employeeId);
+    if (existing) {
+      if (existing.is_absent) {
+        return { error: 'Attendance already marked absent for today' };
+      }
+      return { error: 'Already timed in for today' };
+    }
+
+    const isOnTime = now <= lateAfter;
+
+    const { data: created, error } = await supabase
+      .from('AttendanceLog')
+      .insert({
+        timein_time: now.toISOString(),
+        timeout_time: now.toISOString(),
+        is_ontime: isOnTime,
+        employee_id: employeeId,
+        is_overtime: false,
+        is_absent: false,
+        no_timeout: false,
+        is_undertime: false,
+      })
+      .select('*')
+      .single();
+
+    if (error || !created) {
+      return { error: `Failed to time in: ${error?.message || 'Unknown error'}` };
+    }
+
+    return {
+      error: null,
+      data: {
+        logId: created.id,
+        timeInTime: created.timein_time,
+        hasTimedIn: true,
+        hasTimedOut: false,
+        canTimeIn: false,
+        canTimeOut: true,
+        isLate: !isOnTime,
+        message: 'Timed in successfully',
+      },
+    };
+  } catch (error) {
+    console.error('Error in timeInAttendanceAction:', error);
+    return { error: 'Failed to time in' };
+  }
+}
+
+export async function timeOutAttendanceAction(
+  logId?: string,
+  config?: Partial<AttendanceConfig>
+): Promise<ServerActionResponse<AttendanceStatus>> {
+  try {
+    const supabase = await createClient();
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session?.user) {
+      return { error: 'No active session found' };
+    }
+
+    const employeeId = sessionData.session.user.id;
+    const now = new Date();
+    const normalized = normalizeConfig(config);
+
+    const timeOutAt = parseTimeOnDate(now, normalized.timeOutAt);
+    const overtimeAfter = parseTimeOnDate(now, normalized.overtimeAfter);
+
+    let log = logId ? null : await getTodayLog(employeeId);
+
+    if (logId) {
+      const { data, error } = await supabase
+        .from('AttendanceLog')
+        .select('*')
+        .eq('id', logId)
+        .eq('employee_id', employeeId)
+        .single();
+      if (error || !data) {
+        return { error: 'Attendance log not found' };
+      }
+      log = data as AttendanceLog;
+    }
+
+    if (!log) {
+      return { error: 'No active time in found for today' };
+    }
+
+    if (log.is_absent) {
+      return { error: 'Attendance already marked absent for today' };
+    }
+
+    if (isOnBreak(log)) {
+      return { error: 'Cannot time out while on break. End your break first.' };
+    }
+
+    if (!isOpenLog(log)) {
+      return { error: 'Already timed out for today' };
+    }
+
+    const isOvertime = now > overtimeAfter;
+    const isUndertime = now < timeOutAt;
+
+    const { data: updated, error: updateError } = await supabase
+      .from('AttendanceLog')
+      .update({
+        timeout_time: now.toISOString(),
+        is_overtime: isOvertime,
+        is_undertime: isUndertime,
+        no_timeout: false,
+      })
+      .eq('id', log.id)
+      .select('*')
+      .single();
+
+    if (updateError || !updated) {
+      return { error: `Failed to time out: ${updateError?.message || 'Unknown error'}` };
+    }
+
+    return {
+      error: null,
+      data: {
+        logId: updated.id,
+        timeInTime: updated.timein_time,
+        timeOutTime: updated.timeout_time,
+        hasTimedIn: true,
+        hasTimedOut: true,
+        canTimeIn: false,
+        canTimeOut: false,
+        isOvertime,
+        isUndertime,
+        noTimeout: false,
+        message: 'Timed out successfully',
+      },
+    };
+  } catch (error) {
+    console.error('Error in timeOutAttendanceAction:', error);
+    return { error: 'Failed to time out' };
+  }
+}
+
+export async function startBreakAction(
+  config?: Partial<AttendanceConfig>
+): Promise<ServerActionResponse<AttendanceStatus>> {
+  try {
+    const supabase = await createClient();
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session?.user) {
+      return { error: 'No active session found' };
+    }
+
+    const employeeId = sessionData.session.user.id;
+    const now = new Date();
+
+    const log = await getTodayLog(employeeId);
+
+    if (!log) {
+      return { error: 'No active time in found for today' };
+    }
+
+    if (log.is_absent) {
+      return { error: 'Attendance already marked absent for today' };
+    }
+
+    if (!isOpenLog(log)) {
+      return { error: 'Already timed out for today' };
+    }
+
+    if (isOnBreak(log)) {
+      return { error: 'Already on break' };
+    }
+
+    if (log.breaktime_end) {
+      return { error: 'Break already taken for today' };
+    }
+
+    const { data: updated, error: updateError } = await supabase
+      .from('AttendanceLog')
+      .update({
+        breaktime_start: now.toISOString(),
+      })
+      .eq('id', log.id)
+      .select('*')
+      .single();
+
+    if (updateError || !updated) {
+      return { error: `Failed to start break: ${updateError?.message || 'Unknown error'}` };
+    }
+
+    return {
+      error: null,
+      data: {
+        logId: updated.id,
+        timeInTime: updated.timein_time,
+        breakStartTime: updated.breaktime_start ?? undefined,
+        hasTimedIn: true,
+        hasTimedOut: false,
+        canTimeIn: false,
+        canTimeOut: false,
+        canStartBreak: false,
+        canEndBreak: true,
+        isOnBreak: true,
+        message: 'Break started successfully',
+      },
+    };
+  } catch (error) {
+    console.error('Error in startBreakAction:', error);
+    return { error: 'Failed to start break' };
+  }
+}
+
+export async function endBreakAction(
+  logId?: string,
+  config?: Partial<AttendanceConfig>
+): Promise<ServerActionResponse<AttendanceStatus>> {
+  try {
+    const supabase = await createClient();
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session?.user) {
+      return { error: 'No active session found' };
+    }
+
+    const employeeId = sessionData.session.user.id;
+    const now = new Date();
+    const normalized = normalizeConfig(config);
+
+    let log = logId ? null : await getTodayLog(employeeId);
+
+    if (logId) {
+      const { data, error } = await supabase
+        .from('AttendanceLog')
+        .select('*')
+        .eq('id', logId)
+        .eq('employee_id', employeeId)
+        .single();
+      if (error || !data) {
+        return { error: 'Attendance log not found' };
+      }
+      log = data as AttendanceLog;
+    }
+
+    if (!log) {
+      return { error: 'No active time in found for today' };
+    }
+
+    if (log.is_absent) {
+      return { error: 'Attendance already marked absent for today' };
+    }
+
+    if (!isOnBreak(log)) {
+      return { error: 'Not currently on break' };
+    }
+
+    const breakStart = typeof log.breaktime_start === 'string' ? log.breaktime_start : log.breaktime_start?.toISOString() || '';
+    const breakDurationMs = calculateBreakDuration(breakStart, now.toISOString());
+    const allowedBreakMs = parseDurationToMs(normalized.breaktime_duration);
+    const isOverBreaktime = breakDurationMs > allowedBreakMs;
+
+    const { data: updated, error: updateError } = await supabase
+      .from('AttendanceLog')
+      .update({
+        breaktime_end: now.toISOString(),
+        over_breaktime: isOverBreaktime,
+      })
+      .eq('id', log.id)
+      .select('*')
+      .single();
+
+    if (updateError || !updated) {
+      return { error: `Failed to end break: ${updateError?.message || 'Unknown error'}` };
+    }
+
+    return {
+      error: null,
+      data: {
+        logId: updated.id,
+        timeInTime: updated.timein_time,
+        breakStartTime: updated.breaktime_start ?? undefined,
+        breakEndTime: updated.breaktime_end ?? undefined,
+        isOverBreaktime,
+        hasTimedIn: true,
+        hasTimedOut: false,
+        canTimeIn: false,
+        canTimeOut: true,
+        canStartBreak: false,
+        canEndBreak: false,
+        isOnBreak: false,
+        message: isOverBreaktime
+          ? 'Break ended - exceeded recommended duration'
+          : 'Break ended successfully',
+      },
+    };
+  } catch (error) {
+    console.error('Error in endBreakAction:', error);
+    return { error: 'Failed to end break' };
+  }
+}
+

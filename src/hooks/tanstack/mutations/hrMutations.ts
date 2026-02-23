@@ -1,13 +1,15 @@
 import {
   handleAcceptRedemptionRequestAction,
   handleDeclineRedemptionRequestAction,
+} from '@/action-handlers/hr/redemptions';
+import {
   handleAddRewardAction,
   handleEditRewardAction,
   handleDeleteRewardAction,
   handleHideRewardAction,
-  handleCreateRedemptionRequestAction,
   handleUploadRewardPicture,
-} from '@/action-handlers/hr';
+} from '@/action-handlers/hr/rewards';
+import { handleCreateRedemptionRequestAction } from '@/action-handlers/employee/redemptions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AddRewardInput, EditRewardInput, Reward } from '@/types';
 import { rewardKeys } from '../queries/rewardQueries';
@@ -29,6 +31,8 @@ export function useDeclineRedemptionRequest() {
       // Invalidate redemption queries to refetch the list
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
+      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
     },
   });
 }
@@ -44,6 +48,8 @@ export function useAcceptRedemptionRequest() {
       // Invalidate redemption queries to refetch the list
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
+      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
     },
   });
 }
@@ -66,6 +72,7 @@ export function useCreateRedemptionRequest() {
 
 /**
  * Mutation hook for adding a new reward/mercado item
+ * Optimized to avoid excessive refetching
  */
 export function useAddReward() {
   const queryClient = useQueryClient();
@@ -74,19 +81,24 @@ export function useAddReward() {
     mutationFn: async (input: AddRewardInput): Promise<Reward | null> => {
       return await handleAddRewardAction(input);
     },
-    onSuccess: () => {
-      // Invalidate and refetch rewards list immediately
-      queryClient.invalidateQueries({ queryKey: rewardKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+    onSuccess: (newReward) => {
+      if (newReward) {
+        // Optimistically update the cache with the new reward
+        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+          if (!existing) return [newReward];
+          return [...existing, newReward];
+        });
+      }
 
-      // Force immediate refetch
-      queryClient.refetchQueries({ queryKey: rewardKeys.list() });
+      // Invalidate to ensure consistency, but don't force immediate refetch
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all, refetchType: 'none' });
     },
   });
 }
 
 /**
  * Mutation hook for editing an existing reward/mercado item
+ * Optimized with optimistic updates
  */
 export function useEditReward() {
   const queryClient = useQueryClient();
@@ -95,19 +107,26 @@ export function useEditReward() {
     mutationFn: async ({ id, input }: { id: string; input: EditRewardInput }): Promise<Reward | null> => {
       return await handleEditRewardAction(id, input);
     },
-    onSuccess: () => {
-      // Invalidate and refetch rewards list immediately
-      queryClient.invalidateQueries({ queryKey: rewardKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+    onSuccess: (updatedReward) => {
+      if (updatedReward) {
+        // Optimistically update the cache
+        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+          if (!existing) return [updatedReward];
+          return existing.map((reward) =>
+            reward.id === updatedReward.id ? updatedReward : reward
+          );
+        });
+      }
 
-      // Force immediate refetch
-      queryClient.refetchQueries({ queryKey: rewardKeys.list() });
+      // Invalidate to ensure consistency
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all, refetchType: 'none' });
     },
   });
 }
 
 /**
  * Mutation hook for deleting a reward/mercado item
+ * Optimized with optimistic updates
  */
 export function useDeleteReward() {
   const queryClient = useQueryClient();
@@ -116,19 +135,24 @@ export function useDeleteReward() {
     mutationFn: async (id: string): Promise<boolean> => {
       return await handleDeleteRewardAction(id);
     },
-    onSuccess: () => {
-      // Invalidate and refetch rewards list immediately
-      queryClient.invalidateQueries({ queryKey: rewardKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+    onSuccess: (success, deletedId) => {
+      if (success) {
+        // Optimistically remove from cache
+        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+          if (!existing) return existing;
+          return existing.filter((reward) => reward.id !== deletedId);
+        });
+      }
 
-      // Force immediate refetch
-      queryClient.refetchQueries({ queryKey: rewardKeys.list() });
+      // Invalidate to ensure consistency
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all, refetchType: 'none' });
     },
   });
 }
 
 /**
  * Mutation hook for hiding/unhiding a reward/mercado item
+ * Optimized with optimistic updates
  */
 export function useHideReward() {
   const queryClient = useQueryClient();
@@ -137,19 +161,26 @@ export function useHideReward() {
     mutationFn: async ({ id, isActive }: { id: string; isActive?: boolean }): Promise<boolean> => {
       return await handleHideRewardAction(id, isActive);
     },
-    onSuccess: () => {
-      // Invalidate and refetch rewards list immediately
-      queryClient.invalidateQueries({ queryKey: rewardKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+    onSuccess: (success, { id, isActive }) => {
+      if (success) {
+        // Optimistically update the cache
+        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+          if (!existing) return existing;
+          return existing.map((reward) =>
+            reward.id === id ? { ...reward, isActive: isActive ?? false } : reward
+          );
+        });
+      }
 
-      // Force immediate refetch
-      queryClient.refetchQueries({ queryKey: rewardKeys.list() });
+      // Invalidate to ensure consistency
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all, refetchType: 'none' });
     },
   });
 }
 
 /**
  * Mutation hook for uploading/updating a reward image
+ * Uses optimistic updates with local preview URL for instant feedback
  */
 export function useUploadRewardPicture() {
   const queryClient = useQueryClient();
@@ -166,21 +197,56 @@ export function useUploadRewardPicture() {
     }): Promise<string | null> => {
       return await handleUploadRewardPicture(rewardId, file, rewardName);
     },
-    onSuccess: (publicUrl, variables) => {
+    // Optimistic update: show local preview immediately
+    onMutate: async ({ rewardId, file }) => {
+      // Cancel outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({ queryKey: rewardKeys.list() });
+
+      // Snapshot previous state
+      const previousRewards = queryClient.getQueryData<Reward[]>(rewardKeys.list());
+
+      // Create local preview URL for immediate display
+      const localPreviewUrl = URL.createObjectURL(file);
+
+      // Optimistically update cache with local preview
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return existing;
+        return existing.map((reward) =>
+          reward.id === rewardId
+            ? { ...reward, imageUrl: localPreviewUrl }
+            : reward
+        );
+      });
+
+      return { previousRewards, localPreviewUrl };
+    },
+    onSuccess: (publicUrl, variables, context) => {
+      // Revoke the local preview URL to free memory
+      if (context?.localPreviewUrl) {
+        URL.revokeObjectURL(context.localPreviewUrl);
+      }
+
       if (publicUrl) {
-        // Optimistically update cached rewards with new image URL
+        // Update cache with actual server URL
         queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
           if (!existing) return existing;
           return existing.map((reward) =>
-            reward.id === variables.rewardId ? { ...reward, imageUrl: publicUrl } : reward
+            reward.id === variables.rewardId
+              ? { ...reward, imageUrl: publicUrl }
+              : reward
           );
         });
       }
-
-      // Ensure reward list reflects latest image URL
-      queryClient.invalidateQueries({ queryKey: rewardKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
-      queryClient.refetchQueries({ queryKey: rewardKeys.list() });
+    },
+    onError: (_error, _variables, context) => {
+      // Rollback to previous state on error
+      if (context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+      // Revoke the local preview URL
+      if (context?.localPreviewUrl) {
+        URL.revokeObjectURL(context.localPreviewUrl);
+      }
     },
   });
 }

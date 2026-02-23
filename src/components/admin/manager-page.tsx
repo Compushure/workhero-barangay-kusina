@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, lazy, Suspense, useCallback } from 'react';
 import { useGetUsersPaginated } from '@/hooks/tanstack/queries/userQueries';
 import {
   useAddUser,
   useEditUser,
   useDeleteUser,
   useUploadProfilePicture,
+  useDeleteProfilePicture,
 } from '@/hooks/tanstack/mutations/userMutations';
 import { useDebounce } from '@/hooks/useDebounce';
 import type {
@@ -17,7 +18,6 @@ import type {
   EmploymentStatusValue,
 } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { WhiteCard } from '@/components/ui/white-card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,13 +29,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { UserCard } from './user-card';
-import { AddUserModal } from './modals/add-user-modal';
-import { EditUserModal } from './modals/edit-user-modal';
-import { DeleteUserModal } from './modals/delete-user-modal';
-import { Pagination } from '@/components/Manager/Task-Verification/pagination';
-import { UserPlus, LogOut, ArrowLeft, Loader2, Search, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
-import { handleSignOut } from '@/action-handlers/auth';
+// Lazy load modals for better performance
+const AddUserModal = lazy(() =>
+  import('./modals/add-user-modal').then((mod) => ({ default: mod.AddUserModal }))
+);
+const EditUserModal = lazy(() =>
+  import('./modals/edit-user-modal').then((mod) => ({ default: mod.EditUserModal }))
+);
+const DeleteUserModal = lazy(() =>
+  import('./modals/delete-user-modal').then((mod) => ({ default: mod.DeleteUserModal }))
+);
+import { Pagination } from '@/components/manager/task-verification/pagination';
+import { UserPlus, LogOut, Loader2, Search, SlidersHorizontal } from 'lucide-react';
+import { handleSignOut } from '@/action-handlers/shared/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -57,6 +63,7 @@ export function ManagerPage() {
 
   // Debounce search query to prevent excessive API calls (1500ms delay)
   const debouncedSearchQuery = useDebounce(searchQuery, 1500);
+  const isDebouncing = searchQuery !== debouncedSearchQuery;
 
   // TanStack Query hook with debounced parameters and pagination
   const {
@@ -82,6 +89,7 @@ export function ManagerPage() {
   const editUserMutation = useEditUser();
   const deleteUserMutation = useDeleteUser();
   const uploadProfilePictureMutation = useUploadProfilePicture();
+  const deleteProfilePictureMutation = useDeleteProfilePicture();
 
   // Modal state
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -89,64 +97,101 @@ export function ManagerPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const onHandleProfilePictureUpload = async (
-    userid: string,
-    file: File,
-    username: string
-  ): Promise<boolean> => {
-    const currentUser = users.find((u) => u.id === userid);
-    if (!currentUser) return false;
-    return new Promise((resolve) => {
-      uploadProfilePictureMutation.mutate(
-        { file, userid, username },
-        {
-          onSuccess: () => {
-            // toast.success('Profile picture updated', {
-            //   description: `${username}'s profile picture has been uploaded successfully.`,
-            // });
-            resolve(true);
-          },
-          onError: () => {
-            // toast.error('Failed to upload profile picture', {
-            //   description: 'Please try again. If the issue persists, contact support.',
-            // });
-            resolve(false);
-          },
-        }
-      );
-    });
-  };
+  const onHandleProfilePictureUpload = useCallback(
+    async (userid: string, file: File, username: string): Promise<void> => {
+      const currentUser = users.find((u) => u.id === userid);
+      if (!currentUser) return;
+      return new Promise((resolve) => {
+        uploadProfilePictureMutation.mutate(
+          { file, userid, username },
+          {
+            onSuccess: () => {
+              window.dispatchEvent(
+                new CustomEvent('profile-image-updated', {
+                  detail: { userId: userid, timestamp: Date.now() },
+                })
+              );
+              resolve();
+            },
+            onError: () => {
+              resolve();
+            },
+          }
+        );
+      });
+    },
+    [users, uploadProfilePictureMutation]
+  );
+
+  const onHandleProfilePictureClear = useCallback(
+    async (userid: string, username: string): Promise<void> => {
+      return new Promise((resolve) => {
+        deleteProfilePictureMutation.mutate(
+          { userId: userid, userName: username },
+          {
+            onSuccess: () => {
+              window.dispatchEvent(
+                new CustomEvent('profile-image-updated', {
+                  detail: { userId: userid, timestamp: Date.now() },
+                })
+              );
+              resolve();
+            },
+            onError: () => {
+              resolve();
+            },
+          }
+        );
+      });
+    },
+    [deleteProfilePictureMutation]
+  );
 
   // CRUD handlers using TanStack Query mutations
-  const onAddUser = async (data: AddUserInput): Promise<void> => {
-    addUserMutation.mutate(data, {
-      onSuccess: () => {
-        setAddModalOpen(false);
-      },
-    });
-  };
-
-  const onEditUser = async (userId: string, data: EditUserInput): Promise<boolean> => {
-    const currentUser = users.find((u) => u.id === userId);
-    if (!currentUser) return false;
-
-    return new Promise((resolve) => {
-      editUserMutation.mutate(
-        { userId, data, userName: currentUser.name },
-        {
-          onSuccess: () => {
-            setEditModalOpen(false);
-            resolve(true);
+  const onAddUser = useCallback(
+    async (data: AddUserInput): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        addUserMutation.mutate(data, {
+          onSuccess: async (newUser) => {
+            console.log('User created:', newUser?.id, newUser?.name);
+            // Profile picture can be added later by editing the user
+            setAddModalOpen(false);
+            resolve();
           },
-          onError: () => {
-            resolve(false);
+          onError: (error) => {
+            console.error('User creation error:', error);
+            reject(error);
           },
-        }
-      );
-    });
-  };
+        });
+      });
+    },
+    [addUserMutation]
+  );
 
-  const onDeleteUser = async (): Promise<boolean> => {
+  const onEditUser = useCallback(
+    async (userId: string, data: EditUserInput): Promise<boolean> => {
+      const currentUser = users.find((u) => u.id === userId);
+      if (!currentUser) return false;
+
+      return new Promise((resolve) => {
+        editUserMutation.mutate(
+          { userId, data, userName: currentUser.name },
+          {
+            onSuccess: () => {
+              setEditModalOpen(false);
+              resolve(true);
+            },
+            onError: () => {
+              resolve(false);
+            },
+          }
+        );
+      });
+    },
+    [users, editUserMutation]
+  );
+
+  const onDeleteUser = useCallback(async (): Promise<boolean> => {
     if (!selectedUser) return false;
 
     return new Promise((resolve) => {
@@ -164,51 +209,51 @@ export function ManagerPage() {
         }
       );
     });
-  };
+  }, [selectedUser, deleteUserMutation]);
 
-  const handleEditClick = (user: User) => {
+  const handleEditClick = useCallback((user: User) => {
     setSelectedUser(user);
     setEditModalOpen(true);
-  };
+  }, []);
 
-  const handleDeleteClick = (user: User) => {
+  const handleDeleteClick = useCallback((user: User) => {
     setSelectedUser(user);
     setDeleteModalOpen(true);
-  };
+  }, []);
 
   // Reset to page 1 when filters change
-  const handleSearchChange = (query: string) => {
+  const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);
-    setPage(1); // Reset pagination when searching
-  };
-
-  const handleEmployeeTypeFilterChange = (value: string) => {
-    setEmployeeTypeFilter(value as any);
     setPage(1);
-  };
+  }, []);
 
-  const handleEmploymentStatusFilterChange = (value: string) => {
-    setEmploymentStatusFilter(value as any);
+  const handleEmployeeTypeFilterChange = useCallback((value: string) => {
+    setEmployeeTypeFilter(value as EmployeeTypeValue);
     setPage(1);
-  };
+  }, []);
 
-  const handleSortChange = (value: string) => {
-    setSortBy(value as any);
+  const handleEmploymentStatusFilterChange = useCallback((value: string) => {
+    setEmploymentStatusFilter(value as EmploymentStatusValue);
     setPage(1);
-  };
+  }, []);
 
-  const handleLogout = () => {
+  const handleSortChange = useCallback((value: string) => {
+    setSortBy(value as 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc');
+    setPage(1);
+  }, []);
+
+  const handleLogout = useCallback(() => {
     startTransition(async () => {
       const { error } = await handleSignOut();
       if (!error) {
-        router.push('/admin');
+        router.push('/auth/adminlogin');
 
         toast.success('Logged out', {
           description: 'You have successfully logged out.',
         });
       }
     });
-  };
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-[#f1f1f1]">
@@ -217,17 +262,13 @@ export function ManagerPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Link
-                href="/admin"
-                className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-primary-foreground">
                   User Management
                 </h1>
-                <p className="text-sm text-primary-foreground/70">{users.length} total users on page {page}</p>
+                <p className="text-sm text-primary-foreground/70">
+                  {users.length} total users on page {page}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -269,18 +310,28 @@ export function ManagerPage() {
                 <Input
                   id="search"
                   placeholder="Search by name..."
-                  className="pl-10"
+                  className={`pl-10 pr-9 ${isDebouncing ? 'bg-muted/50' : ''}`}
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                 />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground">
+                  {isDebouncing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                </div>
               </div>
             </div>
 
             {/* Employee Type Filter */}
             <div className="space-y-2">
-              <Label htmlFor="filter-type">Employee Type</Label>
-              <Select value={employeeTypeFilter} onValueChange={handleEmployeeTypeFilterChange}>
-                <SelectTrigger id="filter-type">
+              <Label htmlFor="filter-type" className="flex items-center gap-2">
+                Employee Type
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+              </Label>
+              <Select 
+                value={employeeTypeFilter} 
+                onValueChange={handleEmployeeTypeFilterChange}
+                disabled={isLoading}
+              >
+                <SelectTrigger id="filter-type" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -294,12 +345,16 @@ export function ManagerPage() {
 
             {/* Employment Status Filter */}
             <div className="space-y-2">
-              <Label htmlFor="filter-status">Employment Status</Label>
+              <Label htmlFor="filter-status" className="flex items-center gap-2">
+                Employment Status
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+              </Label>
               <Select
                 value={employmentStatusFilter}
                 onValueChange={handleEmploymentStatusFilterChange}
+                disabled={isLoading}
               >
-                <SelectTrigger id="filter-status">
+                <SelectTrigger id="filter-status" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -312,9 +367,12 @@ export function ManagerPage() {
 
             {/* Sort */}
             <div className="space-y-2 lg:col-span-2">
-              <Label htmlFor="sort">Sort By</Label>
-              <Select value={sortBy} onValueChange={handleSortChange}>
-                <SelectTrigger id="sort">
+              <Label htmlFor="sort" className="flex items-center gap-2">
+                Sort By
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+              </Label>
+              <Select value={sortBy} onValueChange={handleSortChange} disabled={isLoading}>
+                <SelectTrigger id="sort" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -332,8 +390,18 @@ export function ManagerPage() {
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-6 flex flex-col min-h-[calc(100vh-300px)]">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <div className="grid gap-4">
+            {[...Array(3)].map((_, i) => (
+              <WhiteCard key={i} className="p-4 sm:p-6 animate-pulse">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 space-y-3">
+                    <div className="h-4 bg-muted rounded w-32" />
+                    <div className="h-4 bg-muted rounded w-48" />
+                  </div>
+                  <div className="h-10 bg-muted rounded w-20" />
+                </div>
+              </WhiteCard>
+            ))}
           </div>
         ) : error ? (
           <WhiteCard className="p-8 sm:p-12 text-center">
@@ -357,7 +425,7 @@ export function ManagerPage() {
           </WhiteCard>
         ) : (
           <>
-            <div className="grid gap-4 flex-1">
+            <div className="grid gap-4">
               {users.map((user) => (
                 <UserCard
                   key={user.id}
@@ -370,34 +438,48 @@ export function ManagerPage() {
             </div>
             {/* Pagination fixed at bottom */}
             <div className="mt-auto pt-4">
-              <Pagination
-                totalPages={totalPages}
-                currentPage={page}
-                onPageChange={setPage}
-              />
+              <Pagination totalPages={totalPages} currentPage={page} onPageChange={setPage} />
             </div>
           </>
         )}
       </main>
 
       {/* Modals */}
-      <AddUserModal open={addModalOpen} onOpenChange={setAddModalOpen} onAddUser={onAddUser} />
+      {addModalOpen && (
+        <Suspense fallback={<div className="hidden" />}>
+          <AddUserModal
+            open={addModalOpen}
+            onOpenChange={setAddModalOpen}
+            onAddUser={onAddUser}
+          />
+        </Suspense>
+      )}
 
       {selectedUser && (
         <>
-          <EditUserModal
-            open={editModalOpen}
-            onOpenChange={setEditModalOpen}
-            user={selectedUser}
-            onEditUser={onEditUser}
-          />
+          {editModalOpen && (
+            <Suspense fallback={<div className="hidden" />}>
+              <EditUserModal
+                open={editModalOpen}
+                onOpenChange={setEditModalOpen}
+                user={selectedUser}
+                onEditUser={onEditUser}
+                onImageUpload={onHandleProfilePictureUpload}
+                onImageClear={onHandleProfilePictureClear}
+              />
+            </Suspense>
+          )}
 
-          <DeleteUserModal
-            open={deleteModalOpen}
-            onOpenChange={setDeleteModalOpen}
-            userName={selectedUser.name}
-            onConfirm={onDeleteUser}
-          />
+          {deleteModalOpen && (
+            <Suspense fallback={<div className="hidden" />}>
+              <DeleteUserModal
+                open={deleteModalOpen}
+                onOpenChange={setDeleteModalOpen}
+                userName={selectedUser.name}
+                onConfirm={onDeleteUser}
+              />
+            </Suspense>
+          )}
         </>
       )}
     </div>
