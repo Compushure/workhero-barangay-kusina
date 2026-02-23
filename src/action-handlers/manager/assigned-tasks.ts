@@ -2,7 +2,7 @@ import { safeAction } from '@/lib/utils/safe-action';
 import {
   fetchCurrentAssignedTasksPaginated, // ✅ use only the paginated fetch
   fetchCurrentAssignedEmployeesPaginated, // ✅ new employee-specific fetch
-  clearAllTasks,
+  clearAssignedTasks,
   clearAllEmployeeTasks,
   deleteTask,
   updateTaskAssignment,
@@ -15,7 +15,7 @@ import type { AssignedTask, ServerActionResponse } from '@/types';
  */
 export async function handleFetchCurrentAssignedTasksPaginated(
   page: number = 1,
-  pageSize: number = 4,
+  pageSize: number = 10,
   sortBy: string = 'recently added',
   searchTerm: string = ''
 ): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number; employeeCount: number }> {
@@ -45,8 +45,8 @@ export async function handleFetchCurrentAssignedTasksPaginated(
 /**
  * Clear all tasks
  */
-export async function handleClearAllTasks(): Promise<boolean> {
-  const result = await safeAction<ServerActionResponse<boolean>>(() => clearAllTasks());
+export async function handleClearAssignedTasks(): Promise<boolean> {
+  const result = await safeAction<ServerActionResponse<boolean>>(() => clearAssignedTasks());
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);

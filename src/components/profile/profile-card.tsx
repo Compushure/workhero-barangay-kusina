@@ -12,6 +12,7 @@ import { BasicInformation } from './basic-information';
 import { EmploymentDetails } from './employment-details';
 import { ContactInformation } from './contact-information';
 import { GovernmentIDs } from './government-ids';
+import { BadgesCarousel } from './badges-carousel';
 import type { UserWithExtras } from '@/types';
 import { ReactNode } from 'react';
 
@@ -28,7 +29,17 @@ function ProfileCardComponent({ profile, children }: ProfileCardProps) {
       </CardHeader>
       <CardContent className="px-6 pt-6">
         {children}
-        <Accordion type="multiple" defaultValue={["basic", "employment", "contact", "ids"]} className="space-y-4">
+        <Accordion type="multiple" defaultValue={["badges", "basic", "employment", "contact", "ids"]} className="space-y-4">
+          {/* Badges Section */}
+          <AccordionItem value="badges" className="border rounded-lg px-4">
+            <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+              Badges
+            </AccordionTrigger>
+            <AccordionContent>
+              <BadgesCarousel userId={profile.id} />
+            </AccordionContent>
+          </AccordionItem>
+
           {/* Basic Information Section */}
           <AccordionItem value="basic" className="border rounded-lg px-4">
             <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">

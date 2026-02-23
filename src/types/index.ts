@@ -114,6 +114,18 @@ export type AddRewardInput = z.infer<typeof import('@/zod/schemas').addRewardSch
 export type EditRewardInput = z.infer<typeof import('@/zod/schemas').editRewardSchema>;
 
 /**
+ * Type for adding a badge input
+ * Inferred from addBadgeSchema in @/zod/schemas
+ */
+export type AddBadgeInput = z.infer<typeof import('@/zod/schemas').addBadgeSchema>;
+
+/**
+ * Type for editing a badge input
+ * Inferred from editBadgeSchema in @/zod/schemas
+ */
+export type EditBadgeInput = z.infer<typeof import('@/zod/schemas').editBadgeSchema>;
+
+/**
  * Type for server action responses
  * Generic response type for consistent error handling
  */

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, memo } from 'react';
+import { useEffect, useState, memo } from 'react';
 import type { AssignedTask, AssignedEmployee } from '@/types';
 import EmployeeViewCardMenu from './dialogs/employee-view/employee-view-card-menu';
 import ClearAllTasksDialog from './dialogs/employee-view/clear-all-tasks-dialog';
@@ -37,6 +37,16 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
   });
 
   const employees = Array.from(employeeMap.values());
+  useEffect(() => {
+    if (showClearConfirm && !employees.some((emp) => emp.id === showClearConfirm)) {
+      setShowClearConfirm(null);
+    }
+
+    if (showRemoveConfirm && !employees.some((emp) => emp.id === showRemoveConfirm.empId)) {
+      setShowRemoveConfirm(null);
+    }
+  }, [employees, showClearConfirm, showRemoveConfirm]);
+
 
   // Remove client-side sorting since it's handled server-side
 
@@ -58,7 +68,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
     setExpandedEmployees(newSet);
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
     const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
     return new Date(year, month - 1, day).toLocaleDateString('en-GB', {

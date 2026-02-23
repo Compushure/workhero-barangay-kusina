@@ -13,6 +13,7 @@ import { useUpdateTaskAssignmentMutation } from '@/hooks/tanstack/mutations/mana
 import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import TaskViewEmployeeBadges from './task-view-employee-badges';
 import { isTaskOverdue } from '@/utils/date-utils';
+import { formatDate } from '@/utils/date-utils';
 
 interface TaskViewCardProps {
   task: AssignedTask;
@@ -26,7 +27,9 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editMaxOrders, setEditMaxOrders] = useState(task.maxOrders);
-  const [editDueDate, setEditDueDate] = useState<Date>(() => parseISO(task.dateRange.end));
+  const [editDueDate, setEditDueDate] = useState<Date>(() => 
+    task.dateRange?.end ? parseISO(task.dateRange.end) : new Date()
+  );
   const [editAssignedEmployees, setEditAssignedEmployees] = useState<string[]>(
     (task.assignedEmployees ?? []).map((e) => e.id)
   );
@@ -73,17 +76,6 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   const displayedEmployees = task.assignedEmployees ?? [];
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '';
-    const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
-    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      timeZone: 'Asia/Manila',
-    });
-  };
-
   const handleEditTask = async () => {
     const newEmployees = editAssignedEmployees.map((empId) => {
       const existingEmp = (task.assignedEmployees ?? []).find((e) => e.id === empId);
@@ -118,7 +110,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   const handleOpenEditDialog = () => {
     setEditMaxOrders(task.maxOrders);
-    setEditDueDate(parseISO(task.dateRange.end));
+    setEditDueDate(task.dateRange?.end ? parseISO(task.dateRange.end) : new Date());
     setEditAssignedEmployees((task.assignedEmployees ?? []).map((e) => e.id));
     setShowEditDialog(true);
     setOpenPopover(false);
@@ -126,7 +118,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   const handleCancelEdit = () => {
     setEditMaxOrders(task.maxOrders);
-    setEditDueDate(parseISO(task.dateRange.end));
+    setEditDueDate(task.dateRange?.end ? parseISO(task.dateRange.end) : new Date());
     setEditAssignedEmployees((task.assignedEmployees ?? []).map((e) => e.id));
     setShowEditDialog(false);
   };

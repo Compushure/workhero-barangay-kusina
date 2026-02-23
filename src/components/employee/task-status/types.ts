@@ -4,17 +4,24 @@
 
 export interface TaskStatusItem {
   id: string;
-  taskType: string;
-  title: string;
-  progressCurrent: number;
-  progressMax: number;
+  name: string;
+  description: string;
+  completedOrders: number;
+  maxOrders: number;
+  claimedOrders: number;
   points: number;
   xp: number;
   dueDate: string;
+  /** Manager remark (e.g. for verified/approved tasks). */
+  remark?: string;
+  /** When the employee claimed points/XP for this task; null if not yet claimed. */
+  claimedAt?: string | null;
+  /** Task status: assigned | in review | approved | rejected. */
+  status?: string;
 }
 
 export type TaskStatusKind =
   | 'Current'
-  | 'On Review'
-  | 'Verified'
-  | 'Denied Approval';
+  | 'In Review'
+  | 'Approved'
+  | 'Rejected';

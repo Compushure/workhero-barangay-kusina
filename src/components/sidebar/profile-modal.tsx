@@ -13,6 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ProfileAvatar } from '@/components/shared/ProfileAvatar';
+import { RecentBadges } from '@/components/profile/recent-badges';
 import { UserWithExtras } from '@/types';
 
 interface ProfileModalProps {
@@ -66,6 +67,11 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
               size="lg"
               className="bg-[#f2e1c9] transition-transform duration-300 hover:scale-105 border-[#730202]/10"
             />
+          </div>
+
+          {/* Recent Badges (3 badges) */}
+          <div className="flex justify-center">
+            <RecentBadges userId={user.id} showLabel={false} maxBadges={3} />
           </div>
 
           {/* Basic Information */}

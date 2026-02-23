@@ -44,7 +44,7 @@ export interface AssignedTask {
   status?: string;
   dateRange: {
     start: string;
-    end: string;
+    end: string | null;
   };
   maxOrders: number;
   assignedEmployees: AssignedEmployee[];

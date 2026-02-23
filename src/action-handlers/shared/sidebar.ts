@@ -26,6 +26,9 @@ export async function handleFetchSessionUser(): Promise<{
   }
 
   if (result.data?.error) {
+    if (result.data.error === 'No active session found') {
+      return { error: null };
+    }
     toast.error('Failed to load profile', {
       description: result.data.error,
     });

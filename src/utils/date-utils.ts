@@ -9,14 +9,26 @@ const MANILA_TIMEZONE = 'Asia/Manila';
 
 /**
  * Checks if a task is overdue based on its end date
- * @param endDate - The end date of the task
+ * @param endDate - The end date of the task (can be null)
  * @returns boolean - true if the task is overdue, false otherwise
  */
-export function isTaskOverdue(endDate: string): boolean {
+export function isTaskOverdue(endDate: string | null): boolean {
+  if (!endDate) return false;
   const taskEnd = new Date(new Date(endDate).setHours(0, 0, 0, 0));
   const today = new Date(new Date().setHours(0, 0, 0, 0));
   return taskEnd.getTime() < today.getTime();
 }
+
+export const formatDate = (dateString: string | null) => {
+    if (!dateString) return '';
+    const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'Asia/Manila',
+    });
+  };
 
 /**
  * Checks if a mercado item is available now based on its availability date

@@ -56,19 +56,21 @@ export default function TaskViewEmployeeBadges({
             key={emp.id}
             className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border-2 border-gray-300"
           >
-            {emp.status === "assigned" ? 
-              <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" /> :
+            { 
             emp.status === "in review" ?
               <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400" /> :
             emp.status === "approved" ?
               <StatusIcon icon={CircleCheck} className="bg-green-100 text-green-600" /> :
-              <StatusIcon icon={CircleX} className="bg-red-100 text-red-600"/>
+            emp.status === "rejected" ? 
+              <StatusIcon icon={CircleX} className="bg-red-100 text-red-600"/> :
+            <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" />
             }
             <span className="font-medium text-sm text-zinc-700">{emp.name}</span>
             <span className="text-gray-500 font-normal text-xs">{emp.empId}</span>
             <button
               onClick={() => setShowRemoveConfirm(emp.id)}
               className="ml-2 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130"
+              title="Unassign Employee"
             >
               <X className="size-3.5 text-[#690003] hover:text-red-500" />
             </button>
