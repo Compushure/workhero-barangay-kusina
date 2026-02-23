@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Coins } from 'lucide-react';
 import { useGetEmployeePoints } from '@/hooks/tanstack';
 
 export default function PointsIcon() {
-  const { data, error, isLoading } = useGetEmployeePoints();
+  const { data } = useGetEmployeePoints();
   // const [pointsData, setPointsData] = useState<EmployeePointsData | null>(null);
 
   // useEffect(() => {

@@ -5,6 +5,7 @@ import { RankWidget } from '../dashboard/rank-panel';
 import XPProgressAndPoints from './xp-points';
 import ProfileAndLevel from './profile-level';
 import DashboardRedirectButton from './kitchen-redirection';
+import { Card, CardContent } from '@/components/ui/card';
 import { useGetTodayAttendanceStatus } from '@/hooks/tanstack';
 
 export default function AttendanceDesign() {
@@ -35,9 +36,13 @@ export default function AttendanceDesign() {
         <XPProgressAndPoints />
       </div>
 
-      {/* Top‑right: Weekly / Rank */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2">
-        <RankWidget />
+      {/* Top‑right: Weekly / Rank (same wrapper as employee dashboard) */}
+      <div className="absolute top-4 right-4">
+        <Card className="bg-transparent shadow-none border-none">
+          <CardContent>
+            <RankWidget />
+          </CardContent>
+        </Card>
       </div>
 
       {/* Center column: main card + dashboard button */}
