@@ -153,13 +153,11 @@ export function MonthlyRewardsModal({
         <div className="flex-1 overflow-y-auto p-6 bg-[#e6d7bf]">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="bg-[#f6eddd] border border-[#8a6844]/25 p-6 rounded-2xl shadow-xs">
-                <Loader2 className="h-10 w-10 text-[#6a4a2d] animate-spin mx-auto mb-3" />
-                <p className="text-[#4b3522] font-semibold">Loading rewards...</p>
-                <p className="text-[#6b5038] text-sm mt-1">
-                  Fetching available items for {monthName}
-                </p>
-              </div>
+              <Loader2 className="h-10 w-10 text-[#6a4a2d] animate-spin mx-auto mb-3" />
+              <p className="text-[#4b3522] font-semibold">Loading rewards...</p>
+              <p className="text-[#6b5038] text-sm mt-1">
+                Fetching available items for {monthName}
+              </p>
             </div>
           ) : filteredAndSortedRewards.length === 0 ? (
             <EmptyState monthName={monthName} monthId={month} />

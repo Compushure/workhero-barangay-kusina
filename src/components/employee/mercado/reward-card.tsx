@@ -90,6 +90,7 @@ export const RewardCard = memo(function RewardCard({
               src={reward.imageUrl}
               alt={reward.name}
               fill
+              unoptimized
               className="object-contain p-2 pixelated"
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               onError={() => setImageError(true)}
