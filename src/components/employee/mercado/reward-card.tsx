@@ -1,20 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect, memo } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Minus, Plus, ImageIcon, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Coins, Package, CheckCircle2, Clock, XCircle, Minus, Plus } from 'lucide-react';
 import { useRedeemReward } from '@/hooks/tanstack/mutations/redemptionMutations';
-import { formatNumber } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import type { Reward } from '@/types';
 
 interface RewardCardProps {
@@ -23,176 +16,195 @@ interface RewardCardProps {
   hasPendingRequest: boolean;
 }
 
-export function RewardCard({ reward, userPoints, hasPendingRequest }: RewardCardProps) {
+export const RewardCard = memo(function RewardCard({
+  reward,
+  userPoints,
+  hasPendingRequest,
+}: RewardCardProps) {
   const [imageError, setImageError] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const redeemMutation = useRedeemReward();
 
-  const maxQuantity = reward.redeemingLimit || 99;
-  const totalCost = reward.pointsCost * quantity;
-  const canAfford = userPoints >= totalCost;
-  const isOutOfStock = reward.quantity !== undefined && reward.quantity === 0;
-  const canRedeem = canAfford && !hasPendingRequest && !isOutOfStock;
-  const isRedeeming = redeemMutation.isPending;
+  const isOutOfStock = useMemo(() => {
+    return reward.quantity !== undefined && reward.quantity !== null && reward.quantity <= 0;
+  }, [reward.quantity]);
 
-  const handleIncrement = () => {
-    if (quantity < maxQuantity) {
-      setQuantity(quantity + 1);
+  const maxByLimit =
+    reward.redeemingLimit && reward.redeemingLimit > 0 ? reward.redeemingLimit : Infinity;
+  const maxByStock = reward.quantity && reward.quantity > 0 ? reward.quantity : Infinity;
+  const maxByPoints = reward.pointsCost > 0 ? Math.floor(userPoints / reward.pointsCost) : 0;
+
+  const maxSelectable = useMemo(() => {
+    if (isOutOfStock) return 0;
+
+    const boundedByPoints = maxByPoints === 0 ? Infinity : maxByPoints;
+    const value = Math.min(maxByLimit, maxByStock, boundedByPoints);
+
+    if (!Number.isFinite(value)) return 99;
+    return Math.max(0, value);
+  }, [isOutOfStock, maxByLimit, maxByStock, maxByPoints]);
+
+  useEffect(() => {
+    if (maxSelectable <= 0) {
+      setQuantity(1);
+      return;
     }
-  };
 
-  const handleDecrement = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-    }
-  };
+    setQuantity((previous) => Math.min(Math.max(1, previous), maxSelectable));
+  }, [maxSelectable]);
 
-  const handleQuantityChange = (value: string) => {
-    const numValue = parseInt(value);
-    if (!isNaN(numValue) && numValue >= 1 && numValue <= maxQuantity) {
-      setQuantity(numValue);
-    }
-  };
+  const totalPoints = quantity * reward.pointsCost;
+  const canAfford = useMemo(() => userPoints >= totalPoints, [userPoints, totalPoints]);
+  const pointLabel = (value: number) => (value === 1 ? 'pt' : 'pts');
 
-  const handleRedeem = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (canRedeem && !isRedeeming) {
-      redeemMutation.mutate(
-        { rewardId: reward.id, quantity, rewardName: reward.name },
-        {
-          onSuccess: () => {
-            // Reset quantity to 1 after successful redemption
-            setQuantity(1);
-          },
-        }
-      );
+  const isDisabled = useMemo(() => {
+    return (
+      !canAfford ||
+      isOutOfStock ||
+      hasPendingRequest ||
+      redeemMutation.isPending ||
+      maxSelectable <= 0
+    );
+  }, [canAfford, isOutOfStock, hasPendingRequest, redeemMutation.isPending, maxSelectable]);
+
+  const handleRedeem = async () => {
+    if (isDisabled) return;
+
+    try {
+      await redeemMutation.mutateAsync({
+        rewardId: reward.id,
+        quantity,
+        rewardName: reward.name,
+      });
+    } catch (error) {
+      console.error('Failed to redeem reward:', error);
     }
   };
 
   return (
-    <Card className="overflow-hidden border-[#690003]/20 hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
-              {reward.imageUrl && !imageError ? (
-                <img
-                  src={reward.imageUrl}
-                  alt={reward.name}
-                  className="h-full w-full object-cover"
-                  onError={() => setImageError(true)}
-                />
-              ) : (
-                <ImageIcon className="h-5 w-5 text-gray-400" />
-              )}
+    <Card className="group relative overflow-hidden bg-[#eadbc1] border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-80 min-w-0 flex flex-col rounded-lg">
+      <CardContent className="p-0 flex-1 flex flex-col">
+        <div className="relative h-28 w-full overflow-hidden bg-[#dfcfb3] border-b border-[#8a6844]/20">
+          {reward.imageUrl && !imageError ? (
+            <Image
+              src={reward.imageUrl}
+              alt={reward.name}
+              fill
+              unoptimized
+              className="object-contain p-2 pixelated"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Package className="h-10 w-10 text-[#8a6844]/60" />
             </div>
-            <CardTitle className="text-xl text-gray-900">{reward.name}</CardTitle>
-          </div>
-          <div className="flex flex-col items-end gap-1">
+          )}
+
+          <div className="absolute top-2 right-2 flex flex-col gap-1">
+            {hasPendingRequest && (
+              <Badge className="bg-[#c68a2e] text-white hover:bg-[#c68a2e] text-[9px] px-1.5 py-0">
+                <Clock className="h-3 w-3 mr-1" />
+                Pending
+              </Badge>
+            )}
             {isOutOfStock && (
-              <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-300">
+              <Badge className="bg-[#a84b3e] text-white hover:bg-[#a84b3e] text-[9px] px-1.5 py-0">
+                <XCircle className="h-3 w-3 mr-1" />
                 Out of Stock
               </Badge>
             )}
-            {hasPendingRequest && !isOutOfStock && (
-              <Badge className="bg-yellow-500 text-white text-xs">
-                Pending Approval
-              </Badge>
-            )}
           </div>
         </div>
-        {reward.category && (
-          <CardDescription className="text-gray-600">{reward.category}</CardDescription>
-        )}
-      </CardHeader>
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-[#7a3d3d]">Cost per item</span>
-            <span className="text-lg font-bold text-[#690003]">
-              {formatNumber(reward.pointsCost)} <span className="text-sm font-normal">pts</span>
+
+        <div className="px-3 py-2 flex-1 flex flex-col gap-1.5 min-w-0 text-[#4f3a26]">
+          <h3 className="text-xl sm:text-2xl leading-none font-bold text-[#3b2615] line-clamp-1 pixelated-text min-w-0 text-center">
+            {reward.name}
+          </h3>
+          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs sm:text-sm min-w-0 text-center place-items-center">
+            <span className="text-[#6b4d2f] font-semibold truncate text-center">Price:</span>
+            <span className="text-[#6b4d2f] font-semibold truncate text-center">Stock:</span>
+
+            <span className="text-[#a56d1f] font-semibold truncate text-center">
+              {reward.pointsCost.toLocaleString()} {pointLabel(reward.pointsCost)}
+            </span>
+            <span className="text-[#8f6435] font-semibold truncate text-center">
+              {reward.quantity ?? 'Unlimited'}
             </span>
           </div>
 
-          {reward.redeemingLimit && reward.redeemingLimit > 0 && (
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-[#7a3d3d]">Limit per request</span>
-              <span className="text-sm font-medium text-[#5a2a2a]">{reward.redeemingLimit}</span>
-            </div>
-          )}
+          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs sm:text-sm min-w-0 text-center place-items-center">
+            <span className="text-[#6b5a46] font-medium truncate text-center">Limit:</span>
+            <span className="text-[#6b5a46] font-medium truncate text-center">Total:</span>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-[#5a2a2a]">Quantity</label>
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={handleDecrement}
-                disabled={quantity <= 1 || isOutOfStock || isRedeeming}
-                className="h-9 w-9 border-[#690003] text-[#690003] hover:bg-[#fbeaea]"
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <Input
-                type="number"
-                min="1"
-                max={maxQuantity}
-                value={quantity}
-                onChange={(e) => handleQuantityChange(e.target.value)}
-                disabled={isOutOfStock || isRedeeming}
-                className="h-9 w-16 text-center border-[#690003] focus-visible:ring-[#690003]"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={handleIncrement}
-                disabled={quantity >= maxQuantity || isOutOfStock || isRedeeming}
-                className="h-9 w-9 border-[#690003] text-[#690003] hover:bg-[#fbeaea]"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+            <span className="text-[#5d4a34] font-semibold truncate text-center">
+              {reward.redeemingLimit ?? 1}
+            </span>
+            <span className="text-[#6f4f31] font-semibold truncate text-center">
+              {totalPoints.toLocaleString()}
+            </span>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-[#690003]/10">
-            <span className="text-sm font-medium text-[#7a3d3d]">Total Cost</span>
-            <span className="text-2xl font-bold text-[#690003]">
-              {formatNumber(totalCost)} <span className="text-sm font-normal">pts</span>
-            </span>
+          <div className="mt-0.5 flex items-center justify-center gap-2.5">
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              onClick={() => setQuantity((previous) => Math.max(1, previous - 1))}
+              disabled={quantity <= 1 || isDisabled}
+              className="h-8 w-8 rounded-md bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <span className="min-w-5 text-center text-sm font-bold text-[#3f2614]">{quantity}</span>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              onClick={() => setQuantity((previous) => Math.min(maxSelectable, previous + 1))}
+              disabled={quantity >= maxSelectable || isDisabled}
+              className="h-8 w-8 rounded-md bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </CardContent>
-      <CardFooter>
+
+      <CardFooter className="p-2.5 pt-0 min-w-0">
         <Button
-          type="button"
           onClick={handleRedeem}
-          disabled={!canRedeem || isRedeeming}
-          className={`w-full ${
-            canRedeem && !isRedeeming
-              ? 'bg-[#690003] hover:bg-[#8b0000] text-white'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
+          disabled={isDisabled}
+          className={cn(
+            'w-full h-11 text-sm font-bold transition-all duration-200 border-b-4 border-[#6d472a] min-w-0',
+            canAfford && !isOutOfStock && !hasPendingRequest
+              ? 'bg-[#d6962f] hover:bg-[#c18425] text-[#22160d]'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed border-b-0'
+          )}
         >
-          {isRedeeming ? (
+          {redeemMutation.isPending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Redeeming...
+              <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" />
+              Ordering...
             </>
+          ) : hasPendingRequest ? (
+            'Already Requested'
           ) : isOutOfStock ? (
             'Out of Stock'
-          ) : hasPendingRequest ? (
-            'Pending Approval'
           ) : !canAfford ? (
-            'Insufficient Points'
+            <span className="inline-flex items-center gap-1 min-w-0 truncate">
+              Need {(totalPoints - userPoints).toLocaleString()} more <Coins className="h-3 w-3" />
+            </span>
           ) : (
-            `Redeem (${formatNumber(totalCost)} pts)`
+            <span className="inline-flex items-center gap-1 min-w-0 truncate">
+              <Package className="h-3.5 w-3.5 mr-1" />
+              Order ({totalPoints.toLocaleString()} <Coins className="h-3 w-3" />)
+            </span>
           )}
         </Button>
       </CardFooter>
+
+      <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-[#6f5338]/15 rounded-xl" />
     </Card>
   );
-}
+});

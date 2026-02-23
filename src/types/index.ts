@@ -150,6 +150,8 @@ export interface Reward {
   category?: string;
   isActive: boolean;
   availableDate?: string | Date | null;
+  availableMonth?: number; 
+  monthName?: string; // Month name 
   createdAt?: string | Date;
   createdBy?: string;
   imageUrl?: string;
@@ -158,14 +160,7 @@ export interface Reward {
   isOutOfStock?: boolean; // Whether the item is out of stock (quantity <= 0)
 }
 
-// ============================================
-// User Extended Type
-// ============================================
 
-/**
- * UserWithExtras extends the base User interface with additional fields
- * Used throughout the application for comprehensive user data display
- */
 export type UserWithExtras = User & {
   employeeId?: string;
   companyId?: string;

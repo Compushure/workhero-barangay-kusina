@@ -1,12 +1,13 @@
 /**
  * HR Reward Management Action Handlers
- * ====================================
  * Client-side wrappers for HR reward CRUD operations.
  * Handles UI feedback (toasts) and state management.
  */
 
 import {
   addRewardAction,
+  getAvailableRewardsByMonthAction,
+  getRewardsAction,
   editRewardAction,
   deleteRewardAction,
   hideRewardAction,
@@ -15,6 +16,26 @@ import {
 import { safeAction } from '@/lib/utils/safe-action';
 import { toast } from 'sonner';
 import { AddRewardInput, EditRewardInput, Reward } from '@/types';
+
+export async function handleGetRewardsAction(): Promise<Reward[]> {
+  const result = await safeAction(() => getRewardsAction());
+
+  if (!result.success || result.data?.error) {
+    throw new Error(result.error || result.data?.error || 'Failed to fetch rewards');
+  }
+
+  return result.data?.data ?? [];
+}
+
+export async function handleGetAvailableRewardsByMonthAction(month: number): Promise<Reward[]> {
+  const result = await safeAction(() => getAvailableRewardsByMonthAction(month));
+
+  if (!result.success || result.data?.error) {
+    throw new Error(result.error || result.data?.error || 'Failed to fetch monthly rewards');
+  }
+
+  return result.data?.data ?? [];
+}
 
 // Action handler to add a new reward/mercado item
 export async function handleAddRewardAction(

@@ -33,6 +33,7 @@ export function useDeclineRedemptionRequest() {
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
       // Invalidate rewards to update quantities and stock status
       queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
   });
 }
@@ -50,6 +51,7 @@ export function useAcceptRedemptionRequest() {
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
       // Invalidate rewards to update quantities and stock status
       queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
   });
 }
@@ -66,6 +68,9 @@ export function useCreateRedemptionRequest() {
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
+      // Invalidate rewards to update quantities after redemption request
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
   });
 }
@@ -90,8 +95,9 @@ export function useAddReward() {
         });
       }
 
-      // Invalidate to ensure consistency, but don't force immediate refetch
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all, refetchType: 'none' });
+      // Invalidate both HR and Employee queries to ensure real-time updates
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
   });
 }
@@ -118,8 +124,9 @@ export function useEditReward() {
         });
       }
 
-      // Invalidate to ensure consistency
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all, refetchType: 'none' });
+      // Invalidate both HR and Employee queries to ensure real-time updates
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
   });
 }
@@ -144,8 +151,9 @@ export function useDeleteReward() {
         });
       }
 
-      // Invalidate to ensure consistency
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all, refetchType: 'none' });
+      // Invalidate both HR and Employee queries to ensure real-time updates
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
   });
 }
@@ -172,8 +180,9 @@ export function useHideReward() {
         });
       }
 
-      // Invalidate to ensure consistency
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all, refetchType: 'none' });
+      // Invalidate both HR and Employee queries to ensure real-time updates
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
   });
 }
@@ -237,6 +246,10 @@ export function useUploadRewardPicture() {
           );
         });
       }
+
+      // Invalidate both HR and Employee queries to ensure real-time updates
+      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
     onError: (_error, _variables, context) => {
       // Rollback to previous state on error
