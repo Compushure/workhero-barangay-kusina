@@ -10,22 +10,20 @@ import { Card, CardContent } from '@/components/ui/card';
 export default function EmployeeDashboardClient() {
   const tasks = [
     {
-      title: 'Client-Centered Metrics: Special Client Commendation',
+      title: 'Special Client Commendation',
+      category: 'Client-Centered Metrics',
       progress: '0/5',
       points: '100',
       xp: '10',
       dueDate: '12/12/25',
-      points: '100',
-      xp: '10',
     },
     {
-      title: 'Name of Task Type: Internal Training',
+      title: 'Internal Training',
+      category: 'Name of Task Type',
       progress: '0/5',
       points: '100',
       xp: '10',
       dueDate: '12/12/25',
-      points: '100',
-      xp: '10',
     },
   ];
 

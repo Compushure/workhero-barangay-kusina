@@ -6,7 +6,7 @@ function LoadingFallback() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
       <div className="flex items-center gap-3">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         <span className="text-muted-foreground">Loading employee dashboard...</span>
       </div>
     </div>
@@ -14,7 +14,6 @@ function LoadingFallback() {
 }
 
 export default async function EmployeeDashboard() {
-  await protectEmployeeRoute();
   return (
     <Suspense fallback={<LoadingFallback />}>
       <EmployeeDashboardClient />

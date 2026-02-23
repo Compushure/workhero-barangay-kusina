@@ -10,6 +10,26 @@ import {
 } from '@/types';
 import { addRewardSchema, editRewardSchema } from '@/zod/schemas';
 
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+] as const;
+
+function getMonthNameFromNumber(month?: number | null): string | null {
+  if (!month || month < 1 || month > 12) return null;
+  return MONTH_NAMES[month - 1];
+}
+
 // Helper function to get public URL with cache busting
 function getRewardImageUrl(supabase: any, rewardId: string): string {
   const baseUrl = supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`)
@@ -71,15 +91,23 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
         redeemingLimit: item.redeeming_limit,
         category: item.category,
         isActive: item.is_active,
-        availableDate: item.available_date,
+        availableMonth: item.available_month, 
+        monthName: item.month_name, 
         createdAt: item.created_at,
         createdBy: item.created_by,
         imageUrl: getRewardImageUrl(supabase, item.id),
-        // Add computed properties for stock tracking
         redeemedCount,
         isOutOfStock: hasQuantityLimit && item.quantity <= 0,
       };
     });
+
+    console.log('🔵 getRewardsAction - Total rewards from DB:', rewards.length);
+    console.log('🔵 Items with availableMonth:', rewards.filter(r => r.availableMonth).map(r => ({
+      name: r.name,
+      availableMonth: r.availableMonth,
+      isActive: r.isActive
+    })));
+    console.log('🔵 Items with isActive=true:', rewards.filter(r => r.isActive).length);
 
     return { error: null, data: rewards };
   } catch (error) {
@@ -88,6 +116,87 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
       return { error: error.message };
     }
     return { error: 'An unexpected error occurred while fetching items' };
+  }
+}
+
+/**
+ * Get active reward/mercado items assigned to a specific month number
+ * Used by employee Mercado month stalls (1 = January, 12 = December)
+ * @param month - Month number (1-12)
+ * @returns ServerActionResponse with array of rewards for the month
+ */
+export async function getAvailableRewardsByMonthAction(
+  month: number
+): Promise<ServerActionResponse<Reward[]>> {
+  try {
+    if (!Number.isInteger(month) || month < 1 || month > 12) {
+      return { error: 'Invalid month. Must be a number from 1 to 12.' };
+    }
+
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from('Reward')
+      .select('*')
+      .eq('is_active', true)
+      .eq('available_month', month)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching rewards by month:', error);
+      return { error: `Failed to fetch monthly items: ${error.message}` };
+    }
+
+    const rewardIds = (data || []).map((item) => item.id);
+
+    let redemptionData: Array<{ reward_id: string; quantity: number | null }> | null = null;
+    if (rewardIds.length > 0) {
+      const { data: approvedRedemptions } = await supabase
+        .from('RewardRequest')
+        .select('reward_id, quantity')
+        .eq('status', 'approved')
+        .in('reward_id', rewardIds);
+
+      redemptionData = approvedRedemptions;
+    }
+
+    const redeemedCounts = new Map<string, number>();
+    if (redemptionData) {
+      redemptionData.forEach((req: any) => {
+        const current = redeemedCounts.get(req.reward_id) || 0;
+        redeemedCounts.set(req.reward_id, current + (req.quantity || 1));
+      });
+    }
+
+    const rewards: Reward[] = (data || []).map((item) => {
+      const redeemedCount = redeemedCounts.get(item.id) || 0;
+      const hasQuantityLimit = item.quantity !== null && item.quantity !== undefined;
+
+      return {
+        id: item.id,
+        name: item.name,
+        pointsCost: item.points_cost,
+        quantity: item.quantity,
+        redeemingLimit: item.redeeming_limit,
+        category: item.category,
+        isActive: item.is_active,
+        availableMonth: item.available_month,
+        monthName: item.month_name,
+        createdAt: item.created_at,
+        createdBy: item.created_by,
+        imageUrl: getRewardImageUrl(supabase, item.id),
+        redeemedCount,
+        isOutOfStock: hasQuantityLimit && item.quantity <= 0,
+      };
+    });
+
+    return { error: null, data: rewards };
+  } catch (error) {
+    console.error('Error in getAvailableRewardsByMonthAction:', error);
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'An unexpected error occurred while fetching monthly items' };
   }
 }
 
@@ -119,6 +228,8 @@ export async function addRewardAction(
       }
     }
 
+    const monthName = getMonthNameFromNumber(validatedData.availableMonth ?? null);
+
     // Insert reward into database
     const { data, error } = await supabase
       .from('Reward')
@@ -129,7 +240,8 @@ export async function addRewardAction(
         redeeming_limit: validatedData.redeemingLimit,
         category: validatedData.category,
         is_active: validatedData.isActive,
-        available_date: validatedData.availableDate ? validatedData.availableDate.toISOString() : null,
+        available_month: validatedData.availableMonth,
+        month_name: monthName,
       })
       .select()
       .single();
@@ -148,7 +260,8 @@ export async function addRewardAction(
       redeemingLimit: data.redeeming_limit,
       category: data.category,
       isActive: data.is_active,
-      availableDate: data.available_date,
+      availableMonth: data.available_month,
+      monthName: data.month_name,
       createdAt: data.created_at,
       createdBy: data.created_by,
       imageUrl: getRewardImageUrl(supabase, data.id),
@@ -223,8 +336,10 @@ export async function editRewardAction(
       updateData.redeeming_limit = validatedData.redeemingLimit;
     if (validatedData.category !== undefined) updateData.category = validatedData.category;
     if (validatedData.isActive !== undefined) updateData.is_active = validatedData.isActive;
-    if (validatedData.availableDate !== undefined)
-      updateData.available_date = validatedData.availableDate ? validatedData.availableDate.toISOString() : null;
+    if (validatedData.availableMonth !== undefined) {
+      updateData.available_month = validatedData.availableMonth;
+      updateData.month_name = getMonthNameFromNumber(validatedData.availableMonth);
+    }
 
     // Update reward in database
     const { data, error } = await supabase
@@ -248,7 +363,8 @@ export async function editRewardAction(
       redeemingLimit: data.redeeming_limit,
       category: data.category,
       isActive: data.is_active,
-      availableDate: data.available_date,
+      availableMonth: data.available_month,
+      monthName: data.month_name,
       createdAt: data.created_at,
       createdBy: data.created_by,
       imageUrl: getRewardImageUrl(supabase, data.id),
