@@ -20,7 +20,7 @@ interface MercadoItem {
   quantity?: number;
   isActive?: boolean;
   imageUrl?: string;
-  createdAt?: string;
+  availableMonth?: number;
   availableDate?: string | Date | null;
 }
 
@@ -38,17 +38,12 @@ function formatNumber(num: number): string {
   return num.toLocaleString('en-US');
 }
 
-function formatDate(dateString: string | undefined): string {
-  if (!dateString) return '';
-  try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  } catch {
-    return '';
-  }
+function formatAvailableMonth(month: number | undefined): string {
+  if (!month || month < 1 || month > 12) return 'All Months';
+
+  return new Date(2026, month - 1, 1).toLocaleDateString('en-US', {
+    month: 'long',
+  });
 }
 
 export const MercadoCard = memo(function MercadoCard({
@@ -177,9 +172,9 @@ export const MercadoCard = memo(function MercadoCard({
               </p>
             )}
           </div>
-          {item.createdAt && (
-            <p className="text-[#730202]/50 text-xs mt-1">Created: {formatDate(item.createdAt)}</p>
-          )}
+          <p className="text-[#730202]/50 text-xs mt-1">
+            Available Month: {formatAvailableMonth(item.availableMonth)}
+          </p>
         </div>
 
         <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
