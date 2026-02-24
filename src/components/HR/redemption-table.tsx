@@ -91,8 +91,20 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
               className="bg-[#FBF4E8] hover:bg-[#ffffff] transition-colors border-b border-border"
             >
               <TableCell className="px-6">
-                <div className="text-sm font-medium">{new Date(request.requestedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                <div className="text-xs text-muted-foreground">{new Date(request.requestedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</div>
+                <div className="text-sm font-medium">
+                  {new Date(request.requestedAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(request.requestedAt).toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  })}
+                </div>
               </TableCell>
               <TableCell className="text-sm px-6">{request.userName}</TableCell>
               <TableCell className="px-6">
@@ -114,7 +126,8 @@ export function RedemptionTable({ data, onApprove, onReject }: RedemptionTablePr
                 </div>
               </TableCell>
               <TableCell className="text-sm text-right font-medium px-6">
-                {(request.pointsCost * (request.quantity || 1))} Pts
+                {request.pointsCost * (request.quantity || 1)}{' '}
+                {request.pointsCost * (request.quantity || 1) === 1 ? 'Pt' : 'Pts'}
               </TableCell>
               <TableCell className="text-center px-6">
                 <div className="flex items-center justify-center gap-2">

@@ -135,7 +135,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
             <div className="text-center">
               <p className="text-xs font-medium text-[#730202]/60 mb-1">Cost</p>
               <p className="text-base font-semibold text-[#730202]">
-                {formatNumber(item.cost)} pts
+                {formatNumber(item.cost)} {item.cost === 1 ? 'pt' : 'pts'}
               </p>
             </div>
 

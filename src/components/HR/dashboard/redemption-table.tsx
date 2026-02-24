@@ -172,7 +172,9 @@ export function RedemptionTable({
                   </Tooltip>
                 </div>
                 <div className="flex items-center justify-center">
-                  <p className="text-sm font-medium text-[#5a2a2a]">{totalCost} Pts</p>
+                  <p className="text-sm font-medium text-[#5a2a2a]">
+                    {totalCost} {totalCost === 1 ? 'Pt' : 'Pts'}
+                  </p>
                 </div>
                 <div className="flex items-center justify-center">
                   {hasRemarks ? (
