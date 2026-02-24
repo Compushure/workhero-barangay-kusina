@@ -2,13 +2,16 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { Plus } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
 import { MercadoSearchBar } from '@/components/hr/mercado/mercado-search-bar';
+import { Button } from '@/components/ui/button';
 import { MercadoSortToggle, SortOption } from '@/components/hr/mercado/mercado-sort-toggle';
 import {
   MercadoFilterToggle,
+  MonthFilter,
   StockFilter,
   VisibilityFilter,
 } from '@/components/hr/mercado/mercado-filter-toggle';
@@ -94,6 +97,50 @@ const getRewardTimestamp = (reward: Reward): number => {
     : new Date(reward.createdAt).getTime();
 };
 
+const monthNameToNumber: Record<string, number> = {
+  january: 1,
+  february: 2,
+  march: 3,
+  april: 4,
+  may: 5,
+  june: 6,
+  july: 7,
+  august: 8,
+  september: 9,
+  october: 10,
+  november: 11,
+  december: 12,
+};
+
+const getRewardAvailableMonth = (reward: Reward): number | null => {
+  if (
+    typeof reward.availableMonth === 'number' &&
+    reward.availableMonth >= 1 &&
+    reward.availableMonth <= 12
+  ) {
+    return reward.availableMonth;
+  }
+
+  if (reward.availableDate) {
+    const date = new Date(reward.availableDate);
+    if (!Number.isNaN(date.getTime())) {
+      return date.getMonth() + 1;
+    }
+  }
+
+  if (reward.monthName) {
+    const normalizedMonthName = reward.monthName.trim().toLowerCase();
+    return monthNameToNumber[normalizedMonthName] ?? null;
+  }
+
+  return null;
+};
+
+const matchesMonthFilter = (reward: Reward, monthFilter: MonthFilter): boolean => {
+  if (monthFilter === 'all') return true;
+  return getRewardAvailableMonth(reward) === monthFilter;
+};
+
 export default function MercadoPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -103,6 +150,7 @@ export default function MercadoPage() {
   const [sortOrder, setSortOrder] = useState<SortOption>('newest');
   const [stockFilter, setStockFilter] = useState<StockFilter>('all');
   const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>('all');
+  const [monthFilter, setMonthFilter] = useState<MonthFilter>('all');
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [viewingItemId, setViewingItemId] = useState<string | null>(null);
@@ -130,6 +178,8 @@ export default function MercadoPage() {
       if (visibilityFilter === 'visible' && !reward.isActive) return false;
       if (visibilityFilter === 'hidden' && reward.isActive) return false;
 
+      if (!matchesMonthFilter(reward, monthFilter)) return false;
+
       return true;
     });
 
@@ -140,7 +190,7 @@ export default function MercadoPage() {
     });
 
     return filteredRewards;
-  }, [allRewards, debouncedSearch, sortOrder, stockFilter, visibilityFilter]);
+  }, [allRewards, debouncedSearch, sortOrder, stockFilter, visibilityFilter, monthFilter]);
 
   const rewardsById = useMemo(() => {
     return new Map(rewards.map((reward) => [reward.id, reward]));
@@ -175,7 +225,7 @@ export default function MercadoPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, sortOrder, stockFilter, visibilityFilter]);
+  }, [debouncedSearch, sortOrder, stockFilter, visibilityFilter, monthFilter]);
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -314,24 +364,35 @@ export default function MercadoPage() {
         <MercadoHeader
           title="Mercado Manager"
           description="Manage items visible in mercado"
-          onAddClick={handleAdd}
+          showAddButton={false}
         />
 
-        <div className="flex items-center gap-3">
-          <div className="max-w-md flex-1">
-            <MercadoSearchBar
-              value={search}
-              onChange={setSearch}
-              placeholder="Search by employee or items"
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="w-full md:w-auto md:min-w-[320px] md:max-w-md">
+              <MercadoSearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search by employee or items"
+              />
+            </div>
+            <MercadoSortToggle value={sortOrder} onChange={setSortOrder} />
+            <MercadoFilterToggle
+              stockFilter={stockFilter}
+              visibilityFilter={visibilityFilter}
+              monthFilter={monthFilter}
+              onStockFilterChange={setStockFilter}
+              onVisibilityFilterChange={setVisibilityFilter}
+              onMonthFilterChange={setMonthFilter}
             />
           </div>
-          <MercadoSortToggle value={sortOrder} onChange={setSortOrder} />
-          <MercadoFilterToggle
-            stockFilter={stockFilter}
-            visibilityFilter={visibilityFilter}
-            onStockFilterChange={setStockFilter}
-            onVisibilityFilterChange={setVisibilityFilter}
-          />
+          <Button
+            onClick={handleAdd}
+            className="h-10 px-4 rounded-lg bg-[#730202] hover:bg-[#730202]/90 text-white md:ml-auto"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Item
+          </Button>
         </div>
 
         {isLoading ? (
