@@ -18,7 +18,7 @@ interface ViewItemModalProps {
     redeemingLimit?: number;
     isActive: boolean;
     imageUrl?: string;
-    createdAt?: string;
+    availableMonth?: number;
     availableDate?: string | Date | null;
   } | null;
 }
@@ -39,6 +39,14 @@ function formatDate(dateString: string | Date | null | undefined): string {
   } catch {
     return 'N/A';
   }
+}
+
+function formatMonth(month: number | undefined): string {
+  if (!month || month < 1 || month > 12) return 'All Months';
+
+  return new Date(2026, month - 1, 1).toLocaleDateString('en-US', {
+    month: 'long',
+  });
 }
 
 export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModalProps) {
@@ -62,7 +70,9 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
         </button>
 
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl font-bold text-[#730202]">Mercado Item</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl font-bold text-[#730202]">
+            Mercado Item
+          </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-2">
@@ -138,14 +148,12 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
               </div>
             )}
 
-            {item.createdAt && (
-              <div className="text-center">
-                <p className="text-xs font-medium text-[#730202]/60 mb-1">Created At</p>
-                <p className="text-base font-semibold text-[#730202]">
-                  {formatDate(item.createdAt)}
-                </p>
-              </div>
-            )}
+            <div className="text-center">
+              <p className="text-xs font-medium text-[#730202]/60 mb-1">Month Available</p>
+              <p className="text-base font-semibold text-[#730202]">
+                {formatMonth(item.availableMonth)}
+              </p>
+            </div>
           </div>
 
           {/* Action Buttons */}

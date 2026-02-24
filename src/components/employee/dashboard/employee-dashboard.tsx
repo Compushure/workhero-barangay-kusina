@@ -10,22 +10,20 @@ import { Card, CardContent } from '@/components/ui/card';
 export default function EmployeeDashboardClient() {
   const tasks = [
     {
-      title: 'Client-Centered Metrics: Special Client Commendation',
+      title: 'Special Client Commendation',
+      category: 'Client-Centered Metrics',
       progress: '0/5',
       points: '100',
       xp: '10',
       dueDate: '12/12/25',
-      points: '100',
-      xp: '10',
     },
     {
-      title: 'Name of Task Type: Internal Training',
+      title: 'Internal Training',
+      category: 'Name of Task Type',
       progress: '0/5',
       points: '100',
       xp: '10',
       dueDate: '12/12/25',
-      points: '100',
-      xp: '10',
     },
   ];
 
@@ -64,10 +62,9 @@ export default function EmployeeDashboardClient() {
             <CookingSection className="w-full h-full" />
           </div>
 
-          {/* Right column: 20% */}
-          <div className="w-[20%]">
-            <Card className="bg-transparent shadow-none border-none h-full">
-              <CardContent className="h-full">
+          <div className="w-[20%] min-w-[280px] flex items-start justify-start">
+            <Card className="bg-transparent shadow-none border-none">
+              <CardContent className="p-0">
                 <RankWidget />
               </CardContent>
             </Card>

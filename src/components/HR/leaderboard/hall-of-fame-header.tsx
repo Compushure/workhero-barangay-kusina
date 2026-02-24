@@ -33,7 +33,7 @@ export default function HallOfFameHeader({
     <div className="flex flex-col items-center mb-6 sm:mb-8">
       <div className="flex items-center gap-3 sm:gap-4 mb-2">
         <span className="text-2xl sm:text-3xl">🏆</span>
-        <h1 className="text-3xl sm:text-4xl font-bold text-[#6D1616]">Hall of Fame</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold text-[#6D1616]">Leaderboards</h1>
         <span className="text-2xl sm:text-3xl">🏆</span>
       </div>
 
