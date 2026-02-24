@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,33 +20,27 @@ interface ConfirmationDialogProps {
   isProcessing?: boolean;
 }
 
-export function ConfirmationDialog({ open, type, onCancel, onConfirm, isProcessing = false }: ConfirmationDialogProps) {
+export function ConfirmationDialog({
+  open,
+  type,
+  onCancel,
+  onConfirm,
+  isProcessing = false,
+}: ConfirmationDialogProps) {
   const [remark, setRemark] = useState('');
   const [error, setError] = useState('');
-  const [isConfirming, setIsConfirming] = useState(false);
-  const isSubmittingRef = useRef(false);
 
   const title = type === 'approve' ? 'Confirm Approval' : type === 'deny' ? 'Confirm Denial' : '';
   const isRequired = type === 'deny';
-  
-  // Disable if either the modal's internal state OR the parent's processing state is true
-  const isDisabled = isConfirming || isProcessing;
 
   const handleConfirm = () => {
-    // Prevent multiple submissions using ref (synchronous check)
-    if (isSubmittingRef.current || isProcessing) return;
+    if (isProcessing) return;
 
-    // Validate remarks for deny action
     if (isRequired && !remark.trim()) {
       setError('Remarks are required for denial');
       return;
     }
 
-    // Mark as submitting immediately (synchronous)
-    isSubmittingRef.current = true;
-    setIsConfirming(true);
-
-    // Clear error and trigger callback
     setError('');
     onConfirm(remark);
     setRemark('');
@@ -58,30 +52,20 @@ export function ConfirmationDialog({ open, type, onCancel, onConfirm, isProcessi
     onCancel();
   };
 
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      isSubmittingRef.current = false; // Reset ref when dialog closes
-      handleCancel();
-      setIsConfirming(false); // Reset confirming state when dialog closes
-    }
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={(newOpen) => !newOpen && handleCancel()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Warning Message */}
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="font-bold text-red-900">
               This action is permanent. Are you sure you want to proceed?
             </p>
           </div>
 
-          {/* Remarks Textarea */}
           <div className="space-y-2">
             <Label htmlFor="remarks" className="text-sm font-medium">
               Remarks {isRequired && <span className="text-red-600">*</span>}
@@ -96,9 +80,9 @@ export function ConfirmationDialog({ open, type, onCancel, onConfirm, isProcessi
               value={remark}
               onChange={(e) => {
                 setRemark(e.target.value);
-                if (error) setError(''); // Clear error on input
+                if (error) setError('');
               }}
-              disabled={isDisabled}
+              disabled={isProcessing}
               className="min-h-24 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
               aria-required={isRequired}
               aria-invalid={!!error}
@@ -113,16 +97,16 @@ export function ConfirmationDialog({ open, type, onCancel, onConfirm, isProcessi
         </div>
 
         <DialogFooter className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={handleCancel} disabled={isDisabled}>
+          <Button variant="outline" onClick={handleCancel} disabled={isProcessing}>
             Cancel
           </Button>
           <Button
             variant={type === 'approve' ? 'default' : 'destructive'}
             onClick={handleConfirm}
-            disabled={isDisabled}
+            disabled={isProcessing}
             className={type === 'approve' ? 'bg-[#690003] hover:bg-[#af3b3f]' : ''}
           >
-            {isProcessing || isConfirming ? 'Processing...' : 'Confirm'}
+            {isProcessing ? 'Processing...' : 'Confirm'}
           </Button>
         </DialogFooter>
       </DialogContent>
