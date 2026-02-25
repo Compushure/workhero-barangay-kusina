@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import { Check, X, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/manager/task-verification/pagination';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   useAcceptRedemptionRequest,
@@ -161,14 +160,7 @@ export function RedemptionTable({
                   <p className="text-xs text-[#7a3d3d]">{timeStr}</p>
                 </div>
                 <div className="flex items-center">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <p className="text-sm text-[#5a2a2a] truncate">{userName}</p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div className="max-w-xs">{userName}</div>
-                    </TooltipContent>
-                  </Tooltip>
+                  <p className="text-sm text-[#5a2a2a] truncate">{userName}</p>
                 </div>
                 <div className="flex items-center gap-2 min-w-0">
                   <p className="text-sm text-[#5a2a2a] truncate flex-1">{itemDisplay}</p>
