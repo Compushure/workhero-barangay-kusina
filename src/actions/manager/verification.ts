@@ -26,18 +26,11 @@ export async function fetchTasksToReview(): Promise<ServerActionResponse<Verific
   return { error: null, data: data as VerificationRequest[] };
 }
 
-/**
- * Fetch paginated tasks in review
- * @param page - Page number (1-indexed)
- * @param pageSize - Number of items per page
- */
 export async function fetchTasksToReviewPaginated(
   page: number = 1,
   pageSize: number = 8
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
   const supabase = await createClient();
-
-  // Calculate range for pagination
   const start = (page - 1) * pageSize;
   const end = start + pageSize - 1;
 
@@ -52,14 +45,9 @@ export async function fetchTasksToReviewPaginated(
   }
 
   const totalPages = count ? Math.ceil(count / pageSize) : 0;
-
   return {
     error: null,
-    data: {
-      data: data as VerificationRequest[],
-      count: count || 0,
-      totalPages,
-    },
+    data: { data: data as VerificationRequest[], count: count || 0, totalPages },
   };
 }
 
@@ -78,18 +66,11 @@ export async function fetchApprovedTasks(): Promise<ServerActionResponse<Verific
   return { error: null, data: data as VerificationRequest[] };
 }
 
-/**
- * Fetch paginated approved tasks
- * @param page - Page number (1-indexed)
- * @param pageSize - Number of items per page
- */
 export async function fetchApprovedTasksPaginated(
   page: number = 1,
   pageSize: number = 8
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
   const supabase = await createClient();
-
-  // Calculate range for pagination
   const start = (page - 1) * pageSize;
   const end = start + pageSize - 1;
 
@@ -104,14 +85,9 @@ export async function fetchApprovedTasksPaginated(
   }
 
   const totalPages = count ? Math.ceil(count / pageSize) : 0;
-
   return {
     error: null,
-    data: {
-      data: data as VerificationRequest[],
-      count: count || 0,
-      totalPages,
-    },
+    data: { data: data as VerificationRequest[], count: count || 0, totalPages },
   };
 }
 
@@ -130,18 +106,11 @@ export async function fetchDeniedTasks(): Promise<ServerActionResponse<Verificat
   return { error: null, data: data as VerificationRequest[] };
 }
 
-/**
- * Fetch paginated denied/rejected tasks
- * @param page - Page number (1-indexed)
- * @param pageSize - Number of items per page
- */
 export async function fetchDeniedTasksPaginated(
   page: number = 1,
   pageSize: number = 8
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
   const supabase = await createClient();
-
-  // Calculate range for pagination
   const start = (page - 1) * pageSize;
   const end = start + pageSize - 1;
 
@@ -156,14 +125,9 @@ export async function fetchDeniedTasksPaginated(
   }
 
   const totalPages = count ? Math.ceil(count / pageSize) : 0;
-
   return {
     error: null,
-    data: {
-      data: data as VerificationRequest[],
-      count: count || 0,
-      totalPages,
-    },
+    data: { data: data as VerificationRequest[], count: count || 0, totalPages },
   };
 }
 
@@ -173,10 +137,9 @@ export async function approveTaskAction(
 ): Promise<ServerActionResponse<VerificationRequest>> {
   const supabase = await createClient();
 
-  // First, get task details from the view to get category_points
   const { data: taskData, error: taskError } = await supabase
     .from('task_info_view')
-    .select('assigned_to, category_points, category_xp, max_orders, completed_orders, pending_orders')
+    .select('completed_orders, pending_orders, max_orders')
     .eq('kpitask_id', kpitask_id)
     .single();
 
@@ -184,37 +147,23 @@ export async function approveTaskAction(
     return { error: 'Failed to fetch task details: ' + taskError.message, data: undefined };
   }
 
-  // Update the task status and remark
+  // This is what I fixed - Always update status to approved, increment completed_orders, reset pending_orders, and include remark.
+  const newCompleted = (taskData.completed_orders ?? 0) + (taskData.pending_orders ?? 1);
 
-  // if the status max_orders is == completed_orders then change to approved, else changed to assigned
-   
+  const { error: updateError } = await supabase
+    .from('KPITask')
+    .update({
+      status: 'approved',
+      remark: reqmark,            
+      completed_orders: newCompleted,
+      pending_orders: 0,
+    })
+    .eq('id', kpitask_id);
 
-  if ((taskData.max_orders > taskData.completed_orders + 1) && (taskData.pending_orders <= taskData.max_orders - taskData.completed_orders)) {
-    const { error: assignError } = await supabase
-      .from('KPITask')
-      .update({ 
-        status: 'approved', 
-        remark: reqmark ,
-      }) // need this to be completed + pending then pending will then be reset to 0 after the request has been approved
-      .eq('id', kpitask_id);
-
-    if (assignError) {
-      return { error: 'Failed to reassign task: ' + assignError.message, data: undefined };
-    }
+  if (updateError) {
+    return { error: 'Failed to approve task: ' + updateError.message, data: undefined };
   }
-  // } else{
-  //    const { error: updateError } = await supabase
-  //      .from('KPITask')
-  //      .update({ status: 'approved', remark: reqmark , completed_orders: taskData.completed_orders + 1 })
-  //      .eq('id', kpitask_id);
 
-  //    if (updateError) {
-  //      return { error: 'Failed to approve task: ' + updateError.message, data: undefined };
-  //    }
-
-  // }
-
-  // Get the updated task from the view to return
   const { data: updatedTask, error: fetchError } = await supabase
     .from('task_info_view')
     .select('*')
@@ -234,7 +183,6 @@ export async function rejectTaskAction(
 ): Promise<ServerActionResponse<VerificationRequest>> {
   const supabase = await createClient();
 
-  // Update the task status and remark
   const { error: updateError } = await supabase
     .from('KPITask')
     .update({ status: 'rejected', remark: reqmark, pending_orders: 0 })
@@ -244,7 +192,6 @@ export async function rejectTaskAction(
     return { error: 'Failed to reject task: ' + updateError.message, data: undefined };
   }
 
-  // Get the updated task from the view to return
   const { data: rejectedTask, error: fetchError } = await supabase
     .from('task_info_view')
     .select('*')
@@ -255,6 +202,5 @@ export async function rejectTaskAction(
     return { error: 'Failed to fetch updated task: ' + fetchError.message, data: undefined };
   }
 
-  // No need to update the points for rejected tasks
   return { error: null, data: rejectedTask as VerificationRequest };
 }
