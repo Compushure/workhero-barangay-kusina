@@ -60,7 +60,7 @@ export function RequestsTable({
             <TableHead className="text-card font-semibold px-4 w-45">REQUEST DATE</TableHead>
             <TableHead className="text-card font-semibold px-4 w-50">EMPLOYEE</TableHead>
             <TableHead className="text-card font-semibold px-4 w-64">TASK</TableHead>
-            <TableHead className="text-card font-semibold text-center px-4 w-40">
+            <TableHead className="text-card font-semibold text-center px-4 w-30">
               COMPLETED
             </TableHead>
             <TableHead className="text-card font-semibold text-center px-4 w-15">
