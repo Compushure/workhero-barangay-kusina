@@ -189,7 +189,7 @@ export async function fetchCurrentAssignedTasksPaginated(
  */
 export async function fetchCurrentAssignedEmployeesPaginated(
   page: number = 1,
-  pageSize: number = 4,
+  pageSize: number = 10,
   sortBy: string = 'recently added',
   searchTerm: string = ''
 ): Promise<
@@ -469,6 +469,10 @@ export async function updateTaskAssignment(
   const supabase = await createClient();
 
   try {
+    // Validate maxOrders limit
+    if (maxOrders > 99) {
+      return { error: 'Maximum orders cannot exceed 99', data: undefined };
+    }
     // Get the current task to find all related assignments
     const { data: currentTask, error: fetchError } = await supabase
       .from('KPITask')

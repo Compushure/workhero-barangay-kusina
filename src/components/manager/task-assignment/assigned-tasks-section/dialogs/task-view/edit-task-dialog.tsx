@@ -125,7 +125,7 @@ export default function EditTaskDialog({
               <label className="font-bold text-[#690003]">Max Orders</label>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setEditMaxOrders(Math.max(1, editMaxOrders - 1))}
+                  onClick={() => setEditMaxOrders(Math.max(1, Math.min(99, editMaxOrders - 1)))}
                   className="bg-[#690003] text-white size-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
                 >
                   −
@@ -134,13 +134,14 @@ export default function EditTaskDialog({
                   type="number"
                   value={editMaxOrders}
                   onChange={(e) =>
-                    setEditMaxOrders(Math.max(1, Number.parseInt(e.target.value) || 1))
+                    setEditMaxOrders(Math.max(1, Math.min(99, Number.parseInt(e.target.value) || 1)))
                   }
                   className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 bg-[#fafafa]"
                   min="1"
+                  max="99"
                 />
                 <button
-                  onClick={() => setEditMaxOrders(editMaxOrders + 1)}
+                  onClick={() => setEditMaxOrders(Math.max(1, Math.min(99, editMaxOrders + 1)))}
                   className="bg-[#690003] text-white size-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
                 >
                   +

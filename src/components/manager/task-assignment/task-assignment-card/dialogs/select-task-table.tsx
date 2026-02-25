@@ -108,7 +108,7 @@ function SelectTasksTable({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              updateMaxOrders(task.id, Math.max(1, currentMaxOrders - 1));
+                              updateMaxOrders(task.id, Math.max(1, Math.min(99, currentMaxOrders - 1)));
                             }}
                             className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
                           >
@@ -119,16 +119,18 @@ function SelectTasksTable({
                             value={currentMaxOrders}
                             onChange={(e) => {
                               e.stopPropagation();
-                              updateMaxOrders(task.id, Number.parseInt(e.target.value) || 1);
+                              const value = Math.max(1, Math.min(99, Number.parseInt(e.target.value) || 1));
+                              updateMaxOrders(task.id, value);
                             }}
                             onClick={(e) => e.stopPropagation()}
                             className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1"
                             min="1"
+                            max="99"
                           />
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              updateMaxOrders(task.id, currentMaxOrders + 1);
+                              updateMaxOrders(task.id, Math.max(1, Math.min(99, currentMaxOrders + 1)));
                             }}
                             className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
                           >
