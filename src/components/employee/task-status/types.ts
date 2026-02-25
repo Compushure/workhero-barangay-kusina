@@ -6,6 +6,7 @@ export interface TaskStatusItem {
   id: string;
   name: string;
   description: string;
+  pendingOrders: number;
   completedOrders: number;
   maxOrders: number;
   claimedOrders: number;

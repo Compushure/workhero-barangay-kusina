@@ -44,6 +44,7 @@ interface TaskInfoRow {
 function rowToTaskStatusItem(row: TaskInfoRow): TaskStatusItem {
   const points = row.category_points ?? 0;
   const xp = Number(row.category_xp ?? 0);
+  const pendingOrders = row.pending_orders ?? 0;
   const completedOrders = row.completed_orders ?? 0;
   const maxOrders = row.max_orders ?? 1;
   const name = row.category_name ?? 'Task';
@@ -54,6 +55,7 @@ function rowToTaskStatusItem(row: TaskInfoRow): TaskStatusItem {
     id: row.kpitask_id,
     name,
     description,
+    pendingOrders,
     completedOrders,
     maxOrders,
     claimedOrders: claimedOrders,
@@ -317,7 +319,7 @@ export async function claimTaskPointsAndXP(
 
   const { error: pointsError } = await supabase.rpc('increment_points_for_user', {
     target_user_id: user.id,
-    amount: categoryPoints,
+    amount: categoryPoints * pendingOrders,
   });
 
   if (pointsError) {
@@ -337,7 +339,7 @@ export async function claimTaskPointsAndXP(
   const currentLevel = (userRow as { level: number | null }).level ?? 0;
   const currentXp = (userRow as { xp: number | null }).xp ?? 0;
   const totalXp = currentLevel * 100 + currentXp;
-  const newTotalXp = totalXp + categoryXp;
+  const newTotalXp = totalXp + (categoryXp * pendingOrders);
   const newLevel = Math.floor(newTotalXp / 100);
   const newXp = newTotalXp % 100;
 
@@ -355,8 +357,7 @@ export async function claimTaskPointsAndXP(
     .update({ 
       points_claimed_at: new Date().toISOString(),
       // Update status back to assigned if there are remaining orders after this claim
-      status: (completedOrders + pendingOrders) < maxOrders ? 'assigned' : 'approved',
-      completed_orders: completedOrders + pendingOrders, 
+      status: (completedOrders) < maxOrders ? 'assigned' : 'approved',
       pending_orders: 0,
     })
     .eq('id', kpitaskId);
@@ -367,6 +368,6 @@ export async function claimTaskPointsAndXP(
 
   return {
     error: null,
-    data: { pointsAdded: categoryPoints, xpAdded: categoryXp },
+    data: { pointsAdded: categoryPoints * pendingOrders, xpAdded: categoryXp * pendingOrders },
   };
 }

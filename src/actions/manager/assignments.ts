@@ -70,6 +70,7 @@ export async function fetchEmployeeList(): Promise<ServerActionResponse<Assigned
       empId: item.employee_id || '',
       tenure: undefined,
       assignedTasks: [],
+      pendingOrders: 0,
       completedOrders: 0,
     }));
 
@@ -190,6 +191,7 @@ export async function addTaskAssignmentAction(
         name: employee.user_name || 'Unknown Employee',
         empId: employee.employee_id || '',
         assignedTasks: [],
+        pendingOrders: 0,
         completedOrders: 0,
       };
 
