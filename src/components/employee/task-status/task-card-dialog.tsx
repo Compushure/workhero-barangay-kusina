@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog';
 import { Calendar, ChefHat, ChevronDown, Coins, Loader2, Soup } from 'lucide-react';
 import { TaskStatusItem } from './types';
-import { SetStateAction, useState } from 'react';
+import { SetStateAction, useState, useEffect } from 'react';
 import {
   useSubmitTaskVerification,
   useClaimTaskPointsandXP,
@@ -24,8 +24,15 @@ interface TaskCardDialogProps {
 export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCardDialogProps) {
   const remainingOrders = task.maxOrders - task.completedOrders;
 
-  const [remarkOpen, setRemarkOpen] = useState(false);
+  const [remarkOpen, setRemarkOpen] = useState(true);
   const [pendingOrders, setPendingOrders] = useState(task.pendingOrders || 1);
+
+  // Reset remarkOpen to true whenever modal opens
+  useEffect(() => {
+    if (modalOpen) {
+      setRemarkOpen(true);
+    }
+  }, [modalOpen]);
 
   const submitMutation = useSubmitTaskVerification();
   const claimMutation = useClaimTaskPointsandXP();
@@ -206,7 +213,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                 />
               </button>
               {remarkOpen ? (
-                <div className="w-full min-w-0 rounded-lg border border-border bg-white px-3 py-2.5 shadow-sm overflow-hidden inset-shadow-xs/25 tramsition-all duration-500 delay-75 ease-in-out">
+                <div className="overflow-auto w-full min-w-0 max-h-40 rounded-lg border border-border bg-white px-3 py-2.5 shadow-sm inset-shadow-xs/25 tramsition-all duration-500 delay-75 ease-in-out">
                   <p className="text-sm text-foreground leading-relaxed wrap-break-word break-none">
                     {task.remark}
                   </p>
