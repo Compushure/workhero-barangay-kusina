@@ -18,14 +18,14 @@ import {
 import { MercadoSkeleton } from '@/components/hr/mercado/mercado-skeleton';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import type { Reward } from '@/types';
+import { useGetRewards } from '@/hooks/tanstack/queries/rewardQueries';
 import {
-  useGetRewards,
   useAddReward,
   useEditReward,
   useDeleteReward,
   useHideReward,
   useUploadRewardPicture,
-} from '@/hooks/tanstack';
+} from '@/hooks/tanstack/mutations/hrMutations';
 
 const AddItemsModal = dynamic(() =>
   import('@/components/hr/mercado/add-items-modal').then((module) => module.AddItemsModal)
