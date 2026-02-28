@@ -7,6 +7,10 @@ import {
   RedemptionRequest,
 } from '@/types';
 
+function getRewardImageUrl(supabase: any, rewardId: string): string {
+  return supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`).data.publicUrl;
+}
+
 /**
  * Helper function to auto-decline pending requests when stock is insufficient
  * @param rewardId - The reward ID to check pending requests for
@@ -156,6 +160,7 @@ export async function getRedemptionRequestsAction(
       userPoints: item.User?.points || 0,
       rewardId: item.reward_id,
       rewardName: item.Reward?.name || 'Unknown Reward',
+      rewardImageUrl: getRewardImageUrl(supabase, item.reward_id),
       pointsCost: item.Reward?.points_cost || 0,
       quantity: item.quantity || 1,
       status: item.status,

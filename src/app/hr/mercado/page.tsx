@@ -1,31 +1,145 @@
 'use client';
 
-import { useState, useMemo, useCallback, Suspense, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Plus } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Button } from '@/components/ui/button';
 import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
 import { MercadoSearchBar } from '@/components/hr/mercado/mercado-search-bar';
+import { Button } from '@/components/ui/button';
 import { MercadoSortToggle, SortOption } from '@/components/hr/mercado/mercado-sort-toggle';
 import {
   MercadoFilterToggle,
+  MonthFilter,
   StockFilter,
   VisibilityFilter,
 } from '@/components/hr/mercado/mercado-filter-toggle';
-import { AddItemsModal } from '@/components/hr/mercado/add-items-modal';
-import { DeleteModal } from '@/components/hr/mercado/delete-modal';
-import { ViewItemModal } from '@/components/hr/mercado/view-item-modal';
 import { MercadoSkeleton } from '@/components/hr/mercado/mercado-skeleton';
 import { Pagination } from '@/components/manager/task-verification/pagination';
+import type { Reward } from '@/types';
+import { useGetRewards } from '@/hooks/tanstack/queries/rewardQueries';
 import {
-  useGetRewards,
   useAddReward,
   useEditReward,
   useDeleteReward,
   useHideReward,
   useUploadRewardPicture,
-} from '@/hooks/tanstack';
+} from '@/hooks/tanstack/mutations/hrMutations';
+
+const AddItemsModal = dynamic(() =>
+  import('@/components/hr/mercado/add-items-modal').then((module) => module.AddItemsModal)
+);
+
+const DeleteModal = dynamic(() =>
+  import('@/components/hr/mercado/delete-modal').then((module) => module.DeleteModal)
+);
+
+const ViewItemModal = dynamic(() =>
+  import('@/components/hr/mercado/view-item-modal').then((module) => module.ViewItemModal)
+);
+
+const ITEMS_PER_PAGE = 9;
+
+interface EditableMercadoItem {
+  id: string;
+  name: string;
+  cost: number;
+  quantity?: number;
+  redeemingLimit?: number;
+  imageUrl?: string;
+  availableMonth?: number;
+}
+
+interface ViewableMercadoItem {
+  id: string;
+  name: string;
+  cost: number;
+  quantity?: number;
+  redeemingLimit?: number;
+  isActive: boolean;
+  imageUrl?: string;
+  availableMonth?: number;
+  availableDate?: string | Date | null;
+}
+
+const getRewardCreatedAt = (reward: Reward): string | undefined => {
+  if (!reward.createdAt) return undefined;
+  return reward.createdAt instanceof Date ? reward.createdAt.toISOString() : reward.createdAt;
+};
+
+const mapRewardToEditableItem = (reward: Reward): EditableMercadoItem => ({
+  id: reward.id,
+  name: reward.name,
+  cost: reward.pointsCost,
+  quantity: reward.quantity,
+  redeemingLimit: reward.redeemingLimit,
+  imageUrl: reward.imageUrl,
+  availableMonth: reward.availableMonth,
+});
+
+const mapRewardToViewableItem = (reward: Reward): ViewableMercadoItem => ({
+  id: reward.id,
+  name: reward.name,
+  cost: reward.pointsCost,
+  quantity: reward.quantity,
+  redeemingLimit: reward.redeemingLimit,
+  isActive: reward.isActive,
+  imageUrl: reward.imageUrl,
+  availableMonth: reward.availableMonth,
+  availableDate: reward.availableDate,
+});
+
+const getRewardTimestamp = (reward: Reward): number => {
+  if (!reward.createdAt) return 0;
+  return reward.createdAt instanceof Date
+    ? reward.createdAt.getTime()
+    : new Date(reward.createdAt).getTime();
+};
+
+const monthNameToNumber: Record<string, number> = {
+  january: 1,
+  february: 2,
+  march: 3,
+  april: 4,
+  may: 5,
+  june: 6,
+  july: 7,
+  august: 8,
+  september: 9,
+  october: 10,
+  november: 11,
+  december: 12,
+};
+
+const getRewardAvailableMonth = (reward: Reward): number | null => {
+  if (
+    typeof reward.availableMonth === 'number' &&
+    reward.availableMonth >= 1 &&
+    reward.availableMonth <= 12
+  ) {
+    return reward.availableMonth;
+  }
+
+  if (reward.availableDate) {
+    const date = new Date(reward.availableDate);
+    if (!Number.isNaN(date.getTime())) {
+      return date.getMonth() + 1;
+    }
+  }
+
+  if (reward.monthName) {
+    const normalizedMonthName = reward.monthName.trim().toLowerCase();
+    return monthNameToNumber[normalizedMonthName] ?? null;
+  }
+
+  return null;
+};
+
+const matchesMonthFilter = (reward: Reward, monthFilter: MonthFilter): boolean => {
+  if (monthFilter === 'all') return true;
+  return getRewardAvailableMonth(reward) === monthFilter;
+};
 
 export default function MercadoPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -36,125 +150,89 @@ export default function MercadoPage() {
   const [sortOrder, setSortOrder] = useState<SortOption>('newest');
   const [stockFilter, setStockFilter] = useState<StockFilter>('all');
   const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>('all');
-  const [editingItem, setEditingItem] = useState<{
-    id: string;
-    name: string;
-    cost: number;
-    quantity?: number;
-    redeemingLimit?: number;
-    imageUrl?: string;
-    availableDate?: Date | string | null;
-  } | null>(null);
-  const [deletingItem, setDeletingItem] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
-  const [viewingItem, setViewingItem] = useState<{
-    id: string;
-    name: string;
-    cost: number;
-    quantity?: number;
-    redeemingLimit?: number;
-    isActive: boolean;
-    imageUrl?: string;
-    createdAt?: string;
-    availableDate?: string | Date | null;
-  } | null>(null);
+  const [monthFilter, setMonthFilter] = useState<MonthFilter>('all');
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
+  const [viewingItemId, setViewingItemId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9;
 
-  // Debounced search
   const debouncedSearch = useDebounce(search, 300);
+  const { data: allRewards = [], isLoading } = useGetRewards();
 
-  // Fetch rewards
-  const { data: allRewards, isLoading } = useGetRewards();
-
-  // Filter and sort rewards
   const rewards = useMemo(() => {
-    if (!allRewards) return [];
+    const normalizedSearch = debouncedSearch.trim().toLowerCase();
 
-    let filtered = allRewards;
+    const filteredRewards = allRewards.filter((reward) => {
+      if (normalizedSearch && !reward.name.toLowerCase().includes(normalizedSearch)) {
+        return false;
+      }
 
-    // Filter by search
-    if (debouncedSearch) {
-      filtered = filtered.filter((reward) =>
-        reward.name.toLowerCase().includes(debouncedSearch.toLowerCase())
-      );
-    }
-
-    // Filter by stock status
-    if (stockFilter !== 'all') {
-      filtered = filtered.filter((reward) => {
+      if (stockFilter !== 'all') {
         const hasQuantityLimit = reward.quantity !== null && reward.quantity !== undefined;
-        if (stockFilter === 'in-stock') {
-          return !hasQuantityLimit || (reward.quantity !== undefined && reward.quantity > 0);
-        } else if (stockFilter === 'out-of-stock') {
-          return hasQuantityLimit && reward.quantity !== undefined && reward.quantity <= 0;
-        }
-        return true;
-      });
-    }
+        const inStock = !hasQuantityLimit || (reward.quantity ?? 0) > 0;
 
-    // Filter by visibility
-    if (visibilityFilter !== 'all') {
-      filtered = filtered.filter((reward) => {
-        if (visibilityFilter === 'visible') {
-          return reward.isActive;
-        } else if (visibilityFilter === 'hidden') {
-          return !reward.isActive;
-        }
-        return true;
-      });
-    }
+        if (stockFilter === 'in-stock' && !inStock) return false;
+        if (stockFilter === 'out-of-stock' && inStock) return false;
+      }
 
-    // Apply sorting (only date sorting)
-    return [...filtered].sort((a, b) => {
-      const dateA =
-        a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt || 0).getTime();
-      const dateB =
-        b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt || 0).getTime();
+      if (visibilityFilter === 'visible' && !reward.isActive) return false;
+      if (visibilityFilter === 'hidden' && reward.isActive) return false;
+
+      if (!matchesMonthFilter(reward, monthFilter)) return false;
+
+      return true;
+    });
+
+    filteredRewards.sort((a, b) => {
+      const dateA = getRewardTimestamp(a);
+      const dateB = getRewardTimestamp(b);
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
-  }, [allRewards, debouncedSearch, sortOrder, stockFilter, visibilityFilter]);
 
-  // Pagination logic
-  const totalPages = Math.ceil((rewards?.length || 0) / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedRewards = useMemo(
-    () => rewards?.slice(startIndex, endIndex) || [],
-    [rewards, startIndex, endIndex]
+    return filteredRewards;
+  }, [allRewards, debouncedSearch, sortOrder, stockFilter, visibilityFilter, monthFilter]);
+
+  const rewardsById = useMemo(() => {
+    return new Map(rewards.map((reward) => [reward.id, reward]));
+  }, [rewards]);
+
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(rewards.length / ITEMS_PER_PAGE)),
+    [rewards.length]
   );
 
-  // Reset to page 1 when search or sort changes
+  const paginatedRewards = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return rewards.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [rewards, currentPage]);
+
+  const editingItem = useMemo(() => {
+    if (!editingItemId) return null;
+    const item = rewardsById.get(editingItemId);
+    return item ? mapRewardToEditableItem(item) : null;
+  }, [editingItemId, rewardsById]);
+
+  const viewingItem = useMemo(() => {
+    if (!viewingItemId) return null;
+    const item = rewardsById.get(viewingItemId);
+    return item ? mapRewardToViewableItem(item) : null;
+  }, [viewingItemId, rewardsById]);
+
+  const deletingItemName = useMemo(() => {
+    if (!deletingItemId) return undefined;
+    return rewardsById.get(deletingItemId)?.name;
+  }, [deletingItemId, rewardsById]);
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, sortOrder, stockFilter, visibilityFilter]);
+  }, [debouncedSearch, sortOrder, stockFilter, visibilityFilter, monthFilter]);
 
-  // Sync viewing item with updated rewards when mutations complete
   useEffect(() => {
-    if (viewingItem && rewards && isViewModalOpen) {
-      const updatedItem = rewards.find((r) => r.id === viewingItem.id);
-      if (updatedItem) {
-        setViewingItem({
-          id: updatedItem.id,
-          name: updatedItem.name,
-          cost: updatedItem.pointsCost,
-          quantity: updatedItem.quantity,
-          redeemingLimit: updatedItem.redeemingLimit,
-          isActive: updatedItem.isActive,
-          imageUrl: updatedItem.imageUrl,
-          availableDate: updatedItem.availableDate,
-          createdAt:
-            updatedItem.createdAt instanceof Date
-              ? updatedItem.createdAt.toISOString()
-              : updatedItem.createdAt,
-        });
-      }
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
     }
-  }, [rewards, viewingItem?.id, isViewModalOpen]);
+  }, [currentPage, totalPages]);
 
-  // Mutations
   const addReward = useAddReward();
   const editReward = useEditReward();
   const deleteReward = useDeleteReward();
@@ -164,66 +242,46 @@ export default function MercadoPage() {
   const isProcessing = deleteReward.isPending || hideReward.isPending;
 
   const handleAdd = useCallback(() => {
-    setEditingItem(null);
+    setEditingItemId(null);
     setIsAddModalOpen(true);
   }, []);
 
   const handleEdit = useCallback(
     (id: string) => {
-      const item = rewards?.find((item) => item.id === id);
-      if (item) {
-        setEditingItem({
-          id: item.id,
-          name: item.name,
-          cost: item.pointsCost,
-          quantity: item.quantity,
-          redeemingLimit: item.redeemingLimit,
-          imageUrl: item.imageUrl,
-          availableDate: item.availableDate,
-        });
+      if (rewardsById.has(id)) {
+        setEditingItemId(id);
         setIsAddModalOpen(true);
       }
     },
-    [rewards]
+    [rewardsById]
   );
 
   const handleDelete = useCallback(
     (id: string) => {
-      const item = rewards?.find((item) => item.id === id);
-      if (item) {
-        setDeletingItem({ id: item.id, name: item.name });
+      if (rewardsById.has(id)) {
+        setDeletingItemId(id);
         setIsDeleteModalOpen(true);
       }
     },
-    [rewards]
+    [rewardsById]
   );
 
   const handleView = useCallback(
     (id: string) => {
-      const item = rewards?.find((item) => item.id === id);
-      if (item) {
-        setViewingItem({
-          id: item.id,
-          name: item.name,
-          cost: item.pointsCost,
-          quantity: item.quantity,
-          redeemingLimit: item.redeemingLimit,
-          isActive: item.isActive,
-          imageUrl: item.imageUrl,
-          availableDate: item.availableDate,
-          createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : item.createdAt,
-        });
+      if (rewardsById.has(id)) {
+        setViewingItemId(id);
         setIsViewModalOpen(true);
       }
     },
-    [rewards]
+    [rewardsById]
   );
 
   const handleEditFromView = useCallback(() => {
-    if (viewingItem) {
-      handleEdit(viewingItem.id);
+    if (viewingItemId) {
+      handleEdit(viewingItemId);
+      setIsViewModalOpen(false);
     }
-  }, [viewingItem, handleEdit]);
+  }, [viewingItemId, handleEdit]);
 
   const handleHide = useCallback(
     async (id: string) => {
@@ -240,12 +298,12 @@ export default function MercadoPage() {
   );
 
   const handleConfirmDelete = useCallback(async () => {
-    if (deletingItem) {
-      await deleteReward.mutateAsync(deletingItem.id);
-      setDeletingItem(null);
+    if (deletingItemId) {
+      await deleteReward.mutateAsync(deletingItemId);
+      setDeletingItemId(null);
       setIsDeleteModalOpen(false);
     }
-  }, [deletingItem, deleteReward]);
+  }, [deletingItemId, deleteReward]);
 
   const handleSaveItem = useCallback(
     async (data: {
@@ -255,9 +313,8 @@ export default function MercadoPage() {
       quantity: string;
       redeemingLimit: string;
       cost: number;
-      availableDate?: Date | null;
+      availableMonth?: number | null;
     }) => {
-      // Clear previous error
       setSaveError('');
 
       const quantityNum = data.quantity ? parseInt(data.quantity) : undefined;
@@ -266,7 +323,6 @@ export default function MercadoPage() {
       let rewardId = data.id;
 
       if (data.id) {
-        // Edit existing item
         await editReward.mutateAsync({
           id: data.id,
           input: {
@@ -274,51 +330,46 @@ export default function MercadoPage() {
             pointsCost: data.cost,
             quantity: quantityNum,
             redeemingLimit: redeemingLimitNum,
-            availableDate: data.availableDate || null,
+            availableMonth: data.availableMonth || null,
           },
         });
       } else {
-        // Add new item
         const createdReward = await addReward.mutateAsync({
           name: data.name,
           pointsCost: data.cost,
           quantity: quantityNum,
           redeemingLimit: redeemingLimitNum,
           isActive: true,
-          availableDate: data.availableDate || null,
+          availableMonth: data.availableMonth || null,
         });
         rewardId = createdReward?.id;
       }
 
       if (data.icon && rewardId) {
         await uploadRewardPicture.mutateAsync({
-          rewardId: rewardId,
+          rewardId,
           file: data.icon,
           rewardName: data.name,
         });
       }
 
-      // Modal closes from within the modal component after successful save
-      setEditingItem(null);
+      setEditingItemId(null);
     },
     [addReward, editReward, uploadRewardPicture]
   );
 
   return (
-    <main className="min-h-screen bg-[#fff8f5] p-8 flex flex-col">
-      <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col">
-        {/* Header with Search and Sort */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-[#730202]">Mercado Manager</h1>
-              <p className="text-muted-foreground">Manage Items visible in mercado</p>
-            </div>
-          </div>
+    <main className="min-h-screen bg-[#fff8f5] p-8">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <MercadoHeader
+          title="Mercado Manager"
+          description="Manage items visible in mercado"
+          showAddButton={false}
+        />
 
-          {/* Search and Sort Row */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 max-w-md">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="w-full md:w-auto md:min-w-[320px] md:max-w-md">
               <MercadoSearchBar
                 value={search}
                 onChange={setSearch}
@@ -329,25 +380,27 @@ export default function MercadoPage() {
             <MercadoFilterToggle
               stockFilter={stockFilter}
               visibilityFilter={visibilityFilter}
+              monthFilter={monthFilter}
               onStockFilterChange={setStockFilter}
               onVisibilityFilterChange={setVisibilityFilter}
+              onMonthFilterChange={setMonthFilter}
             />
-            <Button
-              onClick={() => setIsAddModalOpen(true)}
-              className="h-11 px-6 rounded-xl bg-[#730202] hover:bg-[#730202]/90 text-white font-semibold text-base ml-auto"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Add Item
-            </Button>
           </div>
+          <Button
+            onClick={handleAdd}
+            className="h-10 px-4 rounded-lg bg-[#730202] hover:bg-[#730202]/90 text-white md:ml-auto"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Item
+          </Button>
         </div>
 
-        <div className="flex-1">
-          {isLoading ? (
-            <MercadoSkeleton />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
-              {paginatedRewards && paginatedRewards.length > 0 ? (
+        {isLoading ? (
+          <MercadoSkeleton />
+        ) : (
+          <>
+            <div className="grid auto-rows-fr grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {paginatedRewards.length > 0 ? (
                 paginatedRewards.map((item) => (
                   <MercadoCard
                     key={item.id}
@@ -358,11 +411,8 @@ export default function MercadoPage() {
                       quantity: item.quantity,
                       isActive: item.isActive,
                       imageUrl: item.imageUrl,
+                      availableMonth: item.availableMonth,
                       availableDate: item.availableDate,
-                      createdAt:
-                        item.createdAt instanceof Date
-                          ? item.createdAt.toISOString()
-                          : item.createdAt,
                     }}
                     onClick={handleView}
                     onEdit={handleEdit}
@@ -372,7 +422,7 @@ export default function MercadoPage() {
                   />
                 ))
               ) : (
-                <div className="col-span-full text-center py-12">
+                <div className="col-span-full py-12 text-center">
                   {search ? (
                     <p className="text-[#730202]">No items found matching your search.</p>
                   ) : (
@@ -381,18 +431,17 @@ export default function MercadoPage() {
                 </div>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Pagination */}
-        {!isLoading && totalPages > 0 && (
-          <div className="mt-8 pb-4">
-            <Pagination
-              totalPages={totalPages}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-            />
-          </div>
+            {totalPages > 1 && (
+              <div className="pb-4">
+                <Pagination
+                  totalPages={totalPages}
+                  currentPage={currentPage}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -400,6 +449,7 @@ export default function MercadoPage() {
         open={isAddModalOpen}
         onOpenChange={(open) => {
           if (!open) setSaveError('');
+          if (!open) setEditingItemId(null);
           setIsAddModalOpen(open);
         }}
         editingItem={editingItem}
@@ -410,15 +460,21 @@ export default function MercadoPage() {
 
       <ViewItemModal
         open={isViewModalOpen}
-        onOpenChange={setIsViewModalOpen}
+        onOpenChange={(open) => {
+          setIsViewModalOpen(open);
+          if (!open) setViewingItemId(null);
+        }}
         onEdit={handleEditFromView}
         item={viewingItem}
       />
 
       <DeleteModal
         open={isDeleteModalOpen}
-        onOpenChange={setIsDeleteModalOpen}
-        itemName={deletingItem?.name}
+        onOpenChange={(open) => {
+          setIsDeleteModalOpen(open);
+          if (!open) setDeletingItemId(null);
+        }}
+        itemName={deletingItemName}
         onConfirm={handleConfirmDelete}
       />
     </main>

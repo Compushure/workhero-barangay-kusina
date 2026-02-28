@@ -19,6 +19,17 @@ export function isTaskOverdue(endDate: string | null): boolean {
   return taskEnd.getTime() < today.getTime();
 }
 
+export const formatDate = (dateString: string | null) => {
+    if (!dateString) return '';
+    const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'Asia/Manila',
+    });
+  };
+
 /**
  * Checks if a mercado item is available now based on its availability date
  * Uses Philippines timezone (Asia/Manila) for comparison
