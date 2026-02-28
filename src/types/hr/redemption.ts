@@ -16,6 +16,7 @@ export interface RedemptionRequest {
   userPoints?: number;
   rewardId: string;
   rewardName: string;
+  rewardImageUrl?: string;
   pointsCost: number;
   quantity: number;
   status: 'pending' | 'approved' | 'rejected';

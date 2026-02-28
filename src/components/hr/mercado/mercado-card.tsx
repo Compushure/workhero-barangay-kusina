@@ -162,7 +162,7 @@ export const MercadoCard = memo(function MercadoCard({
 
           <div className="flex items-center gap-4 mt-2">
             <p className="text-[#730202] font-medium italic opacity-80 text-base">
-              {formattedPrice} pts
+              {formattedPrice} {item.price === 1 ? 'pt' : 'pts'}
             </p>
             {formattedQuantity !== undefined && (
               <p
