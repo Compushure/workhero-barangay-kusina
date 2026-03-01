@@ -135,7 +135,7 @@ export function SelectTasksDialog({
   const updateMaxOrders = (taskId: string, newValue: number) => {
     const task = tasks.find((t) => t.id === taskId);
     if (task && task.isRepeatable) {
-      const newMaxOrders = { ...taskMaxOrders, [taskId]: Math.max(1, newValue) };
+      const newMaxOrders = { ...taskMaxOrders, [taskId]: Math.max(1, Math.min(99, newValue)) };
       setTaskMaxOrders(newMaxOrders);
       onTasksChange(selectedTask, newMaxOrders);
     }

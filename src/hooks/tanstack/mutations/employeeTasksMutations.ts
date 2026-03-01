@@ -74,27 +74,25 @@ export function useRedoTask(): UseMutationResult<
 export function useClaimTaskPointsandXP(): UseMutationResult<
   ClaimTaskResult | null,
   Error,
-  { kpitaskId: string; taskName: string; completedOrders: number; maxOrders: number }
+  { kpitaskId: string; taskName: string; pendingOrders: number; completedOrders: number; maxOrders: number }
 > {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ kpitaskId, taskName, completedOrders, maxOrders }) => {
-      return await handleClaimTaskPointsAndXP(kpitaskId, taskName, completedOrders, maxOrders);
+    mutationFn: async ({ kpitaskId, taskName, pendingOrders, completedOrders, maxOrders }) => {
+      return await handleClaimTaskPointsAndXP(kpitaskId, taskName, pendingOrders, completedOrders, maxOrders);
     },
     onMutate: async ({}) => {
       // Cancel any outgoing refetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({ queryKey: employeeKeys.points() });
       await queryClient.cancelQueries({ queryKey: employeeKeys.xp() });
-      await queryClient.cancelQueries({ queryKey: employeeKeys.level() });
 
       // Snapshot the previous value
       const previousPoints = queryClient.getQueryData(employeeKeys.points());
       const previousXP = queryClient.getQueryData(employeeKeys.xp());
-      const previousLevel = queryClient.getQueryData(employeeKeys.level());
 
       // Return a context object with the snapshotted value
-      return { previousPoints, previousXP, previousLevel };
+      return { previousPoints, previousXP };
     },
     onError: (err, variables, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
@@ -103,9 +101,6 @@ export function useClaimTaskPointsandXP(): UseMutationResult<
       }
       if (context?.previousXP) {
         queryClient.setQueryData(employeeKeys.xp(), context.previousXP);
-      }
-      if (context?.previousLevel) {
-        queryClient.setQueryData(employeeKeys.level(), context.previousLevel);
       }
       console.error('Failed to claim task points:', err);
     },
@@ -134,20 +129,12 @@ export function useClaimTaskPointsandXP(): UseMutationResult<
             currentXP: newCurrentXP,
           };
         });
-
-        // Update level if it changed
-        queryClient.setQueryData(employeeKeys.level(), (old: any) => {
-          if (!old) return old;
-          const currentXP = queryClient.getQueryData(employeeKeys.xp()) as any;
-          return currentXP?.level ?? old;
-        });
       }
     },
     onSettled: () => {
       // Always refetch after error or success to make sure the server state is reflected
       queryClient.invalidateQueries({ queryKey: employeeKeys.points() });
       queryClient.invalidateQueries({ queryKey: employeeKeys.xp() });
-      queryClient.invalidateQueries({ queryKey: employeeKeys.level() });
       // Invalidate tasks cache to reflect the claimed status
       queryClient.invalidateQueries({ queryKey: employeeTasksKeys.lists() });
     },
