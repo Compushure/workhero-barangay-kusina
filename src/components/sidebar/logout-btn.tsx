@@ -66,7 +66,7 @@ export const LogOutBtn = memo(function LogOutBtn() {
     <button
       onClick={handleLogout}
       disabled={isPending || isNavigating || isLoggingOut}
-      className="w-full cursor-pointer bg-white text-[#690003] py-2 rounded-full font-semibold hover:bg-gray-100 transition-all duration-500 ease-in-out text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+      className="w-full cursor-pointer bg-white text-foreground py-2 rounded-full font-semibold hover:bg-gray-100 transition-all duration-500 ease-in-out text-sm disabled:opacity-60 disabled:cursor-not-allowed"
     >
       {isLoggingOut ? (
         <span className="inline-flex items-center gap-2">

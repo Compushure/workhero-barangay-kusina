@@ -28,7 +28,7 @@ export default function EmployeeViewTaskBadges({
   return (
     <div className="flex flex-col pl-4 pr-2 w-full">
       <div className="flex items-center justify-between mb-4">
-        <h4 className="text-lg font-bold text-[#690003]">
+        <h4 className="text-lg font-bold text-foreground">
           Current Tasks{' '}
           <span className="bg-gray-300 text-gray-700 px-2 py-1 rounded-full text-sm ml-2">
             {employee.assignedTasks.length}
@@ -37,7 +37,7 @@ export default function EmployeeViewTaskBadges({
         {hiddenCount > 0 && (
           <button
             onClick={() => toggleEmployeeExpand(employee.id)}
-            className="text-[#690003] font-medium flex items-center gap-1 hover:underline"
+            className="text-foreground font-medium flex items-center gap-1 hover:underline"
           >
             {isExpanded ? 'Show Less' : 'See All'}{' '}
             <ChevronDown
@@ -118,7 +118,7 @@ export default function EmployeeViewTaskBadges({
                 }
                 className="hover:scale-130 transition-all duration-500 ease-in-out cursor-pointer"
               >
-                <X className="size-4 text-[#690003] hover:text-red-500" />
+                <X className="size-4 text-foreground hover:text-red-500" />
               </button>
             </div>
           );

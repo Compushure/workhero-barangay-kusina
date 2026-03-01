@@ -29,7 +29,7 @@ export default function TaskViewEmployeeBadges({
   return (     
     <section className="">
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-base font-semibold text-[#690003]">
+        <h4 className="text-base font-semibold text-foreground">
           Assigned to{' '}
           <span className="bg-zinc-200 text-gray-700 shadow w-7 h-6 px-1 rounded-full text-sm ml-1.5 inline-flex items-center justify-center">
             {(task.assignedEmployees ?? []).length}
@@ -38,7 +38,7 @@ export default function TaskViewEmployeeBadges({
         {(hasOverflow || expanded) && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-[#690003] font-medium flex items-center gap-1 hover:underline"
+            className="text-foreground font-medium flex items-center gap-1 hover:underline"
           >
             {expanded ? 'Show Less' : 'See All'}{' '}
             <ChevronDown className={`w-4 h-4 transition ${expanded ? 'rotate-180' : ''}`} />
@@ -72,7 +72,7 @@ export default function TaskViewEmployeeBadges({
               className="ml-2 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130"
               title="Unassign Employee"
             >
-              <X className="size-3.5 text-[#690003] hover:text-red-500" />
+              <X className="size-3.5 text-foreground hover:text-red-500" />
             </button>
           </div>
         ))}

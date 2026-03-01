@@ -11,8 +11,8 @@ export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border shadow-md">
       <Table>
-        <TableHeader className="bg-[#690003]">
-          <TableRow className="border-b border-border hover:bg-[#690003]">
+        <TableHeader className="bg-foreground">
+          <TableRow className="border-b border-border hover:bg-foreground">
             <TableHead className="text-card font-semibold px-4 w-45">REQUEST DATE</TableHead>
             <TableHead className="text-card font-semibold px-4 w-50">EMPLOYEE</TableHead>
             <TableHead className="text-card font-semibold px-4 w-64">TASK</TableHead>

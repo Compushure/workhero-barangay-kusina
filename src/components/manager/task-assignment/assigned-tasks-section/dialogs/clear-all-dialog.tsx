@@ -29,7 +29,7 @@ function ClearAllAssignedDialog({ setShowClearConfirm }: ClearAllDialogProps) {
     <Dialog open={true} onOpenChange={setShowClearConfirm}>
       <DialogContent className="max-w-sm bg-white rounded-lg p-6 shadow-lg transition-all duration-300 ease-in-out shadow-sm/50">
         <DialogHeader>
-          <DialogTitle className="flex flex-col text-lg font-bold text-[#690003]">
+          <DialogTitle className="flex flex-col text-lg font-bold text-foreground">
             <span className='flex text-red-700 text-base leading-none items-center gap-2 mb-2'>
               <OctagonAlert strokeWidth={2.5}/>
               Danger Zone

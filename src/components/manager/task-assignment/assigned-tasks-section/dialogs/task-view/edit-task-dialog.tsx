@@ -95,13 +95,13 @@ export default function EditTaskDialog({
     <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>
       <DialogContent className="bg-[#FBF4E8] max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader className="shrink-0">
-          <DialogTitle className="text-2xl text-[#690003]">Edit Task</DialogTitle>
+          <DialogTitle className="text-2xl text-foreground">Edit Task</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-4">
           {/* Task Info */}
           <div className="flex items-center justify-between bg-white rounded-xl px-4 py-2 border-2 border-gray-300">
-            <h4 className="text-lg font-bold text-[#690003]">{task.taskName}</h4>
+            <h4 className="text-lg font-bold text-foreground">{task.taskName}</h4>
             <div className="flex flex-col items-center">
               <div className="flex items-end gap-2">
                 <p className="flex gap-1 items-end text-lg font-medium leading-none">
@@ -122,7 +122,7 @@ export default function EditTaskDialog({
             {/* Max Repeats */}
             {task.isRepeatable && (
             <div className='flex flex-col items-center gap-3'>
-              <label className="font-bold text-[#690003]">Max Orders</label>
+              <label className="font-bold text-foreground">Max Orders</label>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setEditMaxOrders(Math.max(1, Math.min(99, editMaxOrders - 1)))}
@@ -152,7 +152,7 @@ export default function EditTaskDialog({
 
             {/* Due Date */}
             <div className="flex flex-col items-center justify-baseline gap-2">
-              <label className="font-bold text-[#690003]">Due Date</label>
+              <label className="font-bold text-foreground">Due Date</label>
               <DatePickerPopover
                 deadline={editDueDate}
                 onDeadlineChange={(date) => date && setEditDueDate(date)}
@@ -168,13 +168,13 @@ export default function EditTaskDialog({
               placeholder="Enter in Employee Name or ID"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-white shadow-sm/15 text-sm focus:outline-none focus:border focus:border-[#690003]"
+              className="w-full pl-10 pr-4 py-2 rounded-full bg-white shadow-sm/15 text-sm focus:outline-none focus:border focus:border-foreground"
             />
           </div>
           
           {/* Assign/Remove Employees */}
           <div className="space-y-3">
-            <h4 className="text-base font-bold text-[#690003]">
+            <h4 className="text-base font-bold text-foreground">
               Assign/Remove Employees
               <span className="bg-gray-50 px-2 py-0.5 rounded-full ml-2 shadow-sm/15">
                 {editAssignedEmployees.length}
@@ -205,7 +205,7 @@ export default function EditTaskDialog({
                           e.stopPropagation();
                           if (!isDisabled) toggleEmployee(emp.id);
                         }}
-                        className="w-5 h-5 rounded cursor-pointer accent-[#690003] disabled:cursor-not-allowed"
+                        className="w-5 h-5 rounded cursor-pointer accent-foreground disabled:cursor-not-allowed"
                       />
                       <div className="flex-1">
                         <p className="text-base font-medium text-gray-800">{emp.name}</p>
@@ -226,7 +226,7 @@ export default function EditTaskDialog({
           <Button
             onClick={handleEditTask}
             disabled={editAssignedEmployees.length === 0 || isProcessing}
-            className="bg-[#690003] hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
+            className="bg-foreground hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
             {isProcessing ? 'Saving...' : 'Confirm'}
           </Button>

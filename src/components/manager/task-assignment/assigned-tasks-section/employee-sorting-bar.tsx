@@ -32,7 +32,7 @@ export function EmployeeSortingBar({ sortBy, onSortChange }: EmployeeSortingBarP
         <Button
           variant="default"
           size="default"
-          className="bg-[#690003] shadow-sm/25 hover:bg-[#af3b3f] transition-all duration-500 ease-in-out cursor-pointer text-white shadow-md w-32 flex justify-between"
+          className="bg-foreground shadow-sm/25 hover:bg-[#af3b3f] transition-all duration-500 ease-in-out cursor-pointer text-white shadow-md w-32 flex justify-between"
         >
           {/* Label on the left */}
           <span className="truncate">{currentLabel}</span>

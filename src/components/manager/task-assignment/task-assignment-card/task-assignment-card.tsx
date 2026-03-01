@@ -144,7 +144,7 @@ export function TaskAssignmentCard() {
 
   return (
     <div className="rounded-3xl bg-[#FBF4E8] p-6 shadow-sm/25">
-      <h2 className="mb-8 text-2xl font-bold text-[#690003]">Assign Employees for Task</h2>
+      <h2 className="mb-8 text-2xl font-bold text-foreground">Assign Employees for Task</h2>
 
       <div className="flex flex-wrap gap-4 mb-2">
         <div className="min-w-50">
@@ -185,7 +185,7 @@ export function TaskAssignmentCard() {
             selectedTask.length === 0 ||
             !selectedDeadline
           }
-          className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:shadow-sm/25 disabled:cursor-not-allowed px-12 shadow-sm/25"
+          className="bg-foreground hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:shadow-sm/25 disabled:cursor-not-allowed px-12 shadow-sm/25"
         >
           {isAssigning ? 'Assigning...' : 'Assign'}
         </Button>
@@ -210,7 +210,7 @@ export function TaskAssignmentCard() {
       <Dialog open={showAssignConfirm} onOpenChange={setShowAssignConfirm}>
         <DialogContent className="transition-all duration-500 ease-in-out">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-[#690003]">
+            <DialogTitle className="text-lg font-bold text-foreground">
               Confirm Assignment
             </DialogTitle>
           </DialogHeader>
@@ -221,7 +221,7 @@ export function TaskAssignmentCard() {
             <Button
               onClick={handleAssign}
               disabled={isAssigning}
-              className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed px-8 shadow-sm/25"
+              className="bg-foreground hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed px-8 shadow-sm/25"
             >
               {isAssigning ? 'Assigning...' : 'Confirm'}
             </Button>

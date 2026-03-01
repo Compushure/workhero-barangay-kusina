@@ -111,7 +111,7 @@ export function AssignEmployeesDialog({
         onClick={() => !disabled && setOpen(true)}
         disabled={disabled}
         className={`bg-white shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out hover:bg-gray-100 flex items-center disabled:opacity-50 disabled:cursor-not-allowed
-          ${selectedEmployees.length === 0 ? 'text-zinc-700' : 'text-[#690003]'}`}
+          ${selectedEmployees.length === 0 ? 'text-zinc-700' : 'text-foreground'}`}
       >
         <div className="flex items-center gap-8">
           <span>{selectedEmployees.length} employee/s selected</span>
@@ -122,7 +122,7 @@ export function AssignEmployeesDialog({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="bg-[#FBF4E8] max-h-[90vh] flex flex-col rounded-3xl pt-12">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[#690003]">Assign Employees for Task</DialogTitle>
+            <DialogTitle className="text-2xl text-foreground">Assign Employees for Task</DialogTitle>
           </DialogHeader>
 
           {/* Search Bar */}
@@ -133,13 +133,13 @@ export function AssignEmployeesDialog({
               placeholder="Enter in Employee Name or ID"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-white shadow-sm/25 focus:outline-none focus:border focus:border-[#690003]"
+              className="w-full pl-10 pr-4 py-2 rounded-full bg-white shadow-sm/25 focus:outline-none focus:border focus:border-foreground"
             />
           </div>
 
           {/* Employees Selected Badge */}
           <div className="mb-1">
-            <h4 className="text-lg font-bold text-[#690003]">
+            <h4 className="text-lg font-bold text-foreground">
               Employees Selected{' '}
               <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
                 {selectedEmployees.length}

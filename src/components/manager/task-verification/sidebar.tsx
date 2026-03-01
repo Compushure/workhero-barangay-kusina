@@ -108,7 +108,7 @@ export function Sidebar({
 
   return (
     <aside
-      className={`bg-[#690003] text-white flex flex-col justify-between transition-all duration-400 ease-in-out overflow-hidden ${
+      className={`bg-foreground text-white flex flex-col justify-between transition-all duration-400 ease-in-out overflow-hidden ${
         isCollapsed ? 'w-20' : 'w-60'
       }`}
     >
@@ -201,7 +201,7 @@ export function Sidebar({
       >
         <div
           className={`bg-white/10 rounded-full flex items-center ${
-            isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
+            isCollapsed ? 'w-16 h-16 justify-center' : 'p-3 gap-3 mb-4'
           }`}
         >
           <SidebarUserProfile isCollapsed={isCollapsed} disabled={isUiDisabled} />

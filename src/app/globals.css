@@ -8,7 +8,7 @@
 
 :root {
   --background: #FBF4E8; /* Soft warm beige */
-  --foreground: #690003; /* Deep reddish brown */
+  --foreground: #591c1e; /* Deep reddish brown */
   --card: #fafafa;
   --card-foreground: #514937;
   --popover: #fafafa;
@@ -18,11 +18,11 @@
 
   /* Primary: Dark olive brown */
   --primary-foreground: #fafafa;
-  --primary: #a83232;
+  --primary: #792828;
 
   /* Secondary: Bright chili red */
   --secondary-foreground: #fafafa;
-  --secondary: #d94f4f; /* Bright chili red */
+  --secondary: #c04e4e; /* Bright chili red */
 
   /* Accent: Light beige */
   /* --accent: #f2d0a7;

@@ -25,14 +25,14 @@ function AssignEmployeesTable({
   return (
     <div className="bg-white rounded-2xl border-2 border-gray-200 flex-1 flex flex-col overflow-auto">
       <table className="w-full">
-        <thead className="bg-[#690003] border-b-2 border-gray-300">
+        <thead className="bg-foreground border-b-2 border-gray-300">
           <tr className="flex py-2 items-center">
             <th className="w-13 p-2 flex justify-center items-center">
               <input
                 type="checkbox"
                 checked={allFilteredSelected}
                 onChange={handleSelectAll}
-                className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
+                className="w-5 h-5 rounded cursor-pointer accent-foreground"
               />
             </th>
             <th className="w-67 px-2 text-left font-bold text-white">NAME</th>
@@ -73,7 +73,7 @@ function AssignEmployeesTable({
                           checked={!!isSelected}
                           disabled={isDisabled}
                           onChange={() => !isDisabled && toggleEmployee(employee)}
-                          className="w-5 h-5 rounded cursor-pointer accent-[#690003] disabled:cursor-not-allowed"
+                          className="w-5 h-5 rounded cursor-pointer accent-foreground disabled:cursor-not-allowed"
                           onClick={(e) => e.stopPropagation()}
                         />
                       </div>

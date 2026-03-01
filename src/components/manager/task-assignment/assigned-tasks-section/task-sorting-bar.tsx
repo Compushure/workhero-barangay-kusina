@@ -30,7 +30,7 @@ export function TaskSortingBar({ sortBy, onSortChange }: TaskSortingBarProps) {
         <Button
           variant="default"
           size="default"
-          className="bg-[#690003] shadow-sm/25 hover:bg-[#950005] transition-all duration-200 ease-in-out cursor-pointer text-zinc-50 shadow-md w-32 justify-between"
+          className="bg-foreground shadow-sm/25 hover:bg-[#950005] transition-all duration-200 ease-in-out cursor-pointer text-zinc-50 shadow-md w-32 justify-between"
         >
           <span className="truncate">{currentLabel}</span>
           <ArrowUpDown size={18} />

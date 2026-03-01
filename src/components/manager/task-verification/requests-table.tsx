@@ -55,8 +55,8 @@ export function RequestsTable({
   return (
     <div className="overflow-x-auto rounded-lg border border-border shadow-md">
       <Table>
-        <TableHeader className="bg-[#690003]">
-          <TableRow className="border-b border-border hover:bg-[#690003]">
+        <TableHeader className="bg-foreground">
+          <TableRow className="border-b border-border hover:bg-foreground">
             <TableHead className="text-card font-semibold px-4 w-45">REQUEST DATE</TableHead>
             <TableHead className="text-card font-semibold px-4 w-50">EMPLOYEE</TableHead>
             <TableHead className="text-card font-semibold px-4 w-64">TASK</TableHead>
@@ -140,7 +140,7 @@ export function RequestsTable({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-[#690003] hover:bg-[#fbeaea]"
+                          className="h-8 w-8 text-foreground hover:bg-[#fbeaea]"
                           onClick={() => {
                             setSelectedRemark(request.remark || '');
                             setRemarkModalOpen(true);
@@ -215,7 +215,7 @@ export function RequestsTable({
       <Dialog open={remarkModalOpen} onOpenChange={setRemarkModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#690003]">Task Remark</DialogTitle>
+            <DialogTitle className="text-foreground">Task Remark</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-[#5a2a2a] whitespace-pre-wrap wrap-break-word">

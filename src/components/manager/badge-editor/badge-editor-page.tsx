@@ -245,13 +245,13 @@ export function BadgeEditorPage() {
     <main className="w-full min-h-screen bg-zinc-50 p-10">
       <div className="mx-auto w-full max-w-500 space-y-8">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-[#690003]">Badge Editor</h1>
+          <h1 className="text-3xl font-bold text-foreground">Badge Editor</h1>
           <p className="text-md text-gray-600">Create, edit, and manage badges with conditions.</p>
         </div>
 
         <section className="flex justify-between">
           {/* Badge Count Display */}
-          <div className="flex gap-4 text-lg font-bold text-[#690003] pl-2">
+          <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
             <h5 className="flex items-center gap-2">
               <Coins size={20} />
               Badges{' '}
@@ -271,7 +271,7 @@ export function BadgeEditorPage() {
                 placeholder="Search badges..."
                 value={searchTerm}
                 onChange={handleSearchChange}
-                className="pl-10 pr-4 py-2 rounded-xl text-sm bg-white shadow-sm/50 border border-gray-200 focus:outline-none focus:border-[#690003] transition-colors"
+                className="pl-10 pr-4 py-2 rounded-xl text-sm bg-white shadow-sm/50 border border-gray-200 focus:outline-none focus:border-foreground transition-colors"
               />
             </div>
 
@@ -286,7 +286,7 @@ export function BadgeEditorPage() {
                 <Button
                   variant="default"
                   size="default"
-                  className="bg-[#690003] hover:brightness-100 w-35 cursor-pointer rounded-full text-white shadow-sm/25 flex justify-between transition-all duration-500 ease-in-out"
+                  className="bg-foreground hover:brightness-100 w-35 cursor-pointer rounded-full text-white shadow-sm/25 flex justify-between transition-all duration-500 ease-in-out"
                 >
                   <span className="truncate">{currentSortLabel}</span>
                   <ArrowUpDown size={18} />
@@ -310,7 +310,7 @@ export function BadgeEditorPage() {
             {/* Add New Badge Button */}
             <Button
               onClick={handleOpenAddDialog}
-              className="px-6 py-2 rounded-full bg-[#690003] hover:brightness-100 text-zinc-50 font-semibold text-sm shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out shrink-0"
+              className="px-6 py-2 rounded-full bg-foreground hover:brightness-100 text-zinc-50 font-semibold text-sm shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out shrink-0"
             >
               <Coins size={18} />
               <span>Add New Badge</span>

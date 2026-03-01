@@ -95,7 +95,7 @@ export default function AwardBadgeDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="bg-background border-none max-w-2xl rounded-2xl p-6 max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-[#690003]">
+          <DialogTitle className="text-2xl font-bold text-foreground">
             Award Badge to {user?.name}
           </DialogTitle>
           <DialogDescription className="text-gray-600">
@@ -113,7 +113,7 @@ export default function AwardBadgeDialog({
                 placeholder="Search by name or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm"
+                className="pl-9 bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm"
               />
             </div>
           </div>
@@ -125,7 +125,7 @@ export default function AwardBadgeDialog({
               value={sortOption}
               onValueChange={(value) => setSortOption(value as SortOption)}
             >
-              <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-[#690003] h-9 text-sm">
+              <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -155,7 +155,7 @@ export default function AwardBadgeDialog({
                         onClick={() => setSelectedBadgeId(badge.id)}
                         className={`p-4 cursor-pointer transition-colors ${
                           selectedBadgeId === badge.id
-                            ? 'bg-[#690003]/10 border-l-4 border-[#690003]'
+                            ? 'bg-foreground/10 border-l-4 border-foreground'
                             : 'hover:bg-gray-50'
                         } ${userHas ? 'bg-[#fdeac8]/30' : ''}`}
                       >
@@ -179,7 +179,7 @@ export default function AwardBadgeDialog({
                               <h4 className="font-semibold text-red-950 text-sm truncate">
                                 {badge.name}
                               </h4>
-                              <div className="flex items-center gap-1 text-xs font-medium text-[#690003]">
+                              <div className="flex items-center gap-1 text-xs font-medium text-foreground">
                                 <Coins size={14} />
                                 {badge.points}
                               </div>
@@ -188,7 +188,7 @@ export default function AwardBadgeDialog({
                               {badge.description || 'No description'}
                             </p>
                             {userHas && (
-                              <span className="inline-block text-xs font-medium text-[#690003] bg-[#fdeac8] px-2 py-1 rounded mt-2">
+                              <span className="inline-block text-xs font-medium text-foreground bg-[#fdeac8] px-2 py-1 rounded mt-2">
                                 User already has this badge
                               </span>
                             )}
@@ -242,7 +242,7 @@ export default function AwardBadgeDialog({
           <Button
             onClick={handleAward}
             disabled={!selectedBadgeId}
-            className="bg-[#690003] hover:brightness-100 text-zinc-50 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-foreground hover:brightness-100 text-zinc-50 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Award Badge
           </Button>

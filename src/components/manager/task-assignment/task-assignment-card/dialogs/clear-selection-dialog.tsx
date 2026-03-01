@@ -37,7 +37,7 @@ function ClearSelectionDialog({
     <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
       <DialogContent className="bg-white">
         <DialogHeader>
-          <DialogTitle className="text-[#690003]">Clear Selection?</DialogTitle>
+          <DialogTitle className="text-foreground">Clear Selection?</DialogTitle>
           <DialogDescription>
             This will clear all selected employees, tasks, and deadline.
           </DialogDescription>
@@ -46,7 +46,7 @@ function ClearSelectionDialog({
           <Button
             onClick={handleClearSelection}
             disabled={isClearing}
-            className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out"
+            className="bg-foreground hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
             {isClearing ? 'Clearing...' : 'Clear'}
           </Button>

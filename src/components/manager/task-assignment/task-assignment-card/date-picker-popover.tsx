@@ -41,7 +41,7 @@ export function DatePickerPopover({ deadline, onDeadlineChange }: DatePickerPopo
             disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
             classNames={{
               day: 'hover:bg-[#D4A574] hover:text-gray-900 rounded-md transition-colors',
-              day_selected: 'bg-[#690003] text-white',
+              day_selected: 'bg-foreground text-white',
             }}
           />
         </div>

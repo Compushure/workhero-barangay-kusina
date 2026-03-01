@@ -27,7 +27,7 @@ function SelectTasksTable({
   return (
     <div className="bg-white rounded-2xl border-2 border-gray-300 flex-1 flex flex-col overflow-auto">
       <table className="w-full">
-        <thead className="bg-[#690003] text-white">
+        <thead className="bg-foreground text-white">
           <tr className="flex justify-baseline">
             <th className="w-12 py-4"></th>
             <th className="w-75 py-4 text-left pl-4 text-sm font-bold">TASK</th>
@@ -82,7 +82,7 @@ function SelectTasksTable({
                         e.stopPropagation();
                         toggleTask(task.id);
                       }}
-                      className="w-5 h-5 cursor-pointer accent-[#690003] disabled:cursor-not-allowed"
+                      className="w-5 h-5 cursor-pointer accent-foreground disabled:cursor-not-allowed"
                       onClick={(e) => e.stopPropagation()}
                     />
                   </td>
@@ -110,7 +110,7 @@ function SelectTasksTable({
                               e.stopPropagation();
                               updateMaxOrders(task.id, Math.max(1, Math.min(99, currentMaxOrders - 1)));
                             }}
-                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
+                            className="bg-foreground text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
                           >
                             −
                           </button>
@@ -132,7 +132,7 @@ function SelectTasksTable({
                               e.stopPropagation();
                               updateMaxOrders(task.id, Math.max(1, Math.min(99, currentMaxOrders + 1)));
                             }}
-                            className="bg-[#690003] text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
+                            className="bg-foreground text-white w-6 h-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
                           >
                             +
                           </button>

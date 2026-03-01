@@ -167,7 +167,7 @@ export function SelectTasksDialog({
       <Button
         onClick={() => setOpen(true)}
         className={`bg-zinc-50 shadow-sm/25 hover:bg-gray-100 flex items-center gap-16 min-w-50 justify-between cursor-pointer transition-all duration-500 ease-in-out
-          ${selectedTask.length === 0 ? 'text-zinc-700' : 'text-[#690003]'}`}
+          ${selectedTask.length === 0 ? 'text-zinc-700' : 'text-foreground'}`}
       >
         <span className="truncate">{buttonLabel}</span>
         <Plus className="w-4 h-4 shrink-0" />
@@ -176,7 +176,7 @@ export function SelectTasksDialog({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="bg-[#FBF4E8] max-w-full min-w-4xl max-h-[90vh] flex flex-col p-6">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[#690003] text-left">Select Tasks</DialogTitle>
+            <DialogTitle className="text-2xl text-foreground text-left">Select Tasks</DialogTitle>
           </DialogHeader>
 
           {/* Search and Filter */}
@@ -189,7 +189,7 @@ export function SelectTasksDialog({
                 value={searchTerm}
                 onChange={handleSearchChange}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full pl-10 pr-4 py-2 rounded-full text-sm bg-white shadow-sm/25 focus:outline-none focus:border-[#690003]"
+                className="w-full pl-10 pr-4 py-2 rounded-full text-sm bg-white shadow-sm/25 focus:outline-none focus:border-foreground"
               />
             </div>
             <DropdownMenu>
@@ -237,7 +237,7 @@ export function SelectTasksDialog({
             <Button
               variant="outline"
               onClick={handleClose}
-              className="px-12 border-gray-300 bg-zinc-50 hover:bg-[#690003] hover:text-zinc-50 cursor-pointer transition-all duration-500 ease-in-out"
+              className="px-12 border-gray-300 bg-zinc-50 hover:bg-foreground hover:text-zinc-50 cursor-pointer transition-all duration-500 ease-in-out"
             >
               Close
             </Button>

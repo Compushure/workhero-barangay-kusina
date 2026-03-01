@@ -62,7 +62,7 @@ export default function TaskCategoryTable({
       <div className="bg-[#FBF4E8] rounded-2xl border-2 border-gray-300 overflow-x-auto overflow-y-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-[#690003] hover:bg-[#690003]">
+            <TableRow className="bg-foreground hover:bg-foreground">
               <TableHead className="min-w-96 max-w-96 w-96 pl-6 py-4 text-left text-sm font-bold text-card">
                 TASK
               </TableHead>
@@ -127,7 +127,7 @@ export default function TaskCategoryTable({
                       variant="ghost"
                       size="icon"
                       onClick={() => onEdit(task)}
-                      className="hover:bg-[#690003]/10 hover:text-[#690003] transition-colors"
+                      className="hover:bg-foreground/10 hover:text-foreground transition-colors"
                       title="Edit task"
                     >
                       <Pencil className="size-5" />

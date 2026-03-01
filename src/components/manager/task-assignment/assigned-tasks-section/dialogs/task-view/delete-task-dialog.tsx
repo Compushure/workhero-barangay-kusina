@@ -36,7 +36,7 @@ function DeleteTaskDialog({
     <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
       <DialogContent className="bg-white">
         <DialogHeader>
-          <DialogTitle className="text-[#690003]">Delete Task?</DialogTitle>
+          <DialogTitle className="text-foreground">Delete Task?</DialogTitle>
           <DialogDescription>
             Are you sure you want to delete this task and unassign all employees? This action cannot
             be undone.
@@ -46,7 +46,7 @@ function DeleteTaskDialog({
           <Button
             onClick={handleDeleteTask}
             disabled={deleteTaskMutation.isPending}
-            className="bg-[#690003] hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
+            className="bg-foreground hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
             {deleteTaskMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
