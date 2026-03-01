@@ -2,7 +2,7 @@
 
 import { LogOutBtn } from '@/components/sidebar/logout-btn';
 import { ProfilePic } from '@/components/sidebar/profile-pic';
-import { FileText, CheckCircle, ChevronLeft, ChevronRight, SquarePen, Award, Medal } from 'lucide-react';
+import { FileText, CheckCircle, ChevronLeft, ChevronRight, SquarePen, Award, Medal, type LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import Link from 'next/link';
@@ -10,11 +10,12 @@ import { usePathname } from 'next/navigation';
 import { NavigationDisplay } from '@/components/manager/navigation-display';
 import { useNavigationStore } from '@/store/navigationStore';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { DynamicIcon } from 'lucide-react/dynamic';
 
 interface NavItem {
   key: string;
   label: string;
-  icon: React.ReactNode;
+  icon: LucideIcon; // The actual icon component
   href: string;
 }
 
@@ -27,10 +28,10 @@ function SidebarUserProfile({ isCollapsed, disabled }: { isCollapsed: boolean; d
   const isProfileLoading = isLoading || isFetching;
 
   return (
-    <>
+    <div className={`w-full flex py-3 rounded-2xl items-center ${isCollapsed ? 'justify-center' : 'pl-2 bg-[#FAA938]/25'}`}>
       <ProfilePic user={user} disabled={disabled} isLoading={isProfileLoading} />
       {!isCollapsed && (
-        <div className="min-w-0">
+        <div className="min-w-0 px-2">
           {isProfileLoading ? (
             <>
               <div className="h-4 w-20 bg-white/20 rounded animate-pulse" />
@@ -41,14 +42,14 @@ function SidebarUserProfile({ isCollapsed, disabled }: { isCollapsed: boolean; d
               {user && (
                 <>
                   <p className="font-semibold text-sm truncate">{user.name}</p>
-                  <p className="text-xs text-red-200 truncate">{user.email}</p>
+                  <p className="text-xs text-zinc-600 truncate">{user.email}</p>
                 </>
               )}
             </>
           )}
         </div>
       )}
-    </>
+    </ div>
   );
 }
 
@@ -57,31 +58,31 @@ export function Sidebar({
     {
       key: 'assignment',
       label: 'Task Assignment',
-      icon: <FileText size={20} className="shrink-0" />,
+      icon: FileText,
       href: '/manager/dashboard/task-assignment',
     },
     {
       key: 'verification',
       label: 'Task Verification',
-      icon: <CheckCircle size={20} className="shrink-0" />,
+      icon: CheckCircle,
       href: '/manager/dashboard/task-verification',
     },
     {
       key: 'editor',
       label: 'Task Editor',
-      icon: <SquarePen size={20} className="shrink-0" />,
+      icon: SquarePen,
       href: '/manager/dashboard/task-editor',
     },
     {
       key: 'badge-assignment',
       label: 'Badge Assignment',
-      icon: <Medal size={20} className="shrink-0" />,
+      icon: Medal,
       href: '/manager/dashboard/badge-assignment',
     },
     {
       key: 'badge-editor',
       label: 'Badge Editor',
-      icon: <Award size={20} className="shrink-0" />,
+      icon: Award,
       href: '/manager/dashboard/badge-editor',
     },
   ],
@@ -108,33 +109,45 @@ export function Sidebar({
 
   return (
     <aside
-      className={`bg-foreground text-white flex flex-col justify-between transition-all duration-400 ease-in-out overflow-hidden ${
-        isCollapsed ? 'w-20' : 'w-60'
+      className={`bg-[#FFF2CC] text-[#131C2A] flex flex-col justify-between transition-all duration-500 ease-in-out overflow-hidden ${
+        isCollapsed ? 'w-16' : 'w-55'
       }`}
     >
       {/* Logo Section */}
-      <div className="p-6 border-b border-red-900">
-        <div className={`flex items-center justify-between mb-2 ${isCollapsed ? 'gap-0' : 'gap-2'}`}>
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="w-full p-1 hover:bg-red-900 cursor-pointer rounded-sm transition-colors flex items-center justify-between"
-            aria-label="Toggle sidebar"
-          >
+      <div className="px-3 py-6 mt-6">
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={`group w-full h-full p-1 hover:bg-zinc-50 cursor-pointer rounded-sm transition-colors ${
+            isCollapsed ? 'flex justify-center items-center' : 'flex flex-col items-baseline'
+          }`}
+          aria-label="Toggle sidebar"
+        >
+          <div className={`flex items-center gap-2 w-full ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-white rounded flex items-center justify-center shrink-0">
-                <span className="text-sm font-bold text-[#690003]">W</span>
+              <div className={`bg-white flex items-center justify-center shrink-0 ${
+                isCollapsed ? 'text-lg size-8 rounded-sm' : 'text-sm size-6 rounded'
+              }`}>
+                <span className={`font-bold text-[#131C2A] group-hover:text-[#f47812] transition-all duration-400 ease-in-out`}>
+                  W
+                </span>
               </div>
-              {!isCollapsed && <h1 className="text-2xl font-bold whitespace-nowrap">WorkHero</h1>}
+              {!isCollapsed && 
+              <div className='flex flex-col items-baseline'>
+                <h1 className="text-2xl font-bold whitespace-nowrap transition-all duration-400 ease-in-out">WorkHero</h1>
+                <p className="block text-nowrap text-xs text-[#f47812] pl-0.5 transition-all duration-400 ease-in-out">Barangay Kusina</p>
+              </div>
+              }
             </div>
-            {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          </button>
-        </div>
-        {!isCollapsed && <p className="text-sm text-red-200">Barangay Kusina</p>}
+            {!isCollapsed && (
+              <ChevronLeft size={20} className='group-hover:text-[#f47812] transition-all duration-400 ease-in-out'/>
+            )}
+          </div>
+        </button>
       </div>
 
       {/* Navigation */}
       <nav
-        className={`flex-1 px-4 py-6 space-y-3 ${
+        className={`flex-1 pb-6 border-t border-[#f47812]/50 ${
           isCollapsed
             ? 'overflow-hidden'
             : 'overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
@@ -144,6 +157,10 @@ export function Sidebar({
           const isActive = pathname === item.href;
           const isNavigatingItem = pendingHref === item.href;
           const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
+
+          const NavIcon = ({ icon: Icon }: { icon: any}) => (
+            <Icon strokeWidth={1.75} className={`shrink-0 text-[#f47812]  ${isActive ? 'group-hover:text-[#f47812]' : 'group-hover:text-zinc-50 '} `} />
+          );
           return (
             <Tooltip key={item.key}>
               <TooltipTrigger asChild>
@@ -156,12 +173,13 @@ export function Sidebar({
                     }
                   }}
                   aria-disabled={isDisabled}
-                  className={`w-full flex items-center justify-start gap-3 py-3 cursor-pointer rounded-full font-medium hover:transition-all duration-400 ease-in-out ${
-                    isCollapsed ? 'px-3.5' : 'px-4'
-                  } ${isActive ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'} ${
-                    isDisabled ? 'opacity-50 pointer-events-none' : ''
-                  }`}
+                  className={`group w-full flex items-center gap-3 py-4.5 cursor-pointer font-medium transition-colors duration-400 ease-in-out border-b border-[#f47812]/50
+                    ${isCollapsed ? 'px-3 justify-center' : 'px-5 justify-start'} 
+                    ${isActive ? 'text-[#f47812] bg-zinc-50' : 'text-[#131C2A] hover:bg-linear-to-b hover:from-[#FAA938]/80 hover:to-[#f47812]/80 hover:text-zinc-50 hover:shadow-sm'} 
+                    ${isDisabled ? 'opacity-50 pointer-events-none' : ''}
+                  `}
                 >
+                    {/* ${isActive ? 'text-[#f47812] bg-zinc-50' : 'text-[#131C2A] hover:bg-[#f47812]/80 hover:text-zinc-50 hover:shadow-sm'}  */}
                   {isCollapsed ? (
                     isNavigatingItem ? (
                       <NavigationDisplay
@@ -170,12 +188,12 @@ export function Sidebar({
                         iconClassName="size-5 animate-spin text-red-200"
                       />
                     ) : (
-                      item.icon
+                      <NavIcon icon={item.icon}/>
                     )
                   ) : (
-                    item.icon
+                    <NavIcon icon={item.icon}/>
                   )}
-                  {!isCollapsed && <span>{item.label}</span>}
+                  {!isCollapsed && <span className='block text-nowrap'>{item.label}</span>}
                   {!isCollapsed && (
                     <NavigationDisplay
                       isNavigating={isNavigatingItem}
@@ -185,7 +203,7 @@ export function Sidebar({
                   )}
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={8}>
+              <TooltipContent side="right" sideOffset={8} className='text-[#131C2A] shadow-2xl'>
                 {item.label}
               </TooltipContent>
             </Tooltip>
@@ -195,13 +213,13 @@ export function Sidebar({
 
       {/* User Profile Section */}
       <div
-        className={`border-t border-red-900 ${
-          isCollapsed ? 'flex justify-center items-center h-24' : 'p-4'
+        className={`${
+          isCollapsed ? 'flex justify-center items-center h-24' : 'px-3 py-4'
         }`}
       >
         <div
-          className={`bg-white/10 rounded-full flex items-center ${
-            isCollapsed ? 'w-16 h-16 justify-center' : 'p-3 gap-3 mb-4'
+          className={`bg-white/10 rounded-full flex items-center w-full ${
+            isCollapsed ? 'w-16 h-16 justify-center' : 'gap-3 mb-4'
           }`}
         >
           <SidebarUserProfile isCollapsed={isCollapsed} disabled={isUiDisabled} />

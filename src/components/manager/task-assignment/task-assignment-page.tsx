@@ -7,7 +7,7 @@ import { CurrentAssignedTasks } from './assigned-tasks-section/current-assigned-
 export function TaskAssignmentPage() {
   return (
     <TaskAssignmentProvider>
-      <main className="w-full min-h-screen bg-zinc-50 p-10">
+      <main className="w-full min-h-screen bg-zinc-100 p-10">
         <div className="mx-auto w-full max-w-500 space-y-8">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-foreground">Task Assignment</h1>

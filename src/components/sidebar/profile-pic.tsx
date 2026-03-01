@@ -57,7 +57,7 @@ export function ProfilePic({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         disabled={isPending || disabled || isLoading}
-        className="relative w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 cursor-pointer transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md disabled:hover:shadow-none"
+        className="relative size-12 bg-white border-4 border-[#FFAB57]/85 rounded-full flex items-center justify-center shrink-0 cursor-pointer transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md disabled:hover:shadow-none"
       >
         {isLoading ? (
           <div className="h-full w-full rounded-full bg-gray-200 animate-pulse" />
