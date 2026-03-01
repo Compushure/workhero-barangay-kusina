@@ -225,10 +225,10 @@ export async function createRedemptionRequestAction(
       return { error: 'Quantity must be at least 1' };
     }
 
-    // Fetch user's current points and deducted_points (admin client: User table not readable by authenticated)
+    // Fetch user's current points (admin client: User table not readable by authenticated)
     const { data: userData, error: userDataError } = await supabaseAdmin
       .from('User')
-      .select('points, deducted_points')
+      .select('points')
       .eq('id', user.id)
       .single();
 
@@ -237,19 +237,17 @@ export async function createRedemptionRequestAction(
     }
 
     const userPoints = userData.points || 0;
-    const currentDeductedPoints = userData.deducted_points || 0;
     const totalCost = reward.points_cost * quantity;
 
     if (userPoints < totalCost) {
       return { error: `Insufficient points. You need ${totalCost} points but have ${userPoints}` };
     }
 
-    // Deduct points immediately and add to deducted_points (admin client: User table not writable by authenticated)
+    // Deduct points immediately (admin client: User table not writable by authenticated)
     const { error: updatePointsError } = await supabaseAdmin
       .from('User')
       .update({
         points: userPoints - totalCost,
-        deducted_points: currentDeductedPoints + totalCost,
       })
       .eq('id', user.id);
 
@@ -273,7 +271,6 @@ export async function createRedemptionRequestAction(
         .from('User')
         .update({
           points: userPoints,
-          deducted_points: currentDeductedPoints,
         })
         .eq('id', user.id);
       return { error: `Failed to create redemption request: ${insertError.message}` };
@@ -286,5 +283,109 @@ export async function createRedemptionRequestAction(
       return { error: error.message };
     }
     return { error: 'An unexpected error occurred while creating the request' };
+  }
+}
+
+/**
+ * Cancel current user's pending redemption request
+ * Employee action - allows a user to cancel their own pending request and restores deducted points
+ * @param requestId - The ID of the redemption request to cancel
+ * @returns ServerActionResponse indicating success or failure
+ */
+export async function cancelMyRedemptionRequestAction(
+  requestId: string
+): Promise<ServerActionResponse<void>> {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { error: 'Unauthorized: User not authenticated' };
+    }
+
+    const { data: request, error: requestError } = await supabase
+      .from('RewardRequest')
+      .select(
+        `
+        id,
+        user_id,
+        status,
+        quantity,
+        Reward!RewardRequest_reward_id_fkey (
+          points_cost
+        )
+      `
+      )
+      .eq('id', requestId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (requestError || !request) {
+      return { error: 'Pending request not found' };
+    }
+
+    if (request.status !== 'pending') {
+      return { error: 'Only pending requests can be cancelled' };
+    }
+
+    const quantity = request.quantity || 1;
+    const rewardData = Array.isArray(request.Reward) ? request.Reward[0] : request.Reward;
+    const pointsCost = rewardData?.points_cost || 0;
+    const pointsToRestore = pointsCost * quantity;
+
+    const { data: userData, error: userDataError } = await supabaseAdmin
+      .from('User')
+      .select('points')
+      .eq('id', user.id)
+      .single();
+
+    if (userDataError || !userData) {
+      return { error: 'Failed to fetch user data' };
+    }
+
+    const { error: cancelRequestError } = await supabase
+      .from('RewardRequest')
+      .update({
+        status: 'rejected',
+        remarks: 'Cancelled by employee',
+      })
+      .eq('id', requestId)
+      .eq('user_id', user.id)
+      .eq('status', 'pending');
+
+    if (cancelRequestError) {
+      return { error: `Failed to cancel request: ${cancelRequestError.message}` };
+    }
+
+    const currentPoints = userData.points || 0;
+
+    const { error: restorePointsError } = await supabaseAdmin
+      .from('User')
+      .update({
+        points: currentPoints + pointsToRestore,
+      })
+      .eq('id', user.id);
+
+    if (restorePointsError) {
+      await supabase
+        .from('RewardRequest')
+        .update({ status: 'pending', remarks: null })
+        .eq('id', requestId)
+        .eq('user_id', user.id);
+
+      return { error: `Failed to restore points. Cancellation reverted.` };
+    }
+
+    return { error: null };
+  } catch (error) {
+    console.error('Error in cancelMyRedemptionRequestAction:', error);
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'An unexpected error occurred while cancelling the request' };
   }
 }

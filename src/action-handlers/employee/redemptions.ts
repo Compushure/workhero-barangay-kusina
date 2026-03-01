@@ -5,12 +5,18 @@
  */
 
 import {
+  cancelMyRedemptionRequestAction,
   createRedemptionRequestAction,
   getMyRedemptionRequestsAction,
 } from '@/actions/employee/redemptions';
 import { safeAction } from '@/lib/utils/safe-action';
 import { toast } from 'sonner';
 import type { RedemptionRequest } from '@/types';
+
+const TOAST_MESSAGES = {
+  itemRequested: 'Item Requested',
+  itemRequestCancelled: 'Item request Cancelled',
+} as const;
 
 export async function handleGetMyRedemptionRequestsAction(
   status?: string
@@ -36,6 +42,18 @@ export async function handleCreateRedemptionRequestAction(
     return false;
   }
 
-  toast.success('Redemption request submitted successfully');
+  toast.success(TOAST_MESSAGES.itemRequested);
+  return true;
+}
+
+export async function handleCancelMyRedemptionRequestAction(requestId: string): Promise<boolean> {
+  const result = await safeAction(() => cancelMyRedemptionRequestAction(requestId));
+
+  if (!result.success || result.data?.error) {
+    toast.error(`Failed to cancel redemption request: ${result.error || result.data?.error}`);
+    return false;
+  }
+
+  toast.success(TOAST_MESSAGES.itemRequestCancelled);
   return true;
 }
