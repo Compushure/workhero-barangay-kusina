@@ -3,10 +3,6 @@
 import { createClient } from '@/lib/supabase/server';
 import type {
   ServerActionResponse,
-  User,
-  AddUserInput,
-  EditUserInput,
-  UserQueryParams,
   VerificationRequest,
   PaginatedResponse,
 } from '@/types';
@@ -156,7 +152,10 @@ export async function approveTaskAction(
       status: 'approved',
       remark: reqmark,            
       completed_orders: newCompleted,
+<<<<<<< HEAD
       pending_orders: 0,
+=======
+>>>>>>> 1ce3388278cd229ea5425fd874bcadc522b07990
     })
     .eq('id', kpitask_id);
 
@@ -164,6 +163,25 @@ export async function approveTaskAction(
     return { error: 'Failed to approve task: ' + updateError.message, data: undefined };
   }
 
+<<<<<<< HEAD
+=======
+
+  // if ((taskData.max_orders >= taskData.completed_orders + 1) && (taskData.pending_orders <= taskData.max_orders - taskData.completed_orders)) {
+  //   const { error: updateError } = await supabase
+  //     .from('KPITask')
+  //     .update({ 
+  //       status: 'approved', 
+  //       remark: reqmark ,
+  //       completed_orders: taskData.completed_orders + taskData.pending_orders, 
+  //     })
+  //     .eq('id', kpitask_id);
+
+  //   if (updateError) {
+  //     return { error: 'Failed to approve task: ' + updateError.message, data: undefined };
+  //   }
+  // } 
+
+>>>>>>> 1ce3388278cd229ea5425fd874bcadc522b07990
   const { data: updatedTask, error: fetchError } = await supabase
     .from('task_info_view')
     .select('*')

@@ -14,25 +14,49 @@ import { Badge } from '@/components/ui/badge';
 
 export type StockFilter = 'all' | 'in-stock' | 'out-of-stock';
 export type VisibilityFilter = 'all' | 'visible' | 'hidden';
+export type MonthFilter = 'all' | number;
+
+const monthOptions = [
+  { value: 1, label: 'January' },
+  { value: 2, label: 'February' },
+  { value: 3, label: 'March' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'May' },
+  { value: 6, label: 'June' },
+  { value: 7, label: 'July' },
+  { value: 8, label: 'August' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'October' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'December' },
+];
 
 interface MercadoFilterToggleProps {
   stockFilter: StockFilter;
   visibilityFilter: VisibilityFilter;
+  monthFilter: MonthFilter;
   onStockFilterChange: (value: StockFilter) => void;
   onVisibilityFilterChange: (value: VisibilityFilter) => void;
+  onMonthFilterChange: (value: MonthFilter) => void;
 }
 
 export function MercadoFilterToggle({
   stockFilter,
   visibilityFilter,
+  monthFilter,
   onStockFilterChange,
   onVisibilityFilterChange,
+  onMonthFilterChange,
 }: MercadoFilterToggleProps) {
-  const activeFilterCount = (stockFilter !== 'all' ? 1 : 0) + (visibilityFilter !== 'all' ? 1 : 0);
+  const activeFilterCount =
+    (stockFilter !== 'all' ? 1 : 0) +
+    (visibilityFilter !== 'all' ? 1 : 0) +
+    (monthFilter !== 'all' ? 1 : 0);
 
   const clearFilters = () => {
     onStockFilterChange('all');
     onVisibilityFilterChange('all');
+    onMonthFilterChange('all');
   };
 
   return (
@@ -52,7 +76,7 @@ export function MercadoFilterToggle({
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align="end" className="w-64 max-h-80 overflow-y-auto">
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Stock Status
           </DropdownMenuLabel>
@@ -94,6 +118,34 @@ export function MercadoFilterToggle({
             <EyeOff className="mr-2 h-4 w-4 text-gray-500" />
             Hidden
           </DropdownMenuCheckboxItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuLabel className="text-xs text-muted-foreground">
+            Available Month
+          </DropdownMenuLabel>
+          <DropdownMenuCheckboxItem
+            checked={monthFilter === 'all'}
+            onCheckedChange={(checked) => {
+              if (checked) onMonthFilterChange('all');
+            }}
+            className="cursor-pointer"
+          >
+            All Months
+          </DropdownMenuCheckboxItem>
+          {monthOptions.map((month) => (
+            <DropdownMenuCheckboxItem
+              key={month.value}
+              checked={monthFilter === month.value}
+              onCheckedChange={(checked) => {
+                if (checked) onMonthFilterChange(month.value);
+                else onMonthFilterChange('all');
+              }}
+              className="cursor-pointer"
+            >
+              {month.label}
+            </DropdownMenuCheckboxItem>
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
 

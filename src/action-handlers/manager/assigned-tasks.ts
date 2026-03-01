@@ -43,6 +43,33 @@ export async function handleFetchCurrentAssignedTasksPaginated(
 }
 
 /**
+ * ✅ Handler for paginated fetch of current assigned tasks for EMPLOYEE view
+ */
+export async function handleFetchCurrentAssignedEmployeesPaginated(
+  page: number = 1,
+  pageSize: number = 7,
+  sortBy: string = 'recently added',
+  searchTerm: string = ''
+): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number }> {
+  const result = await safeAction<
+    ServerActionResponse<{ data: AssignedTask[]; count: number; totalPages: number; taskCount: number }>
+  >(() => fetchCurrentAssignedEmployeesPaginated(page, pageSize, sortBy, searchTerm));
+
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error);
+    return { tasks: [], count: 0, totalPages: 0, taskCount: 0 };
+  }
+
+  const payload = result.data?.data;
+  return {
+    tasks: payload?.data ?? [],
+    count: payload?.count ?? 0,
+    totalPages: payload?.totalPages ?? 0,
+    taskCount: payload?.taskCount ?? 0,
+  };
+}
+
+/**
  * Clear all tasks
  */
 export async function handleClearAssignedTasks(): Promise<boolean> {
@@ -87,32 +114,6 @@ export async function handleDeleteTask(taskId: string): Promise<boolean> {
   return true;
 }
 
-/**
- * ✅ Handler for paginated fetch of current assigned tasks for EMPLOYEE view
- */
-export async function handleFetchCurrentAssignedEmployeesPaginated(
-  page: number = 1,
-  pageSize: number = 4,
-  sortBy: string = 'recently added',
-  searchTerm: string = ''
-): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number }> {
-  const result = await safeAction<
-    ServerActionResponse<{ data: AssignedTask[]; count: number; totalPages: number; taskCount: number }>
-  >(() => fetchCurrentAssignedEmployeesPaginated(page, pageSize, sortBy, searchTerm));
-
-  if (!result.success || result.data?.error) {
-    toast.error(result.error || result.data?.error);
-    return { tasks: [], count: 0, totalPages: 0, taskCount: 0 };
-  }
-
-  const payload = result.data?.data;
-  return {
-    tasks: payload?.data ?? [],
-    count: payload?.count ?? 0,
-    totalPages: payload?.totalPages ?? 0,
-    taskCount: payload?.taskCount ?? 0,
-  };
-}
 
 /**
  * Update task assignment
