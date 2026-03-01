@@ -8,29 +8,15 @@ import {
   RedemptionRequest,
 } from '@/types';
 
-// Helper function to get public URL with cache busting
 function getRewardImageUrl(supabase: any, rewardId: string): string {
   const baseUrl = supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`)
     .data.publicUrl;
-  // Add cache-busting query parameter to force fresh image on every fetch
   return `${baseUrl}?t=${Date.now()}`;
 }
-
-// ============================================
-// Employee Redemption Actions
-// ============================================
-
-/**
- * Get all available rewards
- * Employee view - browses available rewards for redemption
- * @returns ServerActionResponse with array of rewards
- */
 export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>> {
   try {
-    // Get Supabase client
     const supabase = await createClient();
 
-    // Fetch all rewards
     const { data, error } = await supabase
       .from('Reward')
       .select('*')
@@ -41,13 +27,11 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
       return { error: `Failed to fetch items: ${error.message}` };
     }
 
-    // Fetch approved redemption counts for each reward
     const { data: redemptionData } = await supabase
       .from('RewardRequest')
       .select('reward_id, quantity')
       .eq('status', 'approved');
 
-    // Calculate total redeemed quantity per reward
     const redeemedCounts = new Map<string, number>();
     if (redemptionData) {
       redemptionData.forEach((req: any) => {
@@ -56,7 +40,6 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
       });
     }
 
-    // Transform database response to match Reward type
     const rewards: Reward[] = (data || []).map((item) => {
       const redeemedCount = redeemedCounts.get(item.id) || 0;
       const hasQuantityLimit = item.quantity !== null && item.quantity !== undefined;
@@ -73,7 +56,6 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
         createdAt: item.created_at,
         createdBy: item.created_by,
         imageUrl: getRewardImageUrl(supabase, item.id),
-        // Add computed properties for stock tracking
         redeemedCount,
         isOutOfStock: hasQuantityLimit && item.quantity <= 0,
       };
@@ -89,19 +71,12 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
   }
 }
 
-/**
- * Get current user's redemption requests
- * Employee view - views their own redemption history
- * @param status - Optional filter by status ('pending' | 'approved' | 'rejected')
- * @returns ServerActionResponse with array of user's redemption requests
- */
 export async function getMyRedemptionRequestsAction(
   status?: string
 ): Promise<ServerActionResponse<RedemptionRequest[]>> {
   try {
     const supabase = await createClient();
 
-    // Get current authenticated user
     const {
       data: { user },
       error: userError,
@@ -111,7 +86,6 @@ export async function getMyRedemptionRequestsAction(
       return { error: 'Unauthorized: User not authenticated' };
     }
 
-    // Build query with joins, filtered by current user
     let query = supabase
       .from('RewardRequest')
       .select(
@@ -137,7 +111,6 @@ export async function getMyRedemptionRequestsAction(
       .eq('user_id', user.id)
       .order('requested_at', { ascending: false });
 
-    // Apply status filter if provided
     if (status && status !== 'all') {
       query = query.eq('status', status);
     }
@@ -149,7 +122,6 @@ export async function getMyRedemptionRequestsAction(
       return { error: `Failed to fetch your redemption requests: ${error.message}` };
     }
 
-    // Transform database response to match RedemptionRequest type
     const requests: RedemptionRequest[] = (data || []).map((item: any) => ({
       id: item.id,
       userId: item.user_id,
@@ -176,14 +148,6 @@ export async function getMyRedemptionRequestsAction(
   }
 }
 
-/**
- * Create a new redemption request
- * Employee action - submits a request to redeem a reward with points
- * Validates reward availability and user points before creating
- * @param rewardId - The ID of the reward to redeem
- * @param quantity - The quantity of items to redeem
- * @returns ServerActionResponse indicating success or failure
- */
 export async function createRedemptionRequestAction(
   rewardId: string,
   quantity: number = 1
@@ -191,7 +155,6 @@ export async function createRedemptionRequestAction(
   try {
     const supabase = await createClient();
 
-    // Get current authenticated user
     const {
       data: { user },
       error: userError,
@@ -201,7 +164,6 @@ export async function createRedemptionRequestAction(
       return { error: 'Unauthorized: User not authenticated' };
     }
 
-    // Fetch reward to validate it exists and is active
     const { data: reward, error: rewardError } = await supabase
       .from('Reward')
       .select('id, name, points_cost, is_active, redeeming_limit')
@@ -216,7 +178,6 @@ export async function createRedemptionRequestAction(
       return { error: 'This reward is no longer available' };
     }
 
-    // Validate quantity against redeeming limit
     if (reward.redeeming_limit && quantity > reward.redeeming_limit) {
       return { error: `You can only redeem up to ${reward.redeeming_limit} of this item` };
     }
@@ -225,7 +186,6 @@ export async function createRedemptionRequestAction(
       return { error: 'Quantity must be at least 1' };
     }
 
-    // Fetch user's current points (admin client: User table not readable by authenticated)
     const { data: userData, error: userDataError } = await supabaseAdmin
       .from('User')
       .select('points')
@@ -243,7 +203,7 @@ export async function createRedemptionRequestAction(
       return { error: `Insufficient points. You need ${totalCost} points but have ${userPoints}` };
     }
 
-    // Deduct points immediately (admin client: User table not writable by authenticated)
+    //logic for order item points: deduct total cost on request
     const { error: updatePointsError } = await supabaseAdmin
       .from('User')
       .update({
@@ -266,7 +226,6 @@ export async function createRedemptionRequestAction(
 
     if (insertError) {
       console.error('Error creating redemption request:', insertError);
-      // Rollback points deduction
       await supabaseAdmin
         .from('User')
         .update({
@@ -286,12 +245,6 @@ export async function createRedemptionRequestAction(
   }
 }
 
-/**
- * Cancel current user's pending redemption request
- * Employee action - allows a user to cancel their own pending request and restores deducted points
- * @param requestId - The ID of the redemption request to cancel
- * @returns ServerActionResponse indicating success or failure
- */
 export async function cancelMyRedemptionRequestAction(
   requestId: string
 ): Promise<ServerActionResponse<void>> {
@@ -363,6 +316,7 @@ export async function cancelMyRedemptionRequestAction(
 
     const currentPoints = userData.points || 0;
 
+    //logic for cancel item points: refund full item cost
     const { error: restorePointsError } = await supabaseAdmin
       .from('User')
       .update({

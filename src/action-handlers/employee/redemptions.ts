@@ -1,8 +1,10 @@
+
 /**
  * Employee Redemption Action Handlers
  * Client-side wrappers for employee redemption request creation.
  * Handles UI feedback (toasts) for redemption submissions.
  */
+
 
 import {
   cancelMyRedemptionRequestAction,
@@ -21,6 +23,7 @@ const TOAST_MESSAGES = {
 export async function handleGetMyRedemptionRequestsAction(
   status?: string
 ): Promise<RedemptionRequest[]> {
+  //logic for fetch my requests: wrap server action with safe error handling
   const result = await safeAction(() => getMyRedemptionRequestsAction(status));
 
   if (!result.success || result.data?.error) {
@@ -30,11 +33,11 @@ export async function handleGetMyRedemptionRequestsAction(
   return result.data?.data ?? [];
 }
 
-// Action handler to create a new redemption request
 export async function handleCreateRedemptionRequestAction(
   rewardId: string,
   quantity: number
 ): Promise<boolean> {
+  //logic for item request submit: create pending redemption
   const result = await safeAction(() => createRedemptionRequestAction(rewardId, quantity));
 
   if (!result.success || result.data?.error) {
@@ -47,6 +50,7 @@ export async function handleCreateRedemptionRequestAction(
 }
 
 export async function handleCancelMyRedemptionRequestAction(requestId: string): Promise<boolean> {
+  //logic for cancel request submit: cancel pending redemption
   const result = await safeAction(() => cancelMyRedemptionRequestAction(requestId));
 
   if (!result.success || result.data?.error) {
