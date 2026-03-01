@@ -125,8 +125,8 @@ export function CurrentAssignedTasks() {
       </div>
 
       {/* View Cards Number Display & Controls: Search, Sort, Clear */}
-      <section className="flex items-center justify-between">
-        <div className="flex gap-4 text-lg font-bold text-[#690003] pl-2 w-3/10">
+      <section className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex gap-4 text-lg font-bold text-[#690003] pl-2 shrink-0">
           <h5 className="">
             Tasks{' '}
             <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
@@ -141,9 +141,9 @@ export function CurrentAssignedTasks() {
           </h5>
         </div>
 
-        <div className="flex gap-3 justify-end items-center w-7/10">
+        <div className="flex gap-3 justify-end items-center flex-1 min-w-0">
           {/* Search */}
-          <div className="relative w-2/5">
+          <div className="relative flex-1 min-w-48">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"

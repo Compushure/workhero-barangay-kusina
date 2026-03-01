@@ -85,7 +85,7 @@ export default function BadgeTable({
 
   return (
     <>
-      <div className="bg-[#FBF4E8] rounded-2xl border-2 border-gray-300 overflow-hidden">
+      <div className="bg-[#FBF4E8] rounded-2xl border-2 border-gray-300 overflow-x-auto overflow-y-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-[#690003] hover:bg-[#690003]">

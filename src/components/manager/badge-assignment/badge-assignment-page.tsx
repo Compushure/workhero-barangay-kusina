@@ -188,7 +188,7 @@ export default function BadgeAssignmentPage() {
 
   return (
     <main className="w-full min-h-screen bg-white p-10">
-      <div className="mx-auto min-w-250 max-w-400 space-y-8">
+      <div className="mx-auto w-full max-w-500 space-y-8">
         {/* Title */}
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-[#690003]">Badge Assignment</h1>
