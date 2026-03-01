@@ -152,10 +152,6 @@ export async function approveTaskAction(
       status: 'approved',
       remark: reqmark,            
       completed_orders: newCompleted,
-<<<<<<< HEAD
-      pending_orders: 0,
-=======
->>>>>>> 1ce3388278cd229ea5425fd874bcadc522b07990
     })
     .eq('id', kpitask_id);
 
@@ -163,8 +159,6 @@ export async function approveTaskAction(
     return { error: 'Failed to approve task: ' + updateError.message, data: undefined };
   }
 
-<<<<<<< HEAD
-=======
 
   // if ((taskData.max_orders >= taskData.completed_orders + 1) && (taskData.pending_orders <= taskData.max_orders - taskData.completed_orders)) {
   //   const { error: updateError } = await supabase
@@ -181,7 +175,6 @@ export async function approveTaskAction(
   //   }
   // } 
 
->>>>>>> 1ce3388278cd229ea5425fd874bcadc522b07990
   const { data: updatedTask, error: fetchError } = await supabase
     .from('task_info_view')
     .select('*')
