@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ImageIcon, X, Calendar } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -50,9 +50,13 @@ function formatMonth(month: number | undefined): string {
 }
 
 export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModalProps) {
-  if (!item) return null;
-
   const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [item?.imageUrl]);
+
+  if (!item) return null;
 
   // Check if item is scheduled for future
   const isScheduled = item.availableDate && !isItemAvailableNow(item.availableDate);

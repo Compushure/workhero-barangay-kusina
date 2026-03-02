@@ -15,6 +15,9 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
+const MAX_REWARD_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_REWARD_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
 interface AddItemsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -71,6 +74,7 @@ export function AddItemsModal({
   const [redeemingLimit, setRedeemingLimit] = useState('');
   const [availableMonth, setAvailableMonth] = useState<string>('none'); // 'none' means no month selected
   const [isLoading, setIsLoading] = useState(false);
+  const [iconValidationError, setIconValidationError] = useState<string>('');
 
   // Populate form when editing
   useEffect(() => {
@@ -98,6 +102,7 @@ export function AddItemsModal({
       setIconPreview('');
       setExistingImageUrl('');
       setExistingImageError(false);
+      setIconValidationError('');
     }
   }, [editingItem, open]);
 
@@ -159,6 +164,23 @@ export function AddItemsModal({
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!ALLOWED_REWARD_IMAGE_TYPES.includes(file.type)) {
+        setIconFile(null);
+        setIconPreview('');
+        setIconValidationError('Only JPEG, PNG, and WebP images are allowed');
+        e.target.value = '';
+        return;
+      }
+
+      if (file.size > MAX_REWARD_IMAGE_SIZE_BYTES) {
+        setIconFile(null);
+        setIconPreview('');
+        setIconValidationError('Image size must be less than 5MB');
+        e.target.value = '';
+        return;
+      }
+
+      setIconValidationError('');
       setIconFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -169,6 +191,8 @@ export function AddItemsModal({
   };
 
   const handleSave = async () => {
+    if (iconValidationError) return;
+
     if (itemName && itemCost && hasChanges) {
       setIsLoading(true);
       try {
@@ -204,6 +228,7 @@ export function AddItemsModal({
     setItemCost('');
     setAvailableMonth('none');
     setIsLoading(false);
+    setIconValidationError('');
     onOpenChange(false);
   };
 
@@ -242,6 +267,7 @@ export function AddItemsModal({
     !redeemingLimit ||
     isRedeemingLimitInvalid() ||
     hasCharacterLimitErrors ||
+    !!iconValidationError ||
     isLoading ||
     !hasChanges;
 
@@ -314,6 +340,7 @@ export function AddItemsModal({
               onChange={handleIconChange}
               className="hidden"
             />
+            {iconValidationError && <p className="text-xs text-red-600">{iconValidationError}</p>}
           </div>
 
           {/* Form Fields */}

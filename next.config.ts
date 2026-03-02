@@ -9,6 +9,11 @@ const supabaseHost = supabaseUrl ? new URL(supabaseUrl).hostname : null;
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '6mb',
+    },
+  },
   images: supabaseHost
     ? {
         remotePatterns: [

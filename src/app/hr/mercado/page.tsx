@@ -19,6 +19,7 @@ import { MercadoSkeleton } from '@/components/hr/mercado/mercado-skeleton';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import type { Reward } from '@/types';
 import { useGetRewards } from '@/hooks/tanstack/queries/rewardQueries';
+import { useSidebarContentArea } from '@/hooks/useSidebarContentArea';
 import {
   useAddReward,
   useEditReward,
@@ -62,11 +63,6 @@ interface ViewableMercadoItem {
   availableMonth?: number;
   availableDate?: string | Date | null;
 }
-
-const getRewardCreatedAt = (reward: Reward): string | undefined => {
-  if (!reward.createdAt) return undefined;
-  return reward.createdAt instanceof Date ? reward.createdAt.toISOString() : reward.createdAt;
-};
 
 const mapRewardToEditableItem = (reward: Reward): EditableMercadoItem => ({
   id: reward.id,
@@ -155,6 +151,7 @@ export default function MercadoPage() {
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [viewingItemId, setViewingItemId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const { contentAreaStyle } = useSidebarContentArea();
 
   const debouncedSearch = useDebounce(search, 300);
   const { data: allRewards = [], isLoading } = useGetRewards();
@@ -238,8 +235,6 @@ export default function MercadoPage() {
   const deleteReward = useDeleteReward();
   const hideReward = useHideReward();
   const uploadRewardPicture = useUploadRewardPicture();
-
-  const isProcessing = deleteReward.isPending || hideReward.isPending;
 
   const handleAdd = useCallback(() => {
     setEditingItemId(null);
@@ -359,7 +354,7 @@ export default function MercadoPage() {
   );
 
   return (
-    <main className="min-h-screen bg-[#fff8f5] p-8">
+    <main className="min-h-screen bg-[#fff8f5] p-8 pb-28">
       <div className="mx-auto max-w-7xl space-y-8">
         <MercadoHeader
           title="Mercado Manager"
@@ -431,19 +426,19 @@ export default function MercadoPage() {
                 </div>
               )}
             </div>
-
-            {totalPages > 1 && (
-              <div className="pb-4">
-                <Pagination
-                  totalPages={totalPages}
-                  currentPage={currentPage}
-                  onPageChange={setCurrentPage}
-                />
-              </div>
-            )}
           </>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="fixed bottom-6 z-40 flex justify-center" style={contentAreaStyle}>
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
 
       <AddItemsModal
         open={isAddModalOpen}

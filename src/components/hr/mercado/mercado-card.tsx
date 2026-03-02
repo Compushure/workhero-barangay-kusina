@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, memo, useCallback } from 'react';
+import { useState, useMemo, memo, useCallback, useEffect } from 'react';
 import { Pencil, ImageIcon, EyeOff, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,6 +56,10 @@ export const MercadoCard = memo(function MercadoCard({
 }: MercadoCardProps) {
   const [hideDialogOpen, setHideDialogOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [item.imageUrl]);
 
   // Memoize formatted price
   const formattedPrice = useMemo(() => formatNumber(item.price), [item.price]);

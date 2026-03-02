@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Check, X, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useSidebarContentArea } from '@/hooks/useSidebarContentArea';
 import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
@@ -38,6 +39,7 @@ export function RedemptionTable({
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [requestImageError, setRequestImageError] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const { contentAreaStyle } = useSidebarContentArea();
   const itemsPerPage = 8;
 
   // Pagination logic
@@ -50,7 +52,7 @@ export function RedemptionTable({
   );
 
   // Reset to page 1 when data changes and current page is invalid
-  useMemo(() => {
+  useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(1);
     }
@@ -228,7 +230,7 @@ export function RedemptionTable({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="bg-[#fff8f5] py-4">
+        <div className="fixed bottom-6 z-40 flex justify-center" style={contentAreaStyle}>
           <Pagination
             totalPages={totalPages}
             currentPage={currentPage}

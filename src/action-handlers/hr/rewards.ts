@@ -17,6 +17,8 @@ import { safeAction } from '@/lib/utils/safe-action';
 import { toast } from 'sonner';
 import { AddRewardInput, EditRewardInput, Reward } from '@/types';
 
+const MAX_REWARD_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+
 export async function handleGetRewardsAction(): Promise<Reward[]> {
   const result = await safeAction(() => getRewardsAction());
 
@@ -103,6 +105,11 @@ export async function handleUploadRewardPicture(
   file: File,
   rewardName?: string
 ): Promise<string | null> {
+  if (file.size > MAX_REWARD_IMAGE_SIZE_BYTES) {
+    toast.error('Image size must be less than 5MB');
+    return null;
+  }
+
   const result = await safeAction(() => uploadRewardPicture(rewardId, file));
 
   if (!result.success) {
