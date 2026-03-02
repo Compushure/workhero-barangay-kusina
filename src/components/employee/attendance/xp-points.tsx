@@ -13,10 +13,7 @@ export default function XPProgress() {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      const [xp, pts] = await Promise.all([
-        handleFetchEmployeeXP(),
-        handleFetchEmployeePoints(),
-      ]);
+      const [xp, pts] = await Promise.all([handleFetchEmployeeXP(), handleFetchEmployeePoints()]);
       setXpData(xp);
       setPointsData(pts);
       setLoading(false);
@@ -31,7 +28,7 @@ export default function XPProgress() {
 
   const currentXP = xpData?.currentXP ?? 0;
   const maxXp = 100; // matches screenshot
-  const totalPts = pointsData ? pointsData.points - pointsData.deductedPoints : 0;
+  const totalPts = pointsData?.points ?? 0;
 
   return (
     <div className="w-60 max-w-5xl bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-2 py-0 flex flex-col items-center">
