@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/pagination';
 import type { RankLogPeriodType, LeaderboardPlayer } from '@/types';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 8;
 
 interface LeaderboardContentProps {
   periodType: RankLogPeriodType;
