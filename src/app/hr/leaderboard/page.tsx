@@ -1,79 +1,58 @@
-import { getTopPlayers } from '@/actions/hr/leaderboard';
 import { Suspense } from 'react';
-import { MarketSuspense } from '@/components/shared/market-suspense';
-import HallOfFameHeader from '@/components/hr/leaderboard/hall-of-fame-header';
-import PodiumGrid from '@/components/hr/leaderboard/podium-grid';
-import RemainingPlayersGrid from '@/components/hr/leaderboard/remaining-players-grid';
-import EmptyStateAdminCard from '@/components/hr/leaderboard/empty-state-admin-card';
-import {
-  PERIOD_CONFIG,
-  getAdjacentPeriod,
-  getEmptyMessage,
-  type Period,
-} from '@/lib/leaderboard-utils';
+import { Trophy } from 'lucide-react';
+import { LeaderboardSkeleton } from '@/components/hr/leaderboard/leaderboard-skeleton';
+import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-content';
+import GenerateRankingDialog from '@/components/hr/leaderboard/generate-ranking-dialog';
+import { PeriodTypeDropdown } from '@/components/hr/leaderboard/period-type-dropdown';
+import type { RankLogPeriodType } from '@/types';
 
 interface LeaderboardPageProps {
-  searchParams: Promise<{ period?: string }>;
+  searchParams: Promise<{ type?: string; id?: string; page?: string }>;
 }
 
 export default async function LeaderboardPage({ searchParams }: LeaderboardPageProps) {
   const params = await searchParams;
-  const period = (params.period || 'current') as Period;
-
-  const result = await getTopPlayers(period);
-  const config = PERIOD_CONFIG[period];
-  const prevPeriod = getAdjacentPeriod(period, 'prev');
-  const nextPeriod = getAdjacentPeriod(period, 'next');
-
-  // Handle error or empty data
-  if (result.error || !result.data || result.data.length === 0) {
-    const emptyMessage = getEmptyMessage(period, result.error);
-
-    return (
-      <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-        <div className="p-4 sm:p-8 bg-[#F3F3F3] min-h-screen">
-          <div className="max-w-7xl mx-auto">
-            <HallOfFameHeader
-              periodLabel={config.label}
-              period={period}
-              userCount={0}
-              prevPeriod={prevPeriod}
-              nextPeriod={nextPeriod}
-            />
-
-            <EmptyStateAdminCard period={period} message={emptyMessage} />
-          </div>
-        </div>
-      </Suspense>
-    );
-  }
-
-  // Map database results to include rank
-  const playersWithRank = result.data.map((player, index) => ({
-    ...player,
-    rank: index + 1,
-  }));
-
-  const top3 = playersWithRank.slice(0, 3);
-  const remaining = playersWithRank.slice(3);
-  const userCount = playersWithRank.length;
+  const periodType: RankLogPeriodType =
+    params.type && ['weekly', 'monthly', 'yearly'].includes(params.type)
+      ? (params.type as RankLogPeriodType)
+      : 'weekly';
+  const selectedId = params.id;
+  const currentPage = Math.max(1, Number(params.page ?? 1));
 
   return (
-    <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-      <div className="p-4 sm:p-8 bg-[#F3F3F3] min-h-screen">
-        <div className="max-w-7xl mx-auto">
-          <HallOfFameHeader
-            periodLabel={config.label}
-            period={period}
-            userCount={userCount}
-            prevPeriod={prevPeriod}
-            nextPeriod={nextPeriod}
-          />
+    <div className="p-4 sm:p-8 bg-[#F3F3F3] min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center">
+              <Trophy className="w-6 h-6 sm:w-7 sm:h-7 text-[#F59E0B]" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#6D1616]">
+                Leaderboards
+              </h1>
+              <p className="text-sm text-[#5a2a2a]">
+                View and manage performance rankings across weekly, monthly, and yearly periods.
+              </p>
+            </div>
+          </div>
 
-          <PodiumGrid top3={top3} />
-          <RemainingPlayersGrid players={remaining} />
+          {!selectedId && (
+            <div className="flex items-center justify-end gap-3 sm:gap-4">
+              <PeriodTypeDropdown currentType={periodType} basePath="/hr/leaderboard" />
+              <GenerateRankingDialog defaultPeriodType={periodType} />
+            </div>
+          )}
         </div>
+
+        <Suspense fallback={<LeaderboardSkeleton />}>
+          <LeaderboardContent
+            periodType={periodType}
+            selectedId={selectedId}
+            currentPage={currentPage}
+          />
+        </Suspense>
       </div>
-    </Suspense>
+    </div>
   );
 }

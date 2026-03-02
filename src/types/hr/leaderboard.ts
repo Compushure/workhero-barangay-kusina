@@ -54,3 +54,37 @@ export interface LeaderboardAsOfRow {
   performance_score: number | null;
   role_type: string;
 }
+
+/**
+ * RankLog Types
+ * =============
+ * Types for persisted HR-generated rankings
+ */
+
+export type RankLogPeriodType = 'weekly' | 'monthly' | 'yearly';
+
+/**
+ * Single ranked employee entry stored inside the RankLog.rankings JSONB array
+ */
+export interface RankLogEntry {
+  rank: number;
+  user_id: string;
+  user_name: string;
+  performance_score: number;
+}
+
+/**
+ * Row from the RankLog table
+ */
+export interface RankLogRow {
+  id: string;
+  period_type: RankLogPeriodType;
+  period_year: number;
+  period_month: number | null;
+  period_week: number | null;
+  period_label: string;
+  rankings: RankLogEntry[];
+  is_visible: boolean;
+  generated_by: string;
+  generated_at: string;
+}
