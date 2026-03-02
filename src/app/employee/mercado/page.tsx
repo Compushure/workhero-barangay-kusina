@@ -8,7 +8,7 @@ import { useGetAvailableRewardsByMonth } from '@/hooks/tanstack/queries/rewardQu
 
 export default function MercadoPage() {
   const { selectedMonth, setSelectedMonth } = useMercadoContext();
-  const { pendingRequests, userPoints, deductedPoints, isLoading } = useMercadoPageData({
+  const { pendingRequests, userPoints } = useMercadoPageData({
     includeRewards: false,
   });
   const { data: monthRewards = [], isLoading: monthRewardsLoading } =
@@ -19,8 +19,6 @@ export default function MercadoPage() {
     return new Set(pendingRequests.map((req) => req.rewardId));
   }, [pendingRequests]);
 
-  const availablePoints = userPoints - deductedPoints;
-
   return (
     <>
       <MonthlyRewardsModal
@@ -29,8 +27,9 @@ export default function MercadoPage() {
         month={selectedMonth}
         rewards={monthRewards}
         isLoading={monthRewardsLoading}
-        userPoints={availablePoints}
+        userPoints={userPoints}
         pendingRewardIds={pendingRewardIds}
+        pendingRequests={pendingRequests}
       />
     </>
   );

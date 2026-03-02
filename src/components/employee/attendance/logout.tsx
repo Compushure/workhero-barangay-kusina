@@ -62,7 +62,7 @@ export const LogOutBtn = memo(function LogOutBtn() {
   return (
     <div
       onClick={handleLogout}
-      className={`inline-flex items-center bg-[#765332] border-3 border-[#47331F] rounded-lg shadow-md p-2 cursor-pointer transition-all duration-300 
+      className={`inline-flex items-center bg-[#765332] border-3 border-[#47331F] rounded-lg p-2 cursor-pointer transition-all duration-300 
         ${isPending || isNavigating || isLoggingOut ? 'opacity-60 cursor-not-allowed' : 'hover:scale-105'}
       `}
     >
@@ -73,11 +73,7 @@ export const LogOutBtn = memo(function LogOutBtn() {
             <Hand className="size-6" />
           </span>
         ) : (
-          <img
-            src="/assets/door.png"
-            alt="Logout door"
-            className="w-full h-full object-contain"
-          />
+          <img src="/assets/door.png" alt="Logout door" className="w-full h-full object-contain" />
         )}
       </div>
 

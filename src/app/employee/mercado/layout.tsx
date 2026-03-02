@@ -68,7 +68,7 @@ function MercadoLayoutContent({ children }: MercadoLayoutProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const pathname = usePathname();
   const { setSelectedMonth } = useMercadoContext();
-  const { userPoints, deductedPoints, isLoading } = useMercadoPageData();
+  const { userPoints, isLoading } = useMercadoPageData();
 
   const maxSlide = Math.max(0, Math.ceil(MONTH_STALLS.length / STALLS_PER_VIEW) - 1);
   const isAtFirstSlide = currentSlide === 0;
@@ -78,8 +78,6 @@ function MercadoLayoutContent({ children }: MercadoLayoutProps) {
     const start = currentSlide * STALLS_PER_VIEW;
     return MONTH_STALLS.slice(start, start + STALLS_PER_VIEW);
   }, [currentSlide]);
-
-  const availablePoints = useMemo(() => userPoints - deductedPoints, [userPoints, deductedPoints]);
 
   const handlePrevious = () => {
     if (isAtFirstSlide) return;
@@ -119,18 +117,10 @@ function MercadoLayoutContent({ children }: MercadoLayoutProps) {
               <div>
                 <p className="text-xs text-[#7a3d3d] font-medium">Fiesta Points</p>
                 <p className="text-2xl font-bold text-[#690003] pixelated-text">
-                  {isLoading ? '...' : availablePoints.toLocaleString()}
+                  {isLoading ? '...' : userPoints.toLocaleString()}
                 </p>
               </div>
             </div>
-            {deductedPoints > 0 && (
-              <div className="text-right">
-                <p className="text-xs text-[#7a3d3d]">Pending</p>
-                <p className="text-sm font-semibold text-orange-600">
-                  -{deductedPoints.toLocaleString()}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>
