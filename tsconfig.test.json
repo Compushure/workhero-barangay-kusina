@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "types": ["jest", "node", "@testing-library/jest-dom"]
+  },
+  "include": [
+    "__tests___/**/*.ts",
+    "__tests___/**/*.tsx",
+    "jest.setup.ts"
+  ],
+  "exclude": ["cypress", "cypress.config.ts", "node_modules"]
+}

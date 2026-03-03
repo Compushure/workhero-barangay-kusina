@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Pencil, Plus, X, Loader2, Camera } from 'lucide-react';
+import { Pencil, Plus, X, Loader2, Camera, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -25,7 +28,7 @@ interface AddItemsModalProps {
     quantity?: number;
     redeemingLimit?: number;
     imageUrl?: string;
-    availableMonth?: number;
+    availableDate?: Date | string | null;
   } | null;
   onSave?: (data: {
     id?: string;
@@ -34,7 +37,7 @@ interface AddItemsModalProps {
     quantity: string;
     redeemingLimit: string;
     cost: number;
-    availableMonth?: number | null;
+    availableDate?: Date | null;
   }) => Promise<void>;
   saveError?: string;
   onErrorClear?: () => void;
@@ -69,7 +72,7 @@ export function AddItemsModal({
   const [quantity, setQuantity] = useState('');
   const [itemCost, setItemCost] = useState('');
   const [redeemingLimit, setRedeemingLimit] = useState('');
-  const [availableMonth, setAvailableMonth] = useState<string>('none'); // 'none' means no month selected
+  const [availableDate, setAvailableDate] = useState<Date | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   // Populate form when editing
@@ -81,11 +84,11 @@ export function AddItemsModal({
       setRedeemingLimit(editingItem.redeemingLimit?.toString() || '');
       setExistingImageUrl(editingItem.imageUrl ? `${editingItem.imageUrl}?t=${Date.now()}` : '');
       setExistingImageError(false);
-      // Load available month if it exists
-      if (editingItem.availableMonth) {
-        setAvailableMonth(editingItem.availableMonth.toString());
+      // Load available date if it exists
+      if (editingItem.availableDate) {
+        setAvailableDate(new Date(editingItem.availableDate));
       } else {
-        setAvailableMonth('none');
+        setAvailableDate(undefined);
       }
     } else {
       // Reset form when adding new
@@ -93,7 +96,7 @@ export function AddItemsModal({
       setItemCost('');
       setQuantity('');
       setRedeemingLimit('');
-      setAvailableMonth('none');
+      setAvailableDate(undefined);
       setIconFile(null);
       setIconPreview('');
       setExistingImageUrl('');
@@ -111,7 +114,7 @@ export function AddItemsModal({
     quantity,
     itemCost,
     redeemingLimit,
-    availableMonth,
+    availableDate,
     iconFile,
     saveError,
     onErrorClear,
@@ -121,14 +124,7 @@ export function AddItemsModal({
   const hasChanges = useMemo(() => {
     if (!editingItem) {
       // For new items, check if any field has value
-      return !!(
-        itemName ||
-        itemCost ||
-        quantity ||
-        redeemingLimit ||
-        iconFile ||
-        (availableMonth && availableMonth !== 'none')
-      );
+      return !!(itemName || itemCost || quantity || redeemingLimit || iconFile || availableDate);
     }
 
     // For editing, compare with original values
@@ -142,9 +138,12 @@ export function AddItemsModal({
     const isLimitChanged = redeemingLimitNum !== editingItem.redeemingLimit;
     const isIconChanged = !!iconFile;
 
-    // Check if available month changed
-    const originalMonth = editingItem.availableMonth?.toString() || 'none';
-    const isMonthChanged = availableMonth !== originalMonth;
+    // Check if available date changed
+    const originalDate = editingItem.availableDate
+      ? new Date(editingItem.availableDate).getTime()
+      : null;
+    const currentDate = availableDate ? availableDate.getTime() : null;
+    const isDateChanged = originalDate !== currentDate;
 
     return (
       isNameChanged ||
@@ -152,9 +151,9 @@ export function AddItemsModal({
       isQuantityChanged ||
       isLimitChanged ||
       isIconChanged ||
-      isMonthChanged
+      isDateChanged
     );
-  }, [editingItem, itemName, itemCost, quantity, redeemingLimit, iconFile, availableMonth]);
+  }, [editingItem, itemName, itemCost, quantity, redeemingLimit, iconFile, availableDate]);
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -179,8 +178,7 @@ export function AddItemsModal({
           quantity: unformatNumber(quantity),
           redeemingLimit: unformatNumber(redeemingLimit),
           cost: parseFloat(unformatNumber(itemCost)),
-          availableMonth:
-            availableMonth && availableMonth !== 'none' ? parseInt(availableMonth) : null,
+          availableDate: availableDate || null,
         });
         // Close modal on successful save
         handleClose();
@@ -202,7 +200,7 @@ export function AddItemsModal({
     setQuantity('');
     setRedeemingLimit('');
     setItemCost('');
-    setAvailableMonth('none');
+    setAvailableDate(undefined);
     setIsLoading(false);
     onOpenChange(false);
   };
@@ -336,12 +334,9 @@ export function AddItemsModal({
                 minLength={2}
                 className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
               />
-              {/* Validation Messages for Item Name */}
               {itemName && !isItemNameValid && itemName.length < 2 && (
                 <p className="text-xs text-red-600">Item name must be at least 2 characters</p>
               )}
-
-              {/* Character limit  */}
               {itemName.length > 50 && (
                 <p className="text-xs text-red-600">Item name cannot exceed 50 characters</p>
               )}
@@ -399,7 +394,7 @@ export function AddItemsModal({
               </p>
             )}
 
-            {/* Item Cost and Available Month */}
+            {/* Item Cost and Available Date */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 space-y-2">
                 <Label htmlFor="item-cost" className="text-sm font-medium text-[#5a2a2a]">
@@ -422,54 +417,48 @@ export function AddItemsModal({
               </div>
 
               <div className="flex-1 space-y-2">
-                <Label htmlFor="available-month" className="text-sm font-medium text-[#5a2a2a]">
-                  Available Month
+                <Label htmlFor="available-date" className="text-sm font-medium text-[#5a2a2a]">
+                  Available Date
                 </Label>
-                <Select value={availableMonth} onValueChange={setAvailableMonth}>
-                  <SelectTrigger
-                    id="available-month"
-                    className="w-full bg-white border-[#e0cfcf] hover:bg-[#fbeaea] text-[#5a2a2a]"
-                  >
-                    <SelectValue placeholder="Select month (optional)" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="none" className="text-[#7a3d3d]/70 italic">
-                      No specific month (available all year)
-                    </SelectItem>
-                    <SelectItem value="1">January</SelectItem>
-                    <SelectItem value="2">February</SelectItem>
-                    <SelectItem value="3">March</SelectItem>
-                    <SelectItem value="4">April</SelectItem>
-                    <SelectItem value="5">May</SelectItem>
-                    <SelectItem value="6">June</SelectItem>
-                    <SelectItem value="7">July</SelectItem>
-                    <SelectItem value="8">August</SelectItem>
-                    <SelectItem value="9">September</SelectItem>
-                    <SelectItem value="10">October</SelectItem>
-                    <SelectItem value="11">November</SelectItem>
-                    <SelectItem value="12">December</SelectItem>
-                  </SelectContent>
-                </Select>
-                {availableMonth && availableMonth !== 'none' && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="available-date"
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start bg-white border-[#e0cfcf] hover:bg-[#fbeaea] text-[#5a2a2a] font-normal',
+                        !availableDate && 'text-[#7a3d3d]/50'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {availableDate ? format(availableDate, 'MMM d, yyyy') : 'Select date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-white" align="end">
+                    <Calendar
+                      mode="single"
+                      selected={availableDate}
+                      onSelect={setAvailableDate}
+                      disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                      initialFocus
+                    />
+                    {availableDate && (
+                      <div className="p-3 border-t border-[#e0cfcf]">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setAvailableDate(undefined)}
+                          className="w-full bg-white text-[#690003] border-[#e0cfcf] hover:bg-[#fbeaea]"
+                        >
+                          Clear Date
+                        </Button>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+                {availableDate && (
                   <p className="text-xs text-[#7a3d3d]/70 italic">
-                    Item will appear in{' '}
-                    {
-                      [
-                        'January',
-                        'February',
-                        'March',
-                        'April',
-                        'May',
-                        'June',
-                        'July',
-                        'August',
-                        'September',
-                        'October',
-                        'November',
-                        'December',
-                      ][parseInt(availableMonth) - 1]
-                    }{' '}
-                    stall
+                    Available from {format(availableDate, 'MMM d, yyyy')} onwards
                   </p>
                 )}
               </div>
