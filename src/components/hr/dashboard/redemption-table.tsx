@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Check, X, ImageIcon } from 'lucide-react';
+import { Check, X, ChevronDown, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/manager/task-verification/pagination';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   useAcceptRedemptionRequest,
@@ -19,25 +21,19 @@ interface RedemptionTableProps {
   status?: string;
 }
 
-const getRequestQuantity = (request: RedemptionRequest) => request.quantity || 1;
-const getRequestTotalCost = (request: RedemptionRequest) =>
-  request.pointsCost * getRequestQuantity(request);
-const formatPointUnit = (value: number) => (value === 1 ? 'Pt' : 'Pts');
-const formatPoints = (value: number) => `${value} ${formatPointUnit(value)}`;
-
 export function RedemptionTable({
   data,
   onApprove,
   onReject,
   status = 'pending',
 }: RedemptionTableProps) {
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
-  const [selectedRequest, setSelectedRequest] = useState<RedemptionRequest | null>(null);
-  const [requestModalOpen, setRequestModalOpen] = useState(false);
-  const [requestImageError, setRequestImageError] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [remarkModalOpen, setRemarkModalOpen] = useState(false);
+  const [selectedRemarks, setSelectedRemarks] = useState<string>('');
   const itemsPerPage = 8;
 
   // Pagination logic
@@ -56,6 +52,16 @@ export function RedemptionTable({
     }
   }, [data.length, currentPage, totalPages]);
 
+  const toggleRow = (id: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedRows(newExpanded);
+  };
+
   const declineMutation = useDeclineRedemptionRequest();
   const acceptMutation = useAcceptRedemptionRequest();
 
@@ -67,12 +73,6 @@ export function RedemptionTable({
   const handleDeclineClick = (requestId: string) => {
     setSelectedRequestId(requestId);
     setDeclineDialogOpen(true);
-  };
-
-  const handleRequestClick = (request: RedemptionRequest) => {
-    setSelectedRequest(request);
-    setRequestImageError(false);
-    setRequestModalOpen(true);
   };
 
   const handleAcceptConfirm = (remarks?: string) => {
@@ -110,14 +110,15 @@ export function RedemptionTable({
   return (
     <div className="overflow-hidden rounded-lg shadow-md">
       {/* Table Header */}
-      <div className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_120px] gap-4 bg-[#690003] px-6 py-4">
+      <div className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_80px_120px] gap-4 bg-[#690003] px-6 py-4">
         <div className="text-sm font-semibold uppercase tracking-wide text-white">Request Date</div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">Employee</div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">
           Requested Item/s
         </div>
+        <div className="text-sm font-semibold uppercase tracking-wide text-white">Total Cost</div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
-          Total Cost
+          Remarks
         </div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
           Action
@@ -140,89 +141,140 @@ export function RedemptionTable({
           </div>
         ) : (
           paginatedData.map((request) => {
-            const { dateStr, timeStr } = formatDateTime(request.requestedAt);
-            const quantity = getRequestQuantity(request);
-            const totalCost = getRequestTotalCost(request);
-            const itemDisplay = `${quantity} x ${request.rewardName}`;
-            const userPoints = request.userPoints || 0;
-            const hasInsufficientPoints = userPoints < totalCost;
-            const userName = request.userName || 'N/A';
-            const isOutOfStock = request.remarks === 'Item is out of stock';
+          const { dateStr, timeStr } = formatDateTime(request.requestedAt);
+          const quantity = request.quantity || 1;
+          const totalCost = request.pointsCost * quantity;
+          const itemDisplay = `${quantity} x ${request.rewardName}`;
+          const userPoints = request.userPoints || 0;
+          const hasInsufficientPoints = userPoints < totalCost;
+          const hasRemarks = request.remarks && request.remarks.trim() !== '';
+          const userName = request.userName || 'N/A';
+          const isOutOfStock = request.remarks === 'Item is out of stock';
 
-            return (
-              <div
-                key={request.id}
-                className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_120px] gap-4 px-6 py-4 transition-colors hover:bg-[#fbeaea] cursor-pointer"
-                onClick={() => handleRequestClick(request)}
-              >
-                <div className="flex flex-col justify-center">
-                  <p className="text-sm font-medium text-[#5a2a2a]">{dateStr}</p>
-                  <p className="text-xs text-[#7a3d3d]">{timeStr}</p>
-                </div>
-                <div className="flex items-center">
-                  <p className="text-sm text-[#5a2a2a] truncate">{userName}</p>
-                </div>
-                <div className="flex items-center gap-2 min-w-0">
-                  <p className="text-sm text-[#5a2a2a] truncate flex-1">{itemDisplay}</p>
-                </div>
-                <div className="flex items-center justify-center">
-                  <p className="text-sm font-medium text-[#5a2a2a]">{formatPoints(totalCost)}</p>
-                </div>
-                <div
-                  className="flex items-center gap-2 justify-center"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {status === 'pending' ? (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0 text-[#2d5016] hover:bg-[#2d5016] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => handleAcceptClick(request.id)}
-                        disabled={
-                          declineMutation.isPending ||
-                          acceptMutation.isPending ||
-                          hasInsufficientPoints
-                        }
-                        title={
-                          hasInsufficientPoints
-                            ? `Insufficient points: User has ${userPoints} but needs ${totalCost}`
-                            : 'Accept request'
-                        }
-                      >
-                        <Check className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0 text-[#8b0000] hover:bg-[#8b0000] hover:text-white"
-                        onClick={() => handleDeclineClick(request.id)}
-                        disabled={declineMutation.isPending || acceptMutation.isPending}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </>
-                  ) : (
-                    <div
-                      className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 ${
-                        status === 'approved'
-                          ? 'bg-green-100 text-green-700'
-                          : isOutOfStock
-                            ? 'bg-orange-100 text-orange-700'
-                            : 'bg-red-100 text-red-700'
-                      }`}
-                    >
-                      {status === 'approved'
-                        ? 'Approved'
-                        : isOutOfStock
-                          ? 'Out of Stock'
-                          : 'Rejected'}
-                    </div>
-                  )}
-                </div>
+          return (
+            <div
+              key={request.id}
+              className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_80px_120px] gap-4 px-6 py-4 transition-colors hover:bg-[#fbeaea]"
+            >
+              <div className="flex flex-col justify-center">
+                <p className="text-sm font-medium text-[#5a2a2a]">{dateStr}</p>
+                <p className="text-xs text-[#7a3d3d]">{timeStr}</p>
               </div>
-            );
-          })
+              <div className="flex items-center">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-sm text-[#5a2a2a] truncate">{userName}</p>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="max-w-xs">{userName}</div>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="flex items-center gap-2 min-w-0">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-sm text-[#5a2a2a] truncate flex-1">{itemDisplay}</p>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="max-w-xs">{itemDisplay}</div>
+                  </TooltipContent>
+                </Tooltip>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 shrink-0 text-[#5a2a2a] hover:bg-[#fbeaea]"
+                  onClick={() => toggleRow(request.id)}
+                >
+                  <ChevronDown
+                    className={cn(
+                      'h-4 w-4 transition-transform',
+                      expandedRows.has(request.id) && 'rotate-180'
+                    )}
+                  />
+                </Button>
+              </div>
+              <div className="flex items-center">
+                <p className="text-sm font-medium text-[#5a2a2a]">{totalCost} Pts</p>
+              </div>
+              <div className="flex items-center justify-center">
+                {hasRemarks ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          'h-8 w-8 hover:bg-[#fbeaea]',
+                          isOutOfStock ? 'text-orange-600' : 'text-[#690003]'
+                        )}
+                        onClick={() => {
+                          setSelectedRemarks(request.remarks || '');
+                          setRemarkModalOpen(true);
+                        }}
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {isOutOfStock ? 'Auto-declined: Out of stock' : 'View remarks'}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <span className="text-xs text-muted-foreground">-</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 justify-center">
+                {status === 'pending' ? (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 shrink-0 text-[#8b0000] hover:bg-[#8b0000] hover:text-white"
+                      onClick={() => handleDeclineClick(request.id)}
+                      disabled={declineMutation.isPending || acceptMutation.isPending}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 shrink-0 text-[#2d5016] hover:bg-[#2d5016] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => handleAcceptClick(request.id)}
+                      disabled={
+                        declineMutation.isPending ||
+                        acceptMutation.isPending ||
+                        hasInsufficientPoints
+                      }
+                      title={
+                        hasInsufficientPoints
+                          ? `Insufficient points: User has ${userPoints} but needs ${totalCost}`
+                          : 'Accept request'
+                      }
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <div
+                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 ${
+                      status === 'approved'
+                        ? 'bg-green-100 text-green-700'
+                        : isOutOfStock
+                          ? 'bg-orange-100 text-orange-700'
+                          : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {status === 'approved'
+                      ? 'Approved'
+                      : isOutOfStock
+                        ? 'Out of Stock'
+                        : 'Rejected'}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })
         )}
       </div>
 
@@ -260,74 +312,17 @@ export function RedemptionTable({
         isProcessing={acceptMutation.isPending || declineMutation.isPending}
       />
 
-      <Dialog open={requestModalOpen} onOpenChange={setRequestModalOpen}>
+      {/* Remarks Display Modal */}
+      <Dialog open={remarkModalOpen} onOpenChange={setRemarkModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#690003]">Requested Item</DialogTitle>
+            <DialogTitle className="text-[#690003]">Request Remarks</DialogTitle>
           </DialogHeader>
-          {selectedRequest &&
-            (() => {
-              const selectedQuantity = getRequestQuantity(selectedRequest);
-              const selectedTotalCost = getRequestTotalCost(selectedRequest);
-              const { dateStr, timeStr } = formatDateTime(selectedRequest.requestedAt);
-              const requestImageUrl = selectedRequest.rewardImageUrl;
-
-              return (
-                <div className="space-y-4 py-2 text-sm text-[#5a2a2a]">
-                  <div>
-                    <span className="text-xs text-muted-foreground">Requested by: </span>
-                    <span className="font-medium">{selectedRequest.userName || 'N/A'}</span>
-                  </div>
-
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="h-24 w-24 rounded-xl bg-[#f2e1c9] flex items-center justify-center overflow-hidden">
-                      {requestImageUrl && !requestImageError ? (
-                        <img
-                          src={requestImageUrl}
-                          alt={`${selectedRequest.rewardName} image`}
-                          className="h-full w-full object-cover"
-                          loading="lazy"
-                          onError={() => setRequestImageError(true)}
-                        />
-                      ) : (
-                        <ImageIcon className="h-8 w-8 text-[#730202]/40" />
-                      )}
-                    </div>
-                    <p className="font-semibold text-base text-center wrap-anywhere">
-                      {selectedRequest.rewardName}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-[1fr_auto_1fr] items-center">
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Quantity</p>
-                      <p className="font-medium">{selectedQuantity}</p>
-                    </div>
-                    <div className="h-8 w-px bg-border mx-3" />
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Total</p>
-                      <p className="font-medium">{formatPoints(selectedTotalCost)}</p>
-                    </div>
-                  </div>
-
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground">Requested at</p>
-                    <p className="font-medium">
-                      {dateStr} {timeStr}
-                    </p>
-                  </div>
-
-                  {selectedRequest.status !== 'pending' && (
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Remarks</p>
-                      <p className="font-medium whitespace-pre-wrap wrap-anywhere">
-                        {selectedRequest.remarks?.trim() || '-'}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
+          <div className="py-4">
+            <p className="text-sm text-[#5a2a2a] whitespace-pre-wrap wrap-break-word">
+              {selectedRemarks}
+            </p>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

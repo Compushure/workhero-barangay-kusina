@@ -25,7 +25,7 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   href: string;
-}
+} 
 
 interface SidebarProps {
   navItems?: NavItem[];
@@ -140,59 +140,51 @@ export function Sidebar({
           const isActive = pathname === item.href;
           const isNavigatingItem = pendingHref === item.href;
           const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
-          const navLink = (
-            <Link
-              href={item.href}
-              onClick={() => {
-                if (pathname !== item.href) {
-                  setPendingHref(item.href);
-                  startNavigation();
-                }
-              }}
-              aria-disabled={isDisabled}
-              className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all ${
-                isCollapsed ? 'justify-center px-2' : 'justify-start'
-              } ${isActive ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'} ${
-                isDisabled ? 'opacity-50 pointer-events-none' : ''
-              }`}
-            >
-              {isCollapsed ? (
-                isNavigatingItem ? (
-                  <NavigationDisplay
-                    isNavigating={isNavigatingItem}
-                    className="inline-flex items-center justify-center"
-                    iconClassName="size-5 animate-spin text-red-200"
-                  />
-                ) : (
-                  item.icon
-                )
-              ) : (
-                item.icon
-              )}
-              {!isCollapsed && <span>{item.label}</span>}
-              {!isCollapsed && (
-                <NavigationDisplay
-                  isNavigating={isNavigatingItem}
-                  className="ml-auto inline-flex items-center justify-center"
-                  iconClassName="size-4 animate-spin text-red-200"
-                />
-              )}
-            </Link>
-          );
-
           return (
-            <div key={item.key}>
-              {isCollapsed ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>{navLink}</TooltipTrigger>
-                  <TooltipContent side="right" sideOffset={8}>
-                    {item.label}
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                navLink
-              )}
-            </div>
+            <Tooltip key={item.key}>
+              <TooltipTrigger asChild>
+                <Link
+                  href={item.href}
+                  onClick={() => {
+                    if (pathname !== item.href) {
+                      setPendingHref(item.href);
+                      startNavigation();
+                    }
+                  }}
+                  aria-disabled={isDisabled}
+                  className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all ${
+                    isCollapsed ? 'justify-center px-2' : 'justify-start'
+                  } ${isActive ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'} ${
+                    isDisabled ? 'opacity-50 pointer-events-none' : ''
+                  }`}
+                >
+                  {isCollapsed ? (
+                    isNavigatingItem ? (
+                      <NavigationDisplay
+                        isNavigating={isNavigatingItem}
+                        className="inline-flex items-center justify-center"
+                        iconClassName="size-5 animate-spin text-red-200"
+                      />
+                    ) : (
+                      item.icon
+                    )
+                  ) : (
+                    item.icon
+                  )}
+                  {!isCollapsed && <span>{item.label}</span>}
+                  {!isCollapsed && (
+                    <NavigationDisplay
+                      isNavigating={isNavigatingItem}
+                      className="ml-auto inline-flex items-center justify-center"
+                      iconClassName="size-4 animate-spin text-red-200"
+                    />
+                  )}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={8}>
+                {item.label}
+              </TooltipContent>
+            </Tooltip>
           );
         })}
       </nav>

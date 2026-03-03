@@ -15,6 +15,7 @@
  * - Handlers: success/error toasts for fetch/assign/remove/debug flows
  * - Integration: assign → debug → remove with try/finally cleanup guards
  */
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, jest, test } from '@jest/globals';
 import {
   assignManualBadgeToUser,
   fetchAllBadges,
@@ -49,10 +50,14 @@ type UserBadgeRow = {
   date_acquired: string;
 };
 
-let safeActionMock: jest.Mock<Promise<{ success: boolean; data: any; error: any }>, [() => any]>;
-let toastSuccess: jest.Mock;
-let toastError: jest.Mock;
-let getUserRoleMock: jest.Mock;
+type SafeActionFn = (fn: () => any) => Promise<{ success: boolean; data: any; error: any }>;
+type ToastFn = (message?: any) => any;
+type GetUserRoleFn = () => Promise<{ role: string | null; error: string | null }>;
+
+let safeActionMock: jest.MockedFunction<SafeActionFn>;
+let toastSuccess: jest.MockedFunction<ToastFn>;
+let toastError: jest.MockedFunction<ToastFn>;
+let getUserRoleMock: jest.MockedFunction<GetUserRoleFn>;
 
 jest.mock('@/lib/utils/safe-action', () => ({
   safeAction: jest.fn(async (fn: () => any) => {
@@ -70,12 +75,12 @@ jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }))
 
 jest.mock('@/actions/shared/auth', () => ({ getUserRole: jest.fn() }));
 
-const { safeAction } = jest.requireMock('@/lib/utils/safe-action') as { safeAction: jest.Mock };
+const { safeAction } = jest.requireMock('@/lib/utils/safe-action') as { safeAction: jest.MockedFunction<SafeActionFn> };
 safeActionMock = safeAction;
-const { toast } = jest.requireMock('sonner') as { toast: { success: jest.Mock; error: jest.Mock } };
+const { toast } = jest.requireMock('sonner') as { toast: { success: jest.MockedFunction<ToastFn>; error: jest.MockedFunction<ToastFn> } };
 toastSuccess = toast.success;
 toastError = toast.error;
-const { getUserRole } = jest.requireMock('@/actions/shared/auth') as { getUserRole: jest.Mock };
+const { getUserRole } = jest.requireMock('@/actions/shared/auth') as { getUserRole: jest.MockedFunction<GetUserRoleFn> };
 getUserRoleMock = getUserRole;
 
 type SupabaseConfig = {
