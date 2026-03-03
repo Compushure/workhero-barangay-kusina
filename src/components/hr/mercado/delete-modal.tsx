@@ -33,17 +33,17 @@ export function DeleteModal({ open, onOpenChange, itemName, onConfirm }: DeleteM
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-2xl p-6">
+      <DialogContent className="bg-card text-card-foreground border border-border max-w-md rounded-2xl p-6">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-xl bg-red-100 flex items-center justify-center">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+            <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center">
+              <AlertTriangle className="h-6 w-6 text-primary" />
             </div>
-            <DialogTitle className="text-xl font-bold text-[#730202]">Delete Item</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-primary">Delete Item</DialogTitle>
           </div>
-          <DialogDescription className="text-base text-[#730202]/70">
+          <DialogDescription className="text-base text-muted-foreground">
             Are you sure you want to delete{' '}
-            <span className="font-semibold text-[#730202]">{itemName}</span>? This action cannot be
+            <span className="font-semibold text-title">{itemName}</span>? This action cannot be
             undone.
           </DialogDescription>
         </DialogHeader>
@@ -53,14 +53,14 @@ export function DeleteModal({ open, onOpenChange, itemName, onConfirm }: DeleteM
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isDeleting}
-            className="h-11 rounded-xl border-[#730202]/20 text-[#730202] hover:bg-[#f2e1c9] font-semibold text-base"
+            className="h-11 rounded-xl border-border text-foreground hover:bg-muted font-semibold text-base"
           >
             Cancel
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={isDeleting}
-            className="h-11 rounded-xl bg-[#730202] hover:bg-[#730202]/90 text-white font-semibold text-base"
+            className="h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base"
           >
             {isDeleting ? (
               <>

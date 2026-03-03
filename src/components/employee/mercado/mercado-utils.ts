@@ -9,8 +9,7 @@ export function isMonthUnlocked(month: number): boolean {
   const currentMonth = now.getMonth() + 1; // getMonth() returns 0-11
   const currentYear = now.getFullYear();
 
-  // A month is unlocked if it's in the current year and has already occurred
-  // (i.e., current month >= target month)
+ 
   return month <= currentMonth;
 }
 

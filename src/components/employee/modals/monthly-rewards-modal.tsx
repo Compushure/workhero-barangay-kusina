@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import {
   Dialog,
@@ -107,6 +107,7 @@ export function MonthlyRewardsModal({
   const [pendingSearchTerm, setPendingSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [activeView, setActiveView] = useState<'items' | 'pending'>('items');
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
   const monthName = month ? MONTHS[month - 1] : '';
 
@@ -162,6 +163,11 @@ export function MonthlyRewardsModal({
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, sortOrder]);
+
+  useEffect(() => {
+    if (!open) return;
+    scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+  }, [open, month, activeView, currentPage, searchTerm, pendingSearchTerm, sortOrder]);
 
   if (!month) return null;
 
@@ -235,7 +241,7 @@ export function MonthlyRewardsModal({
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto p-6 bg-[#e6d7bf]">
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-6 bg-[#e6d7bf]">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Loader2 className="h-10 w-10 text-[#6a4a2d] animate-spin mx-auto mb-3" />

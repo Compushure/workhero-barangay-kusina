@@ -25,21 +25,21 @@ export function HideRewardDialog({
 }: HideRewardDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-2xl p-6">
+      <DialogContent className="bg-card text-card-foreground border border-border max-w-md rounded-2xl p-6">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-xl bg-[#f2e1c9] flex items-center justify-center">
+            <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
               {isHidden ? (
-                <Eye className="h-6 w-6 text-[#730202]" />
+                <Eye className="h-6 w-6 text-primary" />
               ) : (
-                <EyeOff className="h-6 w-6 text-[#730202]" />
+                <EyeOff className="h-6 w-6 text-primary" />
               )}
             </div>
-            <DialogTitle className="text-xl font-bold text-[#730202]">
+            <DialogTitle className="text-xl font-bold text-primary">
               {isHidden ? 'Unhide Item' : 'Hide Item'}
             </DialogTitle>
           </div>
-          <DialogDescription className="text-base text-[#730202]/70">
+          <DialogDescription className="text-base text-muted-foreground">
             {isHidden
               ? 'This item will be visible to employees in the Mercado.'
               : 'This item will be hidden from employees in the Mercado.'}
@@ -50,7 +50,7 @@ export function HideRewardDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="h-11 rounded-xl border-[#730202]/20 text-[#730202] hover:bg-[#f2e1c9] font-semibold text-base"
+            className="h-11 rounded-xl border-border text-foreground hover:bg-muted font-semibold text-base"
           >
             Cancel
           </Button>
@@ -59,7 +59,7 @@ export function HideRewardDialog({
               onConfirm();
               onOpenChange(false);
             }}
-            className="h-11 rounded-xl bg-[#730202] hover:bg-[#730202]/90 text-white font-semibold text-base"
+            className="h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base"
           >
             {isHidden ? 'Unhide' : 'Hide'}
           </Button>

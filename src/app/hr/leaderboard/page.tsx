@@ -31,7 +31,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
 
     return (
       <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-        <div className="p-4 sm:p-8 bg-[#F3F3F3] min-h-screen">
+        <div className="p-4 sm:p-8 bg-background text-foreground min-h-screen">
           <div className="max-w-7xl mx-auto">
             <HallOfFameHeader
               periodLabel={config.label}
@@ -60,7 +60,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
 
   return (
     <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-      <div className="p-4 sm:p-8 bg-[#F3F3F3] min-h-screen">
+      <div className="p-4 sm:p-8 bg-background text-foreground min-h-screen">
         <div className="max-w-7xl mx-auto">
           <HallOfFameHeader
             periodLabel={config.label}

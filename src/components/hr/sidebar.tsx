@@ -56,7 +56,7 @@ function SidebarUserProfile({
               {user && (
                 <>
                   <p className="font-semibold text-sm truncate">{user.name}</p>
-                  <p className="text-xs text-red-200 truncate">{user.email}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </>
               )}
             </>
@@ -110,28 +110,28 @@ export function Sidebar({
 
   return (
     <aside
-      className={`bg-[#690003] text-white flex flex-col justify-between h-screen sticky top-0 transition-all duration-300 overflow-hidden ${
+      className={`bg-card text-foreground flex flex-col justify-between h-screen sticky top-0 transition-all duration-300 overflow-hidden ${
         isCollapsed ? 'w-20' : 'w-60'
       }`}
     >
       {/* Logo Section */}
-      <div className="p-6 border-b border-red-900">
+      <div className="p-6 border-b border-border">
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-white rounded flex items-center justify-center shrink-0">
-              <span className="text-sm font-bold text-[#690003]">W</span>
+              <span className="text-sm font-bold text-sidebar-primary">W</span>
             </div>
             {!isCollapsed && <h1 className="text-2xl font-bold whitespace-nowrap">WorkHero</h1>}
           </div>
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1 hover:bg-red-900 cursor-pointer rounded transition-colors"
+            className="p-1 hover:bg-accent/20 cursor-pointer rounded transition-colors"
             aria-label="Toggle sidebar"
           >
             {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
           </button>
         </div>
-        {!isCollapsed && <p className="text-sm text-red-200">Barangay Kusina</p>}
+        {!isCollapsed && <p className="pl-8 text-sm text-muted-foreground">Barangay Kusina</p>}
       </div>
 
       {/* Navigation */}
@@ -152,16 +152,16 @@ export function Sidebar({
               aria-disabled={isDisabled}
               className={`w-full flex items-center gap-3 px-4 py-3 cursor-pointer rounded-full font-medium transition-all ${
                 isCollapsed ? 'justify-center px-2' : 'justify-start'
-              } ${isActive ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'} ${
-                isDisabled ? 'opacity-50 pointer-events-none' : ''
-              }`}
+              } ${
+                isActive ? 'bg-accent text-accent-foreground' : 'text-foreground hover:bg-accent/20'
+              } ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}
             >
               {isCollapsed ? (
                 isNavigatingItem ? (
                   <NavigationDisplay
                     isNavigating={isNavigatingItem}
                     className="inline-flex items-center justify-center"
-                    iconClassName="size-5 animate-spin text-red-200"
+                    iconClassName="size-5 animate-spin text-muted-foreground"
                   />
                 ) : (
                   item.icon
@@ -174,7 +174,7 @@ export function Sidebar({
                 <NavigationDisplay
                   isNavigating={isNavigatingItem}
                   className="ml-auto inline-flex items-center justify-center"
-                  iconClassName="size-4 animate-spin text-red-200"
+                  iconClassName="size-4 animate-spin text-muted-foreground"
                 />
               )}
             </Link>
@@ -199,12 +199,12 @@ export function Sidebar({
 
       {/* User Profile Section */}
       <div
-        className={`border-t border-red-900 ${
+        className={`border-t border-border ${
           isCollapsed ? 'flex justify-center items-center h-24' : 'p-4'
         }`}
       >
         <div
-          className={`bg-white/10 rounded-full flex items-center ${
+          className={`bg-accent/20 rounded-full flex items-center ${
             isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
           }`}
         >

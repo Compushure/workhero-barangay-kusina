@@ -2,7 +2,15 @@
 
 import { LogOutBtn } from '@/components/sidebar/logout-btn';
 import { ProfilePic } from '@/components/sidebar/profile-pic';
-import { FileText, CheckCircle, ChevronLeft, ChevronRight, SquarePen, Award, Medal } from 'lucide-react';
+import {
+  FileText,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  SquarePen,
+  Award,
+  Medal,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import Link from 'next/link';
@@ -22,7 +30,13 @@ interface SidebarProps {
   navItems?: NavItem[];
 }
 
-function SidebarUserProfile({ isCollapsed, disabled }: { isCollapsed: boolean; disabled: boolean }) {
+function SidebarUserProfile({
+  isCollapsed,
+  disabled,
+}: {
+  isCollapsed: boolean;
+  disabled: boolean;
+}) {
   const { data: user, isLoading, isFetching } = useGetSessionUser();
   const isProfileLoading = isLoading || isFetching;
 
@@ -41,7 +55,7 @@ function SidebarUserProfile({ isCollapsed, disabled }: { isCollapsed: boolean; d
               {user && (
                 <>
                   <p className="font-semibold text-sm truncate">{user.name}</p>
-                  <p className="text-xs text-red-200 truncate">{user.email}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </>
               )}
             </>
@@ -108,28 +122,30 @@ export function Sidebar({
 
   return (
     <aside
-      className={`bg-[#690003] text-white flex flex-col justify-between transition-all duration-400 ease-in-out overflow-hidden ${
+      className={`bg-sidebar-primary-foreground text-sidebar-foreground flex flex-col justify-between transition-all duration-400 ease-in-out overflow-hidden ${
         isCollapsed ? 'w-20' : 'w-60'
       }`}
     >
       {/* Logo Section */}
-      <div className="p-6 border-b border-red-900">
-        <div className={`flex items-center justify-between mb-2 ${isCollapsed ? 'gap-0' : 'gap-2'}`}>
+      <div className="p-6 border-b border-sidebar-border">
+        <div
+          className={`flex items-center justify-between mb-2 ${isCollapsed ? 'gap-0' : 'gap-2'}`}
+        >
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="w-full p-1 hover:bg-red-900 cursor-pointer rounded-sm transition-colors flex items-center justify-between"
+            className="w-full p-1 hover:bg-sidebar-accent/20 cursor-pointer rounded-sm transition-colors flex items-center justify-between"
             aria-label="Toggle sidebar"
           >
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 bg-white rounded flex items-center justify-center shrink-0">
-                <span className="text-sm font-bold text-[#690003]">W</span>
+                <span className="text-sm font-bold text-sidebar-primary">W</span>
               </div>
               {!isCollapsed && <h1 className="text-2xl font-bold whitespace-nowrap">WorkHero</h1>}
             </div>
             {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
           </button>
         </div>
-        {!isCollapsed && <p className="text-sm text-red-200">Barangay Kusina</p>}
+        {!isCollapsed && <p className="text-sm text-primary">Barangay Kusina</p>}
       </div>
 
       {/* Navigation */}
@@ -158,7 +174,7 @@ export function Sidebar({
                   aria-disabled={isDisabled}
                   className={`w-full flex items-center justify-start gap-3 py-3 cursor-pointer rounded-full font-medium hover:transition-all duration-400 ease-in-out ${
                     isCollapsed ? 'px-3.5' : 'px-4'
-                  } ${isActive ? 'bg-white text-[#690003]' : 'text-white hover:bg-red-900'} ${
+                  } ${isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent/20'} ${
                     isDisabled ? 'opacity-50 pointer-events-none' : ''
                   }`}
                 >
@@ -167,7 +183,7 @@ export function Sidebar({
                       <NavigationDisplay
                         isNavigating={isNavigatingItem}
                         className="inline-flex items-center justify-center"
-                        iconClassName="size-5 animate-spin text-red-200"
+                        iconClassName="size-5 animate-spin text-primary"
                       />
                     ) : (
                       item.icon
@@ -180,7 +196,7 @@ export function Sidebar({
                     <NavigationDisplay
                       isNavigating={isNavigatingItem}
                       className="ml-auto inline-flex items-center justify-center"
-                      iconClassName="size-4 animate-spin text-red-200"
+                      iconClassName="size-4 animate-spin text-primary"
                     />
                   )}
                 </Link>
@@ -195,12 +211,12 @@ export function Sidebar({
 
       {/* User Profile Section */}
       <div
-        className={`border-t border-red-900 ${
+        className={`border-t border-sidebar-border ${
           isCollapsed ? 'flex justify-center items-center h-24' : 'p-4'
         }`}
       >
         <div
-          className={`bg-white/10 rounded-full flex items-center ${
+          className={`bg-sidebar-accent/25 rounded-full flex items-center ${
             isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
           }`}
         >

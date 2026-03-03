@@ -263,9 +263,9 @@ export function RedemptionTable({
       />
 
       <Dialog open={requestModalOpen} onOpenChange={setRequestModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="bg-card text-card-foreground border border-border sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#690003]">Requested Item</DialogTitle>
+            <DialogTitle className="text-primary">Requested Item</DialogTitle>
           </DialogHeader>
           {selectedRequest &&
             (() => {
@@ -275,14 +275,14 @@ export function RedemptionTable({
               const requestImageUrl = selectedRequest.rewardImageUrl;
 
               return (
-                <div className="space-y-4 py-2 text-sm text-[#5a2a2a]">
+                <div className="space-y-4 py-2 text-sm text-foreground">
                   <div>
                     <span className="text-xs text-muted-foreground">Requested by: </span>
                     <span className="font-medium">{selectedRequest.userName || 'N/A'}</span>
                   </div>
 
                   <div className="flex flex-col items-center gap-2">
-                    <div className="h-24 w-24 rounded-xl bg-[#f2e1c9] flex items-center justify-center overflow-hidden">
+                    <div className="h-24 w-24 rounded-xl bg-muted flex items-center justify-center overflow-hidden">
                       {requestImageUrl && !requestImageError ? (
                         <img
                           src={requestImageUrl}
@@ -292,7 +292,7 @@ export function RedemptionTable({
                           onError={() => setRequestImageError(true)}
                         />
                       ) : (
-                        <ImageIcon className="h-8 w-8 text-[#730202]/40" />
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
                       )}
                     </div>
                     <p className="font-semibold text-base text-center wrap-anywhere">
