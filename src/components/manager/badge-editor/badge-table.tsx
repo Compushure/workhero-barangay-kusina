@@ -49,6 +49,7 @@ export default function BadgeTable({
 }: BadgeTableProps) {
   const formatIntervalLabel = (value: BadgeInterval) => {
     if (value === 'none') return 'Manual';
+    if (value === 'anually') return 'Annually';
     return value.charAt(0).toUpperCase() + value.slice(1);
   };
 
