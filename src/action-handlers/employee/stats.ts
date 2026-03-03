@@ -13,7 +13,7 @@ import {
   getEmployeeXP,
 } from '@/actions/employee/stats';
 import { toast } from 'sonner';
-import type { EmployeeRank, EmployeeXP } from '@/types';
+import type { EmployeePointsData, EmployeeRank, EmployeeXP } from '@/types';
 import type { TimePeriod } from '@/lib/utils/time-period-utils';
 
 /**

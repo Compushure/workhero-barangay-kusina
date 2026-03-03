@@ -9,6 +9,7 @@
  * Test Coverage: ()
  *
  */
+import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals';
 import {
   fetchBadges,
   fetchBadgeTaskOptions,
@@ -34,9 +35,15 @@ import {
 import type { Badge, BadgeCondition, BadgeOption } from '@/types/manager/badge-editor';
 import type { AddBadgeInput, EditBadgeInput } from '@/zod/schemas/badge';
 
-let safeActionMock: jest.Mock<Promise<{ success: boolean; data: any }>, [() => any]>;
-let toastSuccess: jest.Mock;
-let toastError: jest.Mock;
+type SafeActionFn = (fn: () => any) => Promise<{ success: boolean; data: any; error: string | null }>;
+type ToastFn = (message?: any) => any;
+type UploadResult = { data: { path: string } | null; error: { message: string } | null };
+type RemoveResult = { data: null; error: { message: string } | null };
+type PublicUrlResult = { data: { publicUrl: string } };
+
+let safeActionMock: jest.MockedFunction<SafeActionFn>;
+let toastSuccess: jest.MockedFunction<ToastFn>;
+let toastError: jest.MockedFunction<ToastFn>;
 
 jest.mock('@/lib/utils/safe-action', () => ({
   safeAction: jest.fn(async (fn: () => any) => {
@@ -52,15 +59,15 @@ jest.mock('@/lib/utils/safe-action', () => ({
 
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
 
-const { safeAction } = jest.requireMock('@/lib/utils/safe-action') as { safeAction: jest.Mock };
+const { safeAction } = jest.requireMock('@/lib/utils/safe-action') as { safeAction: jest.MockedFunction<SafeActionFn> };
 safeActionMock = safeAction;
-const { toast } = jest.requireMock('sonner') as { toast: { success: jest.Mock; error: jest.Mock } };
+const { toast } = jest.requireMock('sonner') as { toast: { success: jest.MockedFunction<ToastFn>; error: jest.MockedFunction<ToastFn> } };
 toastSuccess = toast.success;
 toastError = toast.error;
 
-const mockGetPublicUrl = jest.fn();
-const mockUpload = jest.fn();
-const mockRemove = jest.fn();
+const mockGetPublicUrl = jest.fn() as jest.MockedFunction<(path: string) => PublicUrlResult>;
+const mockUpload = jest.fn() as jest.MockedFunction<(path: string, file: File | Blob) => Promise<UploadResult>>;
+const mockRemove = jest.fn() as jest.MockedFunction<(paths: string[]) => Promise<RemoveResult>>;
 
 type BadgeRow = {
   id: string;

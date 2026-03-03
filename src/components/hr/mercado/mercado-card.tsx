@@ -20,7 +20,7 @@ interface MercadoItem {
   quantity?: number;
   isActive?: boolean;
   imageUrl?: string;
-  availableMonth?: number;
+  createdAt?: string;
   availableDate?: string | Date | null;
 }
 
@@ -38,12 +38,17 @@ function formatNumber(num: number): string {
   return num.toLocaleString('en-US');
 }
 
-function formatAvailableMonth(month: number | undefined): string {
-  if (!month || month < 1 || month > 12) return 'All Months';
-
-  return new Date(2026, month - 1, 1).toLocaleDateString('en-US', {
-    month: 'long',
-  });
+function formatDate(dateString: string | undefined): string {
+  if (!dateString) return '';
+  try {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return '';
+  }
 }
 
 export const MercadoCard = memo(function MercadoCard({
@@ -166,7 +171,7 @@ export const MercadoCard = memo(function MercadoCard({
 
           <div className="flex items-center gap-4 mt-2">
             <p className="text-[#730202] font-medium italic opacity-80 text-base">
-              {formattedPrice} {item.price === 1 ? 'pt' : 'pts'}
+              {formattedPrice} pts
             </p>
             {formattedQuantity !== undefined && (
               <p
@@ -176,9 +181,9 @@ export const MercadoCard = memo(function MercadoCard({
               </p>
             )}
           </div>
-          <p className="text-[#730202]/50 text-xs mt-1">
-            Available Month: {formatAvailableMonth(item.availableMonth)}
-          </p>
+          {item.createdAt && (
+            <p className="text-[#730202]/50 text-xs mt-1">Created: {formatDate(item.createdAt)}</p>
+          )}
         </div>
 
         <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
