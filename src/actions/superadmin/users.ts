@@ -135,20 +135,20 @@ export async function fetchUsersPaginatedAction(
     }
 
     const data = await res.json();
-    const users = data.users as User[];
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 25;
-
-    // Calculate pagination metadata
-    // Note: The backend doesn't return total count directly in the current implementation,
-    // so we estimate based on whether results are less than pageSize
-    const totalPages = users.length < pageSize ? page : page + 1; // Simplified estimation
+    const users = (data.users ?? []) as User[];
+    const fallbackPageSize = params.pageSize ?? 25;
+    const totalCount =
+      typeof data.count === 'number' ? data.count : users.length;
+    const totalPages =
+      typeof data.totalPages === 'number'
+        ? data.totalPages
+        : Math.max(1, Math.ceil(totalCount / fallbackPageSize));
 
     return {
       error: null,
       data: {
         data: users,
-        count: users.length,
+        count: totalCount,
         totalPages,
       },
     };

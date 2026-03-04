@@ -15,35 +15,30 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
 
   const pages: (number | string)[] = [];
 
-  // Always show first 4 pages
-  const firstPages = Math.min(4, totalPages);
-  for (let i = 1; i <= firstPages; i++) {
-    pages.push(i);
-  }
+  if (totalPages <= 8) {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    const firstBlockEnd = 4;
+    const lastBlockStart = totalPages - 3;
 
-  // Show ellipsis if there are more pages beyond first 4
-  if (totalPages > 8) {
-    // If current page is not in first 4 or last 4, show ellipsis and current page
-    if (currentPage > 4 && currentPage <= totalPages - 4) {
+    for (let i = 1; i <= firstBlockEnd; i++) {
+      pages.push(i);
+    }
+
+    if (currentPage > firstBlockEnd + 1 && currentPage < lastBlockStart - 1) {
       pages.push('...');
       pages.push(currentPage);
       pages.push('...');
-    } else if (currentPage > 4) {
-      // Current page is beyond first 4, show ellipsis after first 4
+    } else {
       pages.push('...');
     }
-  }
 
-  // Always show last 4 pages (or fewer if total pages is less)
-  const lastPages = Math.min(4, totalPages - firstPages);
-  if (lastPages > 0) {
-    // Add ellipsis if needed
-    if (totalPages > 8 && currentPage <= totalPages - 4) {
-      pages.push('...');
-    }
-    // Add last 4 pages
-    for (let i = totalPages - lastPages + 1; i <= totalPages; i++) {
-      pages.push(i);
+    for (let i = lastBlockStart; i <= totalPages; i++) {
+      if (!pages.includes(i)) {
+        pages.push(i);
+      }
     }
   }
 

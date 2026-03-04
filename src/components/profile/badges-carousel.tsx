@@ -68,7 +68,7 @@ function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
             {currentBadges.map((badge) => (
               <Tooltip key={badge.userbadge_id}>
                 <TooltipTrigger asChild>
-                  <div className="flex-shrink-0 w-28 h-32 flex flex-col items-center justify-start p-2 rounded-lg border-2 border-[#730202]/10 hover:border-[#730202]/30 transition-colors bg-[#730202]/5 hover:bg-[#730202]/10 cursor-pointer">
+                  <div className="flex-shrink-0 w-28 h-32 flex flex-col items-center justify-start p-2 rounded-lg border-2 border-accent/20 hover:border-accent/40 transition-colors bg-accent/5 hover:bg-accent/10 cursor-pointer">
                     {/* Badge Image */}
                     {badge.img_link ? (
                       <div className="relative h-16 w-16 rounded-lg overflow-hidden mb-2 flex-shrink-0">
@@ -79,15 +79,15 @@ function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
                         />
                       </div>
                     ) : (
-                      <div className="h-16 w-16 rounded-lg bg-[#730202]/20 flex items-center justify-center mb-2 flex-shrink-0">
-                        <Trophy className="h-8 w-8 text-[#730202]" />
+                      <div className="h-16 w-16 rounded-lg bg-accent/15 flex items-center justify-center mb-2 flex-shrink-0">
+                        <Trophy className="h-8 w-8 text-accent" />
                       </div>
                     )}
 
                     {/* Badge Info */}
                     <div className="w-full text-center flex-1 flex flex-col justify-between min-h-16">
                       <div>
-                        <h4 className="text-xs font-bold text-[#730202] line-clamp-2 mb-1">
+                        <h4 className="text-xs font-bold text-title line-clamp-2 mb-1">
                           {badge.badge_name}
                         </h4>
                         {badge.badge_description && (
@@ -153,7 +153,7 @@ function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
                 key={i}
                 onClick={() => setCurrentPage(i)}
                 className={`h-2 rounded-full transition-colors ${
-                  i === currentPage ? 'bg-[#730202] w-3' : 'bg-[#730202]/30 w-2'
+                  i === currentPage ? 'bg-accent w-3' : 'bg-accent/40 w-2'
                 }`}
                 aria-label={`Go to page ${i + 1}`}
               />

@@ -53,6 +53,16 @@ export interface User {
   pagibig?: string;
   createdAt?: Date;
   profilePictureUrl?: string;
+  // Gamified stats
+  xp?: number;
+  user_level?: number;
+  level?: number;
+  total_xp?: number;
+  total_points_earned?: number;
+  points?: number;
+  deducted_points?: number;
+  is_tenured?: boolean;
+  performance_score?: number;
 }
 
 // ============================================
@@ -179,6 +189,19 @@ export type UserWithExtras = User & {
   pagibig?: string;
   createdAt?: string | Date;
   profilePictureUrl?: string;
+  xp?: number;
+  user_level?: number;
+  level?: number;
+  total_xp?: number;
+  total_points_earned?: number;
+  points?: number;
+  deducted_points?: number;
+  is_tenured?: boolean;
+  performance_score?: number;
+  total_absences?: number;
+  total_lates?: number;
+  total_undertimes?: number;
+  total_overtimes?: number;
 };
 // Re-export all domain types for convenience
 export * from './shared';
