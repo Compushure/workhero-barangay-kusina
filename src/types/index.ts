@@ -209,3 +209,4 @@ export * from './manager';
 export * from './hr';
 export * from './employee';
 export * from './admin';
+export * from './notification';

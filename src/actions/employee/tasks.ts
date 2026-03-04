@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import type { ServerActionResponse } from '@/types';
 import type { TaskStatusItem } from '@/components/employee/task-status/types';
+import { insertNotification } from '@/lib/notifications';
 
 export interface EmployeeTasksData {
   currentTasks: TaskStatusItem[];
@@ -159,7 +160,9 @@ export async function submitTaskVerification(
   // Fetch task details with current progress
   const { data: task, error: taskError } = await supabase
     .from('task_info_view')
-    .select('assigned_to, status, completed_orders, pending_orders, max_orders, points_claimed_at')
+    .select(
+      'assigned_to, status, completed_orders, pending_orders, max_orders, points_claimed_at, category_name'
+    )
     .eq('kpitask_id', kpitaskId)
     .single();
 
@@ -172,6 +175,7 @@ export async function submitTaskVerification(
   const completedOrders = (task as { completed_orders: number | null }).completed_orders ?? 0;
   const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
   const pointsClaimedAt = (task as { points_claimed_at: string | null }).points_claimed_at;
+  const taskName = (task as { category_name: string | null }).category_name ?? 'Task';
 
   // Validation checks
   if (assignedTo !== user.id) {
@@ -205,6 +209,22 @@ export async function submitTaskVerification(
   if (updateError) {
     return { error: 'Failed to submit task for verification: ' + updateError.message, data: undefined };
   }
+
+  const remainingAfterSubmission = Math.max(0, maxOrders - completedOrders - pendingOrders);
+
+  await insertNotification({
+    userId: user.id,
+    type: 'task',
+    message: `You have submitted ${pendingOrders} order${pendingOrders !== 1 ? 's' : ''} for "${taskName}" for review!${remainingAfterSubmission > 0 ? ` You have ${remainingAfterSubmission} order${remainingAfterSubmission !== 1 ? 's' : ''} remaining in this task.` : ' This task is now complete!'}`,
+    metadata: {
+      taskId: kpitaskId,
+      taskName,
+      pendingOrdersSubmitted: pendingOrders,
+      remainingOrders: remainingAfterSubmission,
+      maxOrders,
+      pointsClaimedAt,
+    },
+  });
 
   return {
     error: null,

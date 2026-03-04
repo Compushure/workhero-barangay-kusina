@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse, Task, AssignedEmployee, AssignedTask } from '@/types';
+import { insertNotification } from '@/lib/notifications';
 
 /**
  * Fetch all available tasks for assignment
@@ -164,6 +165,25 @@ export async function addTaskAssignmentAction(
       .select();
 
     if (insertError) throw insertError;
+
+    if (insertedData?.length) {
+      await Promise.all(
+        insertedData.map(async (row: any) =>
+          insertNotification({
+            userId: row.assigned_to,
+            type: 'task',
+            message: `You have been assigned to a task: ${taskData.name}`,
+            metadata: {
+              taskId: row.id,
+              categoryId: row.category_id,
+              taskName: taskData.name,
+              deadline: row.deadline_date,
+              maxOrders: row.max_orders,
+            },
+          })
+        )
+      );
+    }
 
     // Group assignments by task to create one AssignedTask with multiple employees
     const taskGroups = new Map<
