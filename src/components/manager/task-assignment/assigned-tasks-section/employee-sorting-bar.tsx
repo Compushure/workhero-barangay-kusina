@@ -32,7 +32,7 @@ export function EmployeeSortingBar({ sortBy, onSortChange }: EmployeeSortingBarP
         <Button
           variant="default"
           size="default"
-          className="bg-[#690003] shadow-sm/25 hover:bg-[#af3b3f] transition-all duration-500 ease-in-out cursor-pointer text-white shadow-md w-32 flex justify-between"
+          className="group bg-card text-foreground shadow-sm/25 hover:bg-primary-gradient hover:text-card transition-all duration-400 ease-in-out cursor-pointer shadow-md w-32 justify-between"
         >
           {/* Label on the left */}
           <span className="truncate">{currentLabel}</span>
@@ -45,7 +45,7 @@ export function EmployeeSortingBar({ sortBy, onSortChange }: EmployeeSortingBarP
           <DropdownMenuItem
             key={opt.value}
             onClick={() => onSortChange(opt.value)}
-            className={`cursor-pointer transition-all duration-500 ease-in-out ${sortBy === opt.value ? 'bg-red-100' : ''}`}
+            className={`cursor-pointer transition-all duration-500 ease-in-out ${sortBy === opt.value ? 'bg-accent text-card' : 'hover:bg-accent/25!'}`}
           >
             {opt.label}
           </DropdownMenuItem>

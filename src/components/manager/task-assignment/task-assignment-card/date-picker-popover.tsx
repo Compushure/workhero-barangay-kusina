@@ -26,9 +26,9 @@ export function DatePickerPopover({ deadline, onDeadlineChange }: DatePickerPopo
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="bg-white text-black hover:bg-gray-100 flex items-center gap-2 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25">
-          <CalendarIcon className="w-4 h-4" />
-          <span>{deadlineDisplay}</span>
+        <Button className="bg-zinc-50 text-primary flex items-center gap-6 cursor-pointer transition-all duration-400 ease-in-out shadow-sm/25 hover:bg-accent/15">
+          <CalendarIcon className="size-4 text-accent" />
+          <span className={`${deadline ? 'text-accent' : 'text-secondary'}`}>{deadlineDisplay}</span>
           <ChevronDown className="w-4 h-4" />
         </Button>
       </PopoverTrigger>
@@ -39,10 +39,6 @@ export function DatePickerPopover({ deadline, onDeadlineChange }: DatePickerPopo
             selected={deadline || undefined}
             onSelect={handleDateSelect}
             disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-            classNames={{
-              day: 'hover:bg-[#D4A574] hover:text-gray-900 rounded-md transition-colors',
-              day_selected: 'bg-[#690003] text-white',
-            }}
           />
         </div>
       </PopoverContent>

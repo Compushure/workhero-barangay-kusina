@@ -31,7 +31,7 @@
 
   /* Muted: Light neutral */
   --muted: #fff2cc; /* Light pinkish neutral */
-  --muted-foreground: #95b8cf;
+  --muted-foreground: #26344b;
 
   /* Destructive: Dark red */
   --destructive: #8b0000; /* Dark red */
@@ -253,3 +253,4 @@
     background-image: var(--primary-gradient);
   }
 }
+

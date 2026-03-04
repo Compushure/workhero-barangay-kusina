@@ -448,9 +448,28 @@ export async function clearAllEmployeeTasks(
   return { error: null, data: true };
 }
 
+// unnassigns one employee from a task instance
 export async function deleteTask(taskId: string): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
   const { error } = await supabase.from('KPITask').delete().eq('id', taskId);
+
+  if (error) return { error: error.message, data: undefined };
+  return { error: null, data: true };
+}
+
+// unnassigns all employees assigned to a task instace, thus delete the task instance entirely
+export async function deleteTaskForAllEmployees(
+  categoryId: string,
+  deadlineDate: string,
+  maxOrders: number
+): Promise<ServerActionResponse<boolean>> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('KPITask')
+    .delete()
+    .eq('category_id', categoryId)
+    .eq('deadline_date', deadlineDate)
+    .eq('max_orders', maxOrders);
 
   if (error) return { error: error.message, data: undefined };
   return { error: null, data: true };

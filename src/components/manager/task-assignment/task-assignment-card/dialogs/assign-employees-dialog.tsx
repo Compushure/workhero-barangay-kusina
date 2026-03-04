@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Users } from 'lucide-react';
 import type { AssignedEmployee, AssignedTask } from '@/types';
 import AssignEmployeesTable from './assign-employees-table';
 import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
@@ -110,19 +110,25 @@ export function AssignEmployeesDialog({
       <Button
         onClick={() => !disabled && setOpen(true)}
         disabled={disabled}
-        className={`bg-white shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out hover:bg-gray-100 flex items-center disabled:opacity-50 disabled:cursor-not-allowed
-          ${selectedEmployees.length === 0 ? 'text-zinc-700' : 'text-[#690003]'}`}
+        className={`bg-zinc-50 transform-gpu shadow-sm/25 cursor-pointer transition-all duration-400 ease-in-out flex items-center 
+          disabled:shadow hover:bg-accent/15 disabled:cursor-not-allowed`}
       >
-        <div className="flex items-center gap-8">
-          <span>{selectedEmployees.length} employee/s selected</span>
-          <Plus className="w-4 h-4" />
+        <div className="flex items-center gap-2 min-w-45 max-9/10">
+          <Users size={16} className='text-accent'/>
+          <span className={`${selectedEmployees.length === 0 ? 'text-secondary' : 'text-primary'}`}>
+            {selectedEmployees.length} employee/s selected
+          </span>
         </div>
+        <Plus className="size-4 text-primary" />
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="bg-[#FBF4E8] max-h-[90vh] flex flex-col rounded-3xl pt-12">
+        <DialogContent className="bg-card max-h-[90vh] flex flex-col rounded-3xl pt-12">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[#690003]">Assign Employees for Task</DialogTitle>
+            <DialogTitle className="flex gap-2 text-2xl text-foreground text-left items-center">
+              <Users className='size-7 p-1.25 bg-primary-gradient text-card rounded-full'/>
+              Assign Employees for Task
+            </DialogTitle>
           </DialogHeader>
 
           {/* Search Bar */}
@@ -133,15 +139,15 @@ export function AssignEmployeesDialog({
               placeholder="Enter in Employee Name or ID"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-white shadow-sm/25 focus:outline-none focus:border focus:border-[#690003]"
+              className="w-full pl-10 pr-4 py-2 rounded-full bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent"
             />
           </div>
 
           {/* Employees Selected Badge */}
           <div className="mb-1">
-            <h4 className="text-lg font-bold text-[#690003]">
+            <h4 className="text-lg font-bold text-foreground">
               Employees Selected{' '}
-              <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+              <span className="bg-accent text-card px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
                 {selectedEmployees.length}
               </span>
             </h4>
@@ -163,7 +169,7 @@ export function AssignEmployeesDialog({
             <Button
               variant="outline"
               onClick={() => setOpen(false)}
-              className="px-12 border-gray-300 bg-zinc-50 hover:bg-[#690009] hover:text-zinc-50 cursor-pointer transition-all duration-500 ease-in-out"
+              className="px-12 bg-card text-foreground hover:bg-accent hover:text-card cursor-pointer transition-all duration-400 ease-in-out"
             >
               Close
             </Button>
