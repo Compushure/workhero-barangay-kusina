@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, Suspense, useEffect, useState, useTransition } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,6 +58,8 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   const [isPending, startTransition] = useTransition();
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [activeTab, setActiveTab] = useState<TabValue>(DEFAULT_TAB);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [roleLoading, setRoleLoading] = useState(true);
   
   const { data: profile, isLoading } = useGetUserProfile(userId);
   const uploadPicture = useUploadOwnProfilePicture(userId);
@@ -70,9 +73,46 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   // So we can safely assume this is the user's own profile
   const isOwnProfile = true;
 
+  // Fetch user's role from Supabase claims
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const supabase = createClient();
+        const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+        
+        if (claimsError || !claimsData?.claims) {
+          console.log('Failed to get user claims');
+          setRoleLoading(false);
+          return;
+        }
+
+        const role = claimsData.claims.app_metadata?.user_role;
+        const normalizedRole = role?.trim().toLowerCase() || null;
+        setUserRole(normalizedRole);
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      } finally {
+        setRoleLoading(false);
+      }
+    };
+
+    fetchUserRole();
+  }, []);
+
+  // Check if user can access stats tab (only regular/employee)
+  const canAccessStats = userRole === 'regular' || userRole === 'employee';
+
   useEffect(() => {
     const applyHash = () => {
       const hash = window.location.hash.replace('#', '') as TabValue;
+      
+      // Check if the requested tab is 'stats' and user doesn't have access
+      if (hash === 'stats' && !canAccessStats) {
+        setActiveTab(DEFAULT_TAB);
+        window.history.replaceState(null, '', `#${DEFAULT_TAB}`);
+        return;
+      }
+      
       if (TAB_VALUES.includes(hash)) {
         setActiveTab(hash);
       } else {
@@ -80,10 +120,13 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
       }
     };
 
-    applyHash();
-    window.addEventListener('hashchange', applyHash);
-    return () => window.removeEventListener('hashchange', applyHash);
-  }, []);
+    // Only apply hash once role has been loaded
+    if (!roleLoading) {
+      applyHash();
+      window.addEventListener('hashchange', applyHash);
+      return () => window.removeEventListener('hashchange', applyHash);
+    }
+  }, [roleLoading, canAccessStats]);
 
   const handleImageSelect = useCallback((croppedImage: File) => {
     setShowCropDialog(false);
@@ -213,9 +256,11 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
             <TabsTrigger value="ids" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
               Government IDs
             </TabsTrigger>
-            <TabsTrigger value="stats" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
-              Gamified Stats
-            </TabsTrigger>
+            {canAccessStats && (
+              <TabsTrigger value="stats" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
+                Gamified Stats
+              </TabsTrigger>
+            )}
             <TabsTrigger value="badges" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
               All Badges
             </TabsTrigger>
@@ -227,7 +272,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
           {activeTab === 'contact' && <ContactInformation profile={profile} />}
           {activeTab === 'employment' && <EmploymentDetails profile={profile} />}
           {activeTab === 'ids' && <GovernmentIDs profile={profile} />}
-          {activeTab === 'stats' && <GamifiedStats profile={profile} />}
+          {activeTab === 'stats' && canAccessStats && <GamifiedStats profile={profile} />}
           {activeTab === 'badges' && (
             <div className="space-y-2">
               <BadgesCarousel userId={userId} />

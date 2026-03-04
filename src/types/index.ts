@@ -198,6 +198,10 @@ export type UserWithExtras = User & {
   deducted_points?: number;
   is_tenured?: boolean;
   performance_score?: number;
+  total_absences?: number;
+  total_lates?: number;
+  total_undertimes?: number;
+  total_overtimes?: number;
 };
 // Re-export all domain types for convenience
 export * from './shared';

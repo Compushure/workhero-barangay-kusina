@@ -17,14 +17,6 @@ const formatValue = (value: unknown): string => {
 export function GamifiedStats({ profile }: { profile: UserWithExtras }) {
   const stats: StatItem[] = [
     {
-      label: 'Level',
-      value: formatValue(profile.user_level ?? profile.level),
-    },
-    {
-      label: 'XP',
-      value: formatValue(profile.xp),
-    },
-    {
       label: 'Total XP',
       value: formatValue(profile.total_xp),
     },
@@ -33,12 +25,28 @@ export function GamifiedStats({ profile }: { profile: UserWithExtras }) {
       value: formatValue(profile.points),
     },
     {
-      label: 'Deducted Points',
-      value: formatValue(profile.deducted_points),
+      label: 'Level',
+      value: formatValue(profile.user_level ?? profile.level),
     },
     {
-      label: 'Tenure',
-      value: profile.is_tenured === true ? 'Tenured' : profile.is_tenured === false ? 'Not Tenured' : 'N/A',
+      label: 'Performance Score',
+      value: formatValue(profile.performance_score),
+    },
+    {
+      label: 'Total Absences',
+      value: formatValue(profile.total_absences),
+    },
+    {
+      label: 'Total Lates',
+      value: formatValue(profile.total_lates),
+    },
+    {
+      label: 'Total Undertimes',
+      value: formatValue(profile.total_undertimes),
+    },
+    {
+      label: 'Total Overtimes',
+      value: formatValue(profile.total_overtimes),
     },
   ];
 
@@ -47,7 +55,7 @@ export function GamifiedStats({ profile }: { profile: UserWithExtras }) {
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="rounded-lg border border-border bg-[var(--color-background-soft)] px-4 py-3 shadow-sm"
+          className="rounded-lg border border-border bg-background-soft px-4 py-3 shadow-sm"
         >
           <p className="text-xs font-medium text-muted-foreground">{stat.label}</p>
           <p className="text-xl font-semibold text-title leading-snug">{stat.value}</p>
