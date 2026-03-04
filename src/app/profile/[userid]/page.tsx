@@ -20,8 +20,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   await protectSessionRoute(userid);
 
   return (
-    <div className="min-h-screen bg-[#f2e1c9] p-6 animate-in fade-in duration-500">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#f2e1c9] px-2 py-4 sm:p-6 animate-in fade-in duration-500">
+      <div className="w-full mx-auto">
         <ProfilePageClient userId={userid} />
       </div>
     </div>

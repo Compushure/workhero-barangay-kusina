@@ -1,20 +1,30 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, Suspense, useState, memo, useTransition } from 'react';
+import { useCallback, Suspense, useEffect, useState, useTransition } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProfileHeader } from './profile-header';
 import { ProfilePicture } from './profile-picture';
 import { ProfileCard } from './profile-card';
 import { RecentBadges } from './recent-badges';
+import { BadgesCarousel } from './badges-carousel';
+import { BasicInformation } from './basic-information';
+import { EmploymentDetails } from './employment-details';
+import { ContactInformation } from './contact-information';
+import { GovernmentIDs } from './government-ids';
+import { GamifiedStats } from './gamified-stats';
 import { ImageCropUpload } from '@/components/admin/image-crop-upload';
 import { useGetUserProfile } from '@/hooks/tanstack/queries/profileQueries';
-import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import { useUploadOwnProfilePicture, useDeleteOwnProfilePicture } from '@/hooks/tanstack/mutations/profileMutations';
 import { useAntiSpam } from '@/hooks/useAntiSpam';
+
+const TAB_VALUES = ['basic', 'contact', 'employment', 'ids', 'stats', 'badges'] as const;
+type TabValue = (typeof TAB_VALUES)[number];
+const DEFAULT_TAB: TabValue = 'basic';
 
 interface ProfilePageClientProps {
   userId: string;
@@ -45,8 +55,8 @@ export function ProfilePageClient({ userId }: ProfilePageClientProps) {
 function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(null);
   const [showCropDialog, setShowCropDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabValue>(DEFAULT_TAB);
   
   const { data: profile, isLoading } = useGetUserProfile(userId);
   const uploadPicture = useUploadOwnProfilePicture(userId);
@@ -60,8 +70,22 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   // So we can safely assume this is the user's own profile
   const isOwnProfile = true;
 
+  useEffect(() => {
+    const applyHash = () => {
+      const hash = window.location.hash.replace('#', '') as TabValue;
+      if (TAB_VALUES.includes(hash)) {
+        setActiveTab(hash);
+      } else {
+        setActiveTab(DEFAULT_TAB);
+      }
+    };
+
+    applyHash();
+    window.addEventListener('hashchange', applyHash);
+    return () => window.removeEventListener('hashchange', applyHash);
+  }, []);
+
   const handleImageSelect = useCallback((croppedImage: File) => {
-    setSelectedProfileImage(croppedImage);
     setShowCropDialog(false);
     
     // Upload immediately after crop
@@ -97,7 +121,6 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
           await deletePicture.mutateAsync();
           // Close modal after successful deletion
           setShowCropDialog(false);
-          setSelectedProfileImage(null);
           // Optionally wait a moment to ensure cache is updated
           setTimeout(() => {
             // This ensures the dialog content re-renders with fresh data
@@ -108,6 +131,16 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
       });
     }
   }, [deletePicture, deleteAntiSpam]);
+
+  const handleTabChange = (value: string) => {
+    const nextValue = TAB_VALUES.includes(value as TabValue)
+      ? (value as TabValue)
+      : DEFAULT_TAB;
+    setActiveTab(nextValue);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `#${nextValue}`);
+    }
+  };
 
   if (isLoading) {
     return <ProfileLoadingSkeleton />;
@@ -136,39 +169,70 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2 w-full px-2 sm:px-3 pb-6 md:max-w-3xl lg:max-w-4xl md:mx-auto">
       {/* Header */}
       <ProfileHeader isPending={isPending} onBack={handleBackClick} />
 
       {/* Profile Card */}
       <ProfileCard profile={profile}>
-        {/* Profile Picture and Recent Badges Section */}
-        <div className="flex flex-col md:flex-row gap-12 mb-6 justify-center md:justify-start items-start md:items-start">
-          {/* Profile Picture Display & Controls - Centered */}
-          <div className="flex justify-center md:justify-start flex-shrink-0">
-            <ProfilePicture
-              profilePictureUrl={profile?.profilePictureUrl}
-              userName={profile?.name || 'User'}
-              userId={userId}
-              isOwnProfile={isOwnProfile}
-              isLoading={uploadPicture.isPending || isPending}
-              isDeleting={deletePicture.isPending}
-              onFileChange={handleFileChange}
-              onDelete={handleDeletePicture}
-              onOpenCropDialog={() => setShowCropDialog(true)}
-            />
+        <div className="flex flex-col items-center text-center gap-2.5 w-full bg-[linear-gradient(to_bottom,rgba(244,120,18,0.58)_0%,rgba(250,169,56,0.36)_38%,rgba(250,169,56,0)_100%)] rounded-xl px-4 py-5 sm:px-5 sm:py-6 shadow-inner">
+          <ProfilePicture
+            profilePictureUrl={profile?.profilePictureUrl}
+            userName={profile?.name || 'User'}
+            userId={userId}
+            isOwnProfile={isOwnProfile}
+            isLoading={uploadPicture.isPending || isPending}
+            isDeleting={deletePicture.isPending}
+            onFileChange={handleFileChange}
+            onDelete={handleDeletePicture}
+            onOpenCropDialog={() => setShowCropDialog(true)}
+          />
+          <div className="space-y-1">
+            <p className="text-xl font-semibold text-title">{profile.name}</p>
+            {profile.employeeId && (
+              <p className="text-sm text-muted-foreground">{profile.employeeId}</p>
+            )}
           </div>
-          
-          {/* Recent Badges Display - Smaller badges */}
-          <div className="flex flex-col items-center md:items-start gap-1">
-            <div className="text-center md:text-left">
-              <p className="text-base font-semibold text-title">{profile.name}</p>
-              {profile.employeeId && (
-                <p className="text-xs text-muted-foreground">{profile.employeeId}</p>
-              )}
+          <RecentBadges userId={userId} showLabel={true} maxBadges={3} />
+        </div>
+
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mt-5">
+          <TabsList
+            variant="line"
+            className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-transparent p-0 gap-2 h-auto"
+          >
+            <TabsTrigger value="basic" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
+              Basic Information
+            </TabsTrigger>
+            <TabsTrigger value="contact" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
+              Contact Information
+            </TabsTrigger>
+            <TabsTrigger value="employment" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
+              Employment Details
+            </TabsTrigger>
+            <TabsTrigger value="ids" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
+              Government IDs
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
+              Gamified Stats
+            </TabsTrigger>
+            <TabsTrigger value="badges" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
+              All Badges
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="mt-4 space-y-4 pb-2 min-h-64 sm:min-h-72">
+          {activeTab === 'basic' && <BasicInformation profile={profile} />}
+          {activeTab === 'contact' && <ContactInformation profile={profile} />}
+          {activeTab === 'employment' && <EmploymentDetails profile={profile} />}
+          {activeTab === 'ids' && <GovernmentIDs profile={profile} />}
+          {activeTab === 'stats' && <GamifiedStats profile={profile} />}
+          {activeTab === 'badges' && (
+            <div className="space-y-2">
+              <BadgesCarousel userId={userId} />
             </div>
-            <RecentBadges userId={userId} showLabel={true} maxBadges={2} />
-          </div>
+          )}
         </div>
       </ProfileCard>
 
