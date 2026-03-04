@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'email and password required' }, { status: 400 });
     }
 
-    // Check if user with this email already exists
+    // Check if user with this email already exists in public."User"
     const { data: existingUser, error: lookupError } = await supabaseAdmin
       .from('User')
       .select('id, email')

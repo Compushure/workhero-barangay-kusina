@@ -6,13 +6,11 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import {
-  handleFetchEmployeePoints,
-  handleFetchEmployeeRank,
-  handleFetchEmployeeXP,
-} from '@/action-handlers/employee/stats';
+import { handleFetchEmployeeRank, handleFetchEmployeePoints, handleFetchEmployeeXP } from '@/action-handlers/employee/stats';
 import { fetchUserBadgesHandler } from '@/action-handlers/employee/badges';
-import type { EmployeePointsData, EmployeeRank, EmployeeXP } from '@/types';
+import type { EmployeeRank } from '@/types';
+import type { EmployeePointsData } from '@/types/employee/points';
+import type { EmployeeXP } from '@/types/employee/xp';
 import type { UserBadge } from '@/actions/employee/badges';
 
 /**
@@ -101,6 +99,40 @@ export function useGetEmployeeRank(
     retry: 1, // Retry once on failure
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   }) as UseQueryResult<EmployeeRank | null, Error>;
+}
+
+/**
+ * Fetches the current employee's points and deducted points
+ */
+export function useGetEmployeePoints(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<EmployeePointsData | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.points(),
+    queryFn: async () => handleFetchEmployeePoints(),
+    enabled: queryOptions.enabled !== false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<EmployeePointsData | null, Error>;
+}
+
+/**
+ * Fetches the current employee's XP (current, total, level)
+ */
+export function useGetEmployeeXP(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<EmployeeXP | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.xp(),
+    queryFn: async () => handleFetchEmployeeXP(),
+    enabled: queryOptions.enabled !== false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<EmployeeXP | null, Error>;
 }
 
 /**

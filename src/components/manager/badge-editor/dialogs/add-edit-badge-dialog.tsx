@@ -50,12 +50,12 @@ interface AddEditBadgeDialogProps {
 
 const REQUIREMENT_TYPES = ['task', 'attribute', 'attendance'];
 const OPERATORS = ['=', '>', '<', '>=', '<=', '!='];
-const INTERVALS: BadgeInterval[] = ['none', 'daily', 'monthly', 'yearly'];
+const INTERVALS: BadgeInterval[] = ['none', 'daily', 'monthly', 'anually'];
 const INTERVAL_LABELS: Record<BadgeInterval, string> = {
   none: 'Manual',
   daily: 'Daily',
   monthly: 'Monthly',
-  yearly: 'Yearly',
+  anually: 'Annually',
 };
 
 export default function AddEditBadgeDialog({

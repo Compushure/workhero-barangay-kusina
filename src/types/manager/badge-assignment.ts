@@ -4,7 +4,7 @@
  * Types for manually awarding badges.
  */
 
-export type BadgeInterval = 'none' | 'daily' | 'monthly' | 'yearly';
+export type BadgeInterval = 'none' | 'daily' | 'monthly' | 'anually';
 
 export interface BadgeSummary {
   id: string;
