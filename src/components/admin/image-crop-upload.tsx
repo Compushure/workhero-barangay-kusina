@@ -314,7 +314,7 @@ export function ImageCropUpload({
       <div className="flex flex-col items-center gap-4">
         <Avatar className="w-24 h-24 border-2 border-border">
           <AvatarImage src={croppedPreview || (currentImageUrl ? `${currentImageUrl}?t=${Date.now()}` : undefined)} alt={userName} />
-          <AvatarFallback className="bg-primary/10 text-primary text-lg">
+          <AvatarFallback className="bg-accent/10 text-foreground text-lg">
             {getInitials(userName)}
           </AvatarFallback>
         </Avatar>
@@ -437,7 +437,7 @@ export function ImageCropUpload({
               <Button
                 type="button"
                 onClick={handleCropSave}
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                className="bg-accent text-white hover:bg-accent/90"
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Save & Upload
