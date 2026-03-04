@@ -26,25 +26,17 @@ export function useDeleteTaskMutation(): UseMutationResult<
   { taskId: string }
 > {
   const queryClient = useQueryClient();
-  const { startOptimistic, optimisticDeleteTask, rollback, commit } =
-    useManagerAssignmentStore();
 
   return useMutation({
     mutationFn: async ({ taskId }: { taskId: string }) => {
       return await handleDeleteTask(taskId);
     },
-    onMutate: async ({ taskId }) => {
-      startOptimistic();
-      optimisticDeleteTask(taskId);
-    },
     onSuccess: () => {
-      commit();
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
     },
     onError: (error) => {
-      rollback();
-      toast.error('Failed to delete task assignment. Rolling back changes.');
+      toast.error('Failed to delete task assignment.');
       console.error('Error deleting task:', error);
     },
   });

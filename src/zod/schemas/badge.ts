@@ -8,7 +8,7 @@ import { z } from 'zod';
 
 export const badgeRequirementTypeSchema = z.enum(['task', 'attribute', 'attendance']);
 export const badgeOperatorSchema = z.enum(['=', '>', '<', '>=', '<=', '!=']);
-export const badgeIntervalSchema = z.enum(['none', 'daily', 'monthly', 'yearly']);
+export const badgeIntervalSchema = z.enum(['none', 'daily', 'monthly', 'anually']);
 export const badgeLogicTypeSchema = z.enum(['and', 'or']);
 
 export const badgeConditionSchema = z.object({

@@ -6,7 +6,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-screen">
       <main className="flex-1">{children}</main>
-      <div className="fixed bottom-4 left-4 z-50 w-40 rounded-full shadow-md">
+      <div className="fixed bottom-4 left-4 z-50">
         <LogOutBtn />
       </div>
     </div>

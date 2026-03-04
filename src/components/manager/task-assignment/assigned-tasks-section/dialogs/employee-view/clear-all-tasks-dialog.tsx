@@ -37,7 +37,7 @@ function ClearAllTasksDialog({
       <DialogTitle></DialogTitle>
       <DialogContent className="bg-white">
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-[#690003]">Clear All Tasks?</h3>
+          <h3 className="text-lg font-bold text-foreground">Clear All Tasks?</h3>
           <p className="text-gray-600">
             Are you sure you want to unassign all tasks from {employee.name}? This action cannot be
             undone.
@@ -46,7 +46,7 @@ function ClearAllTasksDialog({
             <Button
               onClick={handleClearAllTasks}
               disabled={clearAllEmployeeTasksMutation.isPending}
-              className="bg-[#690003] hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
+              className="bg-foreground hover:bg-red-600 text-white cursor-pointer transition-all duration-400 ease-in-out"
             >
               {clearAllEmployeeTasksMutation.isPending ? 'Clearing...' : 'Clear All'}
             </Button>
@@ -54,7 +54,7 @@ function ClearAllTasksDialog({
               variant="outline"
               onClick={() => setShowClearConfirm(null)}
               disabled={clearAllEmployeeTasksMutation.isPending}
-              className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+              className="border-zinc-400 bg-white hover:bg-gray-300 cursor-pointer transition-all duration-400 ease-in-out"
             >
               Cancel
             </Button>

@@ -35,8 +35,7 @@ async function autoDeclinePendingRequestsForReward(
           points_cost
         ),
         User:user_id (
-          points,
-          deducted_points
+          points
         )
       `
       )
@@ -87,7 +86,6 @@ async function autoDeclinePendingRequestsForReward(
             .from('User')
             .update({
               points: (user.points || 0) + totalPointsCost,
-              deducted_points: (user.deducted_points || 0) - totalPointsCost,
             })
             .eq('id', req.user_id);
         }
@@ -217,8 +215,7 @@ export async function acceptRedemptionRequestAction(
           points_cost
         ),
         User:user_id (
-          points,
-          deducted_points
+          points
         )
       `
       )
@@ -238,7 +235,6 @@ export async function acceptRedemptionRequestAction(
     const user = Array.isArray(request.User) ? request.User[0] : request.User;
     const pointsCostPerItem = reward?.points_cost || 0;
     const totalPointsCost = pointsCostPerItem * quantity;
-    const currentDeductedPoints = user?.deducted_points || 0;
 
     // Check current reward quantity before approval
     const { data: currentReward, error: rewardCheckError } = await supabaseAdmin
@@ -270,7 +266,6 @@ export async function acceptRedemptionRequestAction(
           .from('User')
           .update({
             points: (user?.points || 0) + totalPointsCost,
-            deducted_points: currentDeductedPoints - totalPointsCost,
           })
           .eq('id', request.user_id);
 
@@ -293,7 +288,6 @@ export async function acceptRedemptionRequestAction(
           .from('User')
           .update({
             points: (user?.points || 0) + totalPointsCost,
-            deducted_points: currentDeductedPoints - totalPointsCost,
           })
           .eq('id', request.user_id);
 
@@ -350,24 +344,6 @@ export async function acceptRedemptionRequestAction(
       await autoDeclinePendingRequestsForReward(request.reward_id, newQuantity, admin.id);
     }
 
-    // Clear deducted points (admin client: User table not writable by authenticated)
-    const { error: clearDeductedPointsError } = await supabaseAdmin
-      .from('User')
-      .update({
-        deducted_points: currentDeductedPoints - totalPointsCost,
-      })
-      .eq('id', request.user_id);
-
-    if (clearDeductedPointsError) {
-      console.error('Error clearing deducted points:', clearDeductedPointsError);
-      // Try to revert the approval
-      await supabaseAdmin
-        .from('RewardRequest')
-        .update({ status: 'pending', approved_by: null })
-        .eq('id', requestId);
-      return { error: 'Failed to clear deducted points. Request approval reverted.' };
-    }
-
     return { error: null };
   } catch (error) {
     console.error('Error in acceptRedemptionRequestAction:', error);
@@ -416,8 +392,7 @@ export async function declineRedemptionRequestAction(
           points_cost
         ),
         User:user_id (
-          points,
-          deducted_points
+          points
         )
       `
       )
@@ -438,7 +413,6 @@ export async function declineRedemptionRequestAction(
     const pointsCostPerItem = reward?.points_cost || 0;
     const totalPointsCost = pointsCostPerItem * quantity;
     const currentPoints = user?.points || 0;
-    const currentDeductedPoints = user?.deducted_points || 0;
 
     // Update request status to rejected with optional remarks
     const { error: updateError } = await supabase
@@ -460,7 +434,6 @@ export async function declineRedemptionRequestAction(
       .from('User')
       .update({
         points: currentPoints + totalPointsCost,
-        deducted_points: Math.max(0, currentDeductedPoints - totalPointsCost),
       })
       .eq('id', request.user_id);
 
@@ -491,7 +464,6 @@ export async function declineRedemptionRequestAction(
         .from('User')
         .update({
           points: currentPoints,
-          deducted_points: currentDeductedPoints,
         })
         .eq('id', request.user_id);
       return { error: 'Failed to restore stock. Request rejection reverted.' };
@@ -522,7 +494,6 @@ export async function declineRedemptionRequestAction(
           .from('User')
           .update({
             points: currentPoints,
-            deducted_points: currentDeductedPoints,
           })
           .eq('id', request.user_id);
         return { error: 'Failed to restore stock. Request rejection reverted.' };
@@ -573,8 +544,7 @@ export async function autoDeclineInsufficientStockRequestsAction(): Promise<Serv
           points_cost
         ),
         User:user_id (
-          points,
-          deducted_points
+          points
         )
       `
       )
@@ -653,7 +623,6 @@ export async function autoDeclineInsufficientStockRequestsAction(): Promise<Serv
             .from('User')
             .update({
               points: (user.points || 0) + totalPointsCost,
-              deducted_points: (user.deducted_points || 0) - totalPointsCost,
             })
             .eq('id', req.user_id);
         }

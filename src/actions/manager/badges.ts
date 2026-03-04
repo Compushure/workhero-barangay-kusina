@@ -49,6 +49,38 @@ export async function fetchBadges(): Promise<ServerActionResponse<Badge[]>> {
     return { error: `Failed to fetch badges: ${error.message}` };
   }
 
+  const badgeIds = (data || []).map((row: any) => row.badge_id).filter(Boolean);
+
+  if (badgeIds.length === 0) {
+    return { error: null, data: [] };
+  }
+
+  const { data: badgeMeta, error: badgeMetaError } = await supabase
+    .from('Badges')
+    .select('id, date_created, created_by')
+    .in('id', badgeIds);
+
+  if (badgeMetaError) {
+    return { error: `Failed to fetch badge metadata: ${badgeMetaError.message}` };
+  }
+
+  const metaMap = new Map(
+    (badgeMeta || []).map((row: any) => [row.id, { date_created: row.date_created, created_by: row.created_by }])
+  );
+
+  const creatorIds = Array.from(new Set((badgeMeta || []).map((row: any) => row.created_by).filter(Boolean)));
+
+  const { data: creators, error: creatorsError } = await supabase
+    .from('User')
+    .select('id, name')
+    .in('id', creatorIds);
+
+  if (creatorsError) {
+    return { error: `Failed to fetch badge creators: ${creatorsError.message}` };
+  }
+
+  const creatorMap = new Map((creators || []).map((row: any) => [row.id, row.name]));
+
   const badges: Badge[] = (data || []).map((row: any) => ({
     id: row.badge_id,
     name: row.badge_name,
@@ -56,8 +88,12 @@ export async function fetchBadges(): Promise<ServerActionResponse<Badge[]>> {
     points: row.badge_points,
     img_link: row.badge_img_link,
     award_at_interval: row.badge_award_at_interval ?? 'none',
-    created_at: row.badge_created_at ?? row.created_at ?? null,
-    created_by_name: row.badge_created_by_name ?? row.created_by_name ?? null,
+    created_at: metaMap.get(row.badge_id)?.date_created ?? row.badge_created_at ?? row.created_at ?? null,
+    created_by_name:
+      (metaMap.get(row.badge_id)?.created_by && creatorMap.get(metaMap.get(row.badge_id)?.created_by)) ||
+      row.badge_created_by_name ||
+      row.created_by_name ||
+      null,
     conditions: normalizeConditions(row.conditions),
   }));
 

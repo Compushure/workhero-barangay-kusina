@@ -1,13 +1,18 @@
 'use client';
 
+import Image from 'next/image';
+import { useState } from 'react';
 import HeaderHUD from '../widgets/header-hud';
 import NavSection from '../nav-section';
 import CookingSection from './cooking-section';
 import { RankWidget } from './rank-panel';
+import { RewardRequestsFeedbackModal } from './reward-requests-feedback-modal';
 import TasksTable from './tasks-table';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function EmployeeDashboardClient() {
+  const [isRewardFeedbackModalOpen, setIsRewardFeedbackModalOpen] = useState(false);
+
   const tasks = [
     {
       title: 'Special Client Commendation',
@@ -62,10 +67,26 @@ export default function EmployeeDashboardClient() {
             <CookingSection className="w-full h-full" />
           </div>
 
-          <div className="w-[20%] min-w-[280px] flex items-start justify-start">
+          <div className="w-[20%] min-w-70 flex items-start justify-start">
             <Card className="bg-transparent shadow-none border-none">
               <CardContent className="p-0">
                 <RankWidget />
+
+                <button
+                  type="button"
+                  onClick={() => setIsRewardFeedbackModalOpen(true)}
+                  className=" mt-2 w-70 cursor-pointer transition-transform hover:scale-[1.02]"
+                  aria-label="Open reward request feedbacks"
+                >
+                  <Image
+                    src="/mercado/bellbasket.png"
+                    alt="Open reward request feedbacks"
+                    width={280}
+                    height={78}
+                    className="h-auto w-full"
+                    priority
+                  />
+                </button>
               </CardContent>
             </Card>
           </div>
@@ -84,6 +105,11 @@ export default function EmployeeDashboardClient() {
         </div>
         <div className="w-[20%]"></div>
       </section>
+
+      <RewardRequestsFeedbackModal
+        open={isRewardFeedbackModalOpen}
+        onOpenChange={setIsRewardFeedbackModalOpen}
+      />
     </div>
   );
 }

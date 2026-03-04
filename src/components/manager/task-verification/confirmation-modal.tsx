@@ -104,7 +104,7 @@ export function ConfirmationDialog({
             variant={type === 'approve' ? 'default' : 'destructive'}
             onClick={handleConfirm}
             disabled={isProcessing}
-            className={type === 'approve' ? 'bg-[#690003] hover:bg-[#af3b3f]' : ''}
+            className={type === 'approve' ? 'bg-foreground hover:bg-[#af3b3f]' : ''}
           >
             {isProcessing ? 'Processing...' : 'Confirm'}
           </Button>
