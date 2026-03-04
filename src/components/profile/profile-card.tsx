@@ -23,8 +23,8 @@ interface ProfileCardProps {
 
 function ProfileCardComponent({ profile, children }: ProfileCardProps) {
   return (
-    <Card className="border-2 border-[#730202]/20 shadow-lg transition-all duration-300 hover:shadow-xl p-0">
-      <CardHeader className="bg-linear-to-r from-[#730202] to-[#8b0003] text-white rounded-t-lg px-6 py-4">
+    <Card className="border-2 border-accent/25 shadow-lg transition-all duration-300 hover:shadow-xl p-0 bg-background">
+      <CardHeader className="bg-linear-to-r from-[var(--color-accent-secondary)] to-[var(--color-accent)] text-white rounded-t-lg px-6 py-4">
         <CardTitle className="text-2xl font-bold">User Profile</CardTitle>
       </CardHeader>
       <CardContent className="px-6 pt-6">

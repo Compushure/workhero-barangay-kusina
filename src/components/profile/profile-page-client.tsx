@@ -117,7 +117,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
     return (
       <Card className="max-w-md mx-auto">
         <CardContent className="pt-6 text-center">
-          <p className="text-lg font-semibold text-[#730202]">Profile not found</p>
+          <p className="text-lg font-semibold text-title">Profile not found</p>
           <Button 
             onClick={() => router.back()} 
             disabled={isPending}
@@ -162,7 +162,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
           {/* Recent Badges Display - Smaller badges */}
           <div className="flex flex-col items-center md:items-start gap-1">
             <div className="text-center md:text-left">
-              <p className="text-base font-semibold text-[#730202]">{profile.name}</p>
+              <p className="text-base font-semibold text-title">{profile.name}</p>
               {profile.employeeId && (
                 <p className="text-xs text-muted-foreground">{profile.employeeId}</p>
               )}

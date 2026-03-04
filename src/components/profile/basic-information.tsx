@@ -15,7 +15,7 @@ export function BasicInformation({ profile }: BasicInformationProps) {
         <Label htmlFor="name" className="text-sm font-medium text-muted-foreground">
           Full Name
         </Label>
-        <p className="text-base font-semibold text-[#730202] p-2 bg-white rounded-md">
+        <p className="text-base font-semibold text-title p-2 bg-white rounded-md">
           {profile.name}
         </p>
       </div>
@@ -23,7 +23,7 @@ export function BasicInformation({ profile }: BasicInformationProps) {
         <Label htmlFor="email" className="text-sm font-medium text-muted-foreground">
           Email Address
         </Label>
-        <p className="text-base font-semibold text-[#730202] p-2 bg-white rounded-md break-all">
+        <p className="text-base font-semibold text-title p-2 bg-white rounded-md break-all">
           {profile.email}
         </p>
       </div>
@@ -32,7 +32,7 @@ export function BasicInformation({ profile }: BasicInformationProps) {
           <Label htmlFor="employeeId" className="text-sm font-medium text-muted-foreground">
             Employee ID
           </Label>
-          <p className="text-base font-semibold text-[#730202] p-2 bg-white rounded-md">
+          <p className="text-base font-semibold text-title p-2 bg-white rounded-md">
             {profile.employeeId}
           </p>
         </div>
