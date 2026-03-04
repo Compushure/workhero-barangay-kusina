@@ -11,6 +11,7 @@ export * from './queries/managerQueries';
 export * from './queries/managerBadgeQueries';
 export * from './queries/rewardQueries';
 export * from './queries/attendanceQueries';
+export * from './queries/employeeQueries';
 
 // Mutation hooks
 export * from './mutations/userMutations';

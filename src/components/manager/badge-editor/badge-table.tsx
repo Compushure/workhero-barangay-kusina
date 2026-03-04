@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Coins, Pencil, Trash2, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
+import { Coins, Pencil, Trash2, ChevronDown, ChevronUp, HelpCircle, AlertTriangle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,6 +49,7 @@ export default function BadgeTable({
 }: BadgeTableProps) {
   const formatIntervalLabel = (value: BadgeInterval) => {
     if (value === 'none') return 'Manual';
+    if (value === 'anually') return 'Annually';
     return value.charAt(0).toUpperCase() + value.slice(1);
   };
 
@@ -139,6 +140,12 @@ export default function BadgeTable({
                             <div className="text-xs text-red-900 font-medium px-2 rounded-full bg-[#fdeac8] w-fit mt-2">
                               {formatIntervalLabel(badge.award_at_interval)}
                             </div>
+                            {badge.conditions.length === 0 && badge.award_at_interval !== 'none' && (
+                              <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-[11px] font-semibold text-amber-900" title="No conditions configured; badge is treated as manual">
+                                <AlertTriangle className="h-3 w-3" />
+                                No conditions — treated as manual
+                              </div>
+                            )}
                             <div className="text-xs text-gray-500 mt-2">
                               <span className="font-semibold">Created:</span> {formatCreatedDate(badge.created_at)}
                             </div>
