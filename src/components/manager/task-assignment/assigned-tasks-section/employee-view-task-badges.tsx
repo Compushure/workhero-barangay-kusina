@@ -56,15 +56,11 @@ export default function EmployeeViewTaskBadges({
           const completedOrders = taskEmployee?.completedOrders || 0;
           // Reusable StatusIcon component
           const StatusIcon = ({ icon: Icon, className = "",  }: { icon: any; className?: string;}) => (
-            <p className={`flex gap-1 ${className} px-2 py-1 rounded-full items-center`}>
+            <p className={`flex gap-1 ${className} px-2 py-1 rounded-full`}>
               <Icon strokeWidth={2.5} className={`size-4`} />
               <span className={`text-xs`}>
                 {task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : 'Unknown'}
               </span>
-              {task.status === 'in review' && 
-              <span className="text-sm font-semibold leading-0">
-                {taskEmployee?.pendingOrders || 0}
-              </span>}
             </p>
           );
 
@@ -103,7 +99,7 @@ export default function EmployeeViewTaskBadges({
               </div>
 
               <div className='flex flex-col w-[30%] items-end pr-3 gap-2'>
-                <span className={`flex text-sm leading-none items-end ${completedOrders === task.maxOrders ? 'text-green-600 font-bold' : 'text-zinc-500'}`}>
+                <span className='flex text-zinc-500 text-sm leading-none items-end'>
                   <Soup strokeWidth={1.75} className="size-5 mr-1" />
                   {completedOrders} / {task.maxOrders}
                 </span>

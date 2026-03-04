@@ -24,7 +24,7 @@ export default function PointsIcon() {
 
       {/* Number pill, slightly smaller */}
       <div className="bg-white text-red-800 font-bold px-6 py-2 rounded-full text-xl shadow-md relative z-0 border border-yellow-300">
-        {data ? data.points - data.deductedPoints : '...'}
+        {data ? data.points : '...'}
       </div>
     </div>
   );

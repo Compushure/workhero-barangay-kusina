@@ -12,6 +12,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
 import type { EmployeeRank, EmployeeXP } from '@/types';
 import type { TimePeriod } from '@/lib/utils/time-period-utils';
@@ -66,10 +67,10 @@ export async function getEmployeePoints(): Promise<ActionResult<EmployeePointsDa
       throw new Error('User not authenticated');
     }
 
-    const { data, error } = await supabase
-      .from('user_attributes')
+    const { data, error } = await supabaseAdmin
+      .from('User')
       .select('points, deducted_points')
-      .eq('user_id', user.id)
+      .eq('id', user.id)
       .single();
 
     if (error) {

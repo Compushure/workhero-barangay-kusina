@@ -39,7 +39,7 @@ export function CurrentAssignedTasks() {
 
   const employeeQuery = useGetCurrentAssignedEmployeesPaginated(
     page,
-    10,
+    4,
     sortBy,
     debouncedSearchTerm,
     true

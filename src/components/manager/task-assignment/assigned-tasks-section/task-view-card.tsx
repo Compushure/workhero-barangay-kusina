@@ -13,7 +13,6 @@ import { useUpdateTaskAssignmentMutation } from '@/hooks/tanstack/mutations/mana
 import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import TaskViewEmployeeBadges from './task-view-employee-badges';
 import { isTaskOverdue } from '@/utils/date-utils';
-import { formatDate } from '@/utils/date-utils';
 
 interface TaskViewCardProps {
   task: AssignedTask;
@@ -76,6 +75,17 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   const displayedEmployees = task.assignedEmployees ?? [];
 
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '';
+    const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'Asia/Manila',
+    });
+  };
+
   const handleEditTask = async () => {
     const newEmployees = editAssignedEmployees.map((empId) => {
       const existingEmp = (task.assignedEmployees ?? []).find((e) => e.id === empId);
@@ -88,7 +98,6 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         empId: backendEmp?.empId || '',
         tenure: backendEmp?.tenure,
         assignedTasks: [],
-        pendingOrders: 0,
         completedOrders: 0,
       };
     });

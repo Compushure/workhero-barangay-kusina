@@ -16,8 +16,14 @@ export interface Reward {
   quantity?: number;
   category?: string;
   isActive: boolean;
+  redeemingLimit?: number | null;
+  availableMonth?: number | null;
+  monthName?: string | null;
   createdAt?: string | Date;
   createdBy?: string;
+  imageUrl?: string | null;
+  redeemedCount?: number;
+  isOutOfStock?: boolean;
 }
 
 /**

@@ -14,12 +14,19 @@ interface RewardCardProps {
   reward: Reward;
   userPoints: number;
   hasPendingRequest: boolean;
+  onRedeemSuccess?: (payload: {
+    rewardId: string;
+    rewardName: string;
+    quantity: number;
+    pointsCost: number;
+  }) => void;
 }
 
 export const RewardCard = memo(function RewardCard({
   reward,
   userPoints,
   hasPendingRequest,
+  onRedeemSuccess,
 }: RewardCardProps) {
   const [imageError, setImageError] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -71,11 +78,14 @@ export const RewardCard = memo(function RewardCard({
     if (isDisabled) return;
 
     try {
-      await redeemMutation.mutateAsync({
+      const result = await redeemMutation.mutateAsync({
         rewardId: reward.id,
         quantity,
         rewardName: reward.name,
+        pointsCost: reward.pointsCost,
       });
+
+      onRedeemSuccess?.(result);
     } catch (error) {
       console.error('Failed to redeem reward:', error);
     }
