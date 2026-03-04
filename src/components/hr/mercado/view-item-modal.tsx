@@ -6,6 +6,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { isItemAvailableNow } from '@/utils/date-utils';
+import {
+  AvailabilityValue,
+  formatAvailabilityLabel,
+  formatDateShort,
+  formatNumber,
+} from './formatters';
 
 interface ViewItemModalProps {
   open: boolean;
@@ -18,35 +24,9 @@ interface ViewItemModalProps {
     redeemingLimit?: number;
     isActive: boolean;
     imageUrl?: string;
-    availableMonth?: number;
+    availableMonth?: AvailabilityValue;
     availableDate?: string | Date | null;
   } | null;
-}
-
-function formatNumber(num: number | undefined): string {
-  if (num === undefined || num === null) return '0';
-  return num.toLocaleString('en-US');
-}
-
-function formatDate(dateString: string | Date | null | undefined): string {
-  if (!dateString) return 'N/A';
-  try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  } catch {
-    return 'N/A';
-  }
-}
-
-function formatMonth(month: number | undefined): string {
-  if (!month || month < 1 || month > 12) return 'All Months';
-
-  return new Date(2026, month - 1, 1).toLocaleDateString('en-US', {
-    month: 'long',
-  });
 }
 
 export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModalProps) {
@@ -63,7 +43,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card text-card-foreground border border-border max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto [&>button]:hidden">
+      <DialogContent className="bg-muted text-card-foreground border border-border max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto [&>button]:hidden">
         {/* Custom Close Button */}
         <button
           onClick={() => onOpenChange(false)}
@@ -113,7 +93,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
                 {isScheduled && (
                   <Badge variant="secondary" className="bg-primary/15 text-primary text-xs">
                     <Calendar className="h-3 w-3 mr-1" />
-                    Available {formatDate(item.availableDate)}
+                    Available {formatDateShort(item.availableDate)}
                   </Badge>
                 )}
                 {!item.isActive && (
@@ -151,9 +131,9 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
             )}
 
             <div className="text-center">
-              <p className="text-xs font-medium text-muted-foreground mb-1">Month Available</p>
+              <p className="text-xs font-medium text-muted-foreground mb-1">Availability</p>
               <p className="text-base font-semibold text-title">
-                {formatMonth(item.availableMonth)}
+                {formatAvailabilityLabel(item.availableMonth)}
               </p>
             </div>
           </div>
@@ -163,7 +143,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="h-10 sm:h-11 rounded-xl border-border text-foreground hover:bg-muted font-semibold text-sm sm:text-base order-2 sm:order-1"
+              className="h-10 sm:h-11 rounded-xl border-border text-foreground hover:bg-accent-secondary/25 font-semibold text-sm sm:text-base order-2 sm:order-1"
             >
               Cancel
             </Button>

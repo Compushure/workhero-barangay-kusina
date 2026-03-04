@@ -35,7 +35,7 @@ export function MercadoPageContent() {
     sortOrder,
     stockFilter,
     visibilityFilter,
-    monthFilter,
+    intervalFilter,
     isAddModalOpen,
     isDeleteModalOpen,
     isViewModalOpen,
@@ -48,7 +48,7 @@ export function MercadoPageContent() {
     setSortOrder,
     setStockFilter,
     setVisibilityFilter,
-    setMonthFilter,
+    setIntervalFilter,
     setSaveError,
     setIsAddModalOpen,
     setIsDeleteModalOpen,
@@ -69,7 +69,7 @@ export function MercadoPageContent() {
 
   return (
     // Page shell section.
-    <main className="min-h-screen bg-background text-foreground p-8 pb-28">
+    <main className="min-h-screen bg-white text-foreground p-8 pb-28">
       <div className="mx-auto max-w-7xl space-y-8">
         <MercadoHeader
           title="Mercado Manager"
@@ -90,10 +90,10 @@ export function MercadoPageContent() {
             <MercadoFilterToggle
               stockFilter={stockFilter}
               visibilityFilter={visibilityFilter}
-              monthFilter={monthFilter}
+              intervalFilter={intervalFilter}
               onStockFilterChange={setStockFilter}
               onVisibilityFilterChange={setVisibilityFilter}
-              onMonthFilterChange={setMonthFilter}
+              onIntervalFilterChange={setIntervalFilter}
             />
           </div>
           <Button

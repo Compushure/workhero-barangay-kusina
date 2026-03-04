@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Pencil, Plus, X, Loader2, Camera, CalendarIcon } from 'lucide-react';
+import { Pencil, Plus, X, Loader2, Camera } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
+type AvailabilityInterval = 'weekly' | 'monthly' | 'yearly';
+
 const MAX_REWARD_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_REWARD_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
@@ -32,6 +34,7 @@ interface AddItemsModalProps {
     redeemingLimit?: number;
     imageUrl?: string;
     availableDate?: Date | string | null;
+    availableMonth?: number | string | null;
   } | null;
   onSave?: (data: {
     id?: string;
@@ -41,6 +44,7 @@ interface AddItemsModalProps {
     redeemingLimit: string;
     cost: number;
     availableDate?: Date | null;
+    availableMonth?: AvailabilityInterval | null;
   }) => Promise<void>;
   saveError?: string;
   onErrorClear?: () => void;
@@ -76,7 +80,9 @@ export function AddItemsModal({
   const [itemCost, setItemCost] = useState('');
   const [redeemingLimit, setRedeemingLimit] = useState('');
   const [availableDate, setAvailableDate] = useState<Date | undefined>();
-  const [availableMonth, setAvailableMonth] = useState<string>('none');
+  const [availabilityInterval, setAvailabilityInterval] = useState<'none' | AvailabilityInterval>(
+    'none'
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [iconValidationError, setIconValidationError] = useState<string>('');
 
@@ -89,8 +95,13 @@ export function AddItemsModal({
       setRedeemingLimit(editingItem.redeemingLimit?.toString() || '');
       setExistingImageUrl(editingItem.imageUrl ? `${editingItem.imageUrl}?t=${Date.now()}` : '');
       setExistingImageError(false);
-      setAvailableMonth('none');
-      // Load available date if it exists
+      const interval =
+        editingItem.availableMonth === 'weekly' ||
+        editingItem.availableMonth === 'monthly' ||
+        editingItem.availableMonth === 'yearly'
+          ? editingItem.availableMonth
+          : 'none';
+      setAvailabilityInterval(interval);
       if (editingItem.availableDate) {
         setAvailableDate(new Date(editingItem.availableDate));
       } else {
@@ -102,8 +113,8 @@ export function AddItemsModal({
       setItemCost('');
       setQuantity('');
       setRedeemingLimit('');
-      setAvailableMonth('none');
       setAvailableDate(undefined);
+      setAvailabilityInterval('none');
       setIconFile(null);
       setIconPreview('');
       setExistingImageUrl('');
@@ -124,6 +135,7 @@ export function AddItemsModal({
     redeemingLimit,
     availableDate,
     iconFile,
+    availabilityInterval,
     saveError,
     onErrorClear,
   ]);
@@ -132,7 +144,15 @@ export function AddItemsModal({
   const hasChanges = useMemo(() => {
     if (!editingItem) {
       // For new items, check if any field has value
-      return !!(itemName || itemCost || quantity || redeemingLimit || iconFile || availableDate);
+      return !!(
+        itemName ||
+        itemCost ||
+        quantity ||
+        redeemingLimit ||
+        iconFile ||
+        availableDate ||
+        availabilityInterval !== 'none'
+      );
     }
 
     // For editing, compare with original values
@@ -146,7 +166,13 @@ export function AddItemsModal({
     const isLimitChanged = redeemingLimitNum !== editingItem.redeemingLimit;
     const isIconChanged = !!iconFile;
 
-    // Check if available date changed
+    const originalInterval =
+      editingItem.availableMonth === 'weekly' ||
+      editingItem.availableMonth === 'monthly' ||
+      editingItem.availableMonth === 'yearly'
+        ? editingItem.availableMonth
+        : 'none';
+    const isIntervalChanged = originalInterval !== availabilityInterval;
     const originalDate = editingItem.availableDate
       ? new Date(editingItem.availableDate).getTime()
       : null;
@@ -159,9 +185,19 @@ export function AddItemsModal({
       isQuantityChanged ||
       isLimitChanged ||
       isIconChanged ||
+      isIntervalChanged ||
       isDateChanged
     );
-  }, [editingItem, itemName, itemCost, quantity, redeemingLimit, iconFile, availableDate]);
+  }, [
+    editingItem,
+    itemName,
+    itemCost,
+    quantity,
+    redeemingLimit,
+    iconFile,
+    availabilityInterval,
+    availableDate,
+  ]);
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -206,6 +242,7 @@ export function AddItemsModal({
           redeemingLimit: unformatNumber(redeemingLimit),
           cost: parseFloat(unformatNumber(itemCost)),
           availableDate: availableDate || null,
+          availableMonth: availabilityInterval === 'none' ? null : availabilityInterval,
         });
         // Close modal on successful save
         handleClose();
@@ -228,6 +265,7 @@ export function AddItemsModal({
     setRedeemingLimit('');
     setItemCost('');
     setAvailableDate(undefined);
+    setAvailabilityInterval('none');
     setIsLoading(false);
     setIconValidationError('');
     onOpenChange(false);
@@ -261,6 +299,7 @@ export function AddItemsModal({
     unformatNumber(itemCost).length > 6;
 
   const isImageRequiredMissing = !editingItem && !iconFile;
+  const isIntervalDateMissing = availabilityInterval !== 'none' && !availableDate;
 
   const isSaveDisabled =
     !itemName ||
@@ -269,6 +308,7 @@ export function AddItemsModal({
     !quantity ||
     !redeemingLimit ||
     isImageRequiredMissing ||
+    isIntervalDateMissing ||
     isRedeemingLimitInvalid() ||
     hasCharacterLimitErrors ||
     !!iconValidationError ||
@@ -277,7 +317,7 @@ export function AddItemsModal({
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
-      <DialogContent className="bg-card text-card-foreground border border-border max-w-[95vw] sm:max-w-[550px] md:max-w-[650px] lg:max-w-[700px] rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-muted text-card-foreground border border-border max-w-[95vw] sm:max-w-137.5 md:max-w-162.5 lg:max-w-175 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-primary text-base sm:text-lg font-semibold">
@@ -304,7 +344,7 @@ export function AddItemsModal({
             <Label className="text-sm font-medium text-foreground">Select Icon</Label>
             <label
               htmlFor="icon-upload"
-              className="w-full md:w-[160px] lg:w-[180px] h-[140px] md:h-[160px] lg:h-[180px] border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:border-ring transition-colors bg-background mx-auto md:mx-0 relative overflow-hidden group"
+              className="w-full md:w-40 lg:w-45 h-35 md:h-40 lg:h-45 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:border-ring transition-colors bg-background mx-auto md:mx-0 relative overflow-hidden group"
               style={
                 iconPreview || (editingItem && existingImageUrl && !existingImageError)
                   ? {
@@ -428,7 +468,7 @@ export function AddItemsModal({
               </p>
             )}
 
-            {/* Item Cost and Available Date */}
+            {/* Item Cost, Availability Date, and Interval */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 space-y-2">
                 <Label htmlFor="item-cost" className="text-sm font-medium text-foreground">
@@ -449,57 +489,64 @@ export function AddItemsModal({
                 />
                 {unformatNumber(itemCost).length === 6}
               </div>
+              <div className="flex-1 space-y-2">
+                <Label className="text-sm font-medium text-foreground">Availability Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start text-left font-normal bg-background border-border hover:bg-muted',
+                        !availableDate && 'text-muted-foreground'
+                      )}
+                    >
+                      {availableDate ? format(availableDate, 'PPP') : 'Select date (optional)'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={availableDate}
+                      onSelect={setAvailableDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
 
               <div className="flex-1 space-y-2">
                 <Label htmlFor="available-month" className="text-sm font-medium text-foreground">
-                  Available Month
+                  Availability Interval
                 </Label>
-                <Select value={availableMonth} onValueChange={setAvailableMonth}>
+                <Select
+                  value={availabilityInterval}
+                  onValueChange={(value) =>
+                    setAvailabilityInterval(value as 'none' | AvailabilityInterval)
+                  }
+                >
                   <SelectTrigger
                     id="available-month"
                     className="w-full bg-background border-border hover:bg-muted text-foreground"
                   >
-                    <SelectValue placeholder="Select month (optional)" />
+                    <SelectValue placeholder="Select interval (optional)" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover text-popover-foreground">
                     <SelectItem value="none" className="text-muted-foreground italic">
-                      No specific month (available all year)
+                      No interval (always available)
                     </SelectItem>
-                    <SelectItem value="1">January</SelectItem>
-                    <SelectItem value="2">February</SelectItem>
-                    <SelectItem value="3">March</SelectItem>
-                    <SelectItem value="4">April</SelectItem>
-                    <SelectItem value="5">May</SelectItem>
-                    <SelectItem value="6">June</SelectItem>
-                    <SelectItem value="7">July</SelectItem>
-                    <SelectItem value="8">August</SelectItem>
-                    <SelectItem value="9">September</SelectItem>
-                    <SelectItem value="10">October</SelectItem>
-                    <SelectItem value="11">November</SelectItem>
-                    <SelectItem value="12">December</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
                   </SelectContent>
                 </Select>
-                {availableMonth && availableMonth !== 'none' && (
+                {availabilityInterval !== 'none' && (
                   <p className="text-xs text-muted-foreground italic">
-                    Item will appear in{' '}
-                    {
-                      [
-                        'January',
-                        'February',
-                        'March',
-                        'April',
-                        'May',
-                        'June',
-                        'July',
-                        'August',
-                        'September',
-                        'October',
-                        'November',
-                        'December',
-                      ][parseInt(availableMonth) - 1]
-                    }{' '}
-                    stall
+                    Item will use {availabilityInterval} interval from{' '}
+                    {availableDate ? format(availableDate, 'MMM d, yyyy') : 'the selected date'}
                   </p>
+                )}
+                {isIntervalDateMissing && (
+                  <p className="text-xs text-red-600">Please select a date for this interval</p>
                 )}
               </div>
             </div>

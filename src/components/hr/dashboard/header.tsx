@@ -45,6 +45,7 @@ export function HeaderSection({
           <SortButton
             sortBy={statusFilter as any}
             onSortChange={(value) => onStatusChange(value as string)}
+            styleVariant="mercado"
             options={[
               { value: 'pending' as any, label: 'Pending Requests' },
               { value: 'approved' as any, label: 'Approved Requests' },
@@ -56,6 +57,7 @@ export function HeaderSection({
         <SortButton
           sortBy={sortBy as any}
           onSortChange={(value) => onSort?.(value)}
+          styleVariant="mercado"
           options={[
             { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
             { value: 'date-asc' as any, label: 'Date (Oldest)' },

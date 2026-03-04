@@ -58,7 +58,7 @@ export function RewardRequestsContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background text-foreground p-8 pb-28">
+      <div className="min-h-screen bg-white text-foreground p-8 pb-28">
         <MarketSuspense label="Loading redemption requests..." />
       </div>
     );
@@ -66,7 +66,7 @@ export function RewardRequestsContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background text-foreground p-8 pb-28">
+      <div className="min-h-screen bg-white text-foreground p-8 pb-28">
         <div className="flex items-center justify-center py-16">
           <div className="flex flex-col items-center gap-4">
             <p className="text-red-600">Error loading redemption requests: {error.message}</p>
@@ -77,7 +77,7 @@ export function RewardRequestsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8 pb-28">
+    <div className="min-h-screen bg-white text-foreground p-8 pb-28">
       <div className="mx-auto max-w-7xl space-y-8">
         <HeaderSection
           title="Redemption Requests"

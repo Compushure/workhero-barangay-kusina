@@ -109,7 +109,7 @@ export function Sidebar({
       <div className="px-3 py-7 mt-6">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`group w-full h-full p-1 hover:bg-zinc-50 cursor-pointer rounded-sm transition-colors ${
+          className={`group w-full h-full p-1 cursor-pointer rounded-sm transition-colors ${
             isCollapsed ? 'flex justify-center items-center' : 'flex flex-col items-baseline'
           }`}
           aria-label="Toggle sidebar"
@@ -139,10 +139,12 @@ export function Sidebar({
               )}
             </div>
             {!isCollapsed && (
-              <ChevronLeft
-                size={20}
-                className="group-hover:text-[#f47812] transition-all duration-400 ease-in-out"
-              />
+              <span className="rounded-full p-1 hover:bg-[#FAA938]/20 transition-all duration-400 ease-in-out">
+                <ChevronLeft
+                  size={20}
+                  className="group-hover:text-[#f47812] transition-all duration-400 ease-in-out"
+                />
+              </span>
             )}
           </div>
         </button>
@@ -212,7 +214,7 @@ export function Sidebar({
             <Tooltip key={item.key}>
               <TooltipTrigger asChild>{navLink}</TooltipTrigger>
               {isCollapsed && (
-                <TooltipContent side="right" sideOffset={8}>
+                <TooltipContent side="right" sideOffset={8} className="text-black">
                   {item.label}
                 </TooltipContent>
               )}
@@ -224,8 +226,8 @@ export function Sidebar({
       {/* User Profile Section */}
       <div className={`${isCollapsed ? 'flex justify-center items-center h-24' : 'px-3 py-4'}`}>
         <div
-          className={`bg-white/10 rounded-full flex items-center w-full ${
-            isCollapsed ? 'w-16 h-16 justify-center' : 'gap-3 mb-4'
+          className={`bg-zinc-50/75 border border-white/70 rounded-full shadow-sm/15 flex items-center w-full ${
+            isCollapsed ? 'w-16 h-16 justify-center' : 'gap-3 mb-4 px-2 py-2'
           }`}
         >
           <SidebarUserProfile isCollapsed={isCollapsed} disabled={isUiDisabled} />

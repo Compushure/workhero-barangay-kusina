@@ -36,10 +36,13 @@ import {
 } from 'lucide-react';
 import type { RedemptionRequest, Reward } from '@/types';
 
+type RewardInterval = 'weekly' | 'monthly' | 'yearly';
+
 interface MonthlyRewardsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  month: number | null;
+  interval: RewardInterval | null;
+  onIntervalChange: (interval: RewardInterval) => void;
   rewards: Reward[];
   isLoading?: boolean;
   userPoints: number;
@@ -51,20 +54,11 @@ const ITEMS_PER_PAGE = 8;
 const MODAL_CONTENT_CLASS =
   'bg-[#e8d9c0] border border-[#8a6844] w-[60vw] max-w-[60vw] sm:max-w-[60vw] md:max-w-[60vw] lg:max-w-[60vw] max-h-[86vh] rounded-2xl p-0 flex flex-col overflow-hidden shadow-xl';
 const MODAL_GRID_CLASS = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+const INTERVAL_LABELS: Record<RewardInterval, string> = {
+  weekly: 'Weekly',
+  monthly: 'Monthly',
+  yearly: 'Yearly',
+};
 
 function compareRewardsForDisplay(
   first: Reward,
@@ -95,7 +89,8 @@ function compareRewardsForDisplay(
 export function MonthlyRewardsModal({
   open,
   onOpenChange,
-  month,
+  interval,
+  onIntervalChange,
   rewards,
   isLoading = false,
   userPoints,
@@ -109,7 +104,7 @@ export function MonthlyRewardsModal({
   const [activeView, setActiveView] = useState<'items' | 'pending'>('items');
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
-  const monthName = month ? MONTHS[month - 1] : '';
+  const intervalName = interval ? INTERVAL_LABELS[interval] : '';
 
   const filteredAndSortedRewards = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -137,20 +132,20 @@ export function MonthlyRewardsModal({
     return filteredAndSortedRewards.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredAndSortedRewards, currentPage]);
 
-  const pendingRequestsForMonth = useMemo(() => {
-    const monthRewardIds = new Set(rewards.map((reward) => reward.id));
-    return pendingRequests.filter((request) => monthRewardIds.has(request.rewardId));
+  const pendingRequestsForInterval = useMemo(() => {
+    const intervalRewardIds = new Set(rewards.map((reward) => reward.id));
+    return pendingRequests.filter((request) => intervalRewardIds.has(request.rewardId));
   }, [pendingRequests, rewards]);
 
   const filteredPendingRequests = useMemo(() => {
     const normalizedSearch = pendingSearchTerm.trim().toLowerCase();
-    if (!normalizedSearch) return pendingRequestsForMonth;
+    if (!normalizedSearch) return pendingRequestsForInterval;
 
-    return pendingRequestsForMonth.filter((request) => {
+    return pendingRequestsForInterval.filter((request) => {
       const name = (request.requestedItem || request.rewardName || '').toLowerCase();
       return name.includes(normalizedSearch);
     });
-  }, [pendingRequestsForMonth, pendingSearchTerm]);
+  }, [pendingRequestsForInterval, pendingSearchTerm]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -158,7 +153,7 @@ export function MonthlyRewardsModal({
     setPendingSearchTerm('');
     setSortOrder('newest');
     setActiveView('items');
-  }, [month, open]);
+  }, [interval, open]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -167,9 +162,9 @@ export function MonthlyRewardsModal({
   useEffect(() => {
     if (!open) return;
     scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'auto' });
-  }, [open, month, activeView, currentPage, searchTerm, pendingSearchTerm, sortOrder]);
+  }, [open, interval, activeView, currentPage, searchTerm, pendingSearchTerm, sortOrder]);
 
-  if (!month) return null;
+  if (!interval) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -180,11 +175,11 @@ export function MonthlyRewardsModal({
               <Package className="h-6 w-6 text-[#6a4a2d]" />
               <Sparkles className="h-4 w-4 text-amber-500 absolute -top-1 -right-1 animate-pulse" />
             </div>
-            <span className="pixelated-text tracking-tight">{monthName} Market Stall</span>
+            <span className="pixelated-text tracking-tight">{intervalName} Market Stall</span>
           </DialogTitle>
           <DialogDescription className="text-[#6b5038] text-sm text-center">
             Welcome KusinHero! Here are the rewards available for{' '}
-            <span className="font-bold">{monthName}</span>.
+            <span className="font-bold">{intervalName}</span>.
           </DialogDescription>
         </DialogHeader>
 
@@ -192,6 +187,20 @@ export function MonthlyRewardsModal({
           <div className="px-6 pt-3 pb-2 bg-[#e3d4bb] border-b border-[#8a6844]/20 flex items-center justify-between gap-3">
             {activeView === 'items' && rewards.length > 0 ? (
               <div className="flex items-center gap-3">
+                <Select
+                  value={interval || 'weekly'}
+                  onValueChange={(value: RewardInterval) => onIntervalChange(value)}
+                >
+                  <SelectTrigger className="h-8 w-32 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+
                 <Input
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
@@ -214,6 +223,20 @@ export function MonthlyRewardsModal({
               </div>
             ) : (
               <div className="flex items-center gap-3">
+                <Select
+                  value={interval || 'weekly'}
+                  onValueChange={(value: RewardInterval) => onIntervalChange(value)}
+                >
+                  <SelectTrigger className="h-8 w-32 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+
                 <Input
                   value={pendingSearchTerm}
                   onChange={(event) => setPendingSearchTerm(event.target.value)}
@@ -221,7 +244,7 @@ export function MonthlyRewardsModal({
                   className="h-8 w-44 sm:w-56 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
                 />
                 <p className="text-xs text-[#6b5038] font-medium">
-                  Pending requests for {monthName}: {filteredPendingRequests.length}
+                  Pending requests for {intervalName}: {filteredPendingRequests.length}
                 </p>
               </div>
             )}
@@ -235,7 +258,7 @@ export function MonthlyRewardsModal({
               className="h-8 border-[#9b7a56] bg-[#f6eddd] text-[#4b3522] hover:bg-[#ecdcbf]"
             >
               {activeView === 'items'
-                ? `See My Pending Requests (${pendingRequestsForMonth.length})`
+                ? `See My Pending Requests (${pendingRequestsForInterval.length})`
                 : 'Back to Available Items'}
             </Button>
           </div>
@@ -247,17 +270,17 @@ export function MonthlyRewardsModal({
               <Loader2 className="h-10 w-10 text-[#6a4a2d] animate-spin mx-auto mb-3" />
               <p className="text-[#4b3522] font-semibold">Loading rewards...</p>
               <p className="text-[#6b5038] text-sm mt-1">
-                Fetching available items for {monthName}
+                Fetching available items for {intervalName}
               </p>
             </div>
           ) : activeView === 'pending' ? (
             <PendingRequestsView
               requests={filteredPendingRequests}
-              monthName={monthName}
+              intervalName={intervalName}
               rewards={rewards}
             />
           ) : filteredAndSortedRewards.length === 0 ? (
-            <EmptyState monthName={monthName} />
+            <EmptyState intervalName={intervalName} />
           ) : (
             <div className={MODAL_GRID_CLASS}>
               {paginatedRewards.map((reward) => (
@@ -307,11 +330,11 @@ export function MonthlyRewardsModal({
 
 function PendingRequestsView({
   requests,
-  monthName,
+  intervalName,
   rewards,
 }: {
   requests: RedemptionRequest[];
-  monthName: string;
+  intervalName: string;
   rewards: Reward[];
 }) {
   const cancelMutation = useCancelMyRedemptionRequest();
@@ -328,7 +351,7 @@ function PendingRequestsView({
         </div>
         <h3 className="text-[#5a2a2a] text-2xl font-bold mb-2">No Pending Requests</h3>
         <p className="text-[#7a3d3d] max-w-sm">
-          You have no pending reward requests for {monthName}.
+          You have no pending reward requests for {intervalName}.
         </p>
       </div>
     );
@@ -438,7 +461,7 @@ function PendingRequestsView({
   );
 }
 
-function EmptyState({ monthName }: { monthName: string }) {
+function EmptyState({ intervalName }: { intervalName: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="bg-white/40 p-8 rounded-full mb-6">
@@ -446,8 +469,8 @@ function EmptyState({ monthName }: { monthName: string }) {
       </div>
       <h3 className="text-[#5a2a2a] text-2xl font-bold mb-2">No Stock Available</h3>
       <p className="text-[#7a3d3d] max-w-sm mb-8">
-        We couldn't find any rewards specifically for {monthName}. Check back soon or browse other
-        months!
+        We couldn't find any rewards specifically for {intervalName}. Check back soon or browse
+        other intervals!
       </p>
     </div>
   );

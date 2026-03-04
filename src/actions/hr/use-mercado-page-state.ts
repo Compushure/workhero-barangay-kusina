@@ -10,7 +10,11 @@ import {
   useHideReward,
   useUploadRewardPicture,
 } from '@/hooks/tanstack/mutations/hrMutations';
-import { MonthFilter, StockFilter, VisibilityFilter } from '@/components/hr/mercado/mercado-filter-toggle';
+import {
+  IntervalFilter,
+  StockFilter,
+  VisibilityFilter,
+} from '@/components/hr/mercado/mercado-filter-toggle';
 import { SortOption } from '@/components/hr/mercado/mercado-sort-toggle';
 
 const ITEMS_PER_PAGE = 9;
@@ -22,7 +26,8 @@ export interface EditableMercadoItem {
   quantity?: number;
   redeemingLimit?: number;
   imageUrl?: string;
-  availableMonth?: number;
+  availableDate?: string | Date | null;
+  availableMonth?: 'weekly' | 'monthly' | 'yearly' | null;
 }
 
 export interface ViewableMercadoItem {
@@ -33,7 +38,7 @@ export interface ViewableMercadoItem {
   redeemingLimit?: number;
   isActive: boolean;
   imageUrl?: string;
-  availableMonth?: number;
+  availableMonth?: 'weekly' | 'monthly' | 'yearly' | null;
   availableDate?: string | Date | null;
 }
 
@@ -44,23 +49,9 @@ export interface SaveMercadoItemInput {
   quantity: string;
   redeemingLimit: string;
   cost: number;
-  availableMonth?: number | null;
+  availableDate?: Date | null;
+  availableMonth?: 'weekly' | 'monthly' | 'yearly' | null;
 }
-
-const monthNameToNumber: Record<string, number> = {
-  january: 1,
-  february: 2,
-  march: 3,
-  april: 4,
-  may: 5,
-  june: 6,
-  july: 7,
-  august: 8,
-  september: 9,
-  october: 10,
-  november: 11,
-  december: 12,
-};
 
 const mapRewardToEditableItem = (reward: Reward): EditableMercadoItem => ({
   id: reward.id,
@@ -69,7 +60,8 @@ const mapRewardToEditableItem = (reward: Reward): EditableMercadoItem => ({
   quantity: reward.quantity,
   redeemingLimit: reward.redeemingLimit,
   imageUrl: reward.imageUrl,
-  availableMonth: reward.availableMonth ?? undefined,
+  availableDate: reward.availableDate,
+  availableMonth: reward.availableMonth ?? null,
 });
 
 const mapRewardToViewableItem = (reward: Reward): ViewableMercadoItem => ({
@@ -80,7 +72,7 @@ const mapRewardToViewableItem = (reward: Reward): ViewableMercadoItem => ({
   redeemingLimit: reward.redeemingLimit,
   isActive: reward.isActive,
   imageUrl: reward.imageUrl,
-  availableMonth: reward.availableMonth ?? undefined,
+  availableMonth: reward.availableMonth ?? null,
   availableDate: reward.availableDate,
 });
 
@@ -91,33 +83,9 @@ const getRewardTimestamp = (reward: Reward): number => {
     : new Date(reward.createdAt).getTime();
 };
 
-const getRewardAvailableMonth = (reward: Reward): number | null => {
-  if (
-    typeof reward.availableMonth === 'number' &&
-    reward.availableMonth >= 1 &&
-    reward.availableMonth <= 12
-  ) {
-    return reward.availableMonth;
-  }
-
-  if (reward.availableDate) {
-    const date = new Date(reward.availableDate);
-    if (!Number.isNaN(date.getTime())) {
-      return date.getMonth() + 1;
-    }
-  }
-
-  if (reward.monthName) {
-    const normalizedMonthName = reward.monthName.trim().toLowerCase();
-    return monthNameToNumber[normalizedMonthName] ?? null;
-  }
-
-  return null;
-};
-
-const matchesMonthFilter = (reward: Reward, monthFilter: MonthFilter): boolean => {
-  if (monthFilter === 'all') return true;
-  return getRewardAvailableMonth(reward) === monthFilter;
+const matchesIntervalFilter = (reward: Reward, intervalFilter: IntervalFilter): boolean => {
+  if (intervalFilter === 'all') return true;
+  return reward.availableMonth === intervalFilter;
 };
 
 export function useMercadoPageState() {
@@ -130,7 +98,7 @@ export function useMercadoPageState() {
   const [sortOrder, setSortOrder] = useState<SortOption>('newest');
   const [stockFilter, setStockFilter] = useState<StockFilter>('all');
   const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>('all');
-  const [monthFilter, setMonthFilter] = useState<MonthFilter>('all');
+  const [intervalFilter, setIntervalFilter] = useState<IntervalFilter>('all');
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [viewingItemId, setViewingItemId] = useState<string | null>(null);
@@ -161,7 +129,7 @@ export function useMercadoPageState() {
       if (visibilityFilter === 'visible' && !reward.isActive) return false;
       if (visibilityFilter === 'hidden' && reward.isActive) return false;
 
-      if (!matchesMonthFilter(reward, monthFilter)) return false;
+      if (!matchesIntervalFilter(reward, intervalFilter)) return false;
 
       return true;
     });
@@ -173,7 +141,7 @@ export function useMercadoPageState() {
     });
 
     return filteredRewards;
-  }, [allRewards, debouncedSearch, sortOrder, stockFilter, visibilityFilter, monthFilter]);
+  }, [allRewards, debouncedSearch, sortOrder, stockFilter, visibilityFilter, intervalFilter]);
 
   // Fast ID lookup map.
   const rewardsById = useMemo(() => {
@@ -212,7 +180,7 @@ export function useMercadoPageState() {
   // Reset page on filter change.
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, sortOrder, stockFilter, visibilityFilter, monthFilter]);
+  }, [debouncedSearch, sortOrder, stockFilter, visibilityFilter, intervalFilter]);
 
   // Clamp invalid page index.
   useEffect(() => {
@@ -320,6 +288,7 @@ export function useMercadoPageState() {
             pointsCost: data.cost,
             quantity: quantityNum,
             redeemingLimit: redeemingLimitNum,
+            availableDate: data.availableDate || null,
             availableMonth: data.availableMonth || null,
           },
         });
@@ -330,6 +299,7 @@ export function useMercadoPageState() {
           quantity: quantityNum,
           redeemingLimit: redeemingLimitNum,
           isActive: true,
+          availableDate: data.availableDate || null,
           availableMonth: data.availableMonth || null,
         });
         rewardId = createdReward?.id;
@@ -359,7 +329,7 @@ export function useMercadoPageState() {
     sortOrder,
     stockFilter,
     visibilityFilter,
-    monthFilter,
+    intervalFilter,
     isAddModalOpen,
     isDeleteModalOpen,
     isViewModalOpen,
@@ -372,7 +342,7 @@ export function useMercadoPageState() {
     setSortOrder,
     setStockFilter,
     setVisibilityFilter,
-    setMonthFilter,
+    setIntervalFilter,
     setSaveError,
     setIsAddModalOpen,
     setIsDeleteModalOpen,

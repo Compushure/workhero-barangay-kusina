@@ -6,6 +6,7 @@
 
 import {
   addRewardAction,
+  getAvailableRewardsByIntervalAction,
   getAvailableRewardsByMonthAction,
   getRewardsAction,
   editRewardAction,
@@ -34,6 +35,18 @@ export async function handleGetAvailableRewardsByMonthAction(month: number): Pro
 
   if (!result.success || result.data?.error) {
     throw new Error(result.error || result.data?.error || 'Failed to fetch monthly rewards');
+  }
+
+  return result.data?.data ?? [];
+}
+
+export async function handleGetAvailableRewardsByIntervalAction(
+  interval: 'weekly' | 'monthly' | 'yearly'
+): Promise<Reward[]> {
+  const result = await safeAction(() => getAvailableRewardsByIntervalAction(interval));
+
+  if (!result.success || result.data?.error) {
+    throw new Error(result.error || result.data?.error || 'Failed to fetch interval rewards');
   }
 
   return result.data?.data ?? [];

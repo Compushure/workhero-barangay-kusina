@@ -56,34 +56,34 @@ export function AllRewardsModal({ open, onOpenChange }: AllRewardsModalProps) {
   // Debug logging to see reward data
   useEffect(() => {
     if (open) {
-      console.group('🛒 ALL REWARDS MODAL DEBUG');
-      console.log('📊 Data Loading Status:');
+      console.group('ALL REWARDS MODAL DEBUG');
+      console.log(' Data Loading Status:');
       console.log('  - Rewards Loading:', rewardsLoading);
       console.log('  - Requests Loading:', requestsLoading);
       console.log('  - Points Loading:', pointsLoading);
       console.log('  - Overall Loading:', isLoading);
       console.log('');
 
-      console.log('📦 Rewards Data:');
+      console.log(' Rewards Data:');
       console.log('  - Total rewards from DB:', allRewards.length);
       console.log('  - Active rewards:', activeRewards.length);
       console.log('  - Inactive rewards:', allRewards.length - activeRewards.length);
       console.log('');
 
-      console.log('👤 User Data:');
+      console.log(' User Data:');
       console.log('  - User points:', userPoints);
       console.log('  - Pending requests:', pendingRequests.length);
       console.log('');
 
       if (rewardsError) {
-        console.error('❌ ERROR loading rewards:', rewardsError);
+        console.error(' ERROR loading rewards:', rewardsError);
         console.log('');
       }
 
       if (allRewards.length === 0) {
-        console.error('❌ NO REWARDS IN DATABASE!');
+        console.error(' NO REWARDS IN DATABASE!');
         console.log('');
-        console.log('🔧 TO FIX:');
+        console.log(' TO FIX:');
         console.log('   1. Open Supabase SQL Editor');
         console.log('   2. Check file: QUICK_FIX_REWARDS.sql');
         console.log('   3. Run QUERY 1 to check if rewards exist');
@@ -95,28 +95,28 @@ export function AllRewardsModal({ open, onOpenChange }: AllRewardsModalProps) {
         console.table(
           allRewards.slice(0, 5).map((r) => ({
             Name: r.name,
-            Active: r.isActive ? '✅' : '❌',
-            'Available Month': r.availableMonth || 'Not Set',
+            Active: r.isActive ? 'True' : 'False',
+            Availability: r.availableMonth || 'Not Set',
           }))
         );
         console.log('');
-        console.log('🔧 TO FIX:');
+        console.log(' TO FIX:');
         console.log('   1. Open Supabase SQL Editor');
         console.log('   2. Run: UPDATE \"Reward\" SET is_active = true;');
         console.log('   3. Refresh this page');
         console.log('');
       } else {
-        console.log('✅ Active Rewards Found!');
+        console.log('Active Rewards Found!');
         console.log('');
-        console.log('📋 Reward Cards Should Display:');
+        console.log('Reward Cards Should Display:');
         console.table(
           activeRewards.slice(0, 10).map((r) => ({
             Name: r.name,
             'Points Cost': r.pointsCost,
-            Active: r.isActive ? '✅' : '❌',
-            Month: r.availableMonth || 'All',
+            Active: r.isActive ? 'True' : 'False',
+            Availability: r.availableMonth || 'All',
             Quantity: r.quantity ?? '∞',
-            'Has Image': r.imageUrl ? '✅' : '❌',
+            'Has Image': r.imageUrl ? 'True' : 'False',
           }))
         );
         console.log('');

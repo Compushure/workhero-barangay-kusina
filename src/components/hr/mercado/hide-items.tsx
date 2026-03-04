@@ -25,7 +25,7 @@ export function HideRewardDialog({
 }: HideRewardDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card text-card-foreground border border-border max-w-md rounded-2xl p-6">
+      <DialogContent className="bg-muted text-card-foreground border border-border max-w-md rounded-2xl p-6">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">

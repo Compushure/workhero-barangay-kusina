@@ -28,7 +28,6 @@ export function RedemptionTable({
   onReject,
   status = 'pending',
 }: RedemptionTableProps) {
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
@@ -40,6 +39,10 @@ export function RedemptionTable({
   const [requestImageError, setRequestImageError] = useState(false);
   const { contentAreaStyle } = useSidebarContentArea();
   const itemsPerPage = 8;
+  const showRemarksColumn = status === 'approved' || status === 'rejected';
+  const tableGridClass = showRemarksColumn
+    ? 'grid-cols-[150px_180px_minmax(200px,1fr)_120px_80px_120px]'
+    : 'grid-cols-[150px_180px_minmax(200px,1fr)_120px_120px]';
 
   // Pagination logic
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -56,16 +59,6 @@ export function RedemptionTable({
       setCurrentPage(1);
     }
   }, [data.length, currentPage, totalPages]);
-
-  const toggleRow = (id: string) => {
-    const newExpanded = new Set(expandedRows);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedRows(newExpanded);
-  };
 
   const declineMutation = useDeclineRedemptionRequest();
   const acceptMutation = useAcceptRedemptionRequest();
@@ -117,18 +110,20 @@ export function RedemptionTable({
   const getRequestTotalCost = (req: RedemptionRequest) => (req.quantity || 1) * req.pointsCost;
 
   return (
-    <div className="overflow-hidden rounded-lg shadow-md">
+    <div className="overflow-hidden rounded-lg border border-border bg-background shadow-md">
       {/* Table Header */}
-      <div className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_80px_120px] gap-4 bg-primary-gradient px-6 py-4">
+      <div className={cn('grid gap-4 bg-primary-gradient px-6 py-4', tableGridClass)}>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">Request Date</div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">Employee</div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">
           Requested Item/s
         </div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">Total Cost</div>
-        <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
-          Remarks
-        </div>
+        {showRemarksColumn && (
+          <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
+            Remarks
+          </div>
+        )}
         <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
           Action
         </div>
@@ -160,76 +155,66 @@ export function RedemptionTable({
             const userName = request.userName || 'N/A';
             const isOutOfStock = request.remarks === 'Item is out of stock';
 
-            const getRequestQuantity = (req: RedemptionRequest) => req.quantity || 1;
-            const getRequestTotalCost = (req: RedemptionRequest) =>
-              (req.quantity || 1) * req.pointsCost;
-            const formatPoints = (points: number) => `${points} Pts`;
-
             return (
               <div
                 key={request.id}
-                className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_80px_120px] gap-4 px-6 py-4 transition-colors hover:bg-muted/40"
+                className={cn(
+                  'grid gap-4 px-6 py-4 transition-colors hover:bg-accent-secondary/25',
+                  tableGridClass
+                )}
               >
                 <div className="flex flex-col justify-center">
                   <p className="text-sm font-medium text-foreground">{dateStr}</p>
                   <p className="text-xs text-muted-foreground">{timeStr}</p>
                 </div>
                 <div className="flex items-center">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <p className="text-sm text-foreground truncate">{userName}</p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div className="max-w-xs">{userName}</div>
-                    </TooltipContent>
-                  </Tooltip>
+                  <p className="text-sm text-foreground truncate">{userName}</p>
                 </div>
-                <div className="flex items-center gap-2 min-w-0">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <p className="text-sm text-foreground truncate flex-1">{itemDisplay}</p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div className="max-w-xs">{itemDisplay}</div>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 shrink-0 text-foreground hover:bg-muted/50"
-                    onClick={() => toggleRow(request.id)}
-                  ></Button>
+                <div className="flex items-center min-w-0">
+                  <button
+                    type="button"
+                    className="text-sm text-foreground truncate flex-1 text-left cursor-pointer"
+                    onClick={() => {
+                      setSelectedRequest(request);
+                      setRequestImageError(false);
+                      setRequestModalOpen(true);
+                    }}
+                  >
+                    {itemDisplay}
+                  </button>
                 </div>
                 <div className="flex items-center">
                   <p className="text-sm font-medium text-foreground">{totalCost} Pts</p>
                 </div>
-                <div className="flex items-center justify-center">
-                  {hasRemarks ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className={cn(
-                            'h-8 w-8 hover:bg-muted/50',
-                            isOutOfStock ? 'text-orange-600' : 'text-primary'
-                          )}
-                          onClick={() => {
-                            setSelectedRemarks(request.remarks || '');
-                            setRemarkModalOpen(true);
-                          }}
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {isOutOfStock ? 'Auto-declined: Out of stock' : 'View remarks'}
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">-</span>
-                  )}
-                </div>
+                {showRemarksColumn && (
+                  <div className="flex items-center justify-center">
+                    {hasRemarks ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                              'h-8 w-8 hover:bg-muted/50',
+                              isOutOfStock ? 'text-orange-600' : 'text-primary'
+                            )}
+                            onClick={() => {
+                              setSelectedRemarks(request.remarks || '');
+                              setRemarkModalOpen(true);
+                            }}
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {isOutOfStock ? 'Auto-declined: Out of stock' : 'View remarks'}
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">-</span>
+                    )}
+                  </div>
+                )}
                 <div className="flex items-center gap-2 justify-center">
                   {status === 'pending' ? (
                     <>
@@ -389,6 +374,17 @@ export function RedemptionTable({
                 </div>
               );
             })()}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={remarkModalOpen} onOpenChange={setRemarkModalOpen}>
+        <DialogContent className="bg-card text-card-foreground border border-border sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-primary">Remarks</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-foreground whitespace-pre-wrap wrap-break-word">
+            {selectedRemarks.trim() || '-'}
+          </p>
         </DialogContent>
       </Dialog>
     </div>
