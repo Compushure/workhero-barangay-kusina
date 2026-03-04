@@ -109,12 +109,12 @@ export function Sidebar({
 
   return (
     <aside
-      className={`bg-[#FFF2CC] text-[#131C2A] flex flex-col justify-between transition-all duration-500 ease-in-out overflow-hidden ${
-        isCollapsed ? 'w-16' : 'w-55'
+      className={`bg-muted text-[#131C2A] flex flex-col justify-between transition-all duration-500 ease-in-out overflow-hidden ${
+        isCollapsed ? 'w-20' : 'w-60'
       }`}
     >
       {/* Logo Section */}
-      <div className="px-3 py-6 mt-6">
+      <div className="px-3 py-7 mt-6">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={`group w-full h-full p-1 hover:bg-zinc-50 cursor-pointer rounded-sm transition-colors ${
@@ -147,10 +147,10 @@ export function Sidebar({
 
       {/* Navigation */}
       <nav
-        className={`flex-1 pb-6 border-t border-[#f47812]/50 ${
+        className={`flex-1 pb-6 space-y-3 ${
           isCollapsed
-            ? 'overflow-hidden'
-            : 'overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
+            ? 'overflow-hidden px-4'
+            : 'overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-3'
         }`}
       >
         {navItems.map((item) => {
@@ -159,7 +159,7 @@ export function Sidebar({
           const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
 
           const NavIcon = ({ icon: Icon }: { icon: any}) => (
-            <Icon strokeWidth={1.75} className={`shrink-0 text-[#f47812]  ${isActive ? 'group-hover:text-[#f47812]' : 'group-hover:text-zinc-50 '} `} />
+            <Icon strokeWidth={1.75} className={`shrink-0 text-[#f47812]  ${isActive ? 'text-zinc-50' : 'group-hover:text-[#f47812]'} `} />
           );
           return (
             <Tooltip key={item.key}>
@@ -173,9 +173,9 @@ export function Sidebar({
                     }
                   }}
                   aria-disabled={isDisabled}
-                  className={`group w-full flex items-center gap-3 py-4.5 cursor-pointer font-medium transition-colors duration-400 ease-in-out border-b border-[#f47812]/50
-                    ${isCollapsed ? 'px-3 justify-center' : 'px-5 justify-start'} 
-                    ${isActive ? 'text-[#f47812] bg-zinc-50' : 'text-[#131C2A] hover:bg-linear-to-b hover:from-[#FAA938]/80 hover:to-[#f47812]/80 hover:text-zinc-50 hover:shadow-sm'} 
+                  className={`group w-full flex items-center gap-3 py-3 cursor-pointer font-medium transition-all duration-400 ease-in-out rounded-full shadow-sm/15
+                    ${isCollapsed ? 'px-4 justify-center' : 'px-5 justify-start'} 
+                    ${isActive ? 'bg-primary-gradient text-zinc-50 transition-colors' : 'text-[#131C2A] hover:text-[#f47812] bg-zinc-50/75 hover:bg-[#FAA938]/20 hover:shadow-sm hover:scale-103 transform-gpu'} 
                     ${isDisabled ? 'opacity-50 pointer-events-none' : ''}
                   `}
                 >

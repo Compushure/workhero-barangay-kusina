@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Search, Plus, ChevronDown } from 'lucide-react';
+import { Search, Plus, ChevronDown, ListTodo } from 'lucide-react';
 import type { AssignedTask, Task } from '@/types';
 import SelectTasksTable from './select-task-table';
 import { handleFetchTaskList, handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
@@ -166,17 +166,22 @@ export function SelectTasksDialog({
     <>
       <Button
         onClick={() => setOpen(true)}
-        className={`bg-zinc-50 shadow-sm/25 hover:bg-gray-100 flex items-center gap-16 min-w-50 justify-between cursor-pointer transition-all duration-500 ease-in-out
-          ${selectedTask.length === 0 ? 'text-zinc-700' : 'text-foreground'}`}
+        className={`bg-zinc-50 shadow-sm/25 flex items-center min-w-54 justify-between cursor-pointer transition-all duration-400 ease-in-out hover:bg-accent/15`}
       >
-        <span className="truncate">{buttonLabel}</span>
-        <Plus className="w-4 h-4 shrink-0" />
+        <div className="flex items-center gap-2 min-w-45 max-9/10">
+          <ListTodo size={16} className='text-accent'/>
+          <span className={`truncate ${selectedTask.length === 0 ? 'text-secondary' : 'text-primary'}`}>{buttonLabel}</span>
+        </div>
+        <Plus className="size-4 shrink-0 text-primary" />
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="bg-[#FBF4E8] max-w-full min-w-4xl max-h-[90vh] flex flex-col p-6">
+        <DialogContent className="bg-card max-w-full min-w-4xl max-h-[90vh] flex flex-col p-6">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-foreground text-left">Select Tasks</DialogTitle>
+            <DialogTitle className="flex gap-2 text-2xl text-foreground text-left items-center">
+              <ListTodo className='size-7 p-1.25 bg-primary-gradient text-card rounded-full'/>
+              Select Task
+            </DialogTitle>
           </DialogHeader>
 
           {/* Search and Filter */}
@@ -189,7 +194,7 @@ export function SelectTasksDialog({
                 value={searchTerm}
                 onChange={handleSearchChange}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full pl-10 pr-4 py-2 rounded-full text-sm bg-white shadow-sm/25 focus:outline-none focus:border-foreground"
+                className="w-full pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent"
               />
             </div>
             <DropdownMenu>
@@ -197,18 +202,18 @@ export function SelectTasksDialog({
                 <Button
                   variant="default"
                   size="default"
-                  className="bg-white shadow-sm/25 hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-48 py-2 justify-between border border-gray-200"
+                  className="bg-card shadow-sm/25 hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-48 py-2 justify-between border border-gray-200"
                 >
                   <span className="truncate">{currentFilterLabel}</span>
                   <ChevronDown size={18} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className='bg-background'>
                 {taskTypes.map((type) => (
                   <DropdownMenuItem
                     key={type}
                     onClick={() => handleFilterChange(type)}
-                    className={`cursor-pointer transition-all duration-500 ease-in-out ${filterType === type ? 'bg-red-100' : ''}`}
+                    className={`cursor-pointer transition-all duration-400 ease-in-out ${filterType === type ? 'bg-accent text-card' : 'hover:bg-accent/25!'}`}
                   >
                     {type === 'all' ? 'All Types' : type}
                   </DropdownMenuItem>
@@ -237,7 +242,7 @@ export function SelectTasksDialog({
             <Button
               variant="outline"
               onClick={handleClose}
-              className="px-12 border-gray-300 bg-zinc-50 hover:bg-foreground hover:text-zinc-50 cursor-pointer transition-all duration-500 ease-in-out"
+              className="px-12 bg-card text-foreground hover:bg-accent hover:text-card cursor-pointer transition-all duration-400 ease-in-out"
             >
               Close
             </Button>

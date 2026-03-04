@@ -93,14 +93,14 @@ export default function EditTaskDialog({
 
   return (
     <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>
-      <DialogContent className="bg-[#FBF4E8] max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="bg-card max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-2xl text-foreground">Edit Task</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-4">
           {/* Task Info */}
-          <div className="flex items-center justify-between bg-white rounded-xl px-4 py-2 border-2 border-gray-300">
+          <div className="flex items-center justify-between bg-white rounded-xl px-4 py-2 border border-accent/50">
             <h4 className="text-lg font-bold text-foreground">{task.taskName}</h4>
             <div className="flex flex-col items-center">
               <div className="flex items-end gap-2">
@@ -118,15 +118,15 @@ export default function EditTaskDialog({
             </div>
           </div>
 
-          <div className="flex justify-center items-start gap-4 text-sm">
+          <div className="flex justify-center items-start gap-8 text-sm mb-8">
             {/* Max Repeats */}
             {task.isRepeatable && (
-            <div className='flex flex-col items-center gap-3'>
+            <div className='flex flex-col items-center gap-2 font-medium'>
               <label className="font-bold text-foreground">Max Orders</label>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setEditMaxOrders(Math.max(1, Math.min(99, editMaxOrders - 1)))}
-                  className="bg-[#690003] text-white size-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
+                  className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent/50 hover:text-card text-primary size-8 rounded flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out"
                 >
                   −
                 </button>
@@ -136,13 +136,13 @@ export default function EditTaskDialog({
                   onChange={(e) =>
                     setEditMaxOrders(Math.max(1, Math.min(99, Number.parseInt(e.target.value) || 1)))
                   }
-                  className="remove-arrow w-12 text-center border border-gray-300 rounded px-2 py-1 bg-[#fafafa]"
+                  className="remove-arrow w-15  text-center border border-accent/50 rounded px-2 py-1.5 bg-card"
                   min="1"
                   max="99"
                 />
                 <button
                   onClick={() => setEditMaxOrders(Math.max(1, Math.min(99, editMaxOrders + 1)))}
-                  className="bg-[#690003] text-white size-6 rounded flex items-center justify-center hover:bg-[#8B0000] cursor-pointer transition-all duration-500 ease-in-out"
+                  className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent/50 hover:text-card text-primary size-8 rounded flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out"
                 >
                   +
                 </button>
@@ -168,7 +168,7 @@ export default function EditTaskDialog({
               placeholder="Enter in Employee Name or ID"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-white shadow-sm/15 text-sm focus:outline-none focus:border focus:border-foreground"
+              className="w-full pl-10 pr-4 py-2 rounded-full bg-white shadow-sm/15 text-sm border border-accent/0 focus:outline-none focus:border focus:border-accent"
             />
           </div>
           
@@ -180,8 +180,8 @@ export default function EditTaskDialog({
                 {editAssignedEmployees.length}
               </span>
             </h4>
-            <div className="bg-white rounded-xl p-4 border-2 border-gray-300 min-h-[10vh] max-h-[30vh] overflow-y-auto">
-              <div className="space-y-2">
+            <div className="bg-background-soft rounded-xl border border-accent/50 min-h-[10vh] max-h-[30vh] overflow-y-auto">
+              <div className="">
                 {filteredEmployees.map((emp) => {
                   const isDisabled = disabledEmployeeIds.has(emp.id);
                   const isSelected = editAssignedEmployees.includes(emp.id);
@@ -189,10 +189,12 @@ export default function EditTaskDialog({
                   return (
                     <div
                       key={emp.id}
-                      className={`flex items-center gap-2 p-1.5 rounded ${
+                      className={`flex items-center gap-4 pl-6 py-3 ${
                         isDisabled
-                          ? 'opacity-50 cursor-not-allowed bg-gray-100'
-                          : 'hover:bg-gray-50 cursor-pointer transition-all duration-300 ease-in-out'
+                          ? 'brightness-75 opacity-50 cursor-not-allowed'
+                        : isSelected
+                          ? 'bg-accent-secondary/25'
+                          : 'bg-background-soft hover:brightness-96 hover:bg-accent-secondary/25 cursor-pointer transition-all duration-300 ease-in-out border-b border-accent/50'
                       }`}
                       onClick={() => !isDisabled && toggleEmployee(emp.id)}
                     >
@@ -205,7 +207,13 @@ export default function EditTaskDialog({
                           e.stopPropagation();
                           if (!isDisabled) toggleEmployee(emp.id);
                         }}
-                        className="w-5 h-5 rounded cursor-pointer accent-foreground disabled:cursor-not-allowed"
+                        className="size-5 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
+                        style={{
+                          backgroundImage: !!isSelected ? 'url("data:image/svg+xml,%3csvg viewBox=\'0 0 16 16\' fill=\'white\' xmlns=\'http://www.w3.org/2000/svg\'%3e%3cpath d=\'m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z\'/%3e%3c/svg%3e")' : 'none',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundPosition: 'center',
+                          backgroundSize: '1rem'
+                        }}
                       />
                       <div className="flex-1">
                         <p className="text-base font-medium text-gray-800">{emp.name}</p>
@@ -234,7 +242,7 @@ export default function EditTaskDialog({
             variant="outline"
             onClick={handleCancelEdit}
             disabled={isProcessing}
-            className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+            className="border-zinc-400 bg-white hover:bg-gray-100 cursor-pointer transition-all duration-500 ease-in-out"
           >
             Cancel
           </Button>

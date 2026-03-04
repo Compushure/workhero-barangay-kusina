@@ -1,5 +1,5 @@
-@import "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap";
-@import "https://fonts.googleapis.com/css2?family=Jersey+10&display=swap";
+@import 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
+@import 'https://fonts.googleapis.com/css2?family=Jersey+10&display=swap';
 
 @import 'tailwindcss';
 @import 'tw-animate-css';
@@ -7,59 +7,47 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #FBF4E8; /* Soft warm beige */
-  --foreground: #f47812; /* Deep reddish brown */
+  --background: #fcf6e3; /* Soft pastel yellow */
+  --background-soft: #FFFDF5;
+  --foreground: #131c2a;
   --card: #fafafa;
-  --card-foreground: #514937;
-  --popover: #fafafa;
-  --popover-foreground: #514937;
+  --card-foreground: #131c2a;
+  --popover: #fbf4e8;
+  --popover-foreground: #131c2a;
 
-  --title: #1b1b1b;
+  /* main color for heading and main text elements */
+  --title: #131c2a;
 
-  /* Primary: Dark olive brown */
   --primary-foreground: #fafafa;
-  --primary: #792828;
+  --primary: #131c2a;
 
-  /* Secondary: Bright chili red */
   --secondary-foreground: #fafafa;
-  --secondary: #c04e4e; /* Bright chili red */
+  --secondary: #545f6e;
 
-  /* Accent: Light beige */
-  /* --accent: #f2d0a7;
-  --accent-foreground: #514937; */
-  --accent: #f2a29c; /* Rosy coral */
-  --accent-foreground: #5a2a2a;
+  /* this is the main accent color to be used */
+  --accent: #f47812; /* Deep citrus orange */
+  --accent-secondary: #faa938; /* Light citrus orange */
+  --primary-gradient: linear-gradient(180deg, #faa938 0%, #f47812 100%);
 
   /* Muted: Light neutral */
-  /* --muted: #e5e5e5;
-  --muted-foreground: #6b6b6b; */
-  --muted: #fbeaea; /* Light pinkish neutral */
-  --muted-foreground: #7a3d3d;
+  --muted: #fff2cc; /* Light pinkish neutral */
+  --muted-foreground: #26344b;
 
   /* Destructive: Dark red */
-  /* --destructive: #730202;
-  --destructive-foreground: #ffffff; */
   --destructive: #8b0000; /* Dark red */
   --destructive-foreground: #ffffff;
 
   /* Success: Olive green */
-  /* --success: #4c5e3a;
-  --success-foreground: #ffffff; */
   --success: #b85c38; /* Burnt sienna */
   --success-foreground: #ffffff;
 
   /* Info: Coral red for highlights */
-  /* --info: #d94141;
-  --info-foreground: #ffffff; */
-  --info: #e07b7b; /* Soft tomato red */
+  --info: #e0a87b; /* Soft tomato red */
   --info-foreground: #ffffff;
 
-  /* --border: #e0e0e0;
-  --input: #e0e0e0;
-  --ring: #f28705; */
   --border: #e0cfcf;
   --input: #f5e5e5;
-  --ring: #a83232;
+  --ring: #f47812;
 
   /* --radius: 0.5rem; */
   --radius: 0.625rem;
@@ -101,6 +89,7 @@
   --font-sans: 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
+  --color-background-soft: var(--background-soft);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -113,6 +102,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
+  --color-accent-secondary: var(--accent-secondary);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
@@ -198,14 +188,32 @@
 }
 
 @keyframes shake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-4px); }
-  40% { transform: translateX(4px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(4px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 .animate-shake {
   animation: shake 0.5s ease-in-out;
+}
+
+@layer utilities {
+  .bg-primary-gradient {
+    background-image: var(--primary-gradient);
+  }
 }

@@ -75,7 +75,7 @@ export function ProfilePic({
           </>
         ) : (
           <>
-            <span className="text-sm font-semibold text-[#730202] font-medium">
+            <span className="text-sm font-semibold text-[#730202]">
               {user?.name ? getInitials(user.name) : '?'}
             </span>
             {isHovered && !isPending && (

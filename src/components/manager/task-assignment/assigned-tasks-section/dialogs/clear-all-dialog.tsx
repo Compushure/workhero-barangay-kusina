@@ -44,7 +44,7 @@ function ClearAllAssignedDialog({ setShowClearConfirm }: ClearAllDialogProps) {
           <Button
             onClick={handleClearAllAssigned}
             disabled={clearAllMutation.isPending}
-            className="bg-red-700 hover:bg-red-500 text-white cursor-pointer transition-all duration-500 ease-in-out"
+            className="bg-red-700 hover:bg-red-500 text-white cursor-pointer transition-all duration-400 ease-in-out"
           >
             {clearAllMutation.isPending ? 'Clearing...' : 'Clear All'}
           </Button>
@@ -52,7 +52,7 @@ function ClearAllAssignedDialog({ setShowClearConfirm }: ClearAllDialogProps) {
             variant="outline"
             onClick={() => setShowClearConfirm(false)}
             disabled={clearAllMutation.isPending}
-            className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+            className="border-zinc-400 bg-white hover:bg-gray-300 cursor-pointer transition-all duration-400 ease-in-out"
           >
             Cancel
           </Button>

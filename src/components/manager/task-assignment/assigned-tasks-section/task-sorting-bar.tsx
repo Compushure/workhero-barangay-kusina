@@ -30,10 +30,10 @@ export function TaskSortingBar({ sortBy, onSortChange }: TaskSortingBarProps) {
         <Button
           variant="default"
           size="default"
-          className="bg-foreground shadow-sm/25 hover:bg-[#950005] transition-all duration-200 ease-in-out cursor-pointer text-zinc-50 shadow-md w-32 justify-between"
+          className="group bg-card text-foreground shadow-sm/25 hover:bg-accent hover:text-card transition-all duration-400 ease-in-out cursor-pointer w-32 justify-between"
         >
           <span className="truncate">{currentLabel}</span>
-          <ArrowUpDown size={18} />
+          <ArrowUpDown size={18} className='text-accent group-hover:text-card transition-all duration-400 ease-in-out'/>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -41,7 +41,7 @@ export function TaskSortingBar({ sortBy, onSortChange }: TaskSortingBarProps) {
           <DropdownMenuItem
             key={opt.value}
             onClick={() => onSortChange(opt.value)}
-            className={`cursor-pointer transition-all duration-500 ease-in-out ${sortBy === opt.value ? 'bg-red-100' : ''}`}
+            className={`cursor-pointer transition-all duration-500 ease-in-out ${sortBy === opt.value ? 'bg-accent text-card' : 'hover:bg-accent/25!'}`}
           >
             {opt.label}
           </DropdownMenuItem>

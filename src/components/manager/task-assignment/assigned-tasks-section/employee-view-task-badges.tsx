@@ -1,5 +1,5 @@
 import { AssignedEmployee, AssignedTask } from "@/types";
-import { ChevronDown, CircleCheck, CircleDashed, CircleX, Coins, Soup, Target, X } from "lucide-react";
+import { ChevronDown, CircleCheck, CircleDashed, CircleX, Coins, HandCoins, Soup, Target, X } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import { isTaskOverdue } from "@/utils/date-utils";
 
@@ -71,25 +71,34 @@ export default function EmployeeViewTaskBadges({
           return (
             <div
               key={task.id}
-              className="flex items-center justify-between bg-white px-3 py-3 rounded-2xl border-2 border-gray-300 h-full"
+              className="flex items-center justify-between bg-white px-3 py-3 rounded-2xl border-2 border-accent/25 h-full"
             >
               <div className="flex flex-col w-[65%] gap-1">
                   <span className='truncate text-zinc-700 text-sm font-semibold'>
                     {task.taskName}
                   </span>
                   <div className='flex items-center gap-2'>
-                      {task.status === "assigned" ? 
-                        <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500"/> :
-                      task.status === "in review" ?
-                        <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400"/> : 
-                      task.status === "approved" ?
-                        <StatusIcon icon={CircleCheck} className="bg-green-100 text-green-600"/> :
-                        <StatusIcon icon={CircleX} className="bg-red-100 text-red-600"/>
-                      }
-                    
                     <p className={`text-xs text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}>
                       {formatDate(task.dateRange.end)}
                     </p>
+
+                    {task.status === "assigned" ? 
+                      <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500"/> :
+                    task.status === "in review" ?
+                      <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400"/> : 
+                    task.status === "approved" ?
+                      <StatusIcon icon={CircleCheck} className="bg-green-100 text-green-600"/> :
+                      <StatusIcon icon={CircleX} className="bg-red-100 text-red-600"/>
+                    }
+
+                    {taskEmployee?.pendingOrders === 0 && task.status === "approved" &&
+                      <p className={`flex gap-1 px-2 py-1 rounded-full items-center bg-violet-200 text-violet-600`}>
+                        <HandCoins strokeWidth={2.5} className={`size-4 `}/>
+                        <span className={`text-xs sr-only xl:not-sr-only`}>
+                          Claimed
+                        </span>
+                      </p>
+                    }
                   </div>
               </div>
 

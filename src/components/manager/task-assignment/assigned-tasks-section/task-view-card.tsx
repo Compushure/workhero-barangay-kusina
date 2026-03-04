@@ -132,20 +132,20 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   return (
     <div
-      className={`flex items-center justify-between rounded-2xl bg-[#FAFAFA] p-6 gap-8 transition-all ease-in-out duration-400 
+      className={`flex items-center justify-between rounded-2xl bg-card p-6 gap-8 transition-all ease-in-out duration-400
         ${expanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`}
     >
-      <main className="flex flex-col w-full gap-5 min-w-0">
+      <main className="flex flex-col w-full gap-7 min-w-0">
         <section className="flex justify-between min-w-0">
           {/* Task name, description, and date range */}
           <header className="flex flex-col gap-1.5 min-w-0">
             <div className="flex items-end min-w-0">
-              <h3 className="text-xl font-bold text-[#690003] truncate shrink-0">{task.taskName}</h3>
+              <h3 className="text-xl font-bold text-primary truncate shrink-0">{task.taskName}</h3>
               <p className="text-sm text-gray-500 ml-2 mr-8 pb-0.5 truncate min-w-0 flex-1">- {task.taskDescription}</p>
             </div>
 
-            <p className="text-sm font-medium text-zinc-500">
-              {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
+            <p className="flex items-center text-sm font-medium text-secondary">
+              <span className='bg-accent-secondary/25 w-fit rounded-full px-3 py-1'>{formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}</span>
               {isTaskOverdue(task.dateRange.end) && (
                 <span className="bg-red-100 text-red-500 text-sm px-2 py-1 rounded-full ml-2">
                   Task is Overdue
@@ -155,7 +155,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           </header>
 
           {/* Task max orders, fiesta points and XP */}
-          <div className="flex gap-4 text-zinc-500 items-baseline shrink-0">
+          <div className="flex gap-4 text-secondary/85 items-baseline shrink-0">
             <div className="flex flex-col items-end">
               <div className="flex text-base font-medium items-end gap-1">
                 <Soup strokeWidth={1.5} className="size-7 mb-3.5" />

@@ -28,20 +28,20 @@ export default function TaskViewEmployeeBadges({
 
   return (     
     <section className="">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-start gap-5 mb-3">
         <h4 className="text-base font-semibold text-foreground">
           Assigned to{' '}
-          <span className="bg-zinc-200 text-gray-700 shadow w-7 h-6 px-1 rounded-full text-sm ml-1.5 inline-flex items-center justify-center">
+          <span className="bg-accent/65 text-primary-foreground shadow-sm w-7 h-6 px-1 rounded-full text-sm ml-1.5 inline-flex items-center justify-center">
             {(task.assignedEmployees ?? []).length}
           </span>
         </h4>
         {(hasOverflow || expanded) && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-foreground font-medium flex items-center gap-1 hover:underline"
+            className="text-foreground text-sm font-medium flex items-center gap-1 hover:underline hover:text-accent duration-400 ease-in-out transition-all"
           >
             {expanded ? 'Show Less' : 'See All'}{' '}
-            <ChevronDown className={`w-4 h-4 transition ${expanded ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`size-4 transition ${expanded ? 'rotate-180' : ''}`} />
           </button>
         )}
       </div>
@@ -54,7 +54,7 @@ export default function TaskViewEmployeeBadges({
         {(displayedEmployees ?? []).map((emp) => (
           <div
             key={emp.id}
-            className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border-2 border-gray-300"
+            className="flex items-center gap-1.5 bg-background-soft px-2 py-1.5 rounded-full border-2 border-accent/25"
           >
             { 
             emp.status === "in review" ?

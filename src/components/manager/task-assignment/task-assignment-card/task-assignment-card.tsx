@@ -22,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog';
 
 export function TaskAssignmentCard() {
@@ -143,10 +144,10 @@ export function TaskAssignmentCard() {
   };
 
   return (
-    <div className="rounded-3xl bg-[#FBF4E8] p-6 shadow-sm/25">
-      <h2 className="mb-8 text-2xl font-bold text-foreground">Assign Employees for Task</h2>
+    <div className="rounded-3xl bg-background p-6 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
+      <h2 className="mb-7 text-2xl font-semibold text-[#131C2A]">Assign Employees for Task</h2>
 
-      <div className="flex flex-wrap gap-4 mb-2">
+      <div className="flex flex-wrap gap-4">
         <div className="min-w-50">
           <SelectTasksDialog
             selectedTask={selectedTask}
@@ -176,7 +177,7 @@ export function TaskAssignmentCard() {
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-3 justify-end mt-6">
+      <div className="flex gap-3 justify-end mt-4">
         <Button
           onClick={() => setShowAssignConfirm(true)}
           disabled={
@@ -185,7 +186,7 @@ export function TaskAssignmentCard() {
             selectedTask.length === 0 ||
             !selectedDeadline
           }
-          className="bg-foreground hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:shadow-sm/25 disabled:cursor-not-allowed px-12 shadow-sm/25"
+          className="bg-foreground hover:bg-accent text-card cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:shadow-sm/25 disabled:cursor-not-allowed px-12 shadow-sm/25"
         >
           {isAssigning ? 'Assigning...' : 'Assign'}
         </Button>
@@ -193,7 +194,7 @@ export function TaskAssignmentCard() {
         <Button
           variant="outline"
           onClick={() => setShowClearConfirm(true)}
-          className="text-black bg-white hover:bg-gray-100 px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
+          className="text-black bg-white hover:bg-gray-100 hover:text-accent px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
         >
           Clear
         </Button>
@@ -208,27 +209,27 @@ export function TaskAssignmentCard() {
 
       {/* Assign Confirmation Dialog */}
       <Dialog open={showAssignConfirm} onOpenChange={setShowAssignConfirm}>
-        <DialogContent className="transition-all duration-500 ease-in-out">
+        <DialogContent className="transition-all duration-500 ease-in-out bg-card">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">
               Confirm Assignment
             </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to assign this task to the selected employees?
+            </DialogDescription>
           </DialogHeader>
-          <p className="text-sm text-gray-600 mb-4">
-            Are you sure you want to assign this task to the selected employees?
-          </p>
           <DialogFooter className="flex gap-3 justify-end">
             <Button
               onClick={handleAssign}
               disabled={isAssigning}
-              className="bg-foreground hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed px-8 shadow-sm/25"
+              className="bg-foreground hover:bg-accent text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed px-8 shadow-sm/25"
             >
               {isAssigning ? 'Assigning...' : 'Confirm'}
             </Button>
             <Button
               variant="outline"
               onClick={() => setShowAssignConfirm(false)}
-              className="text-black bg-white hover:bg-gray-100 px-8 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
+              className="border-zinc-400 bg-white hover:bg-gray-100 px-8 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
             >
               Cancel
             </Button>
