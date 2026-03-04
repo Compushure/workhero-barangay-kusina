@@ -21,6 +21,7 @@ interface MercadoItem {
   isActive?: boolean;
   imageUrl?: string;
   createdAt?: string;
+  availableMonth?: number | null;
   availableDate?: string | Date | null;
 }
 

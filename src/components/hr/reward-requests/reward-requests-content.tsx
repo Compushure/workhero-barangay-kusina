@@ -5,22 +5,26 @@ import { HeaderSection } from '@/components/hr/dashboard/header';
 import { RedemptionTable } from '@/components/hr/dashboard/redemption-table';
 import { MarketSuspense } from '@/components/shared/market-suspense';
 import { useGetRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export function RewardRequestsContent() {
   const [statusFilter, setStatusFilter] = useState<string>('pending');
   const [sortBy, setSortBy] = useState<string>('date-desc');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 250);
 
   // Fetch redemption requests from database with status filter
   const { data: requests = [], isLoading, error } = useGetRedemptionRequests(statusFilter);
 
   // Filter and sort the data with memoization
   const filteredRequests = useMemo(() => {
+    const normalizedSearch = debouncedSearchTerm.trim().toLowerCase();
+
     return requests
       .filter(
         (req) =>
-          req.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          req.rewardName.toLowerCase().includes(searchTerm.toLowerCase())
+          req.userName.toLowerCase().includes(normalizedSearch) ||
+          req.rewardName.toLowerCase().includes(normalizedSearch)
       )
       .sort((a, b) => {
         switch (sortBy) {
@@ -38,7 +42,7 @@ export function RewardRequestsContent() {
             return 0;
         }
       });
-  }, [requests, searchTerm, sortBy]);
+  }, [requests, debouncedSearchTerm, sortBy]);
 
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);

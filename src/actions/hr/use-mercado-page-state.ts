@@ -69,7 +69,7 @@ const mapRewardToEditableItem = (reward: Reward): EditableMercadoItem => ({
   quantity: reward.quantity,
   redeemingLimit: reward.redeemingLimit,
   imageUrl: reward.imageUrl,
-  availableMonth: reward.availableMonth,
+  availableMonth: reward.availableMonth ?? undefined,
 });
 
 const mapRewardToViewableItem = (reward: Reward): ViewableMercadoItem => ({
@@ -80,7 +80,7 @@ const mapRewardToViewableItem = (reward: Reward): ViewableMercadoItem => ({
   redeemingLimit: reward.redeemingLimit,
   isActive: reward.isActive,
   imageUrl: reward.imageUrl,
-  availableMonth: reward.availableMonth,
+  availableMonth: reward.availableMonth ?? undefined,
   availableDate: reward.availableDate,
 });
 

@@ -8,6 +8,27 @@ import { startOfDay } from 'date-fns';
 const MANILA_TIMEZONE = 'Asia/Manila';
 
 /**
+ * Formats a date-like value into a short readable string.
+ * @param date - Date value (string/date/null)
+ * @returns formatted date string or fallback label
+ */
+export function formatDate(date: string | Date | null | undefined): string {
+  if (!date) return 'No due date';
+
+  const parsedDate = date instanceof Date ? date : new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return 'Invalid date';
+  }
+
+  return parsedDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+/**
  * Checks if a task is overdue based on its end date
  * @param endDate - The end date of the task (can be null)
  * @returns boolean - true if the task is overdue, false otherwise

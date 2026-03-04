@@ -1,4 +1,4 @@
-import LeaderboardCard from '@/components/hr/leaderboard/leaderboard-card';
+import LeaderboardCard from '@/components/hr/leaderboard/leaderboard-podium-card';
 import LeaderboardList from '@/components/hr/leaderboard/leaderboard-list';
 import LeaderboardFilters from '@/components/hr/leaderboard/leaderboard-filters';
 import { getTopPlayers } from '@/actions/hr/leaderboard';
@@ -12,19 +12,6 @@ export default async function LeaderboardPage() {
   if (result.error || !result.data || result.data.length === 0) {
     return (
       <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-<<<<<<< HEAD
-        <div className="p-4 sm:p-8 bg-background text-foreground min-h-screen">
-          <div className="max-w-7xl mx-auto">
-            <HallOfFameHeader
-              periodLabel={config.label}
-              period={period}
-              userCount={0}
-              prevPeriod={prevPeriod}
-              nextPeriod={nextPeriod}
-            />
-
-            <EmptyStateAdminCard period={period} message={emptyMessage} />
-=======
         <div className="p-8 bg-[#F3F3F3] min-h-screen">
           <div className="max-w-6xl mx-auto">
             <div className="flex justify-between items-start mb-8">
@@ -39,7 +26,6 @@ export default async function LeaderboardPage() {
                 {result.error || 'No leaderboard data available at the moment.'}
               </p>
             </div>
->>>>>>> 7c524ad308952552ec3a9c33cee7d435537fff28
           </div>
         </div>
       </Suspense>
@@ -58,17 +44,6 @@ export default async function LeaderboardPage() {
 
   return (
     <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-<<<<<<< HEAD
-      <div className="p-4 sm:p-8 bg-background text-foreground min-h-screen">
-        <div className="max-w-7xl mx-auto">
-          <HallOfFameHeader
-            periodLabel={config.label}
-            period={period}
-            userCount={userCount}
-            prevPeriod={prevPeriod}
-            nextPeriod={nextPeriod}
-          />
-=======
       <div className="p-8 bg-[#F3F3F3] min-h-screen">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
@@ -79,7 +54,6 @@ export default async function LeaderboardPage() {
             </div>
             <LeaderboardFilters />
           </div>
->>>>>>> 7c524ad308952552ec3a9c33cee7d435537fff28
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* 1st Place Highlight */}

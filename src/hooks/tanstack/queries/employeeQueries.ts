@@ -6,9 +6,13 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { handleFetchEmployeeRank } from '@/action-handlers/employee/stats';
+import {
+  handleFetchEmployeePoints,
+  handleFetchEmployeeRank,
+  handleFetchEmployeeXP,
+} from '@/action-handlers/employee/stats';
 import { fetchUserBadgesHandler } from '@/action-handlers/employee/badges';
-import type { EmployeeRank } from '@/types';
+import type { EmployeePointsData, EmployeeRank, EmployeeXP } from '@/types';
 import type { UserBadge } from '@/actions/employee/badges';
 
 /**
@@ -25,9 +29,43 @@ import type { UserBadge } from '@/actions/employee/badges';
 export const employeeKeys = {
   all: ['employees'] as const,
   rank: () => [...employeeKeys.all, 'rank'] as const,
+  points: () => [...employeeKeys.all, 'points'] as const,
+  xp: () => [...employeeKeys.all, 'xp'] as const,
   badges: () => [...employeeKeys.all, 'badges'] as const,
   userBadges: (userId: string) => [...employeeKeys.badges(), userId] as const,
 };
+
+export function useGetEmployeePoints(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<EmployeePointsData | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.points(),
+    queryFn: async () => {
+      return await handleFetchEmployeePoints();
+    },
+    enabled: queryOptions.enabled !== false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<EmployeePointsData | null, Error>;
+}
+
+export function useGetEmployeeXP(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<EmployeeXP | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.xp(),
+    queryFn: async () => {
+      return await handleFetchEmployeeXP();
+    },
+    enabled: queryOptions.enabled !== false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<EmployeeXP | null, Error>;
+}
 
 /**
  * Fetches the current employee's rank among all regular employees
