@@ -42,7 +42,7 @@ function UnassignEmployeeDialog({
     <Dialog open={!!showRemoveConfirm} onOpenChange={(open) => !open && setShowRemoveConfirm(null)}>
       <DialogContent className="bg-white">
         <DialogHeader>
-          <DialogTitle className="text-[#690003]">Unassign Employee?</DialogTitle>
+          <DialogTitle className="text-foreground">Unassign Employee?</DialogTitle>
           <DialogDescription>
             Are you sure you want to unassign this employee from this task?
           </DialogDescription>
@@ -51,7 +51,7 @@ function UnassignEmployeeDialog({
           <Button
             onClick={handleUnassign}
             disabled={deleteTaskMutation.isPending}
-            className="bg-[#690003] hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
+            className="bg-foreground hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
             {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
           </Button>

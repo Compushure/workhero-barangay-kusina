@@ -188,10 +188,10 @@ export default function BadgeAssignmentPage() {
 
   return (
     <main className="w-full min-h-screen bg-white p-10">
-      <div className="mx-auto min-w-250 max-w-400 space-y-8">
+      <div className="mx-auto w-full max-w-500 space-y-8">
         {/* Title */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-[#690003]">Badge Assignment</h1>
+          <h1 className="text-3xl font-bold text-foreground">Badge Assignment</h1>
           <p className="text-md text-gray-600">Manually award badges to employees.</p>
         </div>
 
@@ -201,7 +201,7 @@ export default function BadgeAssignmentPage() {
             onClick={() => setActiveTab('users')}
             className={`flex w-32 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out ${
               activeTab === 'users'
-                ? 'bg-[#690003] text-white shadow-sm/15'
+                ? 'bg-foreground text-white shadow-sm/15'
                 : 'text-gray-500 hover:bg-gray-200'
             }`}
           >
@@ -212,7 +212,7 @@ export default function BadgeAssignmentPage() {
             onClick={() => setActiveTab('quick-assign')}
             className={`flex w-40 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-lg text-sm font-medium transition-all duration-500 ease-in-out ${
               activeTab === 'quick-assign'
-                ? 'bg-[#690003] text-white shadow-sm/15'
+                ? 'bg-foreground text-white shadow-sm/15'
                 : 'text-gray-500 hover:bg-gray-200'
             }`}
           >
@@ -228,7 +228,7 @@ export default function BadgeAssignmentPage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 {/* Badge Count Display */}
-                <div className="flex gap-4 text-lg font-bold text-[#690003] pl-2">
+                <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
                   <h5 className="flex items-center gap-2">
                     <Coins size={20} />
                     Employees{' '}
@@ -246,7 +246,7 @@ export default function BadgeAssignmentPage() {
                       placeholder="Search users..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#690003] focus:border-[#690003]"
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-foreground focus:border-foreground"
                     />
                   </div>
 
@@ -256,7 +256,7 @@ export default function BadgeAssignmentPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex items-center gap-2 border-gray-300 text-[#690003] hover:bg-[#690003]/10"
+                        className="flex items-center gap-2 border-gray-300 text-foreground hover:bg-foreground/10"
                       >
                         {USER_SORT_OPTIONS.find(opt => opt.value === sortOption)?.label || 'Sort'}
                       </Button>
@@ -282,7 +282,7 @@ export default function BadgeAssignmentPage() {
           {activeTab === 'quick-assign' && (
             <div className="space-y-4">
               <div className="flex items-center">
-                <div className="flex gap-4 text-lg font-bold text-[#690003] pl-2">
+                <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
                   <h5 className="flex items-center gap-2">
                     <Coins size={20} />
                     Manual Badges{' '}
@@ -300,7 +300,7 @@ export default function BadgeAssignmentPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex items-center gap-2 border-gray-300 text-[#690003] hover:bg-[#690003]/10"
+                    className="flex items-center gap-2 border-gray-300 text-foreground hover:bg-foreground/10"
                   >
                     {BADGE_SORT_OPTIONS.find(opt => opt.value === badgeSortOption)?.label || 'Sort'}
                   </Button>

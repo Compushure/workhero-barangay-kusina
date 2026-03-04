@@ -23,20 +23,27 @@ function AssignEmployeesTable({
   disabledEmployeeIds = new Set(),
 }: AssignEmployeesTableProps) {
   return (
-    <div className="bg-white rounded-2xl border-2 border-gray-200 flex-1 flex flex-col overflow-auto">
+    <div className="rounded-2xl border border-accent/50 flex-1 flex flex-col overflow-auto">
       <table className="w-full">
-        <thead className="bg-[#690003] border-b-2 border-gray-300">
+        <thead className="bg-background-soft/50 text-primary/50 border-b border-accent/50">
           <tr className="flex py-2 items-center">
             <th className="w-13 p-2 flex justify-center items-center">
               <input
                 type="checkbox"
                 checked={allFilteredSelected}
                 onChange={handleSelectAll}
-                className="w-5 h-5 rounded cursor-pointer accent-[#690003]"
+                className="size-5 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    backgroundImage: !!allFilteredSelected ? 'url("data:image/svg+xml,%3csvg viewBox=\'0 0 16 16\' fill=\'white\' xmlns=\'http://www.w3.org/2000/svg\'%3e%3cpath d=\'m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z\'/%3e%3c/svg%3e")' : 'none',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    backgroundSize: '1rem'
+                  }}
               />
             </th>
-            <th className="w-67 px-2 text-left font-bold text-white">NAME</th>
-            <th className="w-30 px-2 text-left font-bold text-white">ID NO.</th>
+            <th className="w-67 px-2 text-left font-bold">NAME</th>
+            <th className="w-30 px-2 text-left font-bold">ID NO.</th>
           </tr>
         </thead>
       </table>
@@ -59,10 +66,12 @@ function AssignEmployeesTable({
                 return (
                   <tr
                     key={employee.id}
-                    className={`border-b border-gray-200 flex w-full items-center py-1 transition-all duration-300 ease-in-out ${
+                    className={`flex w-full items-center py-1 transition-all duration-300 ease-in-out border-b border-accent/50 ${
                       isDisabled
-                        ? 'opacity-50 cursor-not-allowed bg-gray-100'
-                        : 'hover:bg-gray-50 cursor-pointer'
+                        ? 'brightness-75 opacity-50 cursor-not-allowed'
+                      : isSelected
+                        ? 'bg-accent-secondary/25'
+                        : 'bg-background-soft hover:brightness-96 hover:bg-accent-secondary/25 cursor-pointer transition-all duration-300 ease-in-out'
                     }`}
                     onClick={() => !isDisabled && toggleEmployee(employee)}
                   >
@@ -73,8 +82,14 @@ function AssignEmployeesTable({
                           checked={!!isSelected}
                           disabled={isDisabled}
                           onChange={() => !isDisabled && toggleEmployee(employee)}
-                          className="w-5 h-5 rounded cursor-pointer accent-[#690003] disabled:cursor-not-allowed"
+                          className="size-5 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
                           onClick={(e) => e.stopPropagation()}
+                          style={{
+                            backgroundImage: !!isSelected ? 'url("data:image/svg+xml,%3csvg viewBox=\'0 0 16 16\' fill=\'white\' xmlns=\'http://www.w3.org/2000/svg\'%3e%3cpath d=\'m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z\'/%3e%3c/svg%3e")' : 'none',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'center',
+                            backgroundSize: '1rem'
+                          }}
                         />
                       </div>
                     </td>

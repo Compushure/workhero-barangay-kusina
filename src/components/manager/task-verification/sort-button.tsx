@@ -35,7 +35,7 @@ export function SortButton({
         <Button
           variant="default"
           size="default"
-          className="bg-[#690003] hover:bg-[#af3b3f] w-35 cursor-pointer rounded-full text-white shadow-sm/50 flex justify-between transition-all duration-500 ease-in-out"
+          className="bg-foreground hover:bg-[#af3b3f] w-35 cursor-pointer rounded-full text-white shadow-sm/50 flex justify-between transition-all duration-500 ease-in-out"
         >
           {/* Label on the left */}
           <span className="truncate">{currentLabel}</span>
