@@ -155,14 +155,14 @@ export function CurrentAssignedTasks() {
 
         <div className="flex gap-3 justify-end items-center flex-1 min-w-0">
           {/* Search */}
-          <div className="relative flex-1 min-w-48">
+          <div className="relative flex-1 min-w-48 max-w-1/3">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
-              placeholder={viewMode === 'task' ? 'Search tasks' : 'Search by name or ID'}
+              placeholder={viewMode === 'task' ? 'Search by task name' : 'Search by name or ID'}
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-full bg-card/75 shadow-sm/25 text-sm focus:outline-none transition-all duration-500 ease-in-out focus:border focus:border-accent"
+              className="w-full pl-9 pr-3 py-2 rounded-full bg-card shadow-sm/25 text-sm focus:outline-none transition-all duration-500 ease-in-out focus:border focus:border-accent"
             />
           </div>
 

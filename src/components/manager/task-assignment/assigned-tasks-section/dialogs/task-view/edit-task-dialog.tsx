@@ -176,7 +176,7 @@ export default function EditTaskDialog({
           <div className="space-y-3">
             <h4 className="text-base font-bold text-foreground">
               Assign/Remove Employees
-              <span className="bg-gray-50 px-2 py-0.5 rounded-full ml-2 shadow-sm/15">
+              <span className="bg-accent/65 text-primary-foreground shadow-sm px-2 py-0.5 rounded-full ml-2 shadow-sm/15">
                 {editAssignedEmployees.length}
               </span>
             </h4>
@@ -234,7 +234,7 @@ export default function EditTaskDialog({
           <Button
             onClick={handleEditTask}
             disabled={editAssignedEmployees.length === 0 || isProcessing}
-            className="bg-foreground hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
+            className="bg-foreground hover:bg-accent text-white cursor-pointer transition-all duration-400 ease-in-out"
           >
             {isProcessing ? 'Saving...' : 'Confirm'}
           </Button>
@@ -242,7 +242,7 @@ export default function EditTaskDialog({
             variant="outline"
             onClick={handleCancelEdit}
             disabled={isProcessing}
-            className="border-zinc-400 bg-white hover:bg-gray-100 cursor-pointer transition-all duration-500 ease-in-out"
+            className="border-zinc-400 bg-white hover:bg-gray-200 cursor-pointer transition-all duration-400 ease-in-out"
           >
             Cancel
           </Button>

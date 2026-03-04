@@ -26,11 +26,11 @@ export default function EmployeeViewTaskBadges({
   setShowRemoveConfirm 
 } : EmployeeViewTaskBadgesProps) {
   return (
-    <div className="flex flex-col pl-4 pr-2 w-full">
+    <div className="flex flex-col pl-4 pr-2 w-full border-l-2 border-accent/20">
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-lg font-bold text-foreground">
           Current Tasks{' '}
-          <span className="bg-gray-300 text-gray-700 px-2 py-1 rounded-full text-sm ml-2">
+          <span className="bg-accent/65 text-primary-foreground shadow-sm px-2 py-1 rounded-full text-sm ml-2">
             {employee.assignedTasks.length}
           </span>
         </h4>
@@ -69,12 +69,12 @@ export default function EmployeeViewTaskBadges({
               key={task.id}
               className="flex items-center justify-between bg-white px-3 py-3 rounded-2xl border-2 border-accent/25 h-full"
             >
-              <div className="flex flex-col w-[65%] gap-1">
+              <div className="flex flex-col w-[73%] gap-1">
                   <span className='truncate text-zinc-700 text-sm font-semibold'>
                     {task.taskName}
                   </span>
-                  <div className='flex items-center gap-2'>
-                    <p className={`text-xs text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}>
+                  <div className='flex items-center gap-1 xl:gap-2'>
+                    <p className={`block w-fit text-xs text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}>
                       {formatDate(task.dateRange.end)}
                     </p>
 
@@ -87,8 +87,8 @@ export default function EmployeeViewTaskBadges({
                       <StatusIcon icon={CircleX} className="bg-red-100 text-red-600"/>
                     }
 
-                    {taskEmployee?.pendingOrders === 0 && task.status === "approved" &&
-                      <p className={`flex gap-1 px-2 py-1 rounded-full items-center bg-violet-200 text-violet-600`}>
+                    {taskEmployee?.pendingOrders === 0 && task.status === 'approved' &&
+                      <p className={`flex gap-1 px-1 xl:px-2 py-1 rounded-full items-center bg-violet-200 text-violet-600`}>
                         <HandCoins strokeWidth={2.5} className={`size-4 `}/>
                         <span className={`text-xs sr-only xl:not-sr-only`}>
                           Claimed
@@ -98,7 +98,7 @@ export default function EmployeeViewTaskBadges({
                   </div>
               </div>
 
-              <div className='flex flex-col w-[30%] items-end pr-3 gap-2'>
+              <div className='flex flex-col w-[27%] items-end pr-3 gap-2'>
                 <span className='flex text-zinc-500 text-sm leading-none items-end'>
                   <Soup strokeWidth={1.75} className="size-5 mr-1" />
                   {completedOrders} / {task.maxOrders}
