@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, LayoutDashboard, ShoppingCart, Trophy } from 'lucide-react';
+import { ChevronLeft, LayoutDashboard, ShoppingCart, Trophy } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -36,20 +36,18 @@ function SidebarUserProfile({
     <>
       <ProfilePic user={user} disabled={disabled} isLoading={isProfileLoading} />
       {!isCollapsed && (
-        <div className="min-w-0">
+        <div className="min-w-0 px-2">
           {isProfileLoading ? (
             <>
-              <div className="h-4 w-24 bg-[#caa86f]/40 rounded animate-pulse" />
-              <div className="h-3 w-32 bg-[#caa86f]/30 rounded mt-1 animate-pulse" />
+              <div className="h-4 w-20 bg-white/20 rounded animate-pulse" />
+              <div className="h-3 w-28 bg-white/10 rounded mt-1 animate-pulse" />
             </>
           ) : (
             <>
               {user && (
                 <>
-                  <p className="font-semibold text-foreground text-base leading-tight truncate">
-                    {user.name}
-                  </p>
-                  <p className="text-xs text-[#5f7482] truncate">{user.email}</p>
+                  <p className="font-semibold text-sm truncate">{user.name}</p>
+                  <p className="text-xs text-zinc-600 truncate">{user.email}</p>
                 </>
               )}
             </>
@@ -103,46 +101,71 @@ export function Sidebar({
 
   return (
     <aside
-      className={`bg-[#efe5bf] text-[#111827] flex flex-col justify-between h-screen sticky top-0 transition-all duration-300 overflow-hidden shadow-sm ${
-        isCollapsed ? 'w-20' : 'w-64'
+      className={`bg-muted text-[#131C2A] flex flex-col justify-between transition-all duration-500 ease-in-out overflow-hidden ${
+        isCollapsed ? 'w-20' : 'w-60'
       }`}
     >
       {/* Logo Section */}
-      <div className="p-5 pb-3">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-[#e2ecf4] rounded flex items-center justify-center shrink-0">
-              <span className="text-sm font-bold text-[#111827]">W</span>
+      <div className="px-3 py-7 mt-6">
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={`group w-full h-full p-1 hover:bg-zinc-50 cursor-pointer rounded-sm transition-colors ${
+            isCollapsed ? 'flex justify-center items-center' : 'flex flex-col items-baseline'
+          }`}
+          aria-label="Toggle sidebar"
+        >
+          <div
+            className={`flex items-center gap-2 w-full ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+          >
+            <div className="flex items-center gap-2">
+              <div
+                className={`bg-white flex items-center justify-center shrink-0 ${
+                  isCollapsed ? 'text-lg size-8 rounded-sm' : 'text-sm size-6 rounded'
+                }`}
+              >
+                <span className="font-bold text-[#131C2A] group-hover:text-[#f47812] transition-all duration-400 ease-in-out">
+                  W
+                </span>
+              </div>
+              {!isCollapsed && (
+                <div className="flex flex-col items-baseline">
+                  <h1 className="text-2xl font-bold whitespace-nowrap transition-all duration-400 ease-in-out">
+                    WorkHero
+                  </h1>
+                  <p className="block text-nowrap text-xs text-[#f47812] pl-0.5 transition-all duration-400 ease-in-out">
+                    Barangay Kusina
+                  </p>
+                </div>
+              )}
             </div>
             {!isCollapsed && (
-              <h1 className="text-3xl font-extrabold whitespace-nowrap text-[#111827]">WorkHero</h1>
+              <ChevronLeft
+                size={20}
+                className="group-hover:text-[#f47812] transition-all duration-400 ease-in-out"
+              />
             )}
           </div>
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1 hover:bg-[#f7dba8] text-[#d97706] cursor-pointer rounded transition-colors"
-            aria-label="Toggle sidebar"
-          >
-            {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          </button>
-        </div>
-        {!isCollapsed && (
-          <p className="pl-8 text-base text-[#111827] font-medium">Barangay Kusina</p>
-        )}
+        </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-2.5 overflow-hidden">
+      <nav
+        className={`flex-1 pb-6 space-y-3 ${
+          isCollapsed
+            ? 'overflow-hidden px-4'
+            : 'overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-3'
+        }`}
+      >
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const isNavigatingItem = pendingHref === item.href;
           const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
-          const navClassName = `w-full flex items-center gap-3 px-4 py-2.5 cursor-pointer rounded-full font-semibold shadow-sm transition-all ${
-            isCollapsed ? 'justify-center px-2' : 'justify-start'
+          const navClassName = `group w-full flex items-center gap-3 py-3 cursor-pointer font-medium transition-all duration-400 ease-in-out rounded-full shadow-sm/15 ${
+            isCollapsed ? 'px-4 justify-center' : 'px-5 justify-start'
           } ${
             isActive
-              ? 'bg-linear-to-r from-[#ffd18a] to-[#f8b340] text-[#111827]'
-              : 'bg-[#fff9ef] text-[#111827] border border-[#f2d6a4] hover:bg-[#fde9c8]'
+              ? 'bg-primary-gradient text-zinc-50 transition-colors'
+              : 'text-[#131C2A] hover:text-[#f47812] bg-zinc-50/75 hover:bg-[#FAA938]/20 hover:shadow-sm hover:scale-103 transform-gpu'
           } ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`;
 
           const navLink = (
@@ -162,20 +185,24 @@ export function Sidebar({
                   <NavigationDisplay
                     isNavigating={isNavigatingItem}
                     className="inline-flex items-center justify-center"
-                    iconClassName="size-5 animate-spin text-[#d97706]"
+                    iconClassName="size-5 animate-spin text-primary"
                   />
                 ) : (
-                  <span className="text-[#d97706]">{item.icon}</span>
+                  <span className={`${isActive ? 'text-zinc-50' : 'text-[#f47812]'}`}>
+                    {item.icon}
+                  </span>
                 )
               ) : (
-                <span className="text-[#d97706]">{item.icon}</span>
+                <span className={`${isActive ? 'text-zinc-50' : 'text-[#f47812]'}`}>
+                  {item.icon}
+                </span>
               )}
               {!isCollapsed && <span className="text-base">{item.label}</span>}
               {!isCollapsed && (
                 <NavigationDisplay
                   isNavigating={isNavigatingItem}
                   className="ml-auto inline-flex items-center justify-center"
-                  iconClassName="size-4 animate-spin text-[#d97706]"
+                  iconClassName="size-4 animate-spin text-primary"
                 />
               )}
             </Link>
@@ -195,10 +222,10 @@ export function Sidebar({
       </nav>
 
       {/* User Profile Section */}
-      <div className={`${isCollapsed ? 'flex justify-center items-center h-24 p-2' : 'p-3'}`}>
+      <div className={`${isCollapsed ? 'flex justify-center items-center h-24' : 'px-3 py-4'}`}>
         <div
-          className={`bg-[#f8dca8] rounded-3xl flex items-center ${
-            isCollapsed ? 'w-16 h-16 justify-center' : 'p-2.5 gap-2.5 mb-3'
+          className={`bg-white/10 rounded-full flex items-center w-full ${
+            isCollapsed ? 'w-16 h-16 justify-center' : 'gap-3 mb-4'
           }`}
         >
           <SidebarUserProfile isCollapsed={isCollapsed} disabled={isUiDisabled} />

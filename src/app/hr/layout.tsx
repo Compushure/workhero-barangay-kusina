@@ -6,12 +6,23 @@ import { NavigationOverlay } from '@/components/shared/navigation-overlay';
 export default async function HRLayout({ children }: { children: React.ReactNode }) {
   await protectHRRoute();
   return (
-    <div className="hr-theme flex min-h-screen bg-background text-foreground">
+    <div className="manager-theme flex h-screen bg-background text-foreground">
       <HRThemeBodySync />
       <Sidebar />
-      <div className="relative flex-1">
+      <div className="relative flex-1 min-w-0 overflow-y-auto overflow-x-auto xl:overflow-x-hidden">
         <NavigationOverlay />
-        <main className="relative z-0">{children}</main>
+        <main className="relative z-0 w-full">
+          <div
+            className="min-w-5xl"
+            style={{
+              width: 'clamp(1024px, full, full)',
+              transform: 'scale(clamp(1024px / full, 1, 1))',
+              transformOrigin: 'top left',
+            }}
+          >
+            <div className="w-full">{children}</div>
+          </div>
+        </main>
       </div>
     </div>
   );

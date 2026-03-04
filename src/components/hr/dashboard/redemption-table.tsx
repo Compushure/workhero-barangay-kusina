@@ -114,13 +114,12 @@ export function RedemptionTable({
 
   const getRequestQuantity = (req: RedemptionRequest) => req.quantity || 1;
 
-  const getRequestTotalCost = (req: RedemptionRequest) =>
-    (req.quantity || 1) * req.pointsCost;
+  const getRequestTotalCost = (req: RedemptionRequest) => (req.quantity || 1) * req.pointsCost;
 
   return (
     <div className="overflow-hidden rounded-lg shadow-md">
       {/* Table Header */}
-      <div className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_80px_120px] gap-4 bg-[#690003] px-6 py-4">
+      <div className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_80px_120px] gap-4 bg-primary-gradient px-6 py-4">
         <div className="text-sm font-semibold uppercase tracking-wide text-white">Request Date</div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">Employee</div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">
@@ -136,9 +135,9 @@ export function RedemptionTable({
       </div>
 
       {/* Table Body */}
-      <div className="divide-y divide-border bg-[#fff8f5]">
+      <div className="divide-y divide-border bg-background">
         {paginatedData.length === 0 ? (
-          <div className="flex items-center justify-center px-6 py-12 text-[#5a2a2a]">
+          <div className="flex items-center justify-center px-6 py-12 text-foreground">
             <p className="text-sm">
               {status === 'pending'
                 ? 'No pending redemption requests.'
@@ -169,16 +168,16 @@ export function RedemptionTable({
             return (
               <div
                 key={request.id}
-                className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_80px_120px] gap-4 px-6 py-4 transition-colors hover:bg-[#fbeaea]"
+                className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_80px_120px] gap-4 px-6 py-4 transition-colors hover:bg-muted/40"
               >
                 <div className="flex flex-col justify-center">
-                  <p className="text-sm font-medium text-[#5a2a2a]">{dateStr}</p>
-                  <p className="text-xs text-[#7a3d3d]">{timeStr}</p>
+                  <p className="text-sm font-medium text-foreground">{dateStr}</p>
+                  <p className="text-xs text-muted-foreground">{timeStr}</p>
                 </div>
                 <div className="flex items-center">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <p className="text-sm text-[#5a2a2a] truncate">{userName}</p>
+                      <p className="text-sm text-foreground truncate">{userName}</p>
                     </TooltipTrigger>
                     <TooltipContent>
                       <div className="max-w-xs">{userName}</div>
@@ -188,7 +187,7 @@ export function RedemptionTable({
                 <div className="flex items-center gap-2 min-w-0">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <p className="text-sm text-[#5a2a2a] truncate flex-1">{itemDisplay}</p>
+                      <p className="text-sm text-foreground truncate flex-1">{itemDisplay}</p>
                     </TooltipTrigger>
                     <TooltipContent>
                       <div className="max-w-xs">{itemDisplay}</div>
@@ -197,12 +196,12 @@ export function RedemptionTable({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 shrink-0 text-[#5a2a2a] hover:bg-[#fbeaea]"
+                    className="h-6 w-6 shrink-0 text-foreground hover:bg-muted/50"
                     onClick={() => toggleRow(request.id)}
                   ></Button>
                 </div>
                 <div className="flex items-center">
-                  <p className="text-sm font-medium text-[#5a2a2a]">{totalCost} Pts</p>
+                  <p className="text-sm font-medium text-foreground">{totalCost} Pts</p>
                 </div>
                 <div className="flex items-center justify-center">
                   {hasRemarks ? (
@@ -212,8 +211,8 @@ export function RedemptionTable({
                           variant="ghost"
                           size="icon"
                           className={cn(
-                            'h-8 w-8 hover:bg-[#fbeaea]',
-                            isOutOfStock ? 'text-orange-600' : 'text-[#690003]'
+                            'h-8 w-8 hover:bg-muted/50',
+                            isOutOfStock ? 'text-orange-600' : 'text-primary'
                           )}
                           onClick={() => {
                             setSelectedRemarks(request.remarks || '');
@@ -237,7 +236,7 @@ export function RedemptionTable({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 shrink-0 text-[#8b0000] hover:bg-[#8b0000] hover:text-white"
+                        className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"
                         onClick={() => handleDeclineClick(request.id)}
                         disabled={declineMutation.isPending || acceptMutation.isPending}
                       >
@@ -246,7 +245,7 @@ export function RedemptionTable({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 shrink-0 text-[#2d5016] hover:bg-[#2d5016] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="h-8 w-8 shrink-0 text-emerald-700 hover:bg-emerald-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => handleAcceptClick(request.id)}
                         disabled={
                           declineMutation.isPending ||

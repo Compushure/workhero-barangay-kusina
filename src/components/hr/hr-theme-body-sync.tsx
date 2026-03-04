@@ -4,10 +4,10 @@ import { useEffect } from 'react';
 
 export function HRThemeBodySync() {
   useEffect(() => {
-    document.body.classList.add('hr-theme');
+    document.body.classList.add('manager-theme');
 
     return () => {
-      document.body.classList.remove('hr-theme');
+      document.body.classList.remove('manager-theme');
     };
   }, []);
 

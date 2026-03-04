@@ -12,17 +12,17 @@ export default async function LeaderboardPage() {
   if (result.error || !result.data || result.data.length === 0) {
     return (
       <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-        <div className="p-8 bg-[#F3F3F3] min-h-screen">
+        <div className="min-h-screen bg-background text-foreground p-8 pb-28">
           <div className="max-w-6xl mx-auto">
             <div className="flex justify-between items-start mb-8">
               <div>
-                <h1 className="text-3xl font-bold text-[#6D1616]">Leaderboard Slide</h1>
-                <p className="text-gray-500">List of ranks for this week.</p>
+                <h1 className="text-3xl font-bold tracking-tight">Leaderboard Slide</h1>
+                <p className="text-muted-foreground">List of ranks for this week.</p>
               </div>
               <LeaderboardFilters />
             </div>
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">
+              <p className="text-muted-foreground text-lg">
                 {result.error || 'No leaderboard data available at the moment.'}
               </p>
             </div>
@@ -44,13 +44,13 @@ export default async function LeaderboardPage() {
 
   return (
     <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-      <div className="p-8 bg-[#F3F3F3] min-h-screen">
+      <div className="min-h-screen bg-background text-foreground p-8 pb-28">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
           <div className="flex justify-between items-start mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-[#6D1616]">Leaderboard Slide</h1>
-              <p className="text-gray-500">List of ranks for this week.</p>
+              <h1 className="text-3xl font-bold tracking-tight">Leaderboard Slide</h1>
+              <p className="text-muted-foreground">List of ranks for this week.</p>
             </div>
             <LeaderboardFilters />
           </div>

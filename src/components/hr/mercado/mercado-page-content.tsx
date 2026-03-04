@@ -98,7 +98,7 @@ export function MercadoPageContent() {
           </div>
           <Button
             onClick={openAddModal}
-            className="h-10 px-4 rounded-lg bg-[#730202] hover:bg-[#730202]/90 text-white md:ml-auto"
+            className="h-10 px-4 rounded-lg bg-primary-gradient text-zinc-50 hover:opacity-95 md:ml-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Item
@@ -135,9 +135,11 @@ export function MercadoPageContent() {
               ) : (
                 <div className="col-span-full py-12 text-center">
                   {search ? (
-                    <p className="text-[#730202]">No items found matching your search.</p>
+                    <p className="text-muted-foreground">No items found matching your search.</p>
                   ) : (
-                    <p className="text-[#730202]">No items yet. Click "Add Item" to create one.</p>
+                    <p className="text-muted-foreground">
+                      No items yet. Click "Add Item" to create one.
+                    </p>
                   )}
                 </div>
               )}
