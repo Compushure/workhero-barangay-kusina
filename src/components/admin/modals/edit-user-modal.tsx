@@ -310,12 +310,12 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="admin-theme bg-primary-foreground w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
+      <DialogContent className="bg-card w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col border-2 border-[#f47812]/20">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#f47812]/15 shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <DialogTitle className="text-xl font-bold text-primary">Edit User</DialogTitle>
-              <DialogDescription className="text-sm text-foreground/80">
+              <DialogTitle className="text-xl font-bold text-foreground">Edit User</DialogTitle>
+              <DialogDescription className="text-sm text-gray-600">
                 Leave fields blank to keep current values. Only filled fields will be updated.
               </DialogDescription>
             </div>
@@ -326,7 +326,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                 variant="outline"
                 size="sm"
                 onClick={handleEditAll}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap bg-white hover:bg-gray-100 hover:text-foreground border-zinc-300"
               >
                 Edit All
               </Button>
@@ -335,7 +335,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                 variant="outline"
                 size="sm"
                 onClick={handleClearAll}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap bg-white hover:bg-gray-100 hover:text-foreground border-zinc-300"
               >
                 Clear All
               </Button>
@@ -346,30 +346,30 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
         <ScrollArea className="flex-1 overflow-y-auto">
           <div className="px-6 py-4">
             {/* Read-only information section */}
-            <div className="space-y-3 p-4 bg-card rounded-lg border border-border">
-              <p className="text-xs font-semibold text-primary uppercase">Read-Only Information</p>
+            <div className="space-y-3 p-4 bg-background rounded-lg border border-[#f47812]/15">
+              <p className="text-xs font-semibold text-foreground uppercase">Read-Only Information</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-primary shrink-0" />
+                  <Mail className="h-4 w-4 text-accent shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-foreground/70">Email</p>
-                    <p className="text-sm font-medium truncate">{user.email}</p>
+                    <p className="text-xs text-gray-600">Email</p>
+                    <p className="text-sm font-medium text-foreground truncate">{user.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-primary shrink-0" />
+                  <Building2 className="h-4 w-4 text-accent shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-foreground/70">Company ID</p>
-                    <p className="text-sm font-medium truncate">
+                    <p className="text-xs text-gray-600">Company ID</p>
+                    <p className="text-sm font-medium text-foreground truncate">
                       {(user as any).companyId || 'N/A'}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <IdCard className="h-4 w-4 text-primary shrink-0" />
+                  <IdCard className="h-4 w-4 text-accent shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-foreground/70">Employee ID</p>
-                    <p className="text-sm font-medium truncate">
+                    <p className="text-xs text-gray-600">Employee ID</p>
+                    <p className="text-sm font-medium text-foreground truncate">
                       {(user as any).employeeId || 'N/A'}
                     </p>
                   </div>
@@ -378,19 +378,19 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
             </div>
 
             {/* Current values */}
-            <div className="p-3 bg-card rounded-lg border border-border text-sm space-y-1 mt-4">
-              <p className="text-xs text-primary font-medium">Current Values:</p>
+            <div className="p-3 bg-background rounded-lg border border-[#f47812]/15 text-sm space-y-1 mt-4">
+              <p className="text-xs text-foreground font-medium">Current Values:</p>
               <p>
-                <span className="text-foreground/70">Name:</span> {user.name}
+                <span className="text-gray-600">Name:</span> <span className="text-foreground">{user.name}</span>
               </p>
               <p>
-                <span className="text-foreground/70">Role:</span> {user.employeeType}
+                <span className="text-gray-600">Role:</span> <span className="text-foreground">{user.employeeType}</span>
               </p>
             </div>
 
             {/* Profile Picture */}
             <div className="mt-6 pb-6 border-b border-border">
-              <h3 className="text-sm font-semibold text-primary mb-4">Profile Picture</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-4">Profile Picture</h3>
               <ImageCropUpload
                 currentImageUrl={getProfileUrl(user.id)}
                 userName={user.name}
@@ -402,7 +402,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                 disabled={isPending}
               />
               {selectedProfileImage && (
-                <p className="text-xs text-muted-foreground mt-2 text-center">
+                <p className="text-xs text-gray-600 mt-2 text-center">
                   New image selected: {selectedProfileImage.name}
                 </p>
               )}
@@ -412,8 +412,8 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
               {/* Collapsible Sections */}
               <Accordion type="multiple" defaultValue={["basic", "employment", "address", "ids"]} className="space-y-4">
               {/* Basic Information */}
-              <AccordionItem value="basic" className="border rounded-lg px-4">
-                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+              <AccordionItem value="basic" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
+                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                   Basic Information (Optional)
                 </AccordionTrigger>
                 <AccordionContent>
@@ -429,7 +429,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                         onClick={() => toggleField('name')}
                         className={`p-1 rounded-md transition-colors ${
                           activeFields.name
-                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            ? 'bg-accent text-white hover:bg-accent/90'
                             : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         }`}
                         title={activeFields.name ? 'Deactivate field' : 'Activate field'}
@@ -438,11 +438,11 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                       </button>
                     </div>
                     <div className="relative">
-                      <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                      <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                       <Input
                         id="edit-name"
                         placeholder={`Current: ${user.name}`}
-                        className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 disabled:opacity-50"
+                        className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
                         disabled={isPending || !activeFields.name}
                         {...register('name')}
                       />
@@ -463,7 +463,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                         onClick={() => toggleField('password')}
                         className={`p-1 rounded-md transition-colors ${
                           activeFields.password
-                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            ? 'bg-accent text-white hover:bg-accent/90'
                             : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         }`}
                         title={activeFields.password ? 'Deactivate field' : 'Activate field'}
@@ -472,19 +472,19 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                       </button>
                     </div>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                       <Input
                         id="edit-password"
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Leave blank to keep current (min 6 chars)"
-                        className="pl-10 pr-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 disabled:opacity-50"
+                        className="pl-10 pr-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
                         disabled={isPending || !activeFields.password}
                         {...register('password')}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-foreground transition-colors"
                         disabled={isPending || !activeFields.password}
                       >
                         {showPassword ? (
@@ -510,7 +510,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                         onClick={() => toggleField('contactNumber')}
                         className={`p-1 rounded-md transition-colors ${
                           activeFields.contactNumber
-                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            ? 'bg-accent text-white hover:bg-accent/90'
                             : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         }`}
                         title={activeFields.contactNumber ? 'Deactivate field' : 'Activate field'}
@@ -519,11 +519,11 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                       </button>
                     </div>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                       <Input
                         id="edit-contact"
                         placeholder={`Current: ${(user as any).contactNumber || 'Not set'}`}
-                        className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 disabled:opacity-50"
+                        className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
                         disabled={isPending || !activeFields.contactNumber}
                         {...register('contactNumber')}
                       />
@@ -537,8 +537,8 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
               </AccordionItem>
 
               {/* Employment Details */}
-              <AccordionItem value="employment" className="border rounded-lg px-4">
-                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+              <AccordionItem value="employment" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
+                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                   Employment Details (Optional)
                 </AccordionTrigger>
                 <AccordionContent>
@@ -557,10 +557,10 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                     >
                       <SelectTrigger
                         id="edit-type"
-                        className="border-border focus:border-primary focus:ring-primary"
+                        className="border-border bg-white focus:border-accent focus:ring-accent"
                       >
                         <div className="flex items-center gap-2">
-                          <Briefcase className="h-4 w-4 text-primary" />
+                          <Briefcase className="h-4 w-4 text-accent" />
                           <SelectValue placeholder={`Current: ${user.employeeType}`} />
                         </div>
                       </SelectTrigger>
@@ -597,10 +597,10 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                     >
                       <SelectTrigger
                         id="edit-status"
-                        className="border-border focus:border-primary focus:ring-primary"
+                        className="border-border bg-white focus:border-accent focus:ring-accent"
                       >
                         <div className="flex items-center gap-2">
-                          <BadgeCheck className="h-4 w-4 text-primary" />
+                          <BadgeCheck className="h-4 w-4 text-accent" />
                           <SelectValue
                             placeholder={`Current: ${(user as any).employmentStatus || 'Not set'}`}
                           />
@@ -626,8 +626,8 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
               </AccordionItem>
 
               {/* Address */}
-              <AccordionItem value="address" className="border rounded-lg px-4">
-                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+              <AccordionItem value="address" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
+                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                   Home Address (Optional)
                 </AccordionTrigger>
                 <AccordionContent>
@@ -650,11 +650,11 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                   </button>
                 </div>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-primary" />
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-accent" />
                   <Textarea
                     id="edit-address"
                     placeholder={`Current: ${(user as any).address || 'Not set'}`}
-                    className="pl-10 min-h-20 resize-none border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 disabled:opacity-50"
+                    className="pl-10 min-h-20 resize-none border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
                     disabled={isPending || !activeFields.address}
                     {...register('address')}
                   />
@@ -667,8 +667,8 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
               </AccordionItem>
 
               {/* Government IDs */}
-              <AccordionItem value="ids" className="border rounded-lg px-4">
-                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+              <AccordionItem value="ids" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
+                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                   Government IDs (Optional)
                 </AccordionTrigger>
                 <AccordionContent>
@@ -684,7 +684,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                         onClick={() => toggleField('tin')}
                         className={`p-1 rounded-md transition-colors ${
                           activeFields.tin
-                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            ? 'bg-accent text-white hover:bg-accent/90'
                             : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         }`}
                         title={activeFields.tin ? 'Deactivate field' : 'Activate field'}
@@ -693,11 +693,11 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                       </button>
                     </div>
                     <div className="relative">
-                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                       <Input
                         id="edit-tin"
                         placeholder={`Current: ${(user as any).tin || 'Not set'}`}
-                        className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 disabled:opacity-50"
+                        className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
                         disabled={isPending || !activeFields.tin}
                         onInput={(e) => {
                           const target = e.target as HTMLInputElement;
@@ -720,7 +720,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                         onClick={() => toggleField('sss')}
                         className={`p-1 rounded-md transition-colors ${
                           activeFields.sss
-                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            ? 'bg-accent text-white hover:bg-accent/90'
                             : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         }`}
                         title={activeFields.sss ? 'Deactivate field' : 'Activate field'}
@@ -729,11 +729,11 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                       </button>
                     </div>
                     <div className="relative">
-                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                       <Input
                         id="edit-sss"
                         placeholder={`Current: ${(user as any).sss || 'Not set'}`}
-                        className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 disabled:opacity-50"
+                        className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
                         disabled={isPending || !activeFields.sss}
                         onInput={(e) => {
                           const target = e.target as HTMLInputElement;
@@ -756,7 +756,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                         onClick={() => toggleField('pagibig')}
                         className={`p-1 rounded-md transition-colors ${
                           activeFields.pagibig
-                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            ? 'bg-accent text-white hover:bg-accent/90'
                             : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         }`}
                         title={activeFields.pagibig ? 'Deactivate field' : 'Activate field'}
@@ -765,11 +765,11 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
                       </button>
                     </div>
                     <div className="relative">
-                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                       <Input
                         id="edit-pagibig"
                         placeholder={`Current: ${(user as any).pagibig || 'Not set'}`}
-                        className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 disabled:opacity-50"
+                        className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
                         disabled={isPending || !activeFields.pagibig}
                         onInput={(e) => {
                           const target = e.target as HTMLInputElement;
@@ -791,13 +791,13 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
         </ScrollArea>
 
         {/* Footer outside ScrollArea to avoid overflow issues */}
-        <div className="px-6 py-4 border-t border-border shrink-0 bg-primary-foreground">
+        <div className="px-6 py-4 border-t border-[#f47812]/15 shrink-0 bg-card">
           <div className="flex flex-col-reverse sm:flex-row gap-3">
             <Button
               type="submit"
               form="edit-user-form"
               disabled={isPending || !hasActiveChanges()}
-              className="flex-1 bg-primary cursor-pointer text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-foreground cursor-pointer text-white hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 ease-in-out shadow-sm/25"
             >
               {isPending ? 'Saving...' : 'Save Changes'}
             </Button>
@@ -806,7 +806,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isPending}
-              className="flex-1 border-border cursor-pointer bg-accent text-primary hover:bg-primary/10 hover:text-primary"
+              className="flex-1 cursor-pointer border-zinc-300 bg-white text-foreground hover:bg-gray-100 hover:text-foreground transition-all duration-500 ease-in-out"
             >
               Cancel
             </Button>
