@@ -158,7 +158,10 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
               <div className="flex items-center gap-2 mb-1">
                 <p className="font-semibold truncate text-foreground">{user.name}</p>
                 {user.employeeId ? (
-                  <Badge variant="outline" className="hidden sm:inline-flex text-xs border-gray-300 text-gray-700">
+                  <Badge
+                    variant="outline"
+                    className="hidden sm:inline-flex text-xs border-gray-300 text-gray-700 bg-white"
+                  >
                     {user.employeeId}
                   </Badge>
                 ) : null}
