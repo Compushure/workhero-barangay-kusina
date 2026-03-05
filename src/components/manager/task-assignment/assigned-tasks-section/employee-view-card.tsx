@@ -47,7 +47,6 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
     }
   }, [employees, showClearConfirm, showRemoveConfirm]);
 
-
   // Remove client-side sorting since it's handled server-side
 
   if (employees.length === 0) {
@@ -89,35 +88,38 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
         const hiddenCount = Math.max(0, employee.assignedTasks.length - 2);
 
         return (
-          <div className={`flex w-full items-start justify-between rounded-2xl bg-[#FAFAFA] p-6 transition-all ease-in-out duration-400 
-          ${isExpanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`} key={employee.id}>
-              {/* Employee Details */}
-              <div className="flex flex-col w-[20%] min-w-0">
-                <h3 className="text-lg font-bold text-foreground wrap-break-word">{employee.name}</h3>
-                <p className="text-sm text-gray-600">{employee.empId}</p>
-                {employee.tenure && <p className="text-sm text-gray-500">{employee.tenure}</p>}
-              </div>
+          <div
+            className={`flex w-full items-start justify-between rounded-2xl bg-[#FAFAFA] p-6 transition-all ease-in-out duration-400 
+          ${isExpanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`}
+            key={employee.id}
+          >
+            {/* Employee Details */}
+            <div className="flex flex-col w-[20%] min-w-0">
+              <h3 className="text-lg font-bold text-foreground wrap-break-word">{employee.name}</h3>
+              <p className="text-sm text-gray-600">{employee.empId}</p>
+              {employee.tenure && <p className="text-sm text-gray-500">{employee.tenure}</p>}
+            </div>
 
-              {/* Assigned Tasks */}
-              <EmployeeViewTaskBadges 
+            {/* Assigned Tasks */}
+            <EmployeeViewTaskBadges
+              employee={employee}
+              hiddenCount={hiddenCount}
+              isExpanded={isExpanded}
+              toggleEmployeeExpand={toggleEmployeeExpand}
+              displayedTasks={displayedTasks}
+              formatDate={formatDate}
+              setShowRemoveConfirm={setShowRemoveConfirm}
+            />
+
+            {/* Clear All Assigned Tasks for Employee */}
+            <div className="flex w-fit justify-center">
+              <EmployeeViewCardMenu
+                openPopoverId={openPopoverId}
+                setOpenPopoverId={setOpenPopoverId}
                 employee={employee}
-                hiddenCount={hiddenCount} 
-                isExpanded={isExpanded}
-                toggleEmployeeExpand={toggleEmployeeExpand} 
-                displayedTasks={displayedTasks}
-                formatDate={formatDate} 
-                setShowRemoveConfirm={setShowRemoveConfirm}
+                setShowClearConfirm={setShowClearConfirm}
               />
-
-              {/* Clear All Assigned Tasks for Employee */}
-              <div className='flex w-fit justify-center'>
-                <EmployeeViewCardMenu
-                  openPopoverId={openPopoverId}
-                  setOpenPopoverId={setOpenPopoverId}
-                  employee={employee}
-                  setShowClearConfirm={setShowClearConfirm}
-                />
-              </div>
+            </div>
 
             {/* Unassign Task Dialog */}
             <ClearTaskDialog

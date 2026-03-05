@@ -53,7 +53,12 @@ export async function handleFetchCurrentAssignedEmployeesPaginated(
   searchTerm: string = ''
 ): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number }> {
   const result = await safeAction<
-    ServerActionResponse<{ data: AssignedTask[]; count: number; totalPages: number; taskCount: number }>
+    ServerActionResponse<{
+      data: AssignedTask[];
+      count: number;
+      totalPages: number;
+      taskCount: number;
+    }>
   >(() => fetchCurrentAssignedEmployeesPaginated(page, pageSize, sortBy, searchTerm));
 
   if (!result.success || result.data?.error) {
@@ -89,7 +94,9 @@ export async function handleClearAssignedTasks(): Promise<boolean> {
  * Clear all tasks for a specific employee
  */
 export async function handleClearAllEmployeeTasks(employeeId: string): Promise<boolean> {
-  const result = await safeAction<ServerActionResponse<boolean>>(() => clearAllEmployeeTasks(employeeId));
+  const result = await safeAction<ServerActionResponse<boolean>>(() =>
+    clearAllEmployeeTasks(employeeId)
+  );
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
@@ -136,7 +143,6 @@ export async function handleDeleteTaskForAllEmployees(
   toast.success('Task deleted');
   return true;
 }
-
 
 /**
  * Update task assignment
