@@ -28,8 +28,8 @@ export function HeaderSection({
     <div className="space-y-6">
       {/* Title Section */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-[#5a2a2a]">{title}</h1>
-        {description && <p className="mt-1 text-sm text-[#7a3d3d]">{description}</p>}
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
+        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
       </div>
 
       {/* Search and Filter Bar */}
@@ -45,6 +45,7 @@ export function HeaderSection({
           <SortButton
             sortBy={statusFilter as any}
             onSortChange={(value) => onStatusChange(value as string)}
+            styleVariant="mercado"
             options={[
               { value: 'pending' as any, label: 'Pending Requests' },
               { value: 'approved' as any, label: 'Approved Requests' },
@@ -56,6 +57,7 @@ export function HeaderSection({
         <SortButton
           sortBy={sortBy as any}
           onSortChange={(value) => onSort?.(value)}
+          styleVariant="mercado"
           options={[
             { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
             { value: 'date-asc' as any, label: 'Date (Oldest)' },

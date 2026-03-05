@@ -2,6 +2,7 @@ import { protectEmployeeRoute } from '@/actions/shared/auth';
 import { LogOutBtn } from '@/components/employee/attendance/logout';
 import { NotificationsPopover } from '@/components/notifications/notifications';
 import { RealtimeNotificationToastClientWrapper } from '@/components/notifications/realtime-notification-toast-client-wrapper';
+import { ConditionalLogout } from '@/components/employee/conditional-logout';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   await protectEmployeeRoute();
@@ -12,7 +13,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </div>
       <main className="flex-1">{children}</main>
       <div className="fixed bottom-4 left-4 z-50">
-        <LogOutBtn />
+        <ConditionalLogout hideOnMercado />
       </div>
       <RealtimeNotificationToastClientWrapper />
     </div>

@@ -1,12 +1,16 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
 import {
   ServerActionResponse,
   RedemptionRequest,
 } from '@/types';
 import { insertNotification } from '@/lib/notifications';
+
+async function getSupabaseAdminClient() {
+  const { supabaseAdmin } = await import('@/lib/supabase/admin');
+  return supabaseAdmin;
+}
 
 function getRewardImageUrl(supabase: any, rewardId: string): string {
   return supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`).data.publicUrl;
@@ -24,6 +28,8 @@ async function autoDeclinePendingRequestsForReward(
   adminId: string
 ): Promise<void> {
   try {
+    const supabaseAdmin = await getSupabaseAdminClient();
+
     // Get all pending requests for this reward
     const { data: pendingRequests, error: fetchError } = await supabaseAdmin
       .from('RewardRequest')
@@ -191,6 +197,7 @@ export async function acceptRedemptionRequestAction(
 ): Promise<ServerActionResponse<void>> {
   try {
     const supabase = await createClient();
+    const supabaseAdmin = await getSupabaseAdminClient();
 
     // Get current user (admin)
     const {
@@ -383,6 +390,7 @@ export async function declineRedemptionRequestAction(
 ): Promise<ServerActionResponse<void>> {
   try {
     const supabase = await createClient();
+    const supabaseAdmin = await getSupabaseAdminClient();
 
     // Get current user (admin)
     const {
@@ -550,6 +558,7 @@ export async function declineRedemptionRequestAction(
 export async function autoDeclineInsufficientStockRequestsAction(): Promise<ServerActionResponse<{ declinedCount: number }>> {
   try {
     const supabase = await createClient();
+    const supabaseAdmin = await getSupabaseAdminClient();
 
     // Get current user (admin) for tracking who declined
     const {
