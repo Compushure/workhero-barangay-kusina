@@ -52,39 +52,57 @@ export interface LeaderboardAsOfRow {
   user_id: string;
   user_name: string | null;
   performance_score: number | null;
-  role_type: string;
+  total_kpi_points: number | null;
+  badge_points: number | null;
+  task_count: number | null;
 }
 
-/**
- * RankLog Types
- * =============
- * Types for persisted HR-generated rankings
- */
+// ---------------------------------------------------------------------------
+// Ranking Period & Entry types (normalized schema)
+// ---------------------------------------------------------------------------
 
-export type RankLogPeriodType = 'weekly' | 'monthly' | 'yearly';
+export type RankingPeriodType = 'weekly' | 'monthly' | 'yearly';
 
-/**
- * Single ranked employee entry stored inside the RankLog.rankings JSONB array
- */
-export interface RankLogEntry {
+/** Backward-compat alias — used by page.tsx, period-selector.tsx, etc. */
+export type RankLogPeriodType = RankingPeriodType;
+
+/** Row from the RankingPeriod table */
+export interface RankingPeriodRow {
+  id: string;
+  period_type: RankingPeriodType;
+  period_start: string; // ISO date string (YYYY-MM-DD)
+  period_end: string;
+  is_visible: boolean;
+  generated_at: string;
+}
+
+/** Row from the RankingEntry table */
+export interface RankingEntryRow {
+  id: string;
+  ranking_period_id: string;
+  user_id: string;
   rank: number;
+  performance_score: number;
+  total_kpi_points: number;
+  badge_points: number;
+  completed_task_count: number;
+}
+
+/** Flat row from ranking_leaderboard_view (join of RankingPeriod + RankingEntry + User) */
+export interface RankingLeaderboardViewRow {
+  ranking_period_id: string;
+  period_type: RankingPeriodType;
+  period_start: string;
+  period_end: string;
+  is_visible: boolean;
+  generated_at: string;
+  period_label: string;
+  entry_id: string;
   user_id: string;
   user_name: string;
+  rank: number;
   performance_score: number;
-}
-
-/**
- * Row from the RankLog table
- */
-export interface RankLogRow {
-  id: string;
-  period_type: RankLogPeriodType;
-  period_year: number;
-  period_month: number | null;
-  period_week: number | null;
-  period_label: string;
-  rankings: RankLogEntry[];
-  is_visible: boolean;
-  generated_by: string;
-  generated_at: string;
+  total_kpi_points: number;
+  badge_points: number;
+  completed_task_count: number;
 }

@@ -8,10 +8,11 @@ import {
   startOfISOWeek,
   endOfISOWeek,
   addWeeks,
+  addDays,
   format,
   getISOWeek,
 } from 'date-fns';
-import type { RankLogPeriodType } from '@/types';
+import type { RankLogPeriodType, RankingPeriodType } from '@/types';
 
 /** Jan 4 is always in ISO week 1 of its year; used as anchor for ISO week math */
 const ISO_WEEK_1_ANCHOR = (year: number) => new Date(year, 0, 4);
@@ -158,16 +159,44 @@ export function getISOWeeksInYear(year: number): number {
 }
 
 /**
- * Returns a human-readable date range subtitle for a RankLog row, or null when not applicable.
- * Currently only weekly rankings have a subtitle (e.g. "Jan 27 – Feb 2, 2026").
+ * Compute period_start and period_end dates for a given period.
+ * Used by server actions to derive the date range before inserting into RankingPeriod.
+ */
+export function getPeriodStartEnd(
+  periodType: RankingPeriodType,
+  year: number,
+  month?: number,
+  week?: number
+): { start: Date; end: Date } {
+  switch (periodType) {
+    case 'weekly': {
+      if (week == null) throw new Error('week is required for weekly period');
+      return getISOWeekDateRange(year, week);
+    }
+    case 'monthly': {
+      if (month == null) throw new Error('month is required for monthly period');
+      const start = new Date(year, month - 1, 1);
+      const end = new Date(year, month, 0); // last day of month
+      return { start, end };
+    }
+    case 'yearly': {
+      return { start: new Date(year, 0, 1), end: new Date(year, 11, 31) };
+    }
+  }
+}
+
+/**
+ * Returns a human-readable date range subtitle, or null when not applicable.
+ * For weekly rankings: "Jan 27 – Feb 2, 2026" (derived from period_start date).
  */
 export function getPeriodDateRangeSubtitle(ranking: {
-  period_type: RankLogPeriodType;
-  period_year: number;
-  period_week: number | null;
+  period_type: RankingPeriodType;
+  period_start: string;
 }): string | null {
-  if (ranking.period_type === 'weekly' && ranking.period_week != null) {
-    return getISOWeekDateRangeLabel(ranking.period_year, ranking.period_week);
+  if (ranking.period_type === 'weekly') {
+    const start = new Date(ranking.period_start + 'T00:00:00');
+    const end = addDays(start, 6);
+    return `${format(start, 'MMM d')} – ${format(end, 'MMM d, yyyy')}`;
   }
   return null;
 }

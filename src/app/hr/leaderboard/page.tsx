@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import { getISOWeek } from 'date-fns';
-import { LeaderboardSkeleton } from '@/components/hr/leaderboard/leaderboard-skeleton';
 import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-content';
 import { PeriodSelector } from '@/components/hr/leaderboard/period-selector';
+import LeaderboardTableSkeleton from '@/components/hr/leaderboard/leaderboard-table-skeleton';
 import type { RankLogPeriodType } from '@/types';
 
 interface LeaderboardPageProps {
@@ -25,7 +25,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
   const year = params.year ? Math.max(2025, Number(params.year)) : defaultYear;
   const week = params.week ? Number(params.week) : defaultWeek;
   const month = params.month ? Number(params.month) : defaultMonth;
-  const show = params.show === '1' || (periodType === 'weekly' && !params.show);
+  const show = params.show === '1';
 
   return (
     <div className="h-screen p-4 sm:p-8 bg-[#F3F3F3] overflow-hidden">
@@ -50,7 +50,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
           />
         </div>
 
-        <Suspense fallback={<LeaderboardSkeleton />}>
+        <Suspense fallback={<LeaderboardTableSkeleton />}>
           <LeaderboardContent
             periodType={periodType}
             year={year}

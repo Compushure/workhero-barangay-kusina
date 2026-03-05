@@ -7,6 +7,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { LeaderboardPlayer } from '@/types';
 
 interface LeaderboardTableProps {
@@ -78,9 +84,20 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
                 </div>
               </TableCell>
               <TableCell className="text-right pr-6">
-                <span className="font-semibold text-[#6D1616] text-2xl">
-                  {player.performanceScore.toLocaleString()}
-                </span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="font-semibold text-[#6D1616] text-2xl cursor-help">
+                        {player.performanceScore.toLocaleString()}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-sm">
+                        Performance Score = Total Points Earned × Completed Tasks
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </TableCell>
             </TableRow>
           ))}

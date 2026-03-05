@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { RankLogRow, LeaderboardPlayer } from '@/types';
+import type { RankingLeaderboardViewRow, LeaderboardPlayer } from '@/types';
 import type { UserBadge } from '@/actions/employee/badges';
 import {
   normalizeBadgeImageLink,
@@ -8,14 +8,14 @@ import {
 } from '@/lib/utils/badge-utils';
 
 /**
- * Enrich stored RankLog entries with live profile images and badges.
- * Used by the HR leaderboard page.
+ * Enrich ranking view entries with live profile images and badges.
+ * User names come from the view JOIN (always current).
  */
 export async function enrichRankingPlayers(
-  ranking: RankLogRow,
+  entries: RankingLeaderboardViewRow[],
   supabase: SupabaseClient
 ): Promise<(LeaderboardPlayer & { rank: number })[]> {
-  const userIds = ranking.rankings.map((r) => r.user_id);
+  const userIds = entries.map((e) => e.user_id);
 
   const { data: badgeData } = await supabase
     .from('user_collected_badges_view')
@@ -32,7 +32,7 @@ export async function enrichRankingPlayers(
     }
   }
 
-  return ranking.rankings.map((entry) => {
+  return entries.map((entry) => {
     const { data: storageData } = supabase.storage
       .from('employees')
       .getPublicUrl(`${entry.user_id}/profile.png`);

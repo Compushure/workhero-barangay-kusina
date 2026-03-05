@@ -7,17 +7,17 @@ import { Switch } from '@/components/ui/switch';
 import { toggleRankingVisibility } from '@/actions/hr/leaderboard';
 
 interface VisibilityToggleProps {
-  rankLogId: string;
+  rankingPeriodId: string;
   isVisible: boolean;
 }
 
-export default function VisibilityToggle({ rankLogId, isVisible }: VisibilityToggleProps) {
+export default function VisibilityToggle({ rankingPeriodId, isVisible }: VisibilityToggleProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const handleToggle = (checked: boolean) => {
     startTransition(async () => {
-      const result = await toggleRankingVisibility(rankLogId, checked);
+      const result = await toggleRankingVisibility(rankingPeriodId, checked);
       if (result.success) {
         toast.success(checked ? 'Ranking is now visible to employees' : 'Ranking hidden from employees');
         router.refresh();

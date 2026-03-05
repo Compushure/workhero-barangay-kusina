@@ -1,11 +1,11 @@
-import { Calendar, BarChart2 } from 'lucide-react';
-import { getRankingByPeriod } from '@/actions/hr/leaderboard';
+import { BarChart2, Trophy } from 'lucide-react';
+import { getRankingByPeriod, generateRanking } from '@/actions/hr/leaderboard';
 import LeaderboardTable from '@/components/hr/leaderboard/leaderboard-table';
 import VisibilityToggle from '@/components/hr/leaderboard/visibility-toggle';
 import { enrichRankingPlayers } from '@/lib/utils/enrich-ranking';
 import { getPeriodDateRangeSubtitle } from '@/lib/utils/time-period-utils';
 import { createClient } from '@/lib/supabase/server';
-import type { RankLogPeriodType, LeaderboardPlayer } from '@/types';
+import type { RankLogPeriodType, LeaderboardPlayer, RankingLeaderboardViewRow } from '@/types';
 
 interface LeaderboardContentProps {
   periodType: RankLogPeriodType;
@@ -44,34 +44,70 @@ export async function LeaderboardContent({
     );
   }
 
-  const result = await getRankingByPeriod(
+  // 1. Check if a ranking already exists for this period
+  const existingResult = await getRankingByPeriod(
     periodType,
     year,
     periodType === 'monthly' ? month : undefined,
     periodType === 'weekly' ? week : undefined
   );
 
-  const ranking = result.data ?? null;
+  let rows: RankingLeaderboardViewRow[] | null = existingResult.data ?? null;
 
-  if (!ranking) {
+  // 2. No existing ranking — try to generate from RPC data
+  if (!rows || rows.length === 0) {
+    const genResult = await generateRanking(
+      periodType,
+      year,
+      periodType === 'monthly' ? month : undefined,
+      periodType === 'weekly' ? week : undefined
+    );
+
+    if (!genResult.success || genResult.data === null) {
+      // No KPI data exists for this period
+      return (
+        <div className="flex min-h-[60vh] items-center justify-center py-6 sm:py-8">
+          <div className="flex flex-col items-center gap-4 rounded-2xl px-16 py-14 text-center">
+            <Trophy className="w-32 h-32 text-gray-600" />
+            <p className="text-lg font-semibold text-gray-600">No Rankings for this period</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Fetch fresh rows after generation
+    const freshResult = await getRankingByPeriod(
+      periodType,
+      year,
+      periodType === 'monthly' ? month : undefined,
+      periodType === 'weekly' ? week : undefined
+    );
+    rows = freshResult.data ?? null;
+  }
+
+  if (!rows || rows.length === 0) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center py-6 sm:py-8">
-        <div className="flex flex-col items-center gap-4">
-          <Calendar className="w-32 h-32 text-gray-400" />
-          <p className="text-xl font-semibold text-gray-600">No Ranking for this period</p>
+        <div className="flex flex-col items-center gap-4 rounded-2xl px-16 py-14 text-center">
+          <Trophy className="w-32 h-32 text-gray-600" />
+          <p className="text-lg font-semibold text-gray-600">No Rankings for this period</p>
         </div>
       </div>
     );
   }
 
+  const periodInfo = rows[0];
+
   const supabase = await createClient();
   const enrichedPlayers: (LeaderboardPlayer & { rank: number })[] = await enrichRankingPlayers(
-    ranking,
+    rows,
     supabase
   );
 
   const displayPeriodLabel =
-    periodType === 'weekly' ? ranking.period_label.replace(/,\s*\d{4}$/, '') : ranking.period_label;
+    periodType === 'weekly'
+      ? periodInfo.period_label.replace(/,\s*\d{4}$/, '')
+      : periodInfo.period_label;
 
   // Limit to top 10 players
   const top10Players = enrichedPlayers.slice(0, 10);
@@ -81,12 +117,12 @@ export async function LeaderboardContent({
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between max-w-6xl mx-auto">
         <div>
           <h2 className="text-xl font-bold text-[#6D1616]">{displayPeriodLabel}</h2>
-          {getPeriodDateRangeSubtitle(ranking) && (
-            <p className="text-sm text-gray-600 mt-0.5">{getPeriodDateRangeSubtitle(ranking)}</p>
+          {getPeriodDateRangeSubtitle(periodInfo) && (
+            <p className="text-sm text-gray-600 mt-0.5">{getPeriodDateRangeSubtitle(periodInfo)}</p>
           )}
         </div>
 
-        <VisibilityToggle rankLogId={ranking.id} isVisible={ranking.is_visible} />
+        <VisibilityToggle rankingPeriodId={periodInfo.ranking_period_id} isVisible={periodInfo.is_visible} />
       </div>
 
       <LeaderboardTable players={top10Players} />
