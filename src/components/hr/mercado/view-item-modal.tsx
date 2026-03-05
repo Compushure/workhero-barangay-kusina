@@ -43,7 +43,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-muted text-card-foreground border border-border max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto [&>button]:hidden">
+      <DialogContent className="bg-background text-card-foreground border border-border max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto [&>button]:hidden">
         {/* Custom Close Button */}
         <button
           onClick={() => onOpenChange(false)}

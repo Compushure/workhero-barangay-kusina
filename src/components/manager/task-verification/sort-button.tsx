@@ -33,15 +33,15 @@ export function SortButton({
   const isMercadoStyle = styleVariant === 'mercado';
 
   const triggerClassName = isMercadoStyle
-    ? 'border border-gray-300 bg-zinc-50/75 text-[#131C2A] hover:text-[#f47812] hover:bg-[#FAA938]/20 hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-35'
+    ? 'group border border-gray-300 bg-zinc-50/75 text-[#131C2A] hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-35'
     : 'bg-foreground hover:bg-[#af3b3f] rounded-full text-white w-35';
 
   const itemClassName = (isActive: boolean) =>
     isMercadoStyle
       ? `cursor-pointer transition-all duration-400 ease-in-out ${
           isActive
-            ? 'bg-[#FAA938]/20 text-[#f47812] font-medium'
-            : 'hover:bg-[#FAA938]/20 hover:text-[#f47812]'
+            ? 'bg-accent-secondary text-white font-medium'
+            : 'hover:bg-accent-secondary/80 hover:text-white data-[highlighted]:bg-accent-secondary/80 data-[highlighted]:text-white'
         }`
       : `cursor-pointer transition-all duration-500 ease-in-out ${isActive ? 'bg-red-100' : ''}`;
 
@@ -56,7 +56,10 @@ export function SortButton({
           {/* Label on the left */}
           <span className="truncate">{currentLabel}</span>
           {/* Arrow on the right */}
-          <ArrowUpDown size={18} />
+          <ArrowUpDown
+            size={18}
+            className={isMercadoStyle ? 'text-[#131C2A] group-hover:text-white' : undefined}
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

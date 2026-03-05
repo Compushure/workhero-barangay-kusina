@@ -23,24 +23,36 @@ const sortLabels: Record<SortOption, string> = {
 };
 
 export function MercadoSortToggle({ value, onChange }: MercadoSortToggleProps) {
+  const itemClassName = (isActive: boolean) =>
+    `cursor-pointer transition-all duration-500 ease-in-out ${
+      isActive
+        ? 'bg-accent-secondary text-white'
+        : 'hover:bg-accent-secondary/80 hover:text-white data-[highlighted]:bg-accent-secondary/80 data-[highlighted]:text-white'
+    }`;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="gap-2 h-10 px-4 rounded-lg border border-gray-300 bg-zinc-50/75 text-[#131C2A] hover:text-[#f47812] hover:bg-[#FAA938]/20 hover:shadow-sm hover:scale-103 transform-gpu transition-all duration-400 ease-in-out">
-          <ArrowUpDown className="h-4 w-4" />
-          <span className="hidden sm:inline">Sort: </span>
-          <span className="font-medium">{sortLabels[value]}</span>
+        <Button className="group h-10 w-44 justify-between rounded-xl border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white transition-all duration-400 ease-in-out">
+          <span className="truncate font-medium">{sortLabels[value]}</span>
+          <ArrowUpDown className="h-4 w-4 text-accent group-hover:text-white transition-all duration-400 ease-in-out" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           Sort by Date
         </DropdownMenuLabel>
-        <DropdownMenuItem onSelect={() => onChange('newest')} className="cursor-pointer">
+        <DropdownMenuItem
+          onSelect={() => onChange('newest')}
+          className={itemClassName(value === 'newest')}
+        >
           <ArrowDown className="mr-2 h-4 w-4" />
           Newest First
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onChange('oldest')} className="cursor-pointer">
+        <DropdownMenuItem
+          onSelect={() => onChange('oldest')}
+          className={itemClassName(value === 'oldest')}
+        >
           <ArrowUp className="mr-2 h-4 w-4" />
           Oldest First
         </DropdownMenuItem>

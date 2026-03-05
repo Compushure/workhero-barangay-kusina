@@ -50,18 +50,25 @@ export function MercadoFilterToggle({
     onIntervalFilterChange('all');
   };
 
+  const checkboxItemClassName = (isActive: boolean) =>
+    `group cursor-pointer transition-all duration-500 ease-in-out ${
+      isActive
+        ? 'bg-accent-secondary text-white'
+        : 'hover:bg-accent-secondary/80 hover:text-white data-[highlighted]:bg-accent-secondary/80 data-[highlighted]:text-white'
+    }`;
+
   return (
     <div className="flex items-center gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-lg border-gray-300 bg-zinc-50/75 text-[#131C2A] hover:text-[#f47812] hover:bg-[#FAA938]/20 hover:shadow-sm hover:scale-103 transform-gpu transition-all duration-400 ease-in-out"
+            className="group gap-2 h-10 px-4 rounded-xl border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-foreground transition-all duration-400 ease-in-out"
           >
-            <Filter className="h-4 w-4" />
+            <Filter className="h-4 w-4 text-accent group-hover:text-foreground transition-all duration-400 ease-in-out" />
             <span className="hidden sm:inline">Filter</span>
             {activeFilterCount > 0 && (
-              <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
+              <Badge className="ml-1 h-5 min-w-5 rounded-full p-0 text-[11px] leading-none bg-accent-secondary text-foreground flex items-center justify-center">
                 {activeFilterCount}
               </Badge>
             )}
@@ -74,17 +81,17 @@ export function MercadoFilterToggle({
           <DropdownMenuCheckboxItem
             checked={stockFilter === 'in-stock'}
             onCheckedChange={(checked) => onStockFilterChange(checked ? 'in-stock' : 'all')}
-            className="cursor-pointer"
+            className={checkboxItemClassName(stockFilter === 'in-stock')}
           >
-            <Package className="mr-2 h-4 w-4 text-green-500" />
+            <Package className="mr-2 h-4 w-4 text-green-500 transition-colors group-hover:text-white group-data-highlighted:text-white" />
             In Stock
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
             checked={stockFilter === 'out-of-stock'}
             onCheckedChange={(checked) => onStockFilterChange(checked ? 'out-of-stock' : 'all')}
-            className="cursor-pointer"
+            className={checkboxItemClassName(stockFilter === 'out-of-stock')}
           >
-            <PackageX className="mr-2 h-4 w-4 text-red-500" />
+            <PackageX className="mr-2 h-4 w-4 text-red-500 transition-colors group-hover:text-white group-data-highlighted:text-white" />
             Out of Stock
           </DropdownMenuCheckboxItem>
 
@@ -96,17 +103,17 @@ export function MercadoFilterToggle({
           <DropdownMenuCheckboxItem
             checked={visibilityFilter === 'visible'}
             onCheckedChange={(checked) => onVisibilityFilterChange(checked ? 'visible' : 'all')}
-            className="cursor-pointer"
+            className={checkboxItemClassName(visibilityFilter === 'visible')}
           >
-            <Eye className="mr-2 h-4 w-4 text-blue-500" />
+            <Eye className="mr-2 h-4 w-4 text-blue-500 transition-colors group-hover:text-white group-data-highlighted:text-white" />
             Visible
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
             checked={visibilityFilter === 'hidden'}
             onCheckedChange={(checked) => onVisibilityFilterChange(checked ? 'hidden' : 'all')}
-            className="cursor-pointer"
+            className={checkboxItemClassName(visibilityFilter === 'hidden')}
           >
-            <EyeOff className="mr-2 h-4 w-4 text-gray-500" />
+            <EyeOff className="mr-2 h-4 w-4 text-gray-500 transition-colors group-hover:text-white group-data-highlighted:text-white" />
             Hidden
           </DropdownMenuCheckboxItem>
 
@@ -120,7 +127,7 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => {
               if (checked) onIntervalFilterChange('all');
             }}
-            className="cursor-pointer"
+            className={checkboxItemClassName(intervalFilter === 'all')}
           >
             All Intervals
           </DropdownMenuCheckboxItem>
@@ -132,7 +139,7 @@ export function MercadoFilterToggle({
                 if (checked) onIntervalFilterChange(interval.value);
                 else onIntervalFilterChange('all');
               }}
-              className="cursor-pointer"
+              className={checkboxItemClassName(intervalFilter === interval.value)}
             >
               {interval.label}
             </DropdownMenuCheckboxItem>

@@ -169,7 +169,7 @@ export const MercadoCard = memo(function MercadoCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 bg-accent/75 text-card border border-accent/50 shadow-md hover:bg-accent hover:text-card hover:scale-105 transition-all duration-200"
+                className="h-8 w-8 bg-accent text-card border border-accent/80 shadow-md hover:bg-primary-gradient hover:text-card hover:scale-105 transition-all duration-200"
               >
                 <Pencil className="h-5 w-5" />
               </Button>
