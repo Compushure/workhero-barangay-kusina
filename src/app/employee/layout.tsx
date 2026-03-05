@@ -1,6 +1,7 @@
 import { protectEmployeeRoute } from '@/actions/shared/auth';
 import { LogOutBtn } from '@/components/employee/attendance/logout';
 import { NotificationsPopover } from '@/components/notifications/notifications';
+import { RealtimeNotificationToastClientWrapper } from '@/components/notifications/realtime-notification-toast-client-wrapper';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   await protectEmployeeRoute();
@@ -13,6 +14,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="fixed bottom-4 left-4 z-50">
         <LogOutBtn />
       </div>
+      <RealtimeNotificationToastClientWrapper />
     </div>
   );
 }
