@@ -10,24 +10,75 @@ import {
 } from '@/types';
 import { addRewardSchema, editRewardSchema } from '@/zod/schemas';
 
-const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-] as const;
+const ANCHOR_PREFIX = 'anchor:';
 
-function getMonthNameFromNumber(month?: number | null): string | null {
-  if (!month || month < 1 || month > 12) return null;
-  return MONTH_NAMES[month - 1];
+function toDateOnlyIso(value: Date): string {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function parseAnchorDate(value?: string | Date | null): Date | null {
+  if (!value) return null;
+  const raw = value instanceof Date ? toDateOnlyIso(value) : value;
+  const datePart = raw.startsWith(ANCHOR_PREFIX) ? raw.slice(ANCHOR_PREFIX.length) : raw;
+  const parsed = new Date(`${datePart}T00:00:00`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function toAnchorString(date?: Date | string | null): string | null {
+  if (!date) return null;
+  const parsed = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return toDateOnlyIso(parsed);
+}
+
+function startOfWeekMonday(date: Date): Date {
+  const copy = new Date(date);
+  const day = copy.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  copy.setDate(copy.getDate() + diff);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function isDateInCurrentInterval(anchorDate: Date | null, interval: 'weekly' | 'monthly' | 'yearly'): boolean {
+  if (!anchorDate) return true;
+
+  const now = new Date();
+
+  if (interval === 'weekly') {
+    return startOfWeekMonday(anchorDate).getTime() === startOfWeekMonday(now).getTime();
+  }
+
+  if (interval === 'monthly') {
+    return (
+      anchorDate.getFullYear() === now.getFullYear() &&
+      anchorDate.getMonth() === now.getMonth()
+    );
+  }
+
+  return anchorDate.getFullYear() === now.getFullYear();
+}
+
+function normalizeAvailabilityIntervalValue(
+  value?: number | string | null
+): 'weekly' | 'monthly' | 'yearly' | null {
+  if (value === null || value === undefined) return null;
+
+  if (value === 'weekly' || value === 'monthly' || value === 'yearly') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'weekly' || normalized === 'monthly' || normalized === 'yearly') {
+      return normalized;
+    }
+  }
+
+  return null;
 }
 
 // Helper function to get public URL with cache busting
@@ -91,8 +142,8 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
         redeemingLimit: item.redeeming_limit,
         category: item.category,
         isActive: item.is_active,
-        availableMonth: item.available_month, 
-        monthName: item.month_name, 
+        availableDate: parseAnchorDate(item.availability_anchor_date),
+        availableMonth: normalizeAvailabilityIntervalValue(item.availability_interval),
         createdAt: item.created_at,
         createdBy: item.created_by,
         imageUrl: getRewardImageUrl(supabase, item.id),
@@ -139,7 +190,7 @@ export async function getAvailableRewardsByMonthAction(
       .from('Reward')
       .select('*')
       .eq('is_active', true)
-      .eq('available_month', month)
+      .eq('availability_interval', String(month))
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -180,8 +231,8 @@ export async function getAvailableRewardsByMonthAction(
         redeemingLimit: item.redeeming_limit,
         category: item.category,
         isActive: item.is_active,
-        availableMonth: item.available_month,
-        monthName: item.month_name,
+        availableDate: parseAnchorDate(item.availability_anchor_date),
+        availableMonth: normalizeAvailabilityIntervalValue(item.availability_interval),
         createdAt: item.created_at,
         createdBy: item.created_by,
         imageUrl: getRewardImageUrl(supabase, item.id),
@@ -197,6 +248,91 @@ export async function getAvailableRewardsByMonthAction(
       return { error: error.message };
     }
     return { error: 'An unexpected error occurred while fetching monthly items' };
+  }
+}
+
+/**
+ * Get active reward/mercado items assigned to a specific interval
+ * Used by employee Mercado interval stalls (weekly/monthly/yearly)
+ * @param interval - Availability interval
+ * @returns ServerActionResponse with array of rewards for the interval
+ */
+export async function getAvailableRewardsByIntervalAction(
+  interval: 'weekly' | 'monthly' | 'yearly'
+): Promise<ServerActionResponse<Reward[]>> {
+  try {
+    if (!['weekly', 'monthly', 'yearly'].includes(interval)) {
+      return { error: 'Invalid interval. Must be weekly, monthly, or yearly.' };
+    }
+
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from('Reward')
+      .select('*')
+      .eq('is_active', true)
+      .eq('availability_interval', interval)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching rewards by interval:', error);
+      return { error: `Failed to fetch ${interval} items: ${error.message}` };
+    }
+
+    const rewardIds = (data || []).map((item) => item.id);
+
+    let redemptionData: Array<{ reward_id: string; quantity: number | null }> | null = null;
+    if (rewardIds.length > 0) {
+      const { data: approvedRedemptions } = await supabase
+        .from('RewardRequest')
+        .select('reward_id, quantity')
+        .eq('status', 'approved')
+        .in('reward_id', rewardIds);
+
+      redemptionData = approvedRedemptions;
+    }
+
+    const redeemedCounts = new Map<string, number>();
+    if (redemptionData) {
+      redemptionData.forEach((req: any) => {
+        const current = redeemedCounts.get(req.reward_id) || 0;
+        redeemedCounts.set(req.reward_id, current + (req.quantity || 1));
+      });
+    }
+
+    const rewards: Reward[] = (data || [])
+      .filter((item) =>
+        isDateInCurrentInterval(parseAnchorDate(item.availability_anchor_date), interval)
+      )
+      .map((item) => {
+      const redeemedCount = redeemedCounts.get(item.id) || 0;
+      const hasQuantityLimit = item.quantity !== null && item.quantity !== undefined;
+
+      return {
+        id: item.id,
+        name: item.name,
+        pointsCost: item.points_cost,
+        quantity: item.quantity,
+        redeemingLimit: item.redeeming_limit,
+        category: item.category,
+        isActive: item.is_active,
+        availableDate: parseAnchorDate(item.availability_anchor_date),
+        availableMonth: normalizeAvailabilityIntervalValue(item.availability_interval),
+        createdAt: item.created_at,
+        createdBy: item.created_by,
+        imageUrl: getRewardImageUrl(supabase, item.id),
+        redeemedCount,
+        isOutOfStock: hasQuantityLimit && item.quantity <= 0,
+      };
+    });
+
+    return { error: null, data: rewards };
+  } catch (error) {
+    console.error('Error in getAvailableRewardsByIntervalAction:', error);
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'An unexpected error occurred while fetching interval items' };
   }
 }
 
@@ -228,7 +364,21 @@ export async function addRewardAction(
       }
     }
 
-    const monthName = getMonthNameFromNumber(validatedData.availableMonth ?? null);
+    const normalizedAvailableMonth = normalizeAvailabilityIntervalValue(validatedData.availableMonth);
+    if (
+      (normalizedAvailableMonth === 'weekly' ||
+        normalizedAvailableMonth === 'monthly' ||
+        normalizedAvailableMonth === 'yearly') &&
+      !validatedData.availableDate
+    ) {
+      return { error: 'Availability date is required for weekly, monthly, or yearly interval.' };
+    }
+    const availabilityAnchorDate =
+      normalizedAvailableMonth === 'weekly' ||
+      normalizedAvailableMonth === 'monthly' ||
+      normalizedAvailableMonth === 'yearly'
+        ? toAnchorString(validatedData.availableDate)
+        : null;
 
     // Insert reward into database
     const { data, error } = await supabase
@@ -240,8 +390,9 @@ export async function addRewardAction(
         redeeming_limit: validatedData.redeemingLimit,
         category: validatedData.category,
         is_active: validatedData.isActive,
-        available_month: validatedData.availableMonth,
-        month_name: monthName,
+        availability_interval:
+          normalizedAvailableMonth === null ? null : String(normalizedAvailableMonth),
+        availability_anchor_date: availabilityAnchorDate,
       })
       .select()
       .single();
@@ -260,8 +411,8 @@ export async function addRewardAction(
       redeemingLimit: data.redeeming_limit,
       category: data.category,
       isActive: data.is_active,
-      availableMonth: data.available_month,
-      monthName: data.month_name,
+      availableDate: parseAnchorDate(data.availability_anchor_date),
+      availableMonth: normalizeAvailabilityIntervalValue(data.availability_interval),
       createdAt: data.created_at,
       createdBy: data.created_by,
       imageUrl: getRewardImageUrl(supabase, data.id),
@@ -337,8 +488,42 @@ export async function editRewardAction(
     if (validatedData.category !== undefined) updateData.category = validatedData.category;
     if (validatedData.isActive !== undefined) updateData.is_active = validatedData.isActive;
     if (validatedData.availableMonth !== undefined) {
-      updateData.available_month = validatedData.availableMonth;
-      updateData.month_name = getMonthNameFromNumber(validatedData.availableMonth);
+      const normalizedAvailableMonth = normalizeAvailabilityIntervalValue(validatedData.availableMonth);
+      if (
+        (normalizedAvailableMonth === 'weekly' ||
+          normalizedAvailableMonth === 'monthly' ||
+          normalizedAvailableMonth === 'yearly') &&
+        !validatedData.availableDate
+      ) {
+        return {
+          error: 'Availability date is required when setting weekly, monthly, or yearly interval.',
+        };
+      }
+      updateData.availability_interval =
+        normalizedAvailableMonth === null ? null : String(normalizedAvailableMonth);
+      updateData.availability_anchor_date =
+        normalizedAvailableMonth === 'weekly' ||
+        normalizedAvailableMonth === 'monthly' ||
+        normalizedAvailableMonth === 'yearly'
+          ? toAnchorString(validatedData.availableDate)
+          : null;
+    } else if (validatedData.availableDate !== undefined) {
+      const existingReward = await supabase
+        .from('Reward')
+        .select('availability_interval')
+        .eq('id', id)
+        .single();
+
+      const existingInterval = normalizeAvailabilityIntervalValue(
+        existingReward.data?.availability_interval
+      );
+      if (
+        existingInterval === 'weekly' ||
+        existingInterval === 'monthly' ||
+        existingInterval === 'yearly'
+      ) {
+        updateData.availability_anchor_date = toAnchorString(validatedData.availableDate);
+      }
     }
 
     // Update reward in database
@@ -363,8 +548,8 @@ export async function editRewardAction(
       redeemingLimit: data.redeeming_limit,
       category: data.category,
       isActive: data.is_active,
-      availableMonth: data.available_month,
-      monthName: data.month_name,
+      availableDate: parseAnchorDate(data.availability_anchor_date),
+      availableMonth: normalizeAvailabilityIntervalValue(data.availability_interval),
       createdAt: data.created_at,
       createdBy: data.created_by,
       imageUrl: getRewardImageUrl(supabase, data.id),

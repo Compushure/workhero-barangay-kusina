@@ -2,18 +2,20 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react';
 
+export type MercadoInterval = 'weekly' | 'monthly' | 'yearly';
+
 interface MercadoContextType {
-  selectedMonth: number | null;
-  setSelectedMonth: (month: number | null) => void;
+  selectedInterval: MercadoInterval | null;
+  setSelectedInterval: (interval: MercadoInterval | null) => void;
 }
 
 const MercadoContext = createContext<MercadoContextType | undefined>(undefined);
 
 export function MercadoProvider({ children }: { children: ReactNode }) {
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [selectedInterval, setSelectedInterval] = useState<MercadoInterval | null>(null);
 
   return (
-    <MercadoContext.Provider value={{ selectedMonth, setSelectedMonth }}>
+    <MercadoContext.Provider value={{ selectedInterval, setSelectedInterval }}>
       {children}
     </MercadoContext.Provider>
   );
