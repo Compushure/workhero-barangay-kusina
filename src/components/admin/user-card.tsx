@@ -296,21 +296,21 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   <CreditCard className="h-4 w-4 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-600">TIN</p>
-                    <p className="text-sm font-medium font-mono text-foreground">{user.tin || 'N/A'}</p>
+                    <p className="text-sm font-medium text-foreground">{user.tin || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <CreditCard className="h-4 w-4 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-600">SSS</p>
-                    <p className="text-sm font-medium font-mono text-foreground">{user.sss || 'N/A'}</p>
+                    <p className="text-sm font-medium text-foreground">{user.sss || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <CreditCard className="h-4 w-4 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-600">Pag-IBIG</p>
-                    <p className="text-sm font-medium font-mono text-foreground">{user.pagibig || 'N/A'}</p>
+                    <p className="text-sm font-medium text-foreground">{user.pagibig || 'N/A'}</p>
                   </div>
                 </div>
               </div>
