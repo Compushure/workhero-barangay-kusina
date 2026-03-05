@@ -160,7 +160,7 @@ export interface Reward {
   category?: string;
   isActive: boolean;
   availableDate?: string | Date | null;
-  availableMonth?: number | null;
+  availableMonth?: 'weekly' | 'monthly' | 'yearly' | null;
   monthName?: string | null;
   createdAt?: string | Date;
   createdBy?: string;

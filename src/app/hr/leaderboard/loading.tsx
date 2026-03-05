@@ -2,21 +2,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function LeaderboardLoading() {
   return (
-    <div className="p-4 sm:p-8 bg-[#F3F3F3] min-h-screen">
+    <div className="p-4 sm:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-7xl mx-auto">
         {/* Hall of Fame Header Skeleton */}
         <div className="flex flex-col items-center mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 mb-2">
             <Skeleton className="h-9 w-64 sm:h-11 sm:w-80" />
           </div>
-          
+
           {/* Period Selector Skeleton */}
           <div className="flex items-center gap-2 sm:gap-3">
             <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" />
             <Skeleton className="h-6 w-24 sm:h-7 sm:w-32" />
             <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" />
           </div>
-          
+
           <Skeleton className="h-5 w-72 sm:w-96 mt-2" />
         </div>
 
@@ -80,10 +80,7 @@ export default function LeaderboardLoading() {
         {/* Remaining Players (4-10) - Grid Layout Skeleton */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 justify-items-center mt-8 sm:mt-10">
           {Array.from({ length: 7 }).map((_, index) => (
-            <div
-              key={index}
-              className="shrink-0 w-40 sm:w-48 bg-card rounded-2xl shadow-sm"
-            >
+            <div key={index} className="shrink-0 w-40 sm:w-48 bg-card rounded-2xl shadow-sm">
               <div className="px-3 sm:px-4 py-3 sm:py-4 flex flex-col items-center text-center">
                 <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 rounded-full mb-2 sm:mb-3" />
                 <Skeleton className="h-5 w-24 sm:h-6 sm:w-32 mb-2" />
@@ -105,4 +102,3 @@ export default function LeaderboardLoading() {
     </div>
   );
 }
-
