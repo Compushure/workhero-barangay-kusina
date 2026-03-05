@@ -221,15 +221,6 @@ export function RedemptionTable({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                        onClick={() => handleDeclineClick(request.id)}
-                        disabled={declineMutation.isPending || acceptMutation.isPending}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
                         className="h-8 w-8 shrink-0 text-emerald-700 hover:bg-emerald-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => handleAcceptClick(request.id)}
                         disabled={
@@ -244,6 +235,15 @@ export function RedemptionTable({
                         }
                       >
                         <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={() => handleDeclineClick(request.id)}
+                        disabled={declineMutation.isPending || acceptMutation.isPending}
+                      >
+                        <X className="h-4 w-4" />
                       </Button>
                     </>
                   ) : (
