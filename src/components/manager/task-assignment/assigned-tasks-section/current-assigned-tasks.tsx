@@ -101,7 +101,7 @@ export function CurrentAssignedTasks() {
     <div className="rounded-3xl bg-background pl-6 pr-6 pt-6 shadow-sm/50 flex flex-col w-full">
       {/* Header */}
       <div className="flex flex-row md:items-center justify-between mb-5">
-        <h2 className="text-2xl font-bold text-foreground">Current Assigned Tasks</h2>
+        <h2 className="text-2xl font-bold text-foreground">Task List</h2>
 
         {/* View Toggle */}
         <div className="flex bg-card/75 rounded-xl mb-1">

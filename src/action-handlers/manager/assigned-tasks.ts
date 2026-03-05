@@ -5,6 +5,7 @@ import {
   clearAssignedTasks,
   clearAllEmployeeTasks,
   deleteTask,
+  deleteTaskForAllEmployees,
   updateTaskAssignment,
 } from '@/actions/manager/assigned-tasks';
 import { toast } from 'sonner';
@@ -104,6 +105,28 @@ export async function handleClearAllEmployeeTasks(employeeId: string): Promise<b
  */
 export async function handleDeleteTask(taskId: string): Promise<boolean> {
   const result = await safeAction<ServerActionResponse<boolean>>(() => deleteTask(taskId));
+
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error);
+    return false;
+  }
+
+  toast.success('Task deleted');
+  return true;
+}
+
+/**
+ * Delete all task assignments for a task group
+ */
+export async function handleDeleteTaskForAllEmployees(
+  categoryId: string,
+  deadlineDate: string,
+  maxOrders: number,
+  createdAt: string
+): Promise<boolean> {
+  const result = await safeAction<ServerActionResponse<boolean>>(() =>
+    deleteTaskForAllEmployees(categoryId, deadlineDate, maxOrders, createdAt)
+  );
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
