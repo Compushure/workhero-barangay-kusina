@@ -11,7 +11,7 @@ interface EmployeeViewTaskBadgesProps {
   displayedTasks: AssignedTask[];
   formatDate: (dateString: string | null) => string;
   setShowRemoveConfirm: Dispatch<SetStateAction<{
-      taskId: string;
+      assignmentId?: string;
       empId: string;
   } | null>>
 }
@@ -118,9 +118,10 @@ export default function EmployeeViewTaskBadges({
               </div>
 
               <button
-                onClick={() =>
-                  setShowRemoveConfirm({ taskId: task.id, empId: employee.id })
-                }
+                onClick={() => {
+                  if (!taskEmployee?.assignmentId) return;
+                  setShowRemoveConfirm({ assignmentId: taskEmployee.assignmentId, empId: employee.id });
+                }}
                 className="hover:scale-130 transition-all duration-500 ease-in-out cursor-pointer"
               >
                 <X className="size-4 text-foreground hover:text-red-500" />

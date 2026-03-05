@@ -40,7 +40,7 @@ export default function ProfileLevelCard() {
     return parts[0].slice(0, 2).toUpperCase();
   })();
 
-  const level = xpData?.level ?? 0;
+  const level = xpData?.level ?? 1;
   const name = user?.name ?? 'Employee';
 
   const isLoading = userLoading || loadingXP;

@@ -102,6 +102,7 @@ export async function fetchCurrentAssignedTasksPaginated(
 
   (allSortedData ?? []).forEach((row: any) => {
     const employee: AssignedEmployee = {
+      assignmentId: row.kpitask_id,
       id: row.assigned_to ?? '',
       name: row.assigned_to_name ?? '',
       empId: row.assigned_to_employee_id ?? '',
@@ -382,6 +383,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
     // Convert each task group to an AssignedTask with this employee
     return Array.from(taskGroups.values()).map((taskGroup) => {
       const employeeData: AssignedEmployee = {
+        assignmentId: taskGroup.assignments[0]?.kpitask_id,
         id: employee.id,
         name: employee.name,
         empId: employee.empId,
@@ -462,7 +464,8 @@ export async function deleteTask(taskId: string): Promise<ServerActionResponse<b
 export async function deleteTaskForAllEmployees(
   categoryId: string,
   deadlineDate: string,
-  maxOrders: number
+  maxOrders: number,
+  createdAt: string
 ): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
   const { error } = await supabase
@@ -470,7 +473,8 @@ export async function deleteTaskForAllEmployees(
     .delete()
     .eq('category_id', categoryId)
     .eq('deadline_date', deadlineDate)
-    .eq('max_orders', maxOrders);
+    .eq('max_orders', maxOrders)
+    .eq('created_at', createdAt);
 
   if (error) return { error: error.message, data: undefined };
   return { error: null, data: true };

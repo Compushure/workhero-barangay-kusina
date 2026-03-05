@@ -16,7 +16,7 @@ interface EmployeeViewCardProps {
 export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeViewCardProps) {
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<{
-    taskId: string;
+    assignmentId?: string;
     empId: string;
   } | null>(null);
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
