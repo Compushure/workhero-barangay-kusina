@@ -137,6 +137,41 @@ export async function toggleRankingVisibility(
 }
 
 /**
+ * Fetch a single stored ranking matching the exact period (type + year + month/week).
+ * Returns null if no ranking exists for that period.
+ */
+export async function getRankingByPeriod(
+  periodType: RankLogPeriodType,
+  year: number,
+  month?: number,
+  week?: number
+): Promise<ActionResult<RankLogRow | null>> {
+  return safeAction(async () => {
+    const supabase = await createClient();
+
+    let query = supabase
+      .from('RankLog')
+      .select('*')
+      .eq('period_type', periodType)
+      .eq('period_year', year);
+
+    if (periodType === 'monthly' && month != null) {
+      query = query.eq('period_month', month);
+    } else if (periodType === 'weekly' && week != null) {
+      query = query.eq('period_week', week);
+    }
+
+    const { data, error } = await query.maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch ranking: ${error.message}`);
+    }
+
+    return (data ?? null) as RankLogRow | null;
+  });
+}
+
+/**
  * Fetch all generated rankings, optionally filtered by period type.
  * HR sees all; employees only see visible ones (handled by RLS).
  */
