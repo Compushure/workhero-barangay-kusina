@@ -55,7 +55,7 @@ function MercadoLayoutContent({ children }: MercadoLayoutProps) {
         src="/mercado/mercado-bg.svg"
         alt="Mercado Background"
         fill
-        className="object-cover object-center"
+        className="object-cover object-bottom"
         priority
         quality={100}
       />
