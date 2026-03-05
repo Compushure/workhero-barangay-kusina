@@ -12,8 +12,8 @@ import { useState } from 'react';
 import { useDeleteTaskMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface UnassignEmployeeDialogProps {
-  showRemoveConfirm: string | null;
-  setShowRemoveConfirm: (show: string | null) => void;
+  showRemoveConfirm: { assignmentId?: string; employeeId: string } | null;
+  setShowRemoveConfirm: (show: { assignmentId?: string; employeeId: string } | null) => void;
   task: AssignedTask;
 }
 
@@ -25,11 +25,11 @@ function UnassignEmployeeDialog({
   const deleteTaskMutation = useDeleteTaskMutation();
 
   const handleUnassign = async () => {
-    if (!showRemoveConfirm) return;
+    if (!showRemoveConfirm?.assignmentId) return;
 
     // Use the mutation which will handle cache invalidation
     deleteTaskMutation.mutate(
-      { taskId: task.id },
+      { assignmentId: showRemoveConfirm.assignmentId },
       {
         onSuccess: () => {
           setShowRemoveConfirm(null);

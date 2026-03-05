@@ -14,7 +14,7 @@ export function ContactInformation({ profile }: ContactInformationProps) {
         <Label htmlFor="contactNumber" className="text-sm font-medium text-muted-foreground">
           Phone Number
         </Label>
-        <p className="text-base font-semibold text-[#730202] p-2 bg-white rounded-md">
+        <p className="text-base font-semibold text-title p-2 bg-white rounded-md">
           {profile.contactNumber || 'Not provided'}
         </p>
       </div>
@@ -22,7 +22,7 @@ export function ContactInformation({ profile }: ContactInformationProps) {
         <Label htmlFor="address" className="text-sm font-medium text-muted-foreground">
           Home Address
         </Label>
-        <p className="text-base font-semibold text-[#730202] p-2 bg-white rounded-md">
+        <p className="text-base font-semibold text-title p-2 bg-white rounded-md">
           {profile.address || 'Not provided'}
         </p>
       </div>

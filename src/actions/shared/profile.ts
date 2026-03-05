@@ -35,7 +35,8 @@ export async function fetchUserProfileById(
         points,
         deducted_points,
         is_tenured,
-        total_xp
+        total_xp,
+        performance_score
       `
       )
       .eq('user_id', userId)
@@ -49,6 +50,13 @@ export async function fetchUserProfileById(
         data: undefined,
       };
     }
+
+    // Fetch attendance totals from dedicated view
+    const { data: attendanceData } = await supabase
+      .from('total_attendance_stats_view')
+      .select('total_absences, total_lates, total_undertimes, total_overtimes')
+      .eq('employee_id', userId)
+      .maybeSingle();
 
     // Construct profile picture URL from storage
     const { data: storageData } = supabase.storage
@@ -71,6 +79,17 @@ export async function fetchUserProfileById(
       tin: userData.tin_id || undefined,
       sss: userData.sss_id || undefined,
       pagibig: userData.pagibig_id || undefined,
+      xp: userData.xp ?? undefined,
+      user_level: userData.user_level ?? undefined,
+      points: userData.points ?? undefined,
+      deducted_points: userData.deducted_points ?? undefined,
+      is_tenured: userData.is_tenured ?? undefined,
+      total_xp: userData.total_xp ?? undefined,
+      performance_score: userData.performance_score ?? undefined,
+      total_absences: attendanceData?.total_absences ?? undefined,
+      total_lates: attendanceData?.total_lates ?? undefined,
+      total_undertimes: attendanceData?.total_undertimes ?? undefined,
+      total_overtimes: attendanceData?.total_overtimes ?? undefined,
     };
 
     return {
