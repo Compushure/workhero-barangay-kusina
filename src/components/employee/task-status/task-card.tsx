@@ -33,7 +33,7 @@ export function TaskCard({ task }: TaskCardProps) {
       <CardContent className={`p-0 flex flex-col gap-3 sm:gap-5`}>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-5">
           <div className="flex flex-col gap-1 min-w-0 flex-1">
-            <p className={`text-lg font-medium leading-snug wrap-break-word ${task.status === 'approved' && task.completedOrders === task.maxOrders ? 'text-title/50 line-through' : 'text-title'}`}>
+            <p className={`text-lg font-medium leading-snug wrap-break-word ${task.status === 'approved' && task.completedOrders === task.maxOrders && task.pendingOrders === 0 ? 'text-title/50 line-through' : 'text-title'}`}>
               {task.name}
             </p>
             <span className={`flex gap-2 items-center text-sm font-medium ${isTaskOverdue(task.dueDate) ? 'text-red-700' : ''}`}>

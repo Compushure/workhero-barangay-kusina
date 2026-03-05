@@ -20,16 +20,16 @@ export default function TaskViewCardMenu({
   return (
     <Popover open={openPopover} onOpenChange={setOpenPopover}>
       <PopoverTrigger asChild>
-        <button className="text-black hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer">
+        <button className="text-primary rounded-full py-1 hover:text-accent hover:bg-accent-secondary/25 hover:scale-110 transition-all duration-400 ease-in-out cursor-pointer">
           <MoreVertical className="size-6" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-40 p-2" align="end">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1">
           <Button
             onClick={handleOpenEditDialog}
             variant="ghost"
-            className="justify-start text-[#690003] hover:bg-red-50 cursor-pointer hover: transition-all duration-500 ease-in-out"
+            className="justify-start text-foreground hover:bg-accent-secondary/25 cursor-pointer transition-all duration-400 ease-in-out"
           >
             Edit Task
           </Button>
@@ -39,7 +39,7 @@ export default function TaskViewCardMenu({
               setOpenPopover(false);
             }}
             variant="ghost"
-            className="justify-start text-red-600 hover: transition-all duration-500 ease-in-out hover:bg-red-50 cursor-pointer"
+            className="justify-start text-red-600 hover:text-red-600 hover:bg-accent-secondary/25 cursor-pointer transition-all duration-500 ease-in-out"
           >
             Delete Task
           </Button>

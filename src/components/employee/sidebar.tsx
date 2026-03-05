@@ -1,6 +1,12 @@
 'use client';
 
-import { FileText, ChevronLeft, ChevronRight, LayoutDashboard, ShoppingCart } from 'lucide-react';
+import {
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  ShoppingCart,
+} from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -124,11 +130,11 @@ export function Sidebar({
         }`}
       >
         {/* Rank Widget */}
-        <RankWidget
-          rankData={rankData ?? null}
-          isLoading={isRankLoading}
+        <RankWidget 
+          rankData={rankData ?? null} 
+          isLoading={isRankLoading} 
           isCollapsed={isCollapsed}
-          performanceScore={rankData?.performanceScore}
+          totalXP={xpResult?.totalXP}
         />
 
         <div
@@ -162,10 +168,10 @@ export function Sidebar({
       </div>
 
       {/* Profile Modal */}
-      <ProfileModal
-        open={showProfileModal}
-        onOpenChange={setShowProfileModal}
-        user={user ?? null}
+      <ProfileModal 
+        open={showProfileModal} 
+        onOpenChange={setShowProfileModal} 
+        user={user ?? null} 
       />
     </aside>
   );

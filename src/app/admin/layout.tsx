@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await protectAdminRoute();
   return (
-    <div className="admin-theme min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       {children}
     </div>
   );

@@ -70,6 +70,7 @@ export async function handleSubmitTaskVerification(
 export async function handleClaimTaskPointsAndXP(
   kpitaskId: string,
   taskName: string,
+  pendingOrders: number,
   completedOrders: number,
   maxOrders: number
 ): Promise<ClaimTaskResult | null> {

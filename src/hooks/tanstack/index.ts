@@ -19,4 +19,3 @@ export * from './mutations/managerMutations';
 export * from './mutations/managerBadgeMutations';
 export * from './mutations/hrMutations';
 export * from './mutations/attendanceMutations';
-export * from './mutations/employeeTasksMutations';

@@ -195,7 +195,7 @@ export default function AddEditTaskCategoryDialog({
                 value={taskName}
                 onChange={(e) => setTaskName(e.target.value)}
                 maxLength={255}
-                className={`bg-white border-[#e0cfcf] focus:border-[#690003] ${
+                className={`bg-white border-[#e0cfcf] focus:border-foreground ${
                   taskName && !isTaskNameValid ? 'border-red-500' : ''
                 } ${isDuplicateName ? 'border-red-500' : ''}`}
               />
@@ -226,7 +226,7 @@ export default function AddEditTaskCategoryDialog({
                   setTimeout(() => setShowTypeDropdown(false), 200);
                 }}
                 maxLength={255}
-                className={`bg-white border-[#e0cfcf] focus:border-[#690003] ${
+                className={`bg-white border-[#e0cfcf] focus:border-foreground ${
                   taskType && !isTypeValid ? 'border-red-500' : ''
                 }`}
               />
@@ -266,7 +266,7 @@ export default function AddEditTaskCategoryDialog({
               value={taskDescription}
               onChange={(e) => setTaskDescription(e.target.value)}
               maxLength={255}
-              className={`bg-white border-[#e0cfcf] focus:border-[#690003] ${
+              className={`bg-white border-[#e0cfcf] focus:border-foreground ${
                 taskDescription && !isDescriptionValid ? 'border-red-500' : ''
               }`}
             />
@@ -292,7 +292,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setPoints(Math.max(1, points - 1))}
                     disabled={points <= 1 || isLoading}
-                    className="bg-[#690003] text-white size-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="bg-foreground text-white size-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     −
                   </button>
@@ -305,13 +305,13 @@ export default function AddEditTaskCategoryDialog({
                     }}
                     min={1}
                     max={10000}
-                    className="text-center bg-white border-[#e0cfcf] focus:border-[#690003] remove-arrow"
+                    className="text-center bg-white border-[#e0cfcf] focus:border-foreground remove-arrow"
                   />
                   <button
                     type="button"
                     onClick={() => setPoints(Math.min(10000, points + 1))}
                     disabled={points >= 10000 || isLoading}
-                    className="bg-[#690003] text-white size-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="bg-foreground text-white size-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     +
                   </button>
@@ -331,7 +331,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setXp(Math.max(1, xp - 1))}
                     disabled={xp <= 1 || isLoading}
-                    className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="bg-foreground text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     −
                   </button>
@@ -344,13 +344,13 @@ export default function AddEditTaskCategoryDialog({
                     }}
                     min={1}
                     max={5000}
-                    className="text-center bg-white border-[#e0cfcf] focus:border-[#690003] remove-arrow"
+                    className="text-center bg-white border-[#e0cfcf] focus:border-foreground remove-arrow"
                   />
                   <button
                     type="button"
                     onClick={() => setXp(Math.min(5000, xp + 1))}
                     disabled={xp >= 5000 || isLoading}
-                    className="bg-[#690003] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="bg-foreground text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     +
                   </button>
@@ -385,7 +385,7 @@ export default function AddEditTaskCategoryDialog({
           <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="bg-[#690003] text-white hover:bg-[#8b0000] px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="bg-foreground text-white hover:bg-[#8b0000] px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isLoading ? (
               <>

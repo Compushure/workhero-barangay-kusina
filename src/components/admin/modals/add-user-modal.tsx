@@ -121,10 +121,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="admin-theme bg-primary-foreground w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col">
-        <DialogHeader className="px-6 pt-6 pb-2 border-b border-border shrink-0">
-          <DialogTitle className="text-xl font-bold text-primary">Add New User</DialogTitle>
-          <DialogDescription className="text-sm text-foreground/80">
+      <DialogContent className="bg-card w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col border-2 border-[#f47812]/20">
+        <DialogHeader className="px-6 pt-6 pb-2 border-b border-[#f47812]/15 shrink-0">
+          <DialogTitle className="text-xl font-bold text-foreground">Add New User</DialogTitle>
+          <DialogDescription className="text-sm text-gray-600">
             Create a new employee account with complete details and Philippine government IDs
           </DialogDescription>
         </DialogHeader>
@@ -135,8 +135,8 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
             {/* Collapsible Sections */}
             <Accordion type="multiple" defaultValue={["basic", "employment", "address", "ids"]} className="space-y-4">
               {/* Basic Information */}
-              <AccordionItem value="basic" className="border rounded-lg px-4">
-                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+              <AccordionItem value="basic" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
+                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                   Basic Information
                 </AccordionTrigger>
                 <AccordionContent>
@@ -145,11 +145,11 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                 <div className="space-y-2">
                   <RequiredLabel htmlFor="add-name" filled={!!watch('name')?.trim()}>Full Name</RequiredLabel>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                     <Input
                       id="add-name"
                       placeholder="At least 2 characters"
-                      className={`pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 ${
+                      className={`pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
                         !watch('name')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
                       }`}
                       disabled={isPending}
@@ -163,12 +163,12 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                 <div className="space-y-2">
                   <RequiredLabel htmlFor="add-email" filled={!!watch('email')?.trim()}>Email Address</RequiredLabel>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                     <Input
                       id="add-email"
                       type="email"
                       placeholder="Valid email address"
-                      className={`pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 ${
+                      className={`pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
                         !watch('email')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
                       }`}
                       disabled={isPending}
@@ -182,15 +182,15 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 {/* Company ID */}
                 <div className="space-y-2">
-                  <Label htmlFor="add-company-id" className="text-muted-foreground">
+                  <Label htmlFor="add-company-id" className="text-gray-600">
                     Company ID (Not Implemented)
                   </Label>
                   <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       id="add-company-id"
                       placeholder="Not implemented yet"
-                      className="pl-10 border-border bg-muted/50 text-muted-foreground placeholder:text-muted-foreground/50"
+                      className="pl-10 border-border bg-muted/50 text-gray-600 placeholder:text-gray-400"
                       disabled={true}
                       {...register('companyId')}
                     />
@@ -206,11 +206,11 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     Employee ID (Optional)
                   </Label>
                   <div className="relative">
-                    <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                     <Input
                       id="add-employee-id"
                       placeholder="e.g., EMP-2024-001"
-                      className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
+                      className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400"
                       disabled={isPending}
                       {...register('employeeId')}
                     />
@@ -224,12 +224,12 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                 <div className="space-y-2">
                   <RequiredLabel htmlFor="add-password" filled={!!watch('password')?.trim()}>Password</RequiredLabel>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                     <Input
                       id="add-password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="At least 6 characters"
-                      className={`pl-10 pr-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 ${
+                      className={`pl-10 pr-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
                         !watch('password')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
                       }`}
                       disabled={isPending}
@@ -238,7 +238,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-foreground transition-colors"
                       disabled={isPending}
                     >
                       {showPassword ? (
@@ -259,11 +259,11 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     Contact Number
                   </RequiredLabel>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                     <Input
                       id="add-contact"
                       placeholder="09XX-XXX-XXXX format"
-                      className={`pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 ${
+                      className={`pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
                         !watch('contactNumber')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
                       }`}
                       disabled={isPending}
@@ -279,8 +279,8 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
               </AccordionItem>
 
             {/* Employment Details */}
-              <AccordionItem value="employment" className="border rounded-lg px-4">
-                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+              <AccordionItem value="employment" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
+                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                   Employment Details
                 </AccordionTrigger>
                 <AccordionContent>
@@ -295,10 +295,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                   >
                     <SelectTrigger
                       id="add-type"
-                      className="border-border focus:border-primary focus:ring-primary"
+                      className="border-border bg-white focus:border-accent focus:ring-accent"
                     >
                       <div className="flex items-center gap-2">
-                        <Briefcase className="h-4 w-4 text-primary" />
+                        <Briefcase className="h-4 w-4 text-accent" />
                         <SelectValue />
                       </div>
                     </SelectTrigger>
@@ -327,10 +327,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                   >
                     <SelectTrigger
                       id="add-status"
-                      className="border-border focus:border-primary focus:ring-primary"
+                      className="border-border bg-white focus:border-accent focus:ring-accent"
                     >
                       <div className="flex items-center gap-2">
-                        <BadgeCheck className="h-4 w-4 text-primary" />
+                        <BadgeCheck className="h-4 w-4 text-accent" />
                         <SelectValue />
                       </div>
                     </SelectTrigger>
@@ -351,19 +351,19 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
               </AccordionItem>
 
             {/* Address */}
-              <AccordionItem value="address" className="border rounded-lg px-4">
-                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+              <AccordionItem value="address" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
+                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                   Home Address
                 </AccordionTrigger>
                 <AccordionContent>
             <div className="space-y-2 pt-4">
               <RequiredLabel htmlFor="add-address" filled={!!watch('address')?.trim()}>Address (10-250 characters)</RequiredLabel>
               <div className="relative">
-                <MapPin className="absolute left-3 top-3 h-4 w-4 text-primary" />
+                <MapPin className="absolute left-3 top-3 h-4 w-4 text-accent" />
                 <Textarea
                   id="add-address"
                   placeholder="Complete address: Street, Barangay, City, Province (minimum 50 characters)"
-                  className={`pl-10 min-h-20 resize-none border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 ${
+                  className={`pl-10 min-h-20 resize-none border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
                     !watch('address')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
                   }`}
                   disabled={isPending}
@@ -378,8 +378,8 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
               </AccordionItem>
 
             {/* Government IDs */}
-              <AccordionItem value="ids" className="border rounded-lg px-4">
-                <AccordionTrigger className="text-sm font-semibold text-primary hover:no-underline">
+              <AccordionItem value="ids" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
+                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                   Philippine Government IDs (Optional)
                 </AccordionTrigger>
                 <AccordionContent>
@@ -390,11 +390,11 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     TIN (Optional)
                   </Label>
                   <div className="relative">
-                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                     <Input
                       id="add-tin"
                       placeholder="9 digits"
-                      className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
+                      className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400"
                       disabled={isPending}
                       onInput={(e) => {
                         const target = e.target as HTMLInputElement;
@@ -412,11 +412,11 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     SSS (Optional)
                   </Label>
                   <div className="relative">
-                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                     <Input
                       id="add-sss"
                       placeholder="10 digits"
-                      className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
+                      className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400"
                       disabled={isPending}
                       onInput={(e) => {
                         const target = e.target as HTMLInputElement;
@@ -434,11 +434,11 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     Pag-IBIG (Optional)
                   </Label>
                   <div className="relative">
-                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                     <Input
                       id="add-pagibig"
                       placeholder="12 digits"
-                      className="pl-10 border-border focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50"
+                      className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400"
                       disabled={isPending}
                       onInput={(e) => {
                         const target = e.target as HTMLInputElement;
@@ -460,13 +460,13 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
         </ScrollArea>
 
         {/* Footer Actions - Outside ScrollArea */}
-        <div className="px-6 py-4 border-t border-border shrink-0 bg-primary-foreground">
+        <div className="px-6 py-4 border-t border-[#f47812]/15 shrink-0 bg-card">
           <div className="flex flex-col-reverse sm:flex-row gap-3">
             <Button
               type="submit"
               form="add-user-form"
               disabled={isPending || !isValid}
-              className="flex-1 bg-primary cursor-pointer text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-foreground cursor-pointer text-white hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 ease-in-out shadow-sm/25"
             >
               {isPending ? 'Adding...' : 'Add User'}
             </Button>
@@ -475,7 +475,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
               variant="outline"
               onClick={() => handleOpenChange(false)}
               disabled={isPending}
-              className="flex-1 border-border bg-accent cursor-pointer text-primary hover:bg-primary/10 hover:text-primary"
+              className="flex-1 cursor-pointer border-zinc-300 bg-white text-foreground hover:bg-gray-100 hover:text-foreground transition-all duration-500 ease-in-out"
             >
               Cancel
             </Button>

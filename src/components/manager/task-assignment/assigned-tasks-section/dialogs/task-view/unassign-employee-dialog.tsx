@@ -12,8 +12,8 @@ import { useState } from 'react';
 import { useDeleteTaskMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface UnassignEmployeeDialogProps {
-  showRemoveConfirm: string | null;
-  setShowRemoveConfirm: (show: string | null) => void;
+  showRemoveConfirm: { assignmentId?: string; employeeId: string } | null;
+  setShowRemoveConfirm: (show: { assignmentId?: string; employeeId: string } | null) => void;
   task: AssignedTask;
 }
 
@@ -25,11 +25,11 @@ function UnassignEmployeeDialog({
   const deleteTaskMutation = useDeleteTaskMutation();
 
   const handleUnassign = async () => {
-    if (!showRemoveConfirm) return;
+    if (!showRemoveConfirm?.assignmentId) return;
 
     // Use the mutation which will handle cache invalidation
     deleteTaskMutation.mutate(
-      { taskId: task.id },
+      { assignmentId: showRemoveConfirm.assignmentId },
       {
         onSuccess: () => {
           setShowRemoveConfirm(null);
@@ -42,7 +42,7 @@ function UnassignEmployeeDialog({
     <Dialog open={!!showRemoveConfirm} onOpenChange={(open) => !open && setShowRemoveConfirm(null)}>
       <DialogContent className="bg-white">
         <DialogHeader>
-          <DialogTitle className="text-[#690003]">Unassign Employee?</DialogTitle>
+          <DialogTitle className="text-foreground">Unassign Employee?</DialogTitle>
           <DialogDescription>
             Are you sure you want to unassign this employee from this task?
           </DialogDescription>
@@ -51,7 +51,7 @@ function UnassignEmployeeDialog({
           <Button
             onClick={handleUnassign}
             disabled={deleteTaskMutation.isPending}
-            className="bg-[#690003] hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
+            className="bg-foreground hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
           >
             {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
           </Button>

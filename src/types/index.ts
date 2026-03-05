@@ -53,6 +53,16 @@ export interface User {
   pagibig?: string;
   createdAt?: Date;
   profilePictureUrl?: string;
+  // Gamified stats
+  xp?: number;
+  user_level?: number;
+  level?: number;
+  total_xp?: number;
+  total_points_earned?: number;
+  points?: number;
+  deducted_points?: number;
+  is_tenured?: boolean;
+  performance_score?: number;
 }
 
 // ============================================
@@ -150,8 +160,8 @@ export interface Reward {
   category?: string;
   isActive: boolean;
   availableDate?: string | Date | null;
-  availableMonth?: number; 
-  monthName?: string; // Month name 
+  availableMonth?: number | null;
+  monthName?: string | null;
   createdAt?: string | Date;
   createdBy?: string;
   imageUrl?: string;
@@ -160,7 +170,14 @@ export interface Reward {
   isOutOfStock?: boolean; // Whether the item is out of stock (quantity <= 0)
 }
 
+// ============================================
+// User Extended Type
+// ============================================
 
+/**
+ * UserWithExtras extends the base User interface with additional fields
+ * Used throughout the application for comprehensive user data display
+ */
 export type UserWithExtras = User & {
   employeeId?: string;
   companyId?: string;
@@ -172,6 +189,19 @@ export type UserWithExtras = User & {
   pagibig?: string;
   createdAt?: string | Date;
   profilePictureUrl?: string;
+  xp?: number;
+  user_level?: number;
+  level?: number;
+  total_xp?: number;
+  total_points_earned?: number;
+  points?: number;
+  deducted_points?: number;
+  is_tenured?: boolean;
+  performance_score?: number;
+  total_absences?: number;
+  total_lates?: number;
+  total_undertimes?: number;
+  total_overtimes?: number;
 };
 // Re-export all domain types for convenience
 export * from './shared';

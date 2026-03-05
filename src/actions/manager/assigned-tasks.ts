@@ -101,6 +101,7 @@ export async function fetchCurrentAssignedTasksPaginated(
 
   (allSortedData ?? []).forEach((row: any) => {
     const employee: AssignedEmployee = {
+      assignmentId: row.kpitask_id,
       id: row.assigned_to ?? '',
       name: row.assigned_to_name ?? '',
       empId: row.assigned_to_employee_id ?? '',
@@ -189,7 +190,7 @@ export async function fetchCurrentAssignedTasksPaginated(
  */
 export async function fetchCurrentAssignedEmployeesPaginated(
   page: number = 1,
-  pageSize: number = 4,
+  pageSize: number = 10,
   sortBy: string = 'recently added',
   searchTerm: string = ''
 ): Promise<
@@ -381,6 +382,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
     // Convert each task group to an AssignedTask with this employee
     return Array.from(taskGroups.values()).map((taskGroup) => {
       const employeeData: AssignedEmployee = {
+        assignmentId: taskGroup.assignments[0]?.kpitask_id,
         id: employee.id,
         name: employee.name,
         empId: employee.empId,
@@ -448,9 +450,30 @@ export async function clearAllEmployeeTasks(
   return { error: null, data: true };
 }
 
+// unnassigns one employee from a task instance
 export async function deleteTask(taskId: string): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
   const { error } = await supabase.from('KPITask').delete().eq('id', taskId);
+
+  if (error) return { error: error.message, data: undefined };
+  return { error: null, data: true };
+}
+
+// unnassigns all employees assigned to a task instace, thus delete the task instance entirely
+export async function deleteTaskForAllEmployees(
+  categoryId: string,
+  deadlineDate: string,
+  maxOrders: number,
+  createdAt: string
+): Promise<ServerActionResponse<boolean>> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('KPITask')
+    .delete()
+    .eq('category_id', categoryId)
+    .eq('deadline_date', deadlineDate)
+    .eq('max_orders', maxOrders)
+    .eq('created_at', createdAt);
 
   if (error) return { error: error.message, data: undefined };
   return { error: null, data: true };
@@ -469,6 +492,10 @@ export async function updateTaskAssignment(
   const supabase = await createClient();
 
   try {
+    // Validate maxOrders limit
+    if (maxOrders > 99) {
+      return { error: 'Maximum orders cannot exceed 99', data: undefined };
+    }
     // Get the current task to find all related assignments
     const { data: currentTask, error: fetchError } = await supabase
       .from('KPITask')

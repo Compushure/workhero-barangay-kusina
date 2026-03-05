@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog';
 import { Calendar, ChefHat, ChevronDown, Coins, Loader2, Soup } from 'lucide-react';
 import { TaskStatusItem } from './types';
-import { SetStateAction, useState } from 'react';
+import { SetStateAction, useState, useEffect } from 'react';
 import {
   useSubmitTaskVerification,
   useClaimTaskPointsandXP,
@@ -22,8 +22,17 @@ interface TaskCardDialogProps {
 }
 
 export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCardDialogProps) {
-  const [remarkOpen, setRemarkOpen] = useState(false);
-  const [pendingOrders, setPendingOrders] = useState(1);
+  const remainingOrders = task.maxOrders - task.completedOrders;
+
+  const [remarkOpen, setRemarkOpen] = useState(true);
+  const [pendingOrders, setPendingOrders] = useState(task.pendingOrders || 1);
+
+  // Reset remarkOpen to true whenever modal opens
+  useEffect(() => {
+    if (modalOpen) {
+      setRemarkOpen(true);
+    }
+  }, [modalOpen]);
 
   const submitMutation = useSubmitTaskVerification();
   const claimMutation = useClaimTaskPointsandXP();
@@ -31,7 +40,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
 
   const canClaim =
     task.status?.toLowerCase() === 'approved' &&
-    task.completedOrders > task.claimedOrders &&
+    task.pendingOrders !== 0 &&
     !claimMutation.isSuccess;
   const isFullyCompletedAndClaimed = task.completedOrders === task.maxOrders && task.claimedAt;
   const canSubmit = task.status?.toLowerCase() === 'assigned' && !submitMutation.isSuccess;
@@ -47,6 +56,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
     claimMutation.mutate({
       kpitaskId: task.id,
       taskName: task.name,
+      pendingOrders: task.pendingOrders,
       completedOrders: task.completedOrders,
       maxOrders: task.maxOrders,
     });
@@ -54,7 +64,6 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
 
   function handleSubmit() {
     if (!canSubmit || submitMutation.isPending) return;
-    const remainingOrders = task.maxOrders - task.completedOrders;
     const ordersToSubmit = Math.min(pendingOrders, remainingOrders);
     submitMutation.mutate({
       kpitaskId: task.id,
@@ -116,8 +125,8 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                       e.stopPropagation();
                       setPendingOrders((prev) => Math.max(1, prev - 1));
                     }}
-                    disabled={!canSubmit}
-                    className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+                    disabled={!canSubmit || pendingOrders === 1}
+                    className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] disabled:hover:bg-[#690003] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     −
                   </button>
@@ -125,13 +134,13 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                     type="number"
                     min="1"
                     max={task.maxOrders - task.completedOrders}
-                    value={pendingOrders}
+                    value={!canSubmit ? 1 : pendingOrders}
                     onChange={(e) => {
-                      const remainingOrders = task.maxOrders - task.completedOrders;
                       const newValue = parseInt(e.target.value) || 1;
                       setPendingOrders(Math.max(1, Math.min(newValue, remainingOrders)));
                     }}
                     disabled={!canSubmit}
+                    tabIndex={-1}
                     className="w-20 remove-arrow rounded-md border border-gray-300 bg-card px-2 py-1 inset-shadow-xs/20 text-base text-center ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                   <button
@@ -140,8 +149,8 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                       const remainingOrders = task.maxOrders - task.completedOrders;
                       setPendingOrders((prev) => Math.min(remainingOrders, prev + 1));
                     }}
-                    disabled={!canSubmit}
-                    className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+                    disabled={!canSubmit || pendingOrders === remainingOrders}
+                    className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] disabled:hover:bg-[#690003] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     +
                   </button>
@@ -204,7 +213,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                 />
               </button>
               {remarkOpen ? (
-                <div className="w-full min-w-0 rounded-lg border border-border bg-white px-3 py-2.5 shadow-sm overflow-hidden inset-shadow-xs/25 tramsition-all duration-500 delay-75 ease-in-out">
+                <div className="overflow-auto w-full min-w-0 max-h-40 rounded-lg border border-border bg-white px-3 py-2.5 shadow-sm inset-shadow-xs/25 tramsition-all duration-500 delay-75 ease-in-out">
                   <p className="text-sm text-foreground leading-relaxed wrap-break-word break-none">
                     {task.remark}
                   </p>

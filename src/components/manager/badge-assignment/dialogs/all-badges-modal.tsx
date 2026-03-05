@@ -32,7 +32,7 @@ export default function AllBadgesModal({
         {/* Header */}
         <DialogHeader className="mb-6">
           <div className="space-y-2">
-            <DialogTitle className="text-2xl text-[#690003]">All Badges - {user.name}</DialogTitle>
+            <DialogTitle className="text-2xl text-foreground">All Badges - {user.name}</DialogTitle>
             <p className="text-sm text-gray-600">{user.employee_id}</p>
           </div>
         </DialogHeader>
@@ -64,7 +64,7 @@ export default function AllBadgesModal({
                   <p className="text-xs text-gray-600 line-clamp-2">
                     {badge.description || 'No description'}
                   </p>
-                  <div className="flex items-center gap-1 text-xs font-medium text-[#690003]">
+                  <div className="flex items-center gap-1 text-xs font-medium text-foreground">
                     <Coins size={14} />
                     {badge.points} points
                   </div>
@@ -83,7 +83,7 @@ export default function AllBadgesModal({
           <Button
             onClick={() => onOpenChange(false)}
             variant="outline"
-            className="border-[#e0cfcf] text-[#690003] hover:bg-[#690003]/10"
+            className="border-[#e0cfcf] text-foreground hover:bg-foreground/10"
           >
             Close
           </Button>

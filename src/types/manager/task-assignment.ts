@@ -21,6 +21,8 @@ export interface Task {
  * Assigned employee in a task
  */
 export interface AssignedEmployee {
+  /** KPITask row id for this specific assignment */
+  assignmentId?: string;
   id: string;
   name: string;
   empId: string;
@@ -28,6 +30,7 @@ export interface AssignedEmployee {
   assignedTasks: AssignedTask[];
   completedOrders: number;
   status?: string;
+  pendingOrders?: number;
 }
 
 /**

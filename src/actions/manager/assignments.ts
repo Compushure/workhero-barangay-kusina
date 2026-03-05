@@ -70,6 +70,7 @@ export async function fetchEmployeeList(): Promise<ServerActionResponse<Assigned
       empId: item.employee_id || '',
       tenure: undefined,
       assignedTasks: [],
+      pendingOrders: 0,
       completedOrders: 0,
     }));
 
@@ -95,6 +96,10 @@ export async function addTaskAssignmentAction(
   maxOrders?: number
 ): Promise<ServerActionResponse<AssignedTask[]>> {
   try {
+    // Validate maxOrders limit
+    if (maxOrders && maxOrders > 99) {
+      return { error: 'Maximum orders cannot exceed 99', data: undefined };
+    }
     const supabase = await createClient();
 
     // First, get the task details from KPICategory
@@ -190,6 +195,7 @@ export async function addTaskAssignmentAction(
         name: employee.user_name || 'Unknown Employee',
         empId: employee.employee_id || '',
         assignedTasks: [],
+        pendingOrders: 0,
         completedOrders: 0,
       };
 

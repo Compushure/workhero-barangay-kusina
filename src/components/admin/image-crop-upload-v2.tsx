@@ -225,7 +225,7 @@ export function ImageCropUpload({
       <div className="flex flex-col items-center gap-4">
         <Avatar className="w-24 h-24 border-2 border-border">
           <AvatarImage src={croppedPreview || currentImageUrl} alt={userName} />
-          <AvatarFallback className="bg-primary/10 text-primary text-lg">
+          <AvatarFallback className="bg-accent/10 text-foreground text-lg">
             {getInitials(userName)}
           </AvatarFallback>
         </Avatar>

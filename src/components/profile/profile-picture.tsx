@@ -79,9 +79,9 @@ function ProfilePictureComponent({
     <div className="flex flex-col items-center gap-6 mb-6">
       {/* Profile Picture Circle */}
       <div className="relative">
-        <div className="h-32 w-32 bg-[#f2e1c9] rounded-full flex items-center justify-center overflow-hidden border-4 border-[#730202]/20">
+        <div className="h-32 w-32 bg-[var(--color-background-soft)] rounded-full flex items-center justify-center overflow-hidden border-4 border-accent/25">
           {checkingImage ? (
-            <div className="animate-pulse text-[#730202]/40 text-xl font-semibold">
+            <div className="animate-pulse text-accent/50 text-xl font-semibold">
               Loading...
             </div>
           ) : displayUrl ? (
@@ -103,7 +103,7 @@ function ProfilePictureComponent({
           <button
             onClick={handleCameraClick}
             disabled={isLoading || isDeleting || !uploadAntiSpam.canExecute}
-            className="absolute bottom-0 right-0 bg-[#730202] text-white p-2 rounded-full shadow-lg hover:bg-[#8b0003] hover:shadow-xl disabled:bg-gray-400 disabled:opacity-60 disabled:cursor-not-allowed active:scale-90 cursor-pointer disabled:active:scale-100 transition-all duration-200"
+            className="absolute bottom-0 right-0 bg-[var(--color-accent)] text-white p-2 rounded-full shadow-lg hover:bg-[var(--color-accent-secondary)] hover:shadow-xl disabled:bg-gray-400 disabled:opacity-60 disabled:cursor-not-allowed active:scale-90 cursor-pointer disabled:active:scale-100 transition-all duration-200"
             title={isLoading ? 'Uploading...' : 'Upload profile picture'}
           >
             <Camera className="h-5 w-5" />
