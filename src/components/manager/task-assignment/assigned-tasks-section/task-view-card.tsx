@@ -23,7 +23,9 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   const updateTaskMutation = useUpdateTaskAssignmentMutation();
 
   const [expanded, setExpanded] = useState(false);
-  const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(null);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState<
+    { assignmentId?: string; employeeId: string } | null
+  >(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editMaxOrders, setEditMaxOrders] = useState(task.maxOrders);
   const [editDueDate, setEditDueDate] = useState<Date>(() => 
