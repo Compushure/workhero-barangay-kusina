@@ -47,7 +47,7 @@ function RecentBadgesComponent({ userId, showLabel = true, maxBadges = 2 }: Rece
             title={`${badge.badge_name} - ${new Date(badge.date_acquired).toLocaleDateString()}`}
           >
             {badge.img_link ? (
-              <div className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-[#730202]/20 hover:border-[#730202] transition-colors">
+              <div className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-accent/25 hover:border-accent transition-colors">
                 <img
                   src={badge.img_link}
                   alt={badge.badge_name}
@@ -55,8 +55,8 @@ function RecentBadgesComponent({ userId, showLabel = true, maxBadges = 2 }: Rece
                 />
               </div>
             ) : (
-              <div className="h-12 w-12 rounded-full bg-[#730202]/10 flex items-center justify-center border-2 border-[#730202]/20">
-                <Trophy className="h-6 w-6 text-[#730202]" />
+              <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center border-2 border-accent/25">
+                <Trophy className="h-6 w-6 text-accent" />
               </div>
             )}
 
