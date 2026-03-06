@@ -116,7 +116,7 @@ export async function LeaderboardContent({
     <div className="mb-2">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between max-w-6xl mx-auto">
         <div>
-          <h2 className="text-xl font-bold text-[#6D1616]">{displayPeriodLabel}</h2>
+          <h2 className="text-xl font-bold text-foreground ">{displayPeriodLabel}</h2>
           {getPeriodDateRangeSubtitle(periodInfo) && (
             <p className="text-sm text-gray-600 mt-0.5">{getPeriodDateRangeSubtitle(periodInfo)}</p>
           )}

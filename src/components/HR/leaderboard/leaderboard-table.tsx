@@ -92,7 +92,7 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
                       </span>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-sm">
+                      <p className="text-sm text-foreground">
                         Performance Score = Total Points Earned × Completed Tasks
                       </p>
                     </TooltipContent>
