@@ -261,5 +261,21 @@
   .bg-primary-gradient {
     background-image: var(--primary-gradient);
   }
+
+  .animate-launcher-shadow {
+    animation: launcher-shadow-blink 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes launcher-shadow-blink {
+  0% {
+    box-shadow: 0 0 8px 2px rgba(244, 185, 37, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 16px 8px rgba(244, 185, 37, 0.75);
+  }
+  100% {
+    box-shadow: 0 0 8px 2px rgba(244, 185, 37, 0.35);
+  }
 }
 
