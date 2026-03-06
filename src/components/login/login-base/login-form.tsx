@@ -62,7 +62,7 @@ export function LoginForm({ onSubmit, isSubmitting }: LoginFormProps) {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-300 transform hover:scale-102 active:scale-95 cursor-pointer"
+            className="w-full h-11 bg-primary hover:bg-accent text-primary-foreground font-semibold transition-all duration-300 transform hover:scale-102 active:scale-95 cursor-pointer"
           >
             {isSubmitting ? (
               <>

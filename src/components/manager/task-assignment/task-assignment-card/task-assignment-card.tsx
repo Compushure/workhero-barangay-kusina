@@ -144,7 +144,7 @@ export function TaskAssignmentCard() {
   };
 
   return (
-    <div className="rounded-3xl bg-background p-6 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
+    <div className="rounded-3xl bg-background p-6 shadow-sm/25">
       <h2 className="mb-7 text-2xl font-semibold text-[#131C2A]">Assign Employees for Task</h2>
 
       <div className="flex flex-wrap gap-4">
@@ -186,7 +186,7 @@ export function TaskAssignmentCard() {
             selectedTask.length === 0 ||
             !selectedDeadline
           }
-          className="bg-foreground hover:bg-accent text-card cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:shadow-sm/25 disabled:cursor-not-allowed px-12 shadow-sm/25"
+          className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out disabled:bg-foreground disabled:opacity-50 disabled:brightness-50 disabled:cursor-not-allowed px-12 shadow-sm/25"
         >
           {isAssigning ? 'Assigning...' : 'Assign'}
         </Button>
@@ -194,7 +194,7 @@ export function TaskAssignmentCard() {
         <Button
           variant="outline"
           onClick={() => setShowClearConfirm(true)}
-          className="text-black bg-white hover:bg-gray-100 hover:text-accent px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
+          className="text-primary bg-white hover:bg-gray-100 hover:text-accent px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
         >
           Clear
         </Button>
