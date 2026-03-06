@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { getISOWeek } from 'date-fns';
 import { getISOWeeksInYear, getISOWeekDateRangeLabel } from '@/lib/utils/time-period-utils';
+import { getOrGenerateRankingByPeriod } from '@/actions/hr/leaderboard';
 import type { RankLogPeriodType } from '@/types';
 
 const MONTHS = [
@@ -45,6 +46,7 @@ export function PeriodSelector({
   currentMonth,
 }: PeriodSelectorProps) {
   const router = useRouter();
+  const [, startTransition] = useTransition();
 
   const now = new Date();
   const nowYear = now.getFullYear();
@@ -90,7 +92,21 @@ export function PeriodSelector({
     if (periodType === 'monthly') params.set('month', String(month));
     if (periodType === 'weekly') params.set('week', String(week));
     params.set('show', '1');
-    router.push(`/hr/leaderboard?${params.toString()}`);
+
+    startTransition(async () => {
+      const result = await getOrGenerateRankingByPeriod(
+        periodType,
+        year,
+        periodType === 'monthly' ? month : undefined,
+        periodType === 'weekly' ? week : undefined
+      );
+
+      if (!result.success) {
+        return;
+      }
+
+      router.push(`/hr/leaderboard?${params.toString()}`);
+    });
   };
 
   return (
@@ -116,9 +132,7 @@ export function PeriodSelector({
           <label className="text-xs font-medium text-muted-foreground">Week</label>
           <Select value={String(Math.min(week, maxWeek))} onValueChange={(v) => setWeek(Number(v))}>
             <SelectTrigger className="w-25 bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
-              <span className="truncate">
-                Week {Math.min(week, maxWeek) || '—'}
-              </span>
+              <span className="truncate">Week {Math.min(week, maxWeek) || '—'}</span>
             </SelectTrigger>
             <SelectContent>
               {weekOptions.map((w) => (

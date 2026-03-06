@@ -211,6 +211,55 @@ export async function getOrGenerateRankingByPeriod(
 }
 
 /**
+ * Fetch ranking entries for a specific period (read-only).
+ * Returns rows ordered by rank, or null if no ranking exists for that period.
+ */
+export async function getRankingByPeriod(
+  periodType: RankLogPeriodType,
+  year: number,
+  month?: number,
+  week?: number
+): Promise<ActionResult<RankingLeaderboardViewRow[] | null>> {
+  return safeAction(async () => {
+    noStore();
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Not authenticated');
+    }
+
+    const { start } = getPeriodStartEnd(
+      periodType,
+      year,
+      periodType === 'weekly' ? undefined : month,
+      periodType === 'weekly' ? week : undefined
+    );
+    const periodStart = toDateStr(start);
+
+    const { data, error } = await supabase
+      .from('ranking_leaderboard_view')
+      .select('*')
+      .eq('period_type', periodType)
+      .eq('period_start', periodStart)
+      .order('rank');
+
+    if (error) {
+      throw new Error(`Failed to fetch ranking: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) {
+      return null;
+    }
+
+    return data as RankingLeaderboardViewRow[];
+  });
+}
+
+/**
  * Toggle visibility of a generated ranking.
  */
 export async function toggleRankingVisibility(

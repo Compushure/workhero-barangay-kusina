@@ -1,5 +1,5 @@
 import { BarChart2, Trophy } from 'lucide-react';
-import { getOrGenerateRankingByPeriod } from '@/actions/hr/leaderboard';
+import { getRankingByPeriod } from '@/actions/hr/leaderboard';
 import LeaderboardTable from '@/components/hr/leaderboard/leaderboard-table';
 import VisibilityToggle from '@/components/hr/leaderboard/visibility-toggle';
 import { enrichRankingPlayers } from '@/lib/utils/enrich-ranking';
@@ -44,7 +44,7 @@ export async function LeaderboardContent({
     );
   }
 
-  const rankingResult = await getOrGenerateRankingByPeriod(
+  const rankingResult = await getRankingByPeriod(
     periodType,
     year,
     periodType === 'monthly' ? month : undefined,
