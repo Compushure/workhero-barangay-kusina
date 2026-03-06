@@ -13,6 +13,8 @@ export interface TaskStatusItem {
   points: number;
   xp: number;
   dueDate: string;
+  /** When the manager approved the task (from task_info_view.kpitask_created_at) */
+  approvedAt?: string | null;
   /** Manager remark (e.g. for verified/approved tasks). */
   remark?: string;
   /** When the employee claimed points/XP for this task; null if not yet claimed. */
@@ -21,8 +23,4 @@ export interface TaskStatusItem {
   status?: string;
 }
 
-export type TaskStatusKind =
-  | 'Current'
-  | 'In Review'
-  | 'Approved'
-  | 'Rejected';
+export type TaskStatusKind = 'Current' | 'In Review' | 'Approved' | 'Rejected';

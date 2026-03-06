@@ -34,21 +34,28 @@ export function AssignEmployeesDialog({
   const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const activeStatuses = useMemo(() => new Set(['assigned', 'in review', 'rejected']), []);
+
   const disabledEmployeeIds = useMemo(() => {
     const disabledIds = new Set<string>();
 
     selectedTaskIds.forEach((taskId) => {
       assignedTasks.forEach((assignedTask) => {
         if (assignedTask.taskId === taskId) {
+          const taskStatus = (assignedTask.status ?? '').toLowerCase();
+
           assignedTask.assignedEmployees.forEach((emp) => {
-            disabledIds.add(emp.id);
+            const employeeStatus = (emp.status ?? taskStatus ?? '').toLowerCase();
+            if (activeStatuses.has(employeeStatus)) {
+              disabledIds.add(emp.id);
+            }
           });
         }
       });
     });
 
     return disabledIds;
-  }, [assignedTasks, selectedTaskIds]);
+  }, [activeStatuses, assignedTasks, selectedTaskIds]);
 
   useEffect(() => {
     async function loadEmployees() {
@@ -114,7 +121,7 @@ export function AssignEmployeesDialog({
           disabled:shadow hover:bg-accent/15 disabled:cursor-not-allowed`}
       >
         <div className="flex items-center gap-2 min-w-45 max-9/10">
-          <Users size={16} className='text-accent'/>
+          <Users size={16} className="text-accent" />
           <span className={`${selectedEmployees.length === 0 ? 'text-secondary' : 'text-primary'}`}>
             {selectedEmployees.length} employee/s selected
           </span>
@@ -126,7 +133,7 @@ export function AssignEmployeesDialog({
         <DialogContent className="bg-card max-h-[90vh] flex flex-col rounded-3xl pt-12">
           <DialogHeader>
             <DialogTitle className="flex gap-2 text-2xl text-foreground text-left items-center">
-              <Users className='size-7 p-1.25 bg-primary-gradient text-card rounded-full'/>
+              <Users className="size-7 p-1.25 bg-primary-gradient text-card rounded-full" />
               Assign Employees for Task
             </DialogTitle>
           </DialogHeader>

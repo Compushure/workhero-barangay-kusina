@@ -73,14 +73,9 @@ export function useDeleteTaskGroupMutation(): UseMutationResult<
  * Mutation for clearing all 'assigned' task assignments
  * Automatically invalidates all assignment queries on success
  */
-export function useClearAssignedTasksMutation(): UseMutationResult<
-  boolean,
-  Error,
-  void
-> {
+export function useClearAssignedTasksMutation(): UseMutationResult<boolean, Error, void> {
   const queryClient = useQueryClient();
-  const { startOptimistic, optimisticClearAll, rollback, commit } =
-    useManagerAssignmentStore();
+  const { startOptimistic, optimisticClearAll, rollback, commit } = useManagerAssignmentStore();
 
   return useMutation({
     mutationFn: async () => {
@@ -146,8 +141,7 @@ export function useUpdateTaskAssignmentMutation(): UseMutationResult<
   { taskId: string; maxOrders: number; newDueDate: string; employeeIds: string[] }
 > {
   const queryClient = useQueryClient();
-  const { startOptimistic, optimisticUpdateTask, rollback, commit } =
-    useManagerAssignmentStore();
+  const { startOptimistic, optimisticUpdateTask, rollback, commit } = useManagerAssignmentStore();
 
   return useMutation({
     mutationFn: async ({
