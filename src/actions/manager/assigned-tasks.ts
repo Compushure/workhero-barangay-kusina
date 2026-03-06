@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse } from '@/types';
 import type { AssignedTask, AssignedEmployee } from '@/types';
+import { insertNotification } from '@/lib/notifications';
 
 /**
  * Fetch paginated current assigned tasks
@@ -504,6 +505,18 @@ export async function updateTaskAssignment(
       return { error: 'Task not found', data: undefined };
     }
 
+    const { data: categoryRow, error: categoryError } = await supabase
+      .from('KPICategory')
+      .select('name')
+      .eq('id', currentTask.category_id)
+      .single();
+
+    if (categoryError) {
+      return { error: 'Failed to fetch task details for notification', data: undefined };
+    }
+
+    const taskName = categoryRow?.name || 'Task';
+
     // Find all assignments in this task group
     const { data: existingAssignments, error: groupError } = await supabase
       .from('KPITask')
@@ -571,10 +584,32 @@ export async function updateTaskAssignment(
         max_orders: maxOrders,
       }));
 
-      const { error: insertError } = await supabase.from('KPITask').insert(newAssignments);
+      const { data: insertedRows, error: insertError } = await supabase
+        .from('KPITask')
+        .insert(newAssignments)
+        .select('id, assigned_to, deadline_date, max_orders, category_id');
 
       if (insertError) {
         return { error: insertError.message, data: undefined };
+      }
+
+      if (insertedRows?.length) {
+        await Promise.all(
+          insertedRows.map((row: any) =>
+            insertNotification({
+              userId: row.assigned_to,
+              type: 'task',
+              message: `You have been assigned to a task: ${taskName}`,
+              metadata: {
+                taskId: row.id,
+                categoryId: row.category_id,
+                taskName,
+                deadline: row.deadline_date,
+                maxOrders: row.max_orders,
+              },
+            })
+          )
+        );
       }
     }
 

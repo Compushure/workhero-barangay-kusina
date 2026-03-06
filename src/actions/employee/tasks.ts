@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import type { ServerActionResponse } from '@/types';
 import type { TaskStatusItem } from '@/components/employee/task-status/types';
+import { insertNotification } from '@/lib/notifications';
 
 export interface EmployeeTasksData {
   currentTasks: TaskStatusItem[];
@@ -159,7 +160,9 @@ export async function submitTaskVerification(
   // Fetch task details with current progress
   const { data: task, error: taskError } = await supabase
     .from('task_info_view')
-    .select('assigned_to, status, completed_orders, pending_orders, max_orders, points_claimed_at')
+    .select(
+      'assigned_to, status, completed_orders, pending_orders, max_orders, points_claimed_at, category_name'
+    )
     .eq('kpitask_id', kpitaskId)
     .single();
 
@@ -172,6 +175,7 @@ export async function submitTaskVerification(
   const completedOrders = (task as { completed_orders: number | null }).completed_orders ?? 0;
   const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
   const pointsClaimedAt = (task as { points_claimed_at: string | null }).points_claimed_at;
+  const taskName = (task as { category_name: string | null }).category_name ?? 'Task';
 
   // Validation checks
   if (assignedTo !== user.id) {
@@ -208,6 +212,22 @@ export async function submitTaskVerification(
       data: undefined,
     };
   }
+
+  const remainingAfterSubmission = Math.max(0, maxOrders - completedOrders - pendingOrders);
+
+  await insertNotification({
+    userId: user.id,
+    type: 'task',
+    message: `You have submitted ${pendingOrders} order${pendingOrders !== 1 ? 's' : ''} for "${taskName}" for review!${remainingAfterSubmission > 0 ? ` You have ${remainingAfterSubmission} order${remainingAfterSubmission !== 1 ? 's' : ''} remaining in this task.` : ' This task is now complete!'}`,
+    metadata: {
+      taskId: kpitaskId,
+      taskName,
+      pendingOrdersSubmitted: pendingOrders,
+      remainingOrders: remainingAfterSubmission,
+      maxOrders,
+      pointsClaimedAt,
+    },
+  });
 
   return {
     error: null,
@@ -267,6 +287,26 @@ export async function redoTask(kpitaskId: string): Promise<ServerActionResponse<
     return { error: 'Failed to redo task: ' + updateError.message, data: undefined };
   }
 
+  // Fetch task name for notification
+  const { data: taskName } = await supabase
+    .from('task_info_view')
+    .select('category_name')
+    .eq('kpitask_id', kpitaskId)
+    .single();
+
+  const taskDisplayName = (taskName as { category_name: string | null }).category_name ?? 'Task';
+
+  await insertNotification({
+    userId: user.id,
+    type: 'task',
+    message: `You have sent "${taskDisplayName}" back to the kitchen. You can now submit it again for review.`,
+    metadata: {
+      taskId: kpitaskId,
+      taskName: taskDisplayName,
+      action: 'redo',
+    },
+  });
+
   return {
     error: null,
     data: true,
@@ -289,9 +329,7 @@ export async function claimTaskPointsAndXP(
 
   const { data: task, error: taskError } = await supabase
     .from('task_info_view')
-    .select(
-      'assigned_to, status, points_claimed_at, category_points, category_xp, completed_orders, pending_orders, max_orders'
-    )
+    .select('assigned_to, status, points_claimed_at, category_points, category_xp, completed_orders, pending_orders, max_orders, category_name')
     .eq('kpitask_id', kpitaskId)
     .single();
 
@@ -307,6 +345,7 @@ export async function claimTaskPointsAndXP(
   const completedOrders = (task as { completed_orders: number | null }).completed_orders ?? 0;
   const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
   const pendingOrders = (task as { pending_orders: number | null }).pending_orders ?? 0;
+  const categoryName = (task as { category_name: string | null }).category_name ?? 'Task';
 
   if (assignedTo !== user.id) {
     return { error: 'You can only claim rewards for tasks assigned to you', data: undefined };
@@ -368,6 +407,31 @@ export async function claimTaskPointsAndXP(
   if (claimUpdateError) {
     return { error: 'Failed to mark task as claimed', data: undefined };
   }
+
+  // Build notification message
+  const pointsEarned = categoryPoints * pendingOrders;
+  let notificationMessage = `You have claimed ${pointsEarned} points for completing the task "${categoryName}."`;
+  
+  // Check if user leveled up
+  if (newLevel > currentLevel) {
+    notificationMessage += ` It looks like you've leveled up! You are now level ${newLevel}!`;
+  }
+
+  // Insert notification
+  await insertNotification({
+    userId: user.id,
+    type: 'user',
+    message: notificationMessage,
+    metadata: {
+      taskId: kpitaskId,
+      taskName: categoryName,
+      pointsEarned,
+      xpEarned: categoryXp * pendingOrders,
+      leveledUp: newLevel > currentLevel,
+      newLevel,
+      previousLevel: currentLevel,
+    },
+  });
 
   return {
     error: null,
