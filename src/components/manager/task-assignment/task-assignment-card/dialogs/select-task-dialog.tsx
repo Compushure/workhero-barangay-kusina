@@ -166,9 +166,9 @@ export function SelectTasksDialog({
     <>
       <Button
         onClick={() => setOpen(true)}
-        className={`bg-zinc-50 shadow-sm/25 flex items-center min-w-54 justify-between cursor-pointer transition-all duration-400 ease-in-out hover:bg-accent/15`}
+        className={`bg-zinc-50 shadow-sm/25 flex items-center justify-between cursor-pointer transition-all duration-400 ease-in-out hover:bg-accent/15`}
       >
-        <div className="flex items-center gap-2 min-w-45 max-9/10">
+        <div className="flex items-center gap-2 min-w-45 max-w-75 pr-1">
           <ListTodo size={16} className='text-accent'/>
           <span className={`truncate ${selectedTask.length === 0 ? 'text-secondary' : 'text-primary'}`}>{buttonLabel}</span>
         </div>
@@ -176,7 +176,7 @@ export function SelectTasksDialog({
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="bg-card max-w-full min-w-4xl max-h-[90vh] flex flex-col p-6">
+        <DialogContent className="bg-background max-w-full min-w-4xl max-h-[90vh] flex flex-col p-6">
           <DialogHeader>
             <DialogTitle className="flex gap-2 text-2xl text-foreground text-left items-center">
               <ListTodo className='size-7 p-1.25 bg-primary-gradient text-card rounded-full'/>

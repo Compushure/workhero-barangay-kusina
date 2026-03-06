@@ -106,14 +106,14 @@ export default function AwardBadgeDialog({
         <div className="space-y-4 mt-4">
           {/* Search */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-[#5a2a2a]">Search Badges</Label>
+            <Label className="text-sm font-medium text-primary">Search Badges</Label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
               <Input
                 placeholder="Search by name or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm"
+                className="pl-9 bg-white h-9 text-sm"
               />
             </div>
           </div>
@@ -125,7 +125,7 @@ export default function AwardBadgeDialog({
               value={sortOption}
               onValueChange={(value) => setSortOption(value as SortOption)}
             >
-              <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm">
+              <SelectTrigger className="bg-white h-9 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -139,11 +139,11 @@ export default function AwardBadgeDialog({
 
           {/* Badge List */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-[#5a2a2a]">Available Badges</Label>
+            <Label className="text-sm font-medium text-primary">Available Badges</Label>
             <div className="border border-[#e0cfcf] rounded-lg overflow-hidden bg-white">
               <div className="max-h-80 overflow-y-auto divide-y divide-[#e0cfcf]">
                 {filteredBadges.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500 text-sm">
+                  <div className="p-4 text-center text-secondary text-sm">
                     No badges found matching your search
                   </div>
                 ) : (
@@ -157,7 +157,7 @@ export default function AwardBadgeDialog({
                           selectedBadgeId === badge.id
                             ? 'bg-foreground/10 border-l-4 border-foreground'
                             : 'hover:bg-gray-50'
-                        } ${userHas ? 'bg-[#fdeac8]/30' : ''}`}
+                        } ${userHas ? 'bg-accent-secondary/25' : ''}`}
                       >
                         <div className="flex items-start gap-3">
                           {/* Badge Icon */}
@@ -188,7 +188,7 @@ export default function AwardBadgeDialog({
                               {badge.description || 'No description'}
                             </p>
                             {userHas && (
-                              <span className="inline-block text-xs font-medium text-foreground bg-[#fdeac8] px-2 py-1 rounded mt-2">
+                              <span className="inline-block text-xs font-medium text-foreground bg-background-soft px-2 py-1 rounded mt-2">
                                 User already has this badge
                               </span>
                             )}

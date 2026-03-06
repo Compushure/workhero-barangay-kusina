@@ -113,9 +113,9 @@ export function AssignEmployeesDialog({
         className={`bg-zinc-50 transform-gpu shadow-sm/25 cursor-pointer transition-all duration-400 ease-in-out flex items-center 
           disabled:shadow hover:bg-accent/15 disabled:cursor-not-allowed`}
       >
-        <div className="flex items-center gap-2 min-w-45 max-9/10">
+        <div className="flex items-center gap-2 min-w-45 max-w-75 max-9/10">
           <Users size={16} className='text-accent'/>
-          <span className={`${selectedEmployees.length === 0 ? 'text-secondary' : 'text-primary'}`}>
+          <span className={`truncate ${selectedEmployees.length === 0 ? 'text-secondary' : 'text-primary'}`}>
             {selectedEmployees.length} employee/s selected
           </span>
         </div>
@@ -123,7 +123,7 @@ export function AssignEmployeesDialog({
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="bg-card max-h-[90vh] flex flex-col rounded-3xl pt-12">
+        <DialogContent className="bg-background max-h-[90vh] flex flex-col rounded-3xl pt-12">
           <DialogHeader>
             <DialogTitle className="flex gap-2 text-2xl text-foreground text-left items-center">
               <Users className='size-7 p-1.25 bg-primary-gradient text-card rounded-full'/>

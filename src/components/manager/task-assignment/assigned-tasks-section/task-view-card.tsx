@@ -149,8 +149,8 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           {/* Task name, description, and date range */}
           <header className="flex flex-col gap-1.5 min-w-0">
             <div className="flex items-end min-w-0">
-              <h3 className="text-xl font-bold text-primary truncate shrink-0">{task.taskName}</h3>
-              <p className="text-sm text-gray-500 ml-2 mr-8 pb-0.5 truncate min-w-0 flex-1">- {task.taskDescription}</p>
+              <h3 className="text-xl font-bold text-primary truncate shrink-0 max-w-125">{task.taskName}</h3>
+              <p className="text-sm text-gray-500 ml-2 mr-8 pb-0.5 truncate min-w-0 flex-1">{task.taskDescription}</p>
             </div>
 
             <p className="flex items-center text-sm font-medium text-secondary">

@@ -11,8 +11,8 @@ export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border shadow-md">
       <Table>
-        <TableHeader className="bg-foreground">
-          <TableRow className="border-b border-border hover:bg-foreground">
+        <TableHeader className="bg-primary-gradient">
+          <TableRow className="border-b border-border hover:bg-primary-gradient">
             <TableHead className="text-card font-semibold px-4 w-45">REQUEST DATE</TableHead>
             <TableHead className="text-card font-semibold px-4 w-50">EMPLOYEE</TableHead>
             <TableHead className="text-card font-semibold px-4 w-64">TASK</TableHead>
@@ -27,7 +27,7 @@ export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
         </TableHeader>
         <TableBody>
           {Array.from({ length: rows }).map((_, index) => (
-            <TableRow key={index} className="bg-[#FBF4E8]">
+            <TableRow key={index} className="bg-background">
               <TableCell className="px-4">
                 <div className="h-4 w-28 bg-white/60 rounded animate-pulse" />
               </TableCell>

@@ -59,10 +59,10 @@ export default function TaskCategoryTable({
 
   return (
     <>
-      <div className="bg-[#FBF4E8] rounded-2xl border-2 border-gray-300 overflow-x-auto overflow-y-hidden">
+      <div className="bg-card rounded-2xl border-2 border-accent/25 overflow-x-auto overflow-y-hidden shadow-sm/25">
         <Table>
           <TableHeader>
-            <TableRow className="bg-foreground hover:bg-foreground">
+            <TableRow className="bg-primary-gradient hover:bg-foreground">
               <TableHead className="min-w-96 max-w-96 w-96 pl-6 py-4 text-left text-sm font-bold text-card">
                 TASK
               </TableHead>
@@ -81,88 +81,99 @@ export default function TaskCategoryTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            { isLoading ? (
-              <TaskTableSkeleton/>
+            {isLoading ? (
+              <TaskTableSkeleton />
             ) : (
-            <>
-              {tasks.map((task) => (
-              <TableRow key={task.id} className="hover:bg-gray-50 transition-colors">
-                <TableCell className="min-w-96 max-w-96 w-96 pl-6 py-4 align-middle">
-                  <div className="truncate">
-                    <div className="font-semibold text-base text-red-950 truncate">{task.name}</div>
-                    <div className="text-sm text-amber-900 truncate">{task.description}</div>
-                    <div className="text-sm text-red-900 font-medium px-2 rounded-full bg-[#fdeac8] w-fit mt-2 truncate">{task.type}</div>
-                  </div>
-                </TableCell>
-                <TableCell className="min-w-20 max-w-20 w-20 text-base text-center align-middle font-medium text-red-950">
-                  <div className="flex items-center justify-center gap-1">
-                    <Coins strokeWidth={1.75} className="size-6" />
-                    {task.points}
-                  </div>
-                </TableCell>
-                <TableCell className="min-w-20 max-w-20 w-20 text-base text-center align-middle font-medium text-red-950">
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="inline-block italic text-base leading-none">XP</span>
-                    {task.xp}
-                  </div>
-                </TableCell>
-                <TableCell className='min-w-32 max-w-32 w-32 text-center align-middle text-base'>
-                  <div className="flex justify-center items-center">
-                    {task.isRepeatable ? (
-                      <div className='flex items-center gap-1 text-red-950 font-medium'>
-                        <RefreshCw size={18}/>
-                        <span>Yes</span>
+              <>
+                {tasks.map((task) => (
+                  <TableRow
+                    key={task.id}
+                    className="bg-background hover:bg-row-hover transition-colors"
+                  >
+                    <TableCell className="min-w-96 max-w-96 w-96 pl-6 py-4 align-middle">
+                      <div className="truncate">
+                        <div className="font-semibold text-base text-foreground truncate">
+                          {task.name}
+                        </div>
+                        <div className="text-sm text-secondary truncate">{task.description}</div>
+                        <div className="text-sm text-primary font-medium px-2 rounded-full bg-accent/15 w-fit mt-2 truncate">
+                          {task.type}
+                        </div>
                       </div>
-                    ) : (
-                      <div className='flex items-center gap-1.5 text-zinc-500'>
-                        <RefreshCwOff size={18}/>
-                        <span>No</span>
+                    </TableCell>
+                    <TableCell className="min-w-20 max-w-20 w-20 text-base text-center align-middle font-medium text-foreground">
+                      <div className="flex items-center justify-center gap-1">
+                        <Coins strokeWidth={1.75} className="size-6" />
+                        {task.points}
                       </div>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className='min-w-36 max-w-36 w-36 text-center align-middle'>
-                  <div className="flex justify-center items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit(task)}
-                      className="hover:bg-foreground/10 hover:text-foreground transition-colors"
-                      title="Edit task"
-                    >
-                      <Pencil className="size-5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteClick(task)}
-                      className="hover:bg-red-50 hover:text-red-600 transition-colors"
-                      title="Delete task"
-                    >
-                      <Trash2 className="size-5" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              ))}
-            </>
+                    </TableCell>
+                    <TableCell className="min-w-20 max-w-20 w-20 text-base text-center align-middle font-medium text-foreground">
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="inline-block italic text-base leading-none">XP</span>
+                        {task.xp}
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-32 max-w-32 w-32 text-center align-middle text-base">
+                      <div className="flex justify-center items-center">
+                        {task.isRepeatable ? (
+                          <div className="flex items-center gap-1 text-foreground font-medium">
+                            <RefreshCw size={18} className="text-accent" />
+                            <span>Yes</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-secondary">
+                            <RefreshCwOff size={18} />
+                            <span>No</span>
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-36 max-w-36 w-36 text-center align-middle">
+                      <div className="flex justify-center items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onEdit(task)}
+                          className="hover:bg-card hover:text-foreground border hover:border-accent/50 transition-colors"
+                          title="Edit task"
+                        >
+                          <Pencil className="size-5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteClick(task)}
+                          className="hover:bg-card hover:text-red-600 border hover:border-accent/50 transition-colors"
+                          title="Delete task"
+                        >
+                          <Trash2 className="size-5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
             )}
           </TableBody>
         </Table>
 
-        { isError && (
+        {isError && (
           <div className="bg-background p-8 text-center">
-            <div className='text-5xl mb-4'>🙊</div>
-            <p className="text-zinc-500 text-xl">Woops! Kitchen Issue</p>
-            <p className="text-zinc-400 text-sm mt-2">Something wrong happened. Try again</p>
+            <div className="text-5xl mb-4">🙊</div>
+            <p className="text-secondary text-xl">Woops! Kitchen Issue</p>
+            <p className="text-muted-foreground text-sm mt-2">
+              Something wrong happened. Try again
+            </p>
           </div>
         )}
-        
-        { !isLoading && tasks.length === 0 && (
+
+        {!isLoading && tasks.length === 0 && (
           <div className="bg-background p-8 text-center">
-            <div className='text-5xl mb-4'>🥣</div>
-            <p className="text-zinc-500 text-xl">No task categories found</p>
-            <p className="text-zinc-400 text-sm mt-2">Click "Add New Category" to create one</p>
+            <div className="text-5xl mb-4">🥣</div>
+            <p className="text-secondary text-xl">No task categories found</p>
+            <p className="text-muted-foreground text-sm mt-2">
+              Click "Add New Category" to create one
+            </p>
           </div>
         )}
       </div>
@@ -178,13 +189,18 @@ export default function TaskCategoryTable({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setTaskToDelete(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               className="bg-foreground hover:bg-red-700 text-card"
             >
               Delete
             </AlertDialogAction>
+            <AlertDialogCancel
+              onClick={() => setTaskToDelete(null)}
+              className="bg-card hover:bg-card hover:brightness-90"
+            >
+              Cancel
+            </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

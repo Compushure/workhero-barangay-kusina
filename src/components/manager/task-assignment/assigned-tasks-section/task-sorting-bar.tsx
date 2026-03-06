@@ -30,10 +30,10 @@ export function TaskSortingBar({ sortBy, onSortChange }: TaskSortingBarProps) {
         <Button
           variant="default"
           size="default"
-          className="group bg-card text-foreground shadow-sm/25 hover:bg-accent hover:text-card transition-all duration-400 ease-in-out cursor-pointer w-32 justify-between"
+          className="bg-card text-foreground shadow-sm/25 hover:bg-card hover:text-foreground hover:brightness-90 transition-all duration-400 ease-in-out cursor-pointer w-32 justify-between"
         >
           <span className="truncate">{currentLabel}</span>
-          <ArrowUpDown size={18} className='text-accent group-hover:text-card transition-all duration-400 ease-in-out'/>
+          <ArrowUpDown size={18} className='text-accent'/>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

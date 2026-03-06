@@ -48,12 +48,11 @@ export default function TaskEditorPage() {
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
   // Fetch tasks with debounced search and sort
-  const { data: paginatedData, isLoading, isError } = useGetTaskCategoriesPaginated(
-    page,
-    pageSize,
-    sortOption,
-    debouncedSearchTerm
-  );
+  const {
+    data: paginatedData,
+    isLoading,
+    isError,
+  } = useGetTaskCategoriesPaginated(page, pageSize, sortOption, debouncedSearchTerm);
 
   const tasks = paginatedData?.tasks || [];
   const totalPages = paginatedData?.totalPages || 1;
@@ -68,7 +67,7 @@ export default function TaskEditorPage() {
     paginatedData,
     tasks: tasks.length,
     totalPages,
-    totalCount
+    totalCount,
   });
 
   // Fetch all tasks without filters for duplicate checking
@@ -82,9 +81,9 @@ export default function TaskEditorPage() {
   const deleteMutation = useDeleteTaskCategory();
 
   // Extract existing names for duplicate checking from ALL tasks
-  const existingNames = Array.isArray(allTasksData) 
-    ? [] 
-    : (allTasksData?.tasks?.map((task: TaskCategory) => task.name) || []);
+  const existingNames = Array.isArray(allTasksData)
+    ? []
+    : allTasksData?.tasks?.map((task: TaskCategory) => task.name) || [];
 
   const handleOpenAddDialog = () => {
     setEditingTask(null);
@@ -158,26 +157,25 @@ export default function TaskEditorPage() {
     SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Type & Name';
 
   return (
-    <main className="w-full min-h-screen bg-zinc-50 p-10">
+    <main className="w-full min-h-screen bg-zinc-100 p-10">
       <div className="mx-auto w-full max-w-500 space-y-8">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">Task Editor</h1>
-          <p className="text-md text-gray-600">Add, Edit, Delete assignable tasks in this page.</p>
+          <p className="text-md text-secondary">Add, Edit, Delete assignable tasks in this page.</p>
         </div>
 
-        <section className='flex justify-between'>
+        <section className="flex justify-between">
           {/* Task Categories Count Display */}
           <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
             <h5 className="flex items-center gap-2">
-              <ListTodo size={20} />
+              <ListTodo size={20} className="text-accent" />
               Categories{' '}
-              <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+              <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
                 {totalCount ?? 0}
               </span>
             </h5>
           </div>
 
-          
           {/* Search, Sort, and Add Button */}
           <div className="flex gap-4 items-center justify-end">
             {/* Search Input */}
@@ -188,7 +186,7 @@ export default function TaskEditorPage() {
                 placeholder="Search tasks..."
                 value={searchTerm}
                 onChange={handleSearchChange}
-                className="pl-10 pr-4 py-2 rounded-xl text-sm bg-white shadow-sm/50 border border-gray-200 focus:outline-none focus:border-foreground transition-colors"
+                className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
               />
             </div>
 
@@ -198,19 +196,19 @@ export default function TaskEditorPage() {
                 <Button
                   variant="default"
                   size="default"
-                  className="bg-foreground hover:brightness-100 w-35 cursor-pointer rounded-full text-white shadow-sm/25 flex justify-between transition-all duration-500 ease-in-out"
+                  className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-48 py-2 justify-between border border-gray-200 "
                 >
                   <span className="truncate">{currentSortLabel}</span>
-                  <ArrowUpDown size={18} />
+                  <ArrowUpDown size={18} className='text-accent'/>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="bg-background w-56">
                 {SORT_OPTIONS.map((option) => (
                   <DropdownMenuItem
                     key={option.value}
                     onClick={() => handleSortChange(option.value)}
                     className={`cursor-pointer transition-all duration-300 ease-in-out ${
-                      sortOption === option.value ? 'bg-red-100' : ''
+                      sortOption === option.value ? 'bg-accent/15' : ''
                     }`}
                   >
                     {option.label}
@@ -222,11 +220,11 @@ export default function TaskEditorPage() {
             {/* Add New Category Button */}
             <Button
               onClick={handleOpenAddDialog}
-              className="px-6 py-2 rounded-full bg-foreground hover:brightness-100 text-zinc-50 font-semibold text-sm shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out shrink-0"
+              className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-6 py-2 rounded-full shadow-sm/25 font-semibold text-sm shrink-0"
             >
               <ChefHat size={18} />
               <span>Add New Category</span>
-              <Plus size={18} className='ml-4'/>
+              <Plus size={18} className="ml-4" />
             </Button>
           </div>
         </section>
@@ -243,10 +241,10 @@ export default function TaskEditorPage() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="my-6">
-            <Pagination 
-              totalPages={totalPages} 
-              currentPage={page} 
-              onPageChange={handlePageChange} 
+            <Pagination
+              totalPages={totalPages}
+              currentPage={page}
+              onPageChange={handlePageChange}
             />
           </div>
         )}

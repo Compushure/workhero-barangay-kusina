@@ -29,6 +29,8 @@
   --accent-secondary: #faa938; /* Light citrus orange */
   --primary-gradient: linear-gradient(180deg, #faa938 0%, #f47812 100%);
 
+  --row-hover: #fce4bf;
+
   /* Muted: Light neutral */
   --muted: #fff2cc; /* Light pinkish neutral */
   --muted-foreground: #26344b;
@@ -109,6 +111,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-row-hover: var(--row-hover);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

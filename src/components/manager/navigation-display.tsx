@@ -26,7 +26,7 @@ export function NavigationDisplay({
       aria-live="polite"
       aria-label={label}
     >
-      <CircleDashed className={iconClassName ?? 'size-4 animate-spin text-red-200'} />
+      <CircleDashed className={iconClassName ?? 'size-4 animate-spin text-accent'} />
       <span className="sr-only">{label}</span>
     </div>
   );
