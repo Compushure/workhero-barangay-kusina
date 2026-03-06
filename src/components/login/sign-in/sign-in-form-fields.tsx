@@ -29,14 +29,14 @@ export function LoginFormFields({
           Email Address
         </Label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-accent pointer-events-none" />
           <Input
             id="email"
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
-            className="pl-10 bg-input border-border/50 focus:border-primary focus:ring-primary/50 transition-colors"
+            className="pl-10 bg-accent-secondary/25 border-border/50 transition-colors"
             disabled={false}
           />
         </div>
@@ -50,14 +50,14 @@ export function LoginFormFields({
           </Label>
         </div>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-accent pointer-events-none" />
           <Input
             id="password"
             type={showPassword ? 'text' : 'password'}
             placeholder="Enter your password"
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
-            className="pl-10 pr-10 bg-input border-border/50 focus:border-primary focus:ring-primary/50 transition-colors"
+            className="pl-10 pr-10 bg-accent-secondary/25 border-border/50 transition-colors"
             disabled={false}
           />
           <button

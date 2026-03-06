@@ -13,7 +13,12 @@ interface UserCardsGridProps {
   onViewAllBadges: (user: BadgeAssignmentUser) => void;
 }
 
-export default function UserCardsGrid({ users, badges, onAwardClick, onViewAllBadges }: UserCardsGridProps) {
+export default function UserCardsGrid({
+  users,
+  badges,
+  onAwardClick,
+  onViewAllBadges,
+}: UserCardsGridProps) {
   const [brokenAvatars, setBrokenAvatars] = useState<Record<string, boolean>>({});
   const getBadgeById = (badgeId: string) => badges.find((b) => b.id === badgeId);
 
@@ -36,7 +41,7 @@ export default function UserCardsGrid({ users, badges, onAwardClick, onViewAllBa
         return (
           <div
             key={user.id}
-            className="bg-white rounded-xl border border-[#e0cfcf] p-4 hover:shadow-lg transition-shadow duration-300"
+            className="bg-card rounded-xl border border-accent/25 p-4 hover:shadow-lg transition-shadow duration-300 shadow-sm/25"
           >
             <div className="flex items-center gap-4">
               {/* Avatar and User Info */}
@@ -46,7 +51,7 @@ export default function UserCardsGrid({ users, badges, onAwardClick, onViewAllBa
                   <img
                     src={user.profilePictureUrl}
                     alt={user.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-[#e0cfcf]"
+                    className="w-12 h-12 rounded-full object-cover border-2 border-accent/25"
                     onError={() =>
                       setBrokenAvatars((prev) => ({
                         ...prev,
@@ -55,15 +60,15 @@ export default function UserCardsGrid({ users, badges, onAwardClick, onViewAllBa
                     }
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-linear-to-br from-foreground to-[#8b5a5a] flex items-center justify-center text-white font-bold text-sm border-2 border-[#e0cfcf]">
+                  <div className="w-12 h-12 rounded-full bg-primary-gradient flex items-center justify-center text-white font-bold text-sm border-2 border-accent/25">
                     {getInitials(user.name)}
                   </div>
                 )}
 
                 {/* User Details */}
-                <div className="min-w-0">
-                  <p className="font-semibold text-red-950 text-sm truncate">{user.name}</p>
-                  <p className="text-xs text-gray-500 truncate">{user.employee_id}</p>
+                <div className="min-w-0 w-48">
+                  <p className="font-semibold text-foreground text-sm truncate">{user.name}</p>
+                  <p className="text-xs text-secondary truncate">{user.employee_id}</p>
                 </div>
               </div>
 
@@ -74,12 +79,9 @@ export default function UserCardsGrid({ users, badges, onAwardClick, onViewAllBa
                     {displayedBadges.map((badgeId) => {
                       const badge = getBadgeById(badgeId);
                       return (
-                        <div
-                          key={badgeId}
-                          className="group relative"
-                        >
+                        <div key={badgeId} className="group relative">
                           <div
-                            className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-[#e0cfcf] hover:border-foreground transition-colors cursor-pointer"
+                            className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-accent/25 hover:border-accent transition-colors cursor-pointer"
                             title={badge?.name}
                           >
                             {badge?.img_link ? (
@@ -94,7 +96,7 @@ export default function UserCardsGrid({ users, badges, onAwardClick, onViewAllBa
                           </div>
                           {/* Tooltip */}
                           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
-                            <div className="bg-foreground text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+                            <div className="bg-background text-primary text-xs rounded px-2 py-1 whitespace-nowrap border-b-2 border-x border-accent-secondary/25">
                               {badge?.name}
                             </div>
                           </div>
@@ -108,21 +110,21 @@ export default function UserCardsGrid({ users, badges, onAwardClick, onViewAllBa
                         onClick={() => onViewAllBadges(user)}
                         variant="outline"
                         size="sm"
-                        className="h-12 px-3 border-[#e0cfcf] text-foreground hover:bg-foreground/10 text-xs font-medium"
+                        className="h-12 px-3 border-accent/25 text-primary bg-card hover:bg-accent/15 text-xs font-medium shadow-sm/25"
                       >
                         +{remainingBadgesCount}
                       </Button>
                     )}
                   </div>
                 ) : (
-                  <div className="text-sm text-gray-500 italic">No badges yet</div>
+                  <div className="text-sm text-secondary italic">No badges yet</div>
                 )}
               </div>
 
               {/* Award Button */}
               <Button
                 onClick={() => onAwardClick(user)}
-                className="shrink-0 bg-foreground hover:brightness-90 text-white text-sm"
+                className="shrink-0 bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card text-sm shadow-sm/25"
               >
                 Award Badge
               </Button>

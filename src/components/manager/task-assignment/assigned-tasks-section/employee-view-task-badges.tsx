@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Dispatch, SetStateAction } from 'react';
 import { isTaskOverdue } from '@/utils/date-utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface EmployeeViewTaskBadgesProps {
   employee: AssignedEmployee;
@@ -22,6 +23,7 @@ interface EmployeeViewTaskBadgesProps {
   formatDate: (dateString: string | null) => string;
   setShowRemoveConfirm: Dispatch<
     SetStateAction<{
+      taskId?: string;
       assignmentId?: string;
       empId: string;
     } | null>
@@ -63,20 +65,18 @@ export default function EmployeeViewTaskBadges({
           const taskEmployee = task.assignedEmployees?.find((emp) => emp.id === employee.id);
           const completedOrders = taskEmployee?.completedOrders || 0;
           // Reusable StatusIcon component
-          const StatusIcon = ({
-            icon: Icon,
-            className = '',
-          }: {
-            icon: any;
-            className?: string;
-          }) => (
-            <p className={`flex gap-1 ${className} px-2 py-1 rounded-full`}>
+          const StatusIcon = ({ icon: Icon, className = "",  }: { icon: any; className?: string;}) => (
+            <p className={`flex gap-1 ${className} px-2 py-1 rounded-full items-center`}>
               <Icon strokeWidth={2.5} className={`size-4`} />
               <span className={`text-xs`}>
                 {task.status
                   ? task.status.charAt(0).toUpperCase() + task.status.slice(1)
                   : 'Unknown'}
               </span>
+              {task.status === 'in review' && 
+              <span className="text-sm font-semibold leading-0">
+                {taskEmployee?.pendingOrders || 0}
+              </span>}
             </p>
           );
 
@@ -85,7 +85,7 @@ export default function EmployeeViewTaskBadges({
               key={task.id}
               className="flex items-center justify-between bg-white px-3 py-3 rounded-2xl border-2 border-accent/25 h-full"
             >
-              <div className="flex flex-col w-[73%] gap-1">
+              <div className="flex flex-col w-[60%] gap-1">
                 <span className="truncate text-zinc-700 text-sm font-semibold">
                   {task.taskName}
                 </span>
@@ -106,24 +106,40 @@ export default function EmployeeViewTaskBadges({
                     <StatusIcon icon={CircleX} className="bg-red-100 text-red-600" />
                   )}
 
-                  {taskEmployee?.pendingOrders === 0 && task.status === 'approved' && (
-                    <p
-                      className={`flex gap-1 px-1 xl:px-2 py-1 rounded-full items-center bg-violet-200 text-violet-600`}
-                    >
-                      <HandCoins strokeWidth={2.5} className={`size-4 `} />
-                      <span className={`text-xs sr-only xl:not-sr-only`}>Claimed</span>
-                    </p>
-                  )}
                 </div>
               </div>
 
-              <div className="flex flex-col w-[27%] items-end pr-3 gap-2">
-                <span className="flex text-zinc-500 text-sm leading-none items-end">
-                  <Soup strokeWidth={1.75} className="size-5 mr-1" />
-                  {completedOrders} / {task.maxOrders}
-                </span>
+              <div className="flex flex-col w-[40%] items-end pr-1 gap-1">
+                <div className='flex gap-0.5'>
+                  {taskEmployee?.pendingOrders === 0 && task.status === 'approved' && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="flex px-1.5 py-1 rounded-full items-center bg-green-100 text-green-600">
+                          <HandCoins strokeWidth={2.5} className="size-4" />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="center" className='bg-green-100 text-green-600 border-green-200'>
+                        Points claimed
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  {/* {taskEmployee?.pendingOrders === 0 && task.status === 'approved' &&
+                      <p className={`flex gap-1 px-1 xl:px-2 py-1 rounded-full items-center bg-violet-200 text-violet-600`}>
+                        <HandCoins strokeWidth={2.5} className={`size-4 `}/>
+                        <span className={`text-xs sr-only xl:not-sr-only`}>
+                          Claimed
+                        </span>
+                      </p>
+                    }  */}
+                  <span
+                    className={`flex text-sm leading-none items-end px-2 pt-0.5 pb-1 rounded-full ${completedOrders === task.maxOrders ? 'bg-green-100 text-green-600 font-bold' : 'text-zinc-500'}`}
+                  >
+                    <Soup strokeWidth={1.75} className="size-5 mr-1" />
+                    {completedOrders} / {task.maxOrders}
+                  </span>
+                </div>
 
-                <div className="flex items-end gap-1 text-zinc-500">
+                <div className="flex items-end gap-2 text-zinc-500 pr-1">
                   <p className="flex gap-1 items-end font-semibold text-sm leading-none">
                     <Coins strokeWidth={2.5} className="size-4" />
                     <span className="inline-block">{task.points}</span>

@@ -29,6 +29,8 @@
   --accent-secondary: #faa938; /* Light citrus orange */
   --primary-gradient: linear-gradient(180deg, #faa938 0%, #f47812 100%);
 
+  --row-hover: #fce4bf;
+
   /* Muted: Light neutral */
   --muted: #fff2cc; /* Light pinkish neutral */
   --muted-foreground: #26344b;
@@ -118,6 +120,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-row-hover: var(--row-hover);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -260,6 +263,22 @@
 @layer utilities {
   .bg-primary-gradient {
     background-image: var(--primary-gradient);
+  }
+
+  .animate-launcher-shadow {
+    animation: launcher-shadow-blink 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes launcher-shadow-blink {
+  0% {
+    box-shadow: 0 0 8px 2px rgba(244, 185, 37, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 16px 8px rgba(244, 185, 37, 0.75);
+  }
+  100% {
+    box-shadow: 0 0 8px 2px rgba(244, 185, 37, 0.35);
   }
 }
 
