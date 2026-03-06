@@ -5,8 +5,7 @@ import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 const PERFORMANCE_SCORE_TOOLTIP =
-  'Performance Score = (number of approved tasks) × (total points earned from those tasks). Used for leaderboard ranking.';
-
+  'Performance Score = Total Points Earned × Completed Tasks';
 export function RankWidget() {
   const { data: rankData, isLoading: isRankLoading } = useGetEmployeeRank();
 
@@ -71,7 +70,7 @@ export function RankWidget() {
         <div className="h-12 border-l-2 border-white/30 mx-4" />
 
         {/* Right: Performance Score */}
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-center">
           <span className="text-xs text-white mb-1">Performance Score</span>
           <Tooltip>
             <TooltipTrigger asChild>

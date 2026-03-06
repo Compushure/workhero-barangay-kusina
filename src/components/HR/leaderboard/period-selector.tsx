@@ -97,9 +97,9 @@ export function PeriodSelector({
     <div className="flex w-full flex-wrap items-end gap-3">
       {/* Period Type */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-[#5a2a2a]">Period Type</label>
+        <label className="text-xs font-medium text-muted-foreground">Period Type</label>
         <Select value={periodType} onValueChange={handlePeriodTypeChange}>
-          <SelectTrigger className="w-25 bg-white border-gray-300 text-[#6D1616]">
+          <SelectTrigger className="w-25 bg-white border-gray-300 text-foreground">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -113,9 +113,9 @@ export function PeriodSelector({
       {/* Week (weekly only) */}
       {periodType === 'weekly' && (
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-[#5a2a2a]">Week</label>
+          <label className="text-xs font-medium text-muted-foreground">Week</label>
           <Select value={String(Math.min(week, maxWeek))} onValueChange={(v) => setWeek(Number(v))}>
-            <SelectTrigger className="min-w-[235px] bg-white border-gray-300 text-[#6D1616]">
+            <SelectTrigger className="min-w-[235px] bg-white border-gray-300 text-foreground">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -132,12 +132,12 @@ export function PeriodSelector({
       {/* Month (monthly only) */}
       {periodType === 'monthly' && (
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-[#5a2a2a]">Month</label>
+          <label className="text-xs font-medium text-muted-foreground">Month</label>
           <Select
             value={String(Math.min(month, maxMonth))}
             onValueChange={(v) => setMonth(Number(v))}
           >
-            <SelectTrigger className="w-25 bg-white border-gray-300 text-[#6D1616]">
+            <SelectTrigger className="w-25 bg-white border-gray-300 text-foreground">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -153,9 +153,9 @@ export function PeriodSelector({
 
       {/* Year */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-[#5a2a2a]">Year</label>
+        <label className="text-xs font-medium text-muted-foreground">Year</label>
         <Select value={String(year)} onValueChange={handleYearChange}>
-          <SelectTrigger className="w-25 bg-white border-gray-300 text-[#6D1616]">
+          <SelectTrigger className="w-25 bg-white border-gray-300 text-foreground">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -171,7 +171,7 @@ export function PeriodSelector({
       {/* Show Rankings Button */}
       <Button
         onClick={handleShowRankings}
-        className="bg-[#6D1616] hover:bg-[#5a1212] text-white self-end"
+        className="bg-primary-gradient text-white hover:opacity-95 self-end"
       >
         Show Rankings
       </Button>

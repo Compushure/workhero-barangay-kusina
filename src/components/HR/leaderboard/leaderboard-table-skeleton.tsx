@@ -23,7 +23,8 @@ export default function LeaderboardTableSkeleton() {
 
       <Table>
         <TableHeader>
-          <TableRow className="bg-[#6D1616] border-[#6D1616] hover:bg-[#5a1414]">
+          
+          <TableRow className="bg-primary-gradient border-0 hover:opacity-95">
             <TableHead className="w-20 pl-6 pr-8">
               <Skeleton className="h-4 w-10 rounded bg-white/20" />
             </TableHead>
@@ -37,7 +38,7 @@ export default function LeaderboardTableSkeleton() {
         </TableHeader>
         <TableBody>
           {[1, 2, 3, 4, 5].map((i) => (
-            <TableRow key={i} className="bg-[#FBF4E8] border-gray-300">
+            <TableRow key={i} className="bg-accent/5 border-0">
               <TableCell className="pl-6 pr-8">
                 <Skeleton className="h-6 w-10 rounded" />
               </TableCell>

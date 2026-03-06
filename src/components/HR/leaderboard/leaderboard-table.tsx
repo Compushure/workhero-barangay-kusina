@@ -39,7 +39,7 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
   if (players.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-300 p-8 text-center max-w-6xl mx-auto">
-        <p className="text-[#6D1616]">No players to display</p>
+        <p className="text-foreground">No players to display</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
     <div className="bg-white rounded-xl border border-gray-300 shadow-md overflow-hidden max-w-6xl mx-auto">
       <Table>
         <TableHeader>
-          <TableRow className="bg-[#6D1616] border-[#6D1616] hover:bg-[#5a1414]">
+          <TableRow className="bg-primary-gradient border-0 hover:opacity-95">
             <TableHead className="font-bold text-white w-20 text-lg pl-6 pr-8">RANK</TableHead>
             <TableHead className="font-bold text-white text-lg">NAME</TableHead>
             <TableHead className="font-bold text-white text-right text-lg pr-6">
@@ -60,10 +60,10 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
           {players.map((player) => (
             <TableRow
               key={player.id}
-              className="bg-[#FBF4E8] border-gray-300 hover:bg-white transition-colors"
+              className="bg-accent/5 border-0 hover:bg-white transition-colors"
             >
               <TableCell className="pl-6 pr-8">
-                <span className="font-bold text-[#6D1616] text-xl">
+                <span className="font-bold text-foreground text-xl">
                   {getOrdinalSuffix(player.rank)}
                 </span>
               </TableCell>
@@ -71,7 +71,7 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-12 w-12 border-2 border-gray-300">
                     <AvatarImage src={player.image ?? undefined} alt={player.name} />
-                    <AvatarFallback className="bg-gray-200 text-[#6D1616] font-semibold text-base">
+                    <AvatarFallback className="bg-gray-200 text-foreground font-semibold text-base">
                       {player.name
                         .split(' ')
                         .map((n) => n[0])
@@ -80,14 +80,14 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
                         .slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="font-medium text-[#6D1616] text-xl">{player.name}</span>
+                  <span className="font-medium text-foreground text-xl">{player.name}</span>
                 </div>
               </TableCell>
               <TableCell className="text-right pr-6">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="font-semibold text-[#6D1616] text-2xl cursor-help">
+                      <span className="font-semibold text-foreground text-2xl cursor-help">
                         {player.performanceScore.toLocaleString()}
                       </span>
                     </TooltipTrigger>

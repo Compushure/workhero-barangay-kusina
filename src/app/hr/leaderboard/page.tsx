@@ -28,15 +28,15 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
   const show = params.show === '1';
 
   return (
-    <div className="h-screen p-4 sm:p-8 bg-[#F3F3F3] overflow-hidden">
+    <div className="h-screen p-4 sm:p-8 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 mb-6">
             <div className="flex flex-col gap-1">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#6D1616]">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
                 Leaderboards
               </h1>
-              <p className="text-sm text-[#5a2a2a]">
+              <p className="text-sm text-muted-foreground">
              Performance rankings across weekly, monthly, and yearly periods.
               </p>
             </div>
