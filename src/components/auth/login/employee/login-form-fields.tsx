@@ -10,6 +10,7 @@ interface LoginFormFieldsProps {
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   error: string;
+  disabled: boolean;
 }
 
 export function LoginFormFields({
@@ -18,6 +19,7 @@ export function LoginFormFields({
   onEmailChange,
   onPasswordChange,
   error,
+  disabled,
 }: LoginFormFieldsProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -37,7 +39,7 @@ export function LoginFormFields({
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
             className="w-full pl-10 pr-4 py-3 bg-orange-100 border-3 border-orange-400 text-foreground font-jersey text-sm focus:outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-300 transition-all"
-            disabled={false}
+            disabled={disabled}
           />
         </div>
       </div>
@@ -59,12 +61,13 @@ export function LoginFormFields({
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
             className="w-full pl-10 pr-12 py-3 bg-orange-100 border-3 border-orange-400 text-foreground font-jersey text-sm focus:outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-300 transition-all"
-            disabled={false}
+            disabled={disabled}
           />
           <button
             type="button"
+            disabled={disabled}
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-orange-600 hover:text-orange-800 hover:scale-110 transition-all cursor-pointer"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-orange-600 hover:text-orange-800 hover:scale-110 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             tabIndex={-1}
           >
             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

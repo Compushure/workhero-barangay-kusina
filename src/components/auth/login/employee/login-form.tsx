@@ -8,9 +8,10 @@ import { LoginFormFooter } from './login-form-footer';
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;
+  isBusy: boolean;
 }
 
-export function LoginForm({ onSubmit }: LoginFormProps) {
+export function LoginForm({ onSubmit, isBusy }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,6 +19,7 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting || isBusy) return;
     setError('');
 
     if (!email || !password) {
@@ -70,24 +72,24 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
           onEmailChange={setEmail}
           onPasswordChange={setPassword}
           error={error}
+          disabled={isSubmitting || isBusy}
         />
 
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-linear-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-pixel text-sm border-4 border-orange-900 py-4 px-4 transition-all duration-100 transform active:translate-y-1 cursor-pointer pixel-button"
+          disabled={isSubmitting || isBusy}
+          className="w-full bg-linear-to-br from-[#e89852] to-[#df8540] hover:from-[#de8b45] hover:to-[#d77b35] disabled:from-gray-400 disabled:to-gray-500 text-white font-jersey text-lg tracking-wide border-4 border-orange-900 py-3.5 px-4 transition-all duration-100 transform active:translate-y-1 cursor-pointer pixel-button disabled:cursor-not-allowed"
           style={{
-            boxShadow: isSubmitting
+            boxShadow: isSubmitting || isBusy
               ? 'inset 4px 4px 0px rgba(0,0,0,0.3)'
               : '6px 6px 0px rgba(0,0,0,0.4)',
-            letterSpacing: '0.1em',
           }}
         >
-          {isSubmitting ? (
+          {isSubmitting || isBusy ? (
             <span className="flex items-center justify-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
-              SIGNING IN
+              SIGNING IN...
             </span>
           ) : (
             'SIGN IN'
@@ -105,7 +107,7 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
       </form>
 
       {/* Footer */}
-      <LoginFormFooter />
+      <LoginFormFooter disabled={isSubmitting || isBusy} />
     </div>
   );
 }

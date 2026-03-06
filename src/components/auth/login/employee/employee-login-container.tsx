@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -13,9 +13,14 @@ import { LoginPage } from './login-page';
 export function EmployeeLoginContainer() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
+  const [isRouting, setIsRouting] = useState(false);
 
   const handleSubmit = async (email: string, password: string) => {
+    if (isPending || isRouting) {
+      return Promise.reject(new Error('Authentication in progress'));
+    }
+
     const formData = new FormData();
     formData.append('email', email);
     formData.append('password', password);
@@ -34,10 +39,14 @@ export function EmployeeLoginContainer() {
 
           await queryClient.invalidateQueries({ queryKey: userKeys.session() });
           await queryClient.refetchQueries({ queryKey: userKeys.session() });
+
+          // Keep controls disabled while routing to the resolved dashboard.
+          setIsRouting(true);
           await handleUserRole({ router, setError: () => {}, getUserRole });
 
           resolve();
         } catch (error) {
+          setIsRouting(false);
           toast.error('Login Error', {
             description: 'An unexpected error occurred. Please try again.',
           });
@@ -47,5 +56,5 @@ export function EmployeeLoginContainer() {
     });
   };
 
-  return <LoginPage onSubmit={handleSubmit} />;
+  return <LoginPage onSubmit={handleSubmit} isBusy={isPending || isRouting} />;
 }

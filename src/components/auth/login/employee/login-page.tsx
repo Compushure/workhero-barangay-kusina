@@ -5,9 +5,10 @@ import { LoginFormWrapper } from './login-form-wrapper';
 
 interface LoginPageProps {
   onSubmit: (email: string, password: string) => Promise<void>;
+  isBusy: boolean;
 }
 
-export function LoginPage({ onSubmit }: LoginPageProps) {
+export function LoginPage({ onSubmit, isBusy }: LoginPageProps) {
   return (
     <div className="relative min-h-dvh overflow-hidden bg-linear-to-b from-orange-50 via-yellow-50 to-orange-50">
       {/* Animated Background */}
@@ -15,7 +16,7 @@ export function LoginPage({ onSubmit }: LoginPageProps) {
 
       {/* Form Container with Z-indexing */}
       <div className="relative z-20 min-h-dvh flex items-center justify-center px-3 py-4 sm:px-4 sm:py-6">
-        <LoginFormWrapper onSubmit={onSubmit} />
+        <LoginFormWrapper onSubmit={onSubmit} isBusy={isBusy} />
       </div>
     </div>
   );
