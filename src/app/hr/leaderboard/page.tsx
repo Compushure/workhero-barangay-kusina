@@ -37,7 +37,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
   const show = hasExplicitShow || !!latestWeekly;
 
   return (
-    <div className="h-screen p-4 sm:p-8 bg-white overflow-hidden">
+    <div className="h-screen p-4  bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 mb-6">
@@ -50,7 +50,6 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
               </p>
             </div>
           </div>
-
           <PeriodSelector
             currentType={periodType}
             currentYear={year}
