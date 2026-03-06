@@ -62,12 +62,13 @@ export function SortButton({
           />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-background">
         {options.map((opt) => (
           <DropdownMenuItem
             key={opt.value}
             onClick={() => onSortChange(opt.value)}
-            className={itemClassName(sortBy === opt.value)}
+            className={`cursor-pointer transition-all duration-400 ease-in-out ${sortBy === opt.value ? 'bg-accent text-card' : 'hover:bg-accent/25!'}
+            `}
           >
             {opt.label}
           </DropdownMenuItem>

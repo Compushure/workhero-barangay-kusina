@@ -51,12 +51,7 @@ export async function handleSubmitTaskVerification(
     return null;
   }
 
-  const data = result.data?.data;
-  if (data) {
-    toast.success(`Task submitted for verification. ${data.pendingOrdersSubmitted} order/s of your dish sent to Head Chef`);
-  }
-
-  return data || null;
+  return result.data?.data || null;
 }
 
 /**
@@ -82,28 +77,7 @@ export async function handleClaimTaskPointsAndXP(
     return null;
   }
 
-  const data = result.data?.data;
-  if (data) {
-    // Fetch updated task data to get accurate completed orders count
-    const { data: updatedTask } = await fetchEmployeeTasks();
-    const currentTask = updatedTask?.currentTasks.find(task => task.id === kpitaskId) || 
-                       updatedTask?.onReviewTasks.find(task => task.id === kpitaskId) ||
-                       updatedTask?.verifiedTasks.find(task => task.id === kpitaskId);
-    
-    const updatedCompletedOrders = currentTask?.completedOrders || completedOrders;
-    const updatedMaxOrders = currentTask?.maxOrders || maxOrders;
-    
-    // Check if all orders are completed
-    const isFullyCompleted = updatedCompletedOrders >= updatedMaxOrders;
-    
-    if (isFullyCompleted) {
-      toast.success(`${updatedMaxOrders}/${updatedMaxOrders} orders completed for ${taskName}! Proceed to kitchen to serve the dishes. ${data.pointsAdded} fiesta points and ${data.xpAdded} XP claimed!`);
-    } else {
-      toast.success(`Keep it up! ${updatedCompletedOrders}/${updatedMaxOrders} orders completed for ${taskName}. ${data.pointsAdded} fiesta points and ${data.xpAdded} XP claimed!`);
-    }
-  }
-
-  return data || null;
+  return result.data?.data || null;
 }
 
 /**
@@ -114,21 +88,15 @@ export async function handleClaimTaskPointsAndXP(
 export async function handleRedoTask(
   kpitaskId: string
 ): Promise<boolean | null> {
-  try {
-    const result = await safeAction(() => redoTask(kpitaskId));
+  const result = await safeAction(() => redoTask(kpitaskId));
 
-    if (!result.success || result.data?.error) {
-      const errorMessage = result.data?.error || result.error || 'Failed to redo task';
-      toast.error(errorMessage);
-      return null;
-    }
-
-    toast.success('Task sent back to the kitchen. You can now submit it again.');
-    return true;
-  } catch (error) {
-    toast.error('Failed to redo task');
+  if (!result.success || result.data?.error) {
+    const errorMessage = result.data?.error || result.error || 'Failed to redo task';
+    toast.error(errorMessage);
     return null;
   }
+
+  return true;
 }
 
 /**

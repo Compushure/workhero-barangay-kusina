@@ -19,10 +19,7 @@ interface BadgeFilterToggleProps {
   onFilterChange: (value: BadgeFilterMode) => void;
 }
 
-export function BadgeFilterToggle({
-  filterMode,
-  onFilterChange,
-}: BadgeFilterToggleProps) {
+export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterToggleProps) {
   const activeFilterCount = filterMode === 'all' ? 0 : 1;
 
   const clearFilters = () => {
@@ -35,9 +32,9 @@ export function BadgeFilterToggle({
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-lg border-gray-300 hover:bg-gray-50"
+            className="gap-2 h-10 px-4 rounded-lg border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
           >
-            <Filter className="h-4 w-4" />
+            <Filter className="h-4 w-4 text-accent" />
             <span className="hidden sm:inline">Filters</span>
             {activeFilterCount > 0 && (
               <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
@@ -46,7 +43,7 @@ export function BadgeFilterToggle({
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align="end" className="w-56 bg-background">
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Badge Type
           </DropdownMenuLabel>
@@ -84,7 +81,7 @@ export function BadgeFilterToggle({
           variant="ghost"
           size="sm"
           onClick={clearFilters}
-          className="h-10 px-3 text-sm text-gray-600 hover:text-gray-900"
+          className="h-10 px-3 text-sm text-secondary hover:text-foreground"
         >
           <X className="h-4 w-4 mr-1" />
           Clear

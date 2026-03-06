@@ -148,6 +148,7 @@ export function RedemptionTable({
             const itemDisplay = `${quantity} x ${request.rewardName}`;
             const userPoints = request.userPoints || 0;
             const hasInsufficientPoints = userPoints < totalCost;
+            const hasRemarks = request.remarks && request.remarks.trim() !== '';
             const userName = request.userName || 'N/A';
             const isOutOfStock = request.remarks === 'Item is out of stock';
 

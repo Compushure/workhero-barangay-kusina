@@ -44,7 +44,7 @@ export function LoginContainer() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-card via-card to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Hero Section */}

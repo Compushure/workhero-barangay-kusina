@@ -53,7 +53,7 @@ interface MonthlyRewardsModalProps {
 const ITEMS_PER_PAGE = 8;
 const MODAL_CONTENT_CLASS =
   'bg-[#e8d9c0] border border-[#8a6844] w-[60vw] max-w-[60vw] sm:max-w-[60vw] md:max-w-[60vw] lg:max-w-[60vw] max-h-[86vh] rounded-2xl p-0 flex flex-col overflow-hidden shadow-xl';
-const MODAL_GRID_CLASS = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5';
+const MODAL_GRID_CLASS = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
 const INTERVAL_LABELS: Record<RewardInterval, string> = {
   weekly: 'Weekly',
   monthly: 'Monthly',
@@ -264,7 +264,7 @@ export function MonthlyRewardsModal({
           </div>
         )}
 
-        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-5 bg-[#e6d7bf]">
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-6 bg-[#e6d7bf]">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Loader2 className="h-10 w-10 text-[#6a4a2d] animate-spin mx-auto mb-3" />

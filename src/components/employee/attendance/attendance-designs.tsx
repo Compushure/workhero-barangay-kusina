@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import AttendanceIcon from './attendance';
 import { RankWidget } from '../dashboard/rank-panel';
 import XPProgressAndPoints from './xp-points';
@@ -10,6 +11,25 @@ import { useGetTodayAttendanceStatus } from '@/hooks/tanstack';
 
 export default function AttendanceDesign() {
   const { data: status } = useGetTodayAttendanceStatus();
+  const [dateLabel, setDateLabel] = useState('');
+
+  useEffect(() => {
+    const formatNow = () =>
+      setDateLabel(
+        new Date().toLocaleString('en-US', {
+          weekday: 'long',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        })
+      );
+
+    formatNow();
+    const intervalId = setInterval(formatNow, 60000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   // ✅ Normalize status for DashboardRedirectButton
   const redirectStatus = {
@@ -54,13 +74,7 @@ export default function AttendanceDesign() {
             ⏰ Attendance Station
           </h1>
           <p className="font-jersey text-xl text-[#474747d8] text-center text-parchment-foreground/70">
-            {new Date().toLocaleString('en-US', {
-              weekday: 'long',
-              month: 'short',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit',
-            })}
+            {dateLabel || 'Loading time…'}
           </p>
 
           {/* Attendance controls */}

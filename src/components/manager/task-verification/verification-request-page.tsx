@@ -197,7 +197,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   };
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen flex flex-col">
+    <div className="p-8 bg-zinc-100 min-h-screen flex flex-col">
       <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
 
       <div className="flex-1 flex flex-col">
@@ -246,9 +246,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
         type={confirmAction.type}
         onCancel={() => setConfirmAction({ type: null, id: null })}
         onConfirm={handleConfirm}
-        isProcessing={
-          approveTask.isPending || rejectTask.isPending || isSubmittingRef.current
-        }
+        isProcessing={approveTask.isPending || rejectTask.isPending || isSubmittingRef.current}
       />
     </div>
   );

@@ -15,7 +15,7 @@ import AddEditBadgeDialog, { type BadgeFormData } from './dialogs/add-edit-badge
 import BadgeTable from './badge-table';
 import { BadgeFilterToggle, type BadgeFilterMode } from './badge-filter-toggle';
 import { useDebounce } from '../../../hooks/useDebounce';
-import {Pagination} from '../task-verification/pagination';
+import { Pagination } from '../task-verification/pagination';
 import type { Badge } from '@/types/manager/badge-editor';
 import {
   useAddBadge,
@@ -29,11 +29,7 @@ import {
   useUploadBadgeImage,
 } from '@/hooks/tanstack';
 
-type BadgeSortOption =
-  | 'name-asc'
-  | 'points-desc'
-  | 'created-desc'
-  | 'created-asc';
+type BadgeSortOption = 'name-asc' | 'points-desc' | 'created-desc' | 'created-asc';
 
 const SORT_OPTIONS: { value: BadgeSortOption; label: string }[] = [
   { value: 'name-asc', label: 'Name (A-Z)' },
@@ -242,20 +238,20 @@ export function BadgeEditorPage() {
     SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Name (A-Z)';
 
   return (
-    <main className="w-full min-h-screen bg-zinc-50 p-10">
+    <main className="w-full min-h-screen bg-zinc-100 p-10">
       <div className="mx-auto w-full max-w-500 space-y-8">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">Badge Editor</h1>
-          <p className="text-md text-gray-600">Create, edit, and manage badges with conditions.</p>
+          <p className="text-md text-secondary">Create, edit, and manage badges with conditions.</p>
         </div>
 
         <section className="flex justify-between">
           {/* Badge Count Display */}
           <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
             <h5 className="flex items-center gap-2">
-              <Coins size={20} />
+              <Coins size={20} className="text-accent" />
               Badges{' '}
-              <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+              <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
                 {totalCount ?? 0}
               </span>
             </h5>
@@ -271,14 +267,11 @@ export function BadgeEditorPage() {
                 placeholder="Search badges..."
                 value={searchTerm}
                 onChange={handleSearchChange}
-                className="pl-10 pr-4 py-2 rounded-xl text-sm bg-white shadow-sm/50 border border-gray-200 focus:outline-none focus:border-foreground transition-colors"
+                className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
               />
             </div>
 
-            <BadgeFilterToggle
-              filterMode={filterMode}
-              onFilterChange={handleFilterChange}
-            />
+            <BadgeFilterToggle filterMode={filterMode} onFilterChange={handleFilterChange} />
 
             {/* Sort Dropdown */}
             <DropdownMenu>
@@ -286,19 +279,19 @@ export function BadgeEditorPage() {
                 <Button
                   variant="default"
                   size="default"
-                  className="bg-foreground hover:brightness-100 w-35 cursor-pointer rounded-full text-white shadow-sm/25 flex justify-between transition-all duration-500 ease-in-out"
+                  className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-48 py-2 justify-between border border-gray-200"
                 >
                   <span className="truncate">{currentSortLabel}</span>
-                  <ArrowUpDown size={18} />
+                  <ArrowUpDown size={18} className='text-accent'/>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="bg-background w-56">
                 {SORT_OPTIONS.map((option) => (
                   <DropdownMenuItem
                     key={option.value}
                     onClick={() => handleSortChange(option.value)}
                     className={`cursor-pointer transition-all duration-300 ease-in-out ${
-                      sortOption === option.value ? 'bg-red-100' : ''
+                      sortOption === option.value ? 'bg-accent/15' : ''
                     }`}
                   >
                     {option.label}
@@ -310,7 +303,7 @@ export function BadgeEditorPage() {
             {/* Add New Badge Button */}
             <Button
               onClick={handleOpenAddDialog}
-              className="px-6 py-2 rounded-full bg-foreground hover:brightness-100 text-zinc-50 font-semibold text-sm shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out shrink-0"
+              className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-6 py-2 rounded-full shadow-sm/25 font-semibold text-sm shrink-0"
             >
               <Coins size={18} />
               <span>Add New Badge</span>

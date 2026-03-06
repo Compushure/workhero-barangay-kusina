@@ -308,7 +308,7 @@ export default function AddEditBadgeDialog({
       <DialogContent className="bg-background border-none max-w-[92vw] md:max-w-xl lg:max-w-2xl rounded-2xl p-4 sm:p-5 max-h-[85vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2 text-[#5a2a2a] text-base sm:text-lg font-semibold">
+            <DialogTitle className="flex items-center gap-2 text-primary text-base sm:text-lg font-semibold">
               <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
               {editingBadge ? 'Edit Badge' : 'Add New Badge'}
             </DialogTitle>
@@ -326,7 +326,7 @@ export default function AddEditBadgeDialog({
           {/* Badge Name and Points Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2 flex-1">
-              <Label className="text-sm font-medium text-[#5a2a2a]">
+              <Label className="text-sm font-medium text-primary">
                 Badge Name <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -334,21 +334,21 @@ export default function AddEditBadgeDialog({
                 value={badgeName}
                 onChange={(e) => setBadgeName(e.target.value)}
                 maxLength={255}
-                className={`bg-white border-[#e0cfcf] focus:border-foreground ${
+                className={`bg-white border ${
                   badgeName && !isBadgeNameValid ? 'border-red-500' : ''
                 } ${isDuplicateName ? 'border-red-500' : ''}`}
               />
               <div className="flex justify-between text-xs">
-                <span className="text-[#7a3d3d]/70">
+                <span className="text-secondary">
                   {badgeName && !isBadgeNameValid && 'Must be 2-255 characters'}
                   {isDuplicateName && 'Badge name already exists'}
                 </span>
-                <span className="text-[#7a3d3d]/70">{badgeName.length}/255</span>
+                <span className="text-secondary">{badgeName.length}/255</span>
               </div>
             </div>
 
             <div className="space-y-2 flex-1">
-              <Label className="text-sm font-medium text-[#5a2a2a]">
+              <Label className="text-sm font-medium text-primary">
                 Points <span className="text-red-500">*</span>
               </Label>
               <div className="flex items-center gap-2">
@@ -356,7 +356,7 @@ export default function AddEditBadgeDialog({
                   type="button"
                   onClick={() => setPoints(Math.max(1, points - 1))}
                   disabled={points <= 1 || isLoading}
-                  className="bg-foreground text-white size-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  className="bg-foreground text-white size-8 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                 >
                   −
                 </button>
@@ -369,49 +369,49 @@ export default function AddEditBadgeDialog({
                   }}
                   min={1}
                   max={10000}
-                  className="text-center bg-white border-[#e0cfcf] focus:border-foreground remove-arrow"
+                  className="text-center bg-white border remove-arrow"
                 />
                 <button
                   type="button"
                   onClick={() => setPoints(Math.min(10000, points + 1))}
                   disabled={points >= 10000 || isLoading}
-                  className="bg-foreground text-white size-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  className="bg-foreground text-white size-8 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                 >
                   +
                 </button>
               </div>
-              <p className="text-xs text-gray-500">Points awarded to user when badge is earned</p>
+              <p className="text-xs text-secondary">Points awarded to user when badge is earned</p>
               {!isPointsValid && <p className="text-xs text-red-500">Must be between 1 and 10,000</p>}
             </div>
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-[#5a2a2a]">Description</Label>
+            <Label className="text-sm font-medium text-primary">Description</Label>
             <Input
               placeholder="Enter badge description"
               value={badgeDescription}
               onChange={(e) => setBadgeDescription(e.target.value)}
               maxLength={255}
-              className={`bg-white border-[#e0cfcf] focus:border-foreground ${
+              className={`bg-white border ${
                 badgeDescription && !isDescriptionValid ? 'border-red-500' : ''
               }`}
             />
             <div className="flex justify-between text-xs">
-              <span className="text-[#7a3d3d]/70">
+              <span className="text-secondary">
                 {badgeDescription && !isDescriptionValid && 'Max 255 characters'}
               </span>
-              <span className="text-[#7a3d3d]/70">{badgeDescription.length}/255</span>
+              <span className="text-secondary">{badgeDescription.length}/255</span>
             </div>
           </div>
 
           {/* Badge Icon */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-[#5a2a2a]">Badge Icon</Label>
+            <Label className="text-sm font-medium text-primary">Badge Icon</Label>
             <div className="flex flex-col md:flex-row gap-4 items-start">
               <label
                 htmlFor="badge-icon-upload"
-                className="w-full md:w-40 h-32 border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-foreground transition-colors bg-white relative overflow-hidden group"
+                className="w-full md:w-40 h-32 border-2 border-dashed border-accent-secondary/50 rounded-lg flex items-center justify-center cursor-pointer hover:border-foreground transition-colors bg-white relative overflow-hidden group"
                 style={
                   currentImageUrl
                     ? {
@@ -426,7 +426,7 @@ export default function AddEditBadgeDialog({
                 {currentImageUrl ? (
                   <div className="absolute inset-0" />
                 ) : (
-                  <ImageUp className="h-6 w-6 text-[#7a3d3d]" />
+                  <ImageUp className="h-6 w-6 text-accent" />
                 )}
                 {currentImageUrl && (
                   <div className="absolute top-1 right-1 bg-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -442,7 +442,7 @@ export default function AddEditBadgeDialog({
                 className="hidden"
               />
               <div className="flex-1 space-y-2">
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-secondary">
                   Upload a badge icon (JPG, PNG, WebP). Max 5MB.
                 </p>
                 {currentImageUrl && (
@@ -463,7 +463,7 @@ export default function AddEditBadgeDialog({
 
           {/* Award Interval */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-[#5a2a2a]">Award Interval</Label>
+            <Label className="text-sm font-medium text-primary">Award Interval</Label>
             <Select value={awardAtInterval} onValueChange={(value) => setAwardAtInterval(value as BadgeInterval)}>
               <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground">
                 <SelectValue placeholder="Select interval" />
@@ -485,7 +485,7 @@ export default function AddEditBadgeDialog({
           <div className="space-y-4 border-t-2 border-[#e0cfcf] pt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Label className="text-sm font-bold text-[#5a2a2a]">Conditions</Label>
+                <Label className="text-sm font-bold text-primary">Conditions</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -501,7 +501,7 @@ export default function AddEditBadgeDialog({
                 onClick={handleAddCondition}
                 variant="outline"
                 size="sm"
-                className="border-foreground text-foreground hover:bg-[#fbeaea] bg-transparent"
+                className="border-foreground text-foreground hover:bg-gray-200 bg-card"
               >
                 <PlusIcon size={16} className="mr-1" />
                 Add Condition
@@ -799,17 +799,9 @@ export default function AddEditBadgeDialog({
         {/* Action Buttons */}
         <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
           <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isLoading}
-            className="bg-white text-[#5a2a2a] border-[#e0cfcf] hover:bg-[#fbeaea] px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
-          <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="bg-foreground text-white hover:bg-[#8b0000] px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="bg-foreground text-white hover:bg-accent px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isLoading ? (
               <span className="animate-pulse">Saving...</span>
@@ -819,6 +811,14 @@ export default function AddEditBadgeDialog({
                 {editingBadge ? 'Update Badge' : 'Add Badge'}
               </>
             )}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isLoading}
+            className="bg-card text-primary border hover:bg-gray-200 px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+          >
+            Cancel
           </Button>
         </div>
 
