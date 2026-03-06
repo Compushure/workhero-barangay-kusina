@@ -52,6 +52,13 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
 
 
 
+CREATE EXTENSION IF NOT EXISTS "pgmq";
+
+
+
+
+
+
 CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
 
 
@@ -106,6 +113,17 @@ CREATE TYPE "public"."logic_type_enum" AS ENUM (
 
 
 ALTER TYPE "public"."logic_type_enum" OWNER TO "postgres";
+
+
+CREATE TYPE "public"."notification_type_enum" AS ENUM (
+    'badge',
+    'user',
+    'task',
+    'reward'
+);
+
+
+ALTER TYPE "public"."notification_type_enum" OWNER TO "postgres";
 
 
 CREATE TYPE "public"."operator_enum" AS ENUM (
@@ -411,6 +429,21 @@ BEGIN
         SET points = points + badge_rec.points
         WHERE id = user_rec.id
           AND badge_rec.points > 0;
+
+        -- Insert notification for automatic badge award
+        INSERT INTO public."Notification"(user_id, type, message, metadata)
+        VALUES (
+          user_rec.id,
+          'badge',
+          'You''ve been automatically awarded the ' || badge_rec.name || ' badge by the system and have earned ' || badge_rec.points || ' bonus points.',
+          jsonb_build_object(
+            'badgeId', badge_rec.id::text,
+            'badgeName', badge_rec.name,
+            'pointsAwarded', badge_rec.points,
+            'isAutomatic', true,
+            'evaluatedAt', now()::text
+          )
+        );
       END IF;
     END LOOP;
   END LOOP;
@@ -480,7 +513,7 @@ $$;
 ALTER FUNCTION "public"."get_employee_rank_as_of"("p_user_id" "uuid", "p_cutoff" timestamp with time zone) OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."get_leaderboard_as_of"("p_cutoff" timestamp with time zone) RETURNS TABLE("user_id" "uuid", "user_name" "text", "performance_score" bigint)
+CREATE OR REPLACE FUNCTION "public"."get_leaderboard_as_of"("p_cutoff" timestamp with time zone) RETURNS TABLE("user_id" "uuid", "user_name" "text", "performance_score" bigint, "total_kpi_points" bigint, "badge_points" bigint)
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
     AS $$
@@ -503,11 +536,7 @@ CREATE OR REPLACE FUNCTION "public"."get_leaderboard_as_of"("p_cutoff" timestamp
       )::bigint AS total_kpi_points,
       COALESCE(
         SUM(
-          CASE
-            WHEN COALESCE(kt.max_orders, 0) > 0 AND COALESCE(kt.completed_orders, 0) >= kt.max_orders THEN 1
-            WHEN COALESCE(kt.max_orders, 0) = 0 AND COALESCE(kt.completed_orders, 0) > 0 THEN 1
-            ELSE 0
-          END
+          LEAST(COALESCE(kt.completed_orders, 0), COALESCE(kt.max_orders, 0))
         ),
         0
       )::bigint AS task_count
@@ -521,7 +550,9 @@ CREATE OR REPLACE FUNCTION "public"."get_leaderboard_as_of"("p_cutoff" timestamp
   SELECT
     u.id AS user_id,
     u.name::text AS user_name,
-    ((COALESCE(uk.total_kpi_points,0) + COALESCE(bp.badge_points,0)) * uk.task_count)::bigint AS performance_score
+    ((COALESCE(uk.total_kpi_points,0) + COALESCE(bp.badge_points,0)) * uk.task_count)::bigint AS performance_score,
+    COALESCE(uk.total_kpi_points,0)::bigint AS total_kpi_points,
+    COALESCE(bp.badge_points,0)::bigint AS badge_points
   FROM "User" u
   JOIN "Role" r ON r.id = u.role_id AND r.type = 'regular'
   JOIN user_kpis uk ON uk.user_id = u.id
@@ -1257,22 +1288,46 @@ CREATE TABLE IF NOT EXISTS "public"."Level" (
 ALTER TABLE "public"."Level" OWNER TO "postgres";
 
 
-CREATE TABLE IF NOT EXISTS "public"."RankLog" (
+CREATE TABLE IF NOT EXISTS "public"."Notification" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "period_type" "text" NOT NULL,
-    "period_year" smallint NOT NULL,
-    "period_month" smallint,
-    "period_week" smallint,
-    "period_label" "text" NOT NULL,
-    "rankings" "jsonb" NOT NULL,
-    "is_visible" boolean DEFAULT true NOT NULL,
-    "generated_by" "uuid" NOT NULL,
-    "generated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "RankLog_period_type_check" CHECK (("period_type" = ANY (ARRAY['weekly'::"text", 'monthly'::"text", 'yearly'::"text"])))
+    "user_id" "uuid" NOT NULL,
+    "type" "public"."notification_type_enum" NOT NULL,
+    "message" "text" NOT NULL,
+    "metadata" "jsonb",
+    "read_at" timestamp with time zone,
+    "created_at" timestamp with time zone DEFAULT "timezone"('utc'::"text", "now"()) NOT NULL
 );
 
 
-ALTER TABLE "public"."RankLog" OWNER TO "postgres";
+ALTER TABLE "public"."Notification" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."RankingEntry" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "ranking_period_id" "uuid" NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "rank" smallint NOT NULL,
+    "performance_score" bigint NOT NULL,
+    "total_kpi_points" bigint DEFAULT 0 NOT NULL,
+    "badge_points" bigint DEFAULT 0 NOT NULL,
+    "completed_task_count" integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE "public"."RankingEntry" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."RankingPeriod" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "period_type" "text" NOT NULL,
+    "period_start" "date" NOT NULL,
+    "period_end" "date" NOT NULL,
+    "is_visible" boolean DEFAULT true NOT NULL,
+    "generated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."RankingPeriod" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."Reward" (
@@ -1284,8 +1339,9 @@ CREATE TABLE IF NOT EXISTS "public"."Reward" (
     "created_at" timestamp with time zone DEFAULT "now"(),
     "created_by" "uuid",
     "redeeming_limit" integer,
-    "available_month" "text",
-    "month_name" character varying
+    "availability_interval" "text",
+    "availability_anchor_date" "date",
+    CONSTRAINT "reward_availability_interval_check" CHECK ((("availability_interval" IS NULL) OR ("lower"("availability_interval") = ANY (ARRAY['weekly'::"text", 'monthly'::"text", 'yearly'::"text"]))))
 );
 
 
@@ -1296,7 +1352,11 @@ COMMENT ON COLUMN "public"."Reward"."redeeming_limit" IS 'Maximum number of time
 
 
 
-COMMENT ON COLUMN "public"."Reward"."month_name" IS 'Names month from January to December according to their number from 1 to 12';
+COMMENT ON COLUMN "public"."Reward"."availability_interval" IS 'Availability interval for rewards: weekly, monthly, yearly, or null for always available.';
+
+
+
+COMMENT ON COLUMN "public"."Reward"."availability_anchor_date" IS 'Anchor date used to evaluate weekly/monthly/yearly interval visibility.';
 
 
 
@@ -1384,22 +1444,147 @@ ALTER VIEW "public"."attendance_log_view" OWNER TO "postgres";
 
 
 CREATE OR REPLACE VIEW "public"."badge_conditions_view" AS
- SELECT "b"."id" AS "badge_id",
-    "b"."name" AS "badge_name",
-    "b"."description" AS "badge_description",
-    "b"."points" AS "badge_points",
-    "b"."img_link" AS "badge_img_link",
-    "b"."award_at_interval" AS "badge_award_at_interval",
-    COALESCE("jsonb_agg"("jsonb_build_object"('id', "r"."id", 'requirement_type', ("r"."requirement_type")::"text", 'requirement_operator', ("r"."requirement_operator")::"text", 'requirement_interval', ("r"."requirement_interval")::"text", 'requirement_attrb_id', "r"."requirement_attrb_id", 'requirement_attrb_value', "r"."requirement_attrb_value", 'logic_type', ("r"."logic_type")::"text") ORDER BY "r"."id") FILTER (WHERE ("r"."id" IS NOT NULL)), '[]'::"jsonb") AS "conditions",
-    COALESCE("jsonb_agg"("jsonb_build_object"('id', "ub"."id", 'awarded_to', "ub"."awarded_to", 'date_acquired', "ub"."date_acquired", 'badge_id', "ub"."badge_id", 'badge_name', "b"."name", 'badge_description', "b"."description", 'badge_points', "b"."points", 'badge_img_link', "b"."img_link") ORDER BY "ub"."date_acquired") FILTER (WHERE ("ub"."id" IS NOT NULL)), '[]'::"jsonb") AS "collected_badges",
-    COALESCE("jsonb_agg"(("r"."logic_type")::"text" ORDER BY "r"."id") FILTER (WHERE ("r"."logic_type" IS NOT NULL)), '[]'::"jsonb") AS "requirements_logic_type"
-   FROM (("public"."Badges" "b"
-     LEFT JOIN "public"."BadgeRequirements" "r" ON (("b"."id" = "r"."badge_id")))
-     LEFT JOIN "public"."UserBadges" "ub" ON (("b"."id" = "ub"."badge_id")))
-  GROUP BY "b"."id", "b"."name", "b"."description", "b"."points", "b"."img_link", "b"."award_at_interval";
+ SELECT "id" AS "badge_id",
+    "name" AS "badge_name",
+    "description" AS "badge_description",
+    "points" AS "badge_points",
+    "img_link" AS "badge_img_link",
+    "award_at_interval" AS "badge_award_at_interval",
+    COALESCE(( SELECT "jsonb_agg"("jsonb_build_object"('id', "r"."id", 'requirement_type', ("r"."requirement_type")::"text", 'requirement_operator', ("r"."requirement_operator")::"text", 'requirement_interval', ("r"."requirement_interval")::"text", 'requirement_attrb_id', "r"."requirement_attrb_id", 'requirement_attrb_value', "r"."requirement_attrb_value", 'logic_type', ("r"."logic_type")::"text") ORDER BY "r"."id") AS "jsonb_agg"
+           FROM "public"."BadgeRequirements" "r"
+          WHERE ("r"."badge_id" = "b"."id")), '[]'::"jsonb") AS "conditions",
+    COALESCE(( SELECT "jsonb_agg"("jsonb_build_object"('id', "ub"."id", 'awarded_to', "ub"."awarded_to", 'date_acquired', "ub"."date_acquired", 'badge_id', "ub"."badge_id", 'badge_name', "b"."name", 'badge_description', "b"."description", 'badge_points', "b"."points", 'badge_img_link', "b"."img_link") ORDER BY "ub"."date_acquired") AS "jsonb_agg"
+           FROM "public"."UserBadges" "ub"
+          WHERE ("ub"."badge_id" = "b"."id")), '[]'::"jsonb") AS "collected_badges",
+    COALESCE(( SELECT "jsonb_agg"(("r"."logic_type")::"text" ORDER BY "r"."id") AS "jsonb_agg"
+           FROM "public"."BadgeRequirements" "r"
+          WHERE (("r"."badge_id" = "b"."id") AND ("r"."logic_type" IS NOT NULL))), '[]'::"jsonb") AS "requirements_logic_type"
+   FROM "public"."Badges" "b";
 
 
 ALTER VIEW "public"."badge_conditions_view" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "public"."employee_daily_attendance_stats_view" AS
+ SELECT "employee_id",
+    ("date_trunc"('day'::"text", "timein_time"))::"date" AS "day",
+    "count"(*) FILTER (WHERE "is_absent") AS "absences",
+    "count"(*) FILTER (WHERE "is_overtime") AS "overtimes",
+    "count"(*) FILTER (WHERE ((COALESCE("is_ontime", true) = false) AND (COALESCE("is_absent", false) = false))) AS "lates",
+    "count"(*) FILTER (WHERE "over_breaktime") AS "over_breaktimes",
+    "count"(*) FILTER (WHERE "is_undertime") AS "undertimes"
+   FROM "public"."AttendanceLog" "al"
+  GROUP BY "employee_id", (("date_trunc"('day'::"text", "timein_time"))::"date");
+
+
+ALTER VIEW "public"."employee_daily_attendance_stats_view" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "public"."employee_annual_attendance_stats_view" AS
+ SELECT "u"."id" AS "employee_id",
+    "u"."email",
+    "u"."name",
+    "d"."period_start",
+    (("d"."period_start" + '1 year'::interval) - '00:00:01'::interval) AS "period_end",
+    "sum"("d"."absences") AS "absences",
+    "sum"("d"."overtimes") AS "overtimes",
+    "sum"("d"."lates") AS "lates",
+    "sum"("d"."over_breaktimes") AS "over_breaktimes",
+    "sum"("d"."undertimes") AS "undertimes"
+   FROM (( SELECT "employee_daily_attendance_stats_view"."employee_id",
+            ("date_trunc"('year'::"text", ("employee_daily_attendance_stats_view"."day")::timestamp with time zone))::"date" AS "period_start",
+            "employee_daily_attendance_stats_view"."absences",
+            "employee_daily_attendance_stats_view"."overtimes",
+            "employee_daily_attendance_stats_view"."lates",
+            "employee_daily_attendance_stats_view"."over_breaktimes",
+            "employee_daily_attendance_stats_view"."undertimes"
+           FROM "public"."employee_daily_attendance_stats_view") "d"
+     JOIN "public"."User" "u" ON (("u"."id" = "d"."employee_id")))
+  GROUP BY "u"."id", "u"."email", "u"."name", "d"."period_start";
+
+
+ALTER VIEW "public"."employee_annual_attendance_stats_view" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "public"."employee_monthly_attendance_stats_view" AS
+ SELECT "u"."id" AS "employee_id",
+    "u"."email",
+    "u"."name",
+    "d"."period_start",
+    (("d"."period_start" + '1 mon'::interval) - '00:00:01'::interval) AS "period_end",
+    "sum"("d"."absences") AS "absences",
+    "sum"("d"."overtimes") AS "overtimes",
+    "sum"("d"."lates") AS "lates",
+    "sum"("d"."over_breaktimes") AS "over_breaktimes",
+    "sum"("d"."undertimes") AS "undertimes"
+   FROM (( SELECT "employee_daily_attendance_stats_view"."employee_id",
+            ("date_trunc"('month'::"text", ("employee_daily_attendance_stats_view"."day")::timestamp with time zone))::"date" AS "period_start",
+            "employee_daily_attendance_stats_view"."absences",
+            "employee_daily_attendance_stats_view"."overtimes",
+            "employee_daily_attendance_stats_view"."lates",
+            "employee_daily_attendance_stats_view"."over_breaktimes",
+            "employee_daily_attendance_stats_view"."undertimes"
+           FROM "public"."employee_daily_attendance_stats_view") "d"
+     JOIN "public"."User" "u" ON (("u"."id" = "d"."employee_id")))
+  GROUP BY "u"."id", "u"."email", "u"."name", "d"."period_start";
+
+
+ALTER VIEW "public"."employee_monthly_attendance_stats_view" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "public"."employee_weekly_attendance_stats_view" AS
+ SELECT "u"."id" AS "employee_id",
+    "u"."email",
+    "u"."name",
+    "d"."period_start",
+    (("d"."period_start" + '7 days'::interval) - '00:00:01'::interval) AS "period_end",
+    "sum"("d"."absences") AS "absences",
+    "sum"("d"."overtimes") AS "overtimes",
+    "sum"("d"."lates") AS "lates",
+    "sum"("d"."over_breaktimes") AS "over_breaktimes",
+    "sum"("d"."undertimes") AS "undertimes"
+   FROM (( SELECT "employee_daily_attendance_stats_view"."employee_id",
+            ("date_trunc"('week'::"text", ("employee_daily_attendance_stats_view"."day")::timestamp with time zone))::"date" AS "period_start",
+            "employee_daily_attendance_stats_view"."absences",
+            "employee_daily_attendance_stats_view"."overtimes",
+            "employee_daily_attendance_stats_view"."lates",
+            "employee_daily_attendance_stats_view"."over_breaktimes",
+            "employee_daily_attendance_stats_view"."undertimes"
+           FROM "public"."employee_daily_attendance_stats_view") "d"
+     JOIN "public"."User" "u" ON (("u"."id" = "d"."employee_id")))
+  GROUP BY "u"."id", "u"."email", "u"."name", "d"."period_start";
+
+
+ALTER VIEW "public"."employee_weekly_attendance_stats_view" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "public"."ranking_leaderboard_view" AS
+ SELECT "rp"."id" AS "ranking_period_id",
+    "re"."user_id",
+    "u"."name" AS "user_name",
+    "re"."id" AS "entry_id",
+    "rp"."period_type",
+    "rp"."period_start",
+    "rp"."period_end",
+    "rp"."is_visible",
+    "rp"."generated_at",
+        CASE "rp"."period_type"
+            WHEN 'weekly'::"text" THEN ((('Week '::"text" || (EXTRACT(week FROM "rp"."period_start"))::"text") || ', '::"text") || (EXTRACT(isoyear FROM "rp"."period_start"))::"text")
+            WHEN 'monthly'::"text" THEN "to_char"(("rp"."period_start")::timestamp with time zone, 'FMMonth YYYY'::"text")
+            WHEN 'yearly'::"text" THEN ('Year '::"text" || (EXTRACT(year FROM "rp"."period_start"))::"text")
+            ELSE NULL::"text"
+        END AS "period_label",
+    "re"."rank",
+    "re"."performance_score",
+    "re"."total_kpi_points",
+    "re"."badge_points",
+    "re"."completed_task_count"
+   FROM (("public"."RankingEntry" "re"
+     JOIN "public"."RankingPeriod" "rp" ON (("rp"."id" = "re"."ranking_period_id")))
+     JOIN "public"."User" "u" ON (("u"."id" = "re"."user_id")));
+
+
+ALTER VIEW "public"."ranking_leaderboard_view" OWNER TO "postgres";
 
 
 CREATE OR REPLACE VIEW "public"."role_attributes" AS
@@ -1450,6 +1635,38 @@ CREATE OR REPLACE VIEW "public"."task_info_view" AS
 
 
 ALTER VIEW "public"."task_info_view" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "public"."total_attendance_stats_view" AS
+ SELECT "u"."id" AS "employee_id",
+    "u"."email",
+    "u"."name",
+    COALESCE("sum"("d"."absences"), (0)::numeric) AS "total_absences",
+    COALESCE("sum"("d"."overtimes"), (0)::numeric) AS "total_overtimes",
+    COALESCE("sum"("d"."lates"), (0)::numeric) AS "total_lates",
+    COALESCE("sum"("d"."over_breaktimes"), (0)::numeric) AS "total_over_breaktimes",
+    COALESCE("sum"("d"."undertimes"), (0)::numeric) AS "total_undertimes",
+    "min"("d"."absences") AS "min_absences_per_day",
+    "percentile_cont"((0.5)::double precision) WITHIN GROUP (ORDER BY (("d"."absences")::double precision)) AS "median_absences_per_day",
+    "max"("d"."absences") AS "max_absences_per_day",
+    "min"("d"."overtimes") AS "min_overtimes_per_day",
+    "percentile_cont"((0.5)::double precision) WITHIN GROUP (ORDER BY (("d"."overtimes")::double precision)) AS "median_overtimes_per_day",
+    "max"("d"."overtimes") AS "max_overtimes_per_day",
+    "min"("d"."lates") AS "min_lates_per_day",
+    "percentile_cont"((0.5)::double precision) WITHIN GROUP (ORDER BY (("d"."lates")::double precision)) AS "median_lates_per_day",
+    "max"("d"."lates") AS "max_lates_per_day",
+    "min"("d"."over_breaktimes") AS "min_over_breaktimes_per_day",
+    "percentile_cont"((0.5)::double precision) WITHIN GROUP (ORDER BY (("d"."over_breaktimes")::double precision)) AS "median_over_breaktimes_per_day",
+    "max"("d"."over_breaktimes") AS "max_over_breaktimes_per_day",
+    "min"("d"."undertimes") AS "min_undertimes_per_day",
+    "percentile_cont"((0.5)::double precision) WITHIN GROUP (ORDER BY (("d"."undertimes")::double precision)) AS "median_undertimes_per_day",
+    "max"("d"."undertimes") AS "max_undertimes_per_day"
+   FROM ("public"."User" "u"
+     LEFT JOIN "public"."employee_daily_attendance_stats_view" "d" ON (("d"."employee_id" = "u"."id")))
+  GROUP BY "u"."id", "u"."email", "u"."name";
+
+
+ALTER VIEW "public"."total_attendance_stats_view" OWNER TO "postgres";
 
 
 CREATE OR REPLACE VIEW "public"."user_attributes" AS
@@ -1538,8 +1755,33 @@ ALTER TABLE ONLY "public"."Level"
 
 
 
-ALTER TABLE ONLY "public"."RankLog"
-    ADD CONSTRAINT "RankLog_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."Notification"
+    ADD CONSTRAINT "Notification_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."RankingEntry"
+    ADD CONSTRAINT "RankingEntry_period_rank_unique" UNIQUE ("ranking_period_id", "rank");
+
+
+
+ALTER TABLE ONLY "public"."RankingEntry"
+    ADD CONSTRAINT "RankingEntry_period_user_unique" UNIQUE ("ranking_period_id", "user_id");
+
+
+
+ALTER TABLE ONLY "public"."RankingEntry"
+    ADD CONSTRAINT "RankingEntry_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."RankingPeriod"
+    ADD CONSTRAINT "RankingPeriod_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."RankingPeriod"
+    ADD CONSTRAINT "RankingPeriod_unique_period" UNIQUE ("period_type", "period_start");
 
 
 
@@ -1588,11 +1830,11 @@ ALTER TABLE ONLY "public"."User"
 
 
 
-CREATE INDEX "idx_ranklog_period_type_year" ON "public"."RankLog" USING "btree" ("period_type", "period_year" DESC, COALESCE(("period_month")::integer, 0) DESC, COALESCE(("period_week")::integer, 0) DESC);
+CREATE INDEX "idx_ranking_entry_user_id" ON "public"."RankingEntry" USING "btree" ("user_id");
 
 
 
-CREATE UNIQUE INDEX "idx_ranklog_unique_period" ON "public"."RankLog" USING "btree" ("period_type", "period_year", COALESCE(("period_month")::integer, 0), COALESCE(("period_week")::integer, 0));
+CREATE INDEX "idx_rankingentry_completed_task_count" ON "public"."RankingEntry" USING "btree" ("completed_task_count");
 
 
 
@@ -1605,6 +1847,10 @@ CREATE INDEX "idx_userbadges_awarded_to" ON "public"."UserBadges" USING "btree" 
 
 
 CREATE INDEX "idx_userbadges_badge_id" ON "public"."UserBadges" USING "btree" ("badge_id");
+
+
+
+CREATE INDEX "notification_user_read_created_idx" ON "public"."Notification" USING "btree" ("user_id", "read_at", "created_at" DESC);
 
 
 
@@ -1660,8 +1906,18 @@ ALTER TABLE ONLY "public"."KPITask"
 
 
 
-ALTER TABLE ONLY "public"."RankLog"
-    ADD CONSTRAINT "RankLog_generated_by_fkey" FOREIGN KEY ("generated_by") REFERENCES "public"."User"("id");
+ALTER TABLE ONLY "public"."Notification"
+    ADD CONSTRAINT "Notification_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."User"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."RankingEntry"
+    ADD CONSTRAINT "RankingEntry_period_fk" FOREIGN KEY ("ranking_period_id") REFERENCES "public"."RankingPeriod"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."RankingEntry"
+    ADD CONSTRAINT "RankingEntry_user_fk" FOREIGN KEY ("user_id") REFERENCES "public"."User"("id");
 
 
 
@@ -1715,15 +1971,29 @@ ALTER TABLE ONLY "public"."User"
 
 
 
-CREATE POLICY "Employees can view visible rankings" ON "public"."RankLog" FOR SELECT USING (("is_visible" = true));
+ALTER TABLE "public"."Notification" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "Notification_delete_all" ON "public"."Notification" FOR DELETE USING (true);
 
 
 
-CREATE POLICY "HR can manage all rankings" ON "public"."RankLog" USING ("public"."is_hr_user_by_type"());
+CREATE POLICY "Notification_insert_all" ON "public"."Notification" FOR INSERT WITH CHECK (true);
 
 
 
-ALTER TABLE "public"."RankLog" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Notification_select_all" ON "public"."Notification" FOR SELECT USING (true);
+
+
+
+CREATE POLICY "Notification_update_all" ON "public"."Notification" FOR UPDATE USING (true) WITH CHECK (true);
+
+
+
+ALTER TABLE "public"."RankingEntry" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."RankingPeriod" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."Role" ENABLE ROW LEVEL SECURITY;
@@ -1738,7 +2008,37 @@ ALTER TABLE "public"."SpecificRoleAttribute" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."User" ENABLE ROW LEVEL SECURITY;
 
 
+CREATE POLICY "employee_select_visible_ranking_entry" ON "public"."RankingEntry" FOR SELECT TO "authenticated" USING ((EXISTS ( SELECT 1
+   FROM "public"."RankingPeriod" "rp"
+  WHERE (("rp"."id" = "RankingEntry"."ranking_period_id") AND ("rp"."is_visible" = true)))));
+
+
+
+CREATE POLICY "employee_select_visible_ranking_period" ON "public"."RankingPeriod" FOR SELECT TO "authenticated" USING (("is_visible" = true));
+
+
+
+CREATE POLICY "hr_insert_ranking_entry" ON "public"."RankingEntry" FOR INSERT TO "authenticated" WITH CHECK ("public"."is_hr_user"());
+
+
+
+CREATE POLICY "hr_insert_ranking_period" ON "public"."RankingPeriod" FOR INSERT TO "authenticated" WITH CHECK ("public"."is_hr_user"());
+
+
+
 CREATE POLICY "hr_select_all_users" ON "public"."User" FOR SELECT TO "authenticated" USING ("public"."is_hr_user"());
+
+
+
+CREATE POLICY "hr_select_ranking_entry" ON "public"."RankingEntry" FOR SELECT TO "authenticated" USING ("public"."is_hr_user"());
+
+
+
+CREATE POLICY "hr_select_ranking_period" ON "public"."RankingPeriod" FOR SELECT TO "authenticated" USING ("public"."is_hr_user"());
+
+
+
+CREATE POLICY "hr_update_ranking_period" ON "public"."RankingPeriod" FOR UPDATE TO "authenticated" USING ("public"."is_hr_user"()) WITH CHECK ("public"."is_hr_user"());
 
 
 
@@ -1753,6 +2053,14 @@ CREATE POLICY "user_select_own" ON "public"."User" FOR SELECT TO "authenticated"
 
 
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
+
+
+
+
+
+
+ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."Notification";
+
 
 
 
@@ -2149,9 +2457,21 @@ GRANT ALL ON TABLE "public"."Level" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."RankLog" TO "anon";
-GRANT ALL ON TABLE "public"."RankLog" TO "authenticated";
-GRANT ALL ON TABLE "public"."RankLog" TO "service_role";
+GRANT ALL ON TABLE "public"."Notification" TO "anon";
+GRANT ALL ON TABLE "public"."Notification" TO "authenticated";
+GRANT ALL ON TABLE "public"."Notification" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."RankingEntry" TO "anon";
+GRANT ALL ON TABLE "public"."RankingEntry" TO "authenticated";
+GRANT ALL ON TABLE "public"."RankingEntry" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."RankingPeriod" TO "anon";
+GRANT ALL ON TABLE "public"."RankingPeriod" TO "authenticated";
+GRANT ALL ON TABLE "public"."RankingPeriod" TO "service_role";
 
 
 
@@ -2202,6 +2522,36 @@ GRANT ALL ON TABLE "public"."badge_conditions_view" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."employee_daily_attendance_stats_view" TO "anon";
+GRANT ALL ON TABLE "public"."employee_daily_attendance_stats_view" TO "authenticated";
+GRANT ALL ON TABLE "public"."employee_daily_attendance_stats_view" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."employee_annual_attendance_stats_view" TO "anon";
+GRANT ALL ON TABLE "public"."employee_annual_attendance_stats_view" TO "authenticated";
+GRANT ALL ON TABLE "public"."employee_annual_attendance_stats_view" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."employee_monthly_attendance_stats_view" TO "anon";
+GRANT ALL ON TABLE "public"."employee_monthly_attendance_stats_view" TO "authenticated";
+GRANT ALL ON TABLE "public"."employee_monthly_attendance_stats_view" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."employee_weekly_attendance_stats_view" TO "anon";
+GRANT ALL ON TABLE "public"."employee_weekly_attendance_stats_view" TO "authenticated";
+GRANT ALL ON TABLE "public"."employee_weekly_attendance_stats_view" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."ranking_leaderboard_view" TO "anon";
+GRANT ALL ON TABLE "public"."ranking_leaderboard_view" TO "authenticated";
+GRANT ALL ON TABLE "public"."ranking_leaderboard_view" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."role_attributes" TO "anon";
 GRANT ALL ON TABLE "public"."role_attributes" TO "authenticated";
 GRANT ALL ON TABLE "public"."role_attributes" TO "service_role";
@@ -2211,6 +2561,12 @@ GRANT ALL ON TABLE "public"."role_attributes" TO "service_role";
 GRANT ALL ON TABLE "public"."task_info_view" TO "anon";
 GRANT ALL ON TABLE "public"."task_info_view" TO "authenticated";
 GRANT ALL ON TABLE "public"."task_info_view" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."total_attendance_stats_view" TO "anon";
+GRANT ALL ON TABLE "public"."total_attendance_stats_view" TO "authenticated";
+GRANT ALL ON TABLE "public"."total_attendance_stats_view" TO "service_role";
 
 
 

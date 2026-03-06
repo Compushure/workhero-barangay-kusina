@@ -5,6 +5,7 @@ import {
   clearAssignedTasks,
   clearAllEmployeeTasks,
   deleteTask,
+  deleteTaskForAllEmployees,
   updateTaskAssignment,
 } from '@/actions/manager/assigned-tasks';
 import { toast } from 'sonner';
@@ -52,7 +53,12 @@ export async function handleFetchCurrentAssignedEmployeesPaginated(
   searchTerm: string = ''
 ): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number }> {
   const result = await safeAction<
-    ServerActionResponse<{ data: AssignedTask[]; count: number; totalPages: number; taskCount: number }>
+    ServerActionResponse<{
+      data: AssignedTask[];
+      count: number;
+      totalPages: number;
+      taskCount: number;
+    }>
   >(() => fetchCurrentAssignedEmployeesPaginated(page, pageSize, sortBy, searchTerm));
 
   if (!result.success || result.data?.error) {
@@ -88,7 +94,9 @@ export async function handleClearAssignedTasks(): Promise<boolean> {
  * Clear all tasks for a specific employee
  */
 export async function handleClearAllEmployeeTasks(employeeId: string): Promise<boolean> {
-  const result = await safeAction<ServerActionResponse<boolean>>(() => clearAllEmployeeTasks(employeeId));
+  const result = await safeAction<ServerActionResponse<boolean>>(() =>
+    clearAllEmployeeTasks(employeeId)
+  );
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
@@ -114,6 +122,27 @@ export async function handleDeleteTask(taskId: string): Promise<boolean> {
   return true;
 }
 
+/**
+ * Delete all task assignments for a task group
+ */
+export async function handleDeleteTaskForAllEmployees(
+  categoryId: string,
+  deadlineDate: string,
+  maxOrders: number,
+  createdAt: string
+): Promise<boolean> {
+  const result = await safeAction<ServerActionResponse<boolean>>(() =>
+    deleteTaskForAllEmployees(categoryId, deadlineDate, maxOrders, createdAt)
+  );
+
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error);
+    return false;
+  }
+
+  toast.success('Task deleted');
+  return true;
+}
 
 /**
  * Update task assignment

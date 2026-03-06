@@ -16,7 +16,8 @@ interface EmployeeViewCardProps {
 export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeViewCardProps) {
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<{
-    taskId: string;
+    taskId?: string;
+    assignmentId?: string;
     empId: string;
   } | null>(null);
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
@@ -46,7 +47,6 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
       setShowRemoveConfirm(null);
     }
   }, [employees, showClearConfirm, showRemoveConfirm]);
-
 
   // Remove client-side sorting since it's handled server-side
 
@@ -98,26 +98,26 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
                 {employee.tenure && <p className="text-sm text-gray-500">{employee.tenure}</p>}
               </div>
 
-              {/* Assigned Tasks */}
-              <EmployeeViewTaskBadges 
-                employee={employee}
-                hiddenCount={hiddenCount} 
-                isExpanded={isExpanded}
-                toggleEmployeeExpand={toggleEmployeeExpand} 
-                displayedTasks={displayedTasks}
-                formatDate={formatDate} 
-                setShowRemoveConfirm={setShowRemoveConfirm}
-              />
+            {/* Assigned Tasks */}
+            <EmployeeViewTaskBadges
+              employee={employee}
+              hiddenCount={hiddenCount}
+              isExpanded={isExpanded}
+              toggleEmployeeExpand={toggleEmployeeExpand}
+              displayedTasks={displayedTasks}
+              formatDate={formatDate}
+              setShowRemoveConfirm={setShowRemoveConfirm}
+            />
 
-              {/* Clear All Assigned Tasks for Employee */}
-              <div className='flex w-fit justify-center'>
-                <EmployeeViewCardMenu
-                  openPopoverId={openPopoverId}
-                  setOpenPopoverId={setOpenPopoverId}
-                  employee={employee}
-                  setShowClearConfirm={setShowClearConfirm}
-                />
-              </div>
+            {/* Clear All Assigned Tasks for Employee */}
+            <div className="flex w-fit justify-center">
+              <EmployeeViewCardMenu
+                openPopoverId={openPopoverId}
+                setOpenPopoverId={setOpenPopoverId}
+                employee={employee}
+                setShowClearConfirm={setShowClearConfirm}
+              />
+            </div>
 
             {/* Unassign Task Dialog */}
             <ClearTaskDialog

@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import type { ServerActionResponse } from '@/types';
 import type { BadgeAssignmentUser, BadgeSummary, CollectedBadge, BadgeAwardDebugEntry } from '@/types/manager/badge-assignment';
 import { getUserRole } from '@/actions/shared/auth';
+import { insertNotification } from '@/lib/notifications';
 
 function buildBadgeIds(collected: CollectedBadge[]): string[] {
   return collected.map((badge) => badge.badge_id).filter(Boolean);
@@ -110,7 +111,7 @@ export async function assignManualBadgeToUser(
 
   const { data: badgeRow, error: badgeError } = await supabaseAdmin
     .from('Badges')
-    .select('id, award_at_interval, points')
+    .select('id, name, award_at_interval, points')
     .eq('id', badgeId)
     .single();
 
@@ -170,6 +171,18 @@ export async function assignManualBadgeToUser(
       }
     }
   }
+
+  await insertNotification({
+    userId,
+    type: 'badge',
+    message: `You have been awarded the ${badgeRow.name ?? 'badge'} badge! You have earned ${badgeRow.points ?? 0} bonus points.`,
+    metadata: {
+      badgeId,
+      badgeName: badgeRow.name ?? null,
+      pointsAwarded: badgeRow.points ?? 0,
+      awardedBy,
+    },
+  });
 
   return { error: null, data: true };
 }

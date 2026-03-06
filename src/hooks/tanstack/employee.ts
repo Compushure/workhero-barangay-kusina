@@ -5,13 +5,10 @@
  */
 
 // Queries
-export {
-  useGetEmployeeTasks,
-  employeeTasksKeys,
-} from './queries/employeeTasksQueries';
+export { useGetEmployeeTasks, employeeTasksKeys } from './queries/employeeTasksQueries';
 
 // Mutations
 export {
   useSubmitTaskVerification,
-  useClaimTaskPoints,
+  useClaimTaskPointsandXP,
 } from './mutations/employeeTasksMutations';

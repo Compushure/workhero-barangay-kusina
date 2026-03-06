@@ -6,6 +6,7 @@
 
 import {
   addRewardAction,
+  getAvailableRewardsByIntervalAction,
   getAvailableRewardsByMonthAction,
   getRewardsAction,
   editRewardAction,
@@ -16,6 +17,8 @@ import {
 import { safeAction } from '@/lib/utils/safe-action';
 import { toast } from 'sonner';
 import { AddRewardInput, EditRewardInput, Reward } from '@/types';
+
+const MAX_REWARD_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
 export async function handleGetRewardsAction(): Promise<Reward[]> {
   const result = await safeAction(() => getRewardsAction());
@@ -32,6 +35,18 @@ export async function handleGetAvailableRewardsByMonthAction(month: number): Pro
 
   if (!result.success || result.data?.error) {
     throw new Error(result.error || result.data?.error || 'Failed to fetch monthly rewards');
+  }
+
+  return result.data?.data ?? [];
+}
+
+export async function handleGetAvailableRewardsByIntervalAction(
+  interval: 'weekly' | 'monthly' | 'yearly'
+): Promise<Reward[]> {
+  const result = await safeAction(() => getAvailableRewardsByIntervalAction(interval));
+
+  if (!result.success || result.data?.error) {
+    throw new Error(result.error || result.data?.error || 'Failed to fetch interval rewards');
   }
 
   return result.data?.data ?? [];
@@ -103,6 +118,11 @@ export async function handleUploadRewardPicture(
   file: File,
   rewardName?: string
 ): Promise<string | null> {
+  if (file.size > MAX_REWARD_IMAGE_SIZE_BYTES) {
+    toast.error('Image size must be less than 5MB');
+    return null;
+  }
+
   const result = await safeAction(() => uploadRewardPicture(rewardId, file));
 
   if (!result.success) {

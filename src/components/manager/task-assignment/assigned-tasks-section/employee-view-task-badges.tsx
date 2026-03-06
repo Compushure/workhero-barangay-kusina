@@ -23,7 +23,8 @@ interface EmployeeViewTaskBadgesProps {
   formatDate: (dateString: string | null) => string;
   setShowRemoveConfirm: Dispatch<
     SetStateAction<{
-      taskId: string;
+      taskId?: string;
+      assignmentId?: string;
       empId: string;
     } | null>
   >;
@@ -68,7 +69,9 @@ export default function EmployeeViewTaskBadges({
             <p className={`flex gap-1 ${className} px-2 py-1 rounded-full items-center`}>
               <Icon strokeWidth={2.5} className={`size-4`} />
               <span className={`text-xs`}>
-                {task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : 'Unknown'}
+                {task.status
+                  ? task.status.charAt(0).toUpperCase() + task.status.slice(1)
+                  : 'Unknown'}
               </span>
               {task.status === 'in review' && 
               <span className="text-sm font-semibold leading-0">
@@ -152,7 +155,13 @@ export default function EmployeeViewTaskBadges({
               </div>
 
               <button
-                onClick={() => setShowRemoveConfirm({ taskId: task.id, empId: employee.id })}
+                onClick={() => {
+                  if (!taskEmployee?.assignmentId) return;
+                  setShowRemoveConfirm({
+                    assignmentId: taskEmployee.assignmentId,
+                    empId: employee.id,
+                  });
+                }}
                 className="hover:scale-130 transition-all duration-500 ease-in-out cursor-pointer"
               >
                 <X className="size-4 text-foreground hover:text-red-500" />

@@ -85,6 +85,15 @@
   background-color: #555;
 }
 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 @theme inline {
   --font-pixel: 'Press Start 2P', monospace;
   --font-jersey: 'Jersey 10', monospace;
@@ -168,6 +177,42 @@
   }
 }
 
+.hr-theme {
+  /* Soft off-white/cream background */
+  --background: oklch(0.98 0.01 80); 
+  
+  /* Dark charcoal for main text */
+  --foreground: oklch(0.25 0.02 90); 
+
+  /* The distinct light yellow/cream card color */
+  --card: oklch(0.96 0.04 85); 
+  --card-foreground: oklch(0.25 0.02 90);
+
+  /* Popovers matching the card style */
+  --popover: oklch(0.96 0.04 85);
+  --popover-foreground: oklch(0.25 0.02 90);
+
+  /* The signature WorkHero Orange */
+  --primary: oklch(0.70 0.19 45); 
+  --primary-foreground: oklch(0.99 0 0);
+
+  /* Muted elements and secondary buttons */
+  --secondary: oklch(0.92 0.02 85);
+  --secondary-foreground: oklch(0.40 0.05 45);
+
+  /* Soft borders or disabled states */
+  --muted: oklch(0.90 0.02 85);
+  --muted-foreground: oklch(0.50 0.05 45);
+
+  /* Hover states and accents (Lighter orange/gold) */
+  --accent: oklch(0.85 0.12 75);
+  --accent-foreground: oklch(0.30 0.10 45);
+
+  /* Standard destructive red */
+  --destructive: oklch(0.60 0.20 25);
+  --destructive-foreground: oklch(0.99 0 0);
+}
+
 .pixelated {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
@@ -219,4 +264,21 @@
   .bg-primary-gradient {
     background-image: var(--primary-gradient);
   }
+
+  .animate-launcher-shadow {
+    animation: launcher-shadow-blink 1.6s ease-in-out infinite;
+  }
 }
+
+@keyframes launcher-shadow-blink {
+  0% {
+    box-shadow: 0 0 8px 2px rgba(244, 185, 37, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 16px 8px rgba(244, 185, 37, 0.75);
+  }
+  100% {
+    box-shadow: 0 0 8px 2px rgba(244, 185, 37, 0.35);
+  }
+}
+

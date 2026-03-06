@@ -1,11 +1,10 @@
 // import { HeaderSection } from './header';
 import { DashboardLayout } from './layout';
-import { SidebarNavigation } from './sidebar-navigation';
+import { Sidebar } from './sidebar';
 import { RankingCard } from './ranking-card';
 import { CookingContent } from './cooking-content';
 import { TasksList } from './tasks-list';
 import { MOCK_RANKING_INFO, MOCK_TASKS } from './constants';
-
 
 /**
  * EmployeeDashboardPage - Server Component
@@ -22,7 +21,7 @@ export async function EmployeeDashboardPage() {
 
       {/* Main Dashboard Layout */}
       <DashboardLayout
-        sidebar={<SidebarNavigation />}
+        sidebar={<Sidebar />}
         centerContent={<CookingContent />}
         ranking={<RankingCard ranking={MOCK_RANKING_INFO} />}
         taskTable={<TasksList tasks={MOCK_TASKS} />}

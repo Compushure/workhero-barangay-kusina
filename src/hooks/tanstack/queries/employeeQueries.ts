@@ -27,11 +27,43 @@ import type { UserBadge } from '@/actions/employee/badges';
 export const employeeKeys = {
   all: ['employees'] as const,
   rank: () => [...employeeKeys.all, 'rank'] as const,
-  badges: () => [...employeeKeys.all, 'badges'] as const,
-  userBadges: (userId: string) => [...employeeKeys.badges(), userId] as const,
   points: () => [...employeeKeys.all, 'points'] as const,
   xp: () => [...employeeKeys.all, 'xp'] as const,
+  badges: () => [...employeeKeys.all, 'badges'] as const,
+  userBadges: (userId: string) => [...employeeKeys.badges(), userId] as const,
 };
+
+export function useGetEmployeePoints(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<EmployeePointsData | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.points(),
+    queryFn: async () => {
+      return await handleFetchEmployeePoints();
+    },
+    enabled: queryOptions.enabled !== false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<EmployeePointsData | null, Error>;
+}
+
+export function useGetEmployeeXP(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<EmployeeXP | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.xp(),
+    queryFn: async () => {
+      return await handleFetchEmployeeXP();
+    },
+    enabled: queryOptions.enabled !== false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<EmployeeXP | null, Error>;
+}
 
 /**
  * Fetches the current employee's rank among all regular employees
@@ -67,40 +99,6 @@ export function useGetEmployeeRank(
     retry: 1, // Retry once on failure
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   }) as UseQueryResult<EmployeeRank | null, Error>;
-}
-
-/**
- * Fetches the current employee's points and deducted points
- */
-export function useGetEmployeePoints(
-  queryOptions: { enabled?: boolean } = {}
-): UseQueryResult<EmployeePointsData | null, Error> {
-  return useQuery({
-    queryKey: employeeKeys.points(),
-    queryFn: async () => handleFetchEmployeePoints(),
-    enabled: queryOptions.enabled !== false,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    retry: 1,
-    refetchOnWindowFocus: true,
-  }) as UseQueryResult<EmployeePointsData | null, Error>;
-}
-
-/**
- * Fetches the current employee's XP (current, total, level)
- */
-export function useGetEmployeeXP(
-  queryOptions: { enabled?: boolean } = {}
-): UseQueryResult<EmployeeXP | null, Error> {
-  return useQuery({
-    queryKey: employeeKeys.xp(),
-    queryFn: async () => handleFetchEmployeeXP(),
-    enabled: queryOptions.enabled !== false,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    retry: 1,
-    refetchOnWindowFocus: true,
-  }) as UseQueryResult<EmployeeXP | null, Error>;
 }
 
 /**

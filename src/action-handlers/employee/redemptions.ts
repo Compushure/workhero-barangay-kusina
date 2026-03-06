@@ -45,7 +45,6 @@ export async function handleCreateRedemptionRequestAction(
     return false;
   }
 
-  toast.success(TOAST_MESSAGES.itemRequested);
   return true;
 }
 
@@ -58,6 +57,5 @@ export async function handleCancelMyRedemptionRequestAction(requestId: string): 
     return false;
   }
 
-  toast.success(TOAST_MESSAGES.itemRequestCancelled);
   return true;
 }

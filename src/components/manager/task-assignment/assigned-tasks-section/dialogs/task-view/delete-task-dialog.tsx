@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { AssignedTask } from '@/types';
-import { useDeleteTaskMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
+import { useDeleteTaskGroupMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface DeleteTaskDialogProps {
   showDeleteConfirm: boolean;
@@ -20,11 +20,16 @@ function DeleteTaskDialog({
   setShowDeleteConfirm,
   task,
 }: DeleteTaskDialogProps) {
-  const deleteTaskMutation = useDeleteTaskMutation();
+  const deleteTaskMutation = useDeleteTaskGroupMutation();
 
   const handleDeleteTask = async () => {
     deleteTaskMutation.mutate(
-      { taskId: task.id },
+      {
+        categoryId: task.taskId,
+        deadlineDate: task.dateRange.end ?? '',
+        maxOrders: task.maxOrders,
+        createdAt: task.dateRange.start,
+      },
       {
         onSuccess: () => {
           setShowDeleteConfirm(false);

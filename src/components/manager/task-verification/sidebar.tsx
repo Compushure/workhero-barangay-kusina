@@ -23,7 +23,13 @@ interface SidebarProps {
   navItems?: NavItem[];
 }
 
-function SidebarUserProfile({ isCollapsed, disabled }: { isCollapsed: boolean; disabled: boolean }) {
+function SidebarUserProfile({
+  isCollapsed,
+  disabled,
+}: {
+  isCollapsed: boolean;
+  disabled: boolean;
+}) {
   const { data: user, isLoading, isFetching } = useGetSessionUser();
   const isProfileLoading = isLoading || isFetching;
 
@@ -185,7 +191,7 @@ export function Sidebar({
                       <NavigationDisplay
                         isNavigating={isNavigatingItem}
                         className="inline-flex items-center justify-center"
-                        iconClassName="size-5 animate-spin text-red-200"
+                        iconClassName="size-5 animate-spin text-primary"
                       />
                     ) : (
                       <NavIcon icon={item.icon}/>
@@ -198,7 +204,7 @@ export function Sidebar({
                     <NavigationDisplay
                       isNavigating={isNavigatingItem}
                       className="ml-auto inline-flex items-center justify-center"
-                      iconClassName="size-4 animate-spin text-red-200"
+                      iconClassName="size-4 animate-spin text-primary"
                     />
                   )}
                 </Link>

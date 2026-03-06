@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import {
   handleDeleteTask,
+  handleDeleteTaskForAllEmployees,
   handleClearAssignedTasks,
   handleClearAllEmployeeTasks,
   handleUpdateTaskAssignment,
@@ -23,13 +24,13 @@ import { toast } from 'sonner';
 export function useDeleteTaskMutation(): UseMutationResult<
   boolean,
   Error,
-  { taskId: string }
+  { assignmentId: string }
 > {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ taskId }: { taskId: string }) => {
-      return await handleDeleteTask(taskId);
+    mutationFn: async ({ assignmentId }: { assignmentId: string }) => {
+      return await handleDeleteTask(assignmentId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
@@ -43,17 +44,38 @@ export function useDeleteTaskMutation(): UseMutationResult<
 }
 
 /**
+ * Mutation for deleting all assignments for a task group
+ * This removes the task card and unassigns all employees in that group
+ */
+export function useDeleteTaskGroupMutation(): UseMutationResult<
+  boolean,
+  Error,
+  { categoryId: string; deadlineDate: string; maxOrders: number; createdAt: string }
+> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ categoryId, deadlineDate, maxOrders, createdAt }) => {
+      return await handleDeleteTaskForAllEmployees(categoryId, deadlineDate, maxOrders, createdAt);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
+    },
+    onError: (error) => {
+      toast.error('Failed to delete task group.');
+      console.error('Error deleting task group:', error);
+    },
+  });
+}
+
+/**
  * Mutation for clearing all 'assigned' task assignments
  * Automatically invalidates all assignment queries on success
  */
-export function useClearAssignedTasksMutation(): UseMutationResult<
-  boolean,
-  Error,
-  void
-> {
+export function useClearAssignedTasksMutation(): UseMutationResult<boolean, Error, void> {
   const queryClient = useQueryClient();
-  const { startOptimistic, optimisticClearAll, rollback, commit } =
-    useManagerAssignmentStore();
+  const { startOptimistic, optimisticClearAll, rollback, commit } = useManagerAssignmentStore();
 
   return useMutation({
     mutationFn: async () => {
@@ -119,8 +141,7 @@ export function useUpdateTaskAssignmentMutation(): UseMutationResult<
   { taskId: string; maxOrders: number; newDueDate: string; employeeIds: string[] }
 > {
   const queryClient = useQueryClient();
-  const { startOptimistic, optimisticUpdateTask, rollback, commit } =
-    useManagerAssignmentStore();
+  const { startOptimistic, optimisticUpdateTask, rollback, commit } = useManagerAssignmentStore();
 
   return useMutation({
     mutationFn: async ({

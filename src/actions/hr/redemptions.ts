@@ -1,11 +1,16 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
 import {
   ServerActionResponse,
   RedemptionRequest,
 } from '@/types';
+import { insertNotification } from '@/lib/notifications';
+
+async function getSupabaseAdminClient() {
+  const { supabaseAdmin } = await import('@/lib/supabase/admin');
+  return supabaseAdmin;
+}
 
 function getRewardImageUrl(supabase: any, rewardId: string): string {
   return supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`).data.publicUrl;
@@ -23,6 +28,8 @@ async function autoDeclinePendingRequestsForReward(
   adminId: string
 ): Promise<void> {
   try {
+    const supabaseAdmin = await getSupabaseAdminClient();
+
     // Get all pending requests for this reward
     const { data: pendingRequests, error: fetchError } = await supabaseAdmin
       .from('RewardRequest')
@@ -190,6 +197,7 @@ export async function acceptRedemptionRequestAction(
 ): Promise<ServerActionResponse<void>> {
   try {
     const supabase = await createClient();
+    const supabaseAdmin = await getSupabaseAdminClient();
 
     // Get current user (admin)
     const {
@@ -212,7 +220,8 @@ export async function acceptRedemptionRequestAction(
         quantity,
         status,
         Reward:reward_id (
-          points_cost
+          points_cost,
+          name
         ),
         User:user_id (
           points
@@ -344,6 +353,20 @@ export async function acceptRedemptionRequestAction(
       await autoDeclinePendingRequestsForReward(request.reward_id, newQuantity, admin.id);
     }
 
+    await insertNotification({
+      userId: request.user_id,
+      type: 'reward',
+      message: `Your reward request for ${quantity} x ${reward?.name || 'reward'} has been approved! Check the remarks section for pickup details and instructions.`,
+      metadata: {
+        requestId,
+        rewardId: request.reward_id,
+        rewardName: reward?.name || null,
+        quantity,
+        status: 'approved',
+        remarks: remarks || null,
+      },
+    });
+
     return { error: null };
   } catch (error) {
     console.error('Error in acceptRedemptionRequestAction:', error);
@@ -367,6 +390,7 @@ export async function declineRedemptionRequestAction(
 ): Promise<ServerActionResponse<void>> {
   try {
     const supabase = await createClient();
+    const supabaseAdmin = await getSupabaseAdminClient();
 
     // Get current user (admin)
     const {
@@ -389,7 +413,8 @@ export async function declineRedemptionRequestAction(
         quantity,
         status,
         Reward:reward_id (
-          points_cost
+          points_cost,
+          name
         ),
         User:user_id (
           points
@@ -500,6 +525,20 @@ export async function declineRedemptionRequestAction(
       }
     }
 
+    await insertNotification({
+      userId: request.user_id,
+      type: 'reward',
+      message: `Your reward request for ${quantity} x ${reward?.name || 'reward'} has been rejected. Check the remarks section to see the reason.`,
+      metadata: {
+        requestId,
+        rewardId: request.reward_id,
+        rewardName: reward?.name || null,
+        quantity,
+        status: 'rejected',
+        remarks: remarks || null,
+      },
+    });
+
     return { error: null };
   } catch (error) {
     console.error('Error in declineRedemptionRequestAction:', error);
@@ -519,6 +558,7 @@ export async function declineRedemptionRequestAction(
 export async function autoDeclineInsufficientStockRequestsAction(): Promise<ServerActionResponse<{ declinedCount: number }>> {
   try {
     const supabase = await createClient();
+    const supabaseAdmin = await getSupabaseAdminClient();
 
     // Get current user (admin) for tracking who declined
     const {

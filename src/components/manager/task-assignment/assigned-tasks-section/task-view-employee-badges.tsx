@@ -10,7 +10,9 @@ interface TaskViewEmployeeBadgesProps {
   setExpanded: (value: SetStateAction<boolean>) => void;
   badgesContainerRef: RefObject<HTMLDivElement | null>;
   displayedEmployees: AssignedEmployee[];
-  setShowRemoveConfirm: (value: SetStateAction<string | null>) => void;
+  setShowRemoveConfirm: (
+    value: SetStateAction<{ assignmentId?: string; employeeId: string } | null>
+  ) => void;
 }
 
 export default function TaskViewEmployeeBadges({
@@ -87,7 +89,10 @@ export default function TaskViewEmployeeBadges({
             <span className="font-medium text-sm text-zinc-700">{emp.name}</span>
             <span className="text-gray-500 font-normal text-xs">{emp.empId}</span>
             <button
-              onClick={() => setShowRemoveConfirm(emp.id)}
+              onClick={() => {
+                if (!emp.assignmentId) return;
+                setShowRemoveConfirm({ assignmentId: emp.assignmentId, employeeId: emp.id });
+              }}
               className="ml-2 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130"
               title="Unassign Employee"
             >

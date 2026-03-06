@@ -6,6 +6,7 @@ import type {
   VerificationRequest,
   PaginatedResponse,
 } from '@/types';
+import { insertNotification } from '@/lib/notifications';
 
 export async function fetchTasksToReview(): Promise<ServerActionResponse<VerificationRequest[]>> {
   const supabase = await createClient();
@@ -185,6 +186,20 @@ export async function approveTaskAction(
     return { error: 'Failed to fetch updated task: ' + fetchError.message, data: undefined };
   }
 
+  if (updatedTask?.assigned_to) {
+    await insertNotification({
+      userId: updatedTask.assigned_to,
+      type: 'task',
+      message: 'Your task submission has been approved! Check the remarks section for any additional notes.',
+      metadata: {
+        taskId: kpitask_id,
+        taskName: updatedTask.category_name ?? 'Task',
+        status: updatedTask.status,
+        remark: updatedTask.remark,
+      },
+    });
+  }
+
   return { error: null, data: updatedTask as VerificationRequest };
 }
 
@@ -211,6 +226,20 @@ export async function rejectTaskAction(
 
   if (fetchError) {
     return { error: 'Failed to fetch updated task: ' + fetchError.message, data: undefined };
+  }
+
+  if (rejectedTask?.assigned_to) {
+    await insertNotification({
+      userId: rejectedTask.assigned_to,
+      type: 'task',
+      message: 'Your task submission has been rejected. Check the remarks section to see why.',
+      metadata: {
+        taskId: kpitask_id,
+        taskName: rejectedTask.category_name ?? 'Task',
+        status: rejectedTask.status,
+        remark: rejectedTask.remark,
+      },
+    });
   }
 
   return { error: null, data: rejectedTask as VerificationRequest };

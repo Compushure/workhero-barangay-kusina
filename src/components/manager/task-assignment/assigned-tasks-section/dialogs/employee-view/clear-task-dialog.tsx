@@ -5,12 +5,12 @@ import { useDeleteTaskMutation } from '@/hooks/tanstack/mutations/managerAssignm
 
 interface ClearTaskDialogProps {
   showRemoveConfirm: {
-    taskId: string;
+    assignmentId?: string;
     empId: string;
   } | null;
   setShowRemoveConfirm: (
     show: {
-      taskId: string;
+      assignmentId?: string;
       empId: string;
     } | null
   ) => void;
@@ -25,11 +25,11 @@ function ClearTaskDialog({
   const deleteTaskMutation = useDeleteTaskMutation();
 
   const handleRemoveAssignment = async () => {
-    if (!showRemoveConfirm) return;
+    if (!showRemoveConfirm?.assignmentId) return;
 
     // Use the mutation which will handle cache invalidation
     deleteTaskMutation.mutate(
-      { taskId: showRemoveConfirm.taskId },
+      { assignmentId: showRemoveConfirm.assignmentId },
       {
         onSuccess: () => {
           setShowRemoveConfirm(null);
