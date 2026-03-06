@@ -7,6 +7,7 @@ import {
   Reward,
   RedemptionRequest,
 } from '@/types';
+import { insertNotification } from '@/lib/notifications';
 
 function getRewardImageUrl(supabase: any, rewardId: string): string {
   const baseUrl = supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`)
@@ -235,6 +236,18 @@ export async function createRedemptionRequestAction(
       return { error: `Failed to create redemption request: ${insertError.message}` };
     }
 
+    await insertNotification({
+      userId: user.id,
+      type: 'reward',
+      message: `You have submitted a request for ${quantity} x ${reward.name}. Your request is now pending approval.`,
+      metadata: {
+        rewardId,
+        rewardName: reward.name,
+        quantity,
+        status: 'pending',
+      },
+    });
+
     return { error: null };
   } catch (error) {
     console.error('Error in createRedemptionRequestAction:', error);
@@ -266,10 +279,12 @@ export async function cancelMyRedemptionRequestAction(
         `
         id,
         user_id,
+        reward_id,
         status,
         quantity,
         Reward!RewardRequest_reward_id_fkey (
-          points_cost
+          points_cost,
+          name
         )
       `
       )
@@ -287,6 +302,7 @@ export async function cancelMyRedemptionRequestAction(
 
     const quantity = request.quantity || 1;
     const rewardData = Array.isArray(request.Reward) ? request.Reward[0] : request.Reward;
+    const rewardName = rewardData?.name || 'reward';
     const pointsCost = rewardData?.points_cost || 0;
     const pointsToRestore = pointsCost * quantity;
 
@@ -333,6 +349,20 @@ export async function cancelMyRedemptionRequestAction(
 
       return { error: `Failed to restore points. Cancellation reverted.` };
     }
+
+    await insertNotification({
+      userId: user.id,
+      type: 'reward',
+      message: `You cancelled your request for ${quantity} x ${rewardName}. ${pointsToRestore} points have been restored to your account.`,
+      metadata: {
+        requestId,
+        rewardId: request.reward_id,
+        rewardName,
+        quantity,
+        pointsRestored: pointsToRestore,
+        status: 'cancelled',
+      },
+    });
 
     return { error: null };
   } catch (error) {

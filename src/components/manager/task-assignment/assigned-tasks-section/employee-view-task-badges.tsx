@@ -1,7 +1,18 @@
-import { AssignedEmployee, AssignedTask } from "@/types";
-import { ChevronDown, CircleCheck, CircleDashed, CircleX, Coins, HandCoins, Soup, Target, X } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
-import { isTaskOverdue } from "@/utils/date-utils";
+import { AssignedEmployee, AssignedTask } from '@/types';
+import {
+  ChevronDown,
+  CircleCheck,
+  CircleDashed,
+  CircleX,
+  Coins,
+  HandCoins,
+  Soup,
+  Target,
+  X,
+} from 'lucide-react';
+import { Dispatch, SetStateAction } from 'react';
+import { isTaskOverdue } from '@/utils/date-utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface EmployeeViewTaskBadgesProps {
   employee: AssignedEmployee;
@@ -10,21 +21,24 @@ interface EmployeeViewTaskBadgesProps {
   toggleEmployeeExpand: (empId: string) => void;
   displayedTasks: AssignedTask[];
   formatDate: (dateString: string | null) => string;
-  setShowRemoveConfirm: Dispatch<SetStateAction<{
+  setShowRemoveConfirm: Dispatch<
+    SetStateAction<{
+      taskId?: string;
       assignmentId?: string;
       empId: string;
-  } | null>>
+    } | null>
+  >;
 }
 
-export default function EmployeeViewTaskBadges({ 
+export default function EmployeeViewTaskBadges({
   employee,
-  hiddenCount, 
-  isExpanded, 
-  toggleEmployeeExpand, 
-  displayedTasks, 
-  formatDate, 
-  setShowRemoveConfirm 
-} : EmployeeViewTaskBadgesProps) {
+  hiddenCount,
+  isExpanded,
+  toggleEmployeeExpand,
+  displayedTasks,
+  formatDate,
+  setShowRemoveConfirm,
+}: EmployeeViewTaskBadgesProps) {
   return (
     <div className="flex flex-col pl-4 pr-2 w-full border-l-2 border-accent/20">
       <div className="flex items-center justify-between mb-4">
@@ -40,9 +54,7 @@ export default function EmployeeViewTaskBadges({
             className="text-foreground font-medium flex items-center gap-1 hover:underline"
           >
             {isExpanded ? 'Show Less' : 'See All'}{' '}
-            <ChevronDown
-              className={`w-4 h-4 transition ${isExpanded ? 'rotate-180' : ''}`}
-            />
+            <ChevronDown className={`w-4 h-4 transition ${isExpanded ? 'rotate-180' : ''}`} />
           </button>
         )}
       </div>
@@ -50,17 +62,21 @@ export default function EmployeeViewTaskBadges({
       {/* Task Badges */}
       <div className="grid grid-cols-2 gap-3">
         {displayedTasks.map((task: AssignedTask) => {
-          const taskEmployee = task.assignedEmployees?.find(
-            (emp) => emp.id === employee.id
-          );
+          const taskEmployee = task.assignedEmployees?.find((emp) => emp.id === employee.id);
           const completedOrders = taskEmployee?.completedOrders || 0;
           // Reusable StatusIcon component
           const StatusIcon = ({ icon: Icon, className = "",  }: { icon: any; className?: string;}) => (
-            <p className={`flex gap-1 ${className} px-2 py-1 rounded-full`}>
+            <p className={`flex gap-1 ${className} px-2 py-1 rounded-full items-center`}>
               <Icon strokeWidth={2.5} className={`size-4`} />
               <span className={`text-xs`}>
-                {task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : 'Unknown'}
+                {task.status
+                  ? task.status.charAt(0).toUpperCase() + task.status.slice(1)
+                  : 'Unknown'}
               </span>
+              {task.status === 'in review' && 
+              <span className="text-sm font-semibold leading-0">
+                {taskEmployee?.pendingOrders || 0}
+              </span>}
             </p>
           );
 
@@ -69,42 +85,61 @@ export default function EmployeeViewTaskBadges({
               key={task.id}
               className="flex items-center justify-between bg-white px-3 py-3 rounded-2xl border-2 border-accent/25 h-full"
             >
-              <div className="flex flex-col w-[73%] gap-1">
-                  <span className='truncate text-zinc-700 text-sm font-semibold'>
-                    {task.taskName}
-                  </span>
-                  <div className='flex items-center gap-1 xl:gap-2'>
-                    <p className={`block w-fit text-xs text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}>
-                      {formatDate(task.dateRange.end)}
-                    </p>
+              <div className="flex flex-col w-[60%] gap-1">
+                <span className="truncate text-zinc-700 text-sm font-semibold">
+                  {task.taskName}
+                </span>
+                <div className="flex items-center gap-1 xl:gap-2">
+                  <p
+                    className={`block w-fit text-xs text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}
+                  >
+                    {formatDate(task.dateRange.end)}
+                  </p>
 
-                    {task.status === "assigned" ? 
-                      <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500"/> :
-                    task.status === "in review" ?
-                      <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400"/> : 
-                    task.status === "approved" ?
-                      <StatusIcon icon={CircleCheck} className="bg-green-100 text-green-600"/> :
-                      <StatusIcon icon={CircleX} className="bg-red-100 text-red-600"/>
-                    }
+                  {task.status === 'assigned' ? (
+                    <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" />
+                  ) : task.status === 'in review' ? (
+                    <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400" />
+                  ) : task.status === 'approved' ? (
+                    <StatusIcon icon={CircleCheck} className="bg-green-100 text-green-600" />
+                  ) : (
+                    <StatusIcon icon={CircleX} className="bg-red-100 text-red-600" />
+                  )}
 
-                    {taskEmployee?.pendingOrders === 0 && task.status === 'approved' &&
+                </div>
+              </div>
+
+              <div className="flex flex-col w-[40%] items-end pr-1 gap-1">
+                <div className='flex gap-0.5'>
+                  {taskEmployee?.pendingOrders === 0 && task.status === 'approved' && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="flex px-1.5 py-1 rounded-full items-center bg-green-100 text-green-600">
+                          <HandCoins strokeWidth={2.5} className="size-4" />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="center" className='bg-green-100 text-green-600 border-green-200'>
+                        Points claimed
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  {/* {taskEmployee?.pendingOrders === 0 && task.status === 'approved' &&
                       <p className={`flex gap-1 px-1 xl:px-2 py-1 rounded-full items-center bg-violet-200 text-violet-600`}>
                         <HandCoins strokeWidth={2.5} className={`size-4 `}/>
                         <span className={`text-xs sr-only xl:not-sr-only`}>
                           Claimed
                         </span>
                       </p>
-                    }
-                  </div>
-              </div>
+                    }  */}
+                  <span
+                    className={`flex text-sm leading-none items-end px-2 pt-0.5 pb-1 rounded-full ${completedOrders === task.maxOrders ? 'bg-green-100 text-green-600 font-bold' : 'text-zinc-500'}`}
+                  >
+                    <Soup strokeWidth={1.75} className="size-5 mr-1" />
+                    {completedOrders} / {task.maxOrders}
+                  </span>
+                </div>
 
-              <div className='flex flex-col w-[27%] items-end pr-3 gap-2'>
-                <span className='flex text-zinc-500 text-sm leading-none items-end'>
-                  <Soup strokeWidth={1.75} className="size-5 mr-1" />
-                  {completedOrders} / {task.maxOrders}
-                </span>
-
-                <div className="flex items-end gap-1 text-zinc-500">
+                <div className="flex items-end gap-2 text-zinc-500 pr-1">
                   <p className="flex gap-1 items-end font-semibold text-sm leading-none">
                     <Coins strokeWidth={2.5} className="size-4" />
                     <span className="inline-block">{task.points}</span>
@@ -112,7 +147,9 @@ export default function EmployeeViewTaskBadges({
 
                   <p className="flex gap-1.5 items-end">
                     <span className="inline-block italic font-normal text-sm leading-none">XP</span>
-                    <span className="inline-block font-semibold text-sm leading-none">{task.xp}</span>
+                    <span className="inline-block font-semibold text-sm leading-none">
+                      {task.xp}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -120,7 +157,10 @@ export default function EmployeeViewTaskBadges({
               <button
                 onClick={() => {
                   if (!taskEmployee?.assignmentId) return;
-                  setShowRemoveConfirm({ assignmentId: taskEmployee.assignmentId, empId: employee.id });
+                  setShowRemoveConfirm({
+                    assignmentId: taskEmployee.assignmentId,
+                    empId: employee.id,
+                  });
                 }}
                 className="hover:scale-130 transition-all duration-500 ease-in-out cursor-pointer"
               >

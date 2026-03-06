@@ -13,25 +13,6 @@ import { Card, CardContent } from '@/components/ui/card';
 export default function EmployeeDashboardClient() {
   const [isRewardFeedbackModalOpen, setIsRewardFeedbackModalOpen] = useState(false);
 
-  const tasks = [
-    {
-      title: 'Special Client Commendation',
-      category: 'Client-Centered Metrics',
-      progress: '0/5',
-      points: '100',
-      xp: '10',
-      dueDate: '12/12/25',
-    },
-    {
-      title: 'Internal Training',
-      category: 'Name of Task Type',
-      progress: '0/5',
-      points: '100',
-      xp: '10',
-      dueDate: '12/12/25',
-    },
-  ];
-
   return (
     <div
       // className="flex flex-col min-h-screen bg-bottom bg-repeat bg-contain"
@@ -99,7 +80,7 @@ export default function EmployeeDashboardClient() {
         <div className="w-[60%]">
           <Card className="bg-background shadow-none border-none">
             <CardContent className="p-4">
-              <TasksTable tasks={tasks} />
+              <TasksTable />
             </CardContent>
           </Card>
         </div>

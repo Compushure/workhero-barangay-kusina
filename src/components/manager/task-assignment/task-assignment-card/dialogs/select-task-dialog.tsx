@@ -13,7 +13,10 @@ import {
 import { Search, Plus, ChevronDown, ListTodo } from 'lucide-react';
 import type { AssignedTask, Task } from '@/types';
 import SelectTasksTable from './select-task-table';
-import { handleFetchTaskList, handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
+import {
+  handleFetchTaskList,
+  handleFetchEmployeeList,
+} from '@/action-handlers/manager/assignments';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,19 +87,28 @@ export function SelectTasksDialog({
   // Calculate which tasks have ALL employees assigned
   const fullyAssignedTaskIds = useMemo(() => {
     const assigned = new Set<string>();
+    const activeStatuses = new Set(['assigned', 'in review', 'rejected']);
+
     if (totalEmployees > 0) {
-      // Group assignments by taskId and count unique employees
+      // Group active assignments by taskId and count unique employees
       const taskEmployeeCounts = new Map<string, Set<string>>();
       assignedTasks.forEach((assignment) => {
-        if (!taskEmployeeCounts.has(assignment.taskId)) {
-          taskEmployeeCounts.set(assignment.taskId, new Set());
-        }
+        const taskStatus = (assignment.status ?? '').toLowerCase();
+        const hasActiveTaskStatus = activeStatuses.has(taskStatus);
+
         assignment.assignedEmployees.forEach((emp) => {
+          const employeeStatus = (emp.status ?? taskStatus ?? '').toLowerCase();
+          const isActive = hasActiveTaskStatus || activeStatuses.has(employeeStatus);
+          if (!isActive) return;
+
+          if (!taskEmployeeCounts.has(assignment.taskId)) {
+            taskEmployeeCounts.set(assignment.taskId, new Set());
+          }
           taskEmployeeCounts.get(assignment.taskId)!.add(emp.id);
         });
       });
 
-      // Mark tasks as fully assigned if they have all employees
+      // Mark tasks as fully assigned only when all employees have an active assignment
       taskEmployeeCounts.forEach((employeeIds, taskId) => {
         if (employeeIds.size >= totalEmployees) {
           assigned.add(taskId);
@@ -166,9 +178,9 @@ export function SelectTasksDialog({
     <>
       <Button
         onClick={() => setOpen(true)}
-        className={`bg-zinc-50 shadow-sm/25 flex items-center min-w-54 justify-between cursor-pointer transition-all duration-400 ease-in-out hover:bg-accent/15`}
+        className={`bg-zinc-50 shadow-sm/25 flex items-center justify-between cursor-pointer transition-all duration-400 ease-in-out hover:bg-accent/15`}
       >
-        <div className="flex items-center gap-2 min-w-45 max-9/10">
+        <div className="flex items-center gap-2 min-w-45 max-w-75 pr-1">
           <ListTodo size={16} className='text-accent'/>
           <span className={`truncate ${selectedTask.length === 0 ? 'text-secondary' : 'text-primary'}`}>{buttonLabel}</span>
         </div>
@@ -176,10 +188,10 @@ export function SelectTasksDialog({
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="bg-card max-w-full min-w-4xl max-h-[90vh] flex flex-col p-6">
+        <DialogContent className="bg-background max-w-full min-w-4xl max-h-[90vh] flex flex-col p-6">
           <DialogHeader>
             <DialogTitle className="flex gap-2 text-2xl text-foreground text-left items-center">
-              <ListTodo className='size-7 p-1.25 bg-primary-gradient text-card rounded-full'/>
+              <ListTodo className="size-7 p-1.25 bg-primary-gradient text-card rounded-full" />
               Select Task
             </DialogTitle>
           </DialogHeader>
@@ -208,7 +220,7 @@ export function SelectTasksDialog({
                   <ChevronDown size={18} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className='bg-background'>
+              <DropdownMenuContent align="end" className="bg-background">
                 {taskTypes.map((type) => (
                   <DropdownMenuItem
                     key={type}

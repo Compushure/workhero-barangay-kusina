@@ -51,23 +51,22 @@ export function SortButton({
         <Button
           variant="default"
           size="default"
-          className={`${triggerClassName} cursor-pointer shadow-sm/50 flex justify-between transition-all duration-500 ease-in-out`}
+          className="w-48 bg-card text-foreground shadow-sm/25 hover:bg-card hover:text-foreground hover:brightness-90 transition-all duration-400 ease-in-out cursor-pointer justify-between"
+          // className={`${triggerClassName} cursor-pointer shadow-sm/50 flex justify-between transition-all duration-500 ease-in-out`}
         >
           {/* Label on the left */}
           <span className="truncate">{currentLabel}</span>
           {/* Arrow on the right */}
-          <ArrowUpDown
-            size={18}
-            className={isMercadoStyle ? 'text-[#131C2A] group-hover:text-white' : undefined}
-          />
+          <ArrowUpDown size={18} className='text-accent'/>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-background">
         {options.map((opt) => (
           <DropdownMenuItem
             key={opt.value}
             onClick={() => onSortChange(opt.value)}
-            className={itemClassName(sortBy === opt.value)}
+            className={`cursor-pointer transition-all duration-400 ease-in-out ${sortBy === opt.value ? 'bg-accent text-card' : 'hover:bg-accent/25!'}
+            `}
           >
             {opt.label}
           </DropdownMenuItem>

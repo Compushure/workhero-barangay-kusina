@@ -25,7 +25,7 @@ function AssignEmployeesTable({
   return (
     <div className="rounded-2xl border border-accent/50 flex-1 flex flex-col overflow-auto">
       <table className="w-full">
-        <thead className="bg-background-soft/50 text-primary/50 border-b border-accent/50">
+        <thead className="bg-primary-gradient text-card border-b border-accent/50">
           <tr className="flex py-2 items-center">
             <th className="w-13 p-2 flex justify-center items-center">
               <input
@@ -66,12 +66,12 @@ function AssignEmployeesTable({
                 return (
                   <tr
                     key={employee.id}
-                    className={`flex w-full items-center py-1 transition-all duration-300 ease-in-out border-b border-accent/50 ${
+                    className={`flex w-full items-center py-1 transition-all duration-300 ease-in-out border-b border-accent/25 ${
                       isDisabled
                         ? 'brightness-75 opacity-50 cursor-not-allowed'
                       : isSelected
-                        ? 'bg-accent-secondary/25'
-                        : 'bg-background-soft hover:brightness-96 hover:bg-accent-secondary/25 cursor-pointer transition-all duration-300 ease-in-out'
+                        ? 'bg-row-hover'
+                        : 'bg-card hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
                     }`}
                     onClick={() => !isDisabled && toggleEmployee(employee)}
                   >

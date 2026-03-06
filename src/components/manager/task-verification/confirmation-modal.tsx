@@ -54,14 +54,14 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={(newOpen) => !newOpen && handleCancel()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-card">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="font-bold text-red-900">
+          <div className="bg-background-soft border border-accent/50 rounded-lg p-4">
+            <p className="font-bold">
               This action is permanent. Are you sure you want to proceed?
             </p>
           </div>
@@ -83,7 +83,7 @@ export function ConfirmationDialog({
                 if (error) setError('');
               }}
               disabled={isProcessing}
-              className="min-h-24 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="min-h-24 resize-none disabled:opacity-50 disabled:cursor-not-allowed bg-background-soft border border-accent/50"
               aria-required={isRequired}
               aria-invalid={!!error}
               aria-describedby={error ? 'remark-error' : undefined}
@@ -97,16 +97,16 @@ export function ConfirmationDialog({
         </div>
 
         <DialogFooter className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={handleCancel} disabled={isProcessing}>
-            Cancel
-          </Button>
           <Button
             variant={type === 'approve' ? 'default' : 'destructive'}
             onClick={handleConfirm}
             disabled={isProcessing}
-            className={type === 'approve' ? 'bg-foreground hover:bg-[#af3b3f]' : ''}
+            className={type === 'approve' ? 'bg-foreground hover:bg-accent transition-all duration-400 ease-in-out' : ''}
           >
             {isProcessing ? 'Processing...' : 'Confirm'}
+          </Button>
+          <Button variant="outline" onClick={handleCancel} disabled={isProcessing} className='bg-card border border-primary/50 hover:bg-card hover:brightness-85 transition-all duration-400 ease-in-out'>
+            Cancel
           </Button>
         </DialogFooter>
       </DialogContent>

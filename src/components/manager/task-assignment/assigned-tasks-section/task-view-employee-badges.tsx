@@ -38,7 +38,9 @@ export default function TaskViewEmployeeBadges({
 
   // Reusable StatusIcon component
   const StatusIcon = ({ icon: Icon, className = '' }: { icon: any; className?: string }) => (
-    <Icon strokeWidth={2.5} className={`size-5 p-0.5 rounded-full ${className}`} />
+    <p>
+      <Icon strokeWidth={2.5} className={`size-5 p-0.5 rounded-full ${className}`} />
+    </p>
   );
 
   return (
@@ -80,6 +82,10 @@ export default function TaskViewEmployeeBadges({
             ) : (
               <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" />
             )}
+            {emp.status === 'assigned' && (
+              <span className="text-sm bg-zinc-200 text-zinc-500 px-1 py-2.5 leading-0 rounded-full">{emp.completedOrders !== 0 ? emp.completedOrders : 0}</span>
+            )}
+            
             <span className="font-medium text-sm text-zinc-700">{emp.name}</span>
             <span className="text-gray-500 font-normal text-xs">{emp.empId}</span>
             <button

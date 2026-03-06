@@ -93,14 +93,14 @@ export default function EditTaskDialog({
 
   return (
     <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>
-      <DialogContent className="bg-card max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="bg-background max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-2xl text-foreground">Edit Task</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-4">
           {/* Task Info */}
-          <div className="flex items-center justify-between bg-white rounded-xl px-4 py-2 border border-accent/50">
+          <div className="flex items-center justify-between bg-card rounded-xl px-4 py-2 border border-accent/50">
             <h4 className="text-lg font-bold text-foreground">{task.taskName}</h4>
             <div className="flex flex-col items-center">
               <div className="flex items-end gap-2">
@@ -180,7 +180,7 @@ export default function EditTaskDialog({
                 {editAssignedEmployees.length}
               </span>
             </h4>
-            <div className="bg-background-soft rounded-xl border border-accent/50 min-h-[10vh] max-h-[30vh] overflow-y-auto">
+            <div className="bg-card rounded-xl border border-accent/50 min-h-[10vh] max-h-[30vh] overflow-y-auto">
               <div className="">
                 {filteredEmployees.map((emp) => {
                   const isDisabled = disabledEmployeeIds.has(emp.id);
@@ -194,7 +194,7 @@ export default function EditTaskDialog({
                           ? 'brightness-75 opacity-50 cursor-not-allowed'
                         : isSelected
                           ? 'bg-accent-secondary/25'
-                          : 'bg-background-soft hover:brightness-96 hover:bg-accent-secondary/25 cursor-pointer transition-all duration-300 ease-in-out border-b border-accent/50'
+                          : 'bg-card hover:brightness-96 hover:bg-accent-secondary/25 cursor-pointer transition-all duration-300 ease-in-out border-b border-accent/25'
                       }`}
                       onClick={() => !isDisabled && toggleEmployee(emp.id)}
                     >
