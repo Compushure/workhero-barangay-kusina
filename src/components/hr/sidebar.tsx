@@ -82,10 +82,17 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [hoveredNavKey, setHoveredNavKey] = useState<string | null>(null);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const { startNavigation, stopNavigation, isNavigating, isLoggingOut } = useNavigationStore();
 
   const isUiDisabled = isNavigating || isLoggingOut;
+
+  useEffect(() => {
+    if (!isCollapsed) {
+      setHoveredNavKey(null);
+    }
+  }, [isCollapsed]);
 
   useEffect(() => {
     if (pendingHref && pathname === pendingHref) {
@@ -101,12 +108,12 @@ export function Sidebar({
 
   return (
     <aside
-      className={`bg-muted text-[#131C2A] flex flex-col justify-between transition-all duration-500 ease-in-out overflow-hidden ${
+      className={`max-h-screen bg-muted text-[#131C2A] flex flex-col justify-between transition-all duration-500 ease-in-out overflow-hidden ${
         isCollapsed ? 'w-20' : 'w-60'
       }`}
     >
       {/* Logo Section */}
-      <div className="px-3 py-7 mt-6">
+      <div className="px-3 py-7 pt-4 pb-10 mt-6">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={`group w-full h-full p-1 cursor-pointer rounded-sm transition-colors ${
@@ -173,6 +180,12 @@ export function Sidebar({
           const navLink = (
             <Link
               href={item.href}
+              onMouseEnter={() => {
+                if (isCollapsed) setHoveredNavKey(item.key);
+              }}
+              onMouseLeave={() => {
+                if (isCollapsed) setHoveredNavKey(null);
+              }}
               onClick={() => {
                 if (pathname !== item.href) {
                   setPendingHref(item.href);
@@ -211,7 +224,7 @@ export function Sidebar({
           );
 
           return (
-            <Tooltip key={item.key}>
+            <Tooltip key={item.key} open={isCollapsed && hoveredNavKey === item.key}>
               <TooltipTrigger asChild>{navLink}</TooltipTrigger>
               {isCollapsed && (
                 <TooltipContent side="right" sideOffset={8} className="text-black">

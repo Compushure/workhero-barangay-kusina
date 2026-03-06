@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Check, X, ImageIcon, MessageSquare } from 'lucide-react';
+import { Check, X, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/manager/task-verification/pagination';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSidebarContentArea } from '@/hooks/useSidebarContentArea';
 import {
@@ -32,17 +31,12 @@ export function RedemptionTable({
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [remarkModalOpen, setRemarkModalOpen] = useState(false);
-  const [selectedRemarks, setSelectedRemarks] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<RedemptionRequest | null>(null);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [requestImageError, setRequestImageError] = useState(false);
   const { contentAreaStyle } = useSidebarContentArea();
   const itemsPerPage = 8;
-  const showRemarksColumn = status === 'approved' || status === 'rejected';
-  const tableGridClass = showRemarksColumn
-    ? 'grid-cols-[150px_180px_minmax(200px,1fr)_120px_80px_120px]'
-    : 'grid-cols-[150px_180px_minmax(200px,1fr)_120px_120px]';
+  const tableGridClass = 'grid-cols-[150px_180px_minmax(200px,1fr)_120px_120px]';
 
   // Pagination logic
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -89,6 +83,12 @@ export function RedemptionTable({
     }
   };
 
+  const openRequestModal = (request: RedemptionRequest) => {
+    setSelectedRequest(request);
+    setRequestImageError(false);
+    setRequestModalOpen(true);
+  };
+
   // Format date and time from ISO string
   const formatDateTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -118,12 +118,9 @@ export function RedemptionTable({
         <div className="text-sm font-semibold uppercase tracking-wide text-white">
           Requested Item/s
         </div>
-        <div className="text-sm font-semibold uppercase tracking-wide text-white">Total Cost</div>
-        {showRemarksColumn && (
-          <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
-            Remarks
-          </div>
-        )}
+        <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
+          Total Cost
+        </div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
           Action
         </div>
@@ -151,7 +148,6 @@ export function RedemptionTable({
             const itemDisplay = `${quantity} x ${request.rewardName}`;
             const userPoints = request.userPoints || 0;
             const hasInsufficientPoints = userPoints < totalCost;
-            const hasRemarks = request.remarks && request.remarks.trim() !== '';
             const userName = request.userName || 'N/A';
             const isOutOfStock = request.remarks === 'Item is out of stock';
 
@@ -159,9 +155,18 @@ export function RedemptionTable({
               <div
                 key={request.id}
                 className={cn(
-                  'grid gap-4 px-6 py-4 transition-colors hover:bg-accent-secondary/25',
+                  'grid gap-4 px-6 py-4 transition-colors hover:bg-accent-secondary/25 cursor-pointer',
                   tableGridClass
                 )}
+                onClick={() => openRequestModal(request)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openRequestModal(request);
+                  }
+                }}
               >
                 <div className="flex flex-col justify-center">
                   <p className="text-sm font-medium text-foreground">{dateStr}</p>
@@ -171,50 +176,11 @@ export function RedemptionTable({
                   <p className="text-sm text-foreground truncate">{userName}</p>
                 </div>
                 <div className="flex items-center min-w-0">
-                  <button
-                    type="button"
-                    className="text-sm text-foreground truncate flex-1 text-left cursor-pointer"
-                    onClick={() => {
-                      setSelectedRequest(request);
-                      setRequestImageError(false);
-                      setRequestModalOpen(true);
-                    }}
-                  >
-                    {itemDisplay}
-                  </button>
+                  <p className="text-sm text-foreground truncate flex-1 text-left">{itemDisplay}</p>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center justify-center">
                   <p className="text-sm font-medium text-foreground">{totalCost} Pts</p>
                 </div>
-                {showRemarksColumn && (
-                  <div className="flex items-center justify-center">
-                    {hasRemarks ? (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className={cn(
-                              'h-8 w-8 hover:bg-muted/50',
-                              isOutOfStock ? 'text-orange-600' : 'text-primary'
-                            )}
-                            onClick={() => {
-                              setSelectedRemarks(request.remarks || '');
-                              setRemarkModalOpen(true);
-                            }}
-                          >
-                            <MessageSquare className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {isOutOfStock ? 'Auto-declined: Out of stock' : 'View remarks'}
-                        </TooltipContent>
-                      </Tooltip>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">-</span>
-                    )}
-                  </div>
-                )}
                 <div className="flex items-center gap-2 justify-center">
                   {status === 'pending' ? (
                     <>
@@ -222,7 +188,10 @@ export function RedemptionTable({
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 shrink-0 text-emerald-700 hover:bg-emerald-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => handleAcceptClick(request.id)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleAcceptClick(request.id);
+                        }}
                         disabled={
                           declineMutation.isPending ||
                           acceptMutation.isPending ||
@@ -240,7 +209,10 @@ export function RedemptionTable({
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                        onClick={() => handleDeclineClick(request.id)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleDeclineClick(request.id);
+                        }}
                         disabled={declineMutation.isPending || acceptMutation.isPending}
                       >
                         <X className="h-4 w-4" />
@@ -277,6 +249,7 @@ export function RedemptionTable({
             totalPages={totalPages}
             currentPage={currentPage}
             onPageChange={setCurrentPage}
+            isFixed={false}
           />
         </div>
       )}
@@ -305,7 +278,7 @@ export function RedemptionTable({
       />
 
       <Dialog open={requestModalOpen} onOpenChange={setRequestModalOpen}>
-        <DialogContent className="bg-card text-card-foreground border border-border sm:max-w-md">
+        <DialogContent className="bg-background text-card-foreground border border-border sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-primary">Requested Item</DialogTitle>
           </DialogHeader>
@@ -374,17 +347,6 @@ export function RedemptionTable({
                 </div>
               );
             })()}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={remarkModalOpen} onOpenChange={setRemarkModalOpen}>
-        <DialogContent className="bg-card text-card-foreground border border-border sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-primary">Remarks</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-foreground whitespace-pre-wrap wrap-break-word">
-            {selectedRemarks.trim() || '-'}
-          </p>
         </DialogContent>
       </Dialog>
     </div>

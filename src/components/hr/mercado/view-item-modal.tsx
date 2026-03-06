@@ -5,7 +5,6 @@ import { ImageIcon, X, Calendar } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { isItemAvailableNow } from '@/utils/date-utils';
 import {
   AvailabilityValue,
   formatAvailabilityLabel,
@@ -38,8 +37,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
 
   if (!item) return null;
 
-  // Check if item is scheduled for future
-  const isScheduled = item.availableDate && !isItemAvailableNow(item.availableDate);
+  const availableDateText = item.availableDate ? formatDateShort(item.availableDate) : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -90,10 +88,10 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
                 {item.name}
               </p>
               <div className="flex items-center gap-2 flex-wrap justify-center">
-                {isScheduled && (
+                {availableDateText && (
                   <Badge variant="secondary" className="bg-primary/15 text-primary text-xs">
                     <Calendar className="h-3 w-3 mr-1" />
-                    Available {formatDateShort(item.availableDate)}
+                    Available {availableDateText}
                   </Badge>
                 )}
                 {!item.isActive && (
@@ -143,7 +141,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="h-10 sm:h-11 rounded-xl border-border text-foreground hover:bg-accent-secondary/25 font-semibold text-sm sm:text-base order-2 sm:order-1"
+              className="h-10 sm:h-11 rounded-xl border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white font-semibold text-sm sm:text-base transition-all duration-400 ease-in-out order-2 sm:order-1"
             >
               Cancel
             </Button>
@@ -153,7 +151,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
                   onEdit();
                   onOpenChange(false);
                 }}
-                className="h-10 sm:h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm sm:text-base order-1 sm:order-2"
+                className="h-10 sm:h-11 rounded-xl bg-primary-gradient hover:opacity-95 text-zinc-50 font-semibold text-sm sm:text-base order-1 sm:order-2"
               >
                 Edit
               </Button>
