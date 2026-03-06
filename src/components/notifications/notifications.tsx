@@ -87,8 +87,9 @@ export function NotificationsPopover() {
             </TabsList>
           </Tabs>
         </div>
-        <ScrollArea className="h-90 px-2">
-          {isLoading ? (
+        <div className="h-90 scrollbar-hide">
+          <ScrollArea className="h-full px-2">
+            {isLoading ? (
             <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Loading notifications...
@@ -163,7 +164,8 @@ export function NotificationsPopover() {
               )}
             </div>
           )}
-        </ScrollArea>
+          </ScrollArea>
+        </div>
       </PopoverContent>
     </Popover>
   );

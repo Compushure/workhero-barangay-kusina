@@ -286,6 +286,26 @@ export async function redoTask(
     return { error: 'Failed to redo task: ' + updateError.message, data: undefined };
   }
 
+  // Fetch task name for notification
+  const { data: taskName } = await supabase
+    .from('task_info_view')
+    .select('category_name')
+    .eq('kpitask_id', kpitaskId)
+    .single();
+
+  const taskDisplayName = (taskName as { category_name: string | null }).category_name ?? 'Task';
+
+  await insertNotification({
+    userId: user.id,
+    type: 'task',
+    message: `You have sent "${taskDisplayName}" back to the kitchen. You can now submit it again for review.`,
+    metadata: {
+      taskId: kpitaskId,
+      taskName: taskDisplayName,
+      action: 'redo',
+    },
+  });
+
   return {
     error: null,
     data: true,

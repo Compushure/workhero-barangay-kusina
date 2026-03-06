@@ -83,6 +83,15 @@
   background-color: #555;
 }
 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 @theme inline {
   --font-pixel: 'Press Start 2P', monospace;
   --font-jersey: 'Jersey 10', monospace;
