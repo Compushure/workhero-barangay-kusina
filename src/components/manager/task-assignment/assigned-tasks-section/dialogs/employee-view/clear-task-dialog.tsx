@@ -5,12 +5,12 @@ import { useDeleteTaskMutation } from '@/hooks/tanstack/mutations/managerAssignm
 
 interface ClearTaskDialogProps {
   showRemoveConfirm: {
-    taskId: string;
+    assignmentId?: string;
     empId: string;
   } | null;
   setShowRemoveConfirm: (
     show: {
-      taskId: string;
+      assignmentId?: string;
       empId: string;
     } | null
   ) => void;
@@ -25,11 +25,11 @@ function ClearTaskDialog({
   const deleteTaskMutation = useDeleteTaskMutation();
 
   const handleRemoveAssignment = async () => {
-    if (!showRemoveConfirm) return;
+    if (!showRemoveConfirm?.assignmentId) return;
 
     // Use the mutation which will handle cache invalidation
     deleteTaskMutation.mutate(
-      { taskId: showRemoveConfirm.taskId },
+      { assignmentId: showRemoveConfirm.assignmentId },
       {
         onSuccess: () => {
           setShowRemoveConfirm(null);
@@ -46,7 +46,7 @@ function ClearTaskDialog({
       <DialogTitle className="hidden">Unassign Task to Employee</DialogTitle>
       <DialogContent className="bg-white">
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-[#690003]">Unassign Task?</h3>
+          <h3 className="text-lg font-bold text-foreground">Unassign Task?</h3>
           <p className="text-gray-600">
             Are you sure you want to unassign this task from this employee?
           </p>
@@ -54,7 +54,7 @@ function ClearTaskDialog({
             <Button
               onClick={handleRemoveAssignment}
               disabled={deleteTaskMutation.isPending}
-              className="bg-[#690003] hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
+              className="bg-foreground hover:bg-red-600 text-white cursor-pointer transition-all duration-500 ease-in-out"
             >
               {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
             </Button>
@@ -62,7 +62,7 @@ function ClearTaskDialog({
               variant="outline"
               onClick={() => setShowRemoveConfirm(null)}
               disabled={deleteTaskMutation.isPending}
-              className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+              className="border-zinc-400 bg-white hover:bg-gray-300 cursor-pointer transition-all duration-400 ease-in-out"
             >
               Cancel
             </Button>

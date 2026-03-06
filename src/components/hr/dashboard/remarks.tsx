@@ -94,9 +94,9 @@ export function RemarksDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="bg-card text-card-foreground border border-border sm:max-w-md">
         <DialogHeader className="space-y-3">
-          <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-primary">{title}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             {description}
           </DialogDescription>
@@ -152,7 +152,9 @@ export function RemarksDialog({
             disabled={isConfirmDisabled}
             variant={confirmVariant}
             className={`flex-1 rounded-3xl ${
-              confirmVariant === 'default' ? 'bg-[#690003] hover:bg-[#af3b3f]' : ''
+              confirmVariant === 'default' || confirmVariant === 'destructive'
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : ''
             }`}
           >
             {isProcessing ? 'Processing...' : confirmLabel}

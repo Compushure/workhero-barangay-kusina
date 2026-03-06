@@ -4,15 +4,15 @@ import { useMemo } from 'react';
 import { useMercadoContext } from '../../../components/employee/mercado/mercado-context';
 import { useMercadoPageData } from '@/hooks/useMercadoPageData';
 import { MonthlyRewardsModal } from '@/components/employee/modals/monthly-rewards-modal';
-import { useGetAvailableRewardsByMonth } from '@/hooks/tanstack/queries/rewardQueries';
+import { useGetAvailableRewardsByInterval } from '@/hooks/tanstack/queries/rewardQueries';
 
 export default function MercadoPage() {
-  const { selectedMonth, setSelectedMonth } = useMercadoContext();
+  const { selectedInterval, setSelectedInterval } = useMercadoContext();
   const { pendingRequests, userPoints } = useMercadoPageData({
     includeRewards: false,
   });
-  const { data: monthRewards = [], isLoading: monthRewardsLoading } =
-    useGetAvailableRewardsByMonth(selectedMonth);
+  const { data: intervalRewards = [], isLoading: intervalRewardsLoading } =
+    useGetAvailableRewardsByInterval(selectedInterval);
 
   // Get pending reward IDs
   const pendingRewardIds = useMemo(() => {
@@ -22,11 +22,12 @@ export default function MercadoPage() {
   return (
     <>
       <MonthlyRewardsModal
-        open={!!selectedMonth}
-        onOpenChange={(open) => !open && setSelectedMonth(null)}
-        month={selectedMonth}
-        rewards={monthRewards}
-        isLoading={monthRewardsLoading}
+        open={!!selectedInterval}
+        onOpenChange={(open) => !open && setSelectedInterval(null)}
+        interval={selectedInterval}
+        onIntervalChange={setSelectedInterval}
+        rewards={intervalRewards}
+        isLoading={intervalRewardsLoading}
         userPoints={userPoints}
         pendingRewardIds={pendingRewardIds}
         pendingRequests={pendingRequests}

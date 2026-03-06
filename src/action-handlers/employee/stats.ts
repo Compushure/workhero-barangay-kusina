@@ -13,8 +13,8 @@ import {
   getEmployeeXP,
 } from '@/actions/employee/stats';
 import { toast } from 'sonner';
-import type { EmployeeRank, EmployeeXP } from '@/types';
-import type { TimePeriod } from '@/lib/utils/time-period-utils';
+import type { EmployeePointsData, EmployeeRank, EmployeeXP } from '@/types';
+// import type { TimePeriod } from '@/lib/utils/time-period-utils';
 
 /**
  * Fetches the current employee's level
@@ -22,7 +22,7 @@ import type { TimePeriod } from '@/lib/utils/time-period-utils';
  */
 export async function handleFetchEmployeeLevel(): Promise<number | null> {
   const result = await getEmployeeLevel();
-  
+
   if (!result.success) {
     toast.error('Failed to load level data');
     return null;
@@ -34,7 +34,7 @@ export async function handleFetchEmployeeLevel(): Promise<number | null> {
     });
     return null;
   }
-  
+
   return result.data;
 }
 
@@ -44,7 +44,7 @@ export async function handleFetchEmployeeLevel(): Promise<number | null> {
  */
 export async function handleFetchEmployeePoints(): Promise<EmployeePointsData | null> {
   const result = await getEmployeePoints();
-  
+
   if (result.error) {
     toast.error('Failed to load points', {
       description: result.error,
@@ -63,26 +63,21 @@ export async function handleFetchEmployeePoints(): Promise<EmployeePointsData | 
 }
 
 /**
- * Fetches the current employee's rank among all employees
- * @param period - Time period filter (current/weekly/monthly/yearly)
- * @returns Promise with rank data or null on error
+ * Fetches the latest weekly employee rank
+ * Ranking updates automatically once per week via scheduler.
  */
-export async function handleFetchEmployeeRank(
-  period: TimePeriod | 'current' = 'current'
-): Promise<EmployeeRank | null> {
-  const result = await getEmployeeRank(period);
-  
+export async function handleFetchEmployeeRank(): Promise<EmployeeRank | null> {
+  const result = await getEmployeeRank();
+
   if (!result.success) {
-    toast.error('Failed to load rank', {
+    toast.error('Failed to load weekly rank', {
       description: result.error ?? 'Unknown error',
     });
     return null;
   }
 
   if (!result.data) {
-    toast.error('Failed to load rank', {
-      description: 'No rank data available',
-    });
+    toast.error('No weekly rank available');
     return null;
   }
 

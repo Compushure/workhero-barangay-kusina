@@ -134,6 +134,16 @@ CREATE TYPE "public"."period_intervals_enum" AS ENUM (
 ALTER TYPE "public"."period_intervals_enum" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."rank_interval_enum" AS ENUM (
+    'WEEK',
+    'MONTH',
+    'YEAR'
+);
+
+
+ALTER TYPE "public"."rank_interval_enum" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."requirement_type_enum" AS ENUM (
     'manual',
     'attribute',
@@ -472,12 +482,35 @@ ALTER FUNCTION "public"."get_employee_rank_as_of"("p_user_id" "uuid", "p_cutoff"
 
 CREATE OR REPLACE FUNCTION "public"."get_leaderboard_as_of"("p_cutoff" timestamp with time zone) RETURNS TABLE("user_id" "uuid", "user_name" "text", "performance_score" bigint)
     LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
-  WITH user_kpis AS (
+  WITH badge_points AS (
+    SELECT
+      ub.awarded_to AS user_id,
+      COALESCE(SUM(b.points),0)::bigint AS badge_points
+    FROM "UserBadges" ub
+    JOIN "Badges" b ON ub.badge_id = b.id
+    GROUP BY ub.awarded_to
+  ),
+  user_kpis AS (
     SELECT
       kt.assigned_to AS user_id,
-      COUNT(*)::bigint AS task_count,
-      COALESCE(SUM(kc.points), 0)::bigint AS points_sum
+      COALESCE(
+        SUM(
+          kc.points * LEAST(COALESCE(kt.completed_orders, 0), COALESCE(kt.max_orders, 0))
+        ),
+        0
+      )::bigint AS total_kpi_points,
+      COALESCE(
+        SUM(
+          CASE
+            WHEN COALESCE(kt.max_orders, 0) > 0 AND COALESCE(kt.completed_orders, 0) >= kt.max_orders THEN 1
+            WHEN COALESCE(kt.max_orders, 0) = 0 AND COALESCE(kt.completed_orders, 0) > 0 THEN 1
+            ELSE 0
+          END
+        ),
+        0
+      )::bigint AS task_count
     FROM "KPITask" kt
     JOIN "KPICategory" kc ON kt.category_id = kc.id
     WHERE kt.status = 'approved'
@@ -488,12 +521,12 @@ CREATE OR REPLACE FUNCTION "public"."get_leaderboard_as_of"("p_cutoff" timestamp
   SELECT
     u.id AS user_id,
     u.name::text AS user_name,
-    (uk.task_count * uk.points_sum)::bigint AS performance_score
+    ((COALESCE(uk.total_kpi_points,0) + COALESCE(bp.badge_points,0)) * uk.task_count)::bigint AS performance_score
   FROM "User" u
   JOIN "Role" r ON r.id = u.role_id AND r.type = 'regular'
   JOIN user_kpis uk ON uk.user_id = u.id
-  ORDER BY performance_score DESC
-  LIMIT 10;
+  LEFT JOIN badge_points bp ON bp.user_id = u.id
+  ORDER BY performance_score DESC;
 $$;
 
 
@@ -621,6 +654,23 @@ $$;
 
 
 ALTER FUNCTION "public"."is_hr_user"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."is_hr_user_by_type"() RETURNS boolean
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public."User" u
+    JOIN public."Role" r ON r.id = u.role_id
+    WHERE u.id = auth.uid()
+    AND r.type = 'hr'
+  );
+$$;
+
+
+ALTER FUNCTION "public"."is_hr_user_by_type"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."rpc_assign_user_role_by_type"("p_user_id" "uuid", "p_new_role_type" "text") RETURNS TABLE("updated_user_id" "uuid", "updated_user_name" "text", "assigned_role_id" "uuid", "assigned_role_type" "text")
@@ -1207,6 +1257,24 @@ CREATE TABLE IF NOT EXISTS "public"."Level" (
 ALTER TABLE "public"."Level" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."RankLog" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "period_type" "text" NOT NULL,
+    "period_year" smallint NOT NULL,
+    "period_month" smallint,
+    "period_week" smallint,
+    "period_label" "text" NOT NULL,
+    "rankings" "jsonb" NOT NULL,
+    "is_visible" boolean DEFAULT true NOT NULL,
+    "generated_by" "uuid" NOT NULL,
+    "generated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "RankLog_period_type_check" CHECK (("period_type" = ANY (ARRAY['weekly'::"text", 'monthly'::"text", 'yearly'::"text"])))
+);
+
+
+ALTER TABLE "public"."RankLog" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."Reward" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "name" character varying(255) NOT NULL,
@@ -1217,7 +1285,6 @@ CREATE TABLE IF NOT EXISTS "public"."Reward" (
     "created_by" "uuid",
     "redeeming_limit" integer,
     "available_month" "text",
-    "available_date" "date",
     "month_name" character varying
 );
 
@@ -1471,6 +1538,11 @@ ALTER TABLE ONLY "public"."Level"
 
 
 
+ALTER TABLE ONLY "public"."RankLog"
+    ADD CONSTRAINT "RankLog_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."RewardRequest"
     ADD CONSTRAINT "RewardRequest_pkey" PRIMARY KEY ("id");
 
@@ -1513,6 +1585,14 @@ ALTER TABLE ONLY "public"."User"
 
 ALTER TABLE ONLY "public"."User"
     ADD CONSTRAINT "User_pkey" PRIMARY KEY ("id");
+
+
+
+CREATE INDEX "idx_ranklog_period_type_year" ON "public"."RankLog" USING "btree" ("period_type", "period_year" DESC, COALESCE(("period_month")::integer, 0) DESC, COALESCE(("period_week")::integer, 0) DESC);
+
+
+
+CREATE UNIQUE INDEX "idx_ranklog_unique_period" ON "public"."RankLog" USING "btree" ("period_type", "period_year", COALESCE(("period_month")::integer, 0), COALESCE(("period_week")::integer, 0));
 
 
 
@@ -1580,6 +1660,11 @@ ALTER TABLE ONLY "public"."KPITask"
 
 
 
+ALTER TABLE ONLY "public"."RankLog"
+    ADD CONSTRAINT "RankLog_generated_by_fkey" FOREIGN KEY ("generated_by") REFERENCES "public"."User"("id");
+
+
+
 ALTER TABLE ONLY "public"."RewardRequest"
     ADD CONSTRAINT "RewardRequest_approved_by_fkey" FOREIGN KEY ("approved_by") REFERENCES "public"."User"("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -1628,6 +1713,17 @@ ALTER TABLE ONLY "public"."UserBadges"
 ALTER TABLE ONLY "public"."User"
     ADD CONSTRAINT "User_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "public"."Role"("id") ON UPDATE CASCADE ON DELETE SET NULL;
 
+
+
+CREATE POLICY "Employees can view visible rankings" ON "public"."RankLog" FOR SELECT USING (("is_visible" = true));
+
+
+
+CREATE POLICY "HR can manage all rankings" ON "public"."RankLog" USING ("public"."is_hr_user_by_type"());
+
+
+
+ALTER TABLE "public"."RankLog" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."Role" ENABLE ROW LEVEL SECURITY;
@@ -1916,6 +2012,12 @@ GRANT ALL ON FUNCTION "public"."is_hr_user"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."is_hr_user_by_type"() TO "anon";
+GRANT ALL ON FUNCTION "public"."is_hr_user_by_type"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."is_hr_user_by_type"() TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."rpc_assign_user_role_by_type"("p_user_id" "uuid", "p_new_role_type" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."rpc_assign_user_role_by_type"("p_user_id" "uuid", "p_new_role_type" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."rpc_assign_user_role_by_type"("p_user_id" "uuid", "p_new_role_type" "text") TO "service_role";
@@ -2044,6 +2146,12 @@ GRANT ALL ON TABLE "public"."KPITask" TO "service_role";
 GRANT ALL ON TABLE "public"."Level" TO "anon";
 GRANT ALL ON TABLE "public"."Level" TO "authenticated";
 GRANT ALL ON TABLE "public"."Level" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."RankLog" TO "anon";
+GRANT ALL ON TABLE "public"."RankLog" TO "authenticated";
+GRANT ALL ON TABLE "public"."RankLog" TO "service_role";
 
 
 
@@ -2176,153 +2284,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 
 
 
-
-
-
-revoke delete on table "public"."Role" from "anon";
-
-revoke insert on table "public"."Role" from "anon";
-
-revoke references on table "public"."Role" from "anon";
-
-revoke select on table "public"."Role" from "anon";
-
-revoke trigger on table "public"."Role" from "anon";
-
-revoke truncate on table "public"."Role" from "anon";
-
-revoke update on table "public"."Role" from "anon";
-
-revoke delete on table "public"."Role" from "authenticated";
-
-revoke insert on table "public"."Role" from "authenticated";
-
-revoke references on table "public"."Role" from "authenticated";
-
-revoke select on table "public"."Role" from "authenticated";
-
-revoke trigger on table "public"."Role" from "authenticated";
-
-revoke truncate on table "public"."Role" from "authenticated";
-
-revoke update on table "public"."Role" from "authenticated";
-
-revoke delete on table "public"."User" from "anon";
-
-revoke insert on table "public"."User" from "anon";
-
-revoke references on table "public"."User" from "anon";
-
-revoke select on table "public"."User" from "anon";
-
-revoke trigger on table "public"."User" from "anon";
-
-revoke truncate on table "public"."User" from "anon";
-
-revoke update on table "public"."User" from "anon";
-
-revoke delete on table "public"."User" from "authenticated";
-
-revoke insert on table "public"."User" from "authenticated";
-
-revoke references on table "public"."User" from "authenticated";
-
-revoke trigger on table "public"."User" from "authenticated";
-
-revoke truncate on table "public"."User" from "authenticated";
-
-CREATE TRIGGER trg_auth_user_delete_on_auth_users AFTER DELETE ON auth.users FOR EACH ROW EXECUTE FUNCTION public.delete_public_user_on_auth_delete();
-
-
-  create policy "Allow public DELETE on reward"
-  on "storage"."objects"
-  as permissive
-  for delete
-  to public
-using ((bucket_id = 'reward'::text));
-
-
-
-  create policy "Allow public INSERT on reward"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to public
-with check ((bucket_id = 'reward'::text));
-
-
-
-  create policy "Allow public SELECT on reward"
-  on "storage"."objects"
-  as permissive
-  for select
-  to public
-using ((bucket_id = 'reward'::text));
-
-
-
-  create policy "Allow public UPDATE on reward"
-  on "storage"."objects"
-  as permissive
-  for update
-  to public
-using ((bucket_id = 'reward'::text))
-with check ((bucket_id = 'reward'::text));
-
-
-
-  create policy "allow to public user 1bxl1rk_0"
-  on "storage"."objects"
-  as permissive
-  for select
-  to public
-using ((bucket_id = 'badges'::text));
-
-
-
-  create policy "allow to public user 1bxl1rk_1"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to public
-with check ((bucket_id = 'badges'::text));
-
-
-
-  create policy "allow to public user 1bxl1rk_2"
-  on "storage"."objects"
-  as permissive
-  for update
-  to public
-using ((bucket_id = 'badges'::text));
-
-
-
-  create policy "allow to public user 1bxl1rk_3"
-  on "storage"."objects"
-  as permissive
-  for delete
-  to public
-using ((bucket_id = 'badges'::text));
-
-
-
-  create policy "public_all_employees"
-  on "storage"."objects"
-  as permissive
-  for all
-  to public
-using ((bucket_id = 'employees'::text))
-with check ((bucket_id = 'employees'::text));
-
-
-
-  create policy "public_insert 17mhmrp_0"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to public
-with check ((bucket_id = 'employees'::text));
 
 
 

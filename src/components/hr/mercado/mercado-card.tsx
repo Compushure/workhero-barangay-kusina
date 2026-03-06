@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useMemo, memo, useCallback } from 'react';
-import { Pencil, ImageIcon, EyeOff, Calendar } from 'lucide-react';
+import { useState, useMemo, memo, useCallback, useEffect } from 'react';
+import { Pencil, ImageIcon, EyeOff, Eye, Calendar, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { HideRewardDialog } from './hide-items';
 import { isItemAvailableNow } from '@/utils/date-utils';
+import { AvailabilityInterval, formatDateShort, formatNumber } from './formatters';
 
 interface MercadoItem {
   id: string;
@@ -20,7 +21,8 @@ interface MercadoItem {
   quantity?: number;
   isActive?: boolean;
   imageUrl?: string;
-  availableMonth?: number;
+  createdAt?: string;
+  availableMonth?: AvailabilityInterval | null;
   availableDate?: string | Date | null;
 }
 
@@ -31,19 +33,6 @@ interface MercadoCardProps {
   onDelete?: (id: string) => void;
   onHide?: (id: string) => void;
   onUnhide?: (id: string) => void;
-}
-
-// Format number with comma separators
-function formatNumber(num: number): string {
-  return num.toLocaleString('en-US');
-}
-
-function formatAvailableMonth(month: number | undefined): string {
-  if (!month || month < 1 || month > 12) return 'All Months';
-
-  return new Date(2026, month - 1, 1).toLocaleDateString('en-US', {
-    month: 'long',
-  });
 }
 
 export const MercadoCard = memo(function MercadoCard({
@@ -57,20 +46,26 @@ export const MercadoCard = memo(function MercadoCard({
   const [hideDialogOpen, setHideDialogOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  useEffect(() => {
+    setImageError(false);
+  }, [item.imageUrl]);
+
   // Memoize formatted price
   const formattedPrice = useMemo(() => formatNumber(item.price), [item.price]);
   const formattedQuantity = useMemo(
     () => (item.quantity !== undefined ? formatNumber(item.quantity) : undefined),
     [item.quantity]
   );
+  const isHidden = item.isActive === false;
+  const isOutOfStock = item.quantity !== undefined && item.quantity === 0;
 
   const handleHideConfirm = useCallback(() => {
-    if (item.isActive === false) {
+    if (isHidden) {
       onUnhide?.(item.id);
     } else {
       onHide?.(item.id);
     }
-  }, [item.isActive, item.id, onHide, onUnhide]);
+  }, [isHidden, item.id, onHide, onUnhide]);
 
   const handleCardClick = useCallback(() => {
     onClick?.(item.id);
@@ -83,22 +78,13 @@ export const MercadoCard = memo(function MercadoCard({
 
   const availableDateText = useMemo(() => {
     if (!item.availableDate) return null;
-    try {
-      const date = new Date(item.availableDate);
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      });
-    } catch {
-      return null;
-    }
+    return formatDateShort(item.availableDate, '');
   }, [item.availableDate]);
 
   return (
     <>
       <div
-        className="bg-card border border-border rounded-xl p-4 flex items-center relative shadow-sm hover:shadow-md transition-all h-32 cursor-pointer hover:border-[#730202]/20 hover:scale-[1.02]"
+        className="bg-background border border-border rounded-xl p-4 flex items-center relative shadow-sm hover:shadow-md transition-all h-32 cursor-pointer hover:border-accent/50 hover:scale-[1.02]"
         onClick={handleCardClick}
         role="button"
         tabIndex={0}
@@ -109,7 +95,7 @@ export const MercadoCard = memo(function MercadoCard({
           }
         }}
       >
-        <div className="h-24 w-24 bg-[#f2e1c9] rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+        <div className="h-24 w-24 bg-background border border-accent/20 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
           {item.imageUrl && !imageError ? (
             <img
               src={item.imageUrl}
@@ -125,23 +111,23 @@ export const MercadoCard = memo(function MercadoCard({
               style={{ opacity: 0, transition: 'opacity 0.2s' }}
             />
           ) : (
-            <ImageIcon className="h-8 w-8 text-[#730202]/40" />
+            <ImageIcon className="h-8 w-8 text-primary/40" />
           )}
         </div>
 
         <div className="ml-4 flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-xl font-bold text-[#730202] truncate">{item.name}</h3>
+            <h3 className="text-xl font-bold text-primary truncate">{item.name}</h3>
             {isScheduled && (
               <Badge
                 variant="secondary"
-                className="bg-blue-100 text-blue-700 hover:bg-blue-100 text-xs"
+                className="bg-accent-secondary/25 text-primary hover:bg-accent-secondary/25 text-xs"
               >
                 <Calendar className="h-3 w-3 mr-1" />
                 {availableDateText}
               </Badge>
             )}
-            {item.isActive === false && (
+            {isHidden && (
               <Badge
                 variant="secondary"
                 className="bg-gray-200 text-gray-700 hover:bg-gray-200 text-xs"
@@ -150,10 +136,10 @@ export const MercadoCard = memo(function MercadoCard({
                 Hidden
               </Badge>
             )}
-            {item.quantity !== undefined && item.quantity === 0 && (
+            {isOutOfStock && (
               <Badge
                 variant="destructive"
-                className="bg-red-600 text-white hover:bg-red-600 text-xs"
+                className="bg-destructive text-white hover:bg-destructive text-xs"
               >
                 Out of Stock
               </Badge>
@@ -161,20 +147,20 @@ export const MercadoCard = memo(function MercadoCard({
           </div>
 
           <div className="flex items-center gap-4 mt-2">
-            <p className="text-[#730202] font-medium italic opacity-80 text-base">
-              {formattedPrice} {item.price === 1 ? 'pt' : 'pts'}
-            </p>
+            <p className="text-primary font-semibold text-base">{formattedPrice} pts</p>
             {formattedQuantity !== undefined && (
               <p
-                className={`text-[#730202] text-sm ${item.quantity === 0 ? 'opacity-50 line-through' : 'opacity-70'}`}
+                className={`text-muted-foreground text-sm ${isOutOfStock ? 'opacity-70 line-through' : 'opacity-100'}`}
               >
-                | Available: {formattedQuantity}
+                • Available: {formattedQuantity}
               </p>
             )}
           </div>
-          <p className="text-[#730202]/50 text-xs mt-1">
-            Available Month: {formatAvailableMonth(item.availableMonth)}
-          </p>
+          {item.createdAt && (
+            <p className="text-muted-foreground text-xs mt-1">
+              Created: {formatDateShort(item.createdAt, '')}
+            </p>
+          )}
         </div>
 
         <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
@@ -183,20 +169,29 @@ export const MercadoCard = memo(function MercadoCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 bg-white shadow-md hover:bg-[#690003] hover:text-white transition-all duration-200"
+                className="h-8 w-8 bg-accent text-card border border-accent/80 shadow-md hover:bg-primary-gradient hover:text-card hover:scale-105 transition-all duration-200"
               >
                 <Pencil className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32 rounded-xl">
               <DropdownMenuItem onClick={() => setHideDialogOpen(true)}>
-                {item.isActive === false ? 'Unhide' : 'Hide'}
+                {isHidden ? (
+                  <Eye className="mr-2 h-4 w-4 text-primary" />
+                ) : (
+                  <EyeOff className="mr-2 h-4 w-4 text-primary" />
+                )}
+                {isHidden ? 'Unhide' : 'Hide'}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit?.(item.id)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEdit?.(item.id)}>
+                <Pencil className="mr-2 h-4 w-4 text-primary" />
+                Edit
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => onDelete?.(item.id)}
                 className="text-red-600 font-semibold"
               >
+                <Trash2 className="mr-2 h-4 w-4 text-red-600" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -208,7 +203,7 @@ export const MercadoCard = memo(function MercadoCard({
         open={hideDialogOpen}
         onOpenChange={setHideDialogOpen}
         onConfirm={handleHideConfirm}
-        isHidden={item.isActive === false}
+        isHidden={isHidden}
       />
     </>
   );

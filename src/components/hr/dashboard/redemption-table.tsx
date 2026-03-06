@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Check, X, ImageIcon } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Check, X, ImageIcon, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/manager/task-verification/pagination';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useSidebarContentArea } from '@/hooks/useSidebarContentArea';
 import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
@@ -19,12 +22,6 @@ interface RedemptionTableProps {
   status?: string;
 }
 
-const getRequestQuantity = (request: RedemptionRequest) => request.quantity || 1;
-const getRequestTotalCost = (request: RedemptionRequest) =>
-  request.pointsCost * getRequestQuantity(request);
-const formatPointUnit = (value: number) => (value === 1 ? 'Pt' : 'Pts');
-const formatPoints = (value: number) => `${value} ${formatPointUnit(value)}`;
-
 export function RedemptionTable({
   data,
   onApprove,
@@ -34,11 +31,18 @@ export function RedemptionTable({
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [remarkModalOpen, setRemarkModalOpen] = useState(false);
+  const [selectedRemarks, setSelectedRemarks] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<RedemptionRequest | null>(null);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [requestImageError, setRequestImageError] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const { contentAreaStyle } = useSidebarContentArea();
   const itemsPerPage = 8;
+  const showRemarksColumn = status === 'approved' || status === 'rejected';
+  const tableGridClass = showRemarksColumn
+    ? 'grid-cols-[150px_180px_minmax(200px,1fr)_120px_80px_120px]'
+    : 'grid-cols-[150px_180px_minmax(200px,1fr)_120px_120px]';
 
   // Pagination logic
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -50,7 +54,7 @@ export function RedemptionTable({
   );
 
   // Reset to page 1 when data changes and current page is invalid
-  useMemo(() => {
+  useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(1);
     }
@@ -67,12 +71,6 @@ export function RedemptionTable({
   const handleDeclineClick = (requestId: string) => {
     setSelectedRequestId(requestId);
     setDeclineDialogOpen(true);
-  };
-
-  const handleRequestClick = (request: RedemptionRequest) => {
-    setSelectedRequest(request);
-    setRequestImageError(false);
-    setRequestModalOpen(true);
   };
 
   const handleAcceptConfirm = (remarks?: string) => {
@@ -107,27 +105,34 @@ export function RedemptionTable({
     return { dateStr, timeStr };
   };
 
+  const getRequestQuantity = (req: RedemptionRequest) => req.quantity || 1;
+
+  const getRequestTotalCost = (req: RedemptionRequest) => (req.quantity || 1) * req.pointsCost;
+
   return (
-    <div className="overflow-hidden rounded-lg shadow-md">
+    <div className="overflow-hidden rounded-lg border border-border bg-background shadow-md">
       {/* Table Header */}
-      <div className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_120px] gap-4 bg-[#690003] px-6 py-4">
+      <div className={cn('grid gap-4 bg-primary-gradient px-6 py-4', tableGridClass)}>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">Request Date</div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">Employee</div>
         <div className="text-sm font-semibold uppercase tracking-wide text-white">
           Requested Item/s
         </div>
-        <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
-          Total Cost
-        </div>
+        <div className="text-sm font-semibold uppercase tracking-wide text-white">Total Cost</div>
+        {showRemarksColumn && (
+          <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
+            Remarks
+          </div>
+        )}
         <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
           Action
         </div>
       </div>
 
       {/* Table Body */}
-      <div className="divide-y divide-border bg-[#fff8f5]">
+      <div className="divide-y divide-border bg-background">
         {paginatedData.length === 0 ? (
-          <div className="flex items-center justify-center px-6 py-12 text-[#5a2a2a]">
+          <div className="flex items-center justify-center px-6 py-12 text-foreground">
             <p className="text-sm">
               {status === 'pending'
                 ? 'No pending redemption requests.'
@@ -141,43 +146,82 @@ export function RedemptionTable({
         ) : (
           paginatedData.map((request) => {
             const { dateStr, timeStr } = formatDateTime(request.requestedAt);
-            const quantity = getRequestQuantity(request);
-            const totalCost = getRequestTotalCost(request);
+            const quantity = request.quantity || 1;
+            const totalCost = request.pointsCost * quantity;
             const itemDisplay = `${quantity} x ${request.rewardName}`;
             const userPoints = request.userPoints || 0;
             const hasInsufficientPoints = userPoints < totalCost;
+            const hasRemarks = request.remarks && request.remarks.trim() !== '';
             const userName = request.userName || 'N/A';
             const isOutOfStock = request.remarks === 'Item is out of stock';
 
             return (
               <div
                 key={request.id}
-                className="grid grid-cols-[150px_180px_minmax(200px,1fr)_120px_120px] gap-4 px-6 py-4 transition-colors hover:bg-[#fbeaea] cursor-pointer"
-                onClick={() => handleRequestClick(request)}
+                className={cn(
+                  'grid gap-4 px-6 py-4 transition-colors hover:bg-accent-secondary/25',
+                  tableGridClass
+                )}
               >
                 <div className="flex flex-col justify-center">
-                  <p className="text-sm font-medium text-[#5a2a2a]">{dateStr}</p>
-                  <p className="text-xs text-[#7a3d3d]">{timeStr}</p>
+                  <p className="text-sm font-medium text-foreground">{dateStr}</p>
+                  <p className="text-xs text-muted-foreground">{timeStr}</p>
                 </div>
                 <div className="flex items-center">
-                  <p className="text-sm text-[#5a2a2a] truncate">{userName}</p>
+                  <p className="text-sm text-foreground truncate">{userName}</p>
                 </div>
-                <div className="flex items-center gap-2 min-w-0">
-                  <p className="text-sm text-[#5a2a2a] truncate flex-1">{itemDisplay}</p>
+                <div className="flex items-center min-w-0">
+                  <button
+                    type="button"
+                    className="text-sm text-foreground truncate flex-1 text-left cursor-pointer"
+                    onClick={() => {
+                      setSelectedRequest(request);
+                      setRequestImageError(false);
+                      setRequestModalOpen(true);
+                    }}
+                  >
+                    {itemDisplay}
+                  </button>
                 </div>
-                <div className="flex items-center justify-center">
-                  <p className="text-sm font-medium text-[#5a2a2a]">{formatPoints(totalCost)}</p>
+                <div className="flex items-center">
+                  <p className="text-sm font-medium text-foreground">{totalCost} Pts</p>
                 </div>
-                <div
-                  className="flex items-center gap-2 justify-center"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                {showRemarksColumn && (
+                  <div className="flex items-center justify-center">
+                    {hasRemarks ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                              'h-8 w-8 hover:bg-muted/50',
+                              isOutOfStock ? 'text-orange-600' : 'text-primary'
+                            )}
+                            onClick={() => {
+                              setSelectedRemarks(request.remarks || '');
+                              setRemarkModalOpen(true);
+                            }}
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {isOutOfStock ? 'Auto-declined: Out of stock' : 'View remarks'}
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">-</span>
+                    )}
+                  </div>
+                )}
+                <div className="flex items-center gap-2 justify-center">
                   {status === 'pending' ? (
                     <>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 shrink-0 text-[#2d5016] hover:bg-[#2d5016] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="h-8 w-8 shrink-0 text-emerald-700 hover:bg-emerald-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => handleAcceptClick(request.id)}
                         disabled={
                           declineMutation.isPending ||
@@ -195,7 +239,7 @@ export function RedemptionTable({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 shrink-0 text-[#8b0000] hover:bg-[#8b0000] hover:text-white"
+                        className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"
                         onClick={() => handleDeclineClick(request.id)}
                         disabled={declineMutation.isPending || acceptMutation.isPending}
                       >
@@ -228,7 +272,7 @@ export function RedemptionTable({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="bg-[#fff8f5] py-4">
+        <div className="fixed bottom-6 z-40 flex justify-center" style={contentAreaStyle}>
           <Pagination
             totalPages={totalPages}
             currentPage={currentPage}
@@ -261,9 +305,9 @@ export function RedemptionTable({
       />
 
       <Dialog open={requestModalOpen} onOpenChange={setRequestModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="bg-card text-card-foreground border border-border sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#690003]">Requested Item</DialogTitle>
+            <DialogTitle className="text-primary">Requested Item</DialogTitle>
           </DialogHeader>
           {selectedRequest &&
             (() => {
@@ -272,15 +316,17 @@ export function RedemptionTable({
               const { dateStr, timeStr } = formatDateTime(selectedRequest.requestedAt);
               const requestImageUrl = selectedRequest.rewardImageUrl;
 
+              const formatPoints = (points: number) => `${points} Pts`;
+
               return (
-                <div className="space-y-4 py-2 text-sm text-[#5a2a2a]">
+                <div className="space-y-4 py-2 text-sm text-foreground">
                   <div>
                     <span className="text-xs text-muted-foreground">Requested by: </span>
                     <span className="font-medium">{selectedRequest.userName || 'N/A'}</span>
                   </div>
 
                   <div className="flex flex-col items-center gap-2">
-                    <div className="h-24 w-24 rounded-xl bg-[#f2e1c9] flex items-center justify-center overflow-hidden">
+                    <div className="h-24 w-24 rounded-xl bg-muted flex items-center justify-center overflow-hidden">
                       {requestImageUrl && !requestImageError ? (
                         <img
                           src={requestImageUrl}
@@ -290,7 +336,7 @@ export function RedemptionTable({
                           onError={() => setRequestImageError(true)}
                         />
                       ) : (
-                        <ImageIcon className="h-8 w-8 text-[#730202]/40" />
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
                       )}
                     </div>
                     <p className="font-semibold text-base text-center wrap-anywhere">
@@ -328,6 +374,17 @@ export function RedemptionTable({
                 </div>
               );
             })()}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={remarkModalOpen} onOpenChange={setRemarkModalOpen}>
+        <DialogContent className="bg-card text-card-foreground border border-border sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-primary">Remarks</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-foreground whitespace-pre-wrap wrap-break-word">
+            {selectedRemarks.trim() || '-'}
+          </p>
         </DialogContent>
       </Dialog>
     </div>

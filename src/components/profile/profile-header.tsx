@@ -32,7 +32,7 @@ export function ProfileHeader({ onBack, isPending: isPendingProp = false }: Prof
       <Button
         onClick={handleBack}
         disabled={isPending}
-        className="bg-[#730202] text-white hover:bg-[#8b0003] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95 transition-all duration-200 font-medium"
+        className="bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-secondary)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95 transition-all duration-200 font-medium"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         {isPending ? 'Going back...' : 'Back'}

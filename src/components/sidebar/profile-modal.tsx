@@ -37,19 +37,19 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={!isPending ? onOpenChange : undefined}>
-      <DialogContent className="max-w-[95vw] sm:max-w-125 rounded-2xl p-4 sm:p-6 [&>button]:hidden">
+      <DialogContent className="max-w-[95vw] sm:max-w-125 rounded-2xl p-4 sm:p-6 bg-background text-foreground [&>button]:hidden">
         {/* Custom Close Button */}
         <button
           onClick={() => onOpenChange(false)}
           disabled={isPending}
-          className="absolute right-4 top-4 rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#730202] focus:ring-offset-2 z-50 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="absolute right-4 top-4 rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:ring-offset-2 z-50 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <X className="h-5 w-5 text-[#730202]" />
+          <X className="h-5 w-5 text-[var(--color-accent)]" />
           <span className="sr-only">Close</span>
         </button>
 
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl font-bold text-[#730202]">
+          <DialogTitle className="text-lg sm:text-xl font-bold text-title">
             My Profile
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
@@ -65,7 +65,7 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
               userName={user.name}
               profilePictureUrl={user.profilePictureUrl}
               size="lg"
-              className="bg-[#f2e1c9] transition-transform duration-300 hover:scale-105 border-[#730202]/10"
+              className="bg-[var(--color-background-soft)] transition-transform duration-300 hover:scale-105 border-[var(--color-accent)]/15"
             />
           </div>
 
@@ -79,16 +79,16 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
             <div className="space-y-3">
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-muted-foreground">Full Name</label>
-                <p className="text-base font-semibold text-[#730202]">{user.name}</p>
+                <p className="text-base font-semibold text-title">{user.name}</p>
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-muted-foreground">Email Address</label>
-                <p className="text-sm font-semibold text-[#730202] break-all">{user.email}</p>
+                <p className="text-sm font-semibold text-title break-all">{user.email}</p>
               </div>
               {user.employeeId && (
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-medium text-muted-foreground">Employee ID</label>
-                  <p className="text-base font-semibold text-[#730202]">{user.employeeId}</p>
+                  <p className="text-base font-semibold text-title">{user.employeeId}</p>
                 </div>
               )}
               <div className="flex flex-col gap-1">
@@ -107,7 +107,7 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
             <Button
               onClick={handleViewFullProfile}
               disabled={isPending}
-              className="w-full bg-[#730202] hover:bg-[#8b0003] disabled:bg-gray-400 disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100 group"
+              className="w-full bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] disabled:bg-gray-400 disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100 group"
               size="lg"
             >
               {isPending ? (

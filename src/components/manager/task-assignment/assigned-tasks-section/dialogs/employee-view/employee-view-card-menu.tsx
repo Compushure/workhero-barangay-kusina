@@ -23,7 +23,7 @@ function EmployeeViewCardMenu({
     >
       <div className="flex w-fit h-full">
         <PopoverTrigger asChild>
-          <button className="text-black hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer">
+          <button className="text-primary hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer">
             <MoreVertical className="size-6" />
           </button>
         </PopoverTrigger>
@@ -36,7 +36,7 @@ function EmployeeViewCardMenu({
               setOpenPopoverId(null);
             }}
             variant="ghost"
-            className="justify-start text-red-600 hover:bg-red-50 cursor-pointer hover:transition-all duration-500 ease-in-out"
+            className="justify-start text-red-600 hover:text-red-600 hover:bg-accent-secondary/25 cursor-pointer hover:transition-all duration-500 ease-in-out"
           >
             Clear All Tasks
           </Button>

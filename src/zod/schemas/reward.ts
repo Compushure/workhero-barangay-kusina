@@ -6,6 +6,13 @@
 
 import { z } from 'zod';
 
+const rewardAvailabilitySchema = z
+    .union([
+        z.enum(['weekly', 'monthly', 'yearly']),
+    ])
+    .optional()
+    .nullable();
+
 /**
  * Schema for adding a new reward/mercado item
  */
@@ -17,7 +24,7 @@ export const addRewardSchema = z.object({
     category: z.string().optional(),
     isActive: z.boolean().default(true),
     availableDate: z.date().optional().nullable(),
-    availableMonth: z.number().int().min(1, 'Month must be between 1-12').max(12, 'Month must be between 1-12').optional().nullable(),
+    availableMonth: rewardAvailabilitySchema,
 }).refine((data) => {
     // Validate that redeeming limit doesn't exceed quantity
     if (data.redeemingLimit !== undefined && data.quantity !== undefined) {
@@ -40,7 +47,7 @@ export const editRewardSchema = z.object({
     category: z.string().optional(),
     isActive: z.boolean().optional(),
     availableDate: z.date().optional().nullable(),
-    availableMonth: z.number().int().min(1, 'Month must be between 1-12').max(12, 'Month must be between 1-12').optional().nullable(),
+    availableMonth: rewardAvailabilitySchema,
 }).refine((data) => {
     // Validate that redeeming limit doesn't exceed quantity
     if (data.redeemingLimit !== undefined && data.quantity !== undefined) {

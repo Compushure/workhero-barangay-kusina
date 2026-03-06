@@ -135,20 +135,20 @@ export async function fetchUsersPaginatedAction(
     }
 
     const data = await res.json();
-    const users = data.users as User[];
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 25;
-
-    // Calculate pagination metadata
-    // Note: The backend doesn't return total count directly in the current implementation,
-    // so we estimate based on whether results are less than pageSize
-    const totalPages = users.length < pageSize ? page : page + 1; // Simplified estimation
+    const users = (data.users ?? []) as User[];
+    const fallbackPageSize = params.pageSize ?? 25;
+    const totalCount =
+      typeof data.count === 'number' ? data.count : users.length;
+    const totalPages =
+      typeof data.totalPages === 'number'
+        ? data.totalPages
+        : Math.max(1, Math.ceil(totalCount / fallbackPageSize));
 
     return {
       error: null,
       data: {
         data: users,
-        count: users.length,
+        count: totalCount,
         totalPages,
       },
     };
@@ -203,10 +203,22 @@ export async function addUserAction(input: AddUserInput): Promise<ServerActionRe
     }),
   });
 
-  const { error, user, userRow } = await res.json();
+  let payload: any = null;
+  try {
+    payload = await res.json();
+  } catch (e) {
+    return { error: `Failed to create user: Unable to parse response (${res.status})` };
+  }
+
+  if (!res.ok) {
+    const message = payload?.error || `Failed to create user (status ${res.status})`;
+    return { error: message };
+  }
+
+  const { error, user, userRow } = payload;
 
   if (error) {
-    return { error: 'Failed to create user' + error };
+    return { error: 'Failed to create user: ' + error };
   }
 
   // user is the auth user (has id, email)

@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Coins, Pencil, Trash2, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
+import { Coins, Pencil, Trash2, ChevronDown, ChevronUp, HelpCircle, AlertTriangle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,6 +49,7 @@ export default function BadgeTable({
 }: BadgeTableProps) {
   const formatIntervalLabel = (value: BadgeInterval) => {
     if (value === 'none') return 'Manual';
+    if (value === 'anually') return 'Annually';
     return value.charAt(0).toUpperCase() + value.slice(1);
   };
 
@@ -85,10 +86,10 @@ export default function BadgeTable({
 
   return (
     <>
-      <div className="bg-[#FBF4E8] rounded-2xl border-2 border-gray-300 overflow-hidden">
+      <div className="bg-[#FBF4E8] rounded-2xl border-2 border-gray-300 overflow-x-auto overflow-y-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-[#690003] hover:bg-[#690003]">
+            <TableRow className="bg-foreground hover:bg-foreground">
               <TableHead className="min-w-96 max-w-96 w-96 pl-6 py-4 text-left text-sm font-bold text-card">
                 BADGE
               </TableHead>
@@ -139,6 +140,12 @@ export default function BadgeTable({
                             <div className="text-xs text-red-900 font-medium px-2 rounded-full bg-[#fdeac8] w-fit mt-2">
                               {formatIntervalLabel(badge.award_at_interval)}
                             </div>
+                            {badge.conditions.length === 0 && badge.award_at_interval !== 'none' && (
+                              <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-[11px] font-semibold text-amber-900" title="No conditions configured; badge is treated as manual">
+                                <AlertTriangle className="h-3 w-3" />
+                                No conditions — treated as manual
+                              </div>
+                            )}
                             <div className="text-xs text-gray-500 mt-2">
                               <span className="font-semibold">Created:</span> {formatCreatedDate(badge.created_at)}
                             </div>
@@ -164,7 +171,7 @@ export default function BadgeTable({
                           variant="ghost"
                           size="sm"
                           onClick={() => toggleExpand(badge.id)}
-                          className="text-[#690003] hover:bg-[#690003]/10"
+                          className="text-foreground hover:bg-foreground/10"
                         >
                           <span className="mr-1">{badge.conditions.length}</span>
                           {expandedBadgeId === badge.id ? (
@@ -180,7 +187,7 @@ export default function BadgeTable({
                             variant="ghost"
                             size="icon"
                             onClick={() => onEdit(badge)}
-                            className="hover:bg-[#690003]/10 hover:text-[#690003] transition-colors"
+                            className="hover:bg-foreground/10 hover:text-foreground transition-colors"
                             title="Edit badge"
                           >
                             <Pencil className="size-5" />
@@ -203,7 +210,7 @@ export default function BadgeTable({
                       <TableRow className="bg-[#fdf0eb]">
                         <TableCell colSpan={5} className="pl-12 py-4">
                           <div className="space-y-2">
-                            <h4 className="font-semibold text-sm text-[#690003]">Conditions:</h4>
+                            <h4 className="font-semibold text-sm text-foreground">Conditions:</h4>
                             <div className="max-h-64 overflow-y-auto border border-[#e0cfcf] rounded-lg bg-white divide-y divide-[#e0cfcf]">
                               {badge.conditions.map((condition, idx) => {
                                 const getSpecificName = () => {

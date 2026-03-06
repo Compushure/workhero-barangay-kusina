@@ -43,7 +43,7 @@ export function EmploymentDetails({ profile }: EmploymentDetailsProps) {
         <Label className="text-sm font-medium text-muted-foreground">
           Date Added
         </Label>
-        <p className="text-base font-semibold text-[#730202] p-2 bg-white rounded-md">
+        <p className="text-base font-semibold text-title p-2 bg-white rounded-md">
           {formatDate(profile.date_added || profile.createdAt)}
         </p>
       </div>

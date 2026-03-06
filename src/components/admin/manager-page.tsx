@@ -18,7 +18,6 @@ import type {
   EmploymentStatusValue,
 } from '@/types';
 import { Button } from '@/components/ui/button';
-import { WhiteCard } from '@/components/ui/white-card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -256,35 +255,35 @@ export function ManagerPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-[#f1f1f1]">
+    <div className="min-h-screen bg-zinc-100">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-primary border-b border-border">
+      <header className="sticky top-0 z-10 bg-background border-b-3 border-[#f47812]/15 shadow-sm/25">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-primary-foreground">
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground">
                   User Management
                 </h1>
-                <p className="text-sm text-primary-foreground/70">
+                <p className="text-sm text-gray-600">
                   {users.length} total users on page {page}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Button
-                variant="outline"
+                variant="default"
                 onClick={() => setAddModalOpen(true)}
-                className="gap-2 border-border bg-secondary text-red-foreground cursor-pointer hover:bg-primary/20 hover:text-primary-foreground"
+                className="gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25"
               >
                 <UserPlus className="h-4 w-4" />
                 <span>Add User</span>
               </Button>
               <Button
-                variant="outline"
+                variant="default"
                 onClick={handleLogout}
                 disabled={isPending}
-                className="gap-2 border-border bg-secondary text-red-foreground cursor-pointer hover:bg-primary/20 hover:text-primary-foreground"
+                className="gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>
@@ -295,26 +294,26 @@ export function ManagerPage() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 space-y-4">
-        <WhiteCard className="p-4">
+        <div className="rounded-3xl bg-background p-6 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
           <div className="flex items-center gap-2 mb-4">
-            <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-            <p className="text-sm font-semibold">Search & Filters</p>
+            <SlidersHorizontal className="h-4 w-4 text-gray-600" />
+            <p className="text-sm font-semibold text-foreground">Search & Filters</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div className="space-y-2 lg:col-span-2">
-              <Label htmlFor="search">Search by Name</Label>
+              <Label htmlFor="search" className="text-foreground">Search by Name</Label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
                 <Input
                   id="search"
                   placeholder="Search by name..."
-                  className={`pl-10 pr-9 ${isDebouncing ? 'bg-muted/50' : ''}`}
+                  className={`pl-10 pr-9 border-border focus:border-accent focus:ring-accent ${isDebouncing ? 'bg-muted/50' : 'bg-white'}`}
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600">
                   {isDebouncing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 </div>
               </div>
@@ -322,16 +321,16 @@ export function ManagerPage() {
 
             {/* Employee Type Filter */}
             <div className="space-y-2">
-              <Label htmlFor="filter-type" className="flex items-center gap-2">
+              <Label htmlFor="filter-type" className="flex items-center gap-2 text-foreground">
                 Employee Type
-                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600" />}
               </Label>
               <Select 
                 value={employeeTypeFilter} 
                 onValueChange={handleEmployeeTypeFilterChange}
                 disabled={isLoading}
               >
-                <SelectTrigger id="filter-type" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
+                <SelectTrigger id="filter-type" className={`bg-white border-border focus:border-accent focus:ring-accent ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -345,16 +344,16 @@ export function ManagerPage() {
 
             {/* Employment Status Filter */}
             <div className="space-y-2">
-              <Label htmlFor="filter-status" className="flex items-center gap-2">
+              <Label htmlFor="filter-status" className="flex items-center gap-2 text-foreground">
                 Employment Status
-                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600" />}
               </Label>
               <Select
                 value={employmentStatusFilter}
                 onValueChange={handleEmploymentStatusFilterChange}
                 disabled={isLoading}
               >
-                <SelectTrigger id="filter-status" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
+                <SelectTrigger id="filter-status" className={`bg-white border-border focus:border-accent focus:ring-accent ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -367,12 +366,12 @@ export function ManagerPage() {
 
             {/* Sort */}
             <div className="space-y-2 lg:col-span-2">
-              <Label htmlFor="sort" className="flex items-center gap-2">
+              <Label htmlFor="sort" className="flex items-center gap-2 text-foreground">
                 Sort By
-                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600" />}
               </Label>
               <Select value={sortBy} onValueChange={handleSortChange} disabled={isLoading}>
-                <SelectTrigger id="sort" className={isLoading ? 'opacity-60 cursor-not-allowed' : ''}>
+                <SelectTrigger id="sort" className={`bg-white border-border focus:border-accent focus:ring-accent ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -384,7 +383,7 @@ export function ManagerPage() {
               </Select>
             </div>
           </div>
-        </WhiteCard>
+        </div>
       </div>
 
       {/* Content */}
@@ -392,7 +391,7 @@ export function ManagerPage() {
         {isLoading ? (
           <div className="grid gap-4">
             {[...Array(3)].map((_, i) => (
-              <WhiteCard key={i} className="p-4 sm:p-6 animate-pulse">
+              <div key={i} className="rounded-3xl bg-background p-6 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 animate-pulse">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-3">
                     <div className="h-4 bg-muted rounded w-32" />
@@ -400,29 +399,34 @@ export function ManagerPage() {
                   </div>
                   <div className="h-10 bg-muted rounded w-20" />
                 </div>
-              </WhiteCard>
+              </div>
             ))}
           </div>
         ) : error ? (
-          <WhiteCard className="p-8 sm:p-12 text-center">
-            <p className="text-destructive mb-4">Failed to load users</p>
-            <p className="text-sm text-muted-foreground">{error.message}</p>
-          </WhiteCard>
+          <div className="rounded-3xl bg-background p-8 sm:p-12 text-center border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
+            <p className="text-destructive mb-4 font-semibold">Failed to load users</p>
+            <p className="text-sm text-gray-600">{error.message}</p>
+          </div>
         ) : users.length === 0 ? (
-          <WhiteCard className="p-8 sm:p-12 text-center">
-            <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
-              <UserPlus className="h-6 w-6 text-muted-foreground" />
+          <div className="rounded-3xl bg-background p-8 sm:p-12 text-center border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
+            <div className="mx-auto w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mb-4">
+              <UserPlus className="h-6 w-6 text-foreground" />
             </div>
-            <p className="text-muted-foreground mb-2">No users found</p>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-foreground mb-2 font-semibold">No users found</p>
+            <p className="text-sm text-gray-600 mb-4">
               {searchQuery || employeeTypeFilter !== 'all' || employmentStatusFilter !== 'all'
                 ? 'Try adjusting your filters'
                 : 'Add your first user to get started'}
             </p>
             {!searchQuery && employeeTypeFilter === 'all' && employmentStatusFilter === 'all' && (
-              <Button onClick={() => setAddModalOpen(true)}>Add User</Button>
+              <Button 
+                onClick={() => setAddModalOpen(true)}
+                className="bg-foreground hover:bg-foreground/90 text-white transition-all duration-500 ease-in-out shadow-sm/25"
+              >
+                Add User
+              </Button>
             )}
-          </WhiteCard>
+          </div>
         ) : (
           <>
             <div className="grid gap-4">

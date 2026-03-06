@@ -2,10 +2,13 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Pencil, Plus, X, Loader2, Camera } from 'lucide-react';
+import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -14,6 +17,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+
+type AvailabilityInterval = 'weekly' | 'monthly' | 'yearly';
+
+const MAX_REWARD_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_REWARD_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 interface AddItemsModalProps {
   open: boolean;
@@ -25,7 +33,8 @@ interface AddItemsModalProps {
     quantity?: number;
     redeemingLimit?: number;
     imageUrl?: string;
-    availableMonth?: number;
+    availableDate?: Date | string | null;
+    availableMonth?: number | string | null;
   } | null;
   onSave?: (data: {
     id?: string;
@@ -34,7 +43,8 @@ interface AddItemsModalProps {
     quantity: string;
     redeemingLimit: string;
     cost: number;
-    availableMonth?: number | null;
+    availableDate?: Date | null;
+    availableMonth?: AvailabilityInterval | null;
   }) => Promise<void>;
   saveError?: string;
   onErrorClear?: () => void;
@@ -69,8 +79,12 @@ export function AddItemsModal({
   const [quantity, setQuantity] = useState('');
   const [itemCost, setItemCost] = useState('');
   const [redeemingLimit, setRedeemingLimit] = useState('');
-  const [availableMonth, setAvailableMonth] = useState<string>('none'); // 'none' means no month selected
+  const [availableDate, setAvailableDate] = useState<Date | undefined>();
+  const [availabilityInterval, setAvailabilityInterval] = useState<'none' | AvailabilityInterval>(
+    'none'
+  );
   const [isLoading, setIsLoading] = useState(false);
+  const [iconValidationError, setIconValidationError] = useState<string>('');
 
   // Populate form when editing
   useEffect(() => {
@@ -81,11 +95,17 @@ export function AddItemsModal({
       setRedeemingLimit(editingItem.redeemingLimit?.toString() || '');
       setExistingImageUrl(editingItem.imageUrl ? `${editingItem.imageUrl}?t=${Date.now()}` : '');
       setExistingImageError(false);
-      // Load available month if it exists
-      if (editingItem.availableMonth) {
-        setAvailableMonth(editingItem.availableMonth.toString());
+      const interval =
+        editingItem.availableMonth === 'weekly' ||
+        editingItem.availableMonth === 'monthly' ||
+        editingItem.availableMonth === 'yearly'
+          ? editingItem.availableMonth
+          : 'none';
+      setAvailabilityInterval(interval);
+      if (editingItem.availableDate) {
+        setAvailableDate(new Date(editingItem.availableDate));
       } else {
-        setAvailableMonth('none');
+        setAvailableDate(undefined);
       }
     } else {
       // Reset form when adding new
@@ -93,11 +113,13 @@ export function AddItemsModal({
       setItemCost('');
       setQuantity('');
       setRedeemingLimit('');
-      setAvailableMonth('none');
+      setAvailableDate(undefined);
+      setAvailabilityInterval('none');
       setIconFile(null);
       setIconPreview('');
       setExistingImageUrl('');
       setExistingImageError(false);
+      setIconValidationError('');
     }
   }, [editingItem, open]);
 
@@ -111,8 +133,9 @@ export function AddItemsModal({
     quantity,
     itemCost,
     redeemingLimit,
-    availableMonth,
+    availableDate,
     iconFile,
+    availabilityInterval,
     saveError,
     onErrorClear,
   ]);
@@ -127,7 +150,8 @@ export function AddItemsModal({
         quantity ||
         redeemingLimit ||
         iconFile ||
-        (availableMonth && availableMonth !== 'none')
+        availableDate ||
+        availabilityInterval !== 'none'
       );
     }
 
@@ -142,9 +166,18 @@ export function AddItemsModal({
     const isLimitChanged = redeemingLimitNum !== editingItem.redeemingLimit;
     const isIconChanged = !!iconFile;
 
-    // Check if available month changed
-    const originalMonth = editingItem.availableMonth?.toString() || 'none';
-    const isMonthChanged = availableMonth !== originalMonth;
+    const originalInterval =
+      editingItem.availableMonth === 'weekly' ||
+      editingItem.availableMonth === 'monthly' ||
+      editingItem.availableMonth === 'yearly'
+        ? editingItem.availableMonth
+        : 'none';
+    const isIntervalChanged = originalInterval !== availabilityInterval;
+    const originalDate = editingItem.availableDate
+      ? new Date(editingItem.availableDate).getTime()
+      : null;
+    const currentDate = availableDate ? availableDate.getTime() : null;
+    const isDateChanged = originalDate !== currentDate;
 
     return (
       isNameChanged ||
@@ -152,13 +185,40 @@ export function AddItemsModal({
       isQuantityChanged ||
       isLimitChanged ||
       isIconChanged ||
-      isMonthChanged
+      isIntervalChanged ||
+      isDateChanged
     );
-  }, [editingItem, itemName, itemCost, quantity, redeemingLimit, iconFile, availableMonth]);
+  }, [
+    editingItem,
+    itemName,
+    itemCost,
+    quantity,
+    redeemingLimit,
+    iconFile,
+    availabilityInterval,
+    availableDate,
+  ]);
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!ALLOWED_REWARD_IMAGE_TYPES.includes(file.type)) {
+        setIconFile(null);
+        setIconPreview('');
+        setIconValidationError('Only JPEG, PNG, and WebP images are allowed');
+        e.target.value = '';
+        return;
+      }
+
+      if (file.size > MAX_REWARD_IMAGE_SIZE_BYTES) {
+        setIconFile(null);
+        setIconPreview('');
+        setIconValidationError('Image size must be less than 5MB');
+        e.target.value = '';
+        return;
+      }
+
+      setIconValidationError('');
       setIconFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -169,6 +229,8 @@ export function AddItemsModal({
   };
 
   const handleSave = async () => {
+    if (iconValidationError) return;
+
     if (itemName && itemCost && hasChanges) {
       setIsLoading(true);
       try {
@@ -179,8 +241,8 @@ export function AddItemsModal({
           quantity: unformatNumber(quantity),
           redeemingLimit: unformatNumber(redeemingLimit),
           cost: parseFloat(unformatNumber(itemCost)),
-          availableMonth:
-            availableMonth && availableMonth !== 'none' ? parseInt(availableMonth) : null,
+          availableDate: availableDate || null,
+          availableMonth: availabilityInterval === 'none' ? null : availabilityInterval,
         });
         // Close modal on successful save
         handleClose();
@@ -202,8 +264,10 @@ export function AddItemsModal({
     setQuantity('');
     setRedeemingLimit('');
     setItemCost('');
-    setAvailableMonth('none');
+    setAvailableDate(undefined);
+    setAvailabilityInterval('none');
     setIsLoading(false);
+    setIconValidationError('');
     onOpenChange(false);
   };
 
@@ -234,29 +298,35 @@ export function AddItemsModal({
     unformatNumber(redeemingLimit).length > 6 ||
     unformatNumber(itemCost).length > 6;
 
+  const isImageRequiredMissing = !editingItem && !iconFile;
+  const isIntervalDateMissing = availabilityInterval !== 'none' && !availableDate;
+
   const isSaveDisabled =
     !itemName ||
     !isItemNameValid ||
     !itemCost ||
     !quantity ||
     !redeemingLimit ||
+    isImageRequiredMissing ||
+    isIntervalDateMissing ||
     isRedeemingLimitInvalid() ||
     hasCharacterLimitErrors ||
+    !!iconValidationError ||
     isLoading ||
     !hasChanges;
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
-      <DialogContent className="bg-[#f5e5dc] border-none max-w-[95vw] sm:max-w-[550px] md:max-w-[650px] lg:max-w-[700px] rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-muted text-card-foreground border border-border max-w-[95vw] sm:max-w-137.5 md:max-w-162.5 lg:max-w-175 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2 text-[#5a2a2a] text-base sm:text-lg font-semibold">
+            <DialogTitle className="flex items-center gap-2 text-primary text-base sm:text-lg font-semibold">
               <Pencil className="h-4 w-4 sm:h-5 sm:w-5" />
               {editingItem ? 'Edit Item Reward' : 'Add Item Reward'}
             </DialogTitle>
             <button
               onClick={handleClose}
-              className="text-[#5a2a2a] hover:text-[#690003] transition-colors h-5 w-5"
+              className="text-muted-foreground hover:text-title transition-colors h-5 w-5"
             ></button>
           </div>
         </DialogHeader>
@@ -271,10 +341,10 @@ export function AddItemsModal({
         <div className="grid grid-cols-1 md:grid-cols-[160px_1fr] lg:grid-cols-[190px_1fr] gap-4 mt-4">
           {/* Icon Upload Section */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-[#5a2a2a]">Select Icon</Label>
+            <Label className="text-sm font-medium text-foreground">Select Icon</Label>
             <label
               htmlFor="icon-upload"
-              className="w-full md:w-[160px] lg:w-[180px] h-[140px] md:h-[160px] lg:h-[180px] border-2 border-dashed border-[#7a3d3d] rounded-lg flex items-center justify-center cursor-pointer hover:border-[#690003] transition-colors bg-white mx-auto md:mx-0 relative overflow-hidden group"
+              className="w-full md:w-40 lg:w-45 h-35 md:h-40 lg:h-45 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:border-ring transition-colors bg-background mx-auto md:mx-0 relative overflow-hidden group"
               style={
                 iconPreview || (editingItem && existingImageUrl && !existingImageError)
                   ? {
@@ -297,13 +367,13 @@ export function AddItemsModal({
                 // Existing image shown via background style, overlay info on top
                 <div className="absolute inset-0" />
               ) : (
-                <Plus className="h-8 w-8 text-[#7a3d3d]" />
+                <Plus className="h-8 w-8 text-muted-foreground" />
               )}
 
               {/* Camera icon overlay when there's an image (new or existing) */}
               {(iconPreview || (editingItem && existingImageUrl && !existingImageError)) && (
-                <div className="absolute top-1 right-1 bg-[#690003] rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Camera className="h-4 w-4 text-white" />
+                <div className="absolute top-1 right-1 bg-primary rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="h-4 w-4 text-primary-foreground" />
                 </div>
               )}
             </label>
@@ -314,13 +384,15 @@ export function AddItemsModal({
               onChange={handleIconChange}
               className="hidden"
             />
+            {isImageRequiredMissing && <p className="text-xs text-red-600">Image is required</p>}
+            {iconValidationError && <p className="text-xs text-red-600">{iconValidationError}</p>}
           </div>
 
           {/* Form Fields */}
           <div className="space-y-4">
             {/* Item Name */}
             <div className="space-y-2">
-              <Label htmlFor="item-name" className="text-sm font-medium text-[#5a2a2a]">
+              <Label htmlFor="item-name" className="text-sm font-medium text-foreground">
                 Item name
               </Label>
               <Input
@@ -334,14 +406,11 @@ export function AddItemsModal({
                 }}
                 placeholder="Ex: Vacation ticket"
                 minLength={2}
-                className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
               />
-              {/* Validation Messages for Item Name */}
               {itemName && !isItemNameValid && itemName.length < 2 && (
                 <p className="text-xs text-red-600">Item name must be at least 2 characters</p>
               )}
-
-              {/* Character limit  */}
               {itemName.length > 50 && (
                 <p className="text-xs text-red-600">Item name cannot exceed 50 characters</p>
               )}
@@ -351,7 +420,7 @@ export function AddItemsModal({
             {/* Quantity and Redeeming Limit */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="quantity" className="text-sm font-medium text-[#5a2a2a]">
+                <Label htmlFor="quantity" className="text-sm font-medium text-foreground">
                   Quantity
                 </Label>
                 <Input
@@ -366,12 +435,12 @@ export function AddItemsModal({
                   }}
                   placeholder="Enter quantity"
                   required
-                  className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 />
                 {unformatNumber(quantity).length === 6}
               </div>
               <div className="flex-1 space-y-2">
-                <Label htmlFor="redeeming-limit" className="text-sm font-medium text-[#5a2a2a]">
+                <Label htmlFor="redeeming-limit" className="text-sm font-medium text-foreground">
                   Redeeming limit
                 </Label>
                 <Input
@@ -386,7 +455,7 @@ export function AddItemsModal({
                   }}
                   placeholder="Enter limit"
                   required
-                  className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 />
                 {unformatNumber(redeemingLimit).length === 6}
               </div>
@@ -399,10 +468,10 @@ export function AddItemsModal({
               </p>
             )}
 
-            {/* Item Cost and Available Month */}
+            {/* Item Cost, Availability Date, and Interval */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="item-cost" className="text-sm font-medium text-[#5a2a2a]">
+                <Label htmlFor="item-cost" className="text-sm font-medium text-foreground">
                   Item Cost
                 </Label>
                 <Input
@@ -416,61 +485,68 @@ export function AddItemsModal({
                     }
                   }}
                   placeholder="Fiesta Points"
-                  className="bg-white border-[#e0cfcf] text-[#5a2a2a] placeholder:text-[#7a3d3d]/50"
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 />
                 {unformatNumber(itemCost).length === 6}
               </div>
+              <div className="flex-1 space-y-2">
+                <Label className="text-sm font-medium text-foreground">Availability Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start text-left font-normal bg-background border-border hover:bg-muted',
+                        !availableDate && 'text-muted-foreground'
+                      )}
+                    >
+                      {availableDate ? format(availableDate, 'PPP') : 'Select date (optional)'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={availableDate}
+                      onSelect={setAvailableDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
 
               <div className="flex-1 space-y-2">
-                <Label htmlFor="available-month" className="text-sm font-medium text-[#5a2a2a]">
-                  Available Month
+                <Label htmlFor="available-month" className="text-sm font-medium text-foreground">
+                  Availability Interval
                 </Label>
-                <Select value={availableMonth} onValueChange={setAvailableMonth}>
+                <Select
+                  value={availabilityInterval}
+                  onValueChange={(value) =>
+                    setAvailabilityInterval(value as 'none' | AvailabilityInterval)
+                  }
+                >
                   <SelectTrigger
                     id="available-month"
-                    className="w-full bg-white border-[#e0cfcf] hover:bg-[#fbeaea] text-[#5a2a2a]"
+                    className="w-full bg-background border-border hover:bg-muted text-foreground"
                   >
-                    <SelectValue placeholder="Select month (optional)" />
+                    <SelectValue placeholder="Select interval (optional)" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="none" className="text-[#7a3d3d]/70 italic">
-                      No specific month (available all year)
+                  <SelectContent className="bg-popover text-popover-foreground">
+                    <SelectItem value="none" className="text-muted-foreground italic">
+                      No interval (always available)
                     </SelectItem>
-                    <SelectItem value="1">January</SelectItem>
-                    <SelectItem value="2">February</SelectItem>
-                    <SelectItem value="3">March</SelectItem>
-                    <SelectItem value="4">April</SelectItem>
-                    <SelectItem value="5">May</SelectItem>
-                    <SelectItem value="6">June</SelectItem>
-                    <SelectItem value="7">July</SelectItem>
-                    <SelectItem value="8">August</SelectItem>
-                    <SelectItem value="9">September</SelectItem>
-                    <SelectItem value="10">October</SelectItem>
-                    <SelectItem value="11">November</SelectItem>
-                    <SelectItem value="12">December</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
                   </SelectContent>
                 </Select>
-                {availableMonth && availableMonth !== 'none' && (
-                  <p className="text-xs text-[#7a3d3d]/70 italic">
-                    Item will appear in{' '}
-                    {
-                      [
-                        'January',
-                        'February',
-                        'March',
-                        'April',
-                        'May',
-                        'June',
-                        'July',
-                        'August',
-                        'September',
-                        'October',
-                        'November',
-                        'December',
-                      ][parseInt(availableMonth) - 1]
-                    }{' '}
-                    stall
+                {availabilityInterval !== 'none' && (
+                  <p className="text-xs text-muted-foreground italic">
+                    Item will use {availabilityInterval} interval from{' '}
+                    {availableDate ? format(availableDate, 'MMM d, yyyy') : 'the selected date'}
                   </p>
+                )}
+                {isIntervalDateMissing && (
+                  <p className="text-xs text-red-600">Please select a date for this interval</p>
                 )}
               </div>
             </div>
@@ -483,14 +559,14 @@ export function AddItemsModal({
             variant="outline"
             onClick={handleClose}
             disabled={isLoading}
-            className="bg-white text-[#5a2a2a] border-[#e0cfcf] hover:bg-[#fbeaea] px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="bg-background text-foreground border-border hover:bg-muted px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="bg-[#690003] text-white hover:bg-[#8b0000] px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isLoading ? (
               <>
@@ -505,7 +581,7 @@ export function AddItemsModal({
 
         {/* Helper message when editing but no changes made */}
         {editingItem && !hasChanges && !saveError && (
-          <p className="text-xs text-[#7a3d3d]/70 text-center mt-2 italic">
+          <p className="text-xs text-muted-foreground text-center mt-2 italic">
             Make changes to enable save
           </p>
         )}

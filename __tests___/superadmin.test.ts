@@ -16,6 +16,8 @@
  * - Profile picture management
  */
 
+import { afterAll, beforeAll, beforeEach, describe, expect, jest, test } from '@jest/globals';
+
 process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'test-key';
 process.env.SUPABASE_URL = process.env.SUPABASE_URL || 'http://localhost:54321';
 process.env.NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3008';
@@ -47,10 +49,15 @@ const memDb = {
   userAttributes: [] as Array<{ user_id: string; user_name: string; user_email: string; role_type: string; user_date_added: string; employee_id?: string; contact_details?: string; home_address?: string; tin_id?: string; sss_id?: string; employment_status?: string; pagibig_id?: string }>,
 };
 
-const mockRpc = jest.fn();
-const mockList = jest.fn();
-const mockRemove = jest.fn();
-const mockGetPublicUrl = jest.fn();
+type StorageListResult = { data: Array<{ name: string }> | null; error: { message?: string } | null };
+type StorageRemoveResult = { data: null; error: { message?: string } | null };
+type RpcResult<T = any> = { data: T | null; error: { message: string } | null };
+type FetchResponseMock = { ok: boolean; statusText?: string; json: () => Promise<any> };
+
+const mockRpc = jest.fn() as jest.MockedFunction<(fn: string, args?: any) => Promise<RpcResult>>;
+const mockList = jest.fn() as jest.MockedFunction<() => Promise<StorageListResult>>;
+const mockRemove = jest.fn() as jest.MockedFunction<() => Promise<StorageRemoveResult>>;
+const mockGetPublicUrl = jest.fn() as jest.MockedFunction<(path: string) => { data: { publicUrl: string } }>;
 const mockFrom = jest.fn(() => ({ list: mockList, remove: mockRemove, getPublicUrl: mockGetPublicUrl }));
 const mockSupabase = {
   rpc: mockRpc,
@@ -168,7 +175,8 @@ const EDIT_INPUT: EditUserInput = {
   pagibig: '210987654321',
 };
 
-const mockFetch = jest.fn();
+type FetchMock = (input: RequestInfo | URL, init?: RequestInit) => Promise<any>;
+const mockFetch = jest.fn() as jest.MockedFunction<FetchMock>;
 const realFetch = global.fetch;
 const realNow = Date.now;
 let useRouteFetch = false;

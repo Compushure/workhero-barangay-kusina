@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import {
+    handleGetAvailableRewardsByIntervalAction,
     handleGetAvailableRewardsByMonthAction,
     handleGetRewardsAction,
 } from '@/action-handlers/hr/rewards';
@@ -15,6 +16,8 @@ export const rewardKeys = {
     list: () => [...rewardKeys.lists()] as const,
     available: () => [...rewardKeys.all, 'available'] as const,
     availableByMonth: (month: number) => [...rewardKeys.available(), 'month', month] as const,
+    availableByInterval: (interval: 'weekly' | 'monthly' | 'yearly') =>
+        [...rewardKeys.available(), 'interval', interval] as const,
 };
 
 /**
@@ -53,10 +56,11 @@ export function useGetAvailableRewards(options?: { enabled?: boolean }) {
             console.log('📊 Rewards from database:', allRewards.length);
             console.log('📊 Rewards by month:', allRewards.reduce((acc, r) => {
                 if (r.availableMonth) {
-                    acc[r.availableMonth] = (acc[r.availableMonth] || 0) + 1;
+                    const key = String(r.availableMonth);
+                    acc[key] = (acc[key] || 0) + 1;
                 }
                 return acc;
-            }, {} as Record<number, number>));
+            }, {} as Record<string, number>));
 
             // Filter rewards that are:
             // 1. Active (isActive: true)
@@ -75,10 +79,11 @@ export function useGetAvailableRewards(options?: { enabled?: boolean }) {
             console.log('✅ Available rewards after filtering:', availableRewards.length);
             console.log('✅ Available by month:', availableRewards.reduce((acc, r) => {
                 if (r.availableMonth) {
-                    acc[r.availableMonth] = (acc[r.availableMonth] || 0) + 1;
+                    const key = String(r.availableMonth);
+                    acc[key] = (acc[key] || 0) + 1;
                 }
                 return acc;
-            }, {} as Record<number, number>));
+            }, {} as Record<string, number>));
 
             return availableRewards;
         },
@@ -100,6 +105,28 @@ export function useGetAvailableRewardsByMonth(month: number | null) {
         enabled: typeof month === 'number' && month >= 1 && month <= 12,
         queryFn: async () => {
             return await handleGetAvailableRewardsByMonthAction(month as number);
+        },
+        staleTime: 10 * 1000,
+        gcTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
+    });
+}
+
+/**
+ * Hook to fetch available rewards for a specific interval (weekly/monthly/yearly)
+ * Used by employee Mercado interval modal
+ */
+export function useGetAvailableRewardsByInterval(
+    interval: 'weekly' | 'monthly' | 'yearly' | null
+) {
+    return useQuery<Reward[], Error>({
+        queryKey: interval
+            ? rewardKeys.availableByInterval(interval)
+            : [...rewardKeys.available(), 'interval', 'none'],
+        enabled: interval === 'weekly' || interval === 'monthly' || interval === 'yearly',
+        queryFn: async () => {
+            return await handleGetAvailableRewardsByIntervalAction(interval as 'weekly' | 'monthly' | 'yearly');
         },
         staleTime: 10 * 1000,
         gcTime: 5 * 60 * 1000,

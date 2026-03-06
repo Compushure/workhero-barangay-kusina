@@ -25,7 +25,7 @@ export function GovernmentIDs({ profile }: GovernmentIDsProps) {
           variant="ghost"
           size="sm"
           onClick={toggleVisibility}
-          className="text-[#730202] hover:bg-[#730202]/10 transition-colors duration-200"
+          className="text-accent hover:bg-accent/10 transition-colors duration-200"
         >
           {showUnmaskedIds ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           <span className="ml-2 text-xs">{showUnmaskedIds ? 'Hide' : 'Show'}</span>
@@ -39,7 +39,7 @@ export function GovernmentIDs({ profile }: GovernmentIDsProps) {
           {profile.tin && (
             <div className="space-y-2">
               <Label className="text-sm font-medium text-muted-foreground">TIN</Label>
-              <p className="text-base font-semibold text-[#730202] font-mono p-2 bg-white rounded-md break-all">
+              <p className="text-base font-semibold text-title font-mono p-2 bg-white rounded-md break-all">
                 {showUnmaskedIds ? profile.tin : maskSensitiveId(profile.tin)}
               </p>
             </div>
@@ -47,7 +47,7 @@ export function GovernmentIDs({ profile }: GovernmentIDsProps) {
           {profile.sss && (
             <div className="space-y-2">
               <Label className="text-sm font-medium text-muted-foreground">SSS</Label>
-              <p className="text-base font-semibold text-[#730202] font-mono p-2 bg-white rounded-md break-all">
+              <p className="text-base font-semibold text-title font-mono p-2 bg-white rounded-md break-all">
                 {showUnmaskedIds ? profile.sss : maskSensitiveId(profile.sss)}
               </p>
             </div>
@@ -55,7 +55,7 @@ export function GovernmentIDs({ profile }: GovernmentIDsProps) {
           {profile.pagibig && (
             <div className="space-y-2">
               <Label className="text-sm font-medium text-muted-foreground">Pag-IBIG</Label>
-              <p className="text-base font-semibold text-[#730202] font-mono p-2 bg-white rounded-md break-all">
+              <p className="text-base font-semibold text-title font-mono p-2 bg-white rounded-md break-all">
                 {showUnmaskedIds ? profile.pagibig : maskSensitiveId(profile.pagibig)}
               </p>
             </div>
