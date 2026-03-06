@@ -308,7 +308,7 @@ export async function claimTaskPointsAndXP(
 
   const { data: task, error: taskError } = await supabase
     .from('task_info_view')
-    .select('assigned_to, status, points_claimed_at, category_points, category_xp, completed_orders, pending_orders, max_orders')
+    .select('assigned_to, status, points_claimed_at, category_points, category_xp, completed_orders, pending_orders, max_orders, category_name')
     .eq('kpitask_id', kpitaskId)
     .single();
 
@@ -324,6 +324,7 @@ export async function claimTaskPointsAndXP(
   const completedOrders = (task as { completed_orders: number | null }).completed_orders ?? 0;
   const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
   const pendingOrders = (task as { pending_orders: number | null }).pending_orders ?? 0;
+  const categoryName = (task as { category_name: string | null }).category_name ?? 'Task';
 
   if (assignedTo !== user.id) {
     return { error: 'You can only claim rewards for tasks assigned to you', data: undefined };
@@ -385,6 +386,31 @@ export async function claimTaskPointsAndXP(
   if (claimUpdateError) {
     return { error: 'Failed to mark task as claimed', data: undefined };
   }
+
+  // Build notification message
+  const pointsEarned = categoryPoints * pendingOrders;
+  let notificationMessage = `You have claimed ${pointsEarned} points for completing the task "${categoryName}."`;
+  
+  // Check if user leveled up
+  if (newLevel > currentLevel) {
+    notificationMessage += ` It looks like you've leveled up! You are now level ${newLevel}!`;
+  }
+
+  // Insert notification
+  await insertNotification({
+    userId: user.id,
+    type: 'user',
+    message: notificationMessage,
+    metadata: {
+      taskId: kpitaskId,
+      taskName: categoryName,
+      pointsEarned,
+      xpEarned: categoryXp * pendingOrders,
+      leveledUp: newLevel > currentLevel,
+      newLevel,
+      previousLevel: currentLevel,
+    },
+  });
 
   return {
     error: null,
