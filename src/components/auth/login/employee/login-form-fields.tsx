@@ -71,16 +71,6 @@ export function LoginFormFields({
           </button>
         </div>
       </div>
-
-      {/* Forgot Password Link */}
-      <div className="flex justify-end">
-        <a
-          href="#"
-          className="text-xs font-pixel text-orange-600 hover:text-orange-800 hover:underline transition-colors"
-        >
-          FORGOT PASSWORD?
-        </a>
-      </div>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import { Suspense } from 'react';
 import { LoginBackground } from './login-background';
 import { LoginFormWrapper } from './login-form-wrapper';
 
@@ -10,16 +9,14 @@ interface LoginPageProps {
 
 export function LoginPage({ onSubmit }: LoginPageProps) {
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-orange-50 via-yellow-50 to-orange-50">
+    <div className="relative min-h-dvh overflow-hidden bg-linear-to-b from-orange-50 via-yellow-50 to-orange-50">
       {/* Animated Background */}
       <LoginBackground />
 
       {/* Form Container with Z-indexing */}
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-        <div className="relative z-20 min-h-screen flex items-center justify-center p-4">
-          <LoginFormWrapper onSubmit={onSubmit} />
-        </div>
-      </Suspense>
+      <div className="relative z-20 min-h-dvh flex items-center justify-center px-3 py-4 sm:px-4 sm:py-6">
+        <LoginFormWrapper onSubmit={onSubmit} />
+      </div>
     </div>
   );
 }
