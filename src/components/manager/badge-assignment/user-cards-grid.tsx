@@ -66,7 +66,7 @@ export default function UserCardsGrid({
                 )}
 
                 {/* User Details */}
-                <div className="min-w-0">
+                <div className="min-w-0 w-48">
                   <p className="font-semibold text-foreground text-sm truncate">{user.name}</p>
                   <p className="text-xs text-secondary truncate">{user.employee_id}</p>
                 </div>
@@ -96,7 +96,7 @@ export default function UserCardsGrid({
                           </div>
                           {/* Tooltip */}
                           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
-                            <div className="bg-foreground text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+                            <div className="bg-background text-primary text-xs rounded px-2 py-1 whitespace-nowrap border-b-2 border-x border-accent-secondary/25">
                               {badge?.name}
                             </div>
                           </div>

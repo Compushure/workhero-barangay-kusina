@@ -279,10 +279,10 @@ export function BadgeEditorPage() {
                 <Button
                   variant="default"
                   size="default"
-                  className="bg-card shadow-sm/25 hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-48 py-2 justify-between border border-gray-200"
+                  className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-48 py-2 justify-between border border-gray-200"
                 >
                   <span className="truncate">{currentSortLabel}</span>
-                  <ArrowUpDown size={18} />
+                  <ArrowUpDown size={18} className='text-accent'/>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-background w-56">

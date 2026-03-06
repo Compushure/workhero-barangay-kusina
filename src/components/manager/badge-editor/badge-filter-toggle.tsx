@@ -34,7 +34,7 @@ export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterTog
             variant="outline"
             className="gap-2 h-10 px-4 rounded-lg border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
           >
-            <Filter className="h-4 w-4" />
+            <Filter className="h-4 w-4 text-accent" />
             <span className="hidden sm:inline">Filters</span>
             {activeFilterCount > 0 && (
               <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
@@ -43,7 +43,7 @@ export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterTog
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 bg-card">
+        <DropdownMenuContent align="end" className="w-56 bg-background">
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Badge Type
           </DropdownMenuLabel>
