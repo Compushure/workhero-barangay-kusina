@@ -46,7 +46,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
                 Leaderboards
               </h1>
               <p className="text-sm text-muted-foreground">
-             Performance rankings across weekly, monthly, and yearly periods.
+              View rankings by week, month, and year.
               </p>
             </div>
           </div>
