@@ -6,7 +6,7 @@ export function LoginHero() {
       {/* Logo and Title */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center shadow-lg animate-float">
+          <div className="w-14 h-14 bg-primary-gradient rounded-xl flex items-center justify-center shadow-lg animate-float">
             <Utensils className="w-7 h-7 text-primary-foreground" />
           </div>
           <h1 className="text-4xl font-extrabold text-foreground">
@@ -15,7 +15,7 @@ export function LoginHero() {
           </h1>
         </div>
         <p className="text-muted-foreground text-lg mt-2">
-          Gamified HR system inspired by community feasts
+          Gamified HR system inspired by community feastsscs
         </p>
       </div>
 
@@ -36,8 +36,8 @@ export function LoginHero() {
 
         {/* Team Feast Levels */}
         <div className="flex gap-4 items-start animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-          <div className="w-12 h-12 bg-secondary/20 rounded-xl flex items-center justify-center shrink-0">
-            <Users className="w-6 h-6 text-secondary" />
+          <div className="w-12 h-12 bg-accent-secondary/25 rounded-xl flex items-center justify-center shrink-0">
+            <Users className="w-6 h-6 text-accent" />
           </div>
           <div>
             <h3 className="font-semibold text-foreground">Level Up Together</h3>
@@ -49,8 +49,8 @@ export function LoginHero() {
 
         {/* Potluck Rewards */}
         <div className="flex gap-4 items-start animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-          <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center shrink-0">
-            <Utensils className="w-6 h-6 text-primary" />
+          <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+            <Utensils className="w-6 h-6 text-amber-400" />
           </div>
           <div>
             <h3 className="font-semibold text-foreground">Redeem Your Rewards</h3>
