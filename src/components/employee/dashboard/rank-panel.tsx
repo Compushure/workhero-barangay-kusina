@@ -12,7 +12,7 @@ export function RankWidget() {
   const rank = rankData?.rank ?? 1;
 
   const cardClassName =
-    'bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-4 mb-4 w-[280px] min-h-[140px] shrink-0 font-jersey tracking-widest';
+    'bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-4 mb-4 -ml-6 w-[340px] min-h-[140px] shrink-0 font-jersey tracking-widest';
 
   if (isRankLoading) {
     return (
@@ -70,7 +70,7 @@ export function RankWidget() {
 
         {/* Right: Performance Score */}
         <div className="flex flex-col items-center justify-self-center">
-          <span className="text-xs leading-[1.05] text-white/85 text-center mb-1">
+          <span className="text-sm leading-[1.05] text-white/85 text-center mb-1">
             Performance Score
           </span>
           <Tooltip>
