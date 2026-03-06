@@ -131,7 +131,7 @@ export function PeriodSelector({
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-medium text-muted-foreground">Week</label>
           <Select value={String(Math.min(week, maxWeek))} onValueChange={(v) => setWeek(Number(v))}>
-            <SelectTrigger className="w-25 bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
+            <SelectTrigger className="min-w-[120px] bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
               <span className="truncate">Week {Math.min(week, maxWeek) || '—'}</span>
             </SelectTrigger>
             <SelectContent>
@@ -153,7 +153,7 @@ export function PeriodSelector({
             value={String(Math.min(month, maxMonth))}
             onValueChange={(v) => setMonth(Number(v))}
           >
-            <SelectTrigger className="w-25 bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
+            <SelectTrigger className="min-w-[120px] bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
