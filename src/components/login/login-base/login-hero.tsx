@@ -15,7 +15,7 @@ export function LoginHero() {
           </h1>
         </div>
         <p className="text-muted-foreground text-lg mt-2">
-          Gamified HR system inspired by community feastsscs
+          Gamified HR system inspired by community feasts
         </p>
       </div>
 
