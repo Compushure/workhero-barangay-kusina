@@ -23,12 +23,13 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   const updateTaskMutation = useUpdateTaskAssignmentMutation();
 
   const [expanded, setExpanded] = useState(false);
-  const [showRemoveConfirm, setShowRemoveConfirm] = useState<
-    { assignmentId?: string; employeeId: string } | null
-  >(null);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState<{
+    assignmentId?: string;
+    employeeId: string;
+  } | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editMaxOrders, setEditMaxOrders] = useState(task.maxOrders);
-  const [editDueDate, setEditDueDate] = useState<Date>(() => 
+  const [editDueDate, setEditDueDate] = useState<Date>(() =>
     task.dateRange?.end ? parseISO(task.dateRange.end) : new Date()
   );
   const [editAssignedEmployees, setEditAssignedEmployees] = useState<string[]>(
@@ -152,11 +153,15 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           <header className="flex flex-col gap-1.5 min-w-0">
             <div className="flex items-end min-w-0">
               <h3 className="text-xl font-bold text-primary truncate shrink-0">{task.taskName}</h3>
-              <p className="text-sm text-gray-500 ml-2 mr-8 pb-0.5 truncate min-w-0 flex-1">- {task.taskDescription}</p>
+              <p className="text-sm text-gray-500 ml-2 mr-8 pb-0.5 truncate min-w-0 flex-1">
+                - {task.taskDescription}
+              </p>
             </div>
 
             <p className="flex items-center text-sm font-medium text-secondary">
-              <span className='bg-accent-secondary/25 w-fit rounded-full px-3 py-1'>{formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}</span>
+              <span className="bg-accent-secondary/25 w-fit rounded-full px-3 py-1">
+                {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
+              </span>
               {isTaskOverdue(task.dateRange.end) && (
                 <span className="bg-red-100 text-red-500 text-sm px-2 py-1 rounded-full ml-2">
                   Task is Overdue

@@ -84,7 +84,6 @@ export async function fetchEmployeeList(): Promise<ServerActionResponse<Assigned
   }
 }
 
-
 /**
  * Assign a task to employees and return the created assignment data
  */
@@ -129,7 +128,8 @@ export async function addTaskAssignmentAction(
       .select('assigned_to')
       .eq('category_id', taskId)
       .in('assigned_to', employeeIds)
-      .in('status', ['assigned', 'in review', 'rejected', 'approved']); // Only check active assignments
+      // Block reassignment only while tasks are still in-flight (not yet approved)
+      .in('status', ['assigned', 'in review', 'rejected']);
 
     if (checkError) throw checkError;
 
