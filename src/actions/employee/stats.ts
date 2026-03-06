@@ -125,7 +125,8 @@ export async function getEmployeePerformanceScore(): Promise<ActionResult<number
 
 /**
  * Fetches the latest weekly rank snapshot for the current employee.
- * Ranking is generated automatically weekly and stored in RankLog.
+ * Ranking is generated automatically weekly and stored in RankingPeriod + RankingEntry.
+ * Only shows rankings where is_visible = true in RankingPeriod.
  */
 export async function getEmployeeRank(): Promise<ActionResult<EmployeeRank>> {
   return safeAction(async () => {
@@ -140,18 +141,22 @@ export async function getEmployeeRank(): Promise<ActionResult<EmployeeRank>> {
       throw new Error('User not authenticated');
     }
 
-    // Fetch latest visible weekly RankLog
-    const { data: latestWeekly, error } = await supabase
-      .from('RankLog')
-      .select('rankings, period_year, period_week')
+    // Step 1: Find the latest visible weekly ranking period
+    const { data: latestPeriod, error: periodError } = await supabase
+      .from('RankingPeriod')
+      .select('id')
       .eq('period_type', 'weekly')
       .eq('is_visible', true)
-      .order('period_year', { ascending: false })
-      .order('period_week', { ascending: false })
+      .order('period_start', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
-    if (error || !latestWeekly) {
+    if (periodError) {
+      throw new Error(`Failed to fetch ranking period: ${periodError.message}`);
+    }
+
+    // No visible weekly ranking exists yet
+    if (!latestPeriod) {
       return {
         rank: 1,
         performanceScore: 0,
@@ -159,13 +164,17 @@ export async function getEmployeeRank(): Promise<ActionResult<EmployeeRank>> {
       };
     }
 
-    const rankings = latestWeekly.rankings as Array<{
-      user_id: string;
-      rank: number;
-      performance_score: number;
-    }>;
+    // Step 2: Fetch all entries for this period to get total employee count
+    const { data: allEntries, error: allEntriesError } = await supabase
+      .from('RankingEntry')
+      .select('user_id, rank, performance_score')
+      .eq('ranking_period_id', latestPeriod.id);
 
-    if (!Array.isArray(rankings) || rankings.length === 0) {
+    if (allEntriesError) {
+      throw new Error(`Failed to fetch ranking entries: ${allEntriesError.message}`);
+    }
+
+    if (!allEntries || allEntries.length === 0) {
       return {
         rank: 1,
         performanceScore: 0,
@@ -173,12 +182,13 @@ export async function getEmployeeRank(): Promise<ActionResult<EmployeeRank>> {
       };
     }
 
-    const userRankData = rankings.find((r) => r.user_id === user.id);
+    // Step 3: Find the current user's entry
+    const userEntry = allEntries.find((entry) => entry.user_id === user.id);
 
     return {
-      rank: userRankData?.rank ?? rankings.length,
-      performanceScore: Number(userRankData?.performance_score ?? 0),
-      totalEmployees: rankings.length,
+      rank: userEntry?.rank ?? allEntries.length + 1,
+      performanceScore: Number(userEntry?.performance_score ?? 0),
+      totalEmployees: allEntries.length,
     };
   });
 }
