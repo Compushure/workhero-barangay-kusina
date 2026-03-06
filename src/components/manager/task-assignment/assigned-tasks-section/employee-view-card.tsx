@@ -16,6 +16,7 @@ interface EmployeeViewCardProps {
 export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeViewCardProps) {
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<{
+    taskId?: string;
     assignmentId?: string;
     empId: string;
   } | null>(null);
@@ -88,17 +89,14 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
         const hiddenCount = Math.max(0, employee.assignedTasks.length - 2);
 
         return (
-          <div
-            className={`flex w-full items-start justify-between rounded-2xl bg-[#FAFAFA] p-6 transition-all ease-in-out duration-400 
-          ${isExpanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`}
-            key={employee.id}
-          >
-            {/* Employee Details */}
-            <div className="flex flex-col w-[20%] min-w-0">
-              <h3 className="text-lg font-bold text-foreground wrap-break-word">{employee.name}</h3>
-              <p className="text-sm text-gray-600">{employee.empId}</p>
-              {employee.tenure && <p className="text-sm text-gray-500">{employee.tenure}</p>}
-            </div>
+          <div className={`flex w-full items-start justify-between rounded-2xl bg-[#FAFAFA] p-6 transition-all ease-in-out duration-400 
+          ${isExpanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`} key={employee.id}>
+              {/* Employee Details */}
+              <div className="flex flex-col w-[20%] min-w-0 pr-1">
+                <h3 className="text-lg font-bold text-foreground wrap-break-word">{employee.name}</h3>
+                <p className="text-sm text-gray-600">{employee.empId}</p>
+                {employee.tenure && <p className="text-sm text-gray-500">{employee.tenure}</p>}
+              </div>
 
             {/* Assigned Tasks */}
             <EmployeeViewTaskBadges

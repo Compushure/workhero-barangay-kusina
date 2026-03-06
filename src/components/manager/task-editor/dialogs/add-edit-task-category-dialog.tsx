@@ -169,10 +169,14 @@ export default function AddEditTaskCategoryDialog({
       <DialogContent className="bg-background border-none max-w-[95vw] md:max-w-135 lg:max-w-150 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2 text-[#5a2a2a] text-base sm:text-lg font-semibold">
-              <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+            <DialogTitle className="flex gap-2 text-xl text-foreground text-left items-center">
+              <Plus className='size-6 p-1 bg-primary-gradient text-card rounded-full'/>
               {editingTask ? 'Edit Task Category' : 'Add New Task Category'}
             </DialogTitle>
+            {/* <DialogTitle className="flex items-center gap-2 text-primary text-base sm:text-lg font-semibold">
+              <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+              {editingTask ? 'Edit Task Category' : 'Add New Task Category'}
+            </DialogTitle> */}
           </div>
         </DialogHeader>
 
@@ -187,7 +191,7 @@ export default function AddEditTaskCategoryDialog({
           <div className='flex gap-8'>
             {/* Task Name */}
             <div className="space-y-2 flex-1/2">
-              <Label className="text-sm font-medium text-[#5a2a2a]">
+              <Label className="text-sm font-medium text-primary">
                 Task Name <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -195,22 +199,22 @@ export default function AddEditTaskCategoryDialog({
                 value={taskName}
                 onChange={(e) => setTaskName(e.target.value)}
                 maxLength={255}
-                className={`bg-white border-[#e0cfcf] focus:border-foreground ${
+                className={`bg-white ${
                   taskName && !isTaskNameValid ? 'border-red-500' : ''
                 } ${isDuplicateName ? 'border-red-500' : ''}`}
               />
               <div className="flex justify-between text-xs">
-                <span className="text-[#7a3d3d]/70">
+                <span className="text-secondary">
                   {taskName && !isTaskNameValid && 'Must be 2-255 characters'}
                   {isDuplicateName && 'Task name already exists'}
                 </span>
-                <span className="text-[#7a3d3d]/70">{taskName.length}/255</span>
+                <span className="text-secondary">{taskName.length}/255</span>
               </div>
             </div>
 
             {/* Task Type with Dropdown */}
             <div className="space-y-2 relative flex-1/2">
-              <Label className="text-sm font-medium text-[#5a2a2a]">
+              <Label className="text-sm font-medium text-primary">
                 Type <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -226,20 +230,20 @@ export default function AddEditTaskCategoryDialog({
                   setTimeout(() => setShowTypeDropdown(false), 200);
                 }}
                 maxLength={255}
-                className={`bg-white border-[#e0cfcf] focus:border-foreground ${
+                className={`bg-white ${
                   taskType && !isTypeValid ? 'border-red-500' : ''
                 }`}
               />
 
               {/* Dropdown for existing types */}
               {showTypeDropdown && filteredTypes.length > 0 && (
-                <div className="absolute z-10 w-full bg-white border border-[#e0cfcf] rounded-lg shadow-lg max-h-40 overflow-y-auto mt-1">
+                <div className="absolute z-10 w-full bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto mt-1">
                   {filteredTypes.map((type) => (
                     <button
                       key={type}
                       type="button"
                       onClick={() => handleTypeSelect(type)}
-                      className="w-full text-left px-4 py-2 hover:bg-[#fbeaea] transition-colors text-sm text-[#5a2a2a] border-none bg-transparent"
+                      className="w-full text-left px-4 py-2 hover:bg-accent-secondary/50 transition-colors text-sm text-primary border-none bg-transparent"
                     >
                       {type}
                     </button>
@@ -248,17 +252,17 @@ export default function AddEditTaskCategoryDialog({
               )}
 
               <div className="flex justify-between text-xs">
-                <span className="text-[#7a3d3d]/70">
+                <span className="text-secondary">
                   {taskType && !isTypeValid && 'Must be 2-255 characters'}
                 </span>
-                <span className="text-[#7a3d3d]/70">{taskType.length}/255</span>
+                <span className="text-secondary">{taskType.length}/255</span>
               </div>
             </div>
           </div>
 
           {/* Task Description */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-[#5a2a2a]">
+            <Label className="text-sm font-medium text-primary">
               Description <span className="text-red-500">*</span>
             </Label>
             <Input
@@ -266,15 +270,15 @@ export default function AddEditTaskCategoryDialog({
               value={taskDescription}
               onChange={(e) => setTaskDescription(e.target.value)}
               maxLength={255}
-              className={`bg-white border-[#e0cfcf] focus:border-foreground ${
+              className={`bg-white ${
                 taskDescription && !isDescriptionValid ? 'border-red-500' : ''
               }`}
             />
             <div className="flex justify-between text-xs">
-              <span className="text-[#7a3d3d]/70">
+              <span className="text-secondary">
                 {taskDescription && !isDescriptionValid && 'Must be 2-255 characters'}
               </span>
-              <span className="text-[#7a3d3d]/70">{taskDescription.length}/255</span>
+              <span className="text-secondary">{taskDescription.length}/255</span>
             </div>
           </div>
 
@@ -284,7 +288,7 @@ export default function AddEditTaskCategoryDialog({
             <div className="grid grid-cols-1 gap-4 flex-1/2 mb-6">
               {/* Points */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#5a2a2a]">
+                <Label className="text-sm font-medium text-primary">
                   Fiesta Points <span className="text-red-500">*</span>
                 </Label>
                 <div className="flex items-center gap-2">
@@ -292,7 +296,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setPoints(Math.max(1, points - 1))}
                     disabled={points <= 1 || isLoading}
-                    className="bg-foreground text-white size-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="bg-foreground text-card size-8 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     −
                   </button>
@@ -311,7 +315,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setPoints(Math.min(10000, points + 1))}
                     disabled={points >= 10000 || isLoading}
-                    className="bg-foreground text-white size-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="bg-foreground text-white size-8 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     +
                   </button>
@@ -323,7 +327,7 @@ export default function AddEditTaskCategoryDialog({
 
               {/* XP */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#5a2a2a]">
+                <Label className="text-sm font-medium text-primary">
                   XP <span className="text-red-500">*</span>
                 </Label>
                 <div className="flex items-center gap-2">
@@ -331,7 +335,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setXp(Math.max(1, xp - 1))}
                     disabled={xp <= 1 || isLoading}
-                    className="bg-foreground text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="bg-foreground text-white w-8 h-8 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     −
                   </button>
@@ -350,7 +354,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setXp(Math.min(5000, xp + 1))}
                     disabled={xp >= 5000 || isLoading}
-                    className="bg-foreground text-white w-8 h-8 rounded flex items-center justify-center hover:bg-[#8B0000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="bg-foreground text-white w-8 h-8 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     +
                   </button>
@@ -362,10 +366,10 @@ export default function AddEditTaskCategoryDialog({
             {/* Is Repeatable Toggle */}
             <div className="flex flex-col flex-1/2 items-center justify-between p-4 bg-white rounded-lg border border-[#e0cfcf]">
               <div className="space-y-1">
-                <Label className="text-base font-medium text-[#5a2a2a]">Repeatable Task</Label>
-                <p className="text-sm text-[#7a3d3d]/70">Can this task be assigned with multiple orders?</p>
+                <Label className="text-base font-medium text-primary">Repeatable Task</Label>
+                <p className="text-sm text-secondary">Can this task be assigned with multiple orders?</p>
               </div>
-              <Switch checked={isRepeatable} onCheckedChange={setIsRepeatable} disabled={isLoading} className='scale-150'>
+              <Switch checked={isRepeatable} onCheckedChange={setIsRepeatable} disabled={isLoading} className='scale-150 data-[state=checked]:bg-accent'>
               </Switch>
                     
             </div>
@@ -375,17 +379,9 @@ export default function AddEditTaskCategoryDialog({
         {/* Action Buttons */}
         <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
           <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isLoading}
-            className="bg-white text-[#5a2a2a] border-[#e0cfcf] hover:bg-[#fbeaea] px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
-          <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="bg-foreground text-white hover:bg-[#8b0000] px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="bg-foreground text-white hover:bg-accent px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto transition-all duration-400 ease-in-out"
           >
             {isLoading ? (
               <>
@@ -398,11 +394,19 @@ export default function AddEditTaskCategoryDialog({
               </>
             )}
           </Button>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isLoading}
+            className="bg-white text-primary border-primary/50 hover:bg-white hover:brightness-90 px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+          >
+            Cancel
+          </Button>
         </div>
 
         {/* Helper message when editing but no changes made */}
         {editingTask && !hasChanges && !saveError && (
-          <p className="text-xs text-[#7a3d3d]/70 text-center mt-2 italic">
+          <p className="text-xs text-secondary text-center mt-2 italic">
             Make changes to enable save
           </p>
         )}

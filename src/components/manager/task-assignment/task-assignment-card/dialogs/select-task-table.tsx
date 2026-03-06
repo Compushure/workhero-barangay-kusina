@@ -27,7 +27,7 @@ function SelectTasksTable({
   return (
     <div className="rounded-2xl border-2 border-accent-secondary/50 flex-1 flex flex-col overflow-auto">
       <table className="w-full">
-        <thead className="bg-background text-primary/50 border-b border-accent-secondary/50">
+        <thead className="bg-primary-gradient text-card border-b border-accent-secondary/50">
           <tr className="flex justify-baseline py-2.5 text-sm font-semibold">
             <th className="w-12"></th>
             <th className="w-75 text-left pl-4">TASK</th>
@@ -59,12 +59,12 @@ function SelectTasksTable({
               return (
                 <tr
                   key={task.id}
-                  className={`flex justify-baseline border-b border-accent/50 text-primary ${
+                  className={`flex justify-baseline border-b border-accent/25 text-primary ${
                     isDisabled
                       ? 'brightness-75 opacity-50 cursor-not-allowed'
                       : isSelected
                         ? 'bg-accent-secondary/25'
-                        : 'bg-background-soft hover:brightness-96 hover:bg-accent-secondary/25 cursor-pointer transition-all duration-300 ease-in-out'
+                        : 'bg-card hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
                   } ${!isDisabled && 'cursor-pointer'}`}
                   onClick={(e) => {
                     if (isDisabled) return;
@@ -93,8 +93,8 @@ function SelectTasksTable({
                     />
                   </td>
                   <td className="w-75 px-4 py-3">
-                    <div className="font-medium">{task.name}</div>
-                    <div className="text-sm text-primary/50">{task.type}</div>
+                    <div className="font-medium truncate">{task.name}</div>
+                    <div className="text-sm text-primary/50 truncate">{task.type}</div>
                   </td>
                   <td className="w-35 group flex gap-2 items-center justify-center px-8 py-4 text-primary/75 font-medium text-center">
                     <div className="flex items-center justify-center gap-1">

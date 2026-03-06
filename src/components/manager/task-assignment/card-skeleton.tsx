@@ -17,7 +17,7 @@ export function SkeletonCard() {
 
 export function SkeletonRow() {
   return (
-    <Card className="w-full py-4 rounded-none">
+    <Card className="w-full py-4 rounded-none bg-background-soft">
       <CardContent>
         <Skeleton className="w-full h-8" />
       </CardContent>
