@@ -10,8 +10,17 @@ export function SuperadminLoginBackground() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Set canvas to cover full document height, not just viewport
+    const setCanvasSize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = Math.max(
+        document.documentElement.scrollHeight,
+        document.body.scrollHeight,
+        window.innerHeight
+      );
+    };
+
+    setCanvasSize();
 
     const particles: Array<{
       x: number;
@@ -22,14 +31,14 @@ export function SuperadminLoginBackground() {
       hue: number;
     }> = [];
 
-    // Create larger flame-like particles
-    for (let i = 0; i < 35; i++) {
+    // Create more and larger particles distributed across entire canvas
+    for (let i = 0; i < 50; i++) {
       particles.push({
         x: Math.random() * canvas.width,
-        y: canvas.height + Math.random() * 100, // Start from bottom
-        size: Math.random() * 5 + 3, // Bigger particles: 3-8px
-        opacity: Math.random() * 0.4 + 0.1,
-        speed: Math.random() * 0.5 + 0.2,
+        y: Math.random() * canvas.height, // Distribute across full height
+        size: Math.random() * 7 + 4, // Bigger particles: 4-11px
+        opacity: Math.random() * 0.5 + 0.2, // More visible: 0.2-0.7
+        speed: Math.random() * 0.6 + 0.3, // Slightly faster
         hue: Math.random() * 30, // Orange hue variation
       });
     }
@@ -73,7 +82,7 @@ export function SuperadminLoginBackground() {
         if (particle.y < -10) {
           particle.y = canvas.height + 10;
           particle.x = Math.random() * canvas.width;
-          particle.opacity = Math.random() * 0.4 + 0.1;
+          particle.opacity = Math.random() * 0.5 + 0.2;
         }
       });
 
@@ -83,8 +92,7 @@ export function SuperadminLoginBackground() {
     animate();
 
     const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      setCanvasSize();
     };
 
     window.addEventListener('resize', handleResize);
