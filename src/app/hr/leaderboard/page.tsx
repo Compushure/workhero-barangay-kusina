@@ -3,6 +3,7 @@ import { getISOWeek } from 'date-fns';
 import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-content';
 import { PeriodSelector } from '@/components/hr/leaderboard/period-selector';
 import LeaderboardTableSkeleton from '@/components/hr/leaderboard/leaderboard-table-skeleton';
+import { getLatestWeeklyPeriod } from '@/actions/hr/leaderboard';
 import type { RankLogPeriodType } from '@/types';
 
 interface LeaderboardPageProps {
@@ -22,10 +23,18 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
   const defaultWeek = Math.max(1, getISOWeek(now) - 1);
   const defaultMonth = Math.max(1, now.getMonth()); // previous month (0-based → 1-based)
 
-  const year = params.year ? Math.max(2025, Number(params.year)) : defaultYear;
-  const week = params.week ? Number(params.week) : defaultWeek;
+  // When no period is selected (show≠1), default to the latest generated weekly ranking
+  const hasExplicitShow = params.show === '1';
+  const latestResult = !hasExplicitShow ? await getLatestWeeklyPeriod() : null;
+  const latestWeekly =
+    latestResult?.success && latestResult.data ? latestResult.data : null;
+
+  const year = params.year
+    ? Math.max(2025, Number(params.year))
+    : latestWeekly?.year ?? defaultYear;
+  const week = params.week ? Number(params.week) : latestWeekly?.week ?? defaultWeek;
   const month = params.month ? Number(params.month) : defaultMonth;
-  const show = params.show === '1';
+  const show = hasExplicitShow || !!latestWeekly;
 
   return (
     <div className="h-screen p-4 sm:p-8 bg-white overflow-hidden">

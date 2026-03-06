@@ -13,7 +13,7 @@ import {
   getCutoffForSpecificPeriod,
   getPeriodStartEnd,
 } from '@/lib/utils/time-period-utils';
-import { format } from 'date-fns';
+import { format, getISOWeek } from 'date-fns';
 
 
 
@@ -236,5 +236,39 @@ export async function getGeneratedRankings(
     }
 
     return (data ?? []) as RankingLeaderboardViewRow[];
+  });
+}
+
+/**
+ * Returns the latest generated weekly period (year + ISO week) for default leaderboard view.
+ * Used so the HR leaderboard page can show the latest week by default instead of "Select a Period".
+ */
+export async function getLatestWeeklyPeriod(): Promise<
+  ActionResult<{ year: number; week: number } | null>
+> {
+  return safeAction(async () => {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from('RankingPeriod')
+      .select('period_start')
+      .eq('period_type', 'weekly')
+      .order('period_start', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch latest ranking period: ${error.message}`);
+    }
+
+    if (!data?.period_start) {
+      return null;
+    }
+
+    const startDate = new Date(data.period_start + 'T00:00:00');
+    return {
+      year: startDate.getFullYear(),
+      week: getISOWeek(startDate),
+    };
   });
 }
