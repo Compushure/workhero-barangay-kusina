@@ -2,10 +2,10 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
+import { unstable_noStore as noStore } from 'next/cache';
 import type {
   LeaderboardAsOfRow,
   RankLogPeriodType,
-  RankingPeriodRow,
   RankingLeaderboardViewRow,
 } from '@/types';
 
@@ -13,7 +13,7 @@ import {
   getCutoffForSpecificPeriod,
   getPeriodStartEnd,
 } from '@/lib/utils/time-period-utils';
-import { format, getISOWeek } from 'date-fns';
+import { format, getISOWeek, getISOWeekYear } from 'date-fns';
 
 
 
@@ -28,18 +28,38 @@ function toDateStr(d: Date): string {
   return format(d, 'yyyy-MM-dd');
 }
 
+function buildPeriodLabelLikeView(periodType: RankLogPeriodType, periodStartDate: Date): string {
+  switch (periodType) {
+    case 'weekly': {
+      return `Week ${getISOWeek(periodStartDate)}, ${getISOWeekYear(periodStartDate)}`;
+    }
+    case 'monthly': {
+      return format(periodStartDate, 'MMMM yyyy');
+    }
+    case 'yearly': {
+      return `Year ${format(periodStartDate, 'yyyy')}`;
+    }
+  }
+}
+
+
 /**
- * Generate-or-fetch a ranking for a specific period.
- * If the period already exists, returns the existing RankingPeriod row.
- * Otherwise computes the leaderboard, inserts RankingPeriod + RankingEntry rows, and returns.
+ * Fetch ranking entries for a specific period.
+ * - First checks `ranking_leaderboard_view` (fast path)
+ * - If missing, computes via RPC `get_leaderboard_as_of`, persists, and returns rows immediately
+ *
+ * This avoids a "generate then re-fetch" pattern that can be affected by request memoization
+ * inside a single Server Component render.
  */
-export async function generateRanking(
+export async function getOrGenerateRankingByPeriod(
   periodType: RankLogPeriodType,
   year: number,
   month?: number,
   week?: number
-): Promise<ActionResult<{ period: RankingPeriodRow; isNew: boolean } | null>> {
+): Promise<ActionResult<RankingLeaderboardViewRow[] | null>> {
   return safeAction(async () => {
+    noStore();
+
     const supabase = await createClient();
 
     const {
@@ -59,43 +79,41 @@ export async function generateRanking(
     const periodStart = toDateStr(start);
     const periodEnd = toDateStr(end);
 
-    // Check if ranking already exists for this period
-    const { data: existing } = await supabase
-      .from('RankingPeriod')
+    const { data: existingRows, error: existingError } = await supabase
+      .from('ranking_leaderboard_view')
       .select('*')
       .eq('period_type', periodType)
       .eq('period_start', periodStart)
-      .maybeSingle();
+      .order('rank');
 
-    if (existing) {
-      return { period: existing as RankingPeriodRow, isNew: false };
+    if (existingError) {
+      throw new Error(`Failed to fetch ranking: ${existingError.message}`);
     }
 
-    // Compute cutoff and fetch leaderboard snapshot
+    if (existingRows && existingRows.length > 0) {
+      return existingRows as RankingLeaderboardViewRow[];
+    }
+
     const cutoff = getCutoffForSpecificPeriod(
       periodType,
       year,
       periodType === 'weekly' ? undefined : month,
-      week
+      periodType === 'weekly' ? week : undefined
     );
 
-    const { data: leaderboardData, error: lbError } = await supabase.rpc(
-      'get_leaderboard_as_of',
-      { p_cutoff: cutoff }
-    );
+    const { data: leaderboardData, error: lbError } = await supabase.rpc('get_leaderboard_as_of', {
+      p_cutoff: cutoff,
+    });
 
     if (lbError) {
       throw new Error(`Failed to compute leaderboard: ${lbError.message}`);
     }
 
-    const rows = (leaderboardData ?? []) as LeaderboardAsOfRow[];
-
-    // No employees with approved KPI tasks for this period — signal "no data" to the caller
-    if (rows.length < MIN_EMPLOYEES_FOR_RANKING) {
+    const leaderboardRows = (leaderboardData ?? []) as LeaderboardAsOfRow[];
+    if (leaderboardRows.length < MIN_EMPLOYEES_FOR_RANKING) {
       return null;
     }
 
-    // Insert the period
     const { data: period, error: periodError } = await supabase
       .from('RankingPeriod')
       .insert({
@@ -109,20 +127,30 @@ export async function generateRanking(
 
     if (periodError) {
       if (periodError.code === '23505') {
-        // Race condition: another request inserted first — fetch and return
-        const { data: raceWinner } = await supabase
+        const { data: raceWinner, error: raceError } = await supabase
           .from('RankingPeriod')
           .select('*')
           .eq('period_type', periodType)
           .eq('period_start', periodStart)
           .single();
-        return { period: raceWinner as RankingPeriodRow, isNew: false };
+        if (raceError || !raceWinner) {
+          throw new Error(`Failed to fetch existing ranking period: ${raceError?.message ?? 'Unknown error'}`);
+        }
+        const { data: winnerRows, error: winnerRowsError } = await supabase
+          .from('ranking_leaderboard_view')
+          .select('*')
+          .eq('period_type', periodType)
+          .eq('period_start', periodStart)
+          .order('rank');
+        if (winnerRowsError) {
+          throw new Error(`Failed to fetch ranking after race: ${winnerRowsError.message}`);
+        }
+        return (winnerRows ?? []) as RankingLeaderboardViewRow[];
       }
       throw new Error(`Failed to save ranking period: ${periodError.message}`);
     }
 
-    // Insert all entries
-    const entries = rows.map((row, idx) => ({
+    const entriesToInsert = leaderboardRows.map((row, idx) => ({
       ranking_period_id: period.id,
       user_id: row.user_id,
       rank: idx + 1,
@@ -132,15 +160,53 @@ export async function generateRanking(
       completed_task_count: Number(row.task_count ?? 0),
     }));
 
-    const { error: entriesError } = await supabase
+    const { data: insertedEntries, error: entriesError } = await supabase
       .from('RankingEntry')
-      .insert(entries);
+      .insert(entriesToInsert)
+      .select('id, user_id, rank, performance_score, total_kpi_points, badge_points, completed_task_count');
 
     if (entriesError) {
       throw new Error(`Failed to save ranking entries: ${entriesError.message}`);
     }
 
-    return { period: period as RankingPeriodRow, isNew: true };
+    const entryIdByUserId = new Map<string, string>();
+    for (const entry of (insertedEntries ?? []) as { id: string; user_id: string }[]) {
+      entryIdByUserId.set(entry.user_id, entry.id);
+    }
+
+    const periodLabel = buildPeriodLabelLikeView(periodType, start);
+
+    const resultRows: RankingLeaderboardViewRow[] = leaderboardRows.map((row, idx) => {
+      const entryId = entryIdByUserId.get(row.user_id);
+      if (!entryId) {
+        throw new Error('Failed to return generated leaderboard rows (missing entry id)');
+      }
+
+      const userName = row.user_name ?? '';
+      if (!userName) {
+        throw new Error('Failed to return generated leaderboard rows (missing user name)');
+      }
+
+      return {
+        ranking_period_id: period.id,
+        period_type: periodType,
+        period_start: periodStart,
+        period_end: periodEnd,
+        is_visible: period.is_visible,
+        generated_at: period.generated_at,
+        period_label: periodLabel,
+        entry_id: entryId,
+        user_id: row.user_id,
+        user_name: userName,
+        rank: idx + 1,
+        performance_score: Number(row.performance_score ?? 0),
+        total_kpi_points: Number(row.total_kpi_points ?? 0),
+        badge_points: Number(row.badge_points ?? 0),
+        completed_task_count: Number(row.task_count ?? 0),
+      };
+    });
+
+    return resultRows;
   });
 }
 
@@ -169,75 +235,6 @@ export async function toggleRankingVisibility(
   });
 }
 
-/**
- * Fetch ranking entries for a specific period via the leaderboard view.
- * Returns all entries ordered by rank, or null if no ranking exists for that period.
- */
-export async function getRankingByPeriod(
-  periodType: RankLogPeriodType,
-  year: number,
-  month?: number,
-  week?: number
-): Promise<ActionResult<RankingLeaderboardViewRow[] | null>> {
-  return safeAction(async () => {
-    const supabase = await createClient();
-
-    const { start } = getPeriodStartEnd(
-      periodType,
-      year,
-      periodType === 'weekly' ? undefined : month,
-      periodType === 'weekly' ? week : undefined
-    );
-    const periodStart = toDateStr(start);
-
-    const { data, error } = await supabase
-      .from('ranking_leaderboard_view')
-      .select('*')
-      .eq('period_type', periodType)
-      .eq('period_start', periodStart)
-      .order('rank');
-
-    if (error) {
-      throw new Error(`Failed to fetch ranking: ${error.message}`);
-    }
-
-    if (!data || data.length === 0) {
-      return null;
-    }
-
-    return data as RankingLeaderboardViewRow[];
-  });
-}
-
-/**
- * Fetch all generated rankings, optionally filtered by period type.
- * Returns one row per period (the rank=1 entry) for efficient listing.
- */
-export async function getGeneratedRankings(
-  periodType?: RankLogPeriodType
-): Promise<ActionResult<RankingLeaderboardViewRow[]>> {
-  return safeAction(async () => {
-    const supabase = await createClient();
-
-    let query = supabase
-      .from('ranking_leaderboard_view')
-      .select('*')
-      .eq('rank', 1)
-      .order('period_start', { ascending: false });
-
-    if (periodType) {
-      query = query.eq('period_type', periodType);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      throw new Error(`Failed to fetch rankings: ${error.message}`);
-    }
-
-    return (data ?? []) as RankingLeaderboardViewRow[];
-  });
-}
 
 /**
  * Returns the latest generated weekly period (year + ISO week) for default leaderboard view.

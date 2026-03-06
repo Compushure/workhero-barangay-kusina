@@ -1,5 +1,5 @@
 import { BarChart2, Trophy } from 'lucide-react';
-import { getRankingByPeriod, generateRanking } from '@/actions/hr/leaderboard';
+import { getOrGenerateRankingByPeriod } from '@/actions/hr/leaderboard';
 import LeaderboardTable from '@/components/hr/leaderboard/leaderboard-table';
 import VisibilityToggle from '@/components/hr/leaderboard/visibility-toggle';
 import { enrichRankingPlayers } from '@/lib/utils/enrich-ranking';
@@ -44,46 +44,14 @@ export async function LeaderboardContent({
     );
   }
 
-  // 1. Check if a ranking already exists for this period
-  const existingResult = await getRankingByPeriod(
+  const rankingResult = await getOrGenerateRankingByPeriod(
     periodType,
     year,
     periodType === 'monthly' ? month : undefined,
     periodType === 'weekly' ? week : undefined
   );
 
-  let rows: RankingLeaderboardViewRow[] | null = existingResult.data ?? null;
-
-  // 2. No existing ranking — try to generate from RPC data
-  if (!rows || rows.length === 0) {
-    const genResult = await generateRanking(
-      periodType,
-      year,
-      periodType === 'monthly' ? month : undefined,
-      periodType === 'weekly' ? week : undefined
-    );
-
-    if (!genResult.success || genResult.data === null) {
-      // No KPI data exists for this period
-      return (
-        <div className="flex min-h-[60vh] items-center justify-center py-6 sm:py-8">
-          <div className="flex flex-col items-center gap-4 rounded-2xl px-16 py-14 text-center">
-            <Trophy className="w-32 h-32 text-gray-600" />
-            <p className="text-lg font-semibold text-gray-600">No Rankings for this period</p>
-          </div>
-        </div>
-      );
-    }
-
-    // Fetch fresh rows after generation
-    const freshResult = await getRankingByPeriod(
-      periodType,
-      year,
-      periodType === 'monthly' ? month : undefined,
-      periodType === 'weekly' ? week : undefined
-    );
-    rows = freshResult.data ?? null;
-  }
+  const rows: RankingLeaderboardViewRow[] | null = rankingResult.data ?? null;
 
   if (!rows || rows.length === 0) {
     return (
