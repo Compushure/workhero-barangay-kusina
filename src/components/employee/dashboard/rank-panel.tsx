@@ -4,8 +4,7 @@ import { Trophy } from 'lucide-react';
 import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
-const PERFORMANCE_SCORE_TOOLTIP =
-  'Performance Score = Total Points Earned × Completed Tasks';
+const PERFORMANCE_SCORE_TOOLTIP = 'Performance Score = Total Points Earned × Completed Tasks';
 export function RankWidget() {
   const { data: rankData, isLoading: isRankLoading } = useGetEmployeeRank();
 
@@ -21,15 +20,15 @@ export function RankWidget() {
         <div className="w-28 h-5 bg-white/20 rounded mx-auto mb-3" />
         <div className="border-t-2 border-white/30 mb-3" />
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+          <div className="flex items-center justify-center gap-3">
             <div className="h-10 w-10 bg-white/20 rounded-full" />
             <div className="h-7 w-12 bg-white/20 rounded" />
           </div>
 
           <div className="h-12 border-l-2 border-white/30 mx-4" />
 
-          <div className="h-7 w-14 bg-white/20 rounded" />
+          <div className="h-7 w-14 bg-white/20 rounded justify-self-center" />
         </div>
       </div>
     );
@@ -51,15 +50,15 @@ export function RankWidget() {
   return (
     <div className={cardClassName}>
       {/* Header */}
-      <h2 className="text-lg text-white text-center mb-2">Weekly Rank</h2>
+      <h2 className="text-xl text-white text-center mb-2">Weekly Rank</h2>
 
       {/* Horizontal Divider */}
       <div className="border-t-2 border-white/30 mb-3" />
 
       {/* Content Section */}
-      <div className="flex items-center justify-between">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center">
         {/* Left: Trophy + Rank */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center gap-3">
           <div className="bg-white/20 rounded-full p-2">
             <Trophy size={20} className="text-yellow-300" />
           </div>
@@ -70,13 +69,13 @@ export function RankWidget() {
         <div className="h-12 border-l-2 border-white/30 mx-4" />
 
         {/* Right: Performance Score */}
-        <div className="flex flex-col items-center">
-          <span className="text-xs text-white mb-1">Performance Score</span>
+        <div className="flex flex-col items-center justify-self-center">
+          <span className="text-xs leading-[1.05] text-white/85 text-center mb-1">
+            Performance Score
+          </span>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-xl text-white cursor-help">
-                {performanceScore}
-              </span>
+              <span className="text-xl text-white cursor-help">{performanceScore}</span>
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-60">
               {PERFORMANCE_SCORE_TOOLTIP}
