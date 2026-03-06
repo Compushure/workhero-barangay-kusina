@@ -5,6 +5,7 @@ import {
   ServerActionResponse,
   RedemptionRequest,
 } from '@/types';
+import { insertNotification } from '@/lib/notifications';
 
 async function getSupabaseAdminClient() {
   const { supabaseAdmin } = await import('@/lib/supabase/admin');
@@ -219,7 +220,8 @@ export async function acceptRedemptionRequestAction(
         quantity,
         status,
         Reward:reward_id (
-          points_cost
+          points_cost,
+          name
         ),
         User:user_id (
           points
@@ -351,6 +353,20 @@ export async function acceptRedemptionRequestAction(
       await autoDeclinePendingRequestsForReward(request.reward_id, newQuantity, admin.id);
     }
 
+    await insertNotification({
+      userId: request.user_id,
+      type: 'reward',
+      message: `Your reward request for ${quantity} x ${reward?.name || 'reward'} has been approved! Check the remarks section for pickup details and instructions.`,
+      metadata: {
+        requestId,
+        rewardId: request.reward_id,
+        rewardName: reward?.name || null,
+        quantity,
+        status: 'approved',
+        remarks: remarks || null,
+      },
+    });
+
     return { error: null };
   } catch (error) {
     console.error('Error in acceptRedemptionRequestAction:', error);
@@ -397,7 +413,8 @@ export async function declineRedemptionRequestAction(
         quantity,
         status,
         Reward:reward_id (
-          points_cost
+          points_cost,
+          name
         ),
         User:user_id (
           points
@@ -507,6 +524,20 @@ export async function declineRedemptionRequestAction(
         return { error: 'Failed to restore stock. Request rejection reverted.' };
       }
     }
+
+    await insertNotification({
+      userId: request.user_id,
+      type: 'reward',
+      message: `Your reward request for ${quantity} x ${reward?.name || 'reward'} has been rejected. Check the remarks section to see the reason.`,
+      metadata: {
+        requestId,
+        rewardId: request.reward_id,
+        rewardName: reward?.name || null,
+        quantity,
+        status: 'rejected',
+        remarks: remarks || null,
+      },
+    });
 
     return { error: null };
   } catch (error) {
