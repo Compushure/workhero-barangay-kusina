@@ -77,12 +77,9 @@ export async function LeaderboardContent({
       ? periodInfo.period_label.replace(/,\s*\d{4}$/, '')
       : periodInfo.period_label;
 
-  // Limit to top 10 players
-  const top10Players = enrichedPlayers.slice(0, 10);
-
   return (
-    <div className="mb-2">
-      <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between max-w-6xl mx-auto">
+    <div className="mb-2 w-full">
+      <div className="mb-2 flex w-full flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-xl font-bold text-foreground ">{displayPeriodLabel}</h2>
           {getPeriodDateRangeSubtitle(periodInfo) && (
@@ -93,7 +90,7 @@ export async function LeaderboardContent({
         <VisibilityToggle rankingPeriodId={periodInfo.ranking_period_id} isVisible={periodInfo.is_visible} />
       </div>
 
-      <LeaderboardTable players={top10Players} />
+      <LeaderboardTable players={enrichedPlayers} />
     </div>
   );
 }

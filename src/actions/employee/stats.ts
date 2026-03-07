@@ -14,7 +14,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
-import type { EmployeeRank, EmployeeXP } from '@/types';
+import type { EmployeeRank, EmployeeTopRankEntry, EmployeeXP } from '@/types';
 // import type { TimePeriod } from '@/lib/utils/time-period-utils';
 // import { getCutoffForPeriod } from '@/lib/utils/time-period-utils';
 
@@ -191,6 +191,82 @@ export async function getEmployeeRank(): Promise<ActionResult<EmployeeRank>> {
       performanceScore: Number(userEntry?.performance_score ?? 0),
       totalEmployees: allEntries.length,
     };
+  });
+}
+
+/**
+ * Fetches the top 10 weekly rankings for the latest week that HR generated.
+ * Uses the same "latest weekly period" as HR (RankingPeriod), then returns
+ * entries only when that period is visible to employees.
+ * Returns null when no visible weekly ranking exists for the latest period.
+ */
+export async function getEmployeeTopWeeklyRanks(): Promise<
+  ActionResult<EmployeeTopRankEntry[] | null>
+> {
+  return safeAction(async () => {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error('User not authenticated');
+    }
+
+    // Use same source as HR: latest weekly period from RankingPeriod (the week HR generated)
+    const { data: latestPeriod, error: periodError } = await supabaseAdmin
+      .from('RankingPeriod')
+      .select('period_start')
+      .eq('period_type', 'weekly')
+      .order('period_start', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (periodError) {
+      throw new Error(`Failed to fetch latest ranking period: ${periodError.message}`);
+    }
+
+    if (!latestPeriod?.period_start) {
+      return null;
+    }
+
+    const periodStart = latestPeriod.period_start;
+
+    // Fetch top 10 for that period only when it is visible to employees
+    const { data: rows, error: rowsError } = await supabaseAdmin
+      .from('ranking_leaderboard_view')
+      .select('user_id, user_name, rank, performance_score')
+      .eq('period_type', 'weekly')
+      .eq('is_visible', true)
+      .eq('period_start', periodStart)
+      .order('rank', { ascending: true })
+      .limit(10);
+
+    if (rowsError) {
+      throw new Error(`Failed to fetch ranking entries: ${rowsError.message}`);
+    }
+
+    if (!rows || rows.length === 0) {
+      return null;
+    }
+
+    const result: EmployeeTopRankEntry[] = rows.map((row) => {
+      const { data: urlData } = supabaseAdmin.storage
+        .from('employees')
+        .getPublicUrl(`${row.user_id}/profile.png`);
+      return {
+        rank: row.rank,
+        userId: row.user_id ?? '',
+        name: row.user_name ?? '',
+        performanceScore: Number(row.performance_score ?? 0),
+        isCurrentUser: row.user_id === user.id,
+        profilePictureUrl: urlData?.publicUrl ?? null,
+      };
+    });
+
+    return result;
   });
 }
 

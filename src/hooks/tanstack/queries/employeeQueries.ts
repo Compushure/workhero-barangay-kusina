@@ -6,9 +6,14 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { handleFetchEmployeeRank, handleFetchEmployeePoints, handleFetchEmployeeXP } from '@/action-handlers/employee/stats';
+import {
+  handleFetchEmployeeRank,
+  handleFetchEmployeePoints,
+  handleFetchEmployeeTopWeeklyRanks,
+  handleFetchEmployeeXP,
+} from '@/action-handlers/employee/stats';
 import { fetchUserBadgesHandler } from '@/action-handlers/employee/badges';
-import type { EmployeeRank } from '@/types';
+import type { EmployeeRank, EmployeeTopRankEntry } from '@/types';
 import type { EmployeePointsData } from '@/types/employee/points';
 import type { EmployeeXP } from '@/types/employee/xp';
 import type { UserBadge } from '@/actions/employee/badges';
@@ -27,6 +32,7 @@ import type { UserBadge } from '@/actions/employee/badges';
 export const employeeKeys = {
   all: ['employees'] as const,
   rank: () => [...employeeKeys.all, 'rank'] as const,
+  topWeeklyRanks: () => [...employeeKeys.all, 'top-weekly-ranks'] as const,
   points: () => [...employeeKeys.all, 'points'] as const,
   xp: () => [...employeeKeys.all, 'xp'] as const,
   badges: () => [...employeeKeys.all, 'badges'] as const,
@@ -99,6 +105,24 @@ export function useGetEmployeeRank(
     retry: 1, // Retry once on failure
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   }) as UseQueryResult<EmployeeRank | null, Error>;
+}
+
+/**
+ * Fetches the top 10 weekly rankings for the latest visible period.
+ * Used by the employee dashboard rank panel to show the leaderboard list.
+ */
+export function useGetEmployeeTopWeeklyRanks(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<EmployeeTopRankEntry[] | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.topWeeklyRanks(),
+    queryFn: async () => handleFetchEmployeeTopWeeklyRanks(),
+    enabled: queryOptions.enabled !== false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<EmployeeTopRankEntry[] | null, Error>;
 }
 
 /**

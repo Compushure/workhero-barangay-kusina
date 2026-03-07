@@ -4,8 +4,8 @@ import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { toggleRankingVisibility } from '@/actions/hr/leaderboard';
+import { cn } from '@/lib/utils';
 
 interface VisibilityToggleProps {
   rankingPeriodId: string;
@@ -36,18 +36,16 @@ export default function VisibilityToggle({ rankingPeriodId, isVisible }: Visibil
         disabled={isPending}
         size="sm"
       />
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="text-xs text-gray-500 cursor-help">
-            {isVisible ? 'Visible' : 'Hidden'}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent side="top">
-          {isVisible
-            ? 'Employees can currently see this ranking on their leaderboard.'
-            : 'Employees cannot see this ranking on their leaderboard.'}
-        </TooltipContent>
-      </Tooltip>
+      <span
+        className={cn(
+          'text-xs font-medium cursor-default',
+          isVisible ? 'text-emerald-600' : 'text-gray-500'
+        )}
+      >
+        {isVisible
+          ? 'Employees can currently see this ranking.'
+          : 'Employees cannot see this ranking.'}
+      </span>
     </div>
   );
 }

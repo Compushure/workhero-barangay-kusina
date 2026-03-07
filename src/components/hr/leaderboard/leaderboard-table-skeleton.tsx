@@ -10,8 +10,8 @@ import {
 
 export default function LeaderboardTableSkeleton() {
   return (
-    <div className="mb-2">
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between max-w-6xl mx-auto">
+    <div className="mb-2 w-full">
+      <div className="mb-4 flex w-full flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1.5">
           <Skeleton className="h-7 w-48 rounded" />
           <Skeleton className="h-4 w-36 rounded" />
@@ -19,7 +19,7 @@ export default function LeaderboardTableSkeleton() {
         <Skeleton className="h-9 w-28 rounded" />
       </div>
 
-    <div className="bg-white rounded-xl border border-gray-300 shadow-md overflow-hidden max-w-6xl mx-auto">
+    <div className="w-full bg-white rounded-xl border border-gray-300 shadow-md overflow-hidden">
 
       <Table>
         <TableHeader>

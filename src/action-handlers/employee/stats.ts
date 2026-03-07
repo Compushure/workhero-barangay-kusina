@@ -10,10 +10,11 @@ import {
   getEmployeeLevel,
   getEmployeePoints,
   getEmployeeRank,
+  getEmployeeTopWeeklyRanks,
   getEmployeeXP,
 } from '@/actions/employee/stats';
 import { toast } from 'sonner';
-import type { EmployeePointsData, EmployeeRank, EmployeeXP } from '@/types';
+import type { EmployeePointsData, EmployeeRank, EmployeeTopRankEntry, EmployeeXP } from '@/types';
 // import type { TimePeriod } from '@/lib/utils/time-period-utils';
 
 /**
@@ -82,6 +83,25 @@ export async function handleFetchEmployeeRank(): Promise<EmployeeRank | null> {
   }
 
   return result.data;
+}
+
+/**
+ * Fetches the top 10 weekly rankings for the latest visible period.
+ * Returns null on failure or when no ranking exists (no toast for empty data).
+ */
+export async function handleFetchEmployeeTopWeeklyRanks(): Promise<
+  EmployeeTopRankEntry[] | null
+> {
+  const result = await getEmployeeTopWeeklyRanks();
+
+  if (!result.success) {
+    toast.error('Failed to load top rankings', {
+      description: result.error ?? 'Unknown error',
+    });
+    return null;
+  }
+
+  return result.data ?? null;
 }
 
 /**
