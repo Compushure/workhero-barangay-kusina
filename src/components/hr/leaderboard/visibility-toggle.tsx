@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import { toggleRankingVisibility } from '@/actions/hr/leaderboard';
-import { cn } from '@/lib/utils';
 
 interface VisibilityToggleProps {
   rankingPeriodId: string;
@@ -20,7 +19,9 @@ export default function VisibilityToggle({ rankingPeriodId, isVisible }: Visibil
     startTransition(async () => {
       const result = await toggleRankingVisibility(rankingPeriodId, checked);
       if (result.success) {
-        toast.success(checked ? 'Ranking is now visible to employees' : 'Ranking hidden from employees');
+        toast.success(
+          checked ? 'Ranking is now visible to employees' : 'Ranking hidden from employees'
+        );
         router.refresh();
       } else {
         toast.error(result.error);
@@ -35,13 +36,9 @@ export default function VisibilityToggle({ rankingPeriodId, isVisible }: Visibil
         onCheckedChange={handleToggle}
         disabled={isPending}
         size="sm"
+        className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-400"
       />
-      <span
-        className={cn(
-          'text-xs font-medium cursor-default',
-          isVisible ? 'text-emerald-600' : 'text-gray-500'
-        )}
-      >
+      <span className="text-xs font-medium cursor-default text-gray-600">
         {isVisible
           ? 'Employees can currently see this ranking.'
           : 'Employees cannot see this ranking.'}
