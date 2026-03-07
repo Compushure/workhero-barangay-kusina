@@ -31,7 +31,7 @@ const locations: Array<{
   { id: 'kitchen', label: '🍲 Kitchen', path: '/employee/dashboard', x: 50, y: 25 },
   { id: 'mercado', label: '🏪 Mercado', path: '/employee/mercado', x: 78, y: 36 },
   { id: 'tasks', label: '📋 Task Board', path: '/employee/tasks', x: 35, y: 64 },
-  { id: 'leaderboard', label: '🏆 Leaderboard', x: 79, y: 67 },
+  { id: 'leaderboard', label: '🏆 Leaderboard', path: '/employee/leaderboard', x: 79, y: 67 },
 ];
 
 export function MapOverlay() {

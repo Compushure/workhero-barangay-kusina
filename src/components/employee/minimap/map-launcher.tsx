@@ -91,9 +91,12 @@ export function MapLauncher({ className }: MapLauncherProps) {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        className={`fixed z-[55] flex h-17 w-17 items-center justify-center rounded-full bg-[#6F4C2E] border-3 border-[#47331F] text-[#F4B925] transition-transform ${
-          position ? '' : 'right-4 top-1/2 -translate-y-1/2'
-        } ${dragging ? 'cursor-grabbing' : 'cursor-pointer hover:scale-105'}`}
+        className={cn(
+          'fixed z-[55] flex h-17 w-17 items-center justify-center rounded-full bg-[#6F4C2E] border-3 border-[#47331F] text-[#F4B925] transition-transform',
+          position ? '' : 'right-4 top-1/2 -translate-y-1/2',
+          dragging ? 'cursor-grabbing' : 'cursor-pointer hover:scale-105',
+          className
+        )}
         style={position ? { left: position.x, top: position.y } : undefined}
         aria-label="Open travel map"
       >
