@@ -56,7 +56,14 @@ export function NotificationsPopover({
             unreadCount > 0 ? 'text-[#F4B925]' : 'text-[#F4B925]'
           )}
         >
-          <Bell className="h-6 w-6" />
+          <Bell
+            className={cn('h-6 w-6', iconClassName)}
+            style={
+              unreadCount > 0
+                ? { animation: 'bell-shake 3s ease-in-out infinite', transformOrigin: '50% 10%' }
+                : undefined
+            }
+          />
           {unreadCount > 0 && (
             <span
               className={cn(
@@ -186,6 +193,34 @@ export function NotificationsPopover({
           </ScrollArea>
         </div>
       </PopoverContent>
+      <style jsx>{`
+        @keyframes bell-shake {
+          0% {
+            transform: rotate(0deg);
+          }
+          40% {
+            transform: rotate(0deg);
+          }
+          44% {
+            transform: rotate(12deg);
+          }
+          48% {
+            transform: rotate(-12deg);
+          }
+          52% {
+            transform: rotate(8deg);
+          }
+          56% {
+            transform: rotate(-8deg);
+          }
+          60% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(0deg);
+          }
+        }
+      `}</style>
     </Popover>
   );
 }

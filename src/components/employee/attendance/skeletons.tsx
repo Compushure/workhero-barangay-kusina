@@ -43,6 +43,17 @@ export function ProfileLevelSkeleton() {
   );
 }
 
+export function AttendanceCardSkeleton() {
+  return (
+    <div className="relative flex bg-[#E8DBBF] border-3 border-[#47331F] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[6px_6px_0px_#000] shadow-[#47331F]/50 animate-pulse">
+      <div className="w-40 h-6 bg-[#d9b77a] rounded mb-3" />
+      <div className="w-56 h-4 bg-[#d9b77a] rounded mb-4" />
+
+      <div className="w-full h-32 bg-[#d9b77a] rounded" />
+    </div>
+  );
+}
+
 export function RankWidgetSkeleton({ isCollapsed = false }: { isCollapsed?: boolean }) {
   const cardClassName =
     'bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-4 mb-4 w-[280px] min-h-[140px] shrink-0 font-jersey tracking-widest';

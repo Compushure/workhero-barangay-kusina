@@ -8,9 +8,14 @@ import ProfileAndLevel from './profile-level';
 import DashboardRedirectButton from './kitchen-redirection';
 import { Card, CardContent } from '@/components/ui/card';
 import { useGetTodayAttendanceStatus } from '@/hooks/tanstack';
+import { AttendanceCardSkeleton } from './skeletons';
 
 export default function AttendanceDesign() {
-  const { data: status } = useGetTodayAttendanceStatus();
+  const {
+    data: status,
+    isLoading: statusLoading,
+    isFetching: statusFetching,
+  } = useGetTodayAttendanceStatus();
   const [dateLabel, setDateLabel] = useState('');
 
   useEffect(() => {
@@ -37,6 +42,8 @@ export default function AttendanceDesign() {
     isOnBreak: status?.isOnBreak ?? false,
     hasTimedOut: status?.hasTimedOut ?? false,
   };
+
+  const isAttendanceLoading = statusLoading || statusFetching;
 
   return (
     <div className="flex flex-col font-jersey tracking-widest min-h-screen items-center bg-cover bg-center pixelated relative overflow-y-auto">
@@ -71,18 +78,22 @@ export default function AttendanceDesign() {
       {/* Center column: main card + dashboard button */}
       <div className="flex flex-col items-center gap-4 mt-10 sm:mt-20 px-4 text-center w-full max-w-4xl pb-12">
         {/* Main card */}
-        <div className="relative flex bg-[#E8DBBF] border-3 border-[#47331F] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[6px_6px_0px_#000] shadow-[#47331F]/50 animate-fadeIn">
-          {/* Header */}
-          <h1 className="font-jersey text-3xl text-[#252525d8] text-center mb-1">
-            ⏰ Attendance Station
-          </h1>
-          <p className="font-jersey text-xl text-[#474747d8] text-center text-parchment-foreground/70">
-            {dateLabel || 'Loading time…'}
-          </p>
+        {isAttendanceLoading ? (
+          <AttendanceCardSkeleton />
+        ) : (
+          <div className="relative flex bg-[#E8DBBF] border-3 border-[#47331F] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[6px_6px_0px_#000] shadow-[#47331F]/50 animate-fadeIn">
+            {/* Header */}
+            <h1 className="font-jersey text-3xl text-[#252525d8] text-center mb-1">
+              ⏰ Attendance Station
+            </h1>
+            <p className="font-jersey text-xl text-[#474747d8] text-center text-parchment-foreground/70">
+              {dateLabel || 'Loading time…'}
+            </p>
 
-          {/* Attendance controls */}
-          <AttendanceIcon config={{}} />
-        </div>
+            {/* Attendance controls */}
+            <AttendanceIcon config={{}} />
+          </div>
+        )}
 
         {/* Dashboard Redirect Button directly under the card */}
         <DashboardRedirectButton status={redirectStatus} />

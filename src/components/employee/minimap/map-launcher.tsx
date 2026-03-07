@@ -18,7 +18,10 @@ export function MapLauncher({ className }: MapLauncherProps) {
         type="button"
         onClick={toggleMap}
         title="Click to travel"
-        className="fixed right-4 top-1/2 -translate-y-1/2 z-[55] flex h-17 w-17 items-center justify-center rounded-full bg-[#6F4C2E] border-3 border-[#47331F] text-[#F4B925] cursor-pointer hover:scale-105 transition-transform shadow-[4px_4px_0px_#000] shadow-[#47331F]/50"
+        className={cn(
+          'fixed right-4 top-1/2 -translate-y-1/2 z-[55] flex h-17 w-17 items-center justify-center rounded-full bg-[#6F4C2E] border-3 border-[#47331F] text-[#F4B925] cursor-pointer hover:scale-105 transition-transform shadow-[4px_4px_0px_#000] shadow-[#47331F]/50',
+          className
+        )}
         aria-label="Open travel map"
       >
         <div className="relative flex items-center justify-center h-full w-full rounded-full">
