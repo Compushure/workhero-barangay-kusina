@@ -53,24 +53,18 @@ export function RequestsTable({
   const isShowingActions = sortBy === 'pending';
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border shadow-md">
+    <div className="overflow-x-auto rounded-lg border border-accent/50 shadow-sm/25">
       <Table>
-        <TableHeader className="bg-foreground">
-          <TableRow className="border-b border-border hover:bg-foreground">
-            <TableHead className="text-card font-semibold px-4 w-45">REQUEST DATE</TableHead>
-            <TableHead className="text-card font-semibold px-4 w-50">EMPLOYEE</TableHead>
-            <TableHead className="text-card font-semibold px-4 w-64">TASK</TableHead>
-            <TableHead className="text-card font-semibold text-center px-4 w-30">
-              COMPLETED
-            </TableHead>
-            <TableHead className="text-card font-semibold text-center px-4 w-15">
-              POINTS
-            </TableHead>
-            <TableHead className="text-card font-semibold text-center px-4 w-15">
-              XP
-            </TableHead>
-            <TableHead className="text-card font-semibold text-center px-4 w-20">REMARK</TableHead>
-            <TableHead className="text-card font-semibold text-center px-4 w-30">ACTION</TableHead>
+        <TableHeader className="">
+          <TableRow className="bg-primary-gradient border-b border-accent/50">
+            <TableHead className="text-card px-4 w-45">REQUEST DATE</TableHead>
+            <TableHead className="text-card px-4 w-50">EMPLOYEE</TableHead>
+            <TableHead className="text-card px-4 w-64">TASK</TableHead>
+            <TableHead className="text-card text-center px-4 w-30">COMPLETED</TableHead>
+            <TableHead className="text-card text-center px-4 w-15">POINTS</TableHead>
+            <TableHead className="text-card text-center px-4 w-15">XP</TableHead>
+            <TableHead className="text-card text-center px-4 w-20">REMARK</TableHead>
+            <TableHead className="text-card text-center px-4 w-30">ACTION</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -83,12 +77,12 @@ export function RequestsTable({
             return (
               <TableRow
                 key={request.kpitask_id}
-                className="bg-[#FBF4E8] hover:bg-[#ffffff] transition-colors border-b border-border"
+                className="bg-background hover:bg-row-hover transition-all duration-400 ease-in-out border-b border-accent/25"
               >
                 <TableCell className="text-sm font-medium px-4 w-45">
                   {formatDate(request.kpitask_completed_at || request.kpitask_created_at)}
                 </TableCell>
-                <TableCell className="px-4 w-50">
+                <TableCell className="px-4 max-w-50">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
@@ -104,7 +98,7 @@ export function RequestsTable({
                     </TooltipContent>
                   </Tooltip>
                 </TableCell>
-                <TableCell className="text-sm px-4 w-64">
+                <TableCell className="text-sm px-4 max-w-64">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="truncate">{taskName}</div>
@@ -116,10 +110,9 @@ export function RequestsTable({
                 </TableCell>
                 <TableCell className="text-sm text-center px-4 w-30">
                   <div className="flex items-center justify-left gap-1 font-medium">
-                    <Soup strokeWidth={1.75} className="size-5 ml-10 mr-1"/>
+                    <Soup strokeWidth={1.75} className="size-5 ml-5 mr-1" />
                     {request.completed_orders ?? 0} / {request.max_orders ?? 0}
                   </div>
-                  
                 </TableCell>
                 <TableCell className="text-sm text-center font-medium px-4 w-15">
                   <div className="flex items-center justify-center gap-1">
@@ -133,14 +126,14 @@ export function RequestsTable({
                     {request.category_xp ?? 0}
                   </div>
                 </TableCell>
-                <TableCell className="text-center px-4 w-[80px]">
+                <TableCell className="text-center px-4 w-20">
                   {hasRemark ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-foreground hover:bg-[#fbeaea]"
+                          className="h-8 w-8 text-foreground hover:bg-accent/15"
                           onClick={() => {
                             setSelectedRemark(request.remark || '');
                             setRemarkModalOpen(true);
@@ -155,7 +148,7 @@ export function RequestsTable({
                     <span className="text-xs text-muted-foreground">-</span>
                   )}
                 </TableCell>
-                <TableCell className="text-center px-4 w-[120px]">
+                <TableCell className="text-center px-4 w-30">
                   <div className="flex items-center justify-center gap-2">
                     {isShowingActions ? (
                       <>
@@ -165,7 +158,7 @@ export function RequestsTable({
                           // need to pass extra params, request.category_points, request.assigned_to, request.remark and request.kpitask_id
                           onClick={() => onApprove(request.kpitask_id)}
                           disabled={isRejecting || isApproving}
-                          className="p-2 h-auto shrink-0 text-muted-foreground hover:text-green-600 cursor-pointer hover:bg-green-50 disabled:opacity-50"
+                          className="p-2 h-auto shrink-0 text-muted-foreground border border-accent-secondary/50 hover:text-green-600 cursor-pointer bg-card hover:bg-green-100 disabled:opacity-50"
                           aria-label="Approve request"
                         >
                           <Check size={20} />
@@ -176,7 +169,7 @@ export function RequestsTable({
                           // need to pass extra params, request.category_points, request.assigned_to, request.remark and request.kpitask_id
                           onClick={() => onDeny(request.kpitask_id)}
                           disabled={isRejecting || isApproving}
-                          className="p-2 h-auto shrink-0 text-muted-foreground hover:text-red-600 cursor-pointer hover:bg-red-50 disabled:opacity-50"
+                          className="p-2 h-auto shrink-0 text-muted-foreground border border-accent-secondary/50 hover:text-red-600 cursor-pointer bg-card hover:bg-red-100 disabled:opacity-50"
                           aria-label="Deny request"
                         >
                           <X size={20} />
@@ -206,19 +199,19 @@ export function RequestsTable({
 
       {/* Empty State */}
       {requests.length === 0 && (
-        <div className="text-center bg-[#FBF4E8] py-12 text-muted-foreground">
+        <div className="text-center bg-background py-12 text-secondary">
           <p className="text-sm">No requests found</p>
         </div>
       )}
 
       {/* Remark Modal */}
       <Dialog open={remarkModalOpen} onOpenChange={setRemarkModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-card">
           <DialogHeader>
             <DialogTitle className="text-foreground">Task Remark</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-sm text-[#5a2a2a] whitespace-pre-wrap wrap-break-word">
+            <p className="text-sm text-primary whitespace-pre-wrap wrap-break-word">
               {selectedRemark}
             </p>
           </div>
