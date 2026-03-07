@@ -222,6 +222,7 @@ export async function submitTaskVerification(
     metadata: {
       taskId: kpitaskId,
       taskName,
+      status: 'in review',
       pendingOrdersSubmitted: pendingOrders,
       remainingOrders: remainingAfterSubmission,
       maxOrders,
@@ -303,6 +304,7 @@ export async function redoTask(kpitaskId: string): Promise<ServerActionResponse<
     metadata: {
       taskId: kpitaskId,
       taskName: taskDisplayName,
+      status: 'assigned',
       action: 'redo',
     },
   });
@@ -425,6 +427,7 @@ export async function claimTaskPointsAndXP(
     metadata: {
       taskId: kpitaskId,
       taskName: categoryName,
+      status: completedOrders < maxOrders ? 'assigned' : 'completed',
       pointsEarned,
       xpEarned: categoryXp * pendingOrders,
       leveledUp: newLevel > currentLevel,
