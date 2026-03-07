@@ -9,7 +9,7 @@ export default async function HRLayout({ children }: { children: React.ReactNode
     <div className="manager-theme flex h-screen bg-background text-foreground">
       <HRThemeBodySync />
       <Sidebar />
-      <div className="relative flex-1 min-w-0 overflow-y-auto overflow-x-auto xl:overflow-x-hidden">
+      <div className="relative flex-1 min-w-0 overflow-y-auto overflow-x-auto xl:overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <NavigationOverlay />
         <main className="relative z-0 w-full">
           <div

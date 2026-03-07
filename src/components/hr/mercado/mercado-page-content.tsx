@@ -69,48 +69,47 @@ export function MercadoPageContent() {
 
   return (
     // Page shell section.
-    <main className="min-h-screen bg-white text-foreground p-8 pb-28">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <MercadoHeader
-          title="Mercado Manager"
-          description="Manage items visible in mercado"
-          showAddButton={false}
-        />
+    <main className="min-h-screen bg-white text-foreground p-6 pb-6 flex flex-col">
+      <div className="mx-auto w-full max-w-7xl flex-1 flex flex-col p-2">
+        <div className="space-y-5">
+          <MercadoHeader
+            title="Mercado Manager"
+            description="Manage items visible in mercado"
+            showAddButton={false}
+          />
 
-        <div className="flex flex-col gap-3 md:flex-row md:items-center">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="w-full md:w-auto md:min-w-[320px] md:max-w-md">
-              <MercadoSearchBar
-                value={search}
-                onChange={setSearch}
-                placeholder="Search by employee or items"
+          <div className="flex flex-col gap-4 md:flex-row md:items-center">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="w-full md:w-auto md:min-w-[320px] md:max-w-md">
+                <MercadoSearchBar
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Search by employee or items"
+                />
+              </div>
+              <MercadoSortToggle value={sortOrder} onChange={setSortOrder} />
+              <MercadoFilterToggle
+                stockFilter={stockFilter}
+                visibilityFilter={visibilityFilter}
+                intervalFilter={intervalFilter}
+                onStockFilterChange={setStockFilter}
+                onVisibilityFilterChange={setVisibilityFilter}
+                onIntervalFilterChange={setIntervalFilter}
               />
             </div>
-            <MercadoSortToggle value={sortOrder} onChange={setSortOrder} />
-            <MercadoFilterToggle
-              stockFilter={stockFilter}
-              visibilityFilter={visibilityFilter}
-              intervalFilter={intervalFilter}
-              onStockFilterChange={setStockFilter}
-              onVisibilityFilterChange={setVisibilityFilter}
-              onIntervalFilterChange={setIntervalFilter}
-            />
+            <Button
+              onClick={openAddModal}
+              className="h-10 px-4 rounded-lg bg-primary-gradient text-zinc-50 hover:opacity-95 md:ml-auto"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Item
+            </Button>
           </div>
-          <Button
-            onClick={openAddModal}
-            className="h-10 px-4 rounded-lg bg-primary-gradient text-zinc-50 hover:opacity-95 md:ml-auto"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Item
-          </Button>
-        </div>
-
-        {/* Catalog grid section. */}
-        {isLoading ? (
-          <MercadoSkeleton />
-        ) : (
-          <>
-            <div className="grid auto-rows-fr grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {/* Catalog grid section. */}
+          {isLoading ? (
+            <MercadoSkeleton />
+          ) : (
+            <div className="grid auto-rows-fr grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
               {paginatedRewards.length > 0 ? (
                 paginatedRewards.map((item) => (
                   <MercadoCard
@@ -144,20 +143,21 @@ export function MercadoPageContent() {
                 </div>
               )}
             </div>
-          </>
+          )}
+        </div>
+
+        {/* Centered pagination section. */}
+        {totalPages > 1 && (
+          <div className="fixed bottom-6 z-40 flex justify-center pb-4" style={contentAreaStyle}>
+            <Pagination
+              totalPages={totalPages}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              isFixed={false}
+            />
+          </div>
         )}
       </div>
-
-      {/* Floating pagination section. */}
-      {totalPages > 1 && (
-        <div className="fixed bottom-6 z-40 flex justify-center" style={contentAreaStyle}>
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-          />
-        </div>
-      )}
 
       <AddItemsModal
         open={isAddModalOpen}
