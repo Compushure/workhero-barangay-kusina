@@ -559,14 +559,14 @@ export function AddItemsModal({
             variant="outline"
             onClick={handleClose}
             disabled={isLoading}
-            className="bg-background text-foreground border-border hover:bg-muted px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="h-10 rounded-xl border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white transition-all duration-400 ease-in-out px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="h-10 rounded-xl bg-primary-gradient text-zinc-50 hover:opacity-95 px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isLoading ? (
               <>

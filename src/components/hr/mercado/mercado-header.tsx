@@ -17,7 +17,7 @@ export function MercadoHeader({
   showAddButton = true,
 }: MercadoHeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-8">
+    <div className="p-4 flex items-center justify-between mb-4">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
         <p className="text-base text-muted-foreground mt-1">{description}</p>
