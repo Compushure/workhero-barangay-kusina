@@ -63,13 +63,13 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="min-h-172 w-full bg-white rounded-xl border border-gray-300 shadow-md overflow-hidden">
+      <div className="w-full bg-white rounded-xl border border-gray-300 shadow-md overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-primary-gradient border-0 hover:opacity-95">
-              <TableHead className="font-bold text-white w-20 text-lg pl-6 pr-8">RANK</TableHead>
-              <TableHead className="font-bold text-white text-lg">NAME</TableHead>
-              <TableHead className="font-bold text-white text-right text-lg pr-6">
+              <TableHead className="font-bold text-white w-20 text-base pl-5 pr-5">RANK</TableHead>
+              <TableHead className="font-bold text-white text-base">NAME</TableHead>
+              <TableHead className="font-bold text-white text-right text-base pr-5">
                 PERFORMANCE SCORE
               </TableHead>
             </TableRow>
@@ -80,16 +80,16 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
                 key={player.id}
                 className="bg-accent/5 border-0 hover:bg-white transition-colors"
               >
-                <TableCell className="pl-6 pr-8">
-                  <span className="font-bold text-foreground text-xl">
+                <TableCell className="pl-5 pr-5 py-2.5">
+                  <span className="font-bold text-foreground text-base">
                     {getOrdinalSuffix(player.rank)}
                   </span>
                 </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12 border-2 border-gray-300">
+                <TableCell className="py-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <Avatar className="h-10 w-10 border-2 border-gray-300">
                       <AvatarImage src={player.image ?? undefined} alt={player.name} />
-                      <AvatarFallback className="bg-gray-200 text-foreground font-semibold text-base">
+                      <AvatarFallback className="bg-gray-200 text-foreground font-semibold text-sm">
                         {player.name
                           .split(' ')
                           .map((n) => n[0])
@@ -98,14 +98,14 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
                           .slice(0, 2)}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="font-medium text-foreground text-xl">{player.name}</span>
+                    <span className="font-medium text-foreground text-base">{player.name}</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-right pr-6">
+                <TableCell className="text-right pr-5 py-2.5">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="font-semibold text-foreground text-2xl cursor-help">
+                        <span className="font-semibold text-foreground text-lg cursor-help">
                           {player.performanceScore.toLocaleString()}
                         </span>
                       </TooltipTrigger>
@@ -119,16 +119,31 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
                 </TableCell>
               </TableRow>
             ))}
+            {Array.from({ length: PAGE_SIZE - paginatedPlayers.length }).map((_, i) => (
+              <TableRow key={`placeholder-${i}`} className="border-0 pointer-events-none select-none">
+                <TableCell className="pl-5 pr-5 py-2.5">
+                  <span className="invisible font-bold text-base">0th</span>
+                </TableCell>
+                <TableCell className="py-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-10 w-10 invisible" />
+                  </div>
+                </TableCell>
+                <TableCell className="text-right pr-5 py-2.5">
+                  <span className="invisible font-semibold text-lg">0</span>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>
-      {totalPages > 1 && (
+      <div className={totalPages <= 1 ? 'invisible' : ''}>
         <Pagination
           totalPages={totalPages}
           currentPage={currentPage}
           onPageChange={setCurrentPage}
         />
-      )}
+      </div>
     </div>
   );
 }

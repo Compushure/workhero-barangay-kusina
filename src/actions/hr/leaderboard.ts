@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
 import { unstable_noStore as noStore } from 'next/cache';
 import type {
@@ -287,17 +288,16 @@ export async function toggleRankingVisibility(
 
 /**
  * Returns the latest generated weekly period (year + ISO week) for default leaderboard view.
+ * Uses admin client to bypass RLS so non-visible periods are included.
  * Used so the HR leaderboard page can show the latest week by default instead of "Select a Period".
  */
 export async function getLatestWeeklyPeriod(): Promise<
-  ActionResult<{ year: number; week: number } | null>
+  ActionResult<{ year: number; week: number; is_visible: boolean } | null>
 > {
   return safeAction(async () => {
-    const supabase = await createClient();
-
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('RankingPeriod')
-      .select('period_start')
+      .select('period_start, is_visible')
       .eq('period_type', 'weekly')
       .order('period_start', { ascending: false })
       .limit(1)
@@ -315,6 +315,98 @@ export async function getLatestWeeklyPeriod(): Promise<
     return {
       year: startDate.getFullYear(),
       week: getISOWeek(startDate),
+      is_visible: data.is_visible,
     };
   });
 }
+
+/**
+ * Returns the latest generated monthly period (year + month) from HR.
+ * Uses admin client to bypass RLS so non-visible periods are included.
+ * Used so the employee leaderboard can show and navigate monthly ranks.
+ */
+export async function getLatestMonthlyPeriod(): Promise<
+  ActionResult<{ year: number; month: number; is_visible: boolean } | null>
+> {
+  return safeAction(async () => {
+    const { data, error } = await supabaseAdmin
+      .from('RankingPeriod')
+      .select('period_start, is_visible')
+      .eq('period_type', 'monthly')
+      .order('period_start', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch latest monthly period: ${error.message}`);
+    }
+
+    if (!data?.period_start) {
+      return null;
+    }
+
+    const startDate = new Date(data.period_start + 'T00:00:00');
+    return {
+      year: startDate.getFullYear(),
+      month: startDate.getMonth() + 1,
+      is_visible: data.is_visible,
+    };
+  });
+}
+
+/**
+ * Returns the latest generated yearly period (year) from HR.
+ * Uses admin client to bypass RLS so non-visible periods are included.
+ * Used so the employee leaderboard can show and navigate yearly ranks.
+ */
+export async function getLatestYearlyPeriod(): Promise<
+  ActionResult<{ year: number; is_visible: boolean } | null>
+> {
+  return safeAction(async () => {
+    const { data, error } = await supabaseAdmin
+      .from('RankingPeriod')
+      .select('period_start, is_visible')
+      .eq('period_type', 'yearly')
+      .order('period_start', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch latest yearly period: ${error.message}`);
+    }
+
+    if (!data?.period_start) {
+      return null;
+    }
+
+    const startDate = new Date(data.period_start + 'T00:00:00');
+    return { year: startDate.getFullYear(), is_visible: data.is_visible };
+  });
+}
+
+/**
+ * Returns the latest generated periods for all types (weekly, monthly, yearly).
+ * Used by the employee leaderboard to show the latest month/year and to bound period navigation.
+ */
+export async function getLatestLeaderboardPeriods(): Promise<
+  ActionResult<{
+    weekly: { year: number; week: number } | null;
+    monthly: { year: number; month: number } | null;
+    yearly: { year: number } | null;
+  }>
+> {
+  return safeAction(async () => {
+    const [weeklyResult, monthlyResult, yearlyResult] = await Promise.all([
+      getLatestWeeklyPeriod(),
+      getLatestMonthlyPeriod(),
+      getLatestYearlyPeriod(),
+    ]);
+
+    return {
+      weekly: weeklyResult.success ? weeklyResult.data : null,
+      monthly: monthlyResult.success ? monthlyResult.data : null,
+      yearly: yearlyResult.success ? yearlyResult.data : null,
+    };
+  });
+}
+

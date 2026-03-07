@@ -39,8 +39,8 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
   return (
     <div className="h-screen p-4  bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6 sm:mb-8">
-          <div className="flex items-center gap-3 sm:gap-4 mb-6">
+        <div className="mb-2 sm:mb-3">
+          <div className="flex items-center gap-3 sm:gap-4 mb-4">
             <div className="flex flex-col gap-1">
               <h1 className="text-3xl font-bold tracking-tight text-foreground">
                 Leaderboards

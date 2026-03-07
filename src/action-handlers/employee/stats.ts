@@ -10,6 +10,7 @@ import {
   getEmployeeLevel,
   getEmployeePoints,
   getEmployeeRank,
+  getEmployeeTopRanksByPeriod,
   getEmployeeTopWeeklyRanks,
   getEmployeeXP,
 } from '@/actions/employee/stats';
@@ -96,6 +97,35 @@ export async function handleFetchEmployeeTopWeeklyRanks(): Promise<
 
   if (!result.success) {
     toast.error('Failed to load top rankings', {
+      description: result.error ?? 'Unknown error',
+    });
+    return null;
+  }
+
+  return result.data ?? null;
+}
+
+export type EmployeePeriodParams =
+  | { periodType: 'weekly'; year: number; week: number }
+  | { periodType: 'monthly'; year: number; month: number }
+  | { periodType: 'yearly'; year: number };
+
+/**
+ * Fetches the top 10 rankings for a specific period (weekly, monthly, or yearly).
+ * Returns null on failure or when no visible ranking exists for that period.
+ */
+export async function handleFetchEmployeeTopRanksByPeriod(
+  params: EmployeePeriodParams
+): Promise<EmployeeTopRankEntry[] | null> {
+  const result =
+    params.periodType === 'weekly'
+      ? await getEmployeeTopRanksByPeriod(params.periodType, params.year, undefined, params.week)
+      : params.periodType === 'monthly'
+        ? await getEmployeeTopRanksByPeriod(params.periodType, params.year, params.month)
+        : await getEmployeeTopRanksByPeriod(params.periodType, params.year);
+
+  if (!result.success) {
+    toast.error('Failed to load rankings', {
       description: result.error ?? 'Unknown error',
     });
     return null;

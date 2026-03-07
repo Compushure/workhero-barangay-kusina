@@ -9,9 +9,11 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import {
   handleFetchEmployeeRank,
   handleFetchEmployeePoints,
+  handleFetchEmployeeTopRanksByPeriod,
   handleFetchEmployeeTopWeeklyRanks,
   handleFetchEmployeeXP,
 } from '@/action-handlers/employee/stats';
+import type { EmployeePeriodParams } from '@/action-handlers/employee/stats';
 import { fetchUserBadgesHandler } from '@/action-handlers/employee/badges';
 import type { EmployeeRank, EmployeeTopRankEntry } from '@/types';
 import type { EmployeePointsData } from '@/types/employee/points';
@@ -33,6 +35,14 @@ export const employeeKeys = {
   all: ['employees'] as const,
   rank: () => [...employeeKeys.all, 'rank'] as const,
   topWeeklyRanks: () => [...employeeKeys.all, 'top-weekly-ranks'] as const,
+  topRanksByPeriod: (params: EmployeePeriodParams) =>
+    [
+      ...employeeKeys.all,
+      'top-ranks-by-period',
+      params.periodType,
+      params.year,
+      params.periodType === 'weekly' ? params.week : params.periodType === 'monthly' ? params.month : null,
+    ] as const,
   points: () => [...employeeKeys.all, 'points'] as const,
   xp: () => [...employeeKeys.all, 'xp'] as const,
   badges: () => [...employeeKeys.all, 'badges'] as const,
@@ -118,6 +128,25 @@ export function useGetEmployeeTopWeeklyRanks(
     queryKey: employeeKeys.topWeeklyRanks(),
     queryFn: async () => handleFetchEmployeeTopWeeklyRanks(),
     enabled: queryOptions.enabled !== false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<EmployeeTopRankEntry[] | null, Error>;
+}
+
+/**
+ * Fetches the top 10 rankings for a specific period (weekly, monthly, or yearly).
+ * Use for employee leaderboard when navigating by period.
+ */
+export function useGetEmployeeTopRanksByPeriod(
+  params: EmployeePeriodParams | null,
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<EmployeeTopRankEntry[] | null, Error> {
+  return useQuery({
+    queryKey: params ? employeeKeys.topRanksByPeriod(params) : ['employees', 'top-ranks-by-period', 'disabled'],
+    queryFn: async () => (params ? handleFetchEmployeeTopRanksByPeriod(params) : null),
+    enabled: (queryOptions.enabled !== false) && params !== null,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     retry: 1,

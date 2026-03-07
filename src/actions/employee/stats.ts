@@ -14,9 +14,14 @@
 import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
-import type { EmployeeRank, EmployeeTopRankEntry, EmployeeXP } from '@/types';
-// import type { TimePeriod } from '@/lib/utils/time-period-utils';
-// import { getCutoffForPeriod } from '@/lib/utils/time-period-utils';
+import { getPeriodStartEnd } from '@/lib/utils/time-period-utils';
+import { format } from 'date-fns';
+import type {
+  EmployeeRank,
+  EmployeeTopRankEntry,
+  EmployeeXP,
+  RankLogPeriodType,
+} from '@/types';
 
 export interface EmployeePointsData {
   points: number;
@@ -239,6 +244,71 @@ export async function getEmployeeTopWeeklyRanks(): Promise<
       .from('ranking_leaderboard_view')
       .select('user_id, user_name, rank, performance_score')
       .eq('period_type', 'weekly')
+      .eq('is_visible', true)
+      .eq('period_start', periodStart)
+      .order('rank', { ascending: true })
+      .limit(10);
+
+    if (rowsError) {
+      throw new Error(`Failed to fetch ranking entries: ${rowsError.message}`);
+    }
+
+    if (!rows || rows.length === 0) {
+      return null;
+    }
+
+    const result: EmployeeTopRankEntry[] = rows.map((row) => {
+      const { data: urlData } = supabaseAdmin.storage
+        .from('employees')
+        .getPublicUrl(`${row.user_id}/profile.png`);
+      return {
+        rank: row.rank,
+        userId: row.user_id ?? '',
+        name: row.user_name ?? '',
+        performanceScore: Number(row.performance_score ?? 0),
+        isCurrentUser: row.user_id === user.id,
+        profilePictureUrl: urlData?.publicUrl ?? null,
+      };
+    });
+
+    return result;
+  });
+}
+
+/**
+ * Fetches the top 10 rankings for a specific period (weekly, monthly, or yearly).
+ * Only returns data when that period exists and is visible to employees.
+ */
+export async function getEmployeeTopRanksByPeriod(
+  periodType: RankLogPeriodType,
+  year: number,
+  month?: number,
+  week?: number
+): Promise<ActionResult<EmployeeTopRankEntry[] | null>> {
+  return safeAction(async () => {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { start } = getPeriodStartEnd(
+      periodType,
+      year,
+      periodType === 'monthly' ? month : undefined,
+      periodType === 'weekly' ? week : undefined
+    );
+    const periodStart = format(start, 'yyyy-MM-dd');
+
+    const { data: rows, error: rowsError } = await supabaseAdmin
+      .from('ranking_leaderboard_view')
+      .select('user_id, user_name, rank, performance_score')
+      .eq('period_type', periodType)
       .eq('is_visible', true)
       .eq('period_start', periodStart)
       .order('rank', { ascending: true })
