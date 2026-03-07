@@ -52,7 +52,7 @@ export function NotificationsPopover({
       <PopoverTrigger asChild>
         <Button
           className={cn(
-            'relative h-14 w-14 rounded-full bg-[#6F4C2E] cursor-pointer border-3 border-[#47331F] text-[#F4B925] shadow-[4px_4px_0px_#000] shadow-[#47331F]/50 transition-transform hover:scale-105 hover:bg-[#6F4C2E] hover:text-[#F4B925] hover:border-[#47331F] flex items-center justify-center',
+            'relative h-14 w-14 rounded-full bg-[#6F4C2E] cursor-pointer border-3 border-[#47331F] text-[#F4B925] shadow-[4px_4px_0px_#000] shadow-[#47331F]/50 transition-transform hover:scale-105 active:scale-100 data-[state=open]:scale-100 hover:bg-[#6F4C2E] hover:text-[#F4B925] hover:border-[#47331F] flex items-center justify-center',
             unreadCount > 0 ? 'text-[#F4B925]' : 'text-[#F4B925]'
           )}
         >
