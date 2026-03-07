@@ -87,7 +87,10 @@ export async function LeaderboardContent({
           )}
         </div>
 
-        <VisibilityToggle rankingPeriodId={periodInfo.ranking_period_id} isVisible={periodInfo.is_visible} />
+        <VisibilityToggle
+          rankingPeriodId={periodInfo.ranking_period_id}
+          isVisible={periodInfo.is_visible}
+        />
       </div>
 
       <LeaderboardTable players={enrichedPlayers} />

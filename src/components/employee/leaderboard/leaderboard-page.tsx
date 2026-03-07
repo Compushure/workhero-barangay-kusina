@@ -29,8 +29,14 @@ export function LeaderboardPageClient() {
 
       {/* Page content */}
       <div className="flex flex-col items-center justify-center px-4 min-h-screen -mt-16">
-        {/* Title — only when loading or when rankings are available */}
-        {(isLoading || (entries && entries.length > 0)) && (
+        {/* Title: skeleton when loading, real title when data is ready */}
+        {isLoading && (
+          <div
+            className="h-10 md:h-14 w-64 md:w-96 mx-auto mb-25 rounded-lg bg-[#F4B925]/30 animate-pulse"
+            aria-hidden
+          />
+        )}
+        {!isLoading && entries && entries.length > 0 && (
           <h1 className="font-jersey tracking-widest text-[#F4B925] text-3xl md:text-6xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mb-25 text-center">
             Top Kusineros of the Week
           </h1>
