@@ -51,11 +51,11 @@ export default function ProfileLevelCard() {
 
   return (
     <>
-      <div className="inline-flex items-center bg-[#765332] border-3 border-[#47331F] rounded-lg shadow-md p-2">
+      <div className="inline-flex w-full sm:w-auto max-w-sm sm:max-w-none items-center bg-[#765332] border-3 border-[#47331F] rounded-lg shadow-md p-2">
         {/* Avatar Circle with onClick */}
         <div
           onClick={() => setModalOpen(true)}
-          className="w-12 h-12 rounded-full bg-[#E89C30] flex items-center justify-center border-2 border-[#47331F] shrink-0 mr-3 overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+          className="w-12 h-12 rounded-full bg-[#E89C30] flex items-center justify-center border-2 border-[#47331F] shrink-0 mr-3 overflow-hidden cursor-pointer hover:scale-105 transition-transform shadow-[4px_4px_0px_#000] shadow-[#47331F]/50"
         >
           {imageUrlWithCacheBust && hasImage ? (
             <img
@@ -70,9 +70,9 @@ export default function ProfileLevelCard() {
         </div>
 
         {/* Profile name + level */}
-        <div className="flex flex-col">
-          <span className="text-xl font-semibold text-[#F5E8D6]">{name}</span>
-          <span className="text-lg font-medium text-[#9E9985]">Lv. {level}</span>
+        <div className="flex flex-col min-w-0">
+          <span className="text-lg sm:text-xl font-semibold text-[#F5E8D6] truncate">{name}</span>
+          <span className="text-base sm:text-lg font-medium text-[#9E9985]">Lv. {level}</span>
         </div>
       </div>
 

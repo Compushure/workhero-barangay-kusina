@@ -39,7 +39,7 @@ export default function AttendanceDesign() {
   };
 
   return (
-    <div className="flex font-jersey tracking-widest min-h-screen items-center justify-center bg-cover bg-center pixelated relative">
+    <div className="flex flex-col font-jersey tracking-widest min-h-screen items-center bg-cover bg-center pixelated relative overflow-y-auto">
       {/* Background */}
       <div className="absolute inset-0 -z-10">
         <img
@@ -50,23 +50,26 @@ export default function AttendanceDesign() {
         <div className="absolute inset-0 bg-[#0e0d0c]/30"></div>
       </div>
 
-      {/* Top‑left: Profile + Level */}
-      <div className="absolute top-4 left-4 flex flex-row items-center gap-6">
-        <ProfileAndLevel />
-        <XPProgressAndPoints />
-      </div>
+      {/* Responsive top bar for widgets */}
+      <div className="sticky top-0 left-0 right-0 w-full px-4 sm:px-6 pt-2 z-20 pointer-events-none">
+        <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4 p-2">
+          <div className="pointer-events-auto flex flex-wrap items-center gap-3 sm:gap-4">
+            <ProfileAndLevel />
+            <XPProgressAndPoints />
+          </div>
 
-      {/* Top‑right: Weekly / Rank (same wrapper as employee dashboard) */}
-      <div className="absolute top-4 right-4">
-        <Card className="bg-transparent shadow-none border-none">
-          <CardContent>
-            <RankWidget />
-          </CardContent>
-        </Card>
+          <div className="pointer-events-auto w-full sm:w-auto flex justify-end">
+            <Card className="bg-transparent shadow-none border-none w-full sm:w-auto p-0 gap-0">
+              <CardContent className="p-0">
+                <RankWidget />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
 
       {/* Center column: main card + dashboard button */}
-      <div className="flex flex-col items-center gap-4 mt-10">
+      <div className="flex flex-col items-center gap-4 mt-10 sm:mt-20 px-4 text-center w-full max-w-4xl pb-12">
         {/* Main card */}
         <div className="relative flex bg-[#E8DBBF] border-3 border-[#47331F] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[6px_6px_0px_#000] shadow-[#47331F]/50 animate-fadeIn">
           {/* Header */}

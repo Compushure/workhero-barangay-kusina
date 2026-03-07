@@ -14,7 +14,7 @@ export function RankWidget() {
   const rank = rankData?.rank ?? 1;
 
   const cardClassName =
-    'bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-4 mb-4 w-[280px] min-h-[140px] shrink-0 font-jersey tracking-widest';
+    'bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-3 sm:p-4 mb-4 mr-15 w-full sm:w-64 max-w-sm sm:max-w-none font-jersey tracking-widest';
 
   if (isRankLoading) {
     return (
@@ -22,13 +22,13 @@ export function RankWidget() {
         <div className="w-28 h-5 bg-white/20 rounded mx-auto mb-3" />
         <div className="border-t-2 border-white/30 mb-3" />
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-white/20 rounded-full" />
             <div className="h-7 w-12 bg-white/20 rounded" />
           </div>
 
-          <div className="h-12 border-l-2 border-white/30 mx-4" />
+          <div className="hidden sm:block h-12 border-l-2 border-white/30 mx-2 sm:mx-4" />
 
           <div className="h-7 w-14 bg-white/20 rounded" />
         </div>
@@ -39,7 +39,7 @@ export function RankWidget() {
   if (!rankData || performanceScore === 0) {
     return (
       <div className={cardClassName}>
-        <h2 className="text-lg text-white text-center mb-2">Weekly Rank</h2>
+        <h2 className="text-lg text-yellow-500 text-center mb-2">Weekly Rank</h2>
         <div className="border-t-2 border-white/30 mb-3" />
 
         <div className="flex items-center justify-center min-h-[60px]">
@@ -58,7 +58,7 @@ export function RankWidget() {
       <div className="border-t-2 border-white/30 mb-3" />
 
       {/* Content Section */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         {/* Left: Trophy + Rank */}
         <div className="flex items-center gap-3">
           <div className="bg-white/20 rounded-full p-2">
@@ -68,16 +68,14 @@ export function RankWidget() {
         </div>
 
         {/* Vertical Divider */}
-        <div className="h-12 border-l-2 border-white/30 mx-4" />
+        <div className="hidden sm:block h-12 border-l-2 border-white/30 mx-2 sm:mx-4" />
 
         {/* Right: Performance Score */}
         <div className="flex flex-col items-end">
           <span className="text-xs text-white mb-1">Performance Score</span>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-xl text-white cursor-help">
-                {performanceScore}
-              </span>
+              <span className="text-xl text-white cursor-help">{performanceScore}</span>
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-60">
               {PERFORMANCE_SCORE_TOOLTIP}
