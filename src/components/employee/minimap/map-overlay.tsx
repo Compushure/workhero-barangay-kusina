@@ -55,7 +55,7 @@ export function MapOverlay() {
           <div className="absolute inset-0 bg-black/60" onClick={closeMap} />
 
           <motion.div
-            className="relative w-[92vw] max-w-[700px] aspect-square"
+            className="relative w-[92vw] max-w-[700px] max-h-[90vh] aspect-square"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
