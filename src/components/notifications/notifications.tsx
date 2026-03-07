@@ -15,7 +15,19 @@ import {
 import { NotificationItemCard } from './notification-item';
 import { cn } from '@/lib/utils';
 
-export function NotificationsPopover() {
+interface NotificationsPopoverProps {
+  triggerClassName?: string;
+  iconClassName?: string;
+  badgeClassName?: string;
+  popoverContentClassName?: string;
+}
+
+export function NotificationsPopover({
+  triggerClassName,
+  iconClassName,
+  badgeClassName,
+  popoverContentClassName,
+}: NotificationsPopoverProps = {}) {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const { data, isLoading, isFetching } = useNotifications(false);
   const markNotificationRead = useMarkNotificationRead();
@@ -46,13 +58,18 @@ export function NotificationsPopover() {
         >
           <Bell className="h-6 w-6" />
           {unreadCount > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold leading-none text-white">
+            <span
+              className={cn(
+                'absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold leading-none text-white',
+                badgeClassName
+              )}
+            >
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-95 p-0 shadow-lg">
+      <PopoverContent align="end" className={cn('w-95 p-0 shadow-lg', popoverContentClassName)}>
         <div className="border-b px-4 py-3">
           <div className="flex items-center justify-between mb-3">
             <div>

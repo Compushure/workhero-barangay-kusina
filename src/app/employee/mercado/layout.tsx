@@ -1,8 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
   MercadoProvider,
@@ -10,15 +8,12 @@ import {
 } from '../../../components/employee/mercado/mercado-context';
 import { useMercadoPageData } from '@/hooks/useMercadoPageData';
 import { LogOutBtn } from '@/components/employee/attendance/logout';
+import { NotificationsPopover } from '@/components/notifications/notifications';
+import { MapLauncher } from '@/components/employee/minimap/map-launcher';
 import { Coins } from 'lucide-react';
 
 interface MercadoLayoutProps {
   children: React.ReactNode;
-}
-
-interface QuickNavItem {
-  label: string;
-  href: string;
 }
 
 interface IntervalStall {
@@ -27,12 +22,6 @@ interface IntervalStall {
   image: string;
 }
 
-const QUICK_NAV_ITEMS: QuickNavItem[] = [
-  { label: 'Dashboard', href: '/employee/dashboard' },
-  { label: 'Tasks', href: '/employee/tasks' },
-  { label: 'Mercado', href: '/employee/mercado' },
-];
-
 const INTERVAL_STALLS: IntervalStall[] = [
   { interval: 'weekly', label: 'Weekly', image: '/mercado/market_02.8.png' },
   { interval: 'monthly', label: 'Monthly', image: '/mercado/bakery_01.png' },
@@ -40,16 +29,27 @@ const INTERVAL_STALLS: IntervalStall[] = [
 ];
 
 function MercadoLayoutContent({ children }: MercadoLayoutProps) {
-  const pathname = usePathname();
   const { setSelectedInterval } = useMercadoContext();
   const { userPoints, isLoading } = useMercadoPageData();
+
+  const marketControlStyles = {
+    shell: 'bg-[#765332] border-3 border-[#47331F] rounded-lg',
+    label: 'text-sm text-[#F5E8D6]/90 font-medium',
+    value: 'text-2xl font-bold text-[#F5E8D6] pixelated-text',
+    iconWrap:
+      'flex items-center justify-center w-12 h-12 rounded-full bg-[#E89C30] border-2 border-[#47331F] shrink-0',
+    bellTrigger:
+      'h-16 w-16 rounded-full bg-[#765332] border-3 border-[#47331F] text-[#F5E8D6] hover:scale-105 hover:bg-[#765332] hover:text-[#F5E8D6] transition-all shadow-none',
+    bellIcon: 'h-8 w-8',
+    bellBadge: 'bg-[#E89C30] text-[#690003] border border-[#47331F] font-bold',
+  };
 
   const handleStallClick = (interval: 'weekly' | 'monthly' | 'yearly') => {
     setSelectedInterval(interval);
   };
 
   return (
-    <div className="relative h-screen w-full">
+    <div className="relative h-screen w-full overflow-hidden">
       {/* Background Image */}
       <Image
         src="/mercado/mercado-bg.svg"
@@ -60,54 +60,42 @@ function MercadoLayoutContent({ children }: MercadoLayoutProps) {
         quality={100}
       />
 
-      {/* Points Bar */}
-      <div className="absolute top-4 right-4 z-40 md:top-6 md:right-6 flex flex-col items-end gap-3">
-        <div className="w-full max-w-md bg-linear-to-r from-amber-50/95 to-orange-50/95 backdrop-blur-sm border-2 border-[#690003]/30 rounded-xl shadow-lg px-6 py-3">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Coins className="h-8 w-8 text-amber-600" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-              </div>
-              <div>
-                <p className="text-xs text-[#7a3d3d] font-medium">Fiesta Points</p>
-                <p className="text-2xl font-bold text-[#690003] pixelated-text">
-                  {isLoading ? '...' : userPoints.toLocaleString()}
-                </p>
-              </div>
+      {/* Points Bar + Notifications */}
+      <div className="absolute top-4 left-4 z-40 flex items-start gap-3 md:top-6 md:left-6">
+        <div className={cn('w-40 px-4 py-3 md:w-50', marketControlStyles.shell)}>
+          <div className="flex items-center gap-3">
+            <div className={marketControlStyles.iconWrap}>
+              <Coins className="h-7 w-7 text-[#690003]" />
+            </div>
+            <div>
+              <p className={marketControlStyles.label}>Fiesta Points</p>
+              <p className={marketControlStyles.value}>
+                {isLoading ? '...' : userPoints.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
 
-        <LogOutBtn />
-      </div>
-
-      {/* Quick Navigation */}
-      <div className="absolute top-4 left-4 z-40 md:top-6 md:left-6">
-        <div className="flex items-center gap-2 rounded-xl border border-[#690003]/30 bg-linear-to-r from-amber-50/95 to-orange-50/95 p-2 shadow-lg backdrop-blur-sm">
-          {QUICK_NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'rounded-lg px-3 py-2 text-xs md:text-sm font-semibold transition-colors',
-                  isActive ? 'bg-[#690003] text-white' : 'text-[#690003] hover:bg-[#690003]/10'
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+        <div className="mt-0.5">
+          <NotificationsPopover
+            triggerClassName={marketControlStyles.bellTrigger}
+            iconClassName={marketControlStyles.bellIcon}
+            badgeClassName={marketControlStyles.bellBadge}
+          />
         </div>
       </div>
 
+      {/* Logout + Map */}
+      <div className="absolute top-4 right-4 z-40 flex flex-col items-end gap-3 md:top-6 md:right-6">
+        <LogOutBtn />
+      </div>
+
+      <MapLauncher className="right-4 top-27 translate-y-0 md:right-6 md:top-31" />
+
       {/* Main Content Container */}
-      <div className="relative z-10 flex h-full w-full items-end justify-center pt-20 pb-0 md:pt-24 md:pb-0">
+      <div className="relative z-10 flex h-full w-full items-end justify-center overflow-hidden pt-20 pb-0 md:pt-24 md:pb-0">
         {/* Stalls Container */}
-        <div className="flex h-full w-full max-w-7xl items-end justify-center px-10 translate-y-0 md:px-16 md:translate-y-0 lg:px-20 lg:translate-y-0 pb-0 md:pb-0">
+        <div className="flex h-full w-full max-w-7xl items-end justify-center px-10 translate-y-0 pb-0 md:px-16 md:translate-y-0 md:pb-0 lg:px-20 lg:translate-y-0">
           <div className="flex items-end justify-center gap-0 md:gap-2 lg:gap-3">
             {INTERVAL_STALLS.map((stall) => {
               const intervalLabel = stall.label;

@@ -2,8 +2,13 @@
 
 import { MapOverlay, useMapStore } from './map-overlay';
 import { Map } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export function MapLauncher() {
+interface MapLauncherProps {
+  className?: string;
+}
+
+export function MapLauncher({ className }: MapLauncherProps) {
   const { toggleMap } = useMapStore();
 
   return (

@@ -71,107 +71,95 @@ export const MercadoCard = memo(function MercadoCard({
     onClick?.(item.id);
   }, [onClick, item.id]);
 
-  // Check if item is scheduled for future availability
-  const isScheduled = useMemo(() => {
-    return item.availableDate && !isItemAvailableNow(item.availableDate);
-  }, [item.availableDate]);
-
   const availableDateText = useMemo(() => {
     if (!item.availableDate) return null;
     return formatDateShort(item.availableDate, '');
   }, [item.availableDate]);
 
   return (
-    <>
-      <div
-        className="bg-background border border-border rounded-xl p-4 flex items-center relative shadow-sm hover:shadow-md transition-all h-32 cursor-pointer hover:border-accent/50 hover:scale-[1.02]"
-        onClick={handleCardClick}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleCardClick();
-          }
-        }}
-      >
-        <div className="h-24 w-24 bg-background border border-accent/20 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
-          {item.imageUrl && !imageError ? (
-            <img
-              src={item.imageUrl}
-              alt={`${item.name} icon`}
-              className="h-full w-full object-cover"
-              loading="lazy"
-              decoding="async"
-              onError={() => setImageError(true)}
-              onLoad={(e) => {
-                // Mark image as loaded to prevent layout shift
-                e.currentTarget.style.opacity = '1';
-              }}
-              style={{ opacity: 0, transition: 'opacity 0.2s' }}
-            />
+    <div
+      className="bg-background border border-border rounded-xl p-3.5 flex items-center gap-3.5 relative shadow-sm hover:shadow-md transition-all h-32 cursor-pointer hover:border-accent/50 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+      onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+    >
+      <div className="h-20 w-20 bg-background border border-accent/20 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+        {item.imageUrl && !imageError ? (
+          <img
+            src={item.imageUrl}
+            alt={`${item.name} icon`}
+            className="h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
+            onError={() => setImageError(true)}
+            onLoad={(e) => {
+              // Mark image as loaded to prevent layout shift
+              e.currentTarget.style.opacity = '1';
+            }}
+            style={{ opacity: 0, transition: 'opacity 0.2s' }}
+          />
+        ) : (
+          <ImageIcon className="h-6 w-6 text-primary/40" />
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0 pr-10 grid grid-rows-[24px_24px_24px] items-center gap-0.5">
+        <h3 className="text-lg font-semibold text-primary truncate leading-tight">{item.name}</h3>
+
+        <div className="flex h-6 items-center gap-1.5 overflow-hidden">
+          {availableDateText && (
+            <Badge
+              variant="secondary"
+              className="shrink-0 rounded-lg border border-accent/30 bg-accent-secondary/25 px-2 text-primary hover:bg-accent-secondary/25 text-[11px]"
+            >
+              <Calendar className="h-3 w-3 mr-1" />
+              {availableDateText}
+            </Badge>
+          )}
+          {isHidden && (
+            <Badge
+              variant="secondary"
+              className="shrink-0 rounded-lg border border-gray-300 bg-gray-200 px-2 text-gray-700 hover:bg-gray-200 text-[11px]"
+            >
+              <EyeOff className="h-3 w-3 mr-1" />
+              Hidden
+            </Badge>
+          )}
+        </div>
+
+        <div className="flex h-6 items-center gap-2.5">
+          <p className="text-primary font-semibold text-sm">{formattedPrice} pts</p>
+          {isOutOfStock ? (
+            <Badge
+              variant="destructive"
+              className="shrink-0 rounded-lg border border-destructive/80 bg-destructive px-2 text-white hover:bg-destructive text-[11px]"
+            >
+              Out of stock
+            </Badge>
           ) : (
-            <ImageIcon className="h-8 w-8 text-primary/40" />
-          )}
-        </div>
-
-        <div className="ml-4 flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-xl font-bold text-primary truncate">{item.name}</h3>
-            {isScheduled && (
-              <Badge
-                variant="secondary"
-                className="bg-accent-secondary/25 text-primary hover:bg-accent-secondary/25 text-xs"
-              >
-                <Calendar className="h-3 w-3 mr-1" />
-                {availableDateText}
-              </Badge>
-            )}
-            {isHidden && (
-              <Badge
-                variant="secondary"
-                className="bg-gray-200 text-gray-700 hover:bg-gray-200 text-xs"
-              >
-                <EyeOff className="h-3 w-3 mr-1" />
-                Hidden
-              </Badge>
-            )}
-            {isOutOfStock && (
-              <Badge
-                variant="destructive"
-                className="bg-destructive text-white hover:bg-destructive text-xs"
-              >
-                Out of Stock
-              </Badge>
-            )}
-          </div>
-
-          <div className="flex items-center gap-4 mt-2">
-            <p className="text-primary font-semibold text-base">{formattedPrice} pts</p>
-            {formattedQuantity !== undefined && (
-              <p
-                className={`text-muted-foreground text-sm ${isOutOfStock ? 'opacity-70 line-through' : 'opacity-100'}`}
-              >
-                • Available: {formattedQuantity}
+            formattedQuantity !== undefined && (
+              <p className="text-muted-foreground text-sm truncate px-1">
+                | Available: {formattedQuantity}
               </p>
-            )}
-          </div>
-          {item.createdAt && (
-            <p className="text-muted-foreground text-xs mt-1">
-              Created: {formatDateShort(item.createdAt, '')}
-            </p>
+            )
           )}
         </div>
 
-        <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
+        <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 bg-accent text-card border border-accent/80 shadow-md hover:bg-primary-gradient hover:text-card hover:scale-105 transition-all duration-200"
+                className="h-7 w-7 bg-accent text-card border border-accent/80 shadow-md hover:bg-primary-gradient hover:text-card hover:scale-105 transition-all duration-200"
               >
-                <Pencil className="h-5 w-5" />
+                <Pencil className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32 rounded-xl">
@@ -205,6 +193,6 @@ export const MercadoCard = memo(function MercadoCard({
         onConfirm={handleHideConfirm}
         isHidden={isHidden}
       />
-    </>
+    </div>
   );
 });

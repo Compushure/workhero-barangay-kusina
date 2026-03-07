@@ -143,7 +143,7 @@ export function RemarksDialog({
             variant="outline"
             onClick={handleCancel}
             disabled={isDisabled}
-            className="flex-1 rounded-3xl"
+            className="flex-1 rounded-3xl border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white transition-all duration-400 ease-in-out"
           >
             {cancelLabel}
           </Button>
@@ -152,9 +152,11 @@ export function RemarksDialog({
             disabled={isConfirmDisabled}
             variant={confirmVariant}
             className={`flex-1 rounded-3xl ${
-              confirmVariant === 'default' || confirmVariant === 'destructive'
-                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                : ''
+              confirmVariant === 'default'
+                ? 'bg-primary-gradient text-zinc-50 hover:opacity-95'
+                : confirmVariant === 'destructive'
+                  ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                  : ''
             }`}
           >
             {isProcessing ? 'Processing...' : confirmLabel}
