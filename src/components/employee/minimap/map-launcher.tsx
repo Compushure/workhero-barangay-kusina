@@ -3,8 +3,13 @@
 import { useRef, useState } from 'react';
 import { MapOverlay, useMapStore } from './map-overlay';
 import { Map } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export function MapLauncher() {
+interface MapLauncherProps {
+  className?: string;
+}
+
+export function MapLauncher({ className }: MapLauncherProps) {
   const { toggleMap } = useMapStore();
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const [dragging, setDragging] = useState(false);
