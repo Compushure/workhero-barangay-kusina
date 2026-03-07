@@ -21,9 +21,38 @@ function formatTimestamp(timestamp: string): string {
   });
 }
 
+function formatStatus(status: string): string {
+  return status
+    .replace(/[_-]/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function deriveNotificationStatus(notification: NotificationItem): string | undefined {
+  const metadata = notification.metadata as Record<string, unknown> | null;
+  const rawStatus = metadata?.status;
+
+  if (typeof rawStatus === 'string' && rawStatus.trim()) {
+    return rawStatus;
+  }
+
+  if (notification.type !== 'task') {
+    return undefined;
+  }
+
+  const message = notification.message.toLowerCase();
+  if (message.includes('assigned')) return 'assigned';
+  if (message.includes('review')) return 'in review';
+  if (message.includes('approved')) return 'approved';
+  if (message.includes('rejected')) return 'rejected';
+  if (message.includes('complete') || message.includes('completed')) return 'completed';
+
+  return undefined;
+}
+
 export function NotificationItemCard({ notification, onMarkRead }: NotificationItemCardProps) {
   const isUnread = !notification.readAt;
-  const status = (notification.metadata as Record<string, unknown> | null)?.status as string | undefined;
+  const status = deriveNotificationStatus(notification);
 
   return (
     <div
@@ -36,7 +65,11 @@ export function NotificationItemCard({ notification, onMarkRead }: NotificationI
       <div className="flex-1 space-y-1">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
           <span className="font-semibold text-foreground">{notification.type}</span>
-          {status ? <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-foreground">{status}</span> : null}
+          {status ? (
+            <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-foreground">
+              {formatStatus(status)}
+            </span>
+          ) : null}
         </div>
         <p className="text-sm text-foreground">{notification.message}</p>
         <div className="flex items-center gap-2 text-[11px] text-muted-foreground">

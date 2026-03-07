@@ -177,6 +177,7 @@ export async function addTaskAssignmentAction(
               taskId: row.id,
               categoryId: row.category_id,
               taskName: taskData.name,
+              status: 'assigned',
               deadline: row.deadline_date,
               maxOrders: row.max_orders,
             },
