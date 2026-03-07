@@ -604,6 +604,7 @@ export async function updateTaskAssignment(
                 taskId: row.id,
                 categoryId: row.category_id,
                 taskName,
+                status: 'assigned',
                 deadline: row.deadline_date,
                 maxOrders: row.max_orders,
               },
