@@ -20,11 +20,18 @@ export const useMapStore = create<MapState>((set, get) => ({
   closeMap: () => set({ isMapOpen: false }),
 }));
 
-const locations = [
+const locations: Array<{
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+  path?: string;
+}> = [
   { id: 'attendance', label: '⏰ Attendance Station', path: '/employee/attendance', x: 18, y: 32 },
   { id: 'kitchen', label: '🍲 Kitchen', path: '/employee/dashboard', x: 50, y: 25 },
   { id: 'mercado', label: '🏪 Mercado', path: '/employee/mercado', x: 78, y: 36 },
   { id: 'tasks', label: '📋 Task Board', path: '/employee/tasks', x: 35, y: 64 },
+  { id: 'leaderboard', label: '🏆 Leaderboard', x: 79, y: 67 },
 ];
 
 export function MapOverlay() {
@@ -48,11 +55,11 @@ export function MapOverlay() {
           <div className="absolute inset-0 bg-black/60" onClick={closeMap} />
 
           <motion.div
-            className="relative w-[92vw] max-w-[720px] aspect-square"
-            initial={{ scale: 0.85, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.85, opacity: 0 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 260 }}
+            className="relative w-[92vw] max-w-[700px] aspect-square"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           >
             <Image
               src="/assets/map-bg.png"
@@ -84,7 +91,8 @@ export function MapOverlay() {
                   style={{ transformOrigin: 'center center' }}
                   whileHover={{ scale: 1.12 }}
                   whileTap={{ scale: 0.96 }}
-                  onClick={() => travelTo(loc.path)}
+                  onClick={() => loc.path && travelTo(loc.path)}
+                  aria-disabled={!loc.path}
                 >
                   <div className="inline-flex items-center bg-[#E8DBBF] border-2 border-[#47331F] rounded-lg shadow-[5px_5px_0px_#000] shadow-[#47331F]/50 px-4 py-2.5">
                     <span className="text-[12px] font-semibold text-[#47331F] whitespace-nowrap">
