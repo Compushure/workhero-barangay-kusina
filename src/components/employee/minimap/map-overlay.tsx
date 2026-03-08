@@ -1,10 +1,11 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { create } from 'zustand';
+import { useNavigationStore } from '../nav-loading-state';
 
 interface MapState {
   isMapOpen: boolean;
@@ -36,9 +37,17 @@ const locations: Array<{
 
 export function MapOverlay() {
   const router = useRouter();
+  const pathname = usePathname();
   const { isMapOpen, toggleMap, closeMap } = useMapStore();
+  const { isNavigating, startNavigation } = useNavigationStore();
 
   const travelTo = (path: string) => {
+    if (!path || isNavigating) return;
+    if (pathname === path) {
+      closeMap();
+      return;
+    }
+    startNavigation();
     closeMap();
     router.push(path);
   };
@@ -73,7 +82,8 @@ export function MapOverlay() {
             <button
               type="button"
               onClick={toggleMap}
-              className="absolute -top-4 -right-4 bg-card rounded-full w-11 h-11 flex items-center justify-center z-10 shadow-md hover:scale-105 transition-transform"
+              disabled={isNavigating}
+              className={`absolute -top-4 -right-4 bg-card rounded-full w-11 h-11 flex items-center justify-center z-10 shadow-md hover:scale-105 transition-transform ${isNavigating ? 'opacity-60 cursor-not-allowed hover:scale-100' : ''}`}
               aria-label="Close map"
             >
               <X className="w-5 h-5 text-foreground" />
@@ -87,12 +97,13 @@ export function MapOverlay() {
               >
                 <motion.button
                   type="button"
-                  className="cursor-pointer"
+                  disabled={isNavigating || !loc.path}
+                  className={`cursor-pointer ${isNavigating || !loc.path ? 'opacity-60 cursor-not-allowed' : ''}`}
                   style={{ transformOrigin: 'center center' }}
                   whileHover={{ scale: 1.12 }}
                   whileTap={{ scale: 0.96 }}
                   onClick={() => loc.path && travelTo(loc.path)}
-                  aria-disabled={!loc.path}
+                  aria-disabled={isNavigating || !loc.path}
                 >
                   <div className="inline-flex items-center bg-[#E8DBBF] border-2 border-[#47331F] rounded-lg shadow-[5px_5px_0px_#000] shadow-[#47331F]/50 px-4 py-2.5">
                     <span className="text-[12px] font-semibold text-[#47331F] whitespace-nowrap">

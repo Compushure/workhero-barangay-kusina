@@ -1,21 +1,30 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { MapOverlay, useMapStore } from './map-overlay';
 import { Map } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigationStore } from '../nav-loading-state';
 
 interface MapLauncherProps {
   className?: string;
 }
 
 export function MapLauncher({ className }: MapLauncherProps) {
-  const { toggleMap } = useMapStore();
+  const { toggleMap, closeMap } = useMapStore();
+  const { isNavigating, finishNavigation } = useNavigationStore();
+  const pathname = usePathname();
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const [dragging, setDragging] = useState(false);
   const dragOffsets = useRef({ offsetX: 0, offsetY: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const hasDragged = useRef(false);
+
+  useEffect(() => {
+    finishNavigation();
+    closeMap();
+  }, [pathname, finishNavigation, closeMap]);
 
   const clampToViewport = (x: number, y: number) => {
     if (typeof window === 'undefined') return { x, y };
@@ -41,6 +50,7 @@ export function MapLauncher({ className }: MapLauncherProps) {
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (isNavigating) return;
     event.preventDefault();
     if (!buttonRef.current) return;
     const rect = buttonRef.current.getBoundingClientRect();
@@ -55,6 +65,7 @@ export function MapLauncher({ className }: MapLauncherProps) {
 
   const handlePointerMove = (event: React.PointerEvent<HTMLButtonElement>) => {
     if (!dragging) return;
+    if (isNavigating) return;
     event.preventDefault();
     hasDragged.current = true;
     const next = clampToViewport(
@@ -66,6 +77,7 @@ export function MapLauncher({ className }: MapLauncherProps) {
 
   const handlePointerUp = (event: React.PointerEvent<HTMLButtonElement>) => {
     if (!dragging) return;
+    if (isNavigating) return;
     setPosition((prev) => {
       if (!prev) return prev;
       const clamped = clampToViewport(prev.x, prev.y);
@@ -76,7 +88,7 @@ export function MapLauncher({ className }: MapLauncherProps) {
   };
 
   const handleClick = () => {
-    if (dragging || hasDragged.current) return;
+    if (dragging || hasDragged.current || isNavigating) return;
     toggleMap();
   };
 
@@ -91,14 +103,20 @@ export function MapLauncher({ className }: MapLauncherProps) {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        disabled={isNavigating}
         className={cn(
           'fixed z-[55] flex h-17 w-17 items-center justify-center rounded-full bg-[#6F4C2E] border-3 border-[#47331F] text-[#F4B925] transition-transform',
           position ? '' : 'right-4 top-1/2 -translate-y-1/2',
-          dragging ? 'cursor-grabbing' : 'cursor-pointer hover:scale-105',
+          dragging
+            ? 'cursor-grabbing'
+            : isNavigating
+              ? 'cursor-not-allowed opacity-70'
+              : 'cursor-pointer hover:scale-105',
           className
         )}
         style={position ? { left: position.x, top: position.y } : undefined}
         aria-label="Open travel map"
+        aria-disabled={isNavigating}
       >
         <div className="relative flex items-center justify-center h-full w-full rounded-full">
           <span
