@@ -18,16 +18,8 @@ import type {
   EmploymentStatusValue,
 } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { UserCard } from './user-card';
+import { SearchFilter } from './user-filter';
 // Lazy load modals for better performance
 const AddUserModal = lazy(() =>
   import('./modals/add-user-modal').then((mod) => ({ default: mod.AddUserModal }))
@@ -39,7 +31,7 @@ const DeleteUserModal = lazy(() =>
   import('./modals/delete-user-modal').then((mod) => ({ default: mod.DeleteUserModal }))
 );
 import { Pagination } from '@/components/manager/task-verification/pagination';
-import { UserPlus, LogOut, Loader2, Search, SlidersHorizontal } from 'lucide-react';
+import { UserPlus, LogOut } from 'lucide-react';
 import { handleSignOut } from '@/action-handlers/shared/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -258,140 +250,64 @@ export function ManagerPage() {
     <div className="min-h-screen bg-zinc-100">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background border-b-3 border-[#f47812]/15 shadow-sm/25">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-4">
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">
                   User Management
                 </h1>
-                <p className="text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-gray-600">
                   {users.length} total users on page {page}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 variant="default"
                 onClick={() => setAddModalOpen(true)}
-                className="gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25"
+                className="gap-0 sm:gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-4"
+                aria-label="Add User"
               >
                 <UserPlus className="h-4 w-4" />
-                <span>Add User</span>
+                <span className="hidden sm:inline">Add User</span>
               </Button>
               <Button
                 variant="default"
                 onClick={handleLogout}
                 disabled={isPending}
-                className="gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25"
+                className="gap-0 sm:gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-4"
+                aria-label="Logout"
               >
                 <LogOut className="h-4 w-4" />
-                <span>Logout</span>
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 space-y-4">
-        <div className="rounded-3xl bg-background p-6 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
-          <div className="flex items-center gap-2 mb-4">
-            <SlidersHorizontal className="h-4 w-4 text-gray-600" />
-            <p className="text-sm font-semibold text-foreground">Search & Filters</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="space-y-2 lg:col-span-2">
-              <Label htmlFor="search" className="text-foreground">Search by Name</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
-                <Input
-                  id="search"
-                  placeholder="Search by name..."
-                  className={`pl-10 pr-9 border-border focus:border-accent focus:ring-accent ${isDebouncing ? 'bg-muted/50' : 'bg-white'}`}
-                  value={searchQuery}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600">
-                  {isDebouncing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                </div>
-              </div>
-            </div>
-
-            {/* Employee Type Filter */}
-            <div className="space-y-2">
-              <Label htmlFor="filter-type" className="flex items-center gap-2 text-foreground">
-                Employee Type
-                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600" />}
-              </Label>
-              <Select 
-                value={employeeTypeFilter} 
-                onValueChange={handleEmployeeTypeFilterChange}
-                disabled={isLoading}
-              >
-                <SelectTrigger id="filter-type" className={`bg-white border-border focus:border-accent focus:ring-accent ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="hr">HR</SelectItem>
-                  <SelectItem value="regular">Regular Employee</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Employment Status Filter */}
-            <div className="space-y-2">
-              <Label htmlFor="filter-status" className="flex items-center gap-2 text-foreground">
-                Employment Status
-                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600" />}
-              </Label>
-              <Select
-                value={employmentStatusFilter}
-                onValueChange={handleEmploymentStatusFilterChange}
-                disabled={isLoading}
-              >
-                <SelectTrigger id="filter-status" className={`bg-white border-border focus:border-accent focus:ring-accent ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="probational">Probational</SelectItem>
-                  <SelectItem value="regular">Regular</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Sort */}
-            <div className="space-y-2 lg:col-span-2">
-              <Label htmlFor="sort" className="flex items-center gap-2 text-foreground">
-                Sort By
-                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600" />}
-              </Label>
-              <Select value={sortBy} onValueChange={handleSortChange} disabled={isLoading}>
-                <SelectTrigger id="sort" className={`bg-white border-border focus:border-accent focus:ring-accent ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name-asc">Name (A to Z)</SelectItem>
-                  <SelectItem value="name-desc">Name (Z to A)</SelectItem>
-                  <SelectItem value="date-asc">Date Created (Oldest First)</SelectItem>
-                  <SelectItem value="date-desc">Date Created (Newest First)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
+        <SearchFilter
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          employeeTypeFilter={employeeTypeFilter}
+          onEmployeeTypeChange={handleEmployeeTypeFilterChange}
+          employmentStatusFilter={employmentStatusFilter}
+          onEmploymentStatusChange={handleEmploymentStatusFilterChange}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+          isDebouncing={isDebouncing}
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-6 flex flex-col min-h-[calc(100vh-300px)]">
+      <main className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 pb-6 flex flex-col min-h-[calc(100vh-300px)]">
         {isLoading ? (
-          <div className="grid gap-4">
+          <div className="grid gap-3 sm:gap-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="rounded-3xl bg-background p-6 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 animate-pulse">
+              <div key={i} className="rounded-3xl bg-background p-4 sm:p-6 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 animate-pulse">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-3">
                     <div className="h-4 bg-muted rounded w-32" />
@@ -403,12 +319,12 @@ export function ManagerPage() {
             ))}
           </div>
         ) : error ? (
-          <div className="rounded-3xl bg-background p-8 sm:p-12 text-center border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
+          <div className="rounded-3xl bg-background p-6 sm:p-8 lg:p-12 text-center border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
             <p className="text-destructive mb-4 font-semibold">Failed to load users</p>
             <p className="text-sm text-gray-600">{error.message}</p>
           </div>
         ) : users.length === 0 ? (
-          <div className="rounded-3xl bg-background p-8 sm:p-12 text-center border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
+          <div className="rounded-3xl bg-background p-6 sm:p-8 lg:p-12 text-center border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
             <div className="mx-auto w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mb-4">
               <UserPlus className="h-6 w-6 text-foreground" />
             </div>
@@ -429,7 +345,7 @@ export function ManagerPage() {
           </div>
         ) : (
           <>
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
               {users.map((user) => (
                 <UserCard
                   key={user.id}
@@ -441,7 +357,7 @@ export function ManagerPage() {
               ))}
             </div>
             {/* Pagination fixed at bottom */}
-            <div className="mt-auto pt-4">
+            <div className="mt-auto pt-3 sm:pt-4">
               <Pagination totalPages={totalPages} currentPage={page} onPageChange={setPage} />
             </div>
           </>

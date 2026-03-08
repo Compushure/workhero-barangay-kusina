@@ -122,53 +122,53 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="bg-card w-[95vw] max-w-2xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col border-2 border-[#f47812]/20">
-        <DialogHeader className="px-6 pt-6 pb-2 border-b border-[#f47812]/15 shrink-0">
-          <DialogTitle className="text-xl font-bold text-foreground">Add New User</DialogTitle>
-          <DialogDescription className="text-sm text-gray-600">
+        <DialogHeader className="px-3 sm:px-6 pt-3 sm:pt-6 pb-2 border-b border-[#f47812]/15 shrink-0">
+          <DialogTitle className="text-base sm:text-xl font-bold text-foreground">Add New User</DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm text-gray-600 hidden sm:block">
             Create a new employee account with complete details and Philippine government IDs
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-y-auto">
-          <div className="px-6 py-4">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" id="add-user-form">
+        <ScrollArea className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden md:[&::-webkit-scrollbar]:block">
+          <div className="px-3 sm:px-6 py-3 sm:py-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-6" id="add-user-form">
             {/* Collapsible Sections */}
-            <Accordion type="multiple" defaultValue={["basic", "employment", "address", "ids"]} className="space-y-4">
+            <Accordion type="multiple" defaultValue={["basic", "employment", "address", "ids"]} className="space-y-3 sm:space-y-4">
               {/* Basic Information */}
-              <AccordionItem value="basic" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
-                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
+              <AccordionItem value="basic" className="border border-[#f47812]/15 rounded-lg px-3 sm:px-4 bg-background">
+                <AccordionTrigger className="text-xs sm:text-sm font-semibold text-foreground hover:no-underline py-3">
                   Basic Information
                 </AccordionTrigger>
                 <AccordionContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-3 sm:pt-4">
                 {/* Full Name */}
-                <div className="space-y-2">
-                  <RequiredLabel htmlFor="add-name" filled={!!watch('name')?.trim()}>Full Name</RequiredLabel>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <RequiredLabel htmlFor="add-name" filled={!!watch('name')?.trim()}><span className="text-xs sm:text-sm">Full Name</span></RequiredLabel>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
+                    <User className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent" />
                     <Input
                       id="add-name"
                       placeholder="At least 2 characters"
-                      className={`pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
+                      className={`pl-8 sm:pl-10 text-sm sm:text-base h-9 sm:h-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
                         !watch('name')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
                       }`}
                       disabled={isPending}
                       {...register('name')}
                     />
                   </div>
-                  {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+                  {errors.name && <p className="text-xs sm:text-sm text-destructive">{errors.name.message}</p>}
                 </div>
 
                 {/* Email */}
-                <div className="space-y-2">
-                  <RequiredLabel htmlFor="add-email" filled={!!watch('email')?.trim()}>Email Address</RequiredLabel>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <RequiredLabel htmlFor="add-email" filled={!!watch('email')?.trim()}><span className="text-xs sm:text-sm">Email Address</span></RequiredLabel>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
+                    <Mail className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent" />
                     <Input
                       id="add-email"
                       type="email"
                       placeholder="Valid email address"
-                      className={`pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
+                      className={`pl-8 sm:pl-10 text-sm sm:text-base h-9 sm:h-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
                         !watch('email')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
                       }`}
                       disabled={isPending}
@@ -176,17 +176,20 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     />
                   </div>
                   {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email.message}</p>
+                    <p className="text-xs sm:text-sm text-destructive">{errors.email.message}</p>
                   )}
                 </div>
 
                 {/* Company ID */}
-                <div className="space-y-2">
-                  <Label htmlFor="add-company-id" className="text-gray-600">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="add-company-id" className="text-xs sm:text-sm text-gray-600 hidden sm:block">
                     Company ID (Not Implemented)
                   </Label>
+                  <Label htmlFor="add-company-id" className="text-xs text-gray-600 block sm:hidden">
+                    Company ID
+                  </Label>
                   <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Building2 className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                     <Input
                       id="add-company-id"
                       placeholder="Not implemented yet"

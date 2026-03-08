@@ -50,8 +50,8 @@ function PaginationComponent({
 
   return (
     <div
-      className={`flex items-center justify-center gap-2 scale-115 ${
-        isFixed ? 'fixed bottom-6 left-1/2 z-40 -translate-x-1/2' : ''
+      className={`flex items-center justify-center gap-1 sm:gap-2 scale-100 sm:scale-110 lg:scale-115 ${
+        isFixed ? 'sm:fixed bottom-6 left-1/2 z-40 sm:-translate-x-1/2' : ''
       }`}
     >
       {/* Left arrow */}
@@ -60,7 +60,7 @@ function PaginationComponent({
         size="sm"
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="bg-card text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out"
+        className="bg-card text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out h-8 w-8 sm:h-9 sm:w-9 p-0"
       >
         <ChevronLeft size={16} />
       </Button>
@@ -68,7 +68,7 @@ function PaginationComponent({
       {/* Page numbers */}
       {pages.map((page, idx) =>
         page === '...' ? (
-          <span key={`ellipsis-${idx}`} className="px-2">
+          <span key={`ellipsis-${idx}`} className="px-1 sm:px-2 text-sm">
             …
           </span>
         ) : (
@@ -77,7 +77,7 @@ function PaginationComponent({
             variant="outline"
             size="sm"
             onClick={() => onPageChange(page as number)}
-            className={`transition-all ease-in-out shadow-sm/15 border border-accent/50
+            className={`transition-all ease-in-out shadow-sm/15 border border-accent/50 h-8 w-8 sm:h-9 sm:w-9 p-0 text-sm
               ${page === currentPage ? 'bg-accent-secondary text-white hover:bg-accent-secondary hover:text-white' : 'bg-card text-foreground hover:bg-accent-secondary/80 hover:text-white hover:scale-110 hover:shadow-xs/25'}`}
           >
             {page}
@@ -91,7 +91,7 @@ function PaginationComponent({
         size="sm"
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className="bg-card text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out"
+        className="bg-card text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out h-8 w-8 sm:h-9 sm:w-9 p-0"
       >
         <ChevronRight size={16} />
       </Button>
