@@ -31,7 +31,7 @@ export default function XPProgress() {
   const totalPts = pointsData?.points ?? 0;
 
   return (
-    <div className="w-full sm:w-64 max-w-sm sm:max-w-none bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-2 py-0 flex flex-col items-center">
+    <div className="w-full sm:w-100 max-w-[200px] sm:max-w-[200px] bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-2 py-0 flex flex-col items-center">
       {/* XP text above progress bar */}
       <div className="w-full text-lg sm:text-xl text-yellow-500 text-left">
         XP: {currentXP} / {maxXp}

@@ -51,7 +51,7 @@ export default function ProfileLevelCard() {
 
   return (
     <>
-      <div className="inline-flex w-full sm:w-auto max-w-sm sm:max-w-none items-center bg-[#765332] border-3 border-[#47331F] rounded-lg shadow-md p-2">
+      <div className="inline-flex w-auto max-w-full items-center bg-[#765332] border-3 border-[#47331F] rounded-lg shadow-md p-2">
         {/* Avatar Circle with onClick */}
         <div
           onClick={() => setModalOpen(true)}

@@ -58,9 +58,9 @@ export default function AttendanceDesign() {
       </div>
 
       {/* Responsive top bar for widgets */}
-      <div className="sticky top-0 left-0 right-0 w-full px-4 sm:px-6 pt-2 z-20 pointer-events-none">
-        <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4 p-2">
-          <div className="pointer-events-auto flex flex-wrap items-center gap-3 sm:gap-4">
+      <div className="sticky top-0 left-0 right-0 w-full px-2 sm:px-4 pt-2 z-20 pointer-events-none">
+        <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-4 p-1">
+          <div className="pointer-events-auto flex items-center gap-3 sm:gap-4 flex-nowrap overflow-x-auto">
             <ProfileAndLevel />
             <XPProgressAndPoints />
           </div>
