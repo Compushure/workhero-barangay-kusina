@@ -16,9 +16,48 @@ import {
 } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { useDebounce } from '@/hooks/useDebounce';
 import { SkeletonCard } from '../card-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useManagerAssignmentStore } from '@/store/managerAssignmentStore';
 
-export function CurrentAssignedTasks() {
+function CurrentAssignedTasksSkeleton() {
+  return (
+    <div className="rounded-3xl bg-background px-3 sm:px-4 md:px-6 2xl:px-8 pt-4 sm:pt-6 shadow-sm/50 flex flex-col w-full">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 sm:mb-5">
+        <Skeleton className="h-8 w-40 bg-muted" />
+        <div className="flex rounded-xl overflow-hidden w-40 sm:w-56 border border-accent/25">
+          <Skeleton className="h-9 flex-1 bg-muted rounded-l-xl" />
+          <Skeleton className="h-9 flex-1 bg-muted rounded-r-xl" />
+        </div>
+      </div>
+
+      <section className="flex flex-col gap-3">
+        <Skeleton className="h-8 w-56 rounded-full bg-muted" />
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 items-stretch sm:items-center">
+          <Skeleton className="h-9 w-full rounded-full bg-muted" />
+          <div className="flex gap-2 sm:gap-3">
+            <Skeleton className="h-9 w-36 rounded-lg bg-muted" />
+            <Skeleton className="h-9 w-36 rounded-lg bg-muted" />
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-5 mt-5 pb-8">
+        <SkeletonCard />
+        <SkeletonCard />
+      </section>
+
+      <div className="my-10">
+        <Skeleton className="h-10 w-60 mx-auto bg-muted rounded-full" />
+      </div>
+    </div>
+  );
+}
+
+interface CurrentAssignedTasksProps {
+  onInitialLoadChange?: (isLoading: boolean) => void;
+}
+
+export function CurrentAssignedTasks({ onInitialLoadChange }: CurrentAssignedTasksProps) {
   const { viewMode, setViewMode } = useTaskAssignment();
   const { assignedTasks, hydrateFromServer, isOptimistic } = useManagerAssignmentStore();
 
@@ -96,6 +135,47 @@ export function CurrentAssignedTasks() {
   };
 
   const memoizedTasks = useMemo(() => tasks || [], [tasks]);
+  const isInteractiveLoading = isLoading && memoizedTasks.length === 0;
+
+  useEffect(() => {
+    onInitialLoadChange?.(isInteractiveLoading);
+  }, [isInteractiveLoading, onInitialLoadChange]);
+
+  if (isInteractiveLoading) {
+    return <CurrentAssignedTasksSkeleton />;
+  }
+
+  if (isInteractiveLoading) {
+    return (
+      <div className="rounded-3xl bg-background px-3 sm:px-4 md:px-6 2xl:px-8 pt-4 sm:pt-6 shadow-sm/50 flex flex-col w-full">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 sm:mb-5">
+          <Skeleton className="h-8 w-40 bg-muted" />
+          <div className="flex rounded-xl self-end sm:self-auto gap-1">
+            <Skeleton className="h-9 w-24 sm:w-32 bg-muted rounded-l-xl" />
+            <Skeleton className="h-9 w-24 sm:w-32 bg-muted rounded-r-xl" />
+          </div>
+        </div>
+
+        <section className="flex flex-col gap-3">
+          <Skeleton className="h-8 w-56 rounded-full bg-muted" />
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 items-stretch sm:items-center">
+            <Skeleton className="h-9 w-full rounded-full bg-muted" />
+            <div className="flex gap-2 sm:gap-3">
+              <Skeleton className="h-9 w-36 rounded-lg bg-muted" />
+              <Skeleton className="h-9 w-36 rounded-lg bg-muted" />
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-5 mt-5">
+          <div className="space-y-5 pb-8">
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-3xl bg-background px-3 sm:px-4 md:px-6 2xl:px-8 pt-4 sm:pt-6 shadow-sm/50 flex flex-col w-full">

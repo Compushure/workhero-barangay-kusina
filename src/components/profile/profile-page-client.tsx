@@ -35,11 +35,11 @@ function ProfileLoadingSkeleton() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Skeleton className="h-10 w-32" />
+        <Skeleton className="h-10 w-32 bg-muted" />
       </div>
       <div className="space-y-4">
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-96 w-full" />
+        <Skeleton className="h-40 w-full bg-muted" />
+        <Skeleton className="h-96 w-full bg-muted" />
       </div>
     </div>
   );

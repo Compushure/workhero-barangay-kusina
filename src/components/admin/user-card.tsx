@@ -140,6 +140,11 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                     src={imageUrl}
                     alt={`${user.name}'s profile`}
                     className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-full object-cover"
+                    loading="lazy"
+                    onLoad={(e) => {
+                      e.currentTarget.style.opacity = '1';
+                    }}
+                    style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
                   />
                 ) : (
                   <span className="text-xs sm:text-sm lg:text-base xl:text-lg font-semibold text-foreground">
@@ -353,6 +358,11 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                 src={imageUrl}
                 alt={`${user.name}'s profile`}
                 className="max-w-full max-h-[70vh] rounded-lg object-contain"
+                loading="eager"
+                onLoad={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                }}
+                style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
               />
             ) : (
               <div className="w-64 h-64 lg:w-80 lg:h-80 rounded-lg bg-accent/10 flex items-center justify-center">

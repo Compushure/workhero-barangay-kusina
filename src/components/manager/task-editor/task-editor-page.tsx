@@ -25,6 +25,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import type { TaskCategory } from '@/types/manager/task-editor';
 import type { AddTaskInput } from '@/zod/schemas/task';
+import { TaskEditorHeaderSkeleton } from './task-editor-header-skeleton';
 
 const SORT_OPTIONS: { value: TaskCategorySortOption; label: string }[] = [
   { value: 'type-name', label: 'Type & Name' },
@@ -159,13 +160,17 @@ export default function TaskEditorPage() {
   return (
     <main className="w-full min-h-screen bg-zinc-100 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
       <div className="mx-auto w-full max-w-7xl 2xl:max-w-440 space-y-5 sm:space-y-6 lg:space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Task Editor</h1>
-          <p className="text-sm sm:text-base lg:text-lg text-secondary">Add, Edit, Delete assignable tasks in this page.</p>
-        </div>
+        {isLoading ? (
+          <TaskEditorHeaderSkeleton />
+        ) : (
+          <>
+            <div className="space-y-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Task Editor</h1>
+              <p className="text-sm sm:text-base lg:text-lg text-secondary">Add, Edit, Delete assignable tasks in this page.</p>
+            </div>
 
-        {/* Task Categories Count Display */}
-        <section className="flex gap-3 sm:gap-4 text-base sm:text-lg font-bold text-foreground pl-1 sm:pl-2">
+            {/* Task Categories Count Display */}
+            <section className="flex gap-3 sm:gap-4 text-base sm:text-lg font-bold text-foreground pl-1 sm:pl-2">
           <h5 className="flex items-center gap-2">
             <ListTodo size={20} className="text-accent" />
             Categories{' '}
@@ -230,6 +235,8 @@ export default function TaskEditorPage() {
             </Button>
           </div>
         </section>
+          </>
+        )}
 
         <TaskCategoryTable
           tasks={tasks}

@@ -6,27 +6,28 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function RedemptionTableSkeleton({ rows = 6 }: { rows?: number }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border shadow-md [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <Table>
-        <TableHeader className="bg-primary-gradient">
-          <TableRow className="border-b border-border hover:bg-primary-gradient">
-            <TableHead className="text-card font-semibold px-2 sm:px-4 w-32 sm:w-40 text-xs sm:text-sm">
-              REQUEST DATE
+        <TableHeader className="bg-background">
+          <TableRow className="border-b border-border hover:bg-background">
+            <TableHead className="px-2 sm:px-4 w-32 sm:w-40 text-xs sm:text-sm">
+              <Skeleton className="h-4 w-20 bg-muted" />
             </TableHead>
-            <TableHead className="text-card font-semibold px-2 sm:px-4 w-36 sm:w-48 text-xs sm:text-sm">
-              EMPLOYEE
+            <TableHead className="px-2 sm:px-4 w-36 sm:w-48 text-xs sm:text-sm">
+              <Skeleton className="h-4 w-16 bg-muted" />
             </TableHead>
-            <TableHead className="text-card font-semibold px-2 sm:px-4 w-48 sm:w-64 text-xs sm:text-sm">
-              REQUESTED ITEM/S
+            <TableHead className="px-2 sm:px-4 w-48 sm:w-64 text-xs sm:text-sm">
+              <Skeleton className="h-4 w-28 bg-muted" />
             </TableHead>
-            <TableHead className="text-card font-semibold text-center px-2 sm:px-4 w-20 sm:w-28 text-xs sm:text-sm">
-              TOTAL COST
+            <TableHead className="text-center px-2 sm:px-4 w-20 sm:w-28 text-xs sm:text-sm">
+              <Skeleton className="h-4 w-14 mx-auto bg-muted" />
             </TableHead>
-            <TableHead className="text-card font-semibold text-center px-2 sm:px-4 w-28 sm:w-32 text-xs sm:text-sm sticky right-0 bg-primary-gradient">
-              ACTION
+            <TableHead className="text-center px-2 sm:px-4 w-28 sm:w-32 text-xs sm:text-sm sticky right-0 bg-background">
+              <Skeleton className="h-4 w-14 mx-auto bg-muted" />
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -34,20 +35,20 @@ export function RedemptionTableSkeleton({ rows = 6 }: { rows?: number }) {
           {Array.from({ length: rows }).map((_, index) => (
             <TableRow key={index} className="bg-background">
               <TableCell className="px-2 sm:px-4">
-                <div className="h-4 w-24 sm:w-30 bg-white/60 rounded animate-pulse" />
-                <div className="mt-1 h-3 w-16 sm:w-20 bg-white/50 rounded animate-pulse" />
+                <div className="h-4 w-24 sm:w-30 bg-muted rounded animate-pulse" />
+                <div className="mt-1 h-3 w-16 sm:w-20 bg-muted rounded animate-pulse" />
               </TableCell>
               <TableCell className="px-2 sm:px-4">
-                <div className="h-4 w-24 sm:w-32 bg-white/60 rounded animate-pulse" />
+                <div className="h-4 w-24 sm:w-32 bg-muted rounded animate-pulse" />
               </TableCell>
               <TableCell className="px-2 sm:px-4">
-                <div className="h-4 w-32 sm:w-40 bg-white/60 rounded animate-pulse" />
+                <div className="h-4 w-32 sm:w-40 bg-muted rounded animate-pulse" />
               </TableCell>
               <TableCell className="px-2 sm:px-4">
-                <div className="mx-auto h-4 w-14 sm:w-18 bg-white/60 rounded animate-pulse" />
+                <div className="mx-auto h-4 w-14 sm:w-18 bg-muted rounded animate-pulse" />
               </TableCell>
               <TableCell className="px-2 sm:px-4 sticky right-0 bg-background">
-                <div className="mx-auto h-7 w-18 sm:w-22 bg-white/60 rounded animate-pulse" />
+                <div className="mx-auto h-7 w-18 sm:w-22 bg-muted rounded animate-pulse" />
               </TableCell>
             </TableRow>
           ))}

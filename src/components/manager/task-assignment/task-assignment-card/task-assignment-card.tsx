@@ -14,6 +14,7 @@ import {
   useGetCurrentAssignedTasksPaginated,
   managerAssignmentKeys,
 } from '@/hooks/tanstack/queries/managerAssignmentQueries';
+import { TaskAssignmentCardSkeleton } from './task-assignment-card-skeleton';
 
 // Shadcn UI Dialog imports
 import {
@@ -25,7 +26,11 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
-export function TaskAssignmentCard() {
+interface TaskAssignmentCardProps {
+  onInitialLoadChange?: (isLoading: boolean) => void;
+}
+
+export function TaskAssignmentCard({ onInitialLoadChange }: TaskAssignmentCardProps) {
   const { assignTasks, assignedTasks } = useTaskAssignment();
   const queryClient = useQueryClient();
 
@@ -45,6 +50,7 @@ export function TaskAssignmentCard() {
   const [selectedDeadline, setSelectedDeadline] = useState<Date | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showTaskWarning, setShowTaskWarning] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // NEW STATES
   const [showAssignConfirm, setShowAssignConfirm] = useState(false);
@@ -55,15 +61,19 @@ export function TaskAssignmentCard() {
 
   useEffect(() => {
     async function loadData() {
+      setIsInitialLoading(true);
+      onInitialLoadChange?.(true);
       const [tasks, employees] = await Promise.all([
         handleFetchTaskList(),
         import('@/action-handlers/manager/assignments').then((m) => m.handleFetchEmployeeList()),
       ]);
       setAvailableTasks(tasks);
       setTotalEmployees(employees.length);
+      setIsInitialLoading(false);
+      onInitialLoadChange?.(false);
     }
     loadData();
-  }, []);
+  }, [onInitialLoadChange]);
 
   // Calculate if selected task is fully assigned (all employees assigned)
   const isSelectedTaskFullyAssigned = useMemo(() => {
@@ -142,6 +152,10 @@ export function TaskAssignmentCard() {
     const task = availableTasks.find((t) => t.id === selectedTask[0]);
     return task?.name || 'Select Task';
   };
+
+  if (isInitialLoading) {
+    return <TaskAssignmentCardSkeleton />;
+  }
 
   return (
     <div className="rounded-3xl bg-background p-4 sm:p-6 shadow-sm/25">

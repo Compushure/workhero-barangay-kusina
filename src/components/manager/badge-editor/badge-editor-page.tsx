@@ -17,6 +17,7 @@ import { BadgeFilterToggle, type BadgeFilterMode } from './badge-filter-toggle';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { Pagination } from '../task-verification/pagination';
 import type { Badge } from '@/types/manager/badge-editor';
+import { BadgeEditorHeaderSkeleton } from './badge-editor-header-skeleton';
 import {
   useAddBadge,
   useDeleteBadgeImage,
@@ -240,14 +241,18 @@ export function BadgeEditorPage() {
   return (
     <main className="w-full min-h-screen bg-zinc-100 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
       <div className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl space-y-5 sm:space-y-6 lg:space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Badge Editor</h1>
-          <p className="text-sm sm:text-base lg:text-lg text-secondary">Create, edit, and manage badges with conditions.</p>
-        </div>
+        {isLoading ? (
+          <BadgeEditorHeaderSkeleton />
+        ) : (
+          <>
+            <div className="space-y-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Badge Editor</h1>
+              <p className="text-sm sm:text-base lg:text-lg text-secondary">Create, edit, and manage badges with conditions.</p>
+            </div>
 
-        <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
-          {/* Badge Count Display */}
-          <div className="flex gap-3 sm:gap-4 text-base sm:text-lg font-bold text-foreground pl-1 sm:pl-2">
+            <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+              {/* Badge Count Display */}
+              <div className="flex gap-3 sm:gap-4 text-base sm:text-lg font-bold text-foreground pl-1 sm:pl-2">
             <h5 className="flex items-center gap-2">
               <Coins size={20} className="text-accent" />
               Badges{' '}
@@ -311,6 +316,8 @@ export function BadgeEditorPage() {
             </Button>
           </div>
         </section>
+          </>
+        )}
 
         <BadgeTable
           badges={paginatedBadges}

@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import BadgeTableSkeleton from './badge-table-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { Badge, BadgeOption, BadgeInterval } from '@/types/manager/badge-editor';
 
 interface BadgeTableProps {
@@ -92,6 +93,37 @@ export default function BadgeTable({
     setExpandedBadgeId(expandedBadgeId === badgeId ? null : badgeId);
   };
 
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-2xl border-2 border-accent/25 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-sm/25">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-background border-b border-border hover:bg-background">
+              <TableHead className="min-w-48 sm:min-w-64 md:min-w-96 pl-4 sm:pl-6 py-3 sm:py-4">
+                <Skeleton className="h-4 w-20 bg-muted" />
+              </TableHead>
+              <TableHead className="hidden md:table-cell min-w-20 max-w-20 w-20 text-center">
+                <Skeleton className="h-4 w-12 mx-auto bg-muted" />
+              </TableHead>
+              <TableHead className="hidden lg:table-cell min-w-32 max-w-32 w-32 text-center">
+                <Skeleton className="h-4 w-16 mx-auto bg-muted" />
+              </TableHead>
+              <TableHead className="hidden sm:table-cell min-w-20 sm:min-w-24 text-center">
+                <Skeleton className="h-4 w-16 mx-auto bg-muted" />
+              </TableHead>
+              <TableHead className="text-center px-2 sm:px-4 w-24 sm:w-30 sticky right-0 bg-background">
+                <Skeleton className="h-4 w-14 mx-auto bg-muted" />
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <BadgeTableSkeleton />
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="bg-card rounded-2xl border-2 border-accent/25 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-sm/25">
@@ -116,11 +148,8 @@ export default function BadgeTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
-              <BadgeTableSkeleton />
-            ) : (
-              <>
-                {badges.map((badge) => (
+            <>
+              {badges.map((badge) => (
                   <React.Fragment key={badge.id}>
                     <TableRow className="bg-background hover:bg-row-hover transition-colors border-b border-accent/50">
                       <TableCell className="min-w-48 sm:min-w-64 md:min-w-96 pl-4 sm:pl-6 py-3 sm:py-4 align-middle">
@@ -325,9 +354,8 @@ export default function BadgeTable({
                       </TableRow>
                     )}
                   </React.Fragment>
-                ))}
-              </>
-            )}
+              ))}
+            </>
           </TableBody>
         </Table>
 
@@ -341,7 +369,7 @@ export default function BadgeTable({
           </div>
         )}
 
-        {!isLoading && badges.length === 0 && (
+        {badges.length === 0 && (
           <div className="bg-background p-8 text-center">
             <div className="text-5xl mb-4">🏆</div>
             <p className="text-secondary text-xl">No badges found</p>

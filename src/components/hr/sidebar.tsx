@@ -61,8 +61,8 @@ function SidebarUserProfile({
         <div className="min-w-0 px-2">
           {isProfileLoading ? (
             <>
-              <div className="h-4 w-20 bg-white/20 rounded animate-pulse" />
-              <div className="h-3 w-28 bg-white/10 rounded mt-1 animate-pulse" />
+              <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+              <div className="h-3 w-28 bg-muted rounded mt-1 animate-pulse" />
             </>
           ) : (
             <>
