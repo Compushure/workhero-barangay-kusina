@@ -219,7 +219,7 @@ export function CurrentAssignedTasks() {
 
       {/* Pagination */}
       {memoizedTasks.length > 0 && (
-        <div className="my-5">
+        <div className="my-10">
           <Pagination totalPages={totalPages} currentPage={page} onPageChange={handlePageChange} />
         </div>
       )}
