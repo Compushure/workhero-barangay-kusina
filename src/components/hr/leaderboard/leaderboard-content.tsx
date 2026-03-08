@@ -1,11 +1,11 @@
+'use client';
+
 import { BarChart2, Trophy } from 'lucide-react';
-import { getRankingByPeriod } from '@/actions/hr/leaderboard';
 import LeaderboardTable from '@/components/hr/leaderboard/leaderboard-table';
-import VisibilityToggle from '@/components/hr/leaderboard/visibility-toggle';
-import { enrichRankingPlayers } from '@/lib/utils/enrich-ranking';
-import { getPeriodDateRangeSubtitle } from '@/lib/utils/time-period-utils';
-import { createClient } from '@/lib/supabase/server';
-import type { RankLogPeriodType, LeaderboardPlayer, RankingLeaderboardViewRow } from '@/types';
+import LeaderboardTableSkeleton from '@/components/hr/leaderboard/leaderboard-table-skeleton';
+import { buildPeriodLabel } from '@/lib/utils/time-period-utils';
+import { useLeaderboardRankingQuery } from '@/hooks/tanstack/queries/hrQueries';
+import type { RankLogPeriodType } from '@/types';
 
 interface LeaderboardContentProps {
   periodType: RankLogPeriodType;
@@ -15,13 +15,21 @@ interface LeaderboardContentProps {
   show: boolean;
 }
 
-export async function LeaderboardContent({
+export function LeaderboardContent({
   periodType,
   year,
   week,
   month,
   show,
 }: LeaderboardContentProps) {
+  const { data, isPending, isFetching } = useLeaderboardRankingQuery({
+    periodType,
+    year,
+    week,
+    month,
+    show,
+  });
+
   if (!show) {
     return (
       <div className="flex justify-center py-8 sm:py-12">
@@ -44,56 +52,46 @@ export async function LeaderboardContent({
     );
   }
 
-  const rankingResult = await getRankingByPeriod(
-    periodType,
-    year,
-    periodType === 'monthly' ? month : undefined,
-    periodType === 'weekly' ? week : undefined
-  );
+  // First load for this session: show skeleton
+  if (isPending && !data) {
+    return <LeaderboardTableSkeleton />;
+  }
 
-  const rows: RankingLeaderboardViewRow[] | null = rankingResult.data ?? null;
-
-  if (!rows || rows.length === 0) {
+  // No ranking data for this period
+  if (!data) {
+    const emptyStatePeriodLabel = buildPeriodLabel(
+      periodType,
+      year,
+      periodType === 'monthly' ? month : undefined,
+      periodType === 'weekly' ? week : undefined
+    );
     return (
       <div className="flex min-h-[60vh] items-center justify-center py-6 sm:py-8">
-        <div className="flex flex-col items-center gap-4 rounded-2xl px-16 py-14 text-center">
-          <Trophy className="w-32 h-32 text-gray-600" />
-          <p className="text-lg font-semibold text-gray-600">No Rankings for this period</p>
+        <div className="flex flex-col items-center gap-4 rounded-2xl px-16 py-14 text-center max-w-md">
+          <div className="rounded-full bg-gray-100 p-4">
+            <Trophy className="w-16 h-16 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground">No Ranking Available</h3>
+          <p className="text-sm text-muted-foreground">
+            The ranking for{' '}
+            <span className="font-semibold text-foreground">{emptyStatePeriodLabel}</span> has not
+            been generated yet. Click the generate button above to create it.
+          </p>
         </div>
       </div>
     );
   }
 
-  const periodInfo = rows[0];
-
-  const supabase = await createClient();
-  const enrichedPlayers: (LeaderboardPlayer & { rank: number })[] = await enrichRankingPlayers(
-    rows,
-    supabase
-  );
-
-  const displayPeriodLabel =
-    periodType === 'weekly'
-      ? periodInfo.period_label.replace(/,\s*\d{4}$/, '')
-      : periodInfo.period_label;
-
+  // Render table — kept visible while a background fetch is in progress (isFetching)
   return (
     <div className="mb-2 w-full">
-      <div className="mb-2 flex w-full flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-foreground ">{displayPeriodLabel}</h2>
-          {getPeriodDateRangeSubtitle(periodInfo) && (
-            <p className="text-sm text-gray-600 mt-0.5">{getPeriodDateRangeSubtitle(periodInfo)}</p>
-          )}
-        </div>
-
-        <VisibilityToggle
-          rankingPeriodId={periodInfo.ranking_period_id}
-          isVisible={periodInfo.is_visible}
-        />
-      </div>
-
-      <LeaderboardTable players={enrichedPlayers} />
+      <LeaderboardTable
+        players={data.players}
+        periodLabel={data.periodLabel}
+        dateRangeSubtitle={data.dateRangeSubtitle}
+        rankingPeriodId={data.rankingPeriodId}
+        isVisible={data.isVisible}
+      />
     </div>
   );
 }

@@ -12,31 +12,30 @@ import {
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Pagination } from '@/components/manager/task-verification/pagination';
+import VisibilityToggle from '@/components/hr/leaderboard/visibility-toggle';
 import type { LeaderboardPlayer } from '@/types';
 
 const PAGE_SIZE = 10;
 
 interface LeaderboardTableProps {
   players: (LeaderboardPlayer & { rank: number })[];
+  periodLabel: string;
+  dateRangeSubtitle: string | null;
+  rankingPeriodId: string;
+  isVisible: boolean;
 }
 
-function getOrdinalSuffix(rank: number): string {
-  const j = rank % 10;
-  const k = rank % 100;
-
-  if (j === 1 && k !== 11) {
-    return `${rank}st`;
-  }
-  if (j === 2 && k !== 12) {
-    return `${rank}nd`;
-  }
-  if (j === 3 && k !== 13) {
-    return `${rank}rd`;
-  }
-  return `${rank}th`;
+function RankCell({ rank }: { rank: number }) {
+  return <span className="font-bold text-foreground text-base">{rank}</span>;
 }
 
-export default function LeaderboardTable({ players }: LeaderboardTableProps) {
+export default function LeaderboardTable({
+  players,
+  periodLabel,
+  dateRangeSubtitle,
+  rankingPeriodId,
+  isVisible,
+}: LeaderboardTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(players.length / PAGE_SIZE));
@@ -64,13 +63,37 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="w-full bg-white rounded-xl border border-gray-300 shadow-md overflow-hidden">
+        {/* Period header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+          <div>
+            <h2 className="text-xl font-bold text-foreground">{periodLabel}</h2>
+            {dateRangeSubtitle && (
+              <p className="text-sm text-gray-500 mt-0.5">{dateRangeSubtitle}</p>
+            )}
+          </div>
+          <VisibilityToggle rankingPeriodId={rankingPeriodId} isVisible={isVisible} />
+        </div>
+
         <Table>
           <TableHeader>
-            <TableRow className="bg-primary-gradient border-0 hover:opacity-95">
-              <TableHead className="font-bold text-white w-20 text-base pl-5 pr-5">RANK</TableHead>
-              <TableHead className="font-bold text-white text-base">NAME</TableHead>
-              <TableHead className="font-bold text-white text-right text-base pr-5">
-                PERFORMANCE SCORE
+            <TableRow className="bg-[#F29F4A] border-b border-[#E8943D] hover:bg-[#F29F4A]">
+              <TableHead className="font-bold text-white uppercase text-xs w-20 pl-5 pr-4 tracking-wide">
+                Rank
+              </TableHead>
+              <TableHead className="font-bold text-white uppercase text-xs tracking-wide">
+                Name
+              </TableHead>
+              <TableHead className="font-bold text-white uppercase text-xs text-right pr-4 tracking-wide">
+                Total Completed Tasks
+              </TableHead>
+              <TableHead className="font-bold text-white uppercase text-xs text-right pr-4 tracking-wide">
+                Task Points
+              </TableHead>
+              <TableHead className="font-bold text-white uppercase text-xs text-right pr-4 tracking-wide">
+                Badge Points
+              </TableHead>
+              <TableHead className="font-bold text-white uppercase text-xs text-right pr-5 tracking-wide">
+                Performance Score
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -80,10 +103,8 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
                 key={player.id}
                 className="bg-accent/5 border-0 hover:bg-white transition-colors"
               >
-                <TableCell className="pl-5 pr-5 py-2.5">
-                  <span className="font-bold text-foreground text-base">
-                    {getOrdinalSuffix(player.rank)}
-                  </span>
+                <TableCell className="pl-5 pr-4 py-2.5">
+                  <RankCell rank={player.rank} />
                 </TableCell>
                 <TableCell className="py-2.5">
                   <div className="flex items-center gap-2.5">
@@ -101,11 +122,26 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
                     <span className="font-medium text-foreground text-base">{player.name}</span>
                   </div>
                 </TableCell>
+                <TableCell className="text-right pr-4 py-2.5">
+                  <span className="text-foreground text-base">
+                    {player.totalCompletedTasks.toLocaleString()}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right pr-4 py-2.5">
+                  <span className="text-foreground text-base">
+                    {player.taskPoints.toLocaleString()}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right pr-4 py-2.5">
+                  <span className="text-foreground text-base">
+                    {player.badgePoints.toLocaleString()}
+                  </span>
+                </TableCell>
                 <TableCell className="text-right pr-5 py-2.5">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="font-semibold text-foreground text-lg cursor-help">
+                        <span className="font-semibold text-primary text-lg cursor-help">
                           {player.performanceScore.toLocaleString()}
                         </span>
                       </TooltipTrigger>
@@ -120,14 +156,26 @@ export default function LeaderboardTable({ players }: LeaderboardTableProps) {
               </TableRow>
             ))}
             {Array.from({ length: PAGE_SIZE - paginatedPlayers.length }).map((_, i) => (
-              <TableRow key={`placeholder-${i}`} className="border-0 pointer-events-none select-none">
-                <TableCell className="pl-5 pr-5 py-2.5">
-                  <span className="invisible font-bold text-base">0th</span>
+              <TableRow
+                key={`placeholder-${i}`}
+                className="border-0 pointer-events-none select-none"
+              >
+                <TableCell className="pl-5 pr-4 py-2.5">
+                  <span className="invisible font-bold text-base">0</span>
                 </TableCell>
                 <TableCell className="py-2.5">
                   <div className="flex items-center gap-2.5">
                     <div className="h-10 w-10 invisible" />
                   </div>
+                </TableCell>
+                <TableCell className="text-right pr-4 py-2.5">
+                  <span className="invisible text-base">0</span>
+                </TableCell>
+                <TableCell className="text-right pr-4 py-2.5">
+                  <span className="invisible text-base">0</span>
+                </TableCell>
+                <TableCell className="text-right pr-4 py-2.5">
+                  <span className="invisible text-base">0</span>
                 </TableCell>
                 <TableCell className="text-right pr-5 py-2.5">
                   <span className="invisible font-semibold text-lg">0</span>

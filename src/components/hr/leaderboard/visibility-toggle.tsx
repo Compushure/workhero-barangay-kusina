@@ -1,10 +1,11 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Switch } from '@/components/ui/switch';
+import { Eye, EyeOff } from 'lucide-react';
 import { toggleRankingVisibility } from '@/actions/hr/leaderboard';
+import { hrLeaderboardKeys } from '@/hooks/tanstack/queries/hrQueries';
 
 interface VisibilityToggleProps {
   rankingPeriodId: string;
@@ -12,17 +13,17 @@ interface VisibilityToggleProps {
 }
 
 export default function VisibilityToggle({ rankingPeriodId, isVisible }: VisibilityToggleProps) {
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
-  const handleToggle = (checked: boolean) => {
+  const handleClick = () => {
     startTransition(async () => {
-      const result = await toggleRankingVisibility(rankingPeriodId, checked);
+      const result = await toggleRankingVisibility(rankingPeriodId, !isVisible);
       if (result.success) {
         toast.success(
-          checked ? 'Ranking is now visible to employees' : 'Ranking hidden from employees'
+          !isVisible ? 'Ranking is now visible to employees' : 'Ranking hidden from employees'
         );
-        router.refresh();
+        await queryClient.invalidateQueries({ queryKey: hrLeaderboardKeys.all });
       } else {
         toast.error(result.error);
       }
@@ -30,19 +31,19 @@ export default function VisibilityToggle({ rankingPeriodId, isVisible }: Visibil
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Switch
-        checked={isVisible}
-        onCheckedChange={handleToggle}
-        disabled={isPending}
-        size="sm"
-        className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-400"
-      />
-      <span className="text-xs font-medium cursor-default text-gray-600">
-        {isVisible
-          ? 'Employees can currently see this ranking.'
-          : 'Employees cannot see this ranking.'}
-      </span>
-    </div>
+    <button
+      onClick={handleClick}
+      disabled={isPending}
+      className={[
+        'inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
+        'disabled:opacity-50 disabled:cursor-not-allowed',
+        isVisible
+          ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300'
+          : 'border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:border-gray-300',
+      ].join(' ')}
+    >
+      {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+      {isVisible ? 'Visible to employee' : 'Hidden from employee'}
+    </button>
   );
 }

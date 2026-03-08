@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -10,33 +11,84 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getISOWeek } from 'date-fns';
-import { getISOWeeksInYear, getISOWeekDateRangeLabel } from '@/lib/utils/time-period-utils';
-import { getOrGenerateRankingByPeriod } from '@/actions/hr/leaderboard';
+import { CheckCircle2 } from 'lucide-react';
+import { getISOWeek, getISOWeekYear } from 'date-fns';
+import {
+  getISOWeeksInYear,
+  buildPeriodLabel,
+  getISOWeekDateRangeLabelShort,
+} from '@/lib/utils/time-period-utils';
+import { generateRankingByPeriod } from '@/actions/hr/leaderboard';
+import { hrLeaderboardKeys } from '@/hooks/tanstack/queries/hrQueries';
 import type { RankLogPeriodType } from '@/types';
 
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-] as const;
+function getPreviousWeek(): { year: number; week: number } {
+  const now = new Date();
+  const nowYear = getISOWeekYear(now);
+  const nowWeek = getISOWeek(now);
+  if (nowWeek <= 1) {
+    return { year: nowYear - 1, week: getISOWeeksInYear(nowYear - 1) };
+  }
+  return { year: nowYear, week: nowWeek - 1 };
+}
 
-const RANKING_START_YEAR = 2025;
+function getPreviousMonth(): { year: number; month: number } {
+  const now = new Date();
+  const nowYear = now.getFullYear();
+  const nowMonth1Based = now.getMonth() + 1;
+  if (nowMonth1Based <= 1) {
+    return { year: nowYear - 1, month: 12 };
+  }
+  return { year: nowYear, month: nowMonth1Based - 1 };
+}
+
+function getPreviousYear(): number {
+  return new Date().getFullYear() - 1;
+}
 
 interface PeriodSelectorProps {
   currentType: RankLogPeriodType;
   currentYear: number;
   currentWeek: number;
   currentMonth: number;
+  /** Whether the period we're currently viewing has a ranking (drives badge and buttons) */
+  currentPeriodRankingExists: boolean;
+}
+
+function buildUrlForPeriod(type: RankLogPeriodType): string {
+  const previousWeek = getPreviousWeek();
+  const previousMonth = getPreviousMonth();
+  const previousYear = getPreviousYear();
+  const params = new URLSearchParams({ type, show: '1' });
+  if (type === 'weekly') {
+    params.set('year', String(previousWeek.year));
+    params.set('week', String(previousWeek.week));
+  } else if (type === 'monthly') {
+    params.set('year', String(previousMonth.year));
+    params.set('month', String(previousMonth.month));
+  } else {
+    params.set('year', String(previousYear));
+  }
+  return `/hr/leaderboard?${params.toString()}`;
+}
+
+function buildUrlForCurrentPeriod(
+  type: RankLogPeriodType,
+  year: number,
+  week: number,
+  month: number
+): string {
+  const params = new URLSearchParams({ type, show: '1' });
+  if (type === 'weekly') {
+    params.set('year', String(year));
+    params.set('week', String(week));
+  } else if (type === 'monthly') {
+    params.set('year', String(year));
+    params.set('month', String(month));
+  } else {
+    params.set('year', String(year));
+  }
+  return `/hr/leaderboard?${params.toString()}`;
 }
 
 export function PeriodSelector({
@@ -44,68 +96,45 @@ export function PeriodSelector({
   currentYear,
   currentWeek,
   currentMonth,
+  currentPeriodRankingExists,
 }: PeriodSelectorProps) {
   const router = useRouter();
-  const [, startTransition] = useTransition();
+  const queryClient = useQueryClient();
+  const [isPending, startTransition] = useTransition();
 
-  const now = new Date();
-  const nowYear = now.getFullYear();
-  const nowMonth = now.getMonth() + 1;
-  const nowISOWeek = getISOWeek(now);
+  const periodLabel =
+    currentType === 'weekly'
+      ? `${buildPeriodLabel(currentType, currentYear, undefined, currentWeek)} (${getISOWeekDateRangeLabelShort(currentYear, currentWeek)})`
+      : currentType === 'monthly'
+        ? buildPeriodLabel(currentType, currentYear, currentMonth)
+        : buildPeriodLabel(currentType, currentYear);
 
-  const endYear = Math.max(RANKING_START_YEAR, nowYear);
-  const yearOptions = Array.from(
-    { length: endYear - RANKING_START_YEAR + 1 },
-    (_, i) => RANKING_START_YEAR + i
-  );
-
-  const [periodType, setPeriodType] = useState<RankLogPeriodType>(currentType);
-  const [year, setYear] = useState(currentYear);
-  const [month, setMonth] = useState(currentMonth);
-  const [week, setWeek] = useState(currentWeek);
-
-  const isoWeeksInYear = getISOWeeksInYear(year);
-
-  const maxMonth = year < nowYear ? 12 : Math.max(1, nowMonth - 1);
-  const maxWeek = year < nowYear ? isoWeeksInYear : Math.max(1, nowISOWeek - 1);
-
-  const monthOptions = MONTHS.slice(0, maxMonth).map((name, idx) => ({ value: idx + 1, name }));
-  const weekOptions = Array.from({ length: maxWeek }, (_, i) => i + 1);
+  const periodFieldLabel =
+    currentType === 'weekly' ? 'Week' : currentType === 'monthly' ? 'Month' : 'Year';
 
   const handlePeriodTypeChange = (value: string) => {
-    setPeriodType(value as RankLogPeriodType);
+    const newType = value as RankLogPeriodType;
+    startTransition(() => {
+      router.push(buildUrlForPeriod(newType));
+    });
   };
 
-  const handleYearChange = (value: string) => {
-    const newYear = Number(value);
-    setYear(newYear);
-    const newMaxW = newYear < nowYear ? getISOWeeksInYear(newYear) : Math.max(1, nowISOWeek - 1);
-    const newMaxM = newYear < nowYear ? 12 : Math.max(1, nowMonth - 1);
-    setWeek((w) => Math.min(w, newMaxW));
-    setMonth((m) => Math.min(m, newMaxM));
-  };
-
-  const handleShowRankings = () => {
-    const params = new URLSearchParams();
-    params.set('type', periodType);
-    params.set('year', String(year));
-    if (periodType === 'monthly') params.set('month', String(month));
-    if (periodType === 'weekly') params.set('week', String(week));
-    params.set('show', '1');
-
+  const handleGenerateRank = () => {
     startTransition(async () => {
-      const result = await getOrGenerateRankingByPeriod(
-        periodType,
-        year,
-        periodType === 'monthly' ? month : undefined,
-        periodType === 'weekly' ? week : undefined
+      const result = await generateRankingByPeriod(
+        currentType,
+        currentYear,
+        currentType === 'monthly' ? currentMonth : undefined,
+        currentType === 'weekly' ? currentWeek : undefined
       );
 
       if (!result.success) {
         return;
       }
 
-      router.push(`/hr/leaderboard?${params.toString()}`);
+      queryClient.invalidateQueries({ queryKey: hrLeaderboardKeys.all });
+      router.push(buildUrlForCurrentPeriod(currentType, currentYear, currentWeek, currentMonth));
+      router.refresh();
     });
   };
 
@@ -114,7 +143,7 @@ export function PeriodSelector({
       {/* Period Type */}
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-medium text-muted-foreground">Period Type</label>
-        <Select value={periodType} onValueChange={handlePeriodTypeChange}>
+        <Select value={currentType} onValueChange={handlePeriodTypeChange}>
           <SelectTrigger className="w-25 bg-white border-gray-300 text-foreground transition-all duration-200  hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
             <SelectValue />
           </SelectTrigger>
@@ -126,71 +155,33 @@ export function PeriodSelector({
         </Select>
       </div>
 
-      {/* Week (weekly only) */}
-      {periodType === 'weekly' && (
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-muted-foreground">Week</label>
-          <Select value={String(Math.min(week, maxWeek))} onValueChange={(v) => setWeek(Number(v))}>
-            <SelectTrigger className="min-w-[120px] bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
-              <span className="truncate">Week {Math.min(week, maxWeek) || '—'}</span>
-            </SelectTrigger>
-            <SelectContent>
-              {weekOptions.map((w) => (
-                <SelectItem key={w} value={String(w)}>
-                  Week {w} ({getISOWeekDateRangeLabel(year, w)})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      {/* Month (monthly only) */}
-      {periodType === 'monthly' && (
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-muted-foreground">Month</label>
-          <Select
-            value={String(Math.min(month, maxMonth))}
-            onValueChange={(v) => setMonth(Number(v))}
-          >
-            <SelectTrigger className="min-w-[120px] bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map(({ value, name }) => (
-                <SelectItem key={value} value={String(value)}>
-                  {name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      {/* Year */}
+      {/* Period value (read-only): ISO week for weekly, month name for monthly, year for yearly */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-muted-foreground">Year</label>
-        <Select value={String(year)} onValueChange={handleYearChange}>
-          <SelectTrigger className="w-25 bg-white border-gray-300 text-foreground transition-all duration-200  hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {yearOptions.map((y) => (
-              <SelectItem key={y} value={String(y)}>
-                {y}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <label className="text-xs font-medium text-muted-foreground uppercase">
+          {periodFieldLabel}
+        </label>
+        <div className="flex min-h-9 min-w-40 items-center gap-2 rounded-md border border-gray-300 bg-muted/50 px-3 py-2 text-sm font-medium text-foreground">
+          <span>{periodLabel}</span>
+        </div>
       </div>
 
-      {/* Show Rankings Button */}
-      <Button
-        onClick={handleShowRankings}
-        className="bg-primary-gradient text-white hover:opacity-95 self-end"
-      >
-        Show Rankings
-      </Button>
+      {/* Show Rankings or "Already generated" indicator */}
+      {currentPeriodRankingExists ? (
+        <div className="flex items-center self-end">
+          <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-800">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            Ranking already generated
+          </div>
+        </div>
+      ) : (
+        <Button
+          onClick={handleGenerateRank}
+          disabled={isPending}
+          className="bg-primary-gradient text-white hover:opacity-95 self-end"
+        >
+          {isPending ? 'Generating…' : 'Generate Rank'}
+        </Button>
+      )}
     </div>
   );
 }

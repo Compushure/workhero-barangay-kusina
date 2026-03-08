@@ -14,6 +14,9 @@ export interface LeaderboardPlayer {
   id: string;
   name: string;
   performanceScore: number;
+  totalCompletedTasks: number;
+  taskPoints: number;
+  badgePoints: number;
   image: string | null;
   badges: UserBadge[];
 }
@@ -74,6 +77,12 @@ export interface RankingPeriodRow {
   period_end: string;
   is_visible: boolean;
   generated_at: string;
+}
+
+/** RankingPeriodRow with the top performer's name and participant count included */
+export interface RankingPeriodWithTop extends RankingPeriodRow {
+  top_performer_name: string | null;
+  participant_count: number;
 }
 
 /** Row from the RankingEntry table */

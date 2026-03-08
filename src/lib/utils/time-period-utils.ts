@@ -152,6 +152,15 @@ export function getISOWeekDateRangeLabel(isoYear: number, isoWeek: number): stri
 }
 
 /**
+ * Returns the ISO week date range without year, e.g. "Mar 2 – Mar 8".
+ * Use when the year is already shown (e.g. "Week 10, 2026 (Mar 2 – Mar 8)").
+ */
+export function getISOWeekDateRangeLabelShort(isoYear: number, isoWeek: number): string {
+  const { start, end } = getISOWeekDateRange(isoYear, isoWeek);
+  return `${format(start, 'MMM d')} – ${format(end, 'MMM d')}`;
+}
+
+/**
  * Returns the number of ISO weeks in the given year (52 or 53).
  */
 export function getISOWeeksInYear(year: number): number {

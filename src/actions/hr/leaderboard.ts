@@ -6,15 +6,94 @@ import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
 import { unstable_noStore as noStore } from 'next/cache';
 import type {
   LeaderboardAsOfRow,
+  LeaderboardPlayer,
   RankLogPeriodType,
   RankingLeaderboardViewRow,
 } from '@/types';
 
 import {
   getCutoffForSpecificPeriod,
+  getPeriodDateRangeSubtitle,
   getPeriodStartEnd,
 } from '@/lib/utils/time-period-utils';
+import { enrichRankingPlayers } from '@/lib/utils/enrich-ranking';
 import { format, getISOWeek, getISOWeekYear } from 'date-fns';
+
+// ---------------------------------------------------------------------------
+// Enriched leaderboard result — returned by getEnrichedLeaderboardByPeriod
+// ---------------------------------------------------------------------------
+export interface EnrichedLeaderboardResult {
+  players: (LeaderboardPlayer & { rank: number })[];
+  periodLabel: string;
+  dateRangeSubtitle: string | null;
+  rankingPeriodId: string;
+  isVisible: boolean;
+}
+
+/**
+ * Fetch and enrich ranking entries for a specific period in a single server action.
+ * Fetches from ranking_leaderboard_view and enriches with enrichRankingPlayers so client
+ * components can call this once via TanStack Query without triggering server-side Suspense re-renders.
+ */
+export async function getEnrichedLeaderboardByPeriod(
+  periodType: RankLogPeriodType,
+  year: number,
+  month?: number,
+  week?: number
+): Promise<ActionResult<EnrichedLeaderboardResult | null>> {
+  return safeAction(async () => {
+    noStore();
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Not authenticated');
+    }
+
+    const { start } = getPeriodStartEnd(
+      periodType,
+      year,
+      periodType === 'weekly' ? undefined : month,
+      periodType === 'weekly' ? week : undefined
+    );
+    const periodStart = toDateStr(start);
+
+    const { data, error } = await supabase
+      .from('ranking_leaderboard_view')
+      .select('*')
+      .eq('period_type', periodType)
+      .eq('period_start', periodStart)
+      .order('rank');
+
+    if (error) {
+      throw new Error(`Failed to fetch ranking: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) {
+      return null;
+    }
+
+    const rows = data as RankingLeaderboardViewRow[];
+    const periodInfo = rows[0];
+    const enrichedPlayers = await enrichRankingPlayers(rows, supabase);
+
+    const periodLabel =
+      periodType === 'weekly'
+        ? periodInfo.period_label.replace(/,\s*\d{4}$/, '')
+        : periodInfo.period_label;
+
+    return {
+      players: enrichedPlayers,
+      periodLabel,
+      dateRangeSubtitle: getPeriodDateRangeSubtitle(periodInfo),
+      rankingPeriodId: periodInfo.ranking_period_id,
+      isVisible: periodInfo.is_visible,
+    };
+  });
+}
 
 
 
@@ -45,14 +124,11 @@ function buildPeriodLabelLikeView(periodType: RankLogPeriodType, periodStartDate
 
 
 /**
- * Fetch ranking entries for a specific period.
- * - First checks `ranking_leaderboard_view` (fast path)
- * - If missing, computes via RPC `get_leaderboard_as_of`, persists, and returns rows immediately
- *
- * This avoids a "generate then re-fetch" pattern that can be affected by request memoization
- * inside a single Server Component render.
+ * Generate ranking for a specific period.
+ * Computes via RPC `get_leaderboard_as_of`, persists RankingPeriod + RankingEntry, returns view rows.
+ * If the period already exists (unique constraint), returns the existing rows so the UI can refresh.
  */
-export async function getOrGenerateRankingByPeriod(
+export async function generateRankingByPeriod(
   periodType: RankLogPeriodType,
   year: number,
   month?: number,
@@ -79,21 +155,6 @@ export async function getOrGenerateRankingByPeriod(
     );
     const periodStart = toDateStr(start);
     const periodEnd = toDateStr(end);
-
-    const { data: existingRows, error: existingError } = await supabase
-      .from('ranking_leaderboard_view')
-      .select('*')
-      .eq('period_type', periodType)
-      .eq('period_start', periodStart)
-      .order('rank');
-
-    if (existingError) {
-      throw new Error(`Failed to fetch ranking: ${existingError.message}`);
-    }
-
-    if (existingRows && existingRows.length > 0) {
-      return existingRows as RankingLeaderboardViewRow[];
-    }
 
     const cutoff = getCutoffForSpecificPeriod(
       periodType,
@@ -212,15 +273,14 @@ export async function getOrGenerateRankingByPeriod(
 }
 
 /**
- * Fetch ranking entries for a specific period (read-only).
- * Returns rows ordered by rank, or null if no ranking exists for that period.
+ * Check whether a ranking already exists for a given period.
  */
-export async function getRankingByPeriod(
+export async function checkRankingExists(
   periodType: RankLogPeriodType,
   year: number,
   month?: number,
   week?: number
-): Promise<ActionResult<RankingLeaderboardViewRow[] | null>> {
+): Promise<ActionResult<boolean>> {
   return safeAction(async () => {
     noStore();
     const supabase = await createClient();
@@ -242,21 +302,18 @@ export async function getRankingByPeriod(
     const periodStart = toDateStr(start);
 
     const { data, error } = await supabase
-      .from('ranking_leaderboard_view')
-      .select('*')
+      .from('RankingPeriod')
+      .select('id')
       .eq('period_type', periodType)
       .eq('period_start', periodStart)
-      .order('rank');
+      .limit(1)
+      .maybeSingle();
 
     if (error) {
-      throw new Error(`Failed to fetch ranking: ${error.message}`);
+      throw new Error(`Failed to check ranking: ${error.message}`);
     }
 
-    if (!data || data.length === 0) {
-      return null;
-    }
-
-    return data as RankingLeaderboardViewRow[];
+    return !!data;
   });
 }
 
@@ -381,6 +438,65 @@ export async function getLatestYearlyPeriod(): Promise<
 
     const startDate = new Date(data.period_start + 'T00:00:00');
     return { year: startDate.getFullYear(), is_visible: data.is_visible };
+  });
+}
+
+/**
+ * Returns all previously generated ranking periods across all types, newest first,
+ * with the top performer's name (rank 1) for each period.
+ * Used by the HR "View Past Ranks" list.
+ */
+export async function getAllRankingPeriods(): Promise<ActionResult<import('@/types').RankingPeriodWithTop[]>> {
+  return safeAction(async () => {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Not authenticated');
+    }
+
+    const [periodsRes, topRes, countRes] = await Promise.all([
+      supabase
+        .from('RankingPeriod')
+        .select('id, period_type, period_start, period_end, is_visible, generated_at')
+        .order('period_start', { ascending: false }),
+      supabase
+        .from('ranking_leaderboard_view')
+        .select('ranking_period_id, user_name, rank')
+        .eq('rank', 1),
+      supabase
+        .from('RankingEntry')
+        .select('ranking_period_id'),
+    ]);
+
+    if (periodsRes.error) {
+      throw new Error(`Failed to fetch ranking periods: ${periodsRes.error.message}`);
+    }
+    if (topRes.error) {
+      throw new Error(`Failed to fetch top performers: ${topRes.error.message}`);
+    }
+    if (countRes.error) {
+      throw new Error(`Failed to fetch participant counts: ${countRes.error.message}`);
+    }
+
+    const topByPeriod = new Map<string, string>();
+    for (const row of topRes.data ?? []) {
+      topByPeriod.set(row.ranking_period_id, row.user_name);
+    }
+
+    const countByPeriod = new Map<string, number>();
+    for (const row of countRes.data ?? []) {
+      countByPeriod.set(row.ranking_period_id, (countByPeriod.get(row.ranking_period_id) ?? 0) + 1);
+    }
+
+    return (periodsRes.data ?? []).map((p) => ({
+      ...p,
+      top_performer_name: topByPeriod.get(p.id) ?? null,
+      participant_count: countByPeriod.get(p.id) ?? 0,
+    })) as import('@/types').RankingPeriodWithTop[];
   });
 }
 
