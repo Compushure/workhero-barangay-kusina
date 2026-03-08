@@ -21,7 +21,7 @@ interface TaskAssignmentContextType {
   ) => void;
   clearAll: () => void;
   clearAllEmployeeTasks: (employeeId: string) => void;
-  setAssignedTasks: React.Dispatch<React.SetStateAction<AssignedTask[]>>;
+  setAssignedTasks: (tasks: AssignedTask[]) => void;
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   totalPages: number;
