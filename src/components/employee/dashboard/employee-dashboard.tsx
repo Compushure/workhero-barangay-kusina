@@ -7,7 +7,7 @@ import NavSection from '../nav-section';
 import CookingSection from './cooking-section';
 import { RankWidget } from './rank-panel';
 import { RewardRequestsFeedbackModal } from './reward-requests-feedback-modal';
-import TaskIcon from './claimable-tasks-icon';
+import TaskIcon from './quick-task';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function EmployeeDashboardClient() {

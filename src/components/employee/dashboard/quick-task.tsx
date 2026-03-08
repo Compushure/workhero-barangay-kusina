@@ -2,7 +2,7 @@
 
 import { type ComponentProps, useMemo, useState } from 'react';
 import { AwardIcon, XIcon } from 'lucide-react';
-import TasksTable from './claimable-tasks-table';
+import TasksTable from './quick-task-table';
 import {
   Dialog,
   DialogContent,
