@@ -8,6 +8,7 @@ interface RankWidgetProps {
   isLoading?: boolean;
   isCollapsed?: boolean;
   performanceScore?: number;
+  totalXP?: number;
 }
 
 /**
@@ -15,7 +16,7 @@ interface RankWidgetProps {
  * Displays employee's rank among all regular employees
  * Responsive to sidebar collapsed state
  */
-export function RankWidget({ rankData, isLoading, isCollapsed, performanceScore }: RankWidgetProps) {
+export function RankWidget({ rankData, isLoading, isCollapsed, performanceScore, totalXP }: RankWidgetProps) {
   // Loading state
   if (isLoading) {
     if (isCollapsed) {
