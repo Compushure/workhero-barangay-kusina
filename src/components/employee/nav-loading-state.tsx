@@ -96,8 +96,8 @@ export function NavLoadingState() {
               <ChefHat className="h-full w-full" strokeWidth={2.5} />
             </motion.div>
             <div className="flex flex-col font-pixel gap-1">
-              <div className="text-base font-semibold">Chef is about to travel...</div>
-              <div className="text-sm text-[#6B4A2B]">It won't be long!</div>
+              <div className="text-base font-semibold">Chef is on the move...</div>
+              <div className="text-sm text-[#6B4A2B]">Cooking up the next step!</div>
             </div>
           </motion.div>
         </motion.div>
