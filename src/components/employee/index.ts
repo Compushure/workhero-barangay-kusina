@@ -16,7 +16,6 @@ export { RewardCard } from './mercado';
 
 export {
   TaskStatusBoard,
-  TaskStatusColumn,
   TaskCard,
   // currentTasks,
   // onReviewTasks,
