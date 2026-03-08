@@ -24,8 +24,6 @@ export async function fetchTaskCategoriesPaginated(
     totalPages: number;
   }>
 > {
-  console.log('Server Action Called:', { page, pageSize, sortBy, searchTerm });
-  
   const supabase = await createClient();
 
   // Calculate range for pagination
@@ -109,8 +107,6 @@ export async function fetchTaskCategoriesPaginated(
   
   const { count: totalCount, error: countError } = await countQuery;
   
-  console.log('Count Query Result:', { totalCount, countError });
-  
   if (countError) {
     console.error('Count Error:', countError);
     return { error: 'Failed to count task categories: ' + countError.message, data: undefined };
@@ -125,8 +121,6 @@ export async function fetchTaskCategoriesPaginated(
   }
   
   const { data, error } = await orderedQuery.range(start, end);
-
-  console.log('Data Query Result:', { data, error });
 
   if (error) {
     console.error('Data Error:', error);
@@ -147,7 +141,7 @@ export async function fetchTaskCategoriesPaginated(
 
   const totalPages = Math.ceil((totalCount || 0) / pageSize);
 
-  const response = {
+  return {
     error: null,
     data: {
       data: taskCategories,
@@ -155,9 +149,31 @@ export async function fetchTaskCategoriesPaginated(
       totalPages,
     },
   };
-  
-  console.log('Server Action Response:', response);
-  return response;
+}
+
+export async function fetchTaskCategoryMetadata(): Promise<
+  ServerActionResponse<{ names: string[]; types: string[] }>
+> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('KPICategory')
+    .select('name,type');
+
+  if (error) {
+    return { error: `Failed to fetch task category metadata: ${error.message}` };
+  }
+
+  const names = (data ?? []).map((item) => item.name).filter(Boolean);
+  const types = [...new Set((data ?? []).map((item) => item.type).filter(Boolean))].sort();
+
+  return {
+    error: null,
+    data: {
+      names,
+      types,
+    },
+  };
 }
 
 export async function addTaskCategory(input: AddTaskInput): Promise<ServerActionResponse<TaskCategory>> {

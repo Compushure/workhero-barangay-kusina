@@ -1,4 +1,10 @@
-import { addTaskCategory, deleteTaskCategory, editTaskCategory, fetchTaskCategoriesPaginated } from "@/actions/manager/editor";
+import {
+  addTaskCategory,
+  deleteTaskCategory,
+  editTaskCategory,
+  fetchTaskCategoriesPaginated,
+  fetchTaskCategoryMetadata,
+} from "@/actions/manager/editor";
 import { safeAction } from "@/lib/utils/safe-action";
 import { TaskCategory } from "@/types/manager/task-editor";
 import { AddTaskInput, EditTaskInput } from "@/zod/schemas/task";
@@ -11,8 +17,6 @@ export async function handleFetchTaskCategoriesPaginated(
   sortBy: string = 'type-name',
   searchTerm: string = ''
 ): Promise<{ tasks: TaskCategory[]; count: number; totalPages: number }> {
-  console.log('Action Handler Called:', { page, pageSize, sortBy, searchTerm });
-  
   const result = await safeAction<
     ServerActionResponse<{
       data: TaskCategory[];
@@ -21,22 +25,17 @@ export async function handleFetchTaskCategoriesPaginated(
     }>
   >(() => fetchTaskCategoriesPaginated(page, pageSize, sortBy, searchTerm));
 
-  console.log('Action Handler Result:', result);
-
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
     return { tasks: [], count: 0, totalPages: 0 };
   }
 
   const payload = result.data?.data;
-  const response = {
+  return {
     tasks: payload?.data ?? [],
     count: payload?.count ?? 0,
     totalPages: payload?.totalPages ?? 0,
   };
-  
-  console.log('Action Handler Response:', response);
-  return response;
 }
 
 
@@ -83,4 +82,23 @@ export async function handleDeleteTaskCategoryAction(
 
   toast.success('task category deleted successfully');
   return true;
+}
+
+export async function handleFetchTaskCategoryMetadata(): Promise<{
+  names: string[];
+  types: string[];
+}> {
+  const result = await safeAction<ServerActionResponse<{ names: string[]; types: string[] }>>(
+    () => fetchTaskCategoryMetadata()
+  );
+
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error);
+    return { names: [], types: [] };
+  }
+
+  return {
+    names: result.data?.data?.names ?? [],
+    types: result.data?.data?.types ?? [],
+  };
 }

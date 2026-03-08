@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plus, Search, ArrowUpDown, ChefHat, ListTodo } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +13,7 @@ import AddEditTaskCategoryDialog from './dialogs/add-edit-task-category-dialog';
 import TaskCategoryTable from './task-category-table';
 import {
   useGetTaskCategoriesPaginated,
-  useGetTaskTypes,
+  useGetTaskCategoryMetadata,
   type TaskCategorySortOption,
 } from '@/hooks/tanstack/queries/managerEditorQueries';
 import {
@@ -59,32 +59,20 @@ export default function TaskEditorPage() {
   const totalPages = paginatedData?.totalPages || 1;
   const totalCount = paginatedData?.count || 0;
 
-  // Debug logging
-  console.log('Pagination Debug:', {
-    page,
-    pageSize,
-    sortOption,
-    debouncedSearchTerm,
-    paginatedData,
-    tasks: tasks.length,
-    totalPages,
-    totalCount,
+  // Fetch names/types only when dialog opens to keep initial page load fast.
+  const { data: taskCategoryMeta } = useGetTaskCategoryMetadata({
+    enabled: dialogOpen,
   });
-
-  // Fetch all tasks without filters for duplicate checking
-  const { data: allTasksData } = useGetTaskCategoriesPaginated(1, 1000, sortOption, '');
-
-  const { data: existingTypes = [] } = useGetTaskTypes();
 
   // Mutations
   const addMutation = useAddTaskCategory();
   const editMutation = useEditTaskCategory();
   const deleteMutation = useDeleteTaskCategory();
 
-  // Extract existing names for duplicate checking from ALL tasks
-  const existingNames = Array.isArray(allTasksData)
-    ? []
-    : allTasksData?.tasks?.map((task: TaskCategory) => task.name) || [];
+  // Extract existing names/types for duplicate checks only when dialog is used.
+  const existingNames = useMemo(() => taskCategoryMeta?.names ?? [], [taskCategoryMeta?.names]);
+
+  const existingTypes = useMemo(() => taskCategoryMeta?.types ?? [], [taskCategoryMeta?.types]);
 
   const handleOpenAddDialog = () => {
     setEditingTask(null);
