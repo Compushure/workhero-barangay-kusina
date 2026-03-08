@@ -23,7 +23,7 @@ function AssignEmployeesTable({
   disabledEmployeeIds = new Set(),
 }: AssignEmployeesTableProps) {
   return (
-    <div className="rounded-2xl border border-accent/50 flex-1 flex flex-col overflow-auto">
+    <div className="rounded-2xl border border-accent/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full">
         <thead className="bg-primary-gradient text-card border-b border-accent/50">
           <tr className="flex py-2 items-center">
@@ -48,7 +48,7 @@ function AssignEmployeesTable({
         </thead>
       </table>
 
-      <div className="overflow-y-auto flex flex-col">
+      <div className="overflow-y-auto flex flex-col [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {isLoading ? (
           <>
             <SkeletonRow />

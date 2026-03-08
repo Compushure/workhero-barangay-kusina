@@ -197,22 +197,27 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   };
 
   return (
-    <div className="p-8 bg-zinc-100 min-h-screen flex flex-col">
+    <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
       <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
 
-      <div className="flex-1 flex flex-col">
-        <div className="flex items-center justify-end gap-2 mb-6">
-          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-          <SortButton sortBy={sortBy} onSortChange={setSortBy} />
-          <SortButton
-            sortBy={dateSortBy as any}
-            onSortChange={(value) => setDateSortBy(value as 'date-desc' | 'date-asc' | 'employee')}
-            options={[
-              { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
-              { value: 'date-asc' as any, label: 'Date (Oldest)' },
-              { value: 'employee' as any, label: 'Employee Name' },
-            ]}
-          />
+      <div className="flex-1 flex flex-col max-w-7xl 2xl:max-w-[1760px] w-full mx-auto">
+        {/* Filter Controls - Compact horizontal layout aligned to right */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-4 sm:mt-5 sm:justify-end">
+          <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
+            <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <SortButton sortBy={sortBy} onSortChange={setSortBy} />
+            <SortButton
+              sortBy={dateSortBy as any}
+              onSortChange={(value) => setDateSortBy(value as 'date-desc' | 'date-asc' | 'employee')}
+              options={[
+                { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
+                { value: 'date-asc' as any, label: 'Date (Oldest)' },
+                { value: 'employee' as any, label: 'Employee Name' },
+              ]}
+            />
+          </div>
         </div>
 
         <div className="flex-1 flex flex-col">
@@ -231,7 +236,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           )}
 
           {/* Pagination fixed at bottom */}
-          <div className="mt-auto pt-4">
+          <div className="mt-auto pt-3 sm:pt-4">
             <Pagination
               totalPages={totalPages}
               currentPage={currentPage}

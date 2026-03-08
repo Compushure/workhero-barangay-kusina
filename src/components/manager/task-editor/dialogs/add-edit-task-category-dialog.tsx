@@ -166,7 +166,7 @@ export default function AddEditTaskCategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
-      <DialogContent className="bg-background border-none max-w-[95vw] md:max-w-135 lg:max-w-150 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-background border-none max-w-[95vw] sm:max-w-md md:max-w-135 lg:max-w-150 xl:max-w-175 2xl:max-w-200 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex gap-2 text-xl text-foreground text-left items-center">

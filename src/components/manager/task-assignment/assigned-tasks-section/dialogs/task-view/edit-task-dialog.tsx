@@ -93,7 +93,7 @@ export default function EditTaskDialog({
 
   return (
     <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>
-      <DialogContent className="bg-background max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="bg-background max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-2xl text-foreground">Edit Task</DialogTitle>
         </DialogHeader>

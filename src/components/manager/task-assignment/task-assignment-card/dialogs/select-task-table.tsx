@@ -25,7 +25,7 @@ function SelectTasksTable({
   disabledTaskIds,
 }: SelectTasksTableProps) {
   return (
-    <div className="rounded-2xl border-2 border-accent-secondary/50 flex-1 flex flex-col overflow-auto">
+    <div className="rounded-2xl border-2 border-accent-secondary/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full">
         <thead className="bg-primary-gradient text-card border-b border-accent-secondary/50">
           <tr className="flex justify-baseline py-2.5 text-sm font-semibold">
@@ -37,7 +37,7 @@ function SelectTasksTable({
           </tr>
         </thead>
       </table>
-      <div className="overflow-y-auto flex flex-col">
+      <div className="overflow-y-auto flex flex-col [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {isLoading ? (
           <>
             <SkeletonRow />

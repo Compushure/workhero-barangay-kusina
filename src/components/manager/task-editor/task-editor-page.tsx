@@ -157,46 +157,47 @@ export default function TaskEditorPage() {
     SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Type & Name';
 
   return (
-    <main className="w-full min-h-screen bg-zinc-100 p-10">
-      <div className="mx-auto w-full max-w-500 space-y-8">
+    <main className="w-full min-h-screen bg-zinc-100 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full max-w-7xl 2xl:max-w-440 space-y-5 sm:space-y-6 lg:space-y-8">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">Task Editor</h1>
-          <p className="text-md text-secondary">Add, Edit, Delete assignable tasks in this page.</p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Task Editor</h1>
+          <p className="text-sm sm:text-base lg:text-lg text-secondary">Add, Edit, Delete assignable tasks in this page.</p>
         </div>
 
-        <section className="flex justify-between">
-          {/* Task Categories Count Display */}
-          <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
-            <h5 className="flex items-center gap-2">
-              <ListTodo size={20} className="text-accent" />
-              Categories{' '}
-              <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
-                {totalCount ?? 0}
-              </span>
-            </h5>
+        {/* Task Categories Count Display */}
+        <section className="flex gap-3 sm:gap-4 text-base sm:text-lg font-bold text-foreground pl-1 sm:pl-2">
+          <h5 className="flex items-center gap-2">
+            <ListTodo size={20} className="text-accent" />
+            Categories{' '}
+            <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+              {totalCount ?? 0}
+            </span>
+          </h5>
+        </section>
+
+        {/* Search, Sort, and Add Button - Always visible, stacked on mobile */}
+        <section className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center justify-start sm:justify-end">
+          {/* Search Input */}
+          <div className="relative flex w-full sm:w-auto sm:min-w-50">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
+            />
           </div>
 
-          {/* Search, Sort, and Add Button */}
-          <div className="flex gap-4 items-center justify-end">
-            {/* Search Input */}
-            <div className="relative flex">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search tasks..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
-              />
-            </div>
-
+          {/* Sort and Add Button Row */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
             {/* Sort Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="default"
                   size="default"
-                  className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-48 py-2 justify-between border border-gray-200 "
+                  className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-48 py-2 justify-between border border-gray-200"
                 >
                   <span className="truncate">{currentSortLabel}</span>
                   <ArrowUpDown size={18} className='text-accent'/>
@@ -220,11 +221,12 @@ export default function TaskEditorPage() {
             {/* Add New Category Button */}
             <Button
               onClick={handleOpenAddDialog}
-              className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-6 py-2 rounded-full shadow-sm/25 font-semibold text-sm shrink-0"
+              className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out w-full sm:w-auto px-4 sm:px-6 py-2 rounded-full shadow-sm/25 font-semibold text-sm whitespace-nowrap justify-center"
             >
               <ChefHat size={18} />
-              <span>Add New Category</span>
-              <Plus size={18} className="ml-4" />
+              <span className="hidden sm:inline">Add New Category</span>
+              <span className="sm:hidden">Add New Category</span>
+              <Plus size={18} className="ml-1 sm:ml-4" />
             </Button>
           </div>
         </section>

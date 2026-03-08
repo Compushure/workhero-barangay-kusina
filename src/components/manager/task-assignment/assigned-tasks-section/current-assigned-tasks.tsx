@@ -98,16 +98,16 @@ export function CurrentAssignedTasks() {
   const memoizedTasks = useMemo(() => tasks || [], [tasks]);
 
   return (
-    <div className="rounded-3xl bg-background pl-6 pr-6 pt-6 shadow-sm/50 flex flex-col w-full">
+    <div className="rounded-3xl bg-background px-3 sm:px-4 md:px-6 2xl:px-8 pt-4 sm:pt-6 shadow-sm/50 flex flex-col w-full">
       {/* Header */}
-      <div className="flex flex-row md:items-center justify-between mb-5">
-        <h2 className="text-2xl font-bold text-foreground">Task List</h2>
+      <div className="flex flex-row items-center justify-between mb-4 sm:mb-5">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground">Task List</h2>
 
         {/* View Toggle */}
-        <div className="flex bg-card/75 rounded-xl mb-1">
+        <div className="flex bg-card/75 rounded-xl">
           <button
             onClick={() => handleViewModeChange('task')}
-            className={`flex w-35 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-l-xl text-sm font-medium transition-all duration-400 ease-in-out ${
+            className={`flex w-16 sm:w-20 md:w-35 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-l-xl text-xs sm:text-sm font-medium transition-all duration-400 ease-in-out ${
               viewMode === 'task'
                 ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
                 : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-xs/25'
@@ -117,11 +117,11 @@ export function CurrentAssignedTasks() {
               size={16}
               className={`${viewMode === 'task' ? 'text-zinc-50' : 'text-accent-secondary'}`}
             />
-            Task View
+            <span className="hidden md:inline">Task View</span>
           </button>
           <button
             onClick={() => handleViewModeChange('employee')}
-            className={`flex w-35 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-r-xl text-sm font-medium transition-all duration-400 ease-in-out ${
+            className={`flex w-16 sm:w-20 md:w-35 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-r-xl text-xs sm:text-sm font-medium transition-all duration-400 ease-in-out ${
               viewMode === 'employee'
                 ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
                 : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-xs/25'
@@ -131,63 +131,68 @@ export function CurrentAssignedTasks() {
               size={16}
               className={`${viewMode === 'employee' ? 'text-zinc-50' : 'text-accent-secondary'}`}
             />
-            Employee View
+            <span className="hidden md:inline">Employee View</span>
           </button>
         </div>
       </div>
 
       {/* View Cards Number Display & Controls: Search, Sort, Clear */}
-      <section className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-4 text-lg font-semibold text-primary bg-card/75 inset-shadow-xs/15 border-b border-accent/25 px-4 py-1 rounded-full shrink-0">
-          <h5 className="">
+      <section className="flex flex-col gap-3">
+        {/* Counts */}
+        <div className="flex gap-3 md:gap-4 text-sm md:text-lg font-semibold text-primary bg-card/75 inset-shadow-xs/15 border-b border-accent/25 px-3 md:px-4 py-1 rounded-full w-fit">
+          <h5>
             Tasks{' '}
-            <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+            <span className="bg-accent/75 text-primary-foreground px-2 md:px-2.5 py-0.5 rounded-full text-xs md:text-sm ml-1 shadow-sm/25">
               {totalTasksCount ?? 0}
             </span>
           </h5>
-          <h5 className="">
+          <h5>
             Employees{' '}
-            <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+            <span className="bg-accent/75 text-primary-foreground px-2 md:px-2.5 py-0.5 rounded-full text-xs md:text-sm ml-1 shadow-sm/25">
               {totalEmployeesCount ?? 0}
             </span>
           </h5>
         </div>
 
-        <div className="flex gap-3 justify-end items-center flex-1 min-w-0">
+        {/* Filters Row - Always visible, stacked nicely */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
           {/* Search */}
-          <div className="relative flex-1 min-w-48 max-w-1/3">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <div className="relative flex-1 min-w-30">
+            <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <input
               type="text"
-              placeholder={viewMode === 'task' ? 'Search by task name' : 'Search by name or ID'}
+              placeholder={viewMode === 'task' ? 'Search tasks' : 'Search employees'}
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-full bg-card shadow-sm/25 text-sm focus:outline-none transition-all duration-500 ease-in-out focus:border focus:border-accent"
+              className="w-full pl-8 sm:pl-9 pr-2 sm:pr-3 py-1.5 sm:py-2 rounded-full bg-card shadow-sm/25 text-xs sm:text-sm focus:outline-none transition-all duration-500 ease-in-out focus:border focus:border-accent"
             />
           </div>
 
-          {/* Sort Bar */}
-          <div className="">
-            {viewMode === 'task' ? (
-              <TaskSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
-            ) : (
-              <EmployeeSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
-            )}
-          </div>
+          {/* Sort Bar and Clear All in a row */}
+          <div className="flex gap-2 sm:gap-3">
+            {/* Sort Bar */}
+            <div className="flex-1 sm:flex-initial">
+              {viewMode === 'task' ? (
+                <TaskSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
+              ) : (
+                <EmployeeSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
+              )}
+            </div>
 
-          {/* Clear All */}
-          <Button
-            onClick={() => setShowClearConfirm(true)}
-            disabled={memoizedTasks.length === 0}
-            className="group hover:text-card text-sm px-10 py-2 bg-card shadow-sm/25 hover:bg-red-700 cursor-pointer text-primary disabled:opacity-50 transition-all duration-400 ease-in-out"
-            title="Clear All Assigned Tasks"
-          >
-            <CircleDashed
-              strokeWidth={2}
-              className="text-accent group-hover:text-card transition-all duration-400 ease-in-out"
-            />
-            Clear Assigned
-          </Button>
+            {/* Clear All */}
+            <Button
+              onClick={() => setShowClearConfirm(true)}
+              disabled={memoizedTasks.length === 0}
+              className="group hover:text-card text-xs sm:text-sm px-3 sm:px-6 md:px-10 py-1.5 sm:py-2 bg-card shadow-sm/25 hover:bg-red-700 cursor-pointer text-primary disabled:opacity-50 transition-all duration-400 ease-in-out"
+              title="Clear All Assigned Tasks"
+            >
+              <CircleDashed
+                strokeWidth={2}
+                className="text-accent group-hover:text-card transition-all duration-400 ease-in-out size-4"
+              />
+              <span className="hidden sm:inline">Clear Assigned</span>
+            </Button>
+          </div>
         </div>
       </section>
 

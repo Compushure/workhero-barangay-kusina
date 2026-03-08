@@ -9,7 +9,7 @@ import {
 
 export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-border shadow-md">
+    <div className="overflow-x-auto rounded-lg border border-border shadow-md [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <Table>
         <TableHeader className="bg-primary-gradient">
           <TableRow className="border-b border-border hover:bg-primary-gradient">
