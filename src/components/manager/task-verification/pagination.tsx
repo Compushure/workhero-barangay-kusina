@@ -50,8 +50,8 @@ function PaginationComponent({
 
   return (
     <div
-      className={`flex items-center justify-center gap-1 sm:gap-2 scale-100 sm:scale-110 lg:scale-115 ${
-        isFixed ? 'sm:fixed bottom-6 left-1/2 z-40 sm:-translate-x-1/2' : ''
+      className={`flex items-center justify-center gap-1 sm:gap-2 scale-100 sm:scale-110 lg:scale-115 xl:scale-125 2xl:scale-150 ${
+        isFixed ? 'sm:fixed bottom-6 lg:bottom-8 left-1/2 z-40 sm:-translate-x-1/2' : ''
       }`}
     >
       {/* Left arrow */}

@@ -250,14 +250,14 @@ export function ManagerPage() {
     <div className="min-h-screen bg-zinc-100">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background border-b-3 border-[#f47812]/15 shadow-sm/25">
-        <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 lg:gap-5">
             <div className="flex items-center gap-3 sm:gap-4">
               <div>
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">
+                <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-foreground">
                   User Management
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-600">
+                <p className="text-xs sm:text-sm lg:text-base text-gray-600">
                   {users.length} total users on page {page}
                 </p>
               </div>
@@ -287,7 +287,7 @@ export function ManagerPage() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
+      <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5 space-y-3 sm:space-y-4 lg:space-y-5">
         <SearchFilter
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
@@ -303,7 +303,7 @@ export function ManagerPage() {
       </div>
 
       {/* Content */}
-      <main className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 pb-6 flex flex-col min-h-[calc(100vh-300px)]">
+      <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pb-6 lg:pb-8 flex flex-col min-h-[calc(100vh-300px)]">
         {isLoading ? (
           <div className="grid gap-3 sm:gap-4">
             {[...Array(3)].map((_, i) => (

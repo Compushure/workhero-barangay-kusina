@@ -113,7 +113,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <div className="rounded-3xl bg-background overflow-hidden border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 hover:shadow-lg transition-all duration-300">
-        <div className="w-full p-3 sm:p-4 lg:p-6 flex items-start justify-between gap-2 sm:gap-3">
+        <div className="w-full p-3 sm:p-4 lg:p-6 xl:p-7 2xl:p-8 flex items-start justify-between gap-2 sm:gap-3 lg:gap-4 xl:gap-5">
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 min-w-0 flex-1">
             <div
               className="relative group cursor-zoom-in hover:opacity-90 transition-opacity"
@@ -122,7 +122,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
               onMouseLeave={() => setIsHoveringAvatar(false)}
             >
               <div
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0 transition-colors ${
+                className={`w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-full bg-accent/10 flex items-center justify-center shrink-0 transition-colors ${
                   isHoveringAvatar ? 'bg-accent/20' : ''
                 }`}
               >
@@ -131,7 +131,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   <img
                     src={previewUrl}
                     alt={`${user.name}'s profile (preview)`}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover"
+                    className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-full object-cover"
                   />
                 ) : hasImage === true ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -139,59 +139,59 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                     key={`${user.id}-${imageKey}`}
                     src={imageUrl}
                     alt={`${user.name}'s profile`}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover"
+                    className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-full object-cover"
                   />
                 ) : (
-                  <span className="text-xs sm:text-sm font-semibold text-foreground">
+                  <span className="text-xs sm:text-sm lg:text-base xl:text-lg font-semibold text-foreground">
                     {getInitials(user.name)}
                   </span>
                 )}
               </div>
               {isHoveringAvatar && (
                 <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
-                  <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
                 </div>
               )}
             </div>
             
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                <p className="font-semibold text-sm sm:text-base truncate text-foreground">{user.name}</p>
+              <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 mb-0.5 sm:mb-1 lg:mb-2">
+                <p className="font-semibold text-sm sm:text-base lg:text-lg xl:text-xl truncate text-foreground">{user.name}</p>
                 {user.employeeId ? (
                   <Badge
                     variant="outline"
-                    className="hidden sm:inline-flex text-xs border-gray-300 text-gray-700 bg-white"
+                    className="hidden sm:inline-flex text-xs lg:text-sm border-gray-300 text-gray-700 bg-white"
                   >
                     {user.employeeId}
                   </Badge>
                 ) : null}
               </div>
-              <p className="text-xs sm:text-sm text-gray-600 truncate">{user.email}</p>
-              <div className="flex gap-1.5 sm:gap-2 mt-1.5 sm:mt-2 sm:hidden">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-600 truncate">{user.email}</p>
+              <div className="flex gap-1.5 sm:gap-2 lg:gap-3 mt-1.5 sm:mt-2 lg:mt-3 sm:hidden">
                 <span
-                  className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium capitalize ${
+                  className={`inline-block px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium capitalize ${
                     EMPLOYEE_TYPE_STYLES[user.employeeType]
                   }`}
                 >
                   {user.employeeType}
                 </span>
                 <span
-                  className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium capitalize ${employmentStatusClass}`}
+                  className={`inline-block px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium capitalize ${employmentStatusClass}`}
                 >
                   {employmentStatus}
                 </span>
               </div>
             </div>
-            <div className="hidden sm:flex items-center gap-2 shrink-0">
+            <div className="hidden sm:flex items-center gap-2 lg:gap-3 xl:gap-4 shrink-0">
               <span
-                className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                className={`px-2.5 py-1 lg:px-3.5 lg:py-1.5 rounded-full text-xs lg:text-sm font-medium capitalize ${
                   EMPLOYEE_TYPE_STYLES[user.employeeType]
                 }`}
               >
                 {user.employeeType}
               </span>
               <span
-                className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${employmentStatusClass}`}
+                className={`px-2.5 py-1 lg:px-3.5 lg:py-1.5 rounded-full text-xs lg:text-sm font-medium capitalize ${employmentStatusClass}`}
               >
                 {employmentStatus}
               </span>
@@ -201,10 +201,10 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
             <button
               type="button"
               aria-label={isOpen ? 'Collapse user' : 'Expand user'}
-              className="p-1.5 sm:p-2 rounded-full hover:bg-gray-100 transition-colors shrink-0"
+              className="p-1.5 sm:p-2 lg:p-2.5 rounded-full hover:bg-gray-100 transition-colors shrink-0"
             >
               <ChevronDown
-                className={`h-4 w-4 sm:h-5 sm:w-5 text-gray-600 transition-transform ${
+                className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-gray-600 transition-transform ${
                   isOpen ? 'rotate-180' : ''
                 }`}
               />
@@ -213,126 +213,126 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
         </div>
 
         <CollapsibleContent>
-          <div className="px-3 sm:px-4 lg:px-6 pb-3 sm:pb-4 lg:pb-6 border-t border-[#f47812]/15 pt-3 sm:pt-4 space-y-4 sm:space-y-6">
+          <div className="px-3 sm:px-4 lg:px-6 xl:px-7 2xl:px-8 pb-3 sm:pb-4 lg:pb-6 xl:pb-7 2xl:pb-8 border-t border-[#f47812]/15 pt-3 sm:pt-4 lg:pt-6 xl:pt-7 space-y-4 sm:space-y-6 lg:space-y-8">
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase mb-2 sm:mb-3">
+              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">
                 Basic Information
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <UserIcon className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <UserIcon className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-600">Name</p>
-                    <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Name</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground truncate">{user.name}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <Mail className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <Mail className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-600">Email</p>
-                    <p className="text-sm font-medium text-foreground break-all">{user.email}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Email</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground break-all">{user.email}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <Phone className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <Phone className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-600">Contact</p>
-                    <p className="text-sm font-medium text-foreground">{user.contactNumber || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Contact</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{user.contactNumber || 'N/A'}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase mb-2 sm:mb-3">
+              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">
                 Employment Details
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <Building2 className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <Building2 className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-600">Company ID</p>
-                    <p className="text-sm font-medium text-gray-600">{user.companyId || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Company ID</p>
+                    <p className="text-sm lg:text-base font-medium text-gray-600">{user.companyId || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <IdCard className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <IdCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-600">Employee ID</p>
-                    <p className="text-sm font-medium text-foreground">{user.employeeId || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Employee ID</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{user.employeeId || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <BadgeCheck className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <BadgeCheck className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-600">Status</p>
-                    <p className="text-sm font-medium text-foreground capitalize">{employmentStatus}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Status</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground capitalize">{employmentStatus}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <Calendar className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <Calendar className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-600">Date Created</p>
-                    <p className="text-sm font-medium text-foreground">{dateCreated}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Date Created</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{dateCreated}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase mb-2 sm:mb-3">Address</p>
-              <div className="flex items-start gap-2 sm:gap-3">
-                <MapPin className="h-4 w-4 text-accent mt-0.5 shrink-0" />
-                <p className="text-sm text-foreground">{user.address || 'N/A'}</p>
+              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">Address</p>
+              <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                <MapPin className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
+                <p className="text-sm lg:text-base text-foreground">{user.address || 'N/A'}</p>
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase mb-2 sm:mb-3">
+              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">
                 Philippine Government IDs
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <CreditCard className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-600">TIN</p>
-                    <p className="text-sm font-medium text-foreground">{user.tin || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">TIN</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{user.tin || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <CreditCard className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-600">SSS</p>
-                    <p className="text-sm font-medium text-foreground">{user.sss || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">SSS</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{user.sss || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <CreditCard className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-600">Pag-IBIG</p>
-                    <p className="text-sm font-medium text-foreground">{user.pagibig || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Pag-IBIG</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{user.pagibig || 'N/A'}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 pt-2 lg:pt-4">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(user)}
-                className="gap-2 flex-1 sm:flex-none cursor-pointer bg-white hover:bg-gray-100 hover:text-foreground border-zinc-300 transition-all duration-500 ease-in-out"
+                className="gap-2 flex-1 sm:flex-none cursor-pointer bg-white hover:bg-gray-100 hover:text-foreground border-zinc-300 transition-all duration-500 ease-in-out text-xs sm:text-sm"
               >
-                <Edit2 className="h-4 w-4" />
+                <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Edit User
               </Button>
               <Button
                 variant="destructive"
                 size="sm"
                 onClick={() => onDelete(user)}
-                className="gap-2 flex-1 sm:flex-none bg-destructive cursor-pointer text-white hover:bg-destructive/90 transition-all duration-500 ease-in-out"
+                className="gap-2 flex-1 sm:flex-none bg-destructive cursor-pointer text-white hover:bg-destructive/90 transition-all duration-500 ease-in-out text-xs sm:text-sm"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Delete User
               </Button>
             </div>
@@ -342,9 +342,9 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
       
       {/* Image Preview Modal */}
       <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
-        <DialogContent className="max-w-2xl bg-card">
+        <DialogContent className="max-w-2xl lg:max-w-4xl bg-card">
           <DialogHeader>
-            <DialogTitle className="text-foreground">{user.name}&apos;s Profile Picture</DialogTitle>
+            <DialogTitle className="text-base lg:text-lg text-foreground">{user.name}&apos;s Profile Picture</DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center p-4">
             {hasImage === true ? (
@@ -355,8 +355,8 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                 className="max-w-full max-h-[70vh] rounded-lg object-contain"
               />
             ) : (
-              <div className="w-64 h-64 rounded-lg bg-accent/10 flex items-center justify-center">
-                <span className="text-8xl font-semibold text-foreground/60">
+              <div className="w-64 h-64 lg:w-80 lg:h-80 rounded-lg bg-accent/10 flex items-center justify-center">
+                <span className="text-8xl lg:text-9xl font-semibold text-foreground/60">
                   {getInitials(user.name)}
                 </span>
               </div>
