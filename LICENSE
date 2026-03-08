@@ -1,0 +1,64 @@
+MIT License
+
+Copyright (c) 2026 WorkHero Barangay Kusina Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## Additional Terms
+
+This software includes components and libraries that are licensed under their
+respective open-source licenses:
+
+- **Next.js** - MIT License
+- **React** - MIT License
+- **TypeScript** - Apache 2.0 License
+- **Supabase** - Apache 2.0 License
+- **Tailwind CSS** - MIT License
+- **shadcn/ui** - MIT License
+- **TanStack Query** - MIT License
+- **Zustand** - MIT License
+- **Zod** - MIT License
+- **Jest** - MIT License
+- **Cypress** - MIT License
+- **ESLint** - MIT License
+- **Prettier** - MIT License
+
+Please refer to the respective repositories and npm packages for their full license texts.
+
+---
+
+## Third-Party Licenses
+
+This project uses open-source software that may have different license requirements.
+Always ensure compliance with the respective licenses when using this software
+commercially or in proprietary projects.
+
+For a complete list of all dependencies and their licenses, run:
+```bash
+npm list --all
+```
+
+---
+
+**Important**: This license applies to the original code in this repository only.
+Dependencies and third-party libraries included in this project have their own
+separate licenses. You must adhere to the terms of both this license and any
+licenses for dependencies you use.
