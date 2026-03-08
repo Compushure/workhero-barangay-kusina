@@ -15,7 +15,7 @@ function PaginationComponent({
   totalPages,
   currentPage,
   onPageChange,
-  isFixed = true,
+  isFixed = false,
 }: PaginationProps) {
   if (totalPages <= 1) return null;
 
