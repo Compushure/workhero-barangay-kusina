@@ -100,11 +100,11 @@ export function CurrentAssignedTasks() {
   return (
     <div className="rounded-3xl bg-background px-3 sm:px-4 md:px-6 2xl:px-8 pt-4 sm:pt-6 shadow-sm/50 flex flex-col w-full">
       {/* Header */}
-      <div className="flex flex-row items-center justify-between mb-4 sm:mb-5">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 sm:mb-5">
         <h2 className="text-xl sm:text-2xl font-bold text-foreground">Task List</h2>
 
         {/* View Toggle */}
-        <div className="flex bg-card/75 rounded-xl">
+        <div className="flex bg-card/75 rounded-xl self-end sm:self-auto">
           <button
             onClick={() => handleViewModeChange('task')}
             className={`flex w-16 sm:w-20 md:w-35 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-l-xl text-xs sm:text-sm font-medium transition-all duration-400 ease-in-out ${
@@ -155,7 +155,7 @@ export function CurrentAssignedTasks() {
         </div>
 
         {/* Filters Row - Always visible, stacked nicely */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 items-stretch sm:items-center">
           {/* Search */}
           <div className="relative flex-1 min-w-30">
             <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />

@@ -93,7 +93,7 @@ export default function EmployeeViewTaskBadges({
                   <p
                     className={`block w-fit text-xs text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}
                   >
-                    {formatDate(task.dateRange.end)}
+                    {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end) || 'No deadline'}
                   </p>
 
                   {task.status === 'assigned' ? (

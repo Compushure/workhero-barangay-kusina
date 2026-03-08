@@ -206,7 +206,7 @@ export default function BadgeAssignmentPage() {
               size={20}
               className={activeTab === 'users' ? 'text-zinc-50' : 'text-accent-secondary'}
             />
-            <span className="hidden xs:inline">Users</span>
+            <span className="hidden md:inline">Employee View</span>
           </button>
           <button
             onClick={() => setActiveTab('quick-assign')}
@@ -220,7 +220,7 @@ export default function BadgeAssignmentPage() {
               size={20}
               className={activeTab === 'quick-assign' ? 'text-zinc-50' : 'text-accent-secondary'}
             />
-            <span className="hidden xs:inline">Quick</span>
+            <span className="hidden md:inline">Quick Assignment</span>
           </button>
         </div>
         </section>
@@ -243,14 +243,14 @@ export default function BadgeAssignmentPage() {
                 </div>
 
                 {/* Search and Sort Controls */}
-                <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
-                  <div className="relative flex">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center w-full sm:w-auto">
+                  <div className="relative w-full sm:w-64 md:w-auto">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
                     <input
                       placeholder="Search users..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-all duration-500 ease-in-out w-full sm:w-auto"
+                      className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-all duration-500 ease-in-out w-full sm:w-64 md:w-auto"
                     />
                   </div>
 
@@ -260,7 +260,7 @@ export default function BadgeAssignmentPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex justify-between items-center py-4 w-full sm:w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
+                        className="flex justify-between items-center py-4 w-full sm:w-64 md:w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
                       >
                         {USER_SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Sort'}
                         <ArrowUpDown className='text-accent'/>

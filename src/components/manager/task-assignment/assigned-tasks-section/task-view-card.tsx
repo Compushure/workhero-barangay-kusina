@@ -144,10 +144,10 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   return (
     <div
-      className={`flex flex-col lg:flex-row items-start lg:items-start justify-between rounded-2xl bg-card p-3 sm:p-4 md:p-6 gap-4 sm:gap-6 md:gap-8 transition-all ease-in-out duration-400
-        ${expanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`}
+      className={`relative flex flex-col lg:flex-row items-start lg:items-start justify-between rounded-2xl bg-card p-3 sm:p-4 md:p-6 gap-4 sm:gap-6 md:gap-8 transition-all ease-in-out duration-400
+        ${expanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`}
     >
-      <main className="flex flex-col w-full gap-4 sm:gap-5 md:gap-7 min-w-0 flex-1">
+      <main className="flex flex-col w-full gap-4 sm:gap-5 md:gap-7 min-w-0 flex-1 pr-8 sm:pr-10 lg:pr-0">
         <section className="flex flex-col lg:flex-row lg:justify-between gap-3 sm:gap-4 min-w-0">
           {/* Task name, description, and date range */}
           <header className="flex flex-col gap-1.5 min-w-0">
@@ -214,7 +214,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         />
       </main>
 
-      <div className="flex shrink-0 self-start lg:pt-1">
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:static flex shrink-0 self-start lg:pt-1">
         <TaskViewCardMenu
           openPopover={openPopover}
           setOpenPopover={setOpenPopover}

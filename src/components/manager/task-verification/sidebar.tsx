@@ -20,6 +20,7 @@ import { NavigationDisplay } from '@/components/manager/navigation-display';
 import { LogOutBtn } from '@/components/sidebar/logout-btn';
 import { ProfilePic } from '@/components/sidebar/profile-pic';
 import { ProfileModal } from '@/components/sidebar/profile-modal';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface NavItem {
   key: string;
@@ -179,20 +180,29 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
           </button>
         </div>
 
-        <nav
-          className={`flex-1 space-y-3 pb-6 ${
-            isCollapsed
-              ? 'overflow-hidden px-4'
-              : 'overflow-y-auto px-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
-          }`}
-        >
+        <TooltipProvider>
+          <nav
+            className={`flex-1 space-y-3 pb-6 ${
+              isCollapsed
+                ? 'overflow-hidden px-4'
+                : 'overflow-y-auto px-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
+            }`}
+          >
           {navItems.map((item) => {
             const isActive = isNavLinkActive(item.href);
             const isNavigatingItem = pendingHref === item.href;
             const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
             const Icon = item.icon;
 
-            return (
+            const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-full py-3 font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
+              isCollapsed ? 'justify-center px-4' : 'justify-start px-5'
+            } ${
+              isActive
+                ? 'bg-primary-gradient text-zinc-50'
+                : 'bg-zinc-50/75 text-[#131C2A] hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
+            } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`;
+
+            const navLink = (
               <Link
                 key={item.key}
                 href={item.href}
@@ -203,13 +213,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                   }
                 }}
                 aria-disabled={isDisabled}
-                className={`group flex w-full cursor-pointer items-center gap-3 rounded-full py-3 font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
-                  isCollapsed ? 'justify-center px-4' : 'justify-start px-5'
-                } ${
-                  isActive
-                    ? 'bg-primary-gradient text-zinc-50'
-                    : 'bg-zinc-50/75 text-[#131C2A] hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
-                } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`}
+                className={navLinkClassName}
               >
                 {isCollapsed ? (
                   isNavigatingItem ? (
@@ -240,8 +244,22 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                 )}
               </Link>
             );
+
+            if (!isCollapsed) {
+              return navLink;
+            }
+
+            return (
+              <Tooltip key={item.key}>
+                <TooltipTrigger asChild>{navLink}</TooltipTrigger>
+                <TooltipContent side="right" align="center" className="border border-accent/25 bg-card text-foreground shadow-sm/25">
+                  {item.label}
+                </TooltipContent>
+              </Tooltip>
+            );
           })}
-        </nav>
+          </nav>
+        </TooltipProvider>
 
         <div className={isCollapsed ? 'flex h-24 items-center justify-center' : 'px-3 py-4'}>
           <div

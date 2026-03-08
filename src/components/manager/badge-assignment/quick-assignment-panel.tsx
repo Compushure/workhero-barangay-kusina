@@ -241,7 +241,7 @@ export default function QuickAssignmentPanel({
 
             {/* User Selection */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
                 <h2 className="text-lg font-semibold text-foreground">
                   Assign To Users ({selectedUsers.size} selected)
                 </h2>
@@ -250,7 +250,7 @@ export default function QuickAssignmentPanel({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex justify-between items-center py-4 w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
+                      className="flex justify-between items-center py-4 w-full sm:w-64 md:w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
                     >
                       {USER_SORT_OPTIONS.find((option) => option.value === userSortOption)?.label || 'Sort'}
                       <ArrowUpDown className='text-accent'/>
@@ -269,13 +269,13 @@ export default function QuickAssignmentPanel({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <div className="relative">
+              <div className="relative w-full sm:w-64 md:w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                 <Input
                   placeholder="Search users..."
                   value={userSearchTerm}
                   onChange={(e) => setUserSearchTerm(e.target.value)}
-                  className="pl-10 bg-card border-accent/25 focus:border-accent h-9 text-sm shadow-sm/25"
+                  className="pl-10 bg-card border-accent/25 focus:border-accent h-9 text-sm shadow-sm/25 w-full sm:w-64 md:w-full"
                 />
               </div>
             </div>

@@ -303,11 +303,11 @@ export function BadgeEditorPage() {
             {/* Add New Badge Button */}
             <Button
               onClick={handleOpenAddDialog}
-              className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-3 sm:px-4 md:px-6 py-2 rounded-full shadow-sm/25 font-semibold text-sm shrink-0"
+              className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-3 sm:px-4 py-2 rounded-full shadow-sm/25 font-semibold text-sm w-full sm:w-48 justify-between"
             >
               <Coins size={18} />
-              <span className="hidden sm:inline">Add New Badge</span>
-              <Plus size={18} className="sm:ml-4" />
+              <span className="inline">Add New Badge</span>
+              <Plus size={18} />
             </Button>
           </div>
         </section>
