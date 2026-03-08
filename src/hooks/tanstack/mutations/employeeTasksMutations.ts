@@ -45,11 +45,7 @@ export function useSubmitTaskVerification(): UseMutationResult<
  * Moves the task back to 'assigned' status so it can be resubmitted
  * Automatically invalidates tasks cache on success to reflect the status change
  */
-export function useRedoTask(): UseMutationResult<
-  boolean | null,
-  Error,
-  string
-> {
+export function useRedoTask(): UseMutationResult<boolean | null, Error, string> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -74,13 +70,25 @@ export function useRedoTask(): UseMutationResult<
 export function useClaimTaskPointsandXP(): UseMutationResult<
   ClaimTaskResult | null,
   Error,
-  { kpitaskId: string; taskName: string; pendingOrders: number; completedOrders: number; maxOrders: number }
+  {
+    kpitaskId: string;
+    taskName: string;
+    pendingOrders: number;
+    completedOrders: number;
+    maxOrders: number;
+  }
 > {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ kpitaskId, taskName, pendingOrders, completedOrders, maxOrders }) => {
-      return await handleClaimTaskPointsAndXP(kpitaskId, taskName, pendingOrders, completedOrders, maxOrders);
+      return await handleClaimTaskPointsAndXP(
+        kpitaskId,
+        taskName,
+        pendingOrders,
+        completedOrders,
+        maxOrders
+      );
     },
     onMutate: async ({}) => {
       // Cancel any outgoing refetches so they don't overwrite our optimistic update
@@ -121,7 +129,7 @@ export function useClaimTaskPointsandXP(): UseMutationResult<
           const newTotalXP = old.totalXP + data.xpAdded;
           const newLevel = Math.floor(newTotalXP / 100);
           const newCurrentXP = newTotalXP % 100;
-          
+
           return {
             ...old,
             totalXP: newTotalXP,
@@ -130,6 +138,17 @@ export function useClaimTaskPointsandXP(): UseMutationResult<
           };
         });
       }
+
+      // Remove claimed task from approved list in the shared cache after success
+      queryClient.setQueryData(employeeTasksKeys.list(), (old: any) => {
+        if (!old || !old.verifiedTasks) return old;
+        return {
+          ...old,
+          verifiedTasks: old.verifiedTasks.filter(
+            (task: { id: string }) => task.id !== variables.kpitaskId
+          ),
+        };
+      });
     },
     onSettled: () => {
       // Always refetch after error or success to make sure the server state is reflected

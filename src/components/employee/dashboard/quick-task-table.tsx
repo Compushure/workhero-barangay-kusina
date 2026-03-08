@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
 import { useClaimTaskPointsandXP } from '@/hooks/tanstack/mutations/employeeTasksMutations';
@@ -22,6 +22,7 @@ const formatDate = (iso?: string | null) => {
 export default function TasksTable({ tasks: fallbackTasks = [] }: TasksTableProps) {
   const { data, isLoading, isError } = useGetEmployeeTasks();
   const claimMutation = useClaimTaskPointsandXP();
+  const [activeClaimId, setActiveClaimId] = useState<string | null>(null);
 
   const approvedTasks = useMemo(() => {
     const source = data?.verifiedTasks ?? fallbackTasks;
@@ -31,13 +32,19 @@ export default function TasksTable({ tasks: fallbackTasks = [] }: TasksTableProp
 
   const handleClaim = (task: TaskStatusItem) => {
     if (claimMutation.isPending) return;
-    claimMutation.mutate({
-      kpitaskId: task.id,
-      taskName: task.name,
-      pendingOrders: task.pendingOrders,
-      completedOrders: task.completedOrders,
-      maxOrders: task.maxOrders,
-    });
+    setActiveClaimId(task.id);
+    claimMutation.mutate(
+      {
+        kpitaskId: task.id,
+        taskName: task.name,
+        pendingOrders: task.pendingOrders,
+        completedOrders: task.completedOrders,
+        maxOrders: task.maxOrders,
+      },
+      {
+        onSettled: () => setActiveClaimId(null),
+      }
+    );
   };
 
   return (
@@ -89,9 +96,9 @@ export default function TasksTable({ tasks: fallbackTasks = [] }: TasksTableProp
                     disabled={claimMutation.isPending}
                     title="Claim to cook dish"
                     className="bg-[#D08C23] border-3 text-xs font-pixel border-[#47331F] shadow-[4px_4px_0px_#000] shadow-[#543A23] text-[#211A12] hover:opacity-90 cursor-pointer hover:translate-y-1 hover:shadow-[2px_2px_0px_#000]
-                     transition-all duration-150 hover:bg-[#D08C23]/50"
+                    transition-all duration-150 hover:bg-[#D08C23] disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0px_#000] disabled:hover:bg-[#D08C23]"
                   >
-                    {claimMutation.isPending ? 'Claiming…' : 'Claim'}
+                    {claimMutation.isPending && activeClaimId === task.id ? 'Claiming…' : 'Claim'}
                   </Button>
                 </div>
               </div>
