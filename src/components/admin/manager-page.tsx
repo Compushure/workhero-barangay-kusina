@@ -19,7 +19,7 @@ import type {
 } from '@/types';
 import { Button } from '@/components/ui/button';
 import { UserCard } from './user-card';
-import { SearchFilter } from './user-filter';
+import { SearchFilter, SearchFilterSkeleton } from './user-filter';
 // Lazy load modals for better performance
 const AddUserModal = lazy(() =>
   import('./modals/add-user-modal').then((mod) => ({ default: mod.AddUserModal }))
@@ -247,63 +247,80 @@ export function ManagerPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-zinc-100">
+    <div className="min-h-screen bg-zinc-100 overflow-x-hidden">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background border-b-3 border-[#f47812]/15 shadow-sm/25">
-        <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 lg:gap-5">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div>
-                <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-foreground">
-                  User Management
-                </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-gray-600">
-                  {users.length} total users on page {page}
-                </p>
+        <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2.5 sm:py-3 md:py-4 lg:py-5">
+          {isLoading ? (
+            <div className="animate-pulse flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
+              <div className="space-y-2">
+                <div className="h-6 sm:h-7 lg:h-8 bg-muted rounded w-40 sm:w-52" />
+                <div className="h-4 sm:h-5 bg-muted rounded w-32 sm:w-44" />
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-wrap">
+                <div className="h-9 sm:h-10 bg-muted rounded-xl w-24 sm:w-28 md:w-32" />
+                <div className="h-9 sm:h-10 bg-muted rounded-xl w-24 sm:w-28 md:w-32" />
               </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Button
-                variant="default"
-                onClick={() => setAddModalOpen(true)}
-                className="gap-0 sm:gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-4"
-                aria-label="Add User"
-              >
-                <UserPlus className="h-4 w-4" />
-                <span className="hidden sm:inline">Add User</span>
-              </Button>
-              <Button
-                variant="default"
-                onClick={handleLogout}
-                disabled={isPending}
-                className="gap-0 sm:gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-4"
-                aria-label="Logout"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Logout</span>
-              </Button>
+          ) : (
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div>
+                  <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-foreground">
+                    User Management
+                  </h1>
+                  <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-gray-600">
+                    {users.length} total users on page {page}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-wrap">
+                <Button
+                  variant="default"
+                  onClick={() => setAddModalOpen(true)}
+                  className="gap-0 md:gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-3 md:px-4 h-9 sm:h-10"
+                  aria-label="Add User"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span className="hidden md:inline">Add User</span>
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={handleLogout}
+                  disabled={isPending}
+                  className="gap-0 md:gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-3 md:px-4 h-9 sm:h-10"
+                  aria-label="Logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden md:inline">Logout</span>
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </header>
 
-      <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5 space-y-3 sm:space-y-4 lg:space-y-5">
-        <SearchFilter
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          employeeTypeFilter={employeeTypeFilter}
-          onEmployeeTypeChange={handleEmployeeTypeFilterChange}
-          employmentStatusFilter={employmentStatusFilter}
-          onEmploymentStatusChange={handleEmploymentStatusFilterChange}
-          sortBy={sortBy}
-          onSortChange={handleSortChange}
-          isDebouncing={isDebouncing}
-          isLoading={isLoading}
-        />
+      <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2.5 sm:py-3 md:py-4 lg:py-5 space-y-2.5 sm:space-y-3 md:space-y-4 lg:space-y-5 overflow-x-hidden">
+        {isLoading ? (
+          <SearchFilterSkeleton />
+        ) : (
+          <SearchFilter
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            employeeTypeFilter={employeeTypeFilter}
+            onEmployeeTypeChange={handleEmployeeTypeFilterChange}
+            employmentStatusFilter={employmentStatusFilter}
+            onEmploymentStatusChange={handleEmploymentStatusFilterChange}
+            sortBy={sortBy}
+            onSortChange={handleSortChange}
+            isDebouncing={isDebouncing}
+            isLoading={isLoading}
+          />
+        )}
       </div>
 
       {/* Content */}
-      <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pb-6 lg:pb-8 flex flex-col min-h-[calc(100vh-300px)]">
+      <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 pb-6 lg:pb-8 flex flex-col min-h-[calc(100vh-300px)] overflow-x-hidden">
         {isLoading ? (
           <div className="grid gap-3 sm:gap-4 lg:gap-5">
             {[...Array(3)].map((_, i) => (

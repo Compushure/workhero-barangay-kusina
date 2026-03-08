@@ -160,14 +160,14 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                 {user.employeeId ? (
                   <Badge
                     variant="outline"
-                    className="hidden sm:inline-flex text-xs lg:text-sm border-gray-300 text-gray-700 bg-white"
+                    className="hidden md:inline-flex text-xs lg:text-sm border-gray-300 text-gray-700 bg-white"
                   >
                     {user.employeeId}
                   </Badge>
                 ) : null}
               </div>
               <p className="text-xs sm:text-sm lg:text-base text-gray-600 truncate">{user.email}</p>
-              <div className="flex gap-1.5 sm:gap-2 lg:gap-3 mt-1.5 sm:mt-2 lg:mt-3 sm:hidden">
+              <div className="flex gap-1.5 sm:gap-2 lg:gap-3 mt-1.5 sm:mt-2 lg:mt-3 md:hidden">
                 <span
                   className={`inline-block px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium capitalize ${
                     EMPLOYEE_TYPE_STYLES[user.employeeType]
@@ -182,7 +182,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                 </span>
               </div>
             </div>
-            <div className="hidden sm:flex items-center gap-2 lg:gap-3 xl:gap-4 shrink-0">
+            <div className="hidden md:flex items-center gap-2 lg:gap-3 xl:gap-4 shrink-0">
               <span
                 className={`px-2.5 py-1 lg:px-3.5 lg:py-1.5 rounded-full text-xs lg:text-sm font-medium capitalize ${
                   EMPLOYEE_TYPE_STYLES[user.employeeType]
