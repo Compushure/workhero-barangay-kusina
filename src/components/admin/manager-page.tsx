@@ -305,15 +305,19 @@ export function ManagerPage() {
       {/* Content */}
       <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pb-6 lg:pb-8 flex flex-col min-h-[calc(100vh-300px)]">
         {isLoading ? (
-          <div className="grid gap-3 sm:gap-4">
+          <div className="grid gap-3 sm:gap-4 lg:gap-5">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="rounded-3xl bg-background p-4 sm:p-6 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 animate-pulse">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 space-y-3">
-                    <div className="h-4 bg-muted rounded w-32" />
-                    <div className="h-4 bg-muted rounded w-48" />
+              <div key={i} className="rounded-3xl bg-background p-3 sm:p-4 lg:p-6 xl:p-7 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 animate-pulse">
+                <div className="flex items-start justify-between gap-2 sm:gap-3 lg:gap-4">
+                  <div className="flex-1 min-w-0 space-y-2 sm:space-y-3 lg:space-y-4">
+                    <div className="h-3.5 sm:h-4 lg:h-5 bg-muted rounded w-1/2 sm:w-2/5" />
+                    <div className="h-3.5 sm:h-4 lg:h-5 bg-muted rounded w-4/5 sm:w-3/5" />
+                    <div className="flex gap-1.5 sm:gap-2 lg:gap-3 pt-1 sm:pt-2">
+                      <div className="h-5 sm:h-6 lg:h-7 bg-muted rounded-full w-16 sm:w-20 lg:w-24" />
+                      <div className="h-5 sm:h-6 lg:h-7 bg-muted rounded-full w-20 sm:w-24 lg:w-28" />
+                    </div>
                   </div>
-                  <div className="h-10 bg-muted rounded w-20" />
+                  <div className="h-7 sm:h-8 lg:h-10 bg-muted rounded-full w-7 sm:w-8 lg:w-10 shrink-0" />
                 </div>
               </div>
             ))}
