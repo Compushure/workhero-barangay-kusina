@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
@@ -9,7 +9,7 @@ import { DatePickerPopover } from './date-picker-popover';
 import type { AssignedEmployee, Task } from '@/types';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
-import { handleFetchTaskList } from '@/action-handlers/manager/assignments';
+import { handleFetchTaskList, handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import {
   useGetCurrentAssignedTasksPaginated,
   managerAssignmentKeys,
@@ -27,16 +27,18 @@ import {
 } from '@/components/ui/dialog';
 
 interface TaskAssignmentCardProps {
-  onInitialLoadChange?: (isLoading: boolean) => void;
+  // ✅ Removed onInitialLoadChange - component manages its own loading state
 }
 
-export function TaskAssignmentCard({ onInitialLoadChange }: TaskAssignmentCardProps) {
+export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
   const { assignTasks, assignedTasks } = useTaskAssignment();
   const queryClient = useQueryClient();
 
+  // ✅ Reduced from 1000 to 100 - card only needs to check task assignment status
+  // This significantly reduces network payload and processing time
   const assignedTasksQuery = useGetCurrentAssignedTasksPaginated(
     1,
-    1000,
+    100,
     'recently added',
     '',
     true
@@ -62,18 +64,17 @@ export function TaskAssignmentCard({ onInitialLoadChange }: TaskAssignmentCardPr
   useEffect(() => {
     async function loadData() {
       setIsInitialLoading(true);
-      onInitialLoadChange?.(true);
+      // ✅ Fetch both in parallel - both are already imported at top level
       const [tasks, employees] = await Promise.all([
         handleFetchTaskList(),
-        import('@/action-handlers/manager/assignments').then((m) => m.handleFetchEmployeeList()),
+        handleFetchEmployeeList(),
       ]);
       setAvailableTasks(tasks);
       setTotalEmployees(employees.length);
       setIsInitialLoading(false);
-      onInitialLoadChange?.(false);
     }
     loadData();
-  }, [onInitialLoadChange]);
+  }, []);
 
   // Calculate if selected task is fully assigned (all employees assigned)
   const isSelectedTaskFullyAssigned = useMemo(() => {
@@ -100,7 +101,7 @@ export function TaskAssignmentCard({ onInitialLoadChange }: TaskAssignmentCardPr
     }
   }, [isSelectedTaskFullyAssigned, selectedEmployees.length]);
 
-  const handleTasksChange = (tasks: string[], maxRepeats?: Record<string, number>) => {
+  const handleTasksChange = useCallback((tasks: string[], maxRepeats?: Record<string, number>) => {
     setselectedTask(tasks);
     if (maxRepeats) {
       setTaskMaxRepeats(maxRepeats);
@@ -108,9 +109,18 @@ export function TaskAssignmentCard({ onInitialLoadChange }: TaskAssignmentCardPr
     if (tasks.length > 0) {
       setShowTaskWarning(false);
     }
-  };
+  }, []);
 
-  const handleAssign = async () => {
+  const handleClear = useCallback(() => {
+    setSelectedEmployees([]);
+    setselectedTask([]);
+    setTaskMaxRepeats({});
+    setSelectedDeadline(null);
+    setShowClearConfirm(false);
+    setShowTaskWarning(false);
+  }, []);
+
+  const handleAssign = useCallback(async () => {
     if (selectedEmployees.length > 0 && selectedTask.length > 0 && selectedDeadline) {
       setIsAssigning(true);
 
@@ -126,32 +136,27 @@ export function TaskAssignmentCard({ onInitialLoadChange }: TaskAssignmentCardPr
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
 
-      handleClear();
-      setIsAssigning(false);
+      // Call clear logic directly instead of through closure
+      setSelectedEmployees([]);
+      setselectedTask([]);
+      setTaskMaxRepeats({});
+      setSelectedDeadline(null);
       setShowAssignConfirm(false);
+      setIsAssigning(false);
     }
-  };
+  }, [selectedEmployees, selectedTask, selectedDeadline, taskMaxRepeats, assignTasks, queryClient]);
 
-  const handleClear = () => {
-    setSelectedEmployees([]);
-    setselectedTask([]);
-    setTaskMaxRepeats({});
-    setSelectedDeadline(null);
-    setShowClearConfirm(false);
-    setShowTaskWarning(false);
-  };
-
-  const handleEmployeesDialogAttempt = () => {
+  const handleEmployeesDialogAttempt = useCallback(() => {
     if (selectedTask.length === 0) {
       setShowTaskWarning(true);
     }
-  };
+  }, [selectedTask.length]);
 
-  const getSelectedTaskName = () => {
+  const getSelectedTaskName = useCallback(() => {
     if (selectedTask.length === 0) return 'Select Task';
     const task = availableTasks.find((t) => t.id === selectedTask[0]);
     return task?.name || 'Select Task';
-  };
+  }, [selectedTask, availableTasks]);
 
   if (isInitialLoading) {
     return <TaskAssignmentCardSkeleton />;

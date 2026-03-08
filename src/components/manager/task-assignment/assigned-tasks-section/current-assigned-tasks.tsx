@@ -54,10 +54,10 @@ function CurrentAssignedTasksSkeleton() {
 }
 
 interface CurrentAssignedTasksProps {
-  onInitialLoadChange?: (isLoading: boolean) => void;
+  // ✅ Removed onInitialLoadChange - component manages its own loading state
 }
 
-export function CurrentAssignedTasks({ onInitialLoadChange }: CurrentAssignedTasksProps) {
+export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
   const { viewMode, setViewMode } = useTaskAssignment();
   const { assignedTasks, hydrateFromServer, isOptimistic } = useManagerAssignmentStore();
 
@@ -68,12 +68,13 @@ export function CurrentAssignedTasks({ onInitialLoadChange }: CurrentAssignedTas
 
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
+  // ✅ Only enable the query for the active view mode to prevent unnecessary fetches
   const taskQuery = useGetCurrentAssignedTasksPaginated(
     page,
     10,
     sortBy,
     debouncedSearchTerm,
-    true
+    viewMode === 'task' // Only fetch when task view is active
   );
 
   const employeeQuery = useGetCurrentAssignedEmployeesPaginated(
@@ -81,7 +82,7 @@ export function CurrentAssignedTasks({ onInitialLoadChange }: CurrentAssignedTas
     4,
     sortBy,
     debouncedSearchTerm,
-    true
+    viewMode === 'employee' // Only fetch when employee view is active
   );
 
   const isLoading = viewMode === 'task' ? taskQuery.isLoading : employeeQuery.isLoading;
@@ -137,44 +138,10 @@ export function CurrentAssignedTasks({ onInitialLoadChange }: CurrentAssignedTas
   const memoizedTasks = useMemo(() => tasks || [], [tasks]);
   const isInteractiveLoading = isLoading && memoizedTasks.length === 0;
 
-  useEffect(() => {
-    onInitialLoadChange?.(isInteractiveLoading);
-  }, [isInteractiveLoading, onInitialLoadChange]);
+  // ✅ Removed useEffect that notified parent - prevents unnecessary re-renders
 
   if (isInteractiveLoading) {
     return <CurrentAssignedTasksSkeleton />;
-  }
-
-  if (isInteractiveLoading) {
-    return (
-      <div className="rounded-3xl bg-background px-3 sm:px-4 md:px-6 2xl:px-8 pt-4 sm:pt-6 shadow-sm/50 flex flex-col w-full">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 sm:mb-5">
-          <Skeleton className="h-8 w-40 bg-muted" />
-          <div className="flex rounded-xl self-end sm:self-auto gap-1">
-            <Skeleton className="h-9 w-24 sm:w-32 bg-muted rounded-l-xl" />
-            <Skeleton className="h-9 w-24 sm:w-32 bg-muted rounded-r-xl" />
-          </div>
-        </div>
-
-        <section className="flex flex-col gap-3">
-          <Skeleton className="h-8 w-56 rounded-full bg-muted" />
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 items-stretch sm:items-center">
-            <Skeleton className="h-9 w-full rounded-full bg-muted" />
-            <div className="flex gap-2 sm:gap-3">
-              <Skeleton className="h-9 w-36 rounded-lg bg-muted" />
-              <Skeleton className="h-9 w-36 rounded-lg bg-muted" />
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-5 mt-5">
-          <div className="space-y-5 pb-8">
-            <SkeletonCard />
-            <SkeletonCard />
-          </div>
-        </section>
-      </div>
-    );
   }
 
   return (
