@@ -52,17 +52,17 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
         isLarge ? 'w-56 min-w-56 max-w-56 p-4 pt-7' : 'w-40 min-w-40 max-w-40 p-3 pt-6',
         entry.isCurrentUser &&
           entry.rank !== 1 &&
-          'ring-2 ring-yellow-400 ring-offset-1 ring-offset-transparent',
+          'ring-2 ring-[#47331F] ring-offset-1 ring-offset-transparent',
       ].join(' ')}
     >
       <RankBadge rank={entry.rank} />
 
       {/* Hanging pin */}
-      <div className="absolute -top-2 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full border border-[#F4B925] bg-[#47331F]" />
+      <div className="absolute -top-2 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full border border-[#47331F] bg-[#47331F]" />
 
       <div
         className={[
-          'flex w-full min-w-0 flex-col items-center gap-3 rounded border border-[#C4A882] bg-[#F5E8D6]',
+          'flex w-full min-w-0 flex-col items-center gap-3 rounded border border-[#47331F] bg-[#F5E8D6]',
           isLarge ? 'p-4' : 'p-3',
         ].join(' ')}
       >
