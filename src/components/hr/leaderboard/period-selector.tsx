@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { CheckCircle2 } from 'lucide-react';
-import { getISOWeek, getISOWeekYear } from 'date-fns';
+import { getISOWeek, getISOWeekYear, subWeeks } from 'date-fns';
 import {
   getISOWeeksInYear,
   buildPeriodLabel,
@@ -30,6 +30,21 @@ function getPreviousWeek(): { year: number; week: number } {
     return { year: nowYear - 1, week: getISOWeeksInYear(nowYear - 1) };
   }
   return { year: nowYear, week: nowWeek - 1 };
+}
+
+/** Returns the ISO year and week for the week that was two weeks ago from today. */
+function getTwoWeeksAgo(): { year: number; week: number } {
+  const now = new Date();
+  const twoWeeksAgoDate = subWeeks(now, 2);
+  return {
+    year: getISOWeekYear(twoWeeksAgoDate),
+    week: getISOWeek(twoWeeksAgoDate),
+  };
+}
+
+/** Previous week and two-weeks-ago for the weekly period dropdown. */
+function getWeeklyPeriodOptions(): { year: number; week: number }[] {
+  return [getPreviousWeek(), getTwoWeeksAgo()];
 }
 
 function getPreviousMonth(): { year: number; month: number } {
@@ -91,6 +106,11 @@ function buildUrlForCurrentPeriod(
   return `/hr/leaderboard?${params.toString()}`;
 }
 
+function buildUrlForWeekly(year: number, week: number): string {
+  const params = new URLSearchParams({ type: 'weekly', show: '1', year: String(year), week: String(week) });
+  return `/hr/leaderboard?${params.toString()}`;
+}
+
 export function PeriodSelector({
   currentType,
   currentYear,
@@ -103,14 +123,29 @@ export function PeriodSelector({
   const [isPending, startTransition] = useTransition();
 
   const periodLabel =
-    currentType === 'weekly'
-      ? `${buildPeriodLabel(currentType, currentYear, undefined, currentWeek)} (${getISOWeekDateRangeLabelShort(currentYear, currentWeek)})`
-      : currentType === 'monthly'
-        ? buildPeriodLabel(currentType, currentYear, currentMonth)
-        : buildPeriodLabel(currentType, currentYear);
+    currentType === 'monthly'
+      ? buildPeriodLabel(currentType, currentYear, currentMonth)
+      : currentType === 'yearly'
+        ? buildPeriodLabel(currentType, currentYear)
+        : `${buildPeriodLabel(currentType, currentYear, undefined, currentWeek)} (${getISOWeekDateRangeLabelShort(currentYear, currentWeek)})`;
 
   const periodFieldLabel =
     currentType === 'weekly' ? 'Week' : currentType === 'monthly' ? 'Month' : 'Year';
+
+  const weeklyOptions = getWeeklyPeriodOptions();
+  const currentWeeklyKey = `${currentYear}-${currentWeek}`;
+  const weeklyOptionKeys = new Set(weeklyOptions.map((o) => `${o.year}-${o.week}`));
+  const weeklySelectOptions =
+    weeklyOptionKeys.has(currentWeeklyKey)
+      ? weeklyOptions
+      : [...weeklyOptions, { year: currentYear, week: currentWeek }];
+
+  const handleWeeklyPeriodChange = (value: string) => {
+    const [y, w] = value.split('-').map(Number);
+    startTransition(() => {
+      router.push(buildUrlForWeekly(y, w));
+    });
+  };
 
   const handlePeriodTypeChange = (value: string) => {
     const newType = value as RankLogPeriodType;
@@ -155,14 +190,36 @@ export function PeriodSelector({
         </Select>
       </div>
 
-      {/* Period value (read-only): ISO week for weekly, month name for monthly, year for yearly */}
+      {/* Period value: dropdown for weekly (two previous weeks), read-only for monthly/yearly */}
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-medium text-muted-foreground uppercase">
           {periodFieldLabel}
         </label>
-        <div className="flex min-h-9 min-w-40 items-center gap-2 rounded-md border border-gray-300 bg-muted/50 px-3 py-2 text-sm font-medium text-foreground">
-          <span>{periodLabel}</span>
-        </div>
+        {currentType === 'weekly' ? (
+          <Select
+            value={currentWeeklyKey}
+            onValueChange={handleWeeklyPeriodChange}
+          >
+            <SelectTrigger className="min-w-56 bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {weeklySelectOptions.map(({ year: y, week: w }) => {
+                const key = `${y}-${w}`;
+                const label = `${buildPeriodLabel('weekly', y, undefined, w)} (${getISOWeekDateRangeLabelShort(y, w)})`;
+                return (
+                  <SelectItem key={key} value={key}>
+                    {label}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        ) : (
+          <div className="flex min-h-9 min-w-40 items-center gap-2 rounded-md border border-gray-300 bg-muted/50 px-3 py-2 text-sm font-medium text-foreground">
+            <span>{periodLabel}</span>
+          </div>
+        )}
       </div>
 
       {/* Show Rankings or "Already generated" indicator */}

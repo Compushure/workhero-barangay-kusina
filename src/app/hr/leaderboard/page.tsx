@@ -20,7 +20,14 @@ function getPreviousWeek(): { year: number; week: number } {
 }
 
 interface LeaderboardPageProps {
-  searchParams: Promise<{ type?: string; year?: string; week?: string; month?: string; show?: string; view?: string }>;
+  searchParams: Promise<{
+    type?: string;
+    year?: string;
+    week?: string;
+    month?: string;
+    show?: string;
+    view?: string;
+  }>;
 }
 
 export default async function LeaderboardPage({ searchParams }: LeaderboardPageProps) {
@@ -39,8 +46,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
   // When no period is selected (show≠1), default to the latest generated weekly ranking for show=1 hint only
   const hasExplicitShow = params.show === '1';
   const latestResult = !hasExplicitShow ? await getLatestWeeklyPeriod() : null;
-  const latestWeekly =
-    latestResult?.success && latestResult.data ? latestResult.data : null;
+  const latestWeekly = latestResult?.success && latestResult.data ? latestResult.data : null;
 
   // Weekly: always use previous week when no URL params (WEEK shows previous week only)
   const year =
@@ -48,13 +54,13 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
       ? Math.max(2025, Number(params.year))
       : periodType === 'weekly'
         ? previousWeek.year
-        : latestWeekly?.year ?? defaultYear;
+        : (latestWeekly?.year ?? defaultYear);
   const week =
     params.week != null && params.week !== ''
       ? Number(params.week)
       : periodType === 'weekly'
         ? previousWeek.week
-        : latestWeekly?.week ?? Math.max(1, getISOWeek(now) - 1);
+        : (latestWeekly?.week ?? Math.max(1, getISOWeek(now) - 1));
   const month = params.month ? Number(params.month) : defaultMonth;
 
   // Whether the period we're actually displaying has a ranking (for selector badge + auto-show)
@@ -79,9 +85,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
         <div className="mb-2 sm:mb-3">
           <div className="flex items-center justify-between gap-3 sm:gap-4 mb-4">
             <div className="flex flex-col gap-1">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                Leaderboards
-              </h1>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">Leaderboards</h1>
               <p className="text-sm text-muted-foreground">
                 View rankings by week, month, and year.
               </p>
