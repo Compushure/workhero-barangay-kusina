@@ -153,7 +153,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
                   onEdit();
                   onOpenChange(false);
                 }}
-                className="h-10 sm:h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm sm:text-base order-1 sm:order-2"
+                className="h-10 sm:h-11 rounded-xl bg-primary-gradient hover:opacity-95 text-zinc-50 font-semibold text-sm sm:text-base order-1 sm:order-2"
               >
                 Edit
               </Button>

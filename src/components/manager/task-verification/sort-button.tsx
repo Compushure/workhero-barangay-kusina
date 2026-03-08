@@ -51,13 +51,15 @@ export function SortButton({
         <Button
           variant="default"
           size="default"
-          className="w-48 bg-card text-foreground shadow-sm/25 hover:bg-card hover:text-foreground hover:brightness-90 transition-all duration-400 ease-in-out cursor-pointer justify-between"
-          // className={`${triggerClassName} cursor-pointer shadow-sm/50 flex justify-between transition-all duration-500 ease-in-out`}
+          className={`${triggerClassName} cursor-pointer shadow-sm/50 flex justify-between transition-all duration-500 ease-in-out`}
         >
           {/* Label on the left */}
           <span className="truncate">{currentLabel}</span>
           {/* Arrow on the right */}
-          <ArrowUpDown size={18} className='text-accent'/>
+          <ArrowUpDown
+            size={18}
+            className={isMercadoStyle ? 'text-[#131C2A] group-hover:text-white' : undefined}
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-background">
