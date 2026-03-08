@@ -212,13 +212,13 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   };
 
   return (
-    <div className="space-y-2 w-full px-2 sm:px-3 pb-6 md:max-w-3xl lg:max-w-4xl md:mx-auto">
+    <div className="space-y-3 w-full px-0 pb-4 md:max-w-3xl lg:max-w-4xl 2xl:max-w-5xl md:mx-auto">
       {/* Header */}
       <ProfileHeader isPending={isPending} onBack={handleBackClick} />
 
       {/* Profile Card */}
       <ProfileCard profile={profile}>
-        <div className="flex flex-col items-center text-center gap-2.5 w-full bg-[linear-gradient(to_bottom,rgba(244,120,18,0.58)_0%,rgba(250,169,56,0.36)_38%,rgba(250,169,56,0)_100%)] rounded-xl px-4 py-5 sm:px-5 sm:py-6 shadow-inner">
+        <div className="flex flex-col items-center text-center gap-2 sm:gap-2.5 w-full bg-[linear-gradient(to_bottom,rgba(244,120,18,0.58)_0%,rgba(250,169,56,0.36)_38%,rgba(250,169,56,0)_100%)] rounded-xl px-2.5 py-3 sm:px-3 sm:py-4 md:px-5 md:py-6 shadow-inner">
           <ProfilePicture
             profilePictureUrl={profile?.profilePictureUrl}
             userName={profile?.name || 'User'}
@@ -230,51 +230,58 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
             onDelete={handleDeletePicture}
             onOpenCropDialog={() => setShowCropDialog(true)}
           />
-          <div className="space-y-1">
-            <p className="text-xl font-semibold text-title">{profile.name}</p>
+          <div className="space-y-1 w-full min-w-0">
+            <p className="text-base sm:text-lg md:text-xl font-semibold text-title wrap-break-word">{profile.name}</p>
             {profile.employeeId && (
-              <p className="text-sm text-muted-foreground">{profile.employeeId}</p>
+              <p className="text-xs text-muted-foreground break-all">{profile.employeeId}</p>
             )}
           </div>
           <RecentBadges userId={userId} showLabel={true} maxBadges={3} />
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mt-5">
-          <TabsList
-            variant="line"
-            className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-transparent p-0 gap-2 h-auto"
+          <div
+            className="w-full overflow-x-auto overflow-y-visible -mx-3 px-3 sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            <TabsTrigger value="basic" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
-              Basic Information
-            </TabsTrigger>
-            <TabsTrigger value="contact" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
-              Contact Information
-            </TabsTrigger>
-            <TabsTrigger value="employment" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
-              Employment Details
-            </TabsTrigger>
-            <TabsTrigger value="ids" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
-              Government IDs
-            </TabsTrigger>
-            {canAccessStats && (
-              <TabsTrigger value="stats" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
-                Gamified Stats
+            <TabsList
+              variant="line"
+              className="w-max min-w-max flex! flex-row bg-transparent p-0 gap-2 h-auto"
+            >
+              <TabsTrigger value="basic" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+                Basic Information
               </TabsTrigger>
-            )}
-            <TabsTrigger value="badges" className="w-full h-auto! px-3 py-2 whitespace-normal text-center leading-tight data-[state=active]:bg-background-soft">
-              All Badges
-            </TabsTrigger>
-          </TabsList>
+              <TabsTrigger value="contact" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+                Contact Information
+              </TabsTrigger>
+              <TabsTrigger value="employment" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+                Employment Details
+              </TabsTrigger>
+              <TabsTrigger value="ids" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+                Government IDs
+              </TabsTrigger>
+              {canAccessStats && (
+                <TabsTrigger value="stats" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+                  Gamified Stats
+                </TabsTrigger>
+              )}
+              <TabsTrigger value="badges" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+                All Badges
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </Tabs>
 
-        <div className="mt-4 space-y-4 pb-2 min-h-64 sm:min-h-72">
+        <div
+          className="mt-4 space-y-4 pb-4 w-full max-w-full h-[50svh] sm:h-[52svh] md:h-auto min-h-64 sm:min-h-72 overflow-y-auto md:overflow-y-visible overscroll-y-contain min-w-0 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+        >
           {activeTab === 'basic' && <BasicInformation profile={profile} />}
           {activeTab === 'contact' && <ContactInformation profile={profile} />}
           {activeTab === 'employment' && <EmploymentDetails profile={profile} />}
           {activeTab === 'ids' && <GovernmentIDs profile={profile} />}
           {activeTab === 'stats' && canAccessStats && <GamifiedStats profile={profile} />}
           {activeTab === 'badges' && (
-            <div className="space-y-2">
+            <div className="space-y-2 w-full max-w-full overflow-hidden">
               <BadgesCarousel userId={userId} />
             </div>
           )}
@@ -283,7 +290,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
 
       {/* Image Crop Upload Modal Dialog */}
       <Dialog open={showCropDialog} onOpenChange={setShowCropDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-[min(92vw,720px)] max-h-[88vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Crop Profile Picture</DialogTitle>
             <DialogDescription>
