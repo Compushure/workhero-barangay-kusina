@@ -132,8 +132,8 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
   return (
     <>
       <aside
-        className={`hidden overflow-hidden bg-muted text-[#131C2A] transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between ${
-          isCollapsed ? 'w-20' : 'w-60 lg:w-64'
+        className={`hidden overflow-hidden bg-background text-[#131C2A] transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between z-100 shadow-sm/25 ${
+          isCollapsed ? 'w-18' : 'w-52 lg:w-56'
         }`}
       >
         <div className="mt-6 px-3 py-7">
@@ -184,7 +184,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
           <nav
             className={`flex-1 space-y-3 pb-6 ${
               isCollapsed
-                ? 'overflow-hidden px-4'
+                ? 'overflow-hidden px-3.5'
                 : 'overflow-y-auto px-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
             }`}
           >
@@ -194,12 +194,12 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
             const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
             const Icon = item.icon;
 
-            const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-full py-3 font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
-              isCollapsed ? 'justify-center px-4' : 'justify-start px-5'
+            const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-full px-4 py-3 text-sm font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
+              isCollapsed ? 'justify-center' : 'justify-start'
             } ${
               isActive
                 ? 'bg-primary-gradient text-zinc-50'
-                : 'bg-zinc-50/75 text-[#131C2A] hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
+                : 'bg-card text-[#131C2A] hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
             } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`;
 
             const navLink = (
@@ -215,33 +215,20 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                 aria-disabled={isDisabled}
                 className={navLinkClassName}
               >
-                {isCollapsed ? (
-                  isNavigatingItem ? (
+                {isNavigatingItem ? (
                     <NavigationDisplay
                       isNavigating={isNavigatingItem}
                       className="inline-flex items-center justify-center"
-                      iconClassName="size-5 animate-spin text-primary"
+                      iconClassName="size-5 animate-spin text-accent"
                     />
                   ) : (
                     <Icon
                       strokeWidth={1.75}
-                      className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-[#f47812]'}`}
+                      size={20}
+                      className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-accent'}`}
                     />
-                  )
-                ) : (
-                  <>
-                    <Icon
-                      strokeWidth={1.75}
-                      className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-[#f47812]'}`}
-                    />
-                    <span className="block whitespace-nowrap">{item.label}</span>
-                    <NavigationDisplay
-                      isNavigating={isNavigatingItem}
-                      className="ml-auto inline-flex items-center justify-center"
-                      iconClassName="size-4 animate-spin text-primary"
-                    />
-                  </>
-                )}
+                  )}
+                {!isCollapsed && <span className="block whitespace-nowrap">{item.label}</span>}
               </Link>
             );
 
@@ -274,7 +261,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
         </div>
       </aside>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#f47812]/20 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 md:hidden">
+      {/* <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#f47812]/20 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 md:hidden">
         <div className="px-2 py-2">
           <div className="grid grid-cols-6 gap-1">
             {navItems.map((item) => {
@@ -294,7 +281,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                     }
                   }}
                   aria-disabled={isDisabled}
-                  className={`flex flex-col items-center justify-center rounded-xl px-1 py-1.5 transition-all duration-300 ${
+                  className={`flex flex-col items-center justify-center rounded-xl py-1.5 transition-all duration-300 ${
                     isActive ? 'bg-accent/20 text-[#f47812]' : 'text-[#131C2A]'
                   } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`}
                 >
@@ -324,7 +311,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
             </button>
           </div>
         </div>
-      </nav>
+      </nav> */}
 
       {/* Profile Modal */}
       <ProfileModal 
