@@ -93,7 +93,7 @@ export const MercadoCard = memo(function MercadoCard({
         }
       }}
     >
-      <div className="h-20 w-20 bg-background border border-accent/20 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+      <div className="h-23 w-23 bg-background border border-accent/20 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
         {item.imageUrl && !imageError ? (
           <img
             src={item.imageUrl}
