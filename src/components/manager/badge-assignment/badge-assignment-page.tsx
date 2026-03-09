@@ -209,17 +209,17 @@ export default function BadgeAssignmentPage() {
             <PageHeader title="Badge Assignment" subtitle="Manually award badges to employees." />
 
             {/* Tabs */}
-            <div className="flex bg-card/75 rounded-2xl shadow-sm/25 w-full sm:w-fit h-fit border border-accent/25 overflow-hidden">
+            <div className="flex bg-card/75 rounded-2xl shadow-sm/25 w-full sm:w-fit h-fit border border-accent/25 overflow-hidden text-sm">
               <button
                 onClick={() => setActiveTab('users')}
-                className={`flex flex-1 sm:w-40 justify-center items-center gap-1.5 py-2.5 sm:py-3 cursor-pointer rounded-l-xl text-sm font-medium transition-all duration-500 ease-in-out ${
+                className={`flex flex-1 sm:w-36 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-l-xl text-sm font-medium transition-all duration-500 ease-in-out ${
                   activeTab === 'users'
                     ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
                     : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25'
                 }`}
               >
                 <Users
-                  size={20}
+                  size={16}
                   className={activeTab === 'users' ? 'text-zinc-50' : 'text-accent-secondary'}
                 />
                 <span className="hidden md:inline">Employee View</span>
@@ -233,7 +233,7 @@ export default function BadgeAssignmentPage() {
                 }`}
               >
                 <Award
-                  size={20}
+                  size={16}
                   className={
                     activeTab === 'quick-assign' ? 'text-zinc-50' : 'text-accent-secondary'
                   }
@@ -271,13 +271,13 @@ export default function BadgeAssignmentPage() {
 
                     {/* Search and Sort Controls */}
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center w-full sm:w-auto">
-                      <div className="relative w-full sm:w-64 md:w-auto">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+                      <div className="relative flex">
+                        <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
                         <input
                           placeholder="Search by employee name or email"
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
-                          className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-all duration-500 ease-in-out w-full sm:w-64 md:w-auto"
+                          className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors sm:w-50 md:w-75"
                         />
                       </div>
 
@@ -285,13 +285,13 @@ export default function BadgeAssignmentPage() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex justify-between items-center py-4 w-full sm:w-64 md:w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
+                            variant="default"
+                            size="default"
+                            className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-40 py-1.5 justify-between border border-gray-200 h-8 text-xs"
                           >
-                            {USER_SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label ||
-                              'Sort'}
-                            <ArrowUpDown className="text-accent" />
+                            <span className="truncate">{USER_SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label ||
+                              'Sort'}</span>
+                            <ArrowUpDown size={14} className="text-accent" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-background">
@@ -299,7 +299,9 @@ export default function BadgeAssignmentPage() {
                             <DropdownMenuItem
                               key={option.value}
                               onClick={() => setSortOption(option.value)}
-                              className={sortOption === option.value ? 'bg-accent/15' : ''}
+                              className={`cursor-pointer transition-all duration-300 ease-in-out text-xs ${
+                                sortOption === option.value ? 'bg-accent/15' : ''
+                              }`}
                             >
                               {option.label}
                             </DropdownMenuItem>

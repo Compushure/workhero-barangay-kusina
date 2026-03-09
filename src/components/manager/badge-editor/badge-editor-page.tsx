@@ -243,7 +243,7 @@ export function BadgeEditorPage() {
 
   return (
     <main className="w-full min-h-screen bg-zinc-100 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
-      <div className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl space-y-5 sm:space-y-6 lg:space-y-8">
+      <div className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl space-y-5 sm:space-y-4 lg:space-y-6">
         {isLoading ? (
           <BadgeEditorHeaderSkeleton />
         ) : (
@@ -269,13 +269,13 @@ export function BadgeEditorPage() {
               <div className="flex flex-wrap gap-2 sm:gap-3 items-center justify-start lg:justify-end">
                 {/* Search Input */}
                 <div className="relative flex">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+                  <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Search by badge name or description"
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
+                    className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors sm:w-50 md:w-75"
                   />
                 </div>
 
@@ -287,10 +287,10 @@ export function BadgeEditorPage() {
                     <Button
                       variant="default"
                       size="default"
-                      className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-full sm:w-48 py-2 justify-between border border-gray-200"
+                      className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-40 py-1.5 justify-between border border-gray-200 h-8 text-xs"
                     >
                       <span className="truncate">{currentSortLabel}</span>
-                      <ArrowUpDown size={18} className="text-accent" />
+                      <ArrowUpDown size={14} className="text-accent" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-background w-56">
@@ -298,7 +298,7 @@ export function BadgeEditorPage() {
                       <DropdownMenuItem
                         key={option.value}
                         onClick={() => handleSortChange(option.value)}
-                        className={`cursor-pointer transition-all duration-300 ease-in-out ${
+                        className={`cursor-pointer transition-all duration-300 ease-in-out text-xs ${
                           sortOption === option.value ? 'bg-accent/15' : ''
                         }`}
                       >
@@ -311,11 +311,12 @@ export function BadgeEditorPage() {
                 {/* Add New Badge Button */}
                 <Button
                   onClick={handleOpenAddDialog}
-                  className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-3 sm:px-4 py-2 rounded-full shadow-sm/25 font-semibold text-sm w-full sm:w-48 justify-between"
+                  className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out w-full sm:w-auto px-3 sm:px-4 py-1.5 rounded-full shadow-sm/25 font-semibold text-xs whitespace-nowrap justify-center h-8"
                 >
-                  <Coins size={18} />
-                  <span className="inline">Add New Badge</span>
-                  <Plus size={18} />
+                  <Coins size={14} />
+                  <span className="hidden sm:inline">Add New Badge</span>
+                  <span className="sm:hidden">Add New Badge</span>
+                  <Plus size={14} className="ml-1 sm:ml-3" />
                 </Button>
               </div>
             </section>

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Search, ArrowUpDown } from 'lucide-react';
 import { PageHeader } from '@/components/manager/task-verification/page-header';
 import { SearchBar } from '@/components/manager/task-verification/search-bar';
 import { SortButton } from '@/components/manager/task-verification/sort-button';
@@ -11,6 +12,13 @@ import type { VerificationRequest, SortOption } from '@/types';
 import { ConfirmationDialog } from '@/components/manager/task-verification/confirmation-modal';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   useGetTasksToReviewPaginated,
   useGetApprovedTasksPaginated,
@@ -257,30 +265,68 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           </div>
         ) : (
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-3 sm:mt-4 sm:justify-end">
-            <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
-              <SearchBar
-                searchTerm={searchTerm}
-                onSearchChange={(value) => setSearchTerm(sanitizeSearchInput(value))}
-                placeholder="Search by employee name or employee ID"
-              />
+            <div className="flex-1 min-w-80 md:max-w-2xl lg:max-w-3xl sm:flex-initial">
+              <div className="relative flex">
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by employee name or employee ID"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
+                  className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors sm:w-50 md:w-75"
+                />
+              </div>
             </div>
             <div className="flex gap-2 shrink-0">
-              <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="mercado" />
-              <SortButton
-                sortBy={dateSortBy as any}
-                onSortChange={(value) =>
-                  setDateSortBy(
-                    value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
-                  )
-                }
-                options={[
-                  { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
-                  { value: 'date-asc' as any, label: 'Date (Oldest)' },
-                  { value: 'employee-asc' as any, label: 'Employee Name (A-Z)' },
-                  { value: 'employee-desc' as any, label: 'Employee Name (Z-A)' },
-                ]}
-                styleVariant="mercado"
-              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="default"
+                    size="default"
+                    className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-40 py-1.5 justify-between border border-gray-200 h-8 text-xs"
+                  >
+                    <span className="truncate">Default</span>
+                    <ArrowUpDown size={14} className="text-accent" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background w-48">
+                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
+                    Default
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
+                    Employee Name (A-Z)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
+                    Employee Name (Z-A)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="default"
+                    size="default"
+                    className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-40 py-1.5 justify-between border border-gray-200 h-8 text-xs"
+                  >
+                    <span className="truncate">Date (Newest)</span>
+                    <ArrowUpDown size={14} className="text-accent" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background w-48">
+                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
+                    Date (Newest) - Default
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
+                    Date (Oldest)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
+                    Employee Name (A-Z)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
+                    Employee Name (Z-A)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         )}

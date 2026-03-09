@@ -120,13 +120,14 @@ export default function QuickAssignmentPanel({
       <div className="lg:col-span-1 space-y-4">
         <div className="space-y-2">
           <h2 className="text-lg font-semibold text-foreground">Select Badge</h2>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-            <Input
+          <div className="relative flex">
+            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+            <input
+              type="text"
               placeholder="Search by badge name or description"
               value={badgeSearchTerm}
               onChange={(e) => setBadgeSearchTerm(sanitizeSearchInput(e.target.value))}
-              className="pl-10 bg-card border-accent/25 focus:border-accent h-9 text-sm shadow-sm/25"
+              className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
             />
           </div>
         </div>
@@ -255,20 +256,22 @@ export default function QuickAssignmentPanel({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex justify-between items-center py-4 w-full sm:w-64 md:w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
+                      variant="default"
+                      size="default"
+                      className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-40 py-1.5 justify-between border border-gray-200 h-8 text-xs"
                     >
-                      {USER_SORT_OPTIONS.find((option) => option.value === userSortOption)?.label || 'Sort'}
-                      <ArrowUpDown className='text-accent'/>
+                      <span className="truncate">{USER_SORT_OPTIONS.find((option) => option.value === userSortOption)?.label || 'Sort'}</span>
+                      <ArrowUpDown size={14} className="text-accent"/>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background">
+                  <DropdownMenuContent align="end" className="bg-background w-48">
                     {USER_SORT_OPTIONS.map((option) => (
                       <DropdownMenuItem
                         key={option.value}
                         onClick={() => setUserSortOption(option.value)}
-                        className={userSortOption === option.value ? 'bg-accent/15' : ''}
+                        className={`cursor-pointer transition-all duration-300 ease-in-out text-xs ${
+                          userSortOption === option.value ? 'bg-accent/15' : ''
+                        }`}
                       >
                         {option.label}
                       </DropdownMenuItem>
@@ -276,13 +279,14 @@ export default function QuickAssignmentPanel({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <div className="relative w-full sm:w-64 md:w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-                <Input
+              <div className="relative flex">
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+                <input
+                  type="text"
                   placeholder="Search by employee name, email, or ID"
                   value={userSearchTerm}
                   onChange={(e) => setUserSearchTerm(sanitizeSearchInput(e.target.value))}
-                  className="pl-10 bg-card border-accent/25 focus:border-accent h-9 text-sm shadow-sm/25 w-full sm:w-64 md:w-full"
+                  className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
                 />
               </div>
             </div>

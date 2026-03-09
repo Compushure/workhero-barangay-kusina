@@ -178,28 +178,30 @@ export default function TaskEditorPage() {
               subtitle="Add, Edit, Delete assignable tasks in this page."
             />
 
-            {/* Task Categories Count Display */}
-            <section className="flex gap-2 sm:gap-3 text-sm sm:text-base font-bold text-foreground pl-1">
-              <h5 className="flex items-center gap-1.5">
-                <ListTodo size={16} className="text-accent" />
-                Categories{' '}
-                <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-full text-xs ml-1 shadow-sm/25">
-                  {totalCount ?? 0}
-                </span>
-              </h5>
-            </section>
-
             {/* Search, Sort, and Add Button - Always visible, stacked on mobile */}
-            <section className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-start sm:justify-end">
+            <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+              {/* Category Count Display */}
+              <div className="flex gap-2 sm:gap-3 text-sm sm:text-base font-bold text-foreground pl-0.5 sm:pl-1">
+                <h5 className="flex items-center gap-1.5">
+                  <ListTodo size={16} className="text-accent" />
+                  Categories{' '}
+                  <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-full text-xs ml-1 shadow-sm/25">
+                    {totalCount ?? 0}
+                  </span>
+                </h5>
+              </div>
+
+              {/* Search, Sort, and Add Button */}
+              <div className="flex flex-wrap gap-2 sm:gap-3 items-center justify-start lg:justify-end">
               {/* Search Input */}
-              <div className="relative flex w-full sm:w-auto sm:min-w-44">
+              <div className="relative flex w-full sm:w-auto sm:min-w-75">
                 <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search by task name, type, or description"
                   value={searchTerm}
                   onChange={handleSearchChange}
-                  className="w-full pl-9 pr-3 py-1.5 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
+                  className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
                 />
               </div>
 
@@ -247,6 +249,7 @@ export default function TaskEditorPage() {
                   <span className="sm:hidden">Add New Category</span>
                   <Plus size={14} className="ml-1 sm:ml-3" />
                 </Button>
+              </div>
               </div>
             </section>
           </>

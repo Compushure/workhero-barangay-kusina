@@ -28,7 +28,7 @@ export function SearchBar({
         placeholder={placeholder}
         value={searchTerm}
         onChange={(e) => onSearchChange(sanitizeSearchInput(e.target.value))}
-        className="w-full h-8 sm:h-9 pl-8 sm:pl-9 pr-2 sm:pr-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-full shadow-sm/25 transition-all duration-500 ease-in-out bg-card"
+        className="w-full h-8 sm:h-9 pl-8 sm:pl-9 pr-2 sm:pr-3 py-1 sm:py-1.5 text-[10px] sm:text-xs rounded-full shadow-sm/25 transition-all duration-500 ease-in-out bg-card"
       />
     </div>
   );

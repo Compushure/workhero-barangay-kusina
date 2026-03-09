@@ -32,9 +32,9 @@ export function TaskRepeatabilityFilterToggle({
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-lg border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
+            className="gap-2 h-8 px-4 rounded-lg border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
           >
-            <Filter className="h-4 w-4 text-accent" />
+            <Filter className="size-3 text-accent" />
             <span className="hidden sm:inline">Filter</span>
             {activeFilterCount > 0 && (
               <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">

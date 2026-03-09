@@ -95,7 +95,7 @@ export default function TaskCategoryTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted hover:bg-muted">
-              <TableHead className="min-w-40 max-w-40 w-40 sm:min-w-56 sm:max-w-56 sm:w-56 md:min-w-80 md:max-w-80 md:w-80 pl-2 sm:pl-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-bold text-primary/75">
+              <TableHead className="min-w-40 max-w-40 w-40 sm:min-w-56 sm:max-w-56 sm:w-56 md:min-w-80 md:max-w-80 md:w-80 pl-3 sm:pl-5 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-bold text-primary/75">
                 TASK
               </TableHead>
               <TableHead className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-center text-[10px] sm:text-xs font-bold text-primary/75 hidden md:table-cell">
@@ -119,15 +119,15 @@ export default function TaskCategoryTable({
                   key={task.id}
                   className="bg-background-soft hover:bg-row-hover transition-colors"
                 >
-                  <TableCell className="min-w-40 max-w-40 w-40 sm:min-w-56 sm:max-w-56 sm:w-56 md:min-w-80 md:max-w-80 md:w-80 pl-2 sm:pl-4 py-2 sm:py-3 align-middle">
-                    <div className="truncate">
+                  <TableCell className="min-w-40 max-w-40 w-40 sm:min-w-56 sm:max-w-56 sm:w-56 md:min-w-80 md:max-w-80 md:w-80 pl-3 sm:pl-5 py-2 sm:py-3 align-middle">
+                    <div className="truncate space-y-0.5">
                       <div className="font-semibold text-xs sm:text-sm text-foreground truncate">
                         {task.name}
                       </div>
                       <div className="text-[10px] sm:text-xs text-secondary truncate">
                         {task.description}
                       </div>
-                      <div className="text-[10px] sm:text-xs text-primary font-medium px-1 sm:px-1.5 rounded-full bg-accent/15 w-fit mt-1 truncate">
+                      <div className="text-[10px] sm:text-xs text-primary font-medium px-1 sm:px-1.5 rounded-full bg-accent/15 w-fit mt-2.5 truncate">
                         {task.type}
                       </div>
                     </div>

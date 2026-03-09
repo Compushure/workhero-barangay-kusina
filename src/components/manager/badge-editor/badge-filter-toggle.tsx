@@ -33,7 +33,7 @@ export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterTog
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-lg border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
+            className="gap-2 h-8 px-4 rounded-lg border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
           >
             <Filter className="h-4 w-4 text-accent" />
             <span className="hidden sm:inline">Filters</span>
