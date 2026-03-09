@@ -8,16 +8,10 @@
 import { Suspense } from 'react';
 import { SuperadminLoginContainer } from '@/components/auth/login/superadmin/superadmin-login-container';
 import { redirectifSessionExists } from '@/actions/shared/auth';
+import { LoginCogSuspense } from '@/components/shared/login-cog-suspense';
 
 export function LoadingFallback() {
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <div className="flex items-center gap-3">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <span className="text-muted-foreground">Loading...</span>
-      </div>
-    </div>
-  );
+  return <LoginCogSuspense label="Loading admin login..." />;
 }
 
 export default async function AdminLoginPage() {

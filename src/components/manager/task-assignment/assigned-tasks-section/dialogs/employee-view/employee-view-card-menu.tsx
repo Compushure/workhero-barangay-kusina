@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { MoreVertical } from 'lucide-react';
@@ -21,14 +23,12 @@ function EmployeeViewCardMenu({
       open={openPopoverId === employee.id}
       onOpenChange={(open) => setOpenPopoverId(open ? employee.id : null)}
     >
-      <div className="flex w-fit h-full">
-        <PopoverTrigger asChild>
-          <button className="text-primary hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer">
-            <MoreVertical className="size-6" />
-          </button>
-        </PopoverTrigger>
-      </div>
-      <PopoverContent className="w-40 p-2" align="end">
+      <PopoverTrigger asChild>
+        <button className="text-primary rounded-full hover:text-accent hover:bg-accent-secondary/25 hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer p-1.5 relative z-50">
+          <MoreVertical className="size-6" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-40 p-2 z-100" align="end">
         <div className="flex flex-col gap-2">
           <Button
             onClick={() => {
