@@ -506,9 +506,9 @@ export async function getAllRankingPeriods(): Promise<ActionResult<import('@/typ
  */
 export async function getLatestLeaderboardPeriods(): Promise<
   ActionResult<{
-    weekly: { year: number; week: number } | null;
-    monthly: { year: number; month: number } | null;
-    yearly: { year: number } | null;
+    weekly: { year: number; week: number; is_visible: boolean } | null;
+    monthly: { year: number; month: number; is_visible: boolean } | null;
+    yearly: { year: number; is_visible: boolean } | null;
   }>
 > {
   return safeAction(async () => {
