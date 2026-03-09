@@ -2,6 +2,7 @@
 
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 interface MercadoSearchBarProps {
   value: string;
@@ -12,7 +13,7 @@ interface MercadoSearchBarProps {
 export function MercadoSearchBar({
   value,
   onChange,
-  placeholder = 'Search items...',
+  placeholder = 'Search by item name',
 }: MercadoSearchBarProps) {
   return (
     <div className="relative">
@@ -21,7 +22,7 @@ export function MercadoSearchBar({
         type="text"
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(sanitizeSearchInput(e.target.value))}
         className="pl-9 h-10 bg-white border-gray-200 rounded-lg"
       />
     </div>

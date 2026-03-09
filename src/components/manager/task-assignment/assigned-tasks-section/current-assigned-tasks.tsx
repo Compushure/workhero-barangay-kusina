@@ -18,6 +18,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { SkeletonCard } from '../card-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useManagerAssignmentStore } from '@/store/managerAssignmentStore';
+import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 function CurrentAssignedTasksSkeleton() {
   return (
@@ -127,7 +128,7 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
   };
 
   const handleSearchChange = (term: string) => {
-    setSearchTerm(term);
+    setSearchTerm(sanitizeSearchInput(term));
     setPage(1);
   };
 
@@ -208,7 +209,11 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
             <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <input
               type="text"
-              placeholder={viewMode === 'task' ? 'Search tasks' : 'Search employees'}
+              placeholder={
+                viewMode === 'task'
+                  ? 'Search by task name, type, or assignee'
+                  : 'Search by employee name or employee ID'
+              }
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full pl-8 sm:pl-9 pr-2 sm:pr-3 py-1.5 sm:py-2 rounded-full bg-card shadow-sm/25 text-xs sm:text-sm focus:outline-none transition-all duration-500 ease-in-out focus:border focus:border-accent"

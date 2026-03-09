@@ -1,14 +1,17 @@
 'use client';
 
-import { useState, useMemo, useCallback, Suspense } from 'react';
+import { useState, useMemo, useCallback, Suspense, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { HeaderSection } from '@/components/hr/dashboard/header';
 import { HeaderSkeleton } from '@/components/hr/dashboard/header-skeleton';
 import { RedemptionTable } from '@/components/hr/dashboard/redemption-table';
 import { RedemptionTableSkeleton } from '@/components/hr/dashboard/redemption-table-skeleton';
 import { useGetRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
 import { useDebounce } from '@/hooks/useDebounce';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 export function RewardRequestsContent() {
+  const router = useRouter();
   const [statusFilter, setStatusFilter] = useState<string>('pending');
   const [sortBy, setSortBy] = useState<string>('date-desc');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -17,9 +20,17 @@ export function RewardRequestsContent() {
   // Fetch redemption requests from database with status filter
   const { data: requests = [], isLoading, error } = useGetRedemptionRequests(statusFilter);
 
+  useEffect(() => {
+    if (error) {
+      router.push(
+        `/error?status=500&cause=${encodeURIComponent(error.message || 'Failed to load redemption requests')}&recommendation=${encodeURIComponent('Please refresh the page or try again later.')}`
+      );
+    }
+  }, [error, router]);
+
   // Filter and sort the data with memoization
   const filteredRequests = useMemo(() => {
-    const normalizedSearch = debouncedSearchTerm.trim().toLowerCase();
+    const normalizedSearch = normalizeSearchQuery(debouncedSearchTerm);
 
     return requests
       .filter(
@@ -37,8 +48,10 @@ export function RewardRequestsContent() {
             return b.pointsCost - a.pointsCost;
           case 'cost-asc':
             return a.pointsCost - b.pointsCost;
-          case 'employee':
+          case 'employee-asc':
             return a.userName.localeCompare(b.userName);
+          case 'employee-desc':
+            return b.userName.localeCompare(a.userName);
           default:
             return 0;
         }
@@ -46,7 +59,7 @@ export function RewardRequestsContent() {
   }, [requests, debouncedSearchTerm, sortBy]);
 
   const handleSearch = useCallback((value: string) => {
-    setSearchTerm(value);
+    setSearchTerm(sanitizeSearchInput(value));
   }, []);
 
   const handleSort = useCallback((value: string) => {
@@ -57,17 +70,7 @@ export function RewardRequestsContent() {
     setStatusFilter(value);
   }, []);
 
-  if (error) {
-    return (
-      <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
-        <div className="flex items-center justify-center py-16">
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-red-600">Error loading redemption requests: {error.message}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (error) return null;
 
   return (
     <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">

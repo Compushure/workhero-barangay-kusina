@@ -15,7 +15,8 @@ export async function handleFetchTaskCategoriesPaginated(
   page: number = 1,
   pageSize: number = 10,
   sortBy: string = 'type-name',
-  searchTerm: string = ''
+  searchTerm: string = '',
+  repeatabilityFilter: 'all' | 'repeatable' | 'non-repeatable' = 'all'
 ): Promise<{ tasks: TaskCategory[]; count: number; totalPages: number }> {
   const result = await safeAction<
     ServerActionResponse<{
@@ -23,7 +24,7 @@ export async function handleFetchTaskCategoriesPaginated(
       count: number;
       totalPages: number;
     }>
-  >(() => fetchTaskCategoriesPaginated(page, pageSize, sortBy, searchTerm));
+  >(() => fetchTaskCategoriesPaginated(page, pageSize, sortBy, searchTerm, repeatabilityFilter));
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);

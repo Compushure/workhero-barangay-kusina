@@ -26,6 +26,7 @@ import {
   useGetManualBadges,
 } from '@/hooks/tanstack/queries/managerBadgeAssignmentQueries';
 import { useAssignManualBadgeToUser } from '@/hooks/tanstack/mutations/managerBadgeAssignmentMutations';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 type UserSortOption = 'name-asc' | 'name-desc' | 'employee-asc' | 'employee-desc';
 type BadgeSortOption = 'name-asc' | 'name-desc' | 'points-desc' | 'points-asc';
@@ -106,10 +107,13 @@ export default function BadgeAssignmentPage() {
   }, [debouncedSearchTerm, sortOption]);
 
   const filteredUsers = useMemo(() => {
+    const normalizedSearch = normalizeSearchQuery(debouncedSearchTerm);
+
     const filtered = users.filter(
       (user) =>
-        user.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        !normalizedSearch ||
+        user.name.toLowerCase().includes(normalizedSearch) ||
+        user.email.toLowerCase().includes(normalizedSearch)
     );
 
     return [...filtered].sort((a, b) => {
@@ -263,9 +267,9 @@ export default function BadgeAssignmentPage() {
                   <div className="relative w-full sm:w-64 md:w-auto">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
                     <input
-                      placeholder="Search users..."
+                      placeholder="Search by employee name or email"
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
                       className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-all duration-500 ease-in-out w-full sm:w-64 md:w-auto"
                     />
                   </div>
