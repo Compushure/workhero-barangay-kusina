@@ -6,7 +6,7 @@ export default function TaskTableSkeleton() {
   return (
     <>
     {[1, 2, 3, 4, 5].map((i) => (
-      <TableRow key={i} className="bg-background">
+      <TableRow key={i} className="bg-background-soft">
         <TableCell>
           <div className="space-y-2 pl-4">
             <Skeleton className="h-5 bg-muted w-1/2"/>

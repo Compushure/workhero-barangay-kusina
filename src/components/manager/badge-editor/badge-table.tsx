@@ -129,20 +129,20 @@ export default function BadgeTable({
       <div className="bg-card rounded-2xl border-2 border-accent/25 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-sm/25">
         <Table>
           <TableHeader>
-            <TableRow className="bg-primary-gradient">
-              <TableHead className="min-w-48 sm:min-w-64 md:min-w-96 pl-4 sm:pl-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-bold text-card">
+            <TableRow className="bg-muted">
+              <TableHead className="min-w-48 sm:min-w-64 md:min-w-96 pl-4 sm:pl-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-bold text-primary/75">
                 BADGE
               </TableHead>
-              <TableHead className="hidden md:table-cell min-w-20 max-w-20 w-20 text-center text-xs sm:text-sm font-bold text-card">
+              <TableHead className="hidden md:table-cell min-w-20 max-w-20 w-20 text-center text-xs sm:text-sm font-bold text-primary/75">
                 POINTS
               </TableHead>
-              <TableHead className="hidden lg:table-cell min-w-32 max-w-32 w-32 text-center text-xs sm:text-sm font-bold text-card">
+              <TableHead className="hidden lg:table-cell min-w-32 max-w-32 w-32 text-center text-xs sm:text-sm font-bold text-primary/75">
                 INTERVAL
               </TableHead>
-              <TableHead className="hidden sm:table-cell min-w-20 sm:min-w-24 text-center text-xs sm:text-sm font-bold text-card">
+              <TableHead className="hidden sm:table-cell min-w-20 sm:min-w-24 text-center text-xs sm:text-sm font-bold text-primary/75">
                 CONDITIONS
               </TableHead>
-              <TableHead className="text-card text-center px-2 sm:px-4 w-24 sm:w-30 text-xs sm:text-sm sticky right-0 bg-primary-gradient">
+              <TableHead className="text-primary/75 text-center px-2 sm:px-4 w-24 sm:w-30 text-xs sm:text-sm sticky right-0">
                 ACTIONS
               </TableHead>
             </TableRow>
@@ -151,7 +151,7 @@ export default function BadgeTable({
             <>
               {badges.map((badge) => (
                   <React.Fragment key={badge.id}>
-                    <TableRow className="bg-background hover:bg-row-hover transition-colors border-b border-accent/50">
+                    <TableRow className="bg-background-soft hover:bg-row-hover transition-colors">
                       <TableCell className="min-w-48 sm:min-w-64 md:min-w-96 pl-4 sm:pl-6 py-3 sm:py-4 align-middle">
                         <div className="flex items-start gap-2 sm:gap-3">
                           {/* Badge Icon */}
@@ -200,7 +200,7 @@ export default function BadgeTable({
                       </TableCell>
                       <TableCell className="hidden md:table-cell min-w-20 max-w-20 w-20 text-sm sm:text-base text-center align-middle font-medium text-foreground">
                         <div className="flex items-center justify-center gap-1">
-                          <Coins strokeWidth={1.75} className="size-4 sm:size-5 text-accent" />
+                          <Coins strokeWidth={1.75} className="size-4 sm:size-5" />
                           {badge.points}
                         </div>
                       </TableCell>
@@ -224,7 +224,7 @@ export default function BadgeTable({
                           )}
                         </Button>
                       </TableCell>
-                      <TableCell className="text-center align-middle sticky right-0 bg-background px-2 sm:px-4">
+                      <TableCell className="text-center align-middle sticky right-0 px-2 sm:px-4">
                         <div className="flex justify-center items-center gap-1 sm:gap-2">
                           <Button
                             variant="ghost"
@@ -315,7 +315,7 @@ export default function BadgeTable({
                                     className="px-4 py-3 hover:bg-row-hover transition-colors"
                                   >
                                     <div className="flex items-start gap-3">
-                                      <div className="flex-shrink-0 w-6 text-center">
+                                      <div className="shrink-0 w-6 text-center">
                                         <span className="font-semibold text-foreground text-sm">
                                           {idx + 1}.
                                         </span>
@@ -360,7 +360,7 @@ export default function BadgeTable({
         </Table>
 
         {isError && (
-          <div className="bg-background p-8 text-center">
+          <div className="bg-background-soft p-8 text-center">
             <div className="text-5xl mb-4">🙊</div>
             <p className="text-secondary text-xl">Woops! Kitchen Issue</p>
             <p className="text-muted-foreground text-sm mt-2">
@@ -369,8 +369,8 @@ export default function BadgeTable({
           </div>
         )}
 
-        {badges.length === 0 && (
-          <div className="bg-background p-8 text-center">
+        {!isLoading && badges.length === 0 && (
+          <div className="bg-background-soft p-8 text-center">
             <div className="text-5xl mb-4">🏆</div>
             <p className="text-secondary text-xl">No badges found</p>
             <p className="text-muted-foreground text-sm mt-2">

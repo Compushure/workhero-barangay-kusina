@@ -166,7 +166,7 @@ export default function AddEditTaskCategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
-      <DialogContent className="bg-background border-none max-w-[95vw] sm:max-w-md md:max-w-135 lg:max-w-150 xl:max-w-175 2xl:max-w-200 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-card border-none max-w-[95vw] sm:max-w-md md:max-w-135 lg:max-w-150 xl:max-w-175 2xl:max-w-200 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex gap-2 text-xl text-foreground text-left items-center">
@@ -364,7 +364,7 @@ export default function AddEditTaskCategoryDialog({
             </div>
 
             {/* Is Repeatable Toggle */}
-            <div className="flex flex-col flex-1/2 items-center justify-between p-4 bg-white rounded-lg border border-[#e0cfcf]">
+            <div className="flex flex-col flex-1/2 items-center justify-between p-4 bg-background-soft rounded-lg border border-[#e0cfcf]">
               <div className="space-y-1">
                 <Label className="text-base font-medium text-primary">Repeatable Task</Label>
                 <p className="text-sm text-secondary">Can this task be assigned with multiple orders?</p>
@@ -381,7 +381,7 @@ export default function AddEditTaskCategoryDialog({
           <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="bg-foreground text-white hover:bg-accent px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto transition-all duration-400 ease-in-out"
+            className="bg-primary-gradient hover:brightness-75 text-white hover:bg-accent px-6 sm:px-8 disabled:opacity-50 disabled:brightness-75 disabled:saturate-50 disabled:cursor-not-allowed w-full sm:w-auto transition-all duration-400 ease-in-out"
           >
             {isLoading ? (
               <>

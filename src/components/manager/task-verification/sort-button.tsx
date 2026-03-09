@@ -34,7 +34,7 @@ export function SortButton({
 
   const triggerClassName = isMercadoStyle
     ? 'group border border-gray-300 bg-zinc-50/75 text-[#131C2A] hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-32 sm:flex-1 sm:min-w-[160px]'
-    : 'bg-foreground hover:bg-[#af3b3f] rounded-full text-white w-32 sm:flex-1 sm:min-w-[160px]';
+    : 'bg-card hover:bg-gray-200 rounded-full text-primary w-32 sm:flex-1 sm:min-w-[160px]';
 
   const itemClassName = (isActive: boolean) =>
     isMercadoStyle
@@ -58,7 +58,7 @@ export function SortButton({
           {/* Arrow icon */}
           <ArrowUpDown
             size={14}
-            className={isMercadoStyle ? 'text-[#131C2A] group-hover:text-white ml-1 shrink-0' : 'ml-1 shrink-0'}
+            className={isMercadoStyle ? 'text-[#131C2A] group-hover:text-white ml-1 shrink-0' : 'text-accent ml-1 shrink-0'}
           />
         </Button>
       </DropdownMenuTrigger>

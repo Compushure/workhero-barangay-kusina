@@ -7,7 +7,7 @@ import { ProfilePic } from './user-profile';
 
 export default function HeaderHUD() {
   return (
-    <div className="flex h-24 min-w-160 bg-linear-to-b from-muted-foreground/50 to-amber-900/0">
+    <div className="flex h-24 min-w-300 bg-linear-to-b from-muted-foreground/50 to-amber-900/0">
       {/* Left column: 20%, justify-start */}
       <Card className="w-[20%] flex items-center justify-start bg-transparent shadow-none border-none">
         <CardContent className="flex items-center justify-start p-0">

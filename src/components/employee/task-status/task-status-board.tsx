@@ -58,10 +58,10 @@ export function TaskStatusBoard({
   );
 
   return (
-    <div className="flex flex-col gap-4 w-full min-w-150 overflow-hidden px-8 py-8 my-24 rounded-4xl bg-card/45 backdrop-blur-lg shadow-lg/25">
+    <div className="flex flex-col gap-4 w-full min-w-300 overflow-hidden px-8 py-8 my-24 rounded-4xl bg-card/45 backdrop-blur-lg shadow-lg/25">
       <div className="flex flex-row items-start justify-between gap-2 px-3">
         <Header
-          title="Tasks"
+          title="Tasks Board"
           description="View your tasks by status: Current, On Review, Verified, or Denied Approval."
         />
       
@@ -86,7 +86,7 @@ export function TaskStatusBoard({
             <span className='text-lg'>Error loading tasks. Please try again</span>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full min-w-0">
+          <div className="grid grid-cols-2 gap-8 w-full min-w-0">
           <TaskStatusSection status="Current" task={current}>
             {current.map((task) => (
               <TaskCard key={task.id} task={task} />
