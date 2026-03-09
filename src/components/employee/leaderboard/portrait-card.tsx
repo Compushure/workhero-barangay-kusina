@@ -106,7 +106,7 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
         {/* Score */}
         <div className="flex flex-col items-center gap-1">
           <span className="rounded border border-[#47331F] bg-[#F4B925] px-2 py-0.5 font-jersey text-[#47331F]">
-            ★{entry.performanceScore.toLocaleString()}
+            {entry.performanceScore.toLocaleString()}
           </span>
           <span className="font-jersey text-[11px] leading-none tracking-widest uppercase text-[#3D2512]/80">
             Performance Score
