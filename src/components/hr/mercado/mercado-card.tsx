@@ -158,7 +158,7 @@ export const MercadoCard = memo(function MercadoCard({
         </div>
 
         <p className="text-muted-foreground text-xs sm:text-sm truncate">
-          Created at: {createdAtText}
+         Date Added: {createdAtText}
         </p>
 
         <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
