@@ -38,7 +38,7 @@ export function HeaderSection({
           <SearchBar
             searchTerm={searchTerm}
             onSearchChange={(value) => onSearch?.(value)}
-            placeholder="Search by employee or items"
+            placeholder="Search by employee name or item name"
             width="w-full"
           />
         </div>
@@ -64,7 +64,8 @@ export function HeaderSection({
             options={[
               { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
               { value: 'date-asc' as any, label: 'Date (Oldest)' },
-              { value: 'employee' as any, label: 'Employee Name' },
+              { value: 'employee-asc' as any, label: 'Employee Name (A-Z)' },
+              { value: 'employee-desc' as any, label: 'Employee Name (Z-A)' },
             ]}
           />
         </div>

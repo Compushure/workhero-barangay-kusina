@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Search, SlidersHorizontal, ChevronDown, Loader2 } from 'lucide-react';
 import type { EmployeeTypeValue, EmploymentStatusValue } from '@/types';
+import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 interface SearchFilterProps {
   searchQuery: string;
@@ -68,18 +69,18 @@ export function SearchFilter({
         {/* Search - Full width on mobile, spans 2 cols on md/lg, spans 2 on xl */}
         <div className="space-y-2 md:col-span-2 xl:col-span-2 2xl:col-span-2">
           <Label htmlFor="search" className="text-xs sm:text-sm lg:text-base text-foreground">
-            Search by Name
+            Search by Employee Name
           </Label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
             <Input
               id="search"
-              placeholder="Search by name..."
+              placeholder="Search by employee name"
               className={`pl-10 pr-9 border-border focus:border-accent focus:ring-accent text-sm sm:text-base lg:text-lg ${
                 isDebouncing ? 'bg-muted/50' : 'bg-white'
               }`}
               value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
+              onChange={(e) => onSearchChange(sanitizeSearchInput(e.target.value))}
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600">
               {isDebouncing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

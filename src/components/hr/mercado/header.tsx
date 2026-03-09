@@ -2,6 +2,7 @@
 
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 import {
   Select,
   SelectContent,
@@ -31,9 +32,9 @@ export function HeaderSection({ title, description, onSearch, onSort }: HeaderSe
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search"
+            placeholder="Search by item name"
             className="pl-10"
-            onChange={(e) => onSearch?.(e.target.value)}
+            onChange={(e) => onSearch?.(sanitizeSearchInput(e.target.value))}
           />
         </div>
         <Select onValueChange={onSort}>

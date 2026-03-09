@@ -35,6 +35,7 @@ import { UserPlus, LogOut } from 'lucide-react';
 import { handleSignOut } from '@/action-handlers/shared/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 export function ManagerPage() {
   const router = useRouter();
@@ -214,7 +215,7 @@ export function ManagerPage() {
 
   // Reset to page 1 when filters change
   const handleSearchChange = useCallback((query: string) => {
-    setSearchQuery(query);
+    setSearchQuery(sanitizeSearchInput(query));
     setPage(1);
   }, []);
 
