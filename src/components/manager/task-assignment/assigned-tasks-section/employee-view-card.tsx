@@ -89,16 +89,28 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
         const hiddenCount = Math.max(0, employee.assignedTasks.length - 2);
 
         return (
-          <div className={`flex w-full items-start justify-between rounded-2xl bg-[#FAFAFA] p-6 transition-all ease-in-out duration-400 
-          ${isExpanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`} key={employee.id}>
-              {/* Employee Details */}
-              <div className="flex flex-col w-[20%] min-w-0 pr-1">
-                <h3 className="text-lg font-bold text-foreground wrap-break-word">{employee.name}</h3>
-                <p className="text-sm text-gray-600">{employee.empId}</p>
-                {employee.tenure && <p className="text-sm text-gray-500">{employee.tenure}</p>}
+            <div className={`relative flex flex-col lg:flex-row w-full items-start lg:justify-between rounded-2xl bg-[#FAFAFA] p-4 sm:p-6 gap-3 sm:gap-4 transition-all ease-in-out duration-400 
+          ${isExpanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`} key={employee.id}>
+              {/* Employee Details + Menu */}
+              <div className="flex items-start justify-between w-full lg:w-auto lg:min-w-50 lg:max-w-60 shrink-0 pr-0 lg:pr-4">
+                <div className="flex flex-col min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold text-foreground wrap-break-word">{employee.name}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">{employee.empId}</p>
+                  {employee.tenure && <p className="text-xs sm:text-sm text-gray-500">{employee.tenure}</p>}
+                </div>
+                
+                {/* Triple dots menu - single instance for all breakpoints */}
+                <div className="flex relative z-50 lg:absolute lg:top-5 lg:right-5">
+                  <EmployeeViewCardMenu
+                    openPopoverId={openPopoverId}
+                    setOpenPopoverId={setOpenPopoverId}
+                    employee={employee}
+                    setShowClearConfirm={setShowClearConfirm}
+                  />
+                </div>
               </div>
 
-            {/* Assigned Tasks */}
+            {/* Assigned Tasks - takes remaining space */}
             <EmployeeViewTaskBadges
               employee={employee}
               hiddenCount={hiddenCount}
@@ -108,33 +120,39 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
               formatDate={formatDate}
               setShowRemoveConfirm={setShowRemoveConfirm}
             />
-
-            {/* Clear All Assigned Tasks for Employee */}
-            <div className="flex w-fit justify-center">
-              <EmployeeViewCardMenu
-                openPopoverId={openPopoverId}
-                setOpenPopoverId={setOpenPopoverId}
-                employee={employee}
-                setShowClearConfirm={setShowClearConfirm}
-              />
-            </div>
-
-            {/* Unassign Task Dialog */}
-            <ClearTaskDialog
-              showRemoveConfirm={showRemoveConfirm}
-              setShowRemoveConfirm={setShowRemoveConfirm}
-              employee={employee}
-            />
-
-            {/* Unassign All Tasks Dialog */}
-            <ClearAllTasksDialog
-              showClearConfirm={showClearConfirm}
-              setShowClearConfirm={setShowClearConfirm}
-              employee={employee}
-            />
           </div>
         );
       })}
+
+      {/* Dialogs rendered ONCE outside the map - shared across all employees */}
+      {/* Always render, let the Dialog's open prop control visibility */}
+      <ClearTaskDialog
+        showRemoveConfirm={showRemoveConfirm}
+        setShowRemoveConfirm={setShowRemoveConfirm}
+        employee={
+          employees.find((emp) => emp.id === showRemoveConfirm?.empId) || {
+            id: '',
+            name: '',
+            empId: '',
+            assignedTasks: [],
+            completedOrders: 0,
+          }
+        }
+      />
+
+      <ClearAllTasksDialog
+        showClearConfirm={showClearConfirm}
+        setShowClearConfirm={setShowClearConfirm}
+        employee={
+          employees.find((emp) => emp.id === showClearConfirm) || {
+            id: '',
+            name: '',
+            empId: '',
+            assignedTasks: [],
+            completedOrders: 0,
+          }
+        }
+      />
     </div>
   );
 }

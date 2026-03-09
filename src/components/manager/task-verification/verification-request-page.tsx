@@ -9,6 +9,7 @@ import { RequestsTableSkeleton } from '@/components/manager/task-verification/re
 import type { VerificationRequest, SortOption } from '@/types';
 import { ConfirmationDialog } from '@/components/manager/task-verification/confirmation-modal';
 import { Pagination } from '@/components/manager/task-verification/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   useGetTasksToReviewPaginated,
   useGetApprovedTasksPaginated,
@@ -45,15 +46,15 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const getCurrentTasks = useMemo(() => {
     switch (sortBy) {
       case 'pending':
-        return pendingData?.data ?? initialRequests;
+        return pendingData?.data ?? [];
       case 'approved':
         return approvedData?.data ?? [];
       case 'denied':
         return deniedData?.data ?? [];
       default:
-        return initialRequests;
+        return [];
     }
-  }, [sortBy, pendingData, approvedData, deniedData, initialRequests]);
+  }, [sortBy, pendingData, approvedData, deniedData]);
 
   // Get total pages for current category - memoized to prevent unnecessary recalculations
   const getTotalPages = useMemo(() => {
@@ -101,6 +102,10 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const currentTasks = getCurrentTasks;
   const totalPages = getTotalPages;
   const currentPage = getCurrentPage;
+  const isCurrentCategoryLoading =
+    (sortBy === 'pending' && isLoadingPending) ||
+    (sortBy === 'approved' && isLoadingApproved) ||
+    (sortBy === 'denied' && isLoadingDenied);
 
   // Filter and sort requests based on search term and date/employee sorting
   const filteredRequests = useMemo(() => {
@@ -196,28 +201,54 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
     }
   };
 
-  return (
-    <div className="p-8 bg-zinc-100 min-h-screen flex flex-col">
-      <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
+  const showInitialSkeleton = isCurrentCategoryLoading && currentTasks.length === 0;
 
-      <div className="flex-1 flex flex-col">
-        <div className="flex items-center justify-end gap-2 mb-6">
-          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-          <SortButton sortBy={sortBy} onSortChange={setSortBy} />
-          <SortButton
-            sortBy={dateSortBy as any}
-            onSortChange={(value) => setDateSortBy(value as 'date-desc' | 'date-asc' | 'employee')}
-            options={[
-              { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
-              { value: 'date-asc' as any, label: 'Date (Oldest)' },
-              { value: 'employee' as any, label: 'Employee Name' },
-            ]}
-          />
+  return (
+    <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
+      {showInitialSkeleton ? (
+        <div className="space-y-2">
+          <Skeleton className="h-9 w-72 bg-muted" />
+          <Skeleton className="h-5 w-96 bg-muted" />
         </div>
+      ) : (
+        <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
+      )}
+
+      <div className="flex-1 flex flex-col max-w-7xl 2xl:max-w-440 w-full mx-auto">
+        {/* Filter Controls - Compact horizontal layout aligned to right */}
+        {showInitialSkeleton ? (
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-4 sm:mt-5 sm:justify-end">
+            <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
+              <Skeleton className="h-10 w-full bg-muted rounded-full" />
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <Skeleton className="h-10 w-28 bg-muted rounded-lg" />
+              <Skeleton className="h-10 w-40 bg-muted rounded-lg" />
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-4 sm:mt-5 sm:justify-end">
+            <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
+              <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="mercado" />
+              <SortButton
+                sortBy={dateSortBy as any}
+                onSortChange={(value) => setDateSortBy(value as 'date-desc' | 'date-asc' | 'employee')}
+                options={[
+                  { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
+                  { value: 'date-asc' as any, label: 'Date (Oldest)' },
+                  { value: 'employee' as any, label: 'Employee Name' },
+                ]}
+                styleVariant="mercado"
+              />
+            </div>
+          </div>
+        )}
 
         <div className="flex-1 flex flex-col">
-          {(isLoadingPending || isLoadingApproved || isLoadingDenied) &&
-          filteredRequests.length === 0 ? (
+          {isCurrentCategoryLoading ? (
             <RequestsTableSkeleton />
           ) : (
             <RequestsTable
@@ -231,11 +262,12 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           )}
 
           {/* Pagination fixed at bottom */}
-          <div className="mt-auto pt-4">
+          <div className="mt-auto pt-3 sm:pt-4">
             <Pagination
               totalPages={totalPages}
               currentPage={currentPage}
               onPageChange={handlePageChange}
+              isFixed={false}
             />
           </div>
         </div>

@@ -10,18 +10,18 @@ interface TaskAssignmentContextType {
   assignedTasks: AssignedTask[];
   viewMode: 'task' | 'employee';
   setViewMode: (mode: 'task' | 'employee') => void;
-  assignTasks: (filters: SelectedFilters) => void;
+  assignTasks: (filters: SelectedFilters) => Promise<void>;
   removeAssignment: (taskId: string, employeeId: string) => Promise<void>;
-  deleteTask: (taskId: string) => void;
+  deleteTask: (taskId: string) => Promise<void>;
   editTask: (
     taskId: string,
     maxOrders: number,
     newDueDate: string,
     newEmployees: AssignedEmployee[]
   ) => void;
-  clearAll: () => void;
+  clearAll: () => Promise<void>;
   clearAllEmployeeTasks: (employeeId: string) => void;
-  setAssignedTasks: React.Dispatch<React.SetStateAction<AssignedTask[]>>;
+  setAssignedTasks: (tasks: AssignedTask[]) => void;
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   totalPages: number;

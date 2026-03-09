@@ -11,6 +11,7 @@ import { LogOutBtn } from '@/components/employee/attendance/logout';
 import { NotificationsPopover } from '@/components/notifications/notifications';
 import { MapLauncher } from '@/components/employee/minimap/map-launcher';
 import { Coins } from 'lucide-react';
+import { NavLoadingState } from '@/components/employee/nav-loading-state';
 
 interface MercadoLayoutProps {
   children: React.ReactNode;
@@ -50,6 +51,7 @@ function MercadoLayoutContent({ children }: MercadoLayoutProps) {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
+      <NavLoadingState />
       {/* Background Image */}
       <Image
         src="/mercado/mercado-bg.svg"

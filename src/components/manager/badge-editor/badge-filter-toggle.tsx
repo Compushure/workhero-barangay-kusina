@@ -1,6 +1,6 @@
 'use client';
 
-import { Filter, X } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -9,6 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 
@@ -43,7 +44,7 @@ export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterTog
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 bg-background">
+        <DropdownMenuContent align="start" className="w-56 bg-background">
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Badge Type
           </DropdownMenuLabel>
@@ -66,6 +67,12 @@ export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterTog
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Quick Actions
           </DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={clearFilters}
+            className="cursor-pointer text-secondary hover:text-foreground pl-8"
+          >
+            Clear Filters
+          </DropdownMenuItem>
           <DropdownMenuCheckboxItem
             checked={filterMode === 'all'}
             onCheckedChange={() => onFilterChange('all')}
@@ -75,18 +82,6 @@ export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterTog
           </DropdownMenuCheckboxItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {activeFilterCount > 0 && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={clearFilters}
-          className="h-10 px-3 text-sm text-secondary hover:text-foreground"
-        >
-          <X className="h-4 w-4 mr-1" />
-          Clear
-        </Button>
-      )}
     </div>
   );
 }

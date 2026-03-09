@@ -28,7 +28,7 @@ export default function AllBadgesModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-background border-none max-w-2xl rounded-2xl p-6 max-h-[80vh] overflow-y-auto">
+      <DialogContent className="bg-background border-none max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl rounded-2xl p-6 max-h-[80vh] overflow-y-auto">
         {/* Header */}
         <DialogHeader className="mb-6">
           <div className="space-y-2">

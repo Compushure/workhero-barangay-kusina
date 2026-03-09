@@ -68,7 +68,7 @@ export default function BadgeAwardDebugPanel() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 w-[520px] max-h-[90vh] bg-white border border-[#690003]/20 rounded-lg shadow-2xl z-50 flex flex-col">
+    <div className="fixed bottom-4 right-4 w-130 max-h-[90vh] bg-white border border-[#690003]/20 rounded-lg shadow-2xl z-50 flex flex-col">
       <div className="bg-[#690003] text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bug className="w-4 h-4" />
