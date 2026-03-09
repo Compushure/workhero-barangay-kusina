@@ -96,10 +96,10 @@ export function LeaderboardPageClient({ latestPeriods }: LeaderboardPageClientPr
         <button
           type="button"
           onClick={handleToggleHistory}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-jersey tracking-widest text-base shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl mr-5 font-jersey tracking-widest text-base shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors ${
             view === 'history'
               ? 'bg-[#F4B925] text-[#3D2512]'
-              : 'bg-[#b07440] text-white hover:bg-[#8A6342]'
+              : 'bg-[#694c33] text-white hover:bg-[#8A6342]'
           }`}
         >
           <History className="w-4 h-4" />
