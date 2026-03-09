@@ -501,6 +501,66 @@ export async function getAllRankingPeriods(): Promise<ActionResult<import('@/typ
 }
 
 /**
+ * Returns all previously generated ranking periods visible to employees (is_visible = true),
+ * newest first, with the top performer's name and participant count.
+ * Used by the employee leaderboard "Past Rankings" history list.
+ */
+export async function getVisibleRankingPeriods(): Promise<ActionResult<import('@/types').RankingPeriodWithTop[]>> {
+  return safeAction(async () => {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Not authenticated');
+    }
+
+    const [periodsRes, topRes, countRes] = await Promise.all([
+      supabase
+        .from('RankingPeriod')
+        .select('id, period_type, period_start, period_end, is_visible, generated_at')
+        .eq('is_visible', true)
+        .order('period_start', { ascending: false }),
+      supabase
+        .from('ranking_leaderboard_view')
+        .select('ranking_period_id, user_name, rank')
+        .eq('rank', 1),
+      supabase
+        .from('RankingEntry')
+        .select('ranking_period_id'),
+    ]);
+
+    if (periodsRes.error) {
+      throw new Error(`Failed to fetch ranking periods: ${periodsRes.error.message}`);
+    }
+    if (topRes.error) {
+      throw new Error(`Failed to fetch top performers: ${topRes.error.message}`);
+    }
+    if (countRes.error) {
+      throw new Error(`Failed to fetch participant counts: ${countRes.error.message}`);
+    }
+
+    const topByPeriod = new Map<string, string>();
+    for (const row of topRes.data ?? []) {
+      topByPeriod.set(row.ranking_period_id, row.user_name);
+    }
+
+    const countByPeriod = new Map<string, number>();
+    for (const row of countRes.data ?? []) {
+      countByPeriod.set(row.ranking_period_id, (countByPeriod.get(row.ranking_period_id) ?? 0) + 1);
+    }
+
+    return (periodsRes.data ?? []).map((p) => ({
+      ...p,
+      top_performer_name: topByPeriod.get(p.id) ?? null,
+      participant_count: countByPeriod.get(p.id) ?? 0,
+    })) as import('@/types').RankingPeriodWithTop[];
+  });
+}
+
+/**
  * Returns the latest generated periods for all types (weekly, monthly, yearly).
  * Used by the employee leaderboard to show the latest month/year and to bound period navigation.
  */

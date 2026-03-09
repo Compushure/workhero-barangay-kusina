@@ -26,7 +26,7 @@ function PeriodRow({ row, onSelect }: PeriodRowProps) {
   return (
     <div className="w-full flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 transition-colors hover:border-primary/30">
       <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 shrink-0">
-        <Calendar className="w-5 h-5 text-blue-500" />
+        <Calendar className="w-5 h-5 text-gray-500" />
       </div>
 
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">

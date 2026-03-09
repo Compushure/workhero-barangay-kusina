@@ -95,7 +95,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
             <div className="flex flex-col gap-1">
               <h1 className="text-3xl font-bold tracking-tight text-foreground">Leaderboards</h1>
               <p className="text-sm text-muted-foreground">
-                View rankings by week, month, and year.
+              Generate new rankings or review past results across different periods.
               </p>
             </div>
             <LeaderboardViewToggle currentView={currentView} />

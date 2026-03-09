@@ -52,8 +52,8 @@ export function LeaderboardContent({
     );
   }
 
-  // First load for this session: show skeleton
-  if (isPending && !data) {
+  // Show skeleton during initial load OR background refetch when there's no data yet
+  if ((isPending || isFetching) && !data) {
     return <LeaderboardTableSkeleton />;
   }
 

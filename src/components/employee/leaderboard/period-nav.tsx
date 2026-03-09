@@ -104,7 +104,7 @@ export function getLatestPeriodParams(
 export function getLeaderboardTitle(periodType: RankLogPeriodType, latest: LatestPeriods): string {
   switch (periodType) {
     case 'weekly':
-      return 'Top Kusineros of the Week';
+      return 'Top Kusineros of Week';
     case 'monthly':
       if (latest.monthly) {
         const monthName = MONTH_NAMES[latest.monthly.month - 1];

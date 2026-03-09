@@ -43,7 +43,7 @@ export function LeaderboardViewToggle({ currentView }: LeaderboardViewToggleProp
             : 'text-muted-foreground hover:text-foreground',
         )}
       >
-        Generate Ranking
+        Generate Rankings
       </button>
       <button
         onClick={() => handleSwitch('past')}
@@ -54,7 +54,7 @@ export function LeaderboardViewToggle({ currentView }: LeaderboardViewToggleProp
             : 'text-muted-foreground hover:text-foreground',
         )}
       >
-        View Past Ranks
+        View Past Rankings
       </button>
     </div>
   );

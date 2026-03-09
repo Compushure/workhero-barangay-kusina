@@ -34,7 +34,7 @@ function RankBadge({ rank }: { rank: number }) {
       ].join(' ')}
       aria-hidden
     >
-      <span className="flex h-full w-full shrink-0 items-center justify-center leading-none tabular-nums translate-x-[1px]">
+      <span className="flex h-full w-full shrink-0 items-center justify-center leading-none tabular-nums translate-x-px">
         {rank}
       </span>
     </div>
@@ -104,9 +104,14 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
         </span>
 
         {/* Score */}
-        <span className="rounded border border-[#47331F] bg-[#F4B925] px-2 py-0.5 font-jersey text-[#47331F]">
-          ★ {entry.performanceScore.toLocaleString()}
-        </span>
+        <div className="flex flex-col items-center gap-1">
+          <span className="rounded border border-[#47331F] bg-[#F4B925] px-2 py-0.5 font-jersey text-[#47331F]">
+            ★{entry.performanceScore.toLocaleString()}
+          </span>
+          <span className="font-jersey text-[11px] leading-none tracking-widest uppercase text-[#3D2512]/80">
+            Performance Score
+          </span>
+        </div>
       </div>
     </div>
   );

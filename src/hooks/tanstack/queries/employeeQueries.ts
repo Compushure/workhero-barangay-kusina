@@ -15,7 +15,8 @@ import {
 } from '@/action-handlers/employee/stats';
 import type { EmployeePeriodParams } from '@/action-handlers/employee/stats';
 import { fetchUserBadgesHandler } from '@/action-handlers/employee/badges';
-import type { EmployeeRank, EmployeeTopRankEntry } from '@/types';
+import { getVisibleRankingPeriods } from '@/actions/hr/leaderboard';
+import type { EmployeeRank, EmployeeTopRankEntry, RankingPeriodWithTop } from '@/types';
 import type { EmployeePointsData } from '@/types/employee/points';
 import type { EmployeeXP } from '@/types/employee/xp';
 import type { UserBadge } from '@/actions/employee/badges';
@@ -47,6 +48,7 @@ export const employeeKeys = {
   xp: () => [...employeeKeys.all, 'xp'] as const,
   badges: () => [...employeeKeys.all, 'badges'] as const,
   userBadges: (userId: string) => [...employeeKeys.badges(), userId] as const,
+  visiblePeriods: () => [...employeeKeys.all, 'visible-periods'] as const,
 };
 
 export function useGetEmployeePoints(
@@ -152,6 +154,25 @@ export function useGetEmployeeTopRanksByPeriod(
     retry: 1,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<EmployeeTopRankEntry[] | null, Error>;
+}
+
+/**
+ * Fetches all HR-generated ranking periods that are visible to employees.
+ * Used by the employee leaderboard "Past Rankings" history list.
+ */
+export function useGetEmployeeVisiblePeriods(): UseQueryResult<RankingPeriodWithTop[] | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.visiblePeriods(),
+    queryFn: async () => {
+      const result = await getVisibleRankingPeriods();
+      if (!result.success) return null;
+      return result.data ?? null;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: true,
+  }) as UseQueryResult<RankingPeriodWithTop[] | null, Error>;
 }
 
 /**
