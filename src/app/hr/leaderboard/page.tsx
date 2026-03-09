@@ -3,7 +3,17 @@ import LeaderboardList from '@/components/hr/leaderboard/leaderboard-list';
 import LeaderboardFilters from '@/components/hr/leaderboard/leaderboard-filters';
 import { getTopPlayers } from '@/actions/hr/leaderboard';
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { MarketSuspense } from '@/components/shared/market-suspense';
+
+export const metadata: Metadata = {
+  title: 'WorkHero | Leaderboard',
+  icons: {
+    icon: '/assets/website-logo.svg',
+    shortcut: '/assets/website-logo.svg',
+    apple: '/assets/website-logo.svg',
+  },
+};
 
 export default async function LeaderboardPage() {
   const result = await getTopPlayers();
