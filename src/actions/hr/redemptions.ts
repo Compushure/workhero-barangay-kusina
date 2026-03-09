@@ -119,6 +119,7 @@ export async function getRedemptionRequestsAction(
 ): Promise<ServerActionResponse<RedemptionRequest[]>> {
   try {
     const supabase = await createClient();
+    const cancelledByEmployeeRemarks = ['Cancelled by employee', 'Canceled by employee'];
 
     // Build query with joins
     let query = supabase
@@ -148,6 +149,10 @@ export async function getRedemptionRequestsAction(
     // Apply status filter if provided
     if (status && status !== 'all') {
       query = query.eq('status', status);
+
+      if (status === 'rejected') {
+        query = query.not('remarks', 'in', `(${cancelledByEmployeeRemarks.map((remark) => `"${remark}"`).join(',')})`);
+      }
     }
 
     const { data, error } = await query;
