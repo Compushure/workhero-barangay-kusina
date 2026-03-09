@@ -188,7 +188,7 @@ export function SelectTasksDialog({
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="bg-background max-w-[95vw] sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl max-h-[90vh] flex flex-col p-4 sm:p-6">
+        <DialogContent className="bg-card max-w-[95vw] sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl max-h-[90vh] flex flex-col p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="flex gap-2 text-xl sm:text-2xl text-foreground text-left items-center">
               <ListTodo className="size-7 p-1.25 bg-primary-gradient text-card rounded-full" />

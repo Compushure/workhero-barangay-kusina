@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function UserSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-[#e0cfcf] p-5 space-y-4">
+    <div className="bg-backgorund-soft rounded-xl border border-border p-5 space-y-4">
       {/* Avatar skeleton */}
       <div className="flex justify-center">
         <Skeleton className="w-16 h-16 rounded-full bg-muted" />

@@ -267,6 +267,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
               totalPages={totalPages}
               currentPage={currentPage}
               onPageChange={handlePageChange}
+              isFixed={false}
             />
           </div>
         </div>
