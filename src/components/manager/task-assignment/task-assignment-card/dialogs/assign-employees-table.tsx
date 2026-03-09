@@ -27,12 +27,12 @@ function AssignEmployeesTable({
       <table className="w-full table-fixed">
         <thead className="bg-muted text-primary/75 border-b border-accent/50 sticky top-0 z-10">
           <tr>
-            <th className="w-[12%] p-2 text-center align-middle">
+            <th className="w-[12%] p-1.5 text-center align-middle">
               <input
                 type="checkbox"
                 checked={allFilteredSelected}
                 onChange={handleSelectAll}
-                className="size-5 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
+                className="size-4 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
                 onClick={(e) => e.stopPropagation()}
                 style={{
                   backgroundImage: !!allFilteredSelected
@@ -44,22 +44,22 @@ function AssignEmployeesTable({
                 }}
               />
             </th>
-            <th className="w-[58%] px-2 text-left font-bold">NAME</th>
-            <th className="w-[30%] px-2 text-left font-bold">ID NO.</th>
+            <th className="w-[58%] px-1.5 text-left font-bold text-xs">NAME</th>
+            <th className="w-[30%] px-1.5 text-left font-bold text-xs">ID NO.</th>
           </tr>
         </thead>
         {isLoading ? (
           <tbody>
             {[...Array(4)].map((_, i) => (
               <tr key={i} className="border-b border-accent/25">
-                <td className="w-[12%] p-4 text-center">
-                  <Skeleton className="h-5 w-5 mx-auto bg-muted rounded" />
+                <td className="w-[12%] p-3 text-center">
+                  <Skeleton className="h-4 w-4 mx-auto bg-muted rounded" />
                 </td>
-                <td className="w-[58%] px-2 py-3">
-                  <Skeleton className="h-6 w-3/4 bg-muted" />
+                <td className="w-[58%] px-1.5 py-2">
+                  <Skeleton className="h-5 w-3/4 bg-muted" />
                 </td>
-                <td className="w-[30%] px-2 py-3">
-                  <Skeleton className="h-6 w-1/2 bg-muted" />
+                <td className="w-[30%] px-1.5 py-2">
+                  <Skeleton className="h-5 w-1/2 bg-muted" />
                 </td>
               </tr>
             ))}
@@ -82,14 +82,14 @@ function AssignEmployeesTable({
                   }`}
                   onClick={() => !isDisabled && toggleEmployee(employee)}
                 >
-                  <td className="w-[12%] p-4 text-center align-middle">
+                  <td className="w-[12%] p-3 text-center align-middle">
                     <div className="flex items-center justify-center">
                       <input
                         type="checkbox"
                         checked={!!isSelected}
                         disabled={isDisabled}
                         onChange={() => !isDisabled && toggleEmployee(employee)}
-                        className="size-5 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
+                        className="size-4 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
                         onClick={(e) => e.stopPropagation()}
                         style={{
                           backgroundImage: !!isSelected
@@ -102,15 +102,17 @@ function AssignEmployeesTable({
                       />
                     </div>
                   </td>
-                  <td className="w-[58%] min-w-0 px-2 py-2 font-medium text-gray-800 align-middle truncate">
-                    <div className="flex flex-col gap-1">
+                  <td className="w-[58%] min-w-0 px-1.5 py-1.5 font-medium text-gray-800 align-middle truncate text-sm">
+                    <div className="flex flex-col gap-0.5">
                       <span>{employee.name}</span>
                       {isDisabled && (
-                        <span className="text-xs font-light text-gray-500">Already assigned</span>
+                        <span className="text-2xs font-light text-gray-500">Already assigned</span>
                       )}
                     </div>
                   </td>
-                  <td className="w-[30%] px-2 py-2 text-gray-600 align-middle">{employee.empId}</td>
+                  <td className="w-[30%] px-1.5 py-1.5 text-gray-600 align-middle text-xs">
+                    {employee.empId}
+                  </td>
                 </tr>
               );
             })}

@@ -28,7 +28,9 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('pending');
-  const [dateSortBy, setDateSortBy] = useState<'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'>('date-desc');
+  const [dateSortBy, setDateSortBy] = useState<
+    'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
+  >('date-desc');
   const [pendingPage, setPendingPage] = useState(1);
   const [remark, setRemark] = useState('');
   const [approvedPage, setApprovedPage] = useState(1);
@@ -36,11 +38,21 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const isSubmittingRef = useRef(false);
 
   // Use paginated Tanstack Query hooks with separate pagination for each category
-  const { data: pendingData, isLoading: isLoadingPending, isError: isPendingError } =
-    useGetTasksToReviewPaginated(pendingPage);
-  const { data: approvedData, isLoading: isLoadingApproved, isError: isApprovedError } =
-    useGetApprovedTasksPaginated(approvedPage);
-  const { data: deniedData, isLoading: isLoadingDenied, isError: isDeniedError } = useGetDeniedTasksPaginated(deniedPage);
+  const {
+    data: pendingData,
+    isLoading: isLoadingPending,
+    isError: isPendingError,
+  } = useGetTasksToReviewPaginated(pendingPage);
+  const {
+    data: approvedData,
+    isLoading: isLoadingApproved,
+    isError: isApprovedError,
+  } = useGetApprovedTasksPaginated(approvedPage);
+  const {
+    data: deniedData,
+    isLoading: isLoadingDenied,
+    isError: isDeniedError,
+  } = useGetDeniedTasksPaginated(deniedPage);
 
   const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
@@ -221,11 +233,11 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const showInitialSkeleton = isCurrentCategoryLoading && currentTasks.length === 0;
 
   return (
-    <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
+    <div className="px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6 bg-zinc-100 min-h-screen flex flex-col">
       {showInitialSkeleton ? (
         <div className="space-y-2">
-          <Skeleton className="h-9 w-72 bg-muted" />
-          <Skeleton className="h-5 w-96 bg-muted" />
+          <Skeleton className="h-8 w-64 bg-muted" />
+          <Skeleton className="h-4 w-80 bg-muted" />
         </div>
       ) : (
         <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
@@ -234,17 +246,17 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       <div className="flex-1 flex flex-col max-w-7xl 2xl:max-w-440 w-full mx-auto">
         {/* Filter Controls - Compact horizontal layout aligned to right */}
         {showInitialSkeleton ? (
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-4 sm:mt-5 sm:justify-end">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-3 sm:mt-4 sm:justify-end">
             <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
-              <Skeleton className="h-10 w-full bg-muted rounded-full" />
+              <Skeleton className="h-9 w-full bg-muted rounded-full" />
             </div>
             <div className="flex gap-2 shrink-0">
-              <Skeleton className="h-10 w-28 bg-muted rounded-lg" />
-              <Skeleton className="h-10 w-40 bg-muted rounded-lg" />
+              <Skeleton className="h-9 w-24 bg-muted rounded-lg" />
+              <Skeleton className="h-9 w-32 bg-muted rounded-lg" />
             </div>
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-4 sm:mt-5 sm:justify-end">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-3 sm:mt-4 sm:justify-end">
             <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
               <SearchBar
                 searchTerm={searchTerm}
@@ -257,7 +269,9 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
               <SortButton
                 sortBy={dateSortBy as any}
                 onSortChange={(value) =>
-                  setDateSortBy(value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc')
+                  setDateSortBy(
+                    value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
+                  )
                 }
                 options={[
                   { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
@@ -286,7 +300,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           )}
 
           {/* Pagination fixed at bottom */}
-          <div className="mt-auto pt-3 sm:pt-4">
+          <div className="mt-auto pt-2 sm:pt-3">
             <Pagination
               totalPages={totalPages}
               currentPage={currentPage}

@@ -31,13 +31,13 @@ function CurrentAssignedTasksSkeleton() {
         </div>
       </div>
 
-      <section className="flex flex-col gap-3">
-        <Skeleton className="h-8 w-56 rounded-full bg-muted" />
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 items-stretch sm:items-center">
-          <Skeleton className="h-9 w-full rounded-full bg-muted" />
-          <div className="flex gap-2 sm:gap-3">
-            <Skeleton className="h-9 w-36 rounded-lg bg-muted" />
-            <Skeleton className="h-9 w-36 rounded-lg bg-muted" />
+      <section className="flex flex-col gap-2">
+        <Skeleton className="h-6 w-48 rounded-full bg-muted" />
+        <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 lg:gap-3 items-stretch sm:items-center">
+          <Skeleton className="h-7 w-full rounded-full bg-muted" />
+          <div className="flex gap-1.5 sm:gap-2">
+            <Skeleton className="h-7 w-28 rounded-lg bg-muted" />
+            <Skeleton className="h-7 w-28 rounded-lg bg-muted" />
           </div>
         </div>
       </section>
@@ -48,7 +48,7 @@ function CurrentAssignedTasksSkeleton() {
       </section>
 
       <div className="my-10">
-        <Skeleton className="h-10 w-60 mx-auto bg-muted rounded-full" />
+        <Skeleton className="h-8 w-48 mx-auto bg-muted rounded-full" />
       </div>
     </div>
   );
@@ -146,10 +146,10 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
   }
 
   return (
-    <div className="rounded-3xl bg-background px-3 sm:px-4 md:px-6 2xl:px-8 pt-4 sm:pt-6 shadow-sm/50 flex flex-col w-full">
+    <div className="rounded-3xl bg-background px-2 sm:px-3 md:px-4 2xl:px-6 pt-3 sm:pt-4 shadow-sm/50 flex flex-col w-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 sm:mb-5">
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground">Task List</h2>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
+        <h2 className="text-base sm:text-lg font-bold text-foreground">Task List</h2>
 
         {/* View Toggle */}
         <div className="flex bg-card/75 rounded-xl self-end sm:self-auto">
@@ -256,12 +256,12 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
             <SkeletonCard />
           </div>
         ) : isError ? (
-          <div className="text-center py-10">
-            <p className="text-red-500 text-base">Error loading tasks. Please try again.</p>
+          <div className="text-center py-8">
+            <p className="text-red-500 text-sm">Error loading tasks. Please try again.</p>
           </div>
         ) : memoizedTasks.length === 0 ? (
-          <div className="text-center py-6">
-            <p className="text-gray-500 text-base">No tasks assigned yet.</p>
+          <div className="text-center py-5">
+            <p className="text-gray-500 text-sm">No tasks assigned yet.</p>
           </div>
         ) : viewMode === 'task' ? (
           memoizedTasks.map((task: any) => <TaskViewCard key={task.id} task={task} />)

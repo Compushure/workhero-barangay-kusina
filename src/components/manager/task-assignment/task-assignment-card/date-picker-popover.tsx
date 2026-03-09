@@ -26,14 +26,16 @@ export function DatePickerPopover({ deadline, onDeadlineChange }: DatePickerPopo
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="bg-zinc-50 text-primary flex items-center gap-6 cursor-pointer transition-all duration-400 ease-in-out shadow-sm/25 hover:bg-accent/15">
-          <CalendarIcon className="size-4 text-accent" />
-          <span className={`${deadline ? 'text-accent' : 'text-secondary'}`}>{deadlineDisplay}</span>
-          <ChevronDown className="w-4 h-4" />
+        <Button className="bg-zinc-50 text-primary flex items-center gap-4 cursor-pointer transition-all duration-400 ease-in-out shadow-sm/25 hover:bg-accent/15 text-sm h-8">
+          <CalendarIcon className="size-3.5 text-accent" />
+          <span className={`${deadline ? 'text-accent' : 'text-secondary'}`}>
+            {deadlineDisplay}
+          </span>
+          <ChevronDown className="w-3.5 h-3.5" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto cursor-pointer p-0 bg-white" align="start">
-        <div className="p-3">
+        <div className="p-2">
           <Calendar
             mode="single"
             selected={deadline || undefined}

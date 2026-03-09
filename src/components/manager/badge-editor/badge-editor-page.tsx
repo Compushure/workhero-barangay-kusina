@@ -30,6 +30,7 @@ import {
   useUploadBadgeImage,
 } from '@/hooks/tanstack';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
+import { PageHeader } from '../task-verification/page-header';
 
 type BadgeSortOption = 'name-asc' | 'points-desc' | 'created-desc' | 'created-asc';
 
@@ -247,77 +248,77 @@ export function BadgeEditorPage() {
           <BadgeEditorHeaderSkeleton />
         ) : (
           <>
-            <div className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Badge Editor</h1>
-              <p className="text-sm sm:text-base lg:text-lg text-secondary">Create, edit, and manage badges with conditions.</p>
-            </div>
+            <PageHeader
+              title="Badge Editor"
+              subtitle="Create, edit, and manage badges with conditions."
+            />
 
             <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
               {/* Badge Count Display */}
-              <div className="flex gap-3 sm:gap-4 text-base sm:text-lg font-bold text-foreground pl-1 sm:pl-2">
-            <h5 className="flex items-center gap-2">
-              <Coins size={20} className="text-accent" />
-              Badges{' '}
-              <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
-                {totalCount ?? 0}
-              </span>
-            </h5>
-          </div>
+              <div className="flex gap-2 sm:gap-3 text-sm sm:text-base font-bold text-foreground pl-0.5 sm:pl-1">
+                <h5 className="flex items-center gap-1.5">
+                  <Coins size={16} className="text-accent" />
+                  Badges
+                  <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-full text-xs ml-0.5 shadow-sm/25">
+                    {totalCount ?? 0}
+                  </span>
+                </h5>
+              </div>
 
-          {/* Search, Sort, and Add Button */}
-          <div className="flex flex-wrap gap-2 sm:gap-3 items-center justify-start lg:justify-end">
-            {/* Search Input */}
-            <div className="relative flex">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by badge name or description"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
-              />
-            </div>
+              {/* Search, Sort, and Add Button */}
+              <div className="flex flex-wrap gap-2 sm:gap-3 items-center justify-start lg:justify-end">
+                {/* Search Input */}
+                <div className="relative flex">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by badge name or description"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
+                  />
+                </div>
 
-            <BadgeFilterToggle filterMode={filterMode} onFilterChange={handleFilterChange} />
+                <BadgeFilterToggle filterMode={filterMode} onFilterChange={handleFilterChange} />
 
-            {/* Sort Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+                {/* Sort Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="default"
+                      size="default"
+                      className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-full sm:w-48 py-2 justify-between border border-gray-200"
+                    >
+                      <span className="truncate">{currentSortLabel}</span>
+                      <ArrowUpDown size={18} className="text-accent" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background w-56">
+                    {SORT_OPTIONS.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => handleSortChange(option.value)}
+                        className={`cursor-pointer transition-all duration-300 ease-in-out ${
+                          sortOption === option.value ? 'bg-accent/15' : ''
+                        }`}
+                      >
+                        {option.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Add New Badge Button */}
                 <Button
-                  variant="default"
-                  size="default"
-                  className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-full sm:w-48 py-2 justify-between border border-gray-200"
+                  onClick={handleOpenAddDialog}
+                  className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-3 sm:px-4 py-2 rounded-full shadow-sm/25 font-semibold text-sm w-full sm:w-48 justify-between"
                 >
-                  <span className="truncate">{currentSortLabel}</span>
-                  <ArrowUpDown size={18} className='text-accent'/>
+                  <Coins size={18} />
+                  <span className="inline">Add New Badge</span>
+                  <Plus size={18} />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background w-56">
-                {SORT_OPTIONS.map((option) => (
-                  <DropdownMenuItem
-                    key={option.value}
-                    onClick={() => handleSortChange(option.value)}
-                    className={`cursor-pointer transition-all duration-300 ease-in-out ${
-                      sortOption === option.value ? 'bg-accent/15' : ''
-                    }`}
-                  >
-                    {option.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Add New Badge Button */}
-            <Button
-              onClick={handleOpenAddDialog}
-              className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-3 sm:px-4 py-2 rounded-full shadow-sm/25 font-semibold text-sm w-full sm:w-48 justify-between"
-            >
-              <Coins size={18} />
-              <span className="inline">Add New Badge</span>
-              <Plus size={18} />
-            </Button>
-          </div>
-        </section>
+              </div>
+            </section>
           </>
         )}
 

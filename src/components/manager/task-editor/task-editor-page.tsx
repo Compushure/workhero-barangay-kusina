@@ -31,6 +31,7 @@ import {
   type TaskRepeatabilityFilter,
 } from './task-repeatability-filter-toggle';
 import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
+import { PageHeader } from '../task-verification/page-header';
 
 const SORT_OPTIONS: { value: TaskCategorySortOption; label: string }[] = [
   { value: 'name-asc', label: 'Name (A-Z)' },
@@ -162,88 +163,92 @@ export default function TaskEditorPage() {
     SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Name (A-Z)';
 
   return (
-    <main className="w-full min-h-screen bg-zinc-100 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
-      <div className="mx-auto w-full max-w-7xl 2xl:max-w-440 space-y-5 sm:space-y-6 lg:space-y-8">
+    <main className="w-full min-h-screen bg-zinc-100 px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6">
+      <div className="mx-auto w-full max-w-7xl 2xl:max-w-440 space-y-3 sm:space-y-4 lg:space-y-5">
         {isLoading ? (
           <TaskEditorHeaderSkeleton />
         ) : (
           <>
-            <div className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Task Editor</h1>
-              <p className="text-sm sm:text-base lg:text-lg text-secondary">Add, Edit, Delete assignable tasks in this page.</p>
-            </div>
+            {/* <div className="space-y-1.5">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Task Editor</h1>
+              <p className="text-xs sm:text-sm lg:text-base text-secondary">Add, Edit, Delete assignable tasks in this page.</p>
+            </div> */}
+            <PageHeader
+              title="Task Editor"
+              subtitle="Add, Edit, Delete assignable tasks in this page."
+            />
 
             {/* Task Categories Count Display */}
-            <section className="flex gap-3 sm:gap-4 text-base sm:text-lg font-bold text-foreground pl-1 sm:pl-2">
-          <h5 className="flex items-center gap-2">
-            <ListTodo size={20} className="text-accent" />
-            Categories{' '}
-            <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
-              {totalCount ?? 0}
-            </span>
-          </h5>
-        </section>
+            <section className="flex gap-2 sm:gap-3 text-sm sm:text-base font-bold text-foreground pl-1">
+              <h5 className="flex items-center gap-1.5">
+                <ListTodo size={16} className="text-accent" />
+                Categories{' '}
+                <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-full text-xs ml-1 shadow-sm/25">
+                  {totalCount ?? 0}
+                </span>
+              </h5>
+            </section>
 
-        {/* Search, Sort, and Add Button - Always visible, stacked on mobile */}
-        <section className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center justify-start sm:justify-end">
-          {/* Search Input */}
-          <div className="relative flex w-full sm:w-auto sm:min-w-50">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by task name, type, or description"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
-            />
-          </div>
+            {/* Search, Sort, and Add Button - Always visible, stacked on mobile */}
+            <section className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-start sm:justify-end">
+              {/* Search Input */}
+              <div className="relative flex w-full sm:w-auto sm:min-w-44">
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by task name, type, or description"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="w-full pl-9 pr-3 py-1.5 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
+                />
+              </div>
 
-          <TaskRepeatabilityFilterToggle
-            value={repeatabilityFilter}
-            onChange={handleRepeatabilityFilterChange}
-          />
+              <TaskRepeatabilityFilterToggle
+                value={repeatabilityFilter}
+                onChange={handleRepeatabilityFilterChange}
+              />
 
-          {/* Sort and Add Button Row */}
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-            {/* Sort Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              {/* Sort and Add Button Row */}
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                {/* Sort Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="default"
+                      size="default"
+                      className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-40 py-1.5 justify-between border border-gray-200 h-8 text-xs"
+                    >
+                      <span className="truncate">{currentSortLabel}</span>
+                      <ArrowUpDown size={14} className="text-accent" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background w-48">
+                    {SORT_OPTIONS.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => handleSortChange(option.value)}
+                        className={`cursor-pointer transition-all duration-300 ease-in-out text-xs ${
+                          sortOption === option.value ? 'bg-accent/15' : ''
+                        }`}
+                      >
+                        {option.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Add New Category Button */}
                 <Button
-                  variant="default"
-                  size="default"
-                  className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-48 py-2 justify-between border border-gray-200"
+                  onClick={handleOpenAddDialog}
+                  className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out w-full sm:w-auto px-3 sm:px-4 py-1.5 rounded-full shadow-sm/25 font-semibold text-xs whitespace-nowrap justify-center h-8"
                 >
-                  <span className="truncate">{currentSortLabel}</span>
-                  <ArrowUpDown size={18} className='text-accent'/>
+                  <ChefHat size={14} />
+                  <span className="hidden sm:inline">Add New Category</span>
+                  <span className="sm:hidden">Add New Category</span>
+                  <Plus size={14} className="ml-1 sm:ml-3" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background w-56">
-                {SORT_OPTIONS.map((option) => (
-                  <DropdownMenuItem
-                    key={option.value}
-                    onClick={() => handleSortChange(option.value)}
-                    className={`cursor-pointer transition-all duration-300 ease-in-out ${
-                      sortOption === option.value ? 'bg-accent/15' : ''
-                    }`}
-                  >
-                    {option.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Add New Category Button */}
-            <Button
-              onClick={handleOpenAddDialog}
-              className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out w-full sm:w-auto px-4 sm:px-6 py-2 rounded-full shadow-sm/25 font-semibold text-sm whitespace-nowrap justify-center"
-            >
-              <ChefHat size={18} />
-              <span className="hidden sm:inline">Add New Category</span>
-              <span className="sm:hidden">Add New Category</span>
-              <Plus size={18} className="ml-1 sm:ml-4" />
-            </Button>
-          </div>
-        </section>
+              </div>
+            </section>
           </>
         )}
 
@@ -258,7 +263,7 @@ export default function TaskEditorPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="my-6">
+          <div className="my-4">
             <Pagination
               totalPages={totalPages}
               currentPage={page}

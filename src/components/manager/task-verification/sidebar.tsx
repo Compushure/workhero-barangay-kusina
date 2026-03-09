@@ -132,7 +132,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
   return (
     <>
       <aside
-        className={`hidden overflow-hidden bg-background text-[#131C2A] transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between z-100 shadow-sm/25 ${
+        className={`hidden overflow-hidden bg-background text-[#131C2A] transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between z-50 shadow-sm/25 ${
           isCollapsed ? 'w-18' : 'w-52 lg:w-56'
         }`}
       >
