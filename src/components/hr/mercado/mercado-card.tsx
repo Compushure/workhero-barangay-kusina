@@ -21,7 +21,7 @@ interface MercadoItem {
   quantity?: number;
   isActive?: boolean;
   imageUrl?: string;
-  createdAt?: string;
+  createdAt?: string | Date | null;
   availableMonth?: AvailabilityInterval | null;
   availableDate?: string | Date | null;
 }
@@ -76,6 +76,10 @@ export const MercadoCard = memo(function MercadoCard({
     return formatDateShort(item.availableDate, '');
   }, [item.availableDate]);
 
+  const createdAtText = useMemo(() => {
+    return formatDateShort(item.createdAt, 'N/A');
+  }, [item.createdAt]);
+
   return (
     <div
       className="bg-background border border-border rounded-xl p-3.5 flex items-start gap-3.5 relative shadow-sm hover:shadow-md transition-all min-h-32 cursor-pointer hover:border-accent/50 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
@@ -110,7 +114,9 @@ export const MercadoCard = memo(function MercadoCard({
       </div>
 
       <div className="flex-1 min-w-0 pr-10 flex flex-col gap-1">
-        <h3 className="text-base sm:text-lg font-semibold text-primary truncate leading-tight">{item.name}</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-primary truncate leading-tight">
+          {item.name}
+        </h3>
 
         <div className="flex min-h-5 items-center gap-1.5 flex-wrap">
           {availableDateText && (
@@ -150,6 +156,10 @@ export const MercadoCard = memo(function MercadoCard({
             )
           )}
         </div>
+
+        <p className="text-muted-foreground text-xs sm:text-sm truncate">
+          Created at: {createdAtText}
+        </p>
 
         <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
