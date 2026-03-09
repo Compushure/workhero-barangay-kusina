@@ -13,6 +13,7 @@ import { Search, Plus, Users } from 'lucide-react';
 import type { AssignedEmployee, AssignedTask } from '@/types';
 import AssignEmployeesTable from './assign-employees-table';
 import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 interface AssignEmployeesDialogProps {
   selectedEmployees: AssignedEmployee[];
@@ -67,9 +68,10 @@ export function AssignEmployeesDialog({
   }, []);
 
   const filteredEmployees = useMemo(() => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = normalizeSearchQuery(searchTerm);
     return employees.filter(
       (emp) =>
+        !searchLower ||
         emp.name.toLowerCase().includes(searchLower) ||
         emp.empId.toLowerCase().includes(searchLower)
     );
@@ -143,9 +145,9 @@ export function AssignEmployeesDialog({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search employee or ID"
+              placeholder="Search by employee name or employee ID"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
               className="w-full pl-10 pr-4 py-2 rounded-full bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent"
             />
           </div>

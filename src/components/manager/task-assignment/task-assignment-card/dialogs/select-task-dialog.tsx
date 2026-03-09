@@ -23,6 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 interface SelectTasksDialogProps {
   selectedTask: string[];
@@ -76,7 +77,7 @@ export function SelectTasksDialog({
   }, []);
 
   const filteredTasks = tasks.filter((task) => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = normalizeSearchQuery(searchTerm);
     const matchesSearch = task.name.toLowerCase().includes(searchLower);
     const matchesType = filterType === 'all' || task.type === filterType;
     return matchesSearch && matchesType;
@@ -167,7 +168,7 @@ export function SelectTasksDialog({
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
-    setSearchTerm(e.target.value);
+    setSearchTerm(sanitizeSearchInput(e.target.value));
   };
 
   const handleFilterChange = (value: string) => {
@@ -202,7 +203,7 @@ export function SelectTasksDialog({
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Search by task name"
                 value={searchTerm}
                 onChange={handleSearchChange}
                 onClick={(e) => e.stopPropagation()}

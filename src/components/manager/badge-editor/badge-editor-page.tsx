@@ -29,6 +29,7 @@ import {
   useGetBadges,
   useUploadBadgeImage,
 } from '@/hooks/tanstack';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 type BadgeSortOption = 'name-asc' | 'points-desc' | 'created-desc' | 'created-asc';
 
@@ -63,7 +64,8 @@ export function BadgeEditorPage() {
 
   // Mock data filtering and sorting
   let filteredBadges = badges.filter((badge) => {
-    const searchLower = debouncedSearchTerm.toLowerCase();
+    const searchLower = normalizeSearchQuery(debouncedSearchTerm);
+    if (!searchLower) return true;
     return (
       badge.name.toLowerCase().includes(searchLower) ||
       badge.description?.toLowerCase().includes(searchLower)
@@ -217,7 +219,7 @@ export function BadgeEditorPage() {
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+    setSearchTerm(sanitizeSearchInput(e.target.value));
     setPage(1);
   };
 
@@ -269,7 +271,7 @@ export function BadgeEditorPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search badges..."
+                placeholder="Search by badge name or description"
                 value={searchTerm}
                 onChange={handleSearchChange}
                 className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"

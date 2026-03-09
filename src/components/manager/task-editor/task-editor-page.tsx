@@ -26,14 +26,18 @@ import { Pagination } from '@/components/manager/task-verification/pagination';
 import type { TaskCategory } from '@/types/manager/task-editor';
 import type { AddTaskInput } from '@/zod/schemas/task';
 import { TaskEditorHeaderSkeleton } from './task-editor-header-skeleton';
+import {
+  TaskRepeatabilityFilterToggle,
+  type TaskRepeatabilityFilter,
+} from './task-repeatability-filter-toggle';
+import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 const SORT_OPTIONS: { value: TaskCategorySortOption; label: string }[] = [
-  { value: 'type-name', label: 'Type & Name' },
+  { value: 'name-asc', label: 'Name (A-Z)' },
+  { value: 'name-desc', label: 'Name (Z-A)' },
   { value: 'recently-created', label: 'Recently Created' },
   { value: 'points-desc', label: 'Points (High to Low)' },
   { value: 'xp-desc', label: 'XP (High to Low)' },
-  { value: 'repeatable-only', label: 'Repeatable Only' },
-  { value: 'non-repeatable-only', label: 'Non-Repeatable Only' },
 ];
 
 export default function TaskEditorPage() {
@@ -41,7 +45,8 @@ export default function TaskEditorPage() {
   const [editingTask, setEditingTask] = useState<TaskCategory | null>(null);
   const [saveError, setSaveError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortOption, setSortOption] = useState<TaskCategorySortOption>('type-name');
+  const [sortOption, setSortOption] = useState<TaskCategorySortOption>('name-asc');
+  const [repeatabilityFilter, setRepeatabilityFilter] = useState<TaskRepeatabilityFilter>('all');
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
@@ -53,7 +58,13 @@ export default function TaskEditorPage() {
     data: paginatedData,
     isLoading,
     isError,
-  } = useGetTaskCategoriesPaginated(page, pageSize, sortOption, debouncedSearchTerm);
+  } = useGetTaskCategoriesPaginated(
+    page,
+    pageSize,
+    sortOption,
+    debouncedSearchTerm,
+    repeatabilityFilter
+  );
 
   const tasks = paginatedData?.tasks || [];
   const totalPages = paginatedData?.totalPages || 1;
@@ -129,7 +140,7 @@ export default function TaskEditorPage() {
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+    setSearchTerm(sanitizeSearchInput(e.target.value));
     setPage(1); // Reset to first page when searching
   };
 
@@ -138,12 +149,17 @@ export default function TaskEditorPage() {
     setPage(1); // Reset to first page when sorting
   };
 
+  const handleRepeatabilityFilterChange = (value: TaskRepeatabilityFilter) => {
+    setRepeatabilityFilter(value);
+    setPage(1);
+  };
+
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
   const currentSortLabel =
-    SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Type & Name';
+    SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Name (A-Z)';
 
   return (
     <main className="w-full min-h-screen bg-zinc-100 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
@@ -175,12 +191,17 @@ export default function TaskEditorPage() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search tasks..."
+              placeholder="Search by task name, type, or description"
               value={searchTerm}
               onChange={handleSearchChange}
               className="w-full pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
             />
           </div>
+
+          <TaskRepeatabilityFilterToggle
+            value={repeatabilityFilter}
+            onChange={handleRepeatabilityFilterChange}
+          />
 
           {/* Sort and Add Button Row */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">

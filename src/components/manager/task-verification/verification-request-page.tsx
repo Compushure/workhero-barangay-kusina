@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/manager/task-verification/page-header';
 import { SearchBar } from '@/components/manager/task-verification/search-bar';
 import { SortButton } from '@/components/manager/task-verification/sort-button';
@@ -17,15 +18,17 @@ import {
   useApproveTask,
   useRejectTask,
 } from '@/hooks/tanstack';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 interface VerificationRequestsPageProps {
   initialRequests: VerificationRequest[];
 }
 
 export function VerificationRequestsPage({ initialRequests }: VerificationRequestsPageProps) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('pending');
-  const [dateSortBy, setDateSortBy] = useState<'date-desc' | 'date-asc' | 'employee'>('date-desc');
+  const [dateSortBy, setDateSortBy] = useState<'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'>('date-desc');
   const [pendingPage, setPendingPage] = useState(1);
   const [remark, setRemark] = useState('');
   const [approvedPage, setApprovedPage] = useState(1);
@@ -33,14 +36,22 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const isSubmittingRef = useRef(false);
 
   // Use paginated Tanstack Query hooks with separate pagination for each category
-  const { data: pendingData, isLoading: isLoadingPending } =
+  const { data: pendingData, isLoading: isLoadingPending, isError: isPendingError } =
     useGetTasksToReviewPaginated(pendingPage);
-  const { data: approvedData, isLoading: isLoadingApproved } =
+  const { data: approvedData, isLoading: isLoadingApproved, isError: isApprovedError } =
     useGetApprovedTasksPaginated(approvedPage);
-  const { data: deniedData, isLoading: isLoadingDenied } = useGetDeniedTasksPaginated(deniedPage);
+  const { data: deniedData, isLoading: isLoadingDenied, isError: isDeniedError } = useGetDeniedTasksPaginated(deniedPage);
 
   const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
+
+  useEffect(() => {
+    if (isPendingError && isApprovedError && isDeniedError) {
+      router.push(
+        `/error?status=500&cause=${encodeURIComponent('Failed to load verification requests')}&recommendation=${encodeURIComponent('Please refresh the page or try again later.')}`
+      );
+    }
+  }, [isPendingError, isApprovedError, isDeniedError, router]);
 
   // Extract tasks based on current sort category - memoized to prevent unnecessary recalculations
   const getCurrentTasks = useMemo(() => {
@@ -110,14 +121,15 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   // Filter and sort requests based on search term and date/employee sorting
   const filteredRequests = useMemo(() => {
     let filtered = currentTasks;
+    const normalizedSearch = normalizeSearchQuery(searchTerm);
 
     // Apply search filter
-    if (searchTerm) {
+    if (normalizedSearch) {
       filtered = filtered.filter(
         (req) =>
-          req.assigned_to_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          req.assigned_to_employee_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          req.category_name?.toLowerCase().includes(searchTerm.toLowerCase())
+          req.assigned_to_name?.toLowerCase().includes(normalizedSearch) ||
+          req.assigned_to_employee_id?.toLowerCase().includes(normalizedSearch) ||
+          req.category_name?.toLowerCase().includes(normalizedSearch)
       );
     }
 
@@ -134,10 +146,15 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           const dateB = new Date(b.kpitask_completed_at || b.kpitask_created_at || 0).getTime();
           return dateA - dateB; // Oldest first
         }
-        case 'employee': {
+        case 'employee-asc': {
           const nameA = a.assigned_to_name || '';
           const nameB = b.assigned_to_name || '';
           return nameA.localeCompare(nameB); // Alphabetical by employee name
+        }
+        case 'employee-desc': {
+          const nameA = a.assigned_to_name || '';
+          const nameB = b.assigned_to_name || '';
+          return nameB.localeCompare(nameA);
         }
         default:
           return 0;
@@ -229,17 +246,24 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
         ) : (
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-4 sm:mt-5 sm:justify-end">
             <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
-              <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+              <SearchBar
+                searchTerm={searchTerm}
+                onSearchChange={(value) => setSearchTerm(sanitizeSearchInput(value))}
+                placeholder="Search by employee name or employee ID"
+              />
             </div>
             <div className="flex gap-2 shrink-0">
               <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="mercado" />
               <SortButton
                 sortBy={dateSortBy as any}
-                onSortChange={(value) => setDateSortBy(value as 'date-desc' | 'date-asc' | 'employee')}
+                onSortChange={(value) =>
+                  setDateSortBy(value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc')
+                }
                 options={[
                   { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
                   { value: 'date-asc' as any, label: 'Date (Oldest)' },
-                  { value: 'employee' as any, label: 'Employee Name' },
+                  { value: 'employee-asc' as any, label: 'Employee Name (A-Z)' },
+                  { value: 'employee-desc' as any, label: 'Employee Name (Z-A)' },
                 ]}
                 styleVariant="mercado"
               />

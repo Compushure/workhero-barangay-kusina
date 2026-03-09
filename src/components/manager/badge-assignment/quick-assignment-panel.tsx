@@ -12,6 +12,7 @@ import {
 import { HelpCircle, Coins, Search, ArrowUpDown } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { BadgeAssignmentUser, BadgeSummary } from '@/types/manager/badge-assignment';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 interface QuickAssignmentPanelProps {
   badges: BadgeSummary[];
@@ -50,22 +51,28 @@ export default function QuickAssignmentPanel({
 
   // Note: badges are already paginated from parent, just filter them locally
   const filteredBadges = useMemo(
-    () =>
-      badges.filter(
+    () => {
+      const normalizedSearch = normalizeSearchQuery(debouncedBadgeSearch);
+      return badges.filter(
         (badge) =>
-          badge.name.toLowerCase().includes(debouncedBadgeSearch.toLowerCase()) ||
-          badge.description?.toLowerCase().includes(debouncedBadgeSearch.toLowerCase())
-      ),
+          !normalizedSearch ||
+          badge.name.toLowerCase().includes(normalizedSearch) ||
+          badge.description?.toLowerCase().includes(normalizedSearch)
+      );
+    },
     [badges, debouncedBadgeSearch]
   );
 
   // Filter users
   const filteredUsers = useMemo(() => {
+    const normalizedSearch = normalizeSearchQuery(debouncedUserSearch);
+
     const filtered = users.filter(
       (user) =>
-        user.name.toLowerCase().includes(debouncedUserSearch.toLowerCase()) ||
-        user.email.toLowerCase().includes(debouncedUserSearch.toLowerCase()) ||
-        (user.employee_id || '').toLowerCase().includes(debouncedUserSearch.toLowerCase())
+        !normalizedSearch ||
+        user.name.toLowerCase().includes(normalizedSearch) ||
+        user.email.toLowerCase().includes(normalizedSearch) ||
+        (user.employee_id || '').toLowerCase().includes(normalizedSearch)
     );
 
     return [...filtered].sort((a, b) => {
@@ -116,9 +123,9 @@ export default function QuickAssignmentPanel({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
             <Input
-              placeholder="Search badges..."
+              placeholder="Search by badge name or description"
               value={badgeSearchTerm}
-              onChange={(e) => setBadgeSearchTerm(e.target.value)}
+              onChange={(e) => setBadgeSearchTerm(sanitizeSearchInput(e.target.value))}
               className="pl-10 bg-card border-accent/25 focus:border-accent h-9 text-sm shadow-sm/25"
             />
           </div>
@@ -272,9 +279,9 @@ export default function QuickAssignmentPanel({
               <div className="relative w-full sm:w-64 md:w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                 <Input
-                  placeholder="Search users..."
+                  placeholder="Search by employee name, email, or ID"
                   value={userSearchTerm}
-                  onChange={(e) => setUserSearchTerm(e.target.value)}
+                  onChange={(e) => setUserSearchTerm(sanitizeSearchInput(e.target.value))}
                   className="pl-10 bg-card border-accent/25 focus:border-accent h-9 text-sm shadow-sm/25 w-full sm:w-64 md:w-full"
                 />
               </div>

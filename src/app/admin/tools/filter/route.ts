@@ -33,6 +33,7 @@ const SEARCH_MAP: Record<string, string> = {
   name: 'user_name',
   email: 'user_email',
   employeeid: 'employee_id',
+  employee_id: 'employee_id',
 };
 
 function normalizeOrder(input?: string): SortOrder {
