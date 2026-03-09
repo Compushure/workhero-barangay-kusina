@@ -8,7 +8,7 @@
 
 :root {
   --background: #fcf6e3; /* Soft pastel yellow */
-  --background-soft: #FFFDF5;
+  --background-soft: #fffdf5;
   --foreground: #131c2a;
   --card: #fafafa;
   --card-foreground: #131c2a;
@@ -54,16 +54,6 @@
   /* --radius: 0.5rem; */
   --radius: 0.625rem;
 
-  /* Sidebar specific colors */
-  /* --sidebar: #fafafa;
-  --sidebar-foreground: #514937;
-  --sidebar-primary: #514937;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f2d0a7;
-  --sidebar-accent-foreground: #514937;
-  --sidebar-border: #e0e0e0;
-  --sidebar-ring: #f28705; */
-
   --sidebar: #fff0ec;
   --sidebar-foreground: #5a2a2a;
   --sidebar-primary: #a83232;
@@ -72,6 +62,10 @@
   --sidebar-accent-foreground: #5a2a2a;
   --sidebar-border: #e0cfcf;
   --sidebar-ring: #a83232;
+
+  --wood: #5c3b23;
+  --wood-light: #7d5936;
+  --pixel-border: #47331f;
 }
 
 ::-webkit-scrollbar {
@@ -121,6 +115,9 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-row-hover: var(--row-hover);
+  --color-wood: var(--wood);
+  --color-wood-light: var(--wood-light);
+  --color-pixel-border: var(--pixel-border);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -179,13 +176,13 @@
 
 .hr-theme {
   /* Soft off-white/cream background */
-  --background: oklch(0.98 0.01 80); 
-  
+  --background: oklch(0.98 0.01 80);
+
   /* Dark charcoal for main text */
-  --foreground: oklch(0.25 0.02 90); 
+  --foreground: oklch(0.25 0.02 90);
 
   /* The distinct light yellow/cream card color */
-  --card: oklch(0.96 0.04 85); 
+  --card: oklch(0.96 0.04 85);
   --card-foreground: oklch(0.25 0.02 90);
 
   /* Popovers matching the card style */
@@ -193,23 +190,23 @@
   --popover-foreground: oklch(0.25 0.02 90);
 
   /* The signature WorkHero Orange */
-  --primary: oklch(0.70 0.19 45); 
+  --primary: oklch(0.7 0.19 45);
   --primary-foreground: oklch(0.99 0 0);
 
   /* Muted elements and secondary buttons */
   --secondary: oklch(0.92 0.02 85);
-  --secondary-foreground: oklch(0.40 0.05 45);
+  --secondary-foreground: oklch(0.4 0.05 45);
 
   /* Soft borders or disabled states */
-  --muted: oklch(0.90 0.02 85);
-  --muted-foreground: oklch(0.50 0.05 45);
+  --muted: oklch(0.9 0.02 85);
+  --muted-foreground: oklch(0.5 0.05 45);
 
   /* Hover states and accents (Lighter orange/gold) */
   --accent: oklch(0.85 0.12 75);
-  --accent-foreground: oklch(0.30 0.10 45);
+  --accent-foreground: oklch(0.3 0.1 45);
 
   /* Standard destructive red */
-  --destructive: oklch(0.60 0.20 25);
+  --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: oklch(0.99 0 0);
 }
 
@@ -265,9 +262,17 @@
     background-image: var(--primary-gradient);
   }
 
+  .wood-panel {
+    background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 100%);
+    border: 3px solid var(--pixel-border);
+  }
+
   .animate-launcher-shadow {
     animation: launcher-shadow-blink 1.6s ease-in-out infinite;
   }
+}
+
+@layer components {
 }
 
 @keyframes launcher-shadow-blink {
@@ -281,4 +286,3 @@
     box-shadow: 0 0 8px 2px rgba(244, 185, 37, 0.35);
   }
 }
-

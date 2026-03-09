@@ -16,27 +16,19 @@ export function TasksPage() {
   } = data ?? {};
 
   return (
-    <div className="min-h-screen flex flex-col bg-[radial-gradient(circle,#FFFCF5_0%,#EFC18F_40%,#D68B5C_75%,#60203D_100%)]">
+    <div className="min-h-screen w-full flex flex-col bg-[radial-gradient(circle,#FFFCF5_0%,#EFC18F_40%,#D68B5C_75%,#60203D_100%)]">
 
       <header className='fixed z-50 w-screen'>
         <HeaderHUD />
       </header>
       
-      <div className="flex flex-row gap-8 w-full max-w-400 mx-auto z-10">
-        {/* Left column: Navigation */}
-        {/* <div className="w-30 z-10 shrink-0">
-          <NavSection />
-        </div> */}
-
-        {/* Right column: Task board */}
-        <div className="flex-1 min-w-0 p-4">
-          <TaskStatusBoard
-            currentTasks={currentTasks}
-            inReviewTasks={onReviewTasks}
-            verifiedTasks={verifiedTasks}
-            rejectedTasks={deniedTasks}
-          />
-        </div>
+      <div className="flex flex-row w-full mx-auto p-4">
+        <TaskStatusBoard
+          currentTasks={currentTasks}
+          inReviewTasks={onReviewTasks}
+          verifiedTasks={verifiedTasks}
+          rejectedTasks={deniedTasks}
+        />
       </div>
 
     </div>

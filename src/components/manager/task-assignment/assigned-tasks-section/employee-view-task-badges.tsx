@@ -40,7 +40,7 @@ export default function EmployeeViewTaskBadges({
   setShowRemoveConfirm,
 }: EmployeeViewTaskBadgesProps) {
   return (
-    <div className="flex flex-col flex-1 min-w-0 pl-0 lg:pl-4 pr-0 lg:pr-2 pt-3 lg:pt-0 border-t lg:border-t-0 border-l-0 lg:border-l-2 border-accent/20">
+    <div className="flex flex-col flex-1 min-w-0 w-full pl-0 lg:pl-4 pr-0 lg:pr-2 pt-3 lg:pt-0 border-t lg:border-t-0 border-l-0 lg:border-l-2 border-accent/20">
       <div className="flex items-start sm:items-center justify-between gap-2 mb-3 sm:mb-4 lg:pr-12">
         <h4 className="text-base sm:text-lg font-bold text-foreground">
           Current Tasks{' '}
@@ -64,7 +64,13 @@ export default function EmployeeViewTaskBadges({
           const taskEmployee = task.assignedEmployees?.find((emp) => emp.id === employee.id);
           const completedOrders = taskEmployee?.completedOrders || 0;
 
-          const StatusIcon = ({ icon: Icon, className = '' }: { icon: any; className?: string }) => (
+          const StatusIcon = ({
+            icon: Icon,
+            className = '',
+          }: {
+            icon: any;
+            className?: string;
+          }) => (
             <p className={`flex gap-1 ${className} px-2 py-1 rounded-full items-center`}>
               <Icon strokeWidth={2.5} className="size-4" />
               <span className="hidden sm:inline text-xs">
@@ -83,7 +89,7 @@ export default function EmployeeViewTaskBadges({
           return (
             <div
               key={task.id}
-              className="flex flex-col lg:flex-row lg:items-start gap-2 lg:gap-3 bg-white px-3 py-3 rounded-2xl border-2 border-accent/25 h-full"
+              className="relative flex flex-col md:flex-row md:items-start gap-2 md:gap-3 bg-white pl-3 pr-8 py-3 rounded-2xl border-2 border-accent/25 h-full"
             >
               <div className="flex flex-col min-w-0 flex-1 gap-1">
                 <span className="truncate text-zinc-700 text-sm sm:text-base font-semibold">
@@ -93,7 +99,8 @@ export default function EmployeeViewTaskBadges({
                   <p
                     className={`block w-fit text-xs text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}
                   >
-                    {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end) || 'No deadline'}
+                    {formatDate(task.dateRange.start)} -{' '}
+                    {formatDate(task.dateRange.end) || 'No deadline'}
                   </p>
 
                   {task.status === 'assigned' ? (
@@ -108,45 +115,49 @@ export default function EmployeeViewTaskBadges({
                 </div>
               </div>
 
-              <div className="flex w-full lg:w-auto items-start lg:items-end justify-between lg:justify-start gap-2 lg:gap-3 shrink-0">
-                <div className="flex gap-1 flex-nowrap items-center">
-                  {taskEmployee?.pendingOrders === 0 && task.status === 'approved' && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="flex px-1.5 py-1 rounded-full items-center bg-green-100 text-green-600">
-                          <HandCoins strokeWidth={2.5} className="size-4" />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="top"
-                        align="center"
-                        className="bg-green-100 text-green-600 border-green-200"
-                      >
-                        Points claimed
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
+              <div className="flex w-full md:w-auto items-start md:items-end justify-between md:justify-start gap-0 md:gap-1 shrink-0">
+                <div className="flex md:flex-col items-center md:items-end gap-3 md:gap-1">
+                  <div className="flex gap-1 flex-nowrap items-center">
+                    {taskEmployee?.pendingOrders === 0 && task.status === 'approved' && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex px-1.5 py-1 rounded-full items-center bg-green-100 text-green-600">
+                            <HandCoins strokeWidth={2.5} className="size-4" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          align="center"
+                          className="bg-green-100 text-green-600 border-green-200"
+                        >
+                          Points claimed
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
 
-                  <span
-                    className={`flex text-xs sm:text-sm leading-none items-end px-2 pt-0.5 pb-1 rounded-full ${completedOrders === task.maxOrders ? 'bg-green-100 text-green-600 font-bold' : 'text-zinc-500'}`}
-                  >
-                    <Soup strokeWidth={1.75} className="size-4 sm:size-5 mr-1" />
-                    {completedOrders} / {task.maxOrders}
-                  </span>
-                </div>
-
-                <div className="flex items-end gap-2 text-zinc-500 pr-0 sm:pr-1">
-                  <p className="flex gap-1 items-end font-semibold text-xs sm:text-sm leading-none">
-                    <Coins strokeWidth={2.5} className="size-3.5 sm:size-4" />
-                    <span className="inline-block">{task.points}</span>
-                  </p>
-
-                  <p className="flex gap-1.5 items-end">
-                    <span className="inline-block italic font-normal text-xs sm:text-sm leading-none">XP</span>
-                    <span className="inline-block font-semibold text-xs sm:text-sm leading-none">
-                      {task.xp}
+                    <span
+                      className={`flex text-xs sm:text-sm leading-none items-end px-2 pt-0.5 pb-1 rounded-full ${completedOrders === task.maxOrders ? 'bg-green-100 text-green-600 font-bold' : 'text-zinc-500'}`}
+                    >
+                      <Soup strokeWidth={1.75} className="size-4 sm:size-5 mr-1" />
+                      {completedOrders} / {task.maxOrders}
                     </span>
-                  </p>
+                  </div>
+
+                  <div className="flex items-end gap-2 text-zinc-500 pr-0 sm:pr-2">
+                    <p className="flex gap-1 items-end font-semibold text-xs sm:text-sm leading-none">
+                      <Coins strokeWidth={2.5} className="size-3.5 sm:size-4" />
+                      <span className="inline-block">{task.points}</span>
+                    </p>
+
+                    <p className="flex gap-1.5 items-end">
+                      <span className="inline-block italic font-normal text-xs sm:text-sm leading-none">
+                        XP
+                      </span>
+                      <span className="inline-block font-semibold text-xs sm:text-sm leading-none">
+                        {task.xp}
+                      </span>
+                    </p>
+                  </div>
                 </div>
 
                 <button
@@ -157,7 +168,7 @@ export default function EmployeeViewTaskBadges({
                       empId: employee.id,
                     });
                   }}
-                  className="self-end sm:self-auto hover:scale-130 transition-all duration-500 ease-in-out cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 hover:scale-130 transition-all duration-500 ease-in-out cursor-pointer"
                 >
                   <X className="size-4 text-foreground hover:text-red-500" />
                 </button>

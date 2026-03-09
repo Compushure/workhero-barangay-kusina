@@ -94,20 +94,20 @@ export default function TaskCategoryTable({
       <div className="bg-card rounded-2xl border-2 border-accent/25 overflow-x-auto overflow-y-hidden shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-primary-gradient hover:bg-foreground">
-              <TableHead className="min-w-48 max-w-48 w-48 sm:min-w-64 sm:max-w-64 sm:w-64 md:min-w-96 md:max-w-96 md:w-96 pl-3 sm:pl-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-bold text-card">
+            <TableRow className="bg-muted hover:bg-muted">
+              <TableHead className="min-w-48 max-w-48 w-48 sm:min-w-64 sm:max-w-64 sm:w-64 md:min-w-96 md:max-w-96 md:w-96 pl-3 sm:pl-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-bold text-primary/75">
                 TASK
               </TableHead>
-              <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center text-xs sm:text-sm font-bold text-card hidden md:table-cell">
+              <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center text-xs sm:text-sm font-bold text-primary/75 hidden md:table-cell">
                 POINTS
               </TableHead>
-              <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center text-xs sm:text-sm font-bold text-card hidden md:table-cell">
+              <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center text-xs sm:text-sm font-bold text-primary/75 hidden md:table-cell">
                 XP
               </TableHead>
-              <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-32 sm:max-w-32 sm:w-32 text-center text-xs sm:text-sm font-bold text-card hidden sm:table-cell">
+              <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-32 sm:max-w-32 sm:w-32 text-center text-xs sm:text-sm font-bold text-primary/75 hidden sm:table-cell">
                 REPEATABLE
               </TableHead>
-              <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-36 sm:max-w-36 sm:w-36 text-center text-xs sm:text-sm font-bold text-card sticky right-0 bg-primary-gradient">
+              <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-36 sm:max-w-36 sm:w-36 text-center text-xs sm:text-sm font-bold text-primary/75 sticky right-0">
                 ACTIONS
               </TableHead>
             </TableRow>
@@ -117,7 +117,7 @@ export default function TaskCategoryTable({
               {tasks.map((task) => (
                   <TableRow
                     key={task.id}
-                    className="bg-background hover:bg-row-hover transition-colors"
+                    className="bg-background-soft hover:bg-row-hover transition-colors"
                   >
                     <TableCell className="min-w-48 max-w-48 w-48 sm:min-w-64 sm:max-w-64 sm:w-64 md:min-w-96 md:max-w-96 md:w-96 pl-3 sm:pl-6 py-3 sm:py-4 align-middle">
                       <div className="truncate">
@@ -146,18 +146,18 @@ export default function TaskCategoryTable({
                       <div className="flex justify-center items-center">
                         {task.isRepeatable ? (
                           <div className="flex items-center gap-1 text-foreground font-medium">
-                            <RefreshCw size={16} className="sm:size-[18px] text-accent" />
+                            <RefreshCw size={16} className="sm:size-4.5 text-accent" />
                             <span className="text-xs sm:text-base">Yes</span>
                           </div>
                         ) : (
                           <div className="flex items-center gap-1 sm:gap-1.5 text-secondary">
-                            <RefreshCwOff size={16} className="sm:size-[18px]" />
+                            <RefreshCwOff size={16} className="sm:size-4.5" />
                             <span className="text-xs sm:text-base">No</span>
                           </div>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="min-w-24 max-w-24 w-24 sm:min-w-36 sm:max-w-36 sm:w-36 text-center align-middle sticky right-0 bg-background">
+                    <TableCell className="min-w-24 max-w-24 w-24 sm:min-w-36 sm:max-w-36 sm:w-36 text-center align-middle sticky right-0">
                       <div className="flex justify-center items-center gap-1 sm:gap-2">
                         <Button
                           variant="ghost"

@@ -121,8 +121,10 @@ export function AssignEmployeesDialog({
           disabled:shadow hover:bg-accent/15 disabled:cursor-not-allowed`}
       >
         <div className="flex items-center gap-2 min-w-0 sm:min-w-45 max-w-full sm:max-w-75 max-9/10">
-          <Users size={16} className='text-accent'/>
-          <span className={`truncate ${selectedEmployees.length === 0 ? 'text-secondary' : 'text-primary'}`}>
+          <Users size={16} className="text-accent" />
+          <span
+            className={`truncate ${selectedEmployees.length === 0 ? 'text-secondary' : 'text-primary'}`}
+          >
             {selectedEmployees.length} employee/s selected
           </span>
         </div>
@@ -130,7 +132,7 @@ export function AssignEmployeesDialog({
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="bg-background max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] flex flex-col rounded-3xl p-4 sm:p-6 pt-10 sm:pt-12">
+        <DialogContent className="bg-card max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl max-h-[90vh] flex flex-col rounded-3xl p-4 sm:p-6 pt-10 sm:pt-12">
           <DialogHeader>
             <DialogTitle className="flex gap-2 text-xl sm:text-2xl text-foreground text-left items-center">
               <Users className="size-7 p-1.25 bg-primary-gradient text-card rounded-full" />

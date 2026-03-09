@@ -12,7 +12,7 @@ export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border shadow-md [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <Table>
-        <TableHeader className="bg-background">
+        {/* <TableHeader className="bg-background">
           <TableRow className="border-b border-border hover:bg-background">
             <TableHead className="px-4 w-45">
               <Skeleton className="h-4 w-24 bg-muted" />
@@ -37,12 +37,24 @@ export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
             </TableHead>
             <TableHead className="text-center px-4 w-30">
               <Skeleton className="h-4 w-14 mx-auto bg-muted" />
+            </TableHead> */}
+        <TableHeader className="bg-muted">
+          <TableRow className="border-b border-border hover:bg-muted">
+            <TableHead className="text-primry/75 px-4 w-45">REQUEST DATE</TableHead>
+            <TableHead className="text-primry/75 px-4 w-50">EMPLOYEE</TableHead>
+            <TableHead className="text-primry/75 px-4 w-64">TASK</TableHead>
+            <TableHead className="text-primry/75 text-center px-4 w-40">
+              COMPLETED
             </TableHead>
+            <TableHead className="text-primry/75 text-center px-4 w-15">POINTS</TableHead>
+            <TableHead className="text-primry/75 text-center px-4 w-15">XP</TableHead>
+            <TableHead className="text-primry/75 text-center px-4 w-20">REMARK</TableHead>
+            <TableHead className="text-primry/75 text-center px-4 w-30">ACTION</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {Array.from({ length: rows }).map((_, index) => (
-            <TableRow key={index} className="bg-background">
+            <TableRow key={index} className="bg-background-soft">
               <TableCell className="px-4">
                 <div className="h-4 w-28 bg-muted rounded animate-pulse" />
               </TableCell>

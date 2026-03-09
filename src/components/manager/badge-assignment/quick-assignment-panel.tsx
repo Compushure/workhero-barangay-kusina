@@ -136,7 +136,7 @@ export default function QuickAssignmentPanel({
                     className={`w-full px-4 py-3 text-left transition-colors ${
                       selectedBadge?.id === badge.id
                         ? 'bg-accent/15 border-l-4 border-accent'
-                        : 'bg-card hover:bg-row-hover'
+                        : 'bg-background-soft hover:bg-row-hover'
                     }`}
                   >
                     <div className="flex items-start gap-3">
@@ -338,7 +338,7 @@ export default function QuickAssignmentPanel({
             </div>
           </>
         ) : (
-          <div className="bg-card border border-dashed border-accent/25 rounded-lg p-12 text-center">
+          <div className="bg-background-soft border border-dashed border-accent/25 rounded-lg p-12 text-center">
             <p className="text-secondary text-lg">Select a badge to assign to users</p>
           </div>
         )}
