@@ -107,7 +107,12 @@ function buildUrlForCurrentPeriod(
 }
 
 function buildUrlForWeekly(year: number, week: number): string {
-  const params = new URLSearchParams({ type: 'weekly', show: '1', year: String(year), week: String(week) });
+  const params = new URLSearchParams({
+    type: 'weekly',
+    show: '1',
+    year: String(year),
+    week: String(week),
+  });
   return `/hr/leaderboard?${params.toString()}`;
 }
 
@@ -135,10 +140,9 @@ export function PeriodSelector({
   const weeklyOptions = getWeeklyPeriodOptions();
   const currentWeeklyKey = `${currentYear}-${currentWeek}`;
   const weeklyOptionKeys = new Set(weeklyOptions.map((o) => `${o.year}-${o.week}`));
-  const weeklySelectOptions =
-    weeklyOptionKeys.has(currentWeeklyKey)
-      ? weeklyOptions
-      : [...weeklyOptions, { year: currentYear, week: currentWeek }];
+  const weeklySelectOptions = weeklyOptionKeys.has(currentWeeklyKey)
+    ? weeklyOptions
+    : [...weeklyOptions, { year: currentYear, week: currentWeek }];
 
   const handleWeeklyPeriodChange = (value: string) => {
     const [y, w] = value.split('-').map(Number);
@@ -196,10 +200,7 @@ export function PeriodSelector({
           {periodFieldLabel}
         </label>
         {currentType === 'weekly' ? (
-          <Select
-            value={currentWeeklyKey}
-            onValueChange={handleWeeklyPeriodChange}
-          >
+          <Select value={currentWeeklyKey} onValueChange={handleWeeklyPeriodChange}>
             <SelectTrigger className="min-w-56 bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
               <SelectValue />
             </SelectTrigger>

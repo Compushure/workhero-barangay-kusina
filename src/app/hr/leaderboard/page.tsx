@@ -3,11 +3,15 @@ import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-cont
 import { PeriodSelector } from '@/components/hr/leaderboard/period-selector';
 import { LeaderboardViewToggle } from '@/components/hr/leaderboard/leaderboard-view-toggle';
 import { PastRanksList } from '@/components/hr/leaderboard/past-ranks-list';
-import { getLatestWeeklyPeriod, checkRankingExists } from '@/actions/hr/leaderboard';
+import {
+  getLatestWeeklyPeriod,
+  checkRankingExists,
+  getAllRankingPeriods,
+} from '@/actions/hr/leaderboard';
 import { getISOWeeksInYear } from '@/lib/utils/time-period-utils';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import type { RankLogPeriodType } from '@/types';
+import type { RankLogPeriodType, RankingPeriodWithTop } from '@/types';
 
 function getPreviousWeek(): { year: number; week: number } {
   const now = new Date();
@@ -79,9 +83,22 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
   const currentView = params.view === 'past' ? 'past' : 'generate';
   const isPastViewing = currentView === 'past' && hasExplicitShow;
 
+  // Prefetch past ranks on the server when showing the list so it loads fast (no client waterfall)
+  let pastRanksInitial: {
+    periods: RankingPeriodWithTop[] | null | undefined;
+    error: string | null;
+  } = { periods: undefined, error: null };
+  if (currentView === 'past' && !isPastViewing) {
+    const result = await getAllRankingPeriods();
+    pastRanksInitial = {
+      periods: result.success ? result.data ?? [] : undefined,
+      error: result.success ? null : (result.error ?? 'Failed to load ranking periods.'),
+    };
+  }
+
   return (
     <div className="h-screen p-4  bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto mt-6 sm:mt-4">
         <div className="mb-2 sm:mb-3">
           <div className="flex items-center justify-between gap-3 sm:gap-4 mb-4">
             <div className="flex flex-col gap-1">
@@ -130,7 +147,10 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
             />
           </div>
         ) : (
-          <PastRanksList />
+          <PastRanksList
+            initialPeriods={pastRanksInitial.periods}
+            initialError={pastRanksInitial.error}
+          />
         )}
       </div>
     </div>

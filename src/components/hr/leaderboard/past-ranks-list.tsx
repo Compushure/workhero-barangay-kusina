@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { History, Calendar, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { History, Calendar, Search } from 'lucide-react';
 import { format, getISOWeek } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,8 @@ import {
 } from '@/components/ui/select';
 import { Eye, EyeOff } from 'lucide-react';
 import { getAllRankingPeriods } from '@/actions/hr/leaderboard';
+import { Pagination as PastRanksPagination } from '@/components/manager/task-verification/pagination';
+import { PastRanksListSkeleton } from '@/components/hr/leaderboard/past-ranks-list-skeleton';
 import type { RankingPeriodWithTop, RankingPeriodType } from '@/types';
 
 function periodLabel(row: RankingPeriodWithTop): string {
@@ -53,7 +55,7 @@ const TAB_LABELS: Record<RankingPeriodType, string> = {
 };
 
 const PERIOD_TYPES: RankingPeriodType[] = ['weekly', 'monthly', 'yearly'];
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 7;
 
 function matchesSearch(row: RankingPeriodWithTop, query: string, label: string): boolean {
   if (!query.trim()) return true;
@@ -66,7 +68,6 @@ interface PeriodRowProps {
   row: RankingPeriodWithTop;
   onSelect: (url: string) => void;
 }
-
 
 function PeriodRow({ row, onSelect }: PeriodRowProps) {
   return (
@@ -143,7 +144,7 @@ export function PastRanksList() {
       acc[row.period_type].push(row);
       return acc;
     },
-    { weekly: [], monthly: [], yearly: [] },
+    { weekly: [], monthly: [], yearly: [] }
   );
 
   const filteredGrouped: Record<RankingPeriodType, RankingPeriodWithTop[]> = {
@@ -162,68 +163,76 @@ export function PastRanksList() {
     setCurrentPage(1);
   };
 
+  const list = periods !== null ? filteredGrouped[activeTab] : [];
+  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  const page = Math.min(currentPage, totalPages);
+  const start = (page - 1) * PAGE_SIZE;
+  const paginatedList = list.slice(start, start + PAGE_SIZE);
+
+  const showContent = !isPending && periods !== null;
+
   return (
-    <div className="flex flex-col gap-4 h-full">
-      {isPending && (
-        <div className="flex items-center justify-center py-10">
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        </div>
-      )}
-
-      {!isPending && error && (
-        <div className="flex items-center justify-center py-10">
-          <p className="text-sm text-destructive">{error}</p>
-        </div>
-      )}
-
-      {!isPending && periods !== null && (
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 flex flex-col gap-5 h-full">
-          <div>
-            <h2 className="text-xl font-bold tracking-tight text-foreground">Past Generated Ranks</h2>
-            <p className="text-sm text-muted-foreground">Browse previously generated rankings by period.</p>
+    <>
+      <div className="flex flex-col gap-4 h-full">
+        {isPending ? (
+          <div className="flex items-center justify-center py-10">
+            <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
+        ) : null}
 
-          {/* Filter row: dropdown + search */}
-          <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4 flex items-end gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Select Period</label>
-              <Select value={activeTab} onValueChange={handleTypeChange}>
-                <SelectTrigger className="w-44 bg-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PERIOD_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {TAB_LABELS[type]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        {!isPending && error ? (
+          <div className="flex items-center justify-center py-10">
+            <p className="text-sm text-destructive">{error}</p>
+          </div>
+        ) : null}
 
-            {periods.length > 0 && (
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                <Input
-                  type="search"
-                  placeholder="Search by period or date."
-                  value={searchQuery}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  className="pl-9 rounded-full bg-white"
-                />
+        {showContent ? (
+          <div className="flex flex-col gap-4 flex-1 min-h-0">
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 flex flex-col gap-5 h-full">
+              <div>
+                <h2 className="text-xl font-bold tracking-tight text-foreground">
+                  Past Generated Ranks
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Browse previously generated rankings by period.
+                </p>
               </div>
-            )}
-          </div>
 
-          {/* List */}
-          {(() => {
-            const list = filteredGrouped[activeTab];
-            const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
-            const page = Math.min(currentPage, totalPages);
-            const start = (page - 1) * PAGE_SIZE;
-            const paginatedList = list.slice(start, start + PAGE_SIZE);
+              {/* Filter row: dropdown + search */}
+              <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4 flex items-end gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Select Period
+                  </label>
+                  <Select value={activeTab} onValueChange={handleTypeChange}>
+                    <SelectTrigger className="w-44 bg-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PERIOD_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {TAB_LABELS[type]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            return (
+                {periods && periods.length > 0 ? (
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    <Input
+                      type="search"
+                      placeholder="Search by period or date."
+                      value={searchQuery}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      className="pl-9 rounded-full bg-white"
+                    />
+                  </div>
+                ) : null}
+              </div>
+
+              {/* List only — no pagination inside */}
               <div className="flex flex-col flex-1 overflow-hidden gap-2">
                 {list.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-10 gap-2 flex-1">
@@ -235,49 +244,28 @@ export function PastRanksList() {
                     </p>
                   </div>
                 ) : (
-                  <>
-                    <div className="flex flex-col gap-2 overflow-y-auto flex-1 min-h-0">
-                      {paginatedList.map((row) => (
-                        <PeriodRow key={row.id} row={row} onSelect={handleSelect} />
-                      ))}
-                    </div>
-                    {totalPages > 1 && (
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 shrink-0">
-                        <p className="text-xs text-muted-foreground">
-                          {start + 1}–{start + paginatedList.length} of {list.length}
-                        </p>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                            disabled={page <= 1}
-                            className="h-8 w-8 p-0"
-                          >
-                            <ChevronLeft className="w-4 h-4" />
-                          </Button>
-                          <span className="text-xs font-medium text-foreground min-w-16 text-center">
-                            Page {page} of {totalPages}
-                          </span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                            disabled={page >= totalPages}
-                            className="h-8 w-8 p-0"
-                          >
-                            <ChevronRight className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </>
+                  <div className="flex flex-col gap-2 overflow-y-auto flex-1 min-h-0">
+                    {paginatedList.map((row) => (
+                      <PeriodRow key={row.id} row={row} onSelect={handleSelect} />
+                    ))}
+                  </div>
                 )}
               </div>
-            );
-          })()}
-        </div>
-      )}
-    </div>
+            </div>
+
+            {/* Pagination outside the card — same design as Generate Ranking */}
+            {list.length > 0 ? (
+              <div className={totalPages <= 1 ? 'invisible' : ''}>
+                <PastRanksPagination
+                  totalPages={totalPages}
+                  currentPage={page}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </>
   );
 }

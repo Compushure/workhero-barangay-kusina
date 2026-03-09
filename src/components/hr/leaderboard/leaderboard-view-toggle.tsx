@@ -39,7 +39,7 @@ export function LeaderboardViewToggle({ currentView }: LeaderboardViewToggleProp
         className={cn(
           'rounded-full px-4 py-1.5 text-sm font-medium transition-all',
           currentView === 'generate'
-            ? 'bg-white shadow-sm text-foreground'
+            ? 'bg-[#E07C24] shadow-sm text-white'
             : 'text-muted-foreground hover:text-foreground',
         )}
       >
