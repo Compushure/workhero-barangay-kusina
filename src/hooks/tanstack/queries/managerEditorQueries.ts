@@ -6,16 +6,21 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { handleFetchTaskCategoriesPaginated } from '@/action-handlers/manager/editor';
+import {
+  handleFetchTaskCategoriesPaginated,
+  handleFetchTaskCategoryMetadata,
+} from '@/action-handlers/manager/editor';
 import type { TaskCategory } from '@/types/manager/task-editor';
 
 export type TaskCategorySortOption =
+  | 'name-asc'
+  | 'name-desc'
   | 'type-name'
   | 'recently-created'
   | 'points-desc'
-  | 'xp-desc'
-  | 'repeatable-only'
-  | 'non-repeatable-only';
+  | 'xp-desc';
+
+export type TaskRepeatabilityFilter = 'all' | 'repeatable' | 'non-repeatable';
 
 export interface TaskCategoryQueryParams {
   search?: string;
@@ -35,8 +40,14 @@ export const taskCategoryKeys = {
   all: ['task-categories'] as const,
   lists: () => [...taskCategoryKeys.all, 'list'] as const,
   list: (params?: TaskCategoryQueryParams) => [...taskCategoryKeys.lists(), params] as const,
-  paginatedList: (page: number, pageSize: number, sortBy: string, searchTerm: string) =>
-    [...taskCategoryKeys.all, 'paginated', { page, pageSize, sortBy, searchTerm }] as const,
+  paginatedList: (
+    page: number,
+    pageSize: number,
+    sortBy: string,
+    searchTerm: string,
+    repeatabilityFilter: TaskRepeatabilityFilter
+  ) =>
+    [...taskCategoryKeys.all, 'paginated', { page, pageSize, sortBy, searchTerm, repeatabilityFilter }] as const,
   details: () => [...taskCategoryKeys.all, 'detail'] as const,
   detail: (id: string) => [...taskCategoryKeys.details(), id] as const,
 };
@@ -78,21 +89,28 @@ export function useGetTaskCategoriesPaginated(
   pageSize: number = 10,
   sortBy: string = 'type-name',
   searchTerm: string = '',
+  repeatabilityFilter: TaskRepeatabilityFilter = 'all',
   queryOptions: { enabled?: boolean } = {}
 ): UseQueryResult<
   { tasks: TaskCategory[]; count: number; totalPages: number },
   Error
 > {
   return useQuery({
-    queryKey: taskCategoryKeys.paginatedList(page, pageSize, sortBy, searchTerm),
+    queryKey: taskCategoryKeys.paginatedList(page, pageSize, sortBy, searchTerm, repeatabilityFilter),
     queryFn: async () => {
-      return await handleFetchTaskCategoriesPaginated(page, pageSize, sortBy, searchTerm);
+      return await handleFetchTaskCategoriesPaginated(
+        page,
+        pageSize,
+        sortBy,
+        searchTerm,
+        repeatabilityFilter
+      );
     },
     enabled: queryOptions.enabled !== false,
-    staleTime: 5 * 1000, // 5 seconds - categories don't change frequently
+    staleTime: 30 * 1000, // 30 seconds - avoid frequent refetch churn
     gcTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
-    refetchOnWindowFocus: true,
+    retry: 1,
+    refetchOnWindowFocus: false,
   }) as UseQueryResult<
     { tasks: TaskCategory[]; count: number; totalPages: number },
     Error
@@ -115,5 +133,19 @@ export function useGetTaskTypes(
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
   }) as UseQueryResult<string[], Error>;
+}
+
+export function useGetTaskCategoryMetadata(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<{ names: string[]; types: string[] }, Error> {
+  return useQuery({
+    queryKey: [...taskCategoryKeys.all, 'metadata'],
+    queryFn: async () => handleFetchTaskCategoryMetadata(),
+    enabled: queryOptions.enabled !== false,
+    staleTime: 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: false,
+  }) as UseQueryResult<{ names: string[]; types: string[] }, Error>;
 }
 

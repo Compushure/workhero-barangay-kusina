@@ -16,7 +16,8 @@ export async function fetchTaskCategoriesPaginated(
   page: number = 1,
   pageSize: number = 10,
   sortBy: string = 'type-name',
-  searchTerm: string = ''
+  searchTerm: string = '',
+  repeatabilityFilter: 'all' | 'repeatable' | 'non-repeatable' = 'all'
 ): Promise<
   ServerActionResponse<{
     data: TaskCategory[];
@@ -24,8 +25,6 @@ export async function fetchTaskCategoriesPaginated(
     totalPages: number;
   }>
 > {
-  console.log('Server Action Called:', { page, pageSize, sortBy, searchTerm });
-  
   const supabase = await createClient();
 
   // Calculate range for pagination
@@ -37,6 +36,14 @@ export async function fetchTaskCategoriesPaginated(
   let ascending = false;
 
   switch (sortBy) {
+    case 'name-asc':
+      orderByColumn = 'name';
+      ascending = true;
+      break;
+    case 'name-desc':
+      orderByColumn = 'name';
+      ascending = false;
+      break;
     case 'type-name':
       // Sort by type first, then by name
       orderByColumn = 'type';
@@ -54,18 +61,8 @@ export async function fetchTaskCategoriesPaginated(
       orderByColumn = 'xp';
       ascending = false;
       break;
-    case 'repeatable-only':
-      // Filter for repeatable only, then sort by name
-      orderByColumn = 'name';
-      ascending = true;
-      break;
-    case 'non-repeatable-only':
-      // Filter for non-repeatable only, then sort by name
-      orderByColumn = 'name';
-      ascending = true;
-      break;
     default:
-      orderByColumn = 'type';
+      orderByColumn = 'name';
       ascending = true;
   }
 
@@ -82,10 +79,10 @@ export async function fetchTaskCategoriesPaginated(
     );
   }
 
-  // Apply repeatable/non-repeatable filters
-  if (sortBy === 'repeatable-only') {
+  // Apply repeatable/non-repeatable filter category
+  if (repeatabilityFilter === 'repeatable') {
     query = query.eq('is_repeatable', true);
-  } else if (sortBy === 'non-repeatable-only') {
+  } else if (repeatabilityFilter === 'non-repeatable') {
     query = query.eq('is_repeatable', false);
   }
 
@@ -100,16 +97,14 @@ export async function fetchTaskCategoriesPaginated(
     );
   }
   
-  // Apply repeatable/non-repeatable filters to count query
-  if (sortBy === 'repeatable-only') {
+  // Apply repeatable/non-repeatable filter category to count query
+  if (repeatabilityFilter === 'repeatable') {
     countQuery = countQuery.eq('is_repeatable', true);
-  } else if (sortBy === 'non-repeatable-only') {
+  } else if (repeatabilityFilter === 'non-repeatable') {
     countQuery = countQuery.eq('is_repeatable', false);
   }
   
   const { count: totalCount, error: countError } = await countQuery;
-  
-  console.log('Count Query Result:', { totalCount, countError });
   
   if (countError) {
     console.error('Count Error:', countError);
@@ -125,8 +120,6 @@ export async function fetchTaskCategoriesPaginated(
   }
   
   const { data, error } = await orderedQuery.range(start, end);
-
-  console.log('Data Query Result:', { data, error });
 
   if (error) {
     console.error('Data Error:', error);
@@ -147,7 +140,7 @@ export async function fetchTaskCategoriesPaginated(
 
   const totalPages = Math.ceil((totalCount || 0) / pageSize);
 
-  const response = {
+  return {
     error: null,
     data: {
       data: taskCategories,
@@ -155,9 +148,31 @@ export async function fetchTaskCategoriesPaginated(
       totalPages,
     },
   };
-  
-  console.log('Server Action Response:', response);
-  return response;
+}
+
+export async function fetchTaskCategoryMetadata(): Promise<
+  ServerActionResponse<{ names: string[]; types: string[] }>
+> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('KPICategory')
+    .select('name,type');
+
+  if (error) {
+    return { error: `Failed to fetch task category metadata: ${error.message}` };
+  }
+
+  const names = (data ?? []).map((item) => item.name).filter(Boolean);
+  const types = [...new Set((data ?? []).map((item) => item.type).filter(Boolean))].sort();
+
+  return {
+    error: null,
+    data: {
+      names,
+      types,
+    },
+  };
 }
 
 export async function addTaskCategory(input: AddTaskInput): Promise<ServerActionResponse<TaskCategory>> {

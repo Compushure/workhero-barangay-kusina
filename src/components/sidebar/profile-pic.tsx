@@ -67,7 +67,12 @@ export function ProfilePic({
               src={imageUrlWithCacheBust}
               alt={user?.name || 'User profile'}
               className="w-full h-full rounded-full object-cover"
+              loading="lazy"
               onError={() => setHasImage(false)}
+              onLoad={(e) => {
+                e.currentTarget.style.opacity = '1';
+              }}
+              style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
             />
             {isHovered && !isPending && (
               <div className="absolute inset-0 bg-gray-400/40 rounded-full transition-opacity duration-200" />

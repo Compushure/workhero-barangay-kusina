@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Search, Coins, Users, Award, ArrowUpDown } from 'lucide-react';
+import { Search, Users, Award, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -16,17 +16,17 @@ import AllBadgesModal from './dialogs/all-badges-modal';
 import { Pagination } from '../task-verification/pagination';
 import { useDebounce } from '@/hooks/useDebounce';
 import { toast } from 'sonner';
-import { AwardSuspense } from '@/components/shared/award-suspense';
+import { BadgeAssignmentUsersSkeleton, BadgeAssignmentQuickSkeleton } from './badge-assignment-skeletons';
+import { BadgeAssignmentHeaderSkeleton } from './badge-assignment-header-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { BadgeAssignmentUser, BadgeSummary } from '@/types/manager/badge-assignment';
-import { useQueryClient } from '@tanstack/react-query';
-import { badgeAssignmentKeys } from '@/hooks/tanstack/queries/managerBadgeAssignmentQueries';
-import BadgeAwardDebugPanel from './test/badge-award-debug-panel';
 import {
   useGetAllBadges,
   useGetBadgeAssignmentUsers,
   useGetManualBadges,
 } from '@/hooks/tanstack/queries/managerBadgeAssignmentQueries';
 import { useAssignManualBadgeToUser } from '@/hooks/tanstack/mutations/managerBadgeAssignmentMutations';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 type UserSortOption = 'name-asc' | 'name-desc' | 'employee-asc' | 'employee-desc';
 type BadgeSortOption = 'name-asc' | 'name-desc' | 'points-desc' | 'points-asc';
@@ -61,7 +61,6 @@ export default function BadgeAssignmentPage() {
   const [allBadgesModalOpen, setAllBadgesModalOpen] = useState(false);
   const [selectedUserForAllBadges, setSelectedUserForAllBadges] =
     useState<BadgeAssignmentUser | null>(null);
-  const queryClient = useQueryClient();
 
   const manualBadgesQuery = useGetManualBadges();
   const allBadgesQuery = useGetAllBadges();
@@ -72,6 +71,8 @@ export default function BadgeAssignmentPage() {
   const allBadges = allBadgesQuery.data ?? [];
   const users = usersQuery.data ?? [];
   const isQuickAssignLoading = manualBadgesQuery.isLoading || usersQuery.isLoading;
+  const isHeaderLoading =
+    usersQuery.isLoading || manualBadgesQuery.isLoading || allBadgesQuery.isLoading;
 
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
@@ -106,10 +107,13 @@ export default function BadgeAssignmentPage() {
   }, [debouncedSearchTerm, sortOption]);
 
   const filteredUsers = useMemo(() => {
+    const normalizedSearch = normalizeSearchQuery(debouncedSearchTerm);
+
     const filtered = users.filter(
       (user) =>
-        user.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        !normalizedSearch ||
+        user.name.toLowerCase().includes(normalizedSearch) ||
+        user.email.toLowerCase().includes(normalizedSearch)
     );
 
     return [...filtered].sort((a, b) => {
@@ -176,7 +180,6 @@ export default function BadgeAssignmentPage() {
       {
         onSuccess: () => {
           setDialogOpen(false);
-          queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.debug() });
         },
       }
     );
@@ -188,58 +191,70 @@ export default function BadgeAssignmentPage() {
   };
 
   return (
-    <main className="w-full min-h-screen bg-zinc-100 p-10">
-      <div className="mx-auto w-full max-w-500 space-y-8">
-        <section className='flex justify-between items-end'>
-          {/* Title */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">Badge Assignment</h1>
-          <p className="text-md text-secondary">Manually award badges to employees.</p>
-        </div>
+    <main className="w-full min-h-screen bg-zinc-100 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl space-y-5 sm:space-y-6 lg:space-y-8">
+        {isHeaderLoading ? (
+          <BadgeAssignmentHeaderSkeleton />
+        ) : (
+          <section className='flex flex-col lg:flex-row lg:justify-between lg:items-end gap-3 sm:gap-4'>
+            {/* Title */}
+          <div className="space-y-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Badge Assignment</h1>
+            <p className="text-sm sm:text-base lg:text-lg text-secondary">Manually award badges to employees.</p>
+          </div>
 
-        {/* Tabs */}
-        <div className="flex bg-card/75 rounded-2xl shadow-sm/25 w-fit h-fit border border-accent/25">
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`flex w-40 justify-center items-center gap-1.5 py-3 cursor-pointer rounded-l-xl text-sm font-medium transition-all duration-500 ease-in-out ${
-              activeTab === 'users'
-                ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
-                : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25'
-            }`}
-          >
-            <Users
-              size={20}
-              className={activeTab === 'users' ? 'text-zinc-50' : 'text-accent-secondary'}
-            />
-            Users
-          </button>
-          <button
-            onClick={() => setActiveTab('quick-assign')}
-            className={`flex w-40 justify-center items-center gap-1.5 py-3 cursor-pointer rounded-r-xl text-sm font-medium transition-all duration-500 ease-in-out ${
-              activeTab === 'quick-assign'
-                ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
-                : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25'
-            }`}
-          >
-            <Award
-              size={20}
-              className={activeTab === 'quick-assign' ? 'text-zinc-50' : 'text-accent-secondary'}
-            />
-            Quick Assign
-          </button>
-        </div>
-        </section>
+          {/* Tabs */}
+          <div className="flex bg-card/75 rounded-2xl shadow-sm/25 w-full sm:w-fit h-fit border border-accent/25 overflow-hidden">
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`flex flex-1 sm:w-40 justify-center items-center gap-1.5 py-2.5 sm:py-3 cursor-pointer rounded-l-xl text-sm font-medium transition-all duration-500 ease-in-out ${
+                activeTab === 'users'
+                  ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
+                  : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25'
+              }`}
+            >
+              <Users
+                size={20}
+                className={activeTab === 'users' ? 'text-zinc-50' : 'text-accent-secondary'}
+              />
+              <span className="hidden md:inline">Employee View</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('quick-assign')}
+              className={`flex flex-1 sm:w-40 justify-center items-center gap-1.5 py-2.5 sm:py-3 cursor-pointer rounded-r-xl text-sm font-medium transition-all duration-500 ease-in-out ${
+                activeTab === 'quick-assign'
+                  ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
+                  : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25'
+              }`}
+            >
+              <Award
+                size={20}
+                className={activeTab === 'quick-assign' ? 'text-zinc-50' : 'text-accent-secondary'}
+              />
+              <span className="hidden md:inline">Quick Assignment</span>
+            </button>
+          </div>
+          </section>
+        )}
 
         {/* Tab Content */}
         <section className="space-y-6">
+          {isHeaderLoading ? (
+            activeTab === 'users' ? (
+              <BadgeAssignmentUsersSkeleton />
+            ) : (
+              <BadgeAssignmentQuickSkeleton />
+            )
+          ) : (
+            <>
           {/* Users Tab */}
           {activeTab === 'users' && (
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 {/* Badge Count Display */}
                 <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
                   <h5 className="flex items-center gap-2">
-                    <Coins size={20} className="text-accent" />
+                    <Users size={20} className="text-accent" />
                     Employees{' '}
                     <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
                       {filteredUsers.length ?? 0}
@@ -248,14 +263,14 @@ export default function BadgeAssignmentPage() {
                 </div>
 
                 {/* Search and Sort Controls */}
-                <div className="flex gap-3 items-center">
-                  <div className="relative flex">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center w-full sm:w-auto">
+                  <div className="relative w-full sm:w-64 md:w-auto">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
                     <input
-                      placeholder="Search users..."
+                      placeholder="Search by employee name or email"
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-all duration-500 ease-in-out"
+                      onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
+                      className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-all duration-500 ease-in-out w-full sm:w-64 md:w-auto"
                     />
                   </div>
 
@@ -265,10 +280,10 @@ export default function BadgeAssignmentPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex justify-between items-center py-4 w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
+                        className="flex justify-between items-center py-4 w-full sm:w-64 md:w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
                       >
                         {USER_SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Sort'}
-                        <ArrowUpDown className='text-accent'/>
+                        <ArrowUpDown className="text-accent" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-background">
@@ -294,14 +309,14 @@ export default function BadgeAssignmentPage() {
               <div className="flex items-center">
                 <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
                   <h5 className="flex items-center gap-2">
-                    <Coins size={20} className="text-accent" />
+                    <Award size={20} className="text-accent" />
                     Manual Badges{' '}
                     <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
                       {manualBadges.length}
                     </span>
                   </h5>
                 </div>
-                <p className="text-xs text-secondary ml-auto">
+                <p className="text-xs text-secondary ml-auto hidden sm:inline">
                   Only manual badges (not conditional) appear here
                 </p>
               </div>
@@ -316,7 +331,7 @@ export default function BadgeAssignmentPage() {
                   >
                     {BADGE_SORT_OPTIONS.find((opt) => opt.value === badgeSortOption)?.label ||
                       'Sort'}
-                    <ArrowUpDown className='text-accent'/>
+                    <ArrowUpDown className="text-accent" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="bg-background">
@@ -333,12 +348,11 @@ export default function BadgeAssignmentPage() {
               </DropdownMenu>
             </div>
           )}
+
           {activeTab === 'users' ? (
             <>
               {usersQuery.isLoading ? (
-                <div className="bg-background rounded-lg p-6 border border-accent/25">
-                  <AwardSuspense label="Loading users..." />
-                </div>
+                <BadgeAssignmentUsersSkeleton />
               ) : filteredUsers.length === 0 ? (
                 <div className="bg-background rounded-lg p-12 border border-accent/25 text-center">
                   <p className="text-secondary text-lg">No users found matching your search</p>
@@ -364,9 +378,7 @@ export default function BadgeAssignmentPage() {
               )}
             </>
           ) : isQuickAssignLoading ? (
-            <div className="bg-background rounded-lg p-6 border border-accent/25">
-              <AwardSuspense label="Loading badges..." />
-            </div>
+            <BadgeAssignmentQuickSkeleton />
           ) : (
             <QuickAssignmentPanel
               badges={paginatedBadges}
@@ -376,6 +388,8 @@ export default function BadgeAssignmentPage() {
               users={users}
               onAwardBadge={handleAwardBadge}
             />
+          )}
+            </>
           )}
         </section>
       </div>
@@ -396,7 +410,6 @@ export default function BadgeAssignmentPage() {
         user={selectedUserForAllBadges}
         badges={allBadges}
       />
-      <BadgeAwardDebugPanel />
     </main>
   );
 }

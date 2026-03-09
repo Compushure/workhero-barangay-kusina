@@ -27,13 +27,12 @@ export function TaskCard({ task }: TaskCardProps) {
           setModalOpen(true);
         }
       }}
-      className="text-muted-foreground border-none p-0.75 bg-linear-180 from-[#690003] via-[#B23C00] to-[#F5DDBC] via-25% to-95% hover:from-[#B23C00] hover:via-[#f4533e] w-full rounded-[1.1875rem] cursor-pointer transition-all ease-in-out duration-500 delay-75 shadow-sm/15 hover:shadow-lg/25 active:brightness-90"
+      className="wood-panel border-[#47331F] text-card rounded-2xl border-2 pt-3.5 pb-2 px-5 w-full min-w-0 overflow-hidden cursor-pointer transition-all ease-in-out duration-400 shadow-sm/15 hover:shadow-lg/25 active:brightness-90"
     >
-    <div className='bg-linear-0 from-[#F5DDBC] to-background to-35% rounded-2xl w-full pt-3.5 pb-2 px-5 min-w-0'>
       <CardContent className={`p-0 flex flex-col gap-3 sm:gap-5`}>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-5">
-          <div className="flex flex-col gap-1 min-w-0 flex-1">
-            <p className={`text-lg font-medium leading-snug wrap-break-word ${task.status === 'approved' && task.completedOrders === task.maxOrders && task.pendingOrders === 0 ? 'text-title/50 line-through' : 'text-title'}`}>
+          <div className="flex flex-col gap-1 min-w-0 w-full flex-1">
+            <p className={`min-w-0 w-full max-w-xs truncate text-lg font-medium leading-snug ${task.status === 'approved' && task.completedOrders === task.maxOrders && task.pendingOrders === 0 ? 'text-card/50 line-through' : 'text-card'}`} title={task.name}>
               {task.name}
             </p>
             <span className={`flex gap-2 items-center text-sm font-medium ${isTaskOverdue(task.dueDate) ? 'text-red-700' : ''}`}>
@@ -63,7 +62,6 @@ export function TaskCard({ task }: TaskCardProps) {
           </div>
         </div>
       </CardContent>
-    </div>
     </Card>
 
     <TaskCardDialog task={task} modalOpen={modalOpen} setModalOpen={setModalOpen}/>

@@ -21,6 +21,7 @@ import {
 import { Search, HelpCircle, Coins } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { BadgeAssignmentUser, BadgeSummary } from '@/types/manager/badge-assignment';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 // Types are provided by the badge assignment module.
 
@@ -49,9 +50,14 @@ export default function AwardBadgeDialog({
 
   // Filter and sort badges
   let filteredBadges = availableBadges.filter(
-    (badge) =>
-      badge.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      badge.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    (badge) => {
+      const normalizedSearch = normalizeSearchQuery(debouncedSearchTerm);
+      return (
+        !normalizedSearch ||
+        badge.name.toLowerCase().includes(normalizedSearch) ||
+        badge.description?.toLowerCase().includes(normalizedSearch)
+      );
+    }
   );
 
   // Sort badges
@@ -93,7 +99,7 @@ export default function AwardBadgeDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="bg-background border-none max-w-2xl rounded-2xl p-6 max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-background border-none max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl rounded-2xl p-6 max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-foreground">
             Award Badge to {user?.name}
@@ -110,9 +116,9 @@ export default function AwardBadgeDialog({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
               <Input
-                placeholder="Search by name or description..."
+                placeholder="Search by badge name or description"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
                 className="pl-9 bg-white h-9 text-sm"
               />
             </div>
@@ -141,7 +147,7 @@ export default function AwardBadgeDialog({
           <div className="space-y-2">
             <Label className="text-sm font-medium text-primary">Available Badges</Label>
             <div className="border border-[#e0cfcf] rounded-lg overflow-hidden bg-white">
-              <div className="max-h-80 overflow-y-auto divide-y divide-[#e0cfcf]">
+              <div className="max-h-80 overflow-y-auto divide-y divide-[#e0cfcf] [scrollbar-width:none] sm:[scrollbar-width:auto] [-ms-overflow-style:none] sm:[-ms-overflow-style:auto] [&::-webkit-scrollbar]:hidden sm:[&::-webkit-scrollbar]:block">
                 {filteredBadges.length === 0 ? (
                   <div className="p-4 text-center text-secondary text-sm">
                     No badges found matching your search

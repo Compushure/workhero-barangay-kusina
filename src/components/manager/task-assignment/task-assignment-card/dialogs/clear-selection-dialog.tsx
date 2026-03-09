@@ -35,7 +35,7 @@ function ClearSelectionDialog({
 
   return (
     <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
-      <DialogContent className="bg-white">
+      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white">
         <DialogHeader>
           <DialogTitle className="text-foreground">Clear Selection?</DialogTitle>
           <DialogDescription className=''>

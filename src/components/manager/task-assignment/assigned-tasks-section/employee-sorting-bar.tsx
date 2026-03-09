@@ -32,10 +32,10 @@ export function EmployeeSortingBar({ sortBy, onSortChange }: EmployeeSortingBarP
         <Button
           variant="default"
           size="default"
-          className="bg-card text-foreground shadow-sm/25 hover:bg-card hover:text-foreground hover:brightness-90 transition-all duration-400 ease-in-out cursor-pointer w-32 justify-between"
+          className="bg-card text-foreground shadow-sm/25 hover:bg-card hover:text-foreground hover:brightness-90 transition-all duration-400 ease-in-out cursor-pointer w-24 sm:w-32 justify-between text-xs sm:text-sm px-2 sm:px-4"
         >
           <span className="truncate">{currentLabel}</span>
-          <ArrowUpDown size={18} className='text-accent'/>
+          <ArrowUpDown size={16} className="sm:size-[18px] text-accent" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

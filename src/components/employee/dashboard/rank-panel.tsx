@@ -27,7 +27,7 @@ export function RankWidget() {
             <div className="h-7 w-12 bg-white/20 rounded" />
           </div>
 
-          <div className="h-12 border-l-2 border-white/30 mx-4" />
+          <div className="hidden sm:block h-12 border-l-2 border-white/30 mx-2 sm:mx-4" />
 
           <div className="h-7 w-14 bg-white/20 rounded justify-self-center" />
         </div>
@@ -38,7 +38,7 @@ export function RankWidget() {
   if (!rankData || performanceScore === 0) {
     return (
       <div className={cardClassName}>
-        <h2 className="text-lg text-white text-center mb-2">Weekly Rank</h2>
+        <h2 className="text-lg text-yellow-500 text-center mb-2">Weekly Rank</h2>
         <div className="border-t-2 border-white/30 mb-3" />
 
         <div className="flex items-center justify-center min-h-[60px]">

@@ -10,6 +10,7 @@ import { useQuery, keepPreviousData, type UseQueryResult } from '@tanstack/react
 import { handleFetchUsers, handleFetchUsersPaginated } from '@/action-handlers/superadmin/users';
 import { handleFetchSessionUser } from '@/action-handlers/shared/sidebar';
 import type { User, UserQueryParams, UserWithExtras, PaginatedResponse } from '@/types';
+import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 /**
  * Query key factory for user-related queries
@@ -75,7 +76,7 @@ export function useGetUsers(
 ): UseQueryResult<User[], Error> {
   // Merge with defaults
   const queryParams: UserQueryParams = {
-    searchQuery: params.searchQuery ?? '',
+    searchQuery: sanitizeSearchInput(params.searchQuery ?? ''),
     searchType: params.searchType ?? 'name',
     employeeTypeFilter: params.employeeTypeFilter ?? 'all',
     employmentStatusFilter: params.employmentStatusFilter ?? 'all',
@@ -182,7 +183,7 @@ export function useGetUsersPaginated(
 ): UseQueryResult<PaginatedResponse<User>, Error> {
   // Merge with defaults
   const queryParams: UserQueryParams = {
-    searchQuery: params.searchQuery ?? '',
+    searchQuery: sanitizeSearchInput(params.searchQuery ?? ''),
     searchType: params.searchType ?? 'name',
     employeeTypeFilter: params.employeeTypeFilter ?? 'all',
     employmentStatusFilter: params.employmentStatusFilter ?? 'all',

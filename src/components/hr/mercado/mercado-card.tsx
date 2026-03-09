@@ -78,7 +78,7 @@ export const MercadoCard = memo(function MercadoCard({
 
   return (
     <div
-      className="bg-background border border-border rounded-xl p-3.5 flex items-center gap-3.5 relative shadow-sm hover:shadow-md transition-all h-32 cursor-pointer hover:border-accent/50 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+      className="bg-background border border-border rounded-xl p-3.5 flex items-start gap-3.5 relative shadow-sm hover:shadow-md transition-all min-h-32 cursor-pointer hover:border-accent/50 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -109,42 +109,42 @@ export const MercadoCard = memo(function MercadoCard({
         )}
       </div>
 
-      <div className="flex-1 min-w-0 pr-10 grid grid-rows-[24px_24px_24px] items-center gap-0.5">
-        <h3 className="text-lg font-semibold text-primary truncate leading-tight">{item.name}</h3>
+      <div className="flex-1 min-w-0 pr-10 flex flex-col gap-1">
+        <h3 className="text-base sm:text-lg font-semibold text-primary truncate leading-tight">{item.name}</h3>
 
-        <div className="flex h-6 items-center gap-1.5 overflow-hidden">
+        <div className="flex min-h-5 items-center gap-1.5 flex-wrap">
           {availableDateText && (
             <Badge
               variant="secondary"
-              className="shrink-0 rounded-lg border border-accent/30 bg-accent-secondary/25 px-2 text-primary hover:bg-accent-secondary/25 text-[11px]"
+              className="shrink-0 rounded-lg border border-accent/30 bg-accent-secondary/25 px-1.5 sm:px-2 text-primary hover:bg-accent-secondary/25 text-[10px] sm:text-[11px] leading-tight"
             >
-              <Calendar className="h-3 w-3 mr-1" />
+              <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
               {availableDateText}
             </Badge>
           )}
           {isHidden && (
             <Badge
               variant="secondary"
-              className="shrink-0 rounded-lg border border-gray-300 bg-gray-200 px-2 text-gray-700 hover:bg-gray-200 text-[11px]"
+              className="shrink-0 rounded-lg border border-gray-300 bg-gray-200 px-1.5 sm:px-2 text-gray-700 hover:bg-gray-200 text-[10px] sm:text-[11px] leading-tight"
             >
-              <EyeOff className="h-3 w-3 mr-1" />
+              <EyeOff className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
               Hidden
             </Badge>
           )}
         </div>
 
-        <div className="flex h-6 items-center gap-2.5">
+        <div className="flex min-h-5 items-center gap-2 flex-wrap">
           <p className="text-primary font-semibold text-sm">{formattedPrice} pts</p>
           {isOutOfStock ? (
             <Badge
               variant="destructive"
-              className="shrink-0 rounded-lg border border-destructive/80 bg-destructive px-2 text-white hover:bg-destructive text-[11px]"
+              className="shrink-0 rounded-lg border border-destructive/80 bg-destructive px-1.5 sm:px-2 text-white hover:bg-destructive text-[10px] sm:text-[11px] leading-tight"
             >
               Out of stock
             </Badge>
           ) : (
             formattedQuantity !== undefined && (
-              <p className="text-muted-foreground text-sm truncate px-1">
+              <p className="text-muted-foreground text-xs sm:text-sm truncate">
                 | Available: {formattedQuantity}
               </p>
             )

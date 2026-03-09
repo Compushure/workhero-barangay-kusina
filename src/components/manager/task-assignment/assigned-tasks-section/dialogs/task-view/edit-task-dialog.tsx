@@ -14,6 +14,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import { useGetCurrentAssignedTasksPaginated } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { Coins, Search } from 'lucide-react';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 interface EditTaskDialogProps {
   showEditDialog: boolean;
@@ -63,9 +64,9 @@ export default function EditTaskDialog({
 
   // Filter employees based on search term
   const filteredEmployees = useMemo(() => {
-    if (!searchTerm.trim()) return employees;
-    
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = normalizeSearchQuery(searchTerm);
+    if (!searchLower) return employees;
+
     return employees.filter((emp) => 
       emp.name.toLowerCase().includes(searchLower) ||
       emp.empId.toLowerCase().includes(searchLower)
@@ -93,7 +94,7 @@ export default function EditTaskDialog({
 
   return (
     <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>
-      <DialogContent className="bg-background max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="bg-background max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-2xl text-foreground">Edit Task</DialogTitle>
         </DialogHeader>
@@ -165,9 +166,9 @@ export default function EditTaskDialog({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Enter in Employee Name or ID"
+              placeholder="Search by employee name or employee ID"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
               className="w-full pl-10 pr-4 py-2 rounded-full bg-white shadow-sm/15 text-sm border border-accent/0 focus:outline-none focus:border focus:border-accent"
             />
           </div>
