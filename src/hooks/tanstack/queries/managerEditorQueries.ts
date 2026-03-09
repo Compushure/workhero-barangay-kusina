@@ -13,12 +13,14 @@ import {
 import type { TaskCategory } from '@/types/manager/task-editor';
 
 export type TaskCategorySortOption =
+  | 'name-asc'
+  | 'name-desc'
   | 'type-name'
   | 'recently-created'
   | 'points-desc'
-  | 'xp-desc'
-  | 'repeatable-only'
-  | 'non-repeatable-only';
+  | 'xp-desc';
+
+export type TaskRepeatabilityFilter = 'all' | 'repeatable' | 'non-repeatable';
 
 export interface TaskCategoryQueryParams {
   search?: string;
@@ -38,8 +40,14 @@ export const taskCategoryKeys = {
   all: ['task-categories'] as const,
   lists: () => [...taskCategoryKeys.all, 'list'] as const,
   list: (params?: TaskCategoryQueryParams) => [...taskCategoryKeys.lists(), params] as const,
-  paginatedList: (page: number, pageSize: number, sortBy: string, searchTerm: string) =>
-    [...taskCategoryKeys.all, 'paginated', { page, pageSize, sortBy, searchTerm }] as const,
+  paginatedList: (
+    page: number,
+    pageSize: number,
+    sortBy: string,
+    searchTerm: string,
+    repeatabilityFilter: TaskRepeatabilityFilter
+  ) =>
+    [...taskCategoryKeys.all, 'paginated', { page, pageSize, sortBy, searchTerm, repeatabilityFilter }] as const,
   details: () => [...taskCategoryKeys.all, 'detail'] as const,
   detail: (id: string) => [...taskCategoryKeys.details(), id] as const,
 };
@@ -81,15 +89,22 @@ export function useGetTaskCategoriesPaginated(
   pageSize: number = 10,
   sortBy: string = 'type-name',
   searchTerm: string = '',
+  repeatabilityFilter: TaskRepeatabilityFilter = 'all',
   queryOptions: { enabled?: boolean } = {}
 ): UseQueryResult<
   { tasks: TaskCategory[]; count: number; totalPages: number },
   Error
 > {
   return useQuery({
-    queryKey: taskCategoryKeys.paginatedList(page, pageSize, sortBy, searchTerm),
+    queryKey: taskCategoryKeys.paginatedList(page, pageSize, sortBy, searchTerm, repeatabilityFilter),
     queryFn: async () => {
-      return await handleFetchTaskCategoriesPaginated(page, pageSize, sortBy, searchTerm);
+      return await handleFetchTaskCategoriesPaginated(
+        page,
+        pageSize,
+        sortBy,
+        searchTerm,
+        repeatabilityFilter
+      );
     },
     enabled: queryOptions.enabled !== false,
     staleTime: 30 * 1000, // 30 seconds - avoid frequent refetch churn

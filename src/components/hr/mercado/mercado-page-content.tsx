@@ -89,7 +89,7 @@ export function MercadoPageContent() {
                     <MercadoSearchBar
                       value={search}
                       onChange={setSearch}
-                      placeholder="Search by employee or items"
+                      placeholder="Search by item name"
                     />
                   </div>
                 </div>
