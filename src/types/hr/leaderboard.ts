@@ -58,6 +58,7 @@ export interface LeaderboardAsOfRow {
   total_kpi_points: number | null;
   badge_points: number | null;
   task_count: number | null;
+  rank: number | null;
 }
 
 // ---------------------------------------------------------------------------

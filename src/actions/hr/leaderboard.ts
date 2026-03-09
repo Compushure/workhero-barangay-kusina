@@ -176,6 +176,23 @@ export async function generateRankingByPeriod(
       return null;
     }
 
+    const leaderboardRowsWithRank = leaderboardRows as (LeaderboardAsOfRow & { rank?: number | null })[];
+    const getRpcRank = (row: LeaderboardAsOfRow & { rank?: number | null }, idx: number) =>
+      Number(row.rank ?? idx + 1);
+    const toEntryInsert = (
+      rankingPeriodId: string,
+      row: LeaderboardAsOfRow & { rank?: number | null },
+      idx: number
+    ) => ({
+      ranking_period_id: rankingPeriodId,
+      user_id: row.user_id,
+      rank: getRpcRank(row, idx),
+      performance_score: Number(row.performance_score ?? 0),
+      total_kpi_points: Number(row.total_kpi_points ?? 0),
+      badge_points: Number(row.badge_points ?? 0),
+      completed_task_count: Number(row.task_count ?? 0),
+    });
+
     const { data: period, error: periodError } = await supabase
       .from('RankingPeriod')
       .insert({
@@ -207,20 +224,40 @@ export async function generateRankingByPeriod(
         if (winnerRowsError) {
           throw new Error(`Failed to fetch ranking after race: ${winnerRowsError.message}`);
         }
+
+        // Recovery path: if the period exists but has no entries (for example, after a previous failed insert),
+        // backfill entries so the generated ranking becomes visible immediately in the UI.
+        if (!winnerRows || winnerRows.length === 0) {
+          const recoveryEntries = leaderboardRowsWithRank.map((row, idx) => toEntryInsert(raceWinner.id, row, idx));
+
+          const { error: recoveryError } = await supabase
+            .from('RankingEntry')
+            .upsert(recoveryEntries, { onConflict: 'ranking_period_id,user_id' });
+
+          if (recoveryError) {
+            throw new Error(`Failed to recover missing ranking entries: ${recoveryError.message}`);
+          }
+
+          const { data: recoveredRows, error: recoveredRowsError } = await supabase
+            .from('ranking_leaderboard_view')
+            .select('*')
+            .eq('period_type', periodType)
+            .eq('period_start', periodStart)
+            .order('rank');
+
+          if (recoveredRowsError) {
+            throw new Error(`Failed to fetch recovered ranking rows: ${recoveredRowsError.message}`);
+          }
+
+          return (recoveredRows ?? []) as RankingLeaderboardViewRow[];
+        }
+
         return (winnerRows ?? []) as RankingLeaderboardViewRow[];
       }
       throw new Error(`Failed to save ranking period: ${periodError.message}`);
     }
 
-    const entriesToInsert = leaderboardRows.map((row, idx) => ({
-      ranking_period_id: period.id,
-      user_id: row.user_id,
-      rank: idx + 1,
-      performance_score: Number(row.performance_score ?? 0),
-      total_kpi_points: Number(row.total_kpi_points ?? 0),
-      badge_points: Number(row.badge_points ?? 0),
-      completed_task_count: Number(row.task_count ?? 0),
-    }));
+    const entriesToInsert = leaderboardRowsWithRank.map((row, idx) => toEntryInsert(period.id, row, idx));
 
     const { data: insertedEntries, error: entriesError } = await supabase
       .from('RankingEntry')
@@ -238,7 +275,8 @@ export async function generateRankingByPeriod(
 
     const periodLabel = buildPeriodLabelLikeView(periodType, start);
 
-    const resultRows: RankingLeaderboardViewRow[] = leaderboardRows.map((row, idx) => {
+    const resultRows: RankingLeaderboardViewRow[] = leaderboardRowsWithRank.map((row, idx) => {
+      const rpcRank = getRpcRank(row, idx);
       const entryId = entryIdByUserId.get(row.user_id);
       if (!entryId) {
         throw new Error('Failed to return generated leaderboard rows (missing entry id)');
@@ -260,7 +298,7 @@ export async function generateRankingByPeriod(
         entry_id: entryId,
         user_id: row.user_id,
         user_name: userName,
-        rank: idx + 1,
+        rank: rpcRank,
         performance_score: Number(row.performance_score ?? 0),
         total_kpi_points: Number(row.total_kpi_points ?? 0),
         badge_points: Number(row.badge_points ?? 0),
