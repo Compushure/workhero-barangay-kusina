@@ -7,7 +7,7 @@ import NavSection from '../nav-section';
 import CookingSection from './cooking-section';
 import { RankWidget } from './rank-panel';
 import { RewardRequestsFeedbackModal } from './reward-requests-feedback-modal';
-import TasksTable from './tasks-table';
+import TaskIcon from './quick-task';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function EmployeeDashboardClient() {
@@ -74,17 +74,9 @@ export default function EmployeeDashboardClient() {
         </div>
       </section>
 
-      {/* Row 3: Tasks aligned under Cooking (center 60%) */}
-      <section className="flex gap-4 p-4">
-        <div className="w-[20%]"></div>
-        <div className="w-[60%]">
-          <Card className="bg-background shadow-none border-none">
-            <CardContent className="p-4">
-              <TasksTable />
-            </CardContent>
-          </Card>
-        </div>
-        <div className="w-[20%]"></div>
+      {/* Row 3: Tasks modal trigger only */}
+      <section className="flex p-4 justify-center">
+        <TaskIcon />
       </section>
 
       <RewardRequestsFeedbackModal

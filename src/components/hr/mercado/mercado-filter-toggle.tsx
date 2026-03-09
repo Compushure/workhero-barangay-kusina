@@ -63,12 +63,12 @@ export function MercadoFilterToggle({
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="group gap-2 h-10 px-4 rounded-xl border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-foreground transition-all duration-400 ease-in-out"
+            className="group gap-2 h-10 px-4 rounded-xl border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white transition-all duration-400 ease-in-out"
           >
-            <Filter className="h-4 w-4 text-accent group-hover:text-foreground transition-all duration-400 ease-in-out" />
+            <Filter className="h-4 w-4 text-accent group-hover:text-white transition-all duration-400 ease-in-out" />
             <span className="hidden sm:inline">Filter</span>
             {activeFilterCount > 0 && (
-              <Badge className="ml-1 h-5 min-w-5 rounded-full p-0 text-[11px] leading-none bg-accent-secondary text-foreground flex items-center justify-center">
+              <Badge className="ml-1 h-5 min-w-5 rounded-full p-0 text-[11px] leading-none bg-accent-secondary text-white flex items-center justify-center">
                 {activeFilterCount}
               </Badge>
             )}

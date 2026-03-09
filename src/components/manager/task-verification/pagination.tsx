@@ -8,9 +8,15 @@ interface PaginationProps {
   totalPages: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  isFixed?: boolean;
 }
 
-function PaginationComponent({ totalPages, currentPage, onPageChange }: PaginationProps) {
+function PaginationComponent({
+  totalPages,
+  currentPage,
+  onPageChange,
+  isFixed = false,
+}: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const pages: (number | string)[] = [];
@@ -43,14 +49,18 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
   }
 
   return (
-    <div className="flex justify-center items-center gap-2 my-6 scale-115">
+    <div
+      className={`flex items-center justify-center gap-2 scale-115 ${
+        isFixed ? 'fixed bottom-6 left-1/2 z-40 -translate-x-1/2' : ''
+      }`}
+    >
       {/* Left arrow */}
       <Button
         variant="outline"
         size="sm"
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className='bg-card hover:bg-accent/75 hover:text-card not-disabled:shadow-sm/15 border border-accent/50'
+        className="bg-card text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out"
       >
         <ChevronLeft size={16} />
       </Button>
@@ -64,11 +74,11 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
         ) : (
           <Button
             key={page}
-            variant={page === currentPage ? 'default' : 'outline'}
+            variant="outline"
             size="sm"
             onClick={() => onPageChange(page as number)}
             className={`transition-all ease-in-out shadow-sm/15 border border-accent/50
-              ${page === currentPage ? 'bg-accent/75 text-card' : 'bg-card hover:bg-accent/25 hover:scale-110 hover:shadow-xs/25'}`}
+              ${page === currentPage ? 'bg-accent-secondary text-white hover:bg-accent-secondary hover:text-white' : 'bg-card text-foreground hover:bg-accent-secondary/80 hover:text-white hover:scale-110 hover:shadow-xs/25'}`}
           >
             {page}
           </Button>
@@ -81,7 +91,7 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
         size="sm"
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className='bg-card hover:bg-accent/75 hover:text-card not-disabled:shadow-sm/15 border border-accent/50'
+        className="bg-card text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out"
       >
         <ChevronRight size={16} />
       </Button>
