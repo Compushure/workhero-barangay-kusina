@@ -2,7 +2,17 @@ import { protectManagerRoute } from '@/actions/shared/auth';
 import { ManagerThemeBodySync } from '@/components/manager/manager-theme-body-sync';
 import { Sidebar } from '@/components/manager/task-verification/sidebar';
 import { NavigationOverlay } from '@/components/shared/navigation-overlay';
+import type { Metadata } from 'next';
 import React from 'react';
+
+export const metadata: Metadata = {
+  title: 'WorkHero | Manager',
+  icons: {
+    icon: '/assets/website-logo.svg',
+    shortcut: '/assets/website-logo.svg',
+    apple: '/assets/website-logo.svg',
+  },
+};
 
 export default async function ManagerLayout({ children }: { children: React.ReactNode }) {
   await protectManagerRoute();
@@ -21,9 +31,7 @@ export default async function ManagerLayout({ children }: { children: React.Reac
               transformOrigin: 'top left',
             }}
           >
-            <div className="w-full">
-              {children}
-            </div>
+            <div className="w-full">{children}</div>
           </div>
         </main>
       </div>
