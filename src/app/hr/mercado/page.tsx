@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { MercadoPageContent } from '@/components/hr/mercado/mercado-page-content';
+import { MarketSuspense } from '@/components/shared/market-suspense';
 
 export const metadata: Metadata = {
   title: 'WorkHero | Mercado',
@@ -11,5 +13,9 @@ export const metadata: Metadata = {
 };
 
 export default function MercadoPage() {
-  return <MercadoPageContent />;
+  return (
+    <Suspense fallback={<MarketSuspense label="Loading mercado manager..." />}>
+      <MercadoPageContent />
+    </Suspense>
+  );
 }

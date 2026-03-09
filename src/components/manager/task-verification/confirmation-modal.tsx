@@ -54,7 +54,7 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={(newOpen) => !newOpen && handleCancel()}>
-      <DialogContent className="max-w-md bg-card">
+      <DialogContent className="max-w-[95vw] sm:max-w-md lg:max-w-lg xl:max-w-xl bg-card">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>

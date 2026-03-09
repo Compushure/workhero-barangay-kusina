@@ -39,7 +39,7 @@ function DeleteTaskDialog({
   };
   return (
     <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-      <DialogContent className="bg-white">
+      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white">
         <DialogHeader>
           <DialogTitle className="text-foreground">Delete Task?</DialogTitle>
           <DialogDescription>

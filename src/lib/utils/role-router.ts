@@ -55,7 +55,7 @@ export async function handleUserRole({ router, setError, getUserRole }: HandleRo
     default:
       setError('You are not authorized to access this system.');
       toast.error('Not Authorized', {
-        description: `Your role (${role}) does not have access to any dashboard.`,
+        description: `Your role (${role}) does not have access to any attendance page.`,
       });
       break;
   }

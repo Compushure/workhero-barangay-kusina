@@ -93,7 +93,7 @@ export default function AwardBadgeDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="bg-background border-none max-w-2xl rounded-2xl p-6 max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-background border-none max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl rounded-2xl p-6 max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-foreground">
             Award Badge to {user?.name}
@@ -141,7 +141,7 @@ export default function AwardBadgeDialog({
           <div className="space-y-2">
             <Label className="text-sm font-medium text-primary">Available Badges</Label>
             <div className="border border-[#e0cfcf] rounded-lg overflow-hidden bg-white">
-              <div className="max-h-80 overflow-y-auto divide-y divide-[#e0cfcf]">
+              <div className="max-h-80 overflow-y-auto divide-y divide-[#e0cfcf] [scrollbar-width:none] sm:[scrollbar-width:auto] [-ms-overflow-style:none] sm:[-ms-overflow-style:auto] [&::-webkit-scrollbar]:hidden sm:[&::-webkit-scrollbar]:block">
                 {filteredBadges.length === 0 ? (
                   <div className="p-4 text-center text-secondary text-sm">
                     No badges found matching your search

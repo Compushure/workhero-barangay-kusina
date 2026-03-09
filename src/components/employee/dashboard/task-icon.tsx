@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import TasksTable from './tasks-table';
+import TasksTable from './quick-task-table';
 import {
   Dialog,
   DialogContent,

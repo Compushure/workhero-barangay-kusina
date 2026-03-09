@@ -7,17 +7,17 @@ export default function LeaderboardLoading() {
         {/* Hall of Fame Header Skeleton */}
         <div className="flex flex-col items-center mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 mb-2">
-            <Skeleton className="h-9 w-64 sm:h-11 sm:w-80" />
+            <Skeleton className="h-9 w-64 sm:h-11 sm:w-80 bg-muted" />
           </div>
 
           {/* Period Selector Skeleton */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" />
-            <Skeleton className="h-6 w-24 sm:h-7 sm:w-32" />
-            <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" />
+            <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-muted" />
+            <Skeleton className="h-6 w-24 sm:h-7 sm:w-32 bg-muted" />
+            <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-muted" />
           </div>
 
-          <Skeleton className="h-5 w-72 sm:w-96 mt-2" />
+          <Skeleton className="h-5 w-72 sm:w-96 mt-2 bg-muted" />
         </div>
 
         {/* Top 3 Podium Skeletons - Order: 2nd, 1st, 3rd */}
@@ -25,17 +25,17 @@ export default function LeaderboardLoading() {
           {/* Position 2 - Left (2nd Place) */}
           <div className="w-full max-w-sm bg-card rounded-2xl shadow-sm">
             <div className="px-3 sm:px-4 py-3 sm:py-4 flex flex-col items-center text-center">
-              <Skeleton className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-3 sm:mb-4" />
-              <Skeleton className="h-6 w-32 sm:h-7 sm:w-40 mb-3 sm:mb-4" />
+              <Skeleton className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-3 sm:mb-4 bg-muted" />
+              <Skeleton className="h-6 w-32 sm:h-7 sm:w-40 mb-3 sm:mb-4 bg-muted" />
               {/* Badge Skeletons */}
               <div className="flex gap-1.5 sm:gap-2 justify-center mb-3 sm:mb-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" />
+                  <Skeleton key={i} className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-muted" />
                 ))}
               </div>
               <div className="w-full border-t border-orange-200 pt-2 sm:pt-3">
-                <Skeleton className="h-7 w-16 sm:h-8 sm:w-20 mx-auto mb-2" />
-                <Skeleton className="h-3 w-28 mx-auto" />
+                <Skeleton className="h-7 w-16 sm:h-8 sm:w-20 mx-auto mb-2 bg-muted" />
+                <Skeleton className="h-3 w-28 mx-auto bg-muted" />
               </div>
             </div>
           </div>
@@ -43,17 +43,17 @@ export default function LeaderboardLoading() {
           {/* Position 1 - Center (1st Place) - Larger and raised */}
           <div className="w-full max-w-sm sm:scale-110 sm:-translate-y-4 bg-card rounded-2xl shadow-sm">
             <div className="px-4 sm:px-6 py-4 sm:py-6 flex flex-col items-center text-center">
-              <Skeleton className="w-24 h-24 sm:w-32 sm:h-32 rounded-full mb-3 sm:mb-4" />
-              <Skeleton className="h-7 w-40 sm:h-8 sm:w-48 mb-3 sm:mb-4" />
+              <Skeleton className="w-24 h-24 sm:w-32 sm:h-32 rounded-full mb-3 sm:mb-4 bg-muted" />
+              <Skeleton className="h-7 w-40 sm:h-8 sm:w-48 mb-3 sm:mb-4 bg-muted" />
               {/* Badge Skeletons */}
               <div className="flex gap-1.5 sm:gap-2 justify-center mb-3 sm:mb-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-10 sm:h-12 sm:w-12 rounded-full" />
+                  <Skeleton key={i} className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-muted" />
                 ))}
               </div>
               <div className="w-full border-t border-orange-200 pt-2 sm:pt-3">
-                <Skeleton className="h-8 w-20 sm:h-10 sm:w-24 mx-auto mb-2" />
-                <Skeleton className="h-4 w-32 mx-auto" />
+                <Skeleton className="h-8 w-20 sm:h-10 sm:w-24 mx-auto mb-2 bg-muted" />
+                <Skeleton className="h-4 w-32 mx-auto bg-muted" />
               </div>
             </div>
           </div>
@@ -61,17 +61,17 @@ export default function LeaderboardLoading() {
           {/* Position 3 - Right (3rd Place) */}
           <div className="w-full max-w-sm bg-card rounded-2xl shadow-sm">
             <div className="px-3 sm:px-4 py-3 sm:py-4 flex flex-col items-center text-center">
-              <Skeleton className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-3 sm:mb-4" />
-              <Skeleton className="h-6 w-32 sm:h-7 sm:w-40 mb-3 sm:mb-4" />
+              <Skeleton className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-3 sm:mb-4 bg-muted" />
+              <Skeleton className="h-6 w-32 sm:h-7 sm:w-40 mb-3 sm:mb-4 bg-muted" />
               {/* Badge Skeletons */}
               <div className="flex gap-1.5 sm:gap-2 justify-center mb-3 sm:mb-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" />
+                  <Skeleton key={i} className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-muted" />
                 ))}
               </div>
               <div className="w-full border-t border-orange-200 pt-2 sm:pt-3">
-                <Skeleton className="h-7 w-16 sm:h-8 sm:w-20 mx-auto mb-2" />
-                <Skeleton className="h-3 w-28 mx-auto" />
+                <Skeleton className="h-7 w-16 sm:h-8 sm:w-20 mx-auto mb-2 bg-muted" />
+                <Skeleton className="h-3 w-28 mx-auto bg-muted" />
               </div>
             </div>
           </div>
@@ -82,17 +82,17 @@ export default function LeaderboardLoading() {
           {Array.from({ length: 7 }).map((_, index) => (
             <div key={index} className="shrink-0 w-40 sm:w-48 bg-card rounded-2xl shadow-sm">
               <div className="px-3 sm:px-4 py-3 sm:py-4 flex flex-col items-center text-center">
-                <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 rounded-full mb-2 sm:mb-3" />
-                <Skeleton className="h-5 w-24 sm:h-6 sm:w-32 mb-2" />
+                <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 rounded-full mb-2 sm:mb-3 bg-muted" />
+                <Skeleton className="h-5 w-24 sm:h-6 sm:w-32 mb-2 bg-muted" />
                 {/* Badge Skeletons */}
                 <div className="flex gap-1 justify-center mb-2">
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-7 w-7 sm:h-8 sm:w-8 rounded-full" />
+                    <Skeleton key={i} className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-muted" />
                   ))}
                 </div>
                 <div className="w-full border-t border-orange-200 pt-2">
-                  <Skeleton className="h-6 w-12 sm:h-7 sm:w-16 mx-auto mb-1" />
-                  <Skeleton className="h-3 w-20 sm:w-24 mx-auto" />
+                  <Skeleton className="h-6 w-12 sm:h-7 sm:w-16 mx-auto mb-1 bg-muted" />
+                  <Skeleton className="h-3 w-20 sm:w-24 mx-auto bg-muted" />
                 </div>
               </div>
             </div>

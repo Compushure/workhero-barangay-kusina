@@ -52,16 +52,16 @@ export function DeleteUserModal({ open, onOpenChange, userName, onConfirm }: Del
           </div>
         </DialogHeader>
 
-        <div className="py-4 px-4 bg-background rounded-lg border border-[#f47812]/15">
+        <div className="py-4 px-3 sm:px-4 bg-background rounded-lg border border-[#f47812]/15">
           <p className="text-sm text-foreground">
             Are you sure you want to delete <strong className="text-foreground">{userName}</strong>?
           </p>
-          <p className="text-sm text-gray-600 mt-2">
+          <p className="text-xs sm:text-sm text-gray-600 mt-2">
             All associated data will be permanently removed from the system.
           </p>
         </div>
 
-        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
+        <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4">
           <Button
             variant="destructive"
             onClick={handleConfirm}

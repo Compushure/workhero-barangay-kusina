@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
+import { LoginCogSuspense } from '@/components/shared/login-cog-suspense';
 import type { Metadata } from 'next';
 import { EmployeeLoginContainer } from '@/components/auth/login/employee/employee-login-container';
-import { LoadingFallback } from '@/app/auth/adminlogin/page';
 import { redirectifSessionExists } from '@/actions/shared/auth';
 
 export const metadata: Metadata = {
@@ -16,7 +16,7 @@ export default async function LoginPage() {
   await redirectifSessionExists();
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={<LoginCogSuspense label="Loading employee login..." />}>
       <EmployeeLoginContainer />
     </Suspense>
   );

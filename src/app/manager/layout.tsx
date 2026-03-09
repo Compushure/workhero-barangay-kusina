@@ -17,10 +17,10 @@ export const metadata: Metadata = {
 export default async function ManagerLayout({ children }: { children: React.ReactNode }) {
   await protectManagerRoute();
   return (
-    <div className="manager-theme flex h-screen bg-background text-foreground">
+    <div className="manager-theme flex min-h-screen md:h-screen bg-background text-foreground overflow-x-hidden">
       <ManagerThemeBodySync />
       <Sidebar />
-      <div className="relative flex-1 min-w-0 overflow-y-auto overflow-x-auto xl:overflow-x-hidden">
+      <div className="relative flex-1 min-w-0 overflow-y-auto overflow-x-hidden pb-20 md:pb-0">
         <NavigationOverlay />
         <main className="relative z-0 w-full">
           <div

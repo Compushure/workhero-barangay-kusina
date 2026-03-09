@@ -22,12 +22,12 @@ export default async function LeaderboardPage() {
   if (result.error || !result.data || result.data.length === 0) {
     return (
       <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-        <div className="min-h-screen bg-background text-foreground p-8 pb-28">
+        <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-background text-foreground min-h-screen">
           <div className="max-w-6xl mx-auto">
-            <div className="flex justify-between items-start mb-8">
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-8">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Leaderboard Slide</h1>
-                <p className="text-muted-foreground">List of ranks for this week.</p>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Leaderboard Slide</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">List of ranks for this week.</p>
               </div>
               <LeaderboardFilters />
             </div>
@@ -54,13 +54,13 @@ export default async function LeaderboardPage() {
 
   return (
     <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-      <div className="min-h-screen bg-background text-foreground p-8 pb-28">
+      <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-background text-foreground min-h-screen">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
-          <div className="flex justify-between items-start mb-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Leaderboard Slide</h1>
-              <p className="text-muted-foreground">List of ranks for this week.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Leaderboard Slide</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">List of ranks for this week.</p>
             </div>
             <LeaderboardFilters />
           </div>
