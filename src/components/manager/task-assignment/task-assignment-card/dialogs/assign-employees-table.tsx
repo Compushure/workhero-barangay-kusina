@@ -102,7 +102,7 @@ function AssignEmployeesTable({
                       />
                     </div>
                   </td>
-                  <td className="w-[58%] min-w-0 px-2 py-2 font-medium text-gray-800 align-middle">
+                  <td className="w-[58%] min-w-0 px-2 py-2 font-medium text-gray-800 align-middle truncate">
                     <div className="flex flex-col gap-1">
                       <span>{employee.name}</span>
                       {isDisabled && (
