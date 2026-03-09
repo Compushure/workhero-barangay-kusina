@@ -103,10 +103,12 @@ function AssignEmployeesTable({
                     </div>
                   </td>
                   <td className="w-[58%] min-w-0 px-2 py-2 font-medium text-gray-800 align-middle">
-                    <span>{employee.name}</span>
-                    {isDisabled && (
-                      <span className="text-xs font-light text-gray-500">Already assigned</span>
-                    )}
+                    <div className="flex flex-col gap-1">
+                      <span>{employee.name}</span>
+                      {isDisabled && (
+                        <span className="text-xs font-light text-gray-500">Already assigned</span>
+                      )}
+                    </div>
                   </td>
                   <td className="w-[30%] px-2 py-2 text-gray-600 align-middle">{employee.empId}</td>
                 </tr>
