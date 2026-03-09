@@ -11,7 +11,7 @@ import {
 import { getISOWeeksInYear } from '@/lib/utils/time-period-utils';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import type { RankLogPeriodType, RankingPeriodWithTop } from '@/types';
+import type { RankLogPeriodType } from '@/types';
 
 function getPreviousWeek(): { year: number; week: number } {
   const now = new Date();
@@ -83,18 +83,9 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
   const currentView = params.view === 'past' ? 'past' : 'generate';
   const isPastViewing = currentView === 'past' && hasExplicitShow;
 
-  // Prefetch past ranks on the server when showing the list so it loads fast (no client waterfall)
-  let pastRanksInitial: {
-    periods: RankingPeriodWithTop[] | null | undefined;
-    error: string | null;
-  } = { periods: undefined, error: null };
-  if (currentView === 'past' && !isPastViewing) {
-    const result = await getAllRankingPeriods();
-    pastRanksInitial = {
-      periods: result.success ? result.data ?? [] : undefined,
-      error: result.success ? null : (result.error ?? 'Failed to load ranking periods.'),
-    };
-  }
+  // Fetch past ranks on the server when showing the list so the client can render immediately
+  const pastRanksResult =
+    currentView === 'past' && !isPastViewing ? await getAllRankingPeriods() : null;
 
   return (
     <div className="h-screen p-4  bg-white overflow-hidden">
@@ -147,10 +138,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
             />
           </div>
         ) : (
-          <PastRanksList
-            initialPeriods={pastRanksInitial.periods}
-            initialError={pastRanksInitial.error}
-          />
+          <PastRanksList initialData={pastRanksResult} />
         )}
       </div>
     </div>
