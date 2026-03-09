@@ -25,8 +25,8 @@ function AssignEmployeesTable({
   return (
     <div className="rounded-2xl border border-accent/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full">
-        <thead className="bg-primary-gradient text-card border-b border-accent/50">
-          <tr className="flex py-2 items-center">
+        <thead className="bg-muted text-primary/75 border-b border-accent/50">
+          <tr className="flex py-1 items-center">
             <th className="w-13 p-2 flex justify-center items-center">
               <input
                 type="checkbox"
@@ -71,7 +71,7 @@ function AssignEmployeesTable({
                         ? 'brightness-75 opacity-50 cursor-not-allowed'
                       : isSelected
                         ? 'bg-row-hover'
-                        : 'bg-card hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
+                        : 'bg-background-soft hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
                     }`}
                     onClick={() => !isDisabled && toggleEmployee(employee)}
                   >

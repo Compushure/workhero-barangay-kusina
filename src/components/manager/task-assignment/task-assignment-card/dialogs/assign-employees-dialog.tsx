@@ -130,7 +130,7 @@ export function AssignEmployeesDialog({
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="bg-background max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] flex flex-col rounded-3xl p-4 sm:p-6 pt-10 sm:pt-12">
+        <DialogContent className="bg-card max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] flex flex-col rounded-3xl p-4 sm:p-6 pt-10 sm:pt-12">
           <DialogHeader>
             <DialogTitle className="flex gap-2 text-xl sm:text-2xl text-foreground text-left items-center">
               <Users className="size-7 p-1.25 bg-primary-gradient text-card rounded-full" />

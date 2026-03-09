@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Search, Coins, Users, Award, ArrowUpDown } from 'lucide-react';
+import { Search, Users, Award, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,6 +18,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { toast } from 'sonner';
 import { BadgeAssignmentUsersSkeleton, BadgeAssignmentQuickSkeleton } from './badge-assignment-skeletons';
 import { BadgeAssignmentHeaderSkeleton } from './badge-assignment-header-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { BadgeAssignmentUser, BadgeSummary } from '@/types/manager/badge-assignment';
 import {
   useGetAllBadges,
@@ -249,7 +250,7 @@ export default function BadgeAssignmentPage() {
                 {/* Badge Count Display */}
                 <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
                   <h5 className="flex items-center gap-2">
-                    <Coins size={20} className="text-accent" />
+                    <Users size={20} className="text-accent" />
                     Employees{' '}
                     <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
                       {filteredUsers.length ?? 0}
@@ -278,7 +279,7 @@ export default function BadgeAssignmentPage() {
                         className="flex justify-between items-center py-4 w-full sm:w-64 md:w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
                       >
                         {USER_SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Sort'}
-                        <ArrowUpDown className='text-accent'/>
+                        <ArrowUpDown className="text-accent" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-background">
@@ -304,7 +305,7 @@ export default function BadgeAssignmentPage() {
               <div className="flex items-center">
                 <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
                   <h5 className="flex items-center gap-2">
-                    <Coins size={20} className="text-accent" />
+                    <Award size={20} className="text-accent" />
                     Manual Badges{' '}
                     <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
                       {manualBadges.length}
@@ -326,7 +327,7 @@ export default function BadgeAssignmentPage() {
                   >
                     {BADGE_SORT_OPTIONS.find((opt) => opt.value === badgeSortOption)?.label ||
                       'Sort'}
-                    <ArrowUpDown className='text-accent'/>
+                    <ArrowUpDown className="text-accent" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="bg-background">
