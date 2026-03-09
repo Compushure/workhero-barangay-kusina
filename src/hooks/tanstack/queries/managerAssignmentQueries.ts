@@ -59,7 +59,7 @@ export function useGetCurrentAssignedTasksPaginated(
     staleTime: 30 * 1000, // 30 seconds - tasks don't change that frequently
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Prevent unnecessary refetch on window focus
   }) as UseQueryResult<
     { tasks: AssignedTask[]; count: number; totalPages: number; employeeCount: number },
     Error
@@ -99,7 +99,7 @@ export function useGetCurrentAssignedEmployeesPaginated(
     staleTime: 30 * 1000,
     gcTime: 5 * 60 * 1000,
     retry: 2,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Prevent unnecessary refetch on window focus
   }) as UseQueryResult<
     { tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number },
     Error

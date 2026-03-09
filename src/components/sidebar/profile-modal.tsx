@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { ProfileAvatar } from '@/components/shared/ProfileAvatar';
 import { RecentBadges } from '@/components/profile/recent-badges';
 import { UserWithExtras } from '@/types';
+import { LogOutBtn } from '@/components/sidebar/logout-btn';
 
 interface ProfileModalProps {
   open: boolean;
@@ -37,27 +38,27 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={!isPending ? onOpenChange : undefined}>
-      <DialogContent className="max-w-[95vw] sm:max-w-125 rounded-2xl p-4 sm:p-6 bg-background text-foreground [&>button]:hidden">
+      <DialogContent className="w-[min(90vw,360px)] sm:w-[min(88vw,420px)] md:w-[min(80vw,540px)] xl:w-[min(60vw,620px)] 2xl:w-[min(48vw,700px)] rounded-2xl p-3 sm:p-4 md:p-5 bg-background text-foreground [&>button]:hidden">
         {/* Custom Close Button */}
         <button
           onClick={() => onOpenChange(false)}
           disabled={isPending}
-          className="absolute right-4 top-4 rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:ring-offset-2 z-50 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="absolute right-3 top-3 md:right-4 md:top-4 rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-(--color-accent) focus:ring-offset-2 z-50 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <X className="h-5 w-5 text-[var(--color-accent)]" />
+          <X className="h-4 w-4 md:h-5 md:w-5 text-(--color-accent)" />
           <span className="sr-only">Close</span>
         </button>
 
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl font-bold text-title">
+          <DialogTitle className="text-base sm:text-lg md:text-xl font-bold text-title">
             My Profile
           </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
+          <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
             Quick view of your profile information
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-6 py-2">
+        <div className="flex flex-col gap-4 md:gap-5 py-1 md:py-2">
           {/* Profile Picture */}
           <div className="flex justify-center">
             <ProfileAvatar
@@ -65,7 +66,7 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
               userName={user.name}
               profilePictureUrl={user.profilePictureUrl}
               size="lg"
-              className="bg-[var(--color-background-soft)] transition-transform duration-300 hover:scale-105 border-[var(--color-accent)]/15"
+              className="bg-(--color-background-soft) transition-transform duration-300 hover:scale-105 border-accent/15"
             />
           </div>
 
@@ -75,20 +76,20 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
           </div>
 
           {/* Basic Information */}
-          <div className="space-y-4 animate-in fade-in duration-300">
-            <div className="space-y-3">
+          <div className="space-y-3 animate-in fade-in duration-300">
+            <div className="space-y-2.5">
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-muted-foreground">Full Name</label>
-                <p className="text-base font-semibold text-title">{user.name}</p>
+                <p className="text-sm sm:text-base font-semibold text-title">{user.name}</p>
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-muted-foreground">Email Address</label>
-                <p className="text-sm font-semibold text-title break-all">{user.email}</p>
+                <p className="text-xs sm:text-sm font-semibold text-title break-all">{user.email}</p>
               </div>
               {user.employeeId && (
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-medium text-muted-foreground">Employee ID</label>
-                  <p className="text-base font-semibold text-title">{user.employeeId}</p>
+                  <p className="text-sm sm:text-base font-semibold text-title">{user.employeeId}</p>
                 </div>
               )}
               <div className="flex flex-col gap-1">
@@ -102,13 +103,13 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
             </div>
           </div>
 
-          {/* See Full Profile Button */}
-          <div className="pt-4 border-t border-border">
+          {/* Action Buttons */}
+          <div className="pt-3 md:pt-4 border-t border-border space-y-2.5">
             <Button
               onClick={handleViewFullProfile}
               disabled={isPending}
-              className="w-full bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] disabled:bg-gray-400 disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100 group"
-              size="lg"
+              className="w-full bg-(--color-accent) hover:bg-(--color-accent-secondary) disabled:bg-gray-400 disabled:opacity-70 disabled:cursor-not-allowed text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100 group"
+              size="default"
             >
               {isPending ? (
                 <>
@@ -122,6 +123,9 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
                 </>
               )}
             </Button>
+            
+            {/* Logout Button */}
+            <LogOutBtn />
           </div>
         </div>
       </DialogContent>

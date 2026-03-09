@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
@@ -9,11 +9,12 @@ import { DatePickerPopover } from './date-picker-popover';
 import type { AssignedEmployee, Task } from '@/types';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
-import { handleFetchTaskList } from '@/action-handlers/manager/assignments';
+import { handleFetchTaskList, handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import {
   useGetCurrentAssignedTasksPaginated,
   managerAssignmentKeys,
 } from '@/hooks/tanstack/queries/managerAssignmentQueries';
+import { TaskAssignmentCardSkeleton } from './task-assignment-card-skeleton';
 
 // Shadcn UI Dialog imports
 import {
@@ -25,13 +26,19 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
-export function TaskAssignmentCard() {
+interface TaskAssignmentCardProps {
+  // ✅ Removed onInitialLoadChange - component manages its own loading state
+}
+
+export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
   const { assignTasks, assignedTasks } = useTaskAssignment();
   const queryClient = useQueryClient();
 
+  // ✅ Reduced from 1000 to 100 - card only needs to check task assignment status
+  // This significantly reduces network payload and processing time
   const assignedTasksQuery = useGetCurrentAssignedTasksPaginated(
     1,
-    1000,
+    100,
     'recently added',
     '',
     true
@@ -45,6 +52,7 @@ export function TaskAssignmentCard() {
   const [selectedDeadline, setSelectedDeadline] = useState<Date | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showTaskWarning, setShowTaskWarning] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // NEW STATES
   const [showAssignConfirm, setShowAssignConfirm] = useState(false);
@@ -55,12 +63,15 @@ export function TaskAssignmentCard() {
 
   useEffect(() => {
     async function loadData() {
+      setIsInitialLoading(true);
+      // ✅ Fetch both in parallel - both are already imported at top level
       const [tasks, employees] = await Promise.all([
         handleFetchTaskList(),
-        import('@/action-handlers/manager/assignments').then((m) => m.handleFetchEmployeeList()),
+        handleFetchEmployeeList(),
       ]);
       setAvailableTasks(tasks);
       setTotalEmployees(employees.length);
+      setIsInitialLoading(false);
     }
     loadData();
   }, []);
@@ -90,7 +101,7 @@ export function TaskAssignmentCard() {
     }
   }, [isSelectedTaskFullyAssigned, selectedEmployees.length]);
 
-  const handleTasksChange = (tasks: string[], maxRepeats?: Record<string, number>) => {
+  const handleTasksChange = useCallback((tasks: string[], maxRepeats?: Record<string, number>) => {
     setselectedTask(tasks);
     if (maxRepeats) {
       setTaskMaxRepeats(maxRepeats);
@@ -98,9 +109,18 @@ export function TaskAssignmentCard() {
     if (tasks.length > 0) {
       setShowTaskWarning(false);
     }
-  };
+  }, []);
 
-  const handleAssign = async () => {
+  const handleClear = useCallback(() => {
+    setSelectedEmployees([]);
+    setselectedTask([]);
+    setTaskMaxRepeats({});
+    setSelectedDeadline(null);
+    setShowClearConfirm(false);
+    setShowTaskWarning(false);
+  }, []);
+
+  const handleAssign = useCallback(async () => {
     if (selectedEmployees.length > 0 && selectedTask.length > 0 && selectedDeadline) {
       setIsAssigning(true);
 
@@ -116,39 +136,38 @@ export function TaskAssignmentCard() {
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
 
-      handleClear();
-      setIsAssigning(false);
+      // Call clear logic directly instead of through closure
+      setSelectedEmployees([]);
+      setselectedTask([]);
+      setTaskMaxRepeats({});
+      setSelectedDeadline(null);
       setShowAssignConfirm(false);
+      setIsAssigning(false);
     }
-  };
+  }, [selectedEmployees, selectedTask, selectedDeadline, taskMaxRepeats, assignTasks, queryClient]);
 
-  const handleClear = () => {
-    setSelectedEmployees([]);
-    setselectedTask([]);
-    setTaskMaxRepeats({});
-    setSelectedDeadline(null);
-    setShowClearConfirm(false);
-    setShowTaskWarning(false);
-  };
-
-  const handleEmployeesDialogAttempt = () => {
+  const handleEmployeesDialogAttempt = useCallback(() => {
     if (selectedTask.length === 0) {
       setShowTaskWarning(true);
     }
-  };
+  }, [selectedTask.length]);
 
-  const getSelectedTaskName = () => {
+  const getSelectedTaskName = useCallback(() => {
     if (selectedTask.length === 0) return 'Select Task';
     const task = availableTasks.find((t) => t.id === selectedTask[0]);
     return task?.name || 'Select Task';
-  };
+  }, [selectedTask, availableTasks]);
+
+  if (isInitialLoading) {
+    return <TaskAssignmentCardSkeleton />;
+  }
 
   return (
-    <div className="rounded-3xl bg-background p-6 shadow-sm/25">
-      <h2 className="mb-7 text-2xl font-semibold text-[#131C2A]">Assign Employees for Task</h2>
+    <div className="rounded-3xl bg-background p-4 sm:p-6 shadow-sm/25">
+      <h2 className="mb-5 sm:mb-7 text-xl sm:text-2xl font-semibold text-[#131C2A]">Assign Employees for Task</h2>
 
-      <div className="flex flex-wrap gap-4">
-        <div className="min-w-50">
+      <div className="flex flex-wrap gap-3 sm:gap-4">
+        <div className="w-full sm:w-auto sm:min-w-50">
           <SelectTasksDialog
             selectedTask={selectedTask}
             onTasksChange={handleTasksChange}
@@ -157,7 +176,7 @@ export function TaskAssignmentCard() {
           />
         </div>
 
-        <div onClick={handleEmployeesDialogAttempt}>
+        <div className="w-full sm:w-auto" onClick={handleEmployeesDialogAttempt}>
           <AssignEmployeesDialog
             selectedEmployees={selectedEmployees}
             onEmployeesChange={setSelectedEmployees}
@@ -167,7 +186,9 @@ export function TaskAssignmentCard() {
           />
         </div>
 
-        <DatePickerPopover deadline={selectedDeadline} onDeadlineChange={setSelectedDeadline} />
+        <div className="w-full sm:w-auto">
+          <DatePickerPopover deadline={selectedDeadline} onDeadlineChange={setSelectedDeadline} />
+        </div>
       </div>
 
       {showTaskWarning && (
@@ -177,7 +198,7 @@ export function TaskAssignmentCard() {
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-3 justify-end mt-4">
+      <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
         <Button
           onClick={() => setShowAssignConfirm(true)}
           disabled={
@@ -186,7 +207,7 @@ export function TaskAssignmentCard() {
             selectedTask.length === 0 ||
             !selectedDeadline
           }
-          className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out disabled:bg-foreground disabled:opacity-50 disabled:brightness-50 disabled:cursor-not-allowed px-12 shadow-sm/25"
+          className="w-full sm:w-auto bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out disabled:bg-foreground disabled:opacity-50 disabled:brightness-50 disabled:cursor-not-allowed px-6 sm:px-12 shadow-sm/25"
         >
           {isAssigning ? 'Assigning...' : 'Assign'}
         </Button>
@@ -194,7 +215,7 @@ export function TaskAssignmentCard() {
         <Button
           variant="outline"
           onClick={() => setShowClearConfirm(true)}
-          className="text-primary bg-white hover:bg-gray-100 hover:text-accent px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
+          className="w-full sm:w-auto text-primary bg-white hover:bg-gray-100 hover:text-accent px-6 sm:px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
         >
           Clear
         </Button>
@@ -209,7 +230,7 @@ export function TaskAssignmentCard() {
 
       {/* Assign Confirmation Dialog */}
       <Dialog open={showAssignConfirm} onOpenChange={setShowAssignConfirm}>
-        <DialogContent className="transition-all duration-500 ease-in-out bg-card">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl transition-all duration-500 ease-in-out bg-card">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">
               Confirm Assignment

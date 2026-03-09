@@ -41,17 +41,17 @@ export default function UserCardsGrid({
         return (
           <div
             key={user.id}
-            className="bg-card rounded-xl border border-accent/25 p-4 hover:shadow-lg transition-shadow duration-300 shadow-sm/25"
+            className="bg-card rounded-xl border border-accent/25 p-3 sm:p-4 hover:shadow-lg transition-shadow duration-300 shadow-sm/25"
           >
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
               {/* Avatar and User Info */}
-              <div className="shrink-0 flex items-center gap-3 min-w-48">
+              <div className="shrink-0 flex items-center gap-3 min-w-0 sm:min-w-48">
                 {/* Avatar */}
                 {user.profilePictureUrl && !brokenAvatars[user.id] ? (
                   <img
                     src={user.profilePictureUrl}
                     alt={user.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-accent/25"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-accent/25"
                     onError={() =>
                       setBrokenAvatars((prev) => ({
                         ...prev,
@@ -60,20 +60,20 @@ export default function UserCardsGrid({
                     }
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-primary-gradient flex items-center justify-center text-white font-bold text-sm border-2 border-accent/25">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary-gradient flex items-center justify-center text-white font-bold text-xs sm:text-sm border-2 border-accent/25">
                     {getInitials(user.name)}
                   </div>
                 )}
 
                 {/* User Details */}
-                <div className="min-w-0 w-48">
+                <div className="min-w-0 flex-1 sm:w-48">
                   <p className="font-semibold text-foreground text-sm truncate">{user.name}</p>
                   <p className="text-xs text-secondary truncate">{user.employee_id}</p>
                 </div>
               </div>
 
-              {/* Badges Section - Highlighted */}
-              <div className="flex-1 flex items-center gap-3 px-4">
+              {/* Badges Section */}
+              <div className="flex-1 flex items-center gap-3 px-0 sm:px-4 min-w-0">
                 {user.badge_ids.length > 0 ? (
                   <div className="flex items-center gap-2 flex-wrap">
                     {displayedBadges.map((badgeId) => {
@@ -81,7 +81,7 @@ export default function UserCardsGrid({
                       return (
                         <div key={badgeId} className="group relative">
                           <div
-                            className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-accent/25 hover:border-accent transition-colors cursor-pointer"
+                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-accent/25 hover:border-accent transition-colors cursor-pointer"
                             title={badge?.name}
                           >
                             {badge?.img_link ? (
@@ -91,7 +91,7 @@ export default function UserCardsGrid({
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <HelpCircle size={24} className="text-gray-400" />
+                              <HelpCircle size={20} className="sm:size-6 text-gray-400" />
                             )}
                           </div>
                           {/* Tooltip */}
@@ -110,21 +110,21 @@ export default function UserCardsGrid({
                         onClick={() => onViewAllBadges(user)}
                         variant="outline"
                         size="sm"
-                        className="h-12 px-3 border-accent/25 text-primary bg-card hover:bg-accent/15 text-xs font-medium shadow-sm/25"
+                        className="h-10 sm:h-12 px-2 sm:px-3 border-accent/25 text-primary bg-card hover:bg-accent/15 text-xs font-medium shadow-sm/25"
                       >
                         +{remainingBadgesCount}
                       </Button>
                     )}
                   </div>
                 ) : (
-                  <div className="text-sm text-secondary italic">No badges yet</div>
+                  <div className="text-xs sm:text-sm text-secondary italic">No badges yet</div>
                 )}
               </div>
 
               {/* Award Button */}
               <Button
                 onClick={() => onAwardClick(user)}
-                className="shrink-0 bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card text-sm shadow-sm/25"
+                className="shrink-0 w-full sm:w-auto bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card text-sm shadow-sm/25"
               >
                 Award Badge
               </Button>

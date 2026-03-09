@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, Suspense } from 'react';
 import { HeaderSection } from '@/components/hr/dashboard/header';
+import { HeaderSkeleton } from '@/components/hr/dashboard/header-skeleton';
 import { RedemptionTable } from '@/components/hr/dashboard/redemption-table';
-import { MarketSuspense } from '@/components/shared/market-suspense';
+import { RedemptionTableSkeleton } from '@/components/hr/dashboard/redemption-table-skeleton';
 import { useGetRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
 import { useDebounce } from '@/hooks/useDebounce';
 
@@ -56,17 +57,9 @@ export function RewardRequestsContent() {
     setStatusFilter(value);
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white text-foreground p-8 pb-28">
-        <MarketSuspense label="Loading redemption requests..." />
-      </div>
-    );
-  }
-
   if (error) {
     return (
-      <div className="min-h-screen bg-white text-foreground p-8 pb-28">
+      <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
         <div className="flex items-center justify-center py-16">
           <div className="flex flex-col items-center gap-4">
             <p className="text-red-600">Error loading redemption requests: {error.message}</p>
@@ -77,19 +70,29 @@ export function RewardRequestsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-foreground p-8 pb-28">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <HeaderSection
-          title="Redemption Requests"
-          description="Manage employee's request of redemption"
-          searchTerm={searchTerm}
-          onSearch={handleSearch}
-          onSort={handleSort}
-          sortBy={sortBy}
-          statusFilter={statusFilter}
-          onStatusChange={handleStatusChange}
-        />
-        <RedemptionTable data={filteredRequests} status={statusFilter} />
+    <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
+      <div className="mx-auto max-w-7xl 2xl:max-w-440 w-full flex-1 flex flex-col">
+        {isLoading ? (
+          <HeaderSkeleton />
+        ) : (
+          <div className="flex-1 flex flex-col gap-4 sm:gap-6">
+            <Suspense fallback={<HeaderSkeleton />}>
+              <HeaderSection
+                title="Redemption Requests"
+                description="Manage employee's request of redemption"
+                searchTerm={searchTerm}
+                onSearch={handleSearch}
+                onSort={handleSort}
+                sortBy={sortBy}
+                statusFilter={statusFilter}
+                onStatusChange={handleStatusChange}
+              />
+            </Suspense>
+            <div className="flex-1 flex flex-col">
+              <RedemptionTable data={filteredRequests} status={statusFilter} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -144,24 +144,24 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   return (
     <div
-      className={`flex items-center justify-between rounded-2xl bg-card p-6 gap-8 transition-all ease-in-out duration-400
-        ${expanded ? 'scale-102 relative shadow-md/25' : 'shadow-sm/25'}`}
+      className={`relative flex flex-col lg:flex-row items-start lg:items-start justify-between rounded-2xl bg-card p-3 sm:p-4 md:p-6 gap-4 sm:gap-6 md:gap-8 transition-all ease-in-out duration-400
+        ${expanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`}
     >
-      <main className="flex flex-col w-full gap-7 min-w-0">
-        <section className="flex justify-between min-w-0">
+      <main className="flex flex-col w-full gap-4 sm:gap-5 md:gap-7 min-w-0 flex-1 pr-8 sm:pr-10 lg:pr-0">
+        <section className="flex flex-col lg:flex-row lg:justify-between gap-3 sm:gap-4 min-w-0">
           {/* Task name, description, and date range */}
           <header className="flex flex-col gap-1.5 min-w-0">
-            <div className="flex items-end min-w-0">
-              <h3 className="text-xl font-bold text-primary truncate shrink-0 max-w-125">{task.taskName}</h3>
-              <p className="text-sm text-gray-500 ml-2 mr-8 pb-0.5 truncate min-w-0 flex-1">{task.taskDescription}</p>
+            <div className="flex flex-col sm:flex-row sm:items-end gap-1 sm:gap-0 min-w-0">
+              <h3 className="text-lg sm:text-xl font-bold text-primary truncate shrink-0 max-w-full sm:max-w-125">{task.taskName}</h3>
+              <p className="text-xs sm:text-sm text-gray-500 sm:ml-2 sm:mr-8 sm:pb-0.5 truncate min-w-0 flex-1">{task.taskDescription}</p>
             </div>
 
-            <p className="flex items-center text-sm font-medium text-secondary">
-              <span className="bg-accent-secondary/25 w-fit rounded-full px-3 py-1">
+            <p className="flex items-center text-xs sm:text-sm font-medium text-secondary flex-wrap gap-1 sm:gap-2">
+              <span className="bg-accent-secondary/25 w-fit rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-sm">
                 {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
               </span>
               {isTaskOverdue(task.dateRange.end) && (
-                <span className="bg-red-100 text-red-500 text-sm px-2 py-1 rounded-full ml-2">
+                <span className="bg-red-100 text-red-500 text-[10px] sm:text-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
                   Task is Overdue
                 </span>
               )}
@@ -169,15 +169,15 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           </header>
 
           {/* Task max orders, fiesta points and XP */}
-          <div className="flex gap-4 text-secondary/85 items-baseline shrink-0">
+          <div className="flex gap-3 sm:gap-4 text-secondary/85 items-baseline shrink-0">
             <div className="flex flex-col items-end">
-              <div className="flex text-base font-medium items-end gap-1">
-                <Soup strokeWidth={1.5} className="size-7 mb-3.5" />
+              <div className="flex text-sm sm:text-base font-medium items-end gap-1">
+                <Soup strokeWidth={1.5} className="size-5 sm:size-7 mb-2 sm:mb-3.5" />
                 <p className="flex flex-col items-center">
-                  <span className="inline-block font-semibold pb-1 leading-none">
+                  <span className="inline-block font-semibold pb-1 leading-none text-xs sm:text-base">
                     {task.maxOrders} max order/s
                   </span>
-                  <span className="text-xs font-extralight text-zinc-400 leading-none">
+                  <span className="text-[10px] sm:text-xs font-extralight text-zinc-400 leading-none">
                     per employee
                   </span>
                 </p>
@@ -185,19 +185,19 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
             </div>
 
             <div className="flex flex-col items-center">
-              <div className="flex items-end gap-2">
-                <p className="flex gap-1 items-end text-xl font-medium leading-none">
-                  <Coins strokeWidth={1.75} className="size-6" />
-                  <span className="inline-block font-semibold pb-0.5">{task.points}</span>
+              <div className="flex items-end gap-1.5 sm:gap-2">
+                <p className="flex gap-0.5 sm:gap-1 items-end text-base sm:text-xl font-medium leading-none">
+                  <Coins strokeWidth={1.75} className="size-4 sm:size-6" />
+                  <span className="inline-block font-semibold pb-0.5 text-sm sm:text-base">{task.points}</span>
                 </p>
 
-                <p className="flex gap-1.5 items-end font-medium pb-0.5">
-                  <span className="inline-block italic text-lg leading-none">XP</span>
-                  <span className="inline-block font-semibold text-xl leading-none">{task.xp}</span>
+                <p className="flex gap-1 sm:gap-1.5 items-end font-medium pb-0.5">
+                  <span className="inline-block italic text-sm sm:text-lg leading-none">XP</span>
+                  <span className="inline-block font-semibold text-base sm:text-xl leading-none">{task.xp}</span>
                 </p>
               </div>
 
-              <p className="text-xs font-extralight text-zinc-400 pl-3">per order</p>
+              <p className="text-[10px] sm:text-xs font-extralight text-zinc-400 pl-2 sm:pl-3">per order</p>
             </div>
           </div>
         </section>
@@ -214,7 +214,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         />
       </main>
 
-      <div className="flex shrink-0">
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:static flex shrink-0 self-start lg:pt-1">
         <TaskViewCardMenu
           openPopover={openPopover}
           setOpenPopover={setOpenPopover}

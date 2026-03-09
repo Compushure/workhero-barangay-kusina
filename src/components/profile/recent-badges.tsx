@@ -52,6 +52,11 @@ function RecentBadgesComponent({ userId, showLabel = true, maxBadges = 2 }: Rece
                   src={badge.img_link}
                   alt={badge.badge_name}
                   className="h-full w-full object-cover"
+                  loading="lazy"
+                  onLoad={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
                 />
               </div>
             ) : (

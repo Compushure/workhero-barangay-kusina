@@ -338,13 +338,13 @@ export function AddItemsModal({
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-[160px_1fr] lg:grid-cols-[190px_1fr] gap-4 mt-4">
+        <div className="mt-4 grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,10rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,11.25rem)_minmax(0,1fr)]">
           {/* Icon Upload Section */}
-          <div className="space-y-2">
+          <div className="space-y-2 md:pr-2">
             <Label className="text-sm font-medium text-foreground">Select Icon</Label>
             <label
               htmlFor="icon-upload"
-              className="w-full md:w-40 lg:w-45 h-35 md:h-40 lg:h-45 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:border-ring transition-colors bg-background mx-auto md:mx-0 relative overflow-hidden group"
+              className="relative mx-auto w-full max-w-35 overflow-hidden rounded-lg border-2 border-dashed border-border bg-background aspect-square flex items-center justify-center cursor-pointer transition-colors hover:border-ring group md:mx-0 md:max-w-40 lg:max-w-45"
               style={
                 iconPreview || (editingItem && existingImageUrl && !existingImageError)
                   ? {
@@ -389,7 +389,7 @@ export function AddItemsModal({
           </div>
 
           {/* Form Fields */}
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             {/* Item Name */}
             <div className="space-y-2">
               <Label htmlFor="item-name" className="text-sm font-medium text-foreground">
