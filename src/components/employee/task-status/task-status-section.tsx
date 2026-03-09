@@ -42,8 +42,8 @@ export function TaskStatusSection({ status, task, children }: TaskStatusSectionP
       </header>
       {/* Exactly 3 task cards visible; 4+ tasks scroll vertically */}
       <div className="bg-[#2D061D]/35 border rounded-xl shadow-sm h-80 flex flex-col min-h-0 overflow-hidden w-full inset-shadow-sm/25">
-        <ScrollArea className="flex-1 min-h-0">
-          <div className="flex flex-col gap-4 items-center p-4">
+        <ScrollArea className="flex-1 min-h-0 w-full">
+          <div className="flex flex-col gap-4 items-stretch p-4 w-full min-w-0">
             {isLoading ? (
               <>
               <Skeleton className="w-full h-20 rounded-[1.1875rem] bg-background" />

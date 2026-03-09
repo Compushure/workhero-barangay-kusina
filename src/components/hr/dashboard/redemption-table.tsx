@@ -1,12 +1,19 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Check, X, ImageIcon } from 'lucide-react';
+import { Check, X, ImageIcon, Info, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useSidebarContentArea } from '@/hooks/useSidebarContentArea';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
@@ -34,9 +41,7 @@ export function RedemptionTable({
   const [selectedRequest, setSelectedRequest] = useState<RedemptionRequest | null>(null);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [requestImageError, setRequestImageError] = useState(false);
-  const { contentAreaStyle } = useSidebarContentArea();
   const itemsPerPage = 8;
-  const tableGridClass = 'grid-cols-[150px_180px_minmax(200px,1fr)_120px_120px]';
 
   // Pagination logic
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -110,142 +115,166 @@ export function RedemptionTable({
   const getRequestTotalCost = (req: RedemptionRequest) => (req.quantity || 1) * req.pointsCost;
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-background shadow-md">
-      {/* Table Header */}
-      <div className={cn('grid gap-4 bg-primary-gradient px-6 py-4', tableGridClass)}>
-        <div className="text-sm font-semibold uppercase tracking-wide text-white">Request Date</div>
-        <div className="text-sm font-semibold uppercase tracking-wide text-white">Employee</div>
-        <div className="text-sm font-semibold uppercase tracking-wide text-white">
-          Requested Item/s
-        </div>
-        <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
-          Total Cost
-        </div>
-        <div className="text-sm font-semibold uppercase tracking-wide text-white text-center">
-          Action
-        </div>
-      </div>
+    <>
+      <div className="overflow-hidden rounded-lg border border-border bg-background shadow-md">
+        <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <Table>
+            <TableHeader className="bg-primary-gradient">
+              <TableRow className="border-b border-border hover:bg-primary-gradient">
+                <TableHead className="text-card font-semibold px-2 sm:px-4 w-32 sm:w-40 text-xs sm:text-sm">
+                  REQUEST DATE
+                </TableHead>
+                <TableHead className="text-card font-semibold px-2 sm:px-4 w-36 sm:w-48 text-xs sm:text-sm">
+                  EMPLOYEE
+                </TableHead>
+                <TableHead className="text-card font-semibold px-2 sm:px-4 w-48 sm:w-64 text-xs sm:text-sm">
+                  REQUESTED ITEM/S
+                </TableHead>
+                <TableHead className="text-card font-semibold text-center px-2 sm:px-4 w-20 sm:w-28 text-xs sm:text-sm">
+                  TOTAL COST
+                </TableHead>
+                <TableHead className="text-card font-semibold text-center px-2 sm:px-4 w-24 sm:w-28 text-xs sm:text-sm">
+                  DETAILS
+                </TableHead>
+                <TableHead className="text-card font-semibold text-center px-2 sm:px-4 w-28 sm:w-32 text-xs sm:text-sm sticky right-0 bg-primary-gradient">
+                  ACTION
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+          <TableBody>
+            {paginatedData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="py-12 text-center text-foreground">
+                  <p className="text-sm">
+                    {status === 'pending'
+                      ? 'No pending redemption requests.'
+                      : status === 'approved'
+                        ? 'No approved redemption requests.'
+                        : status === 'rejected'
+                          ? 'No rejected redemption requests.'
+                          : 'No redemption requests found.'}
+                  </p>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedData.map((request) => {
+                const { dateStr, timeStr } = formatDateTime(request.requestedAt);
+                const quantity = request.quantity || 1;
+                const totalCost = request.pointsCost * quantity;
+                const itemDisplay = `${quantity} x ${request.rewardName}`;
+                const userPoints = request.userPoints || 0;
+                const hasInsufficientPoints = userPoints < totalCost;
+                const userName = request.userName || 'N/A';
+                const isOutOfStock = request.remarks === 'Item is out of stock';
+                const hasRemarks = request.remarks && request.remarks.trim() !== '';
 
-      {/* Table Body */}
-      <div className="divide-y divide-border bg-background">
-        {paginatedData.length === 0 ? (
-          <div className="flex items-center justify-center px-6 py-12 text-foreground">
-            <p className="text-sm">
-              {status === 'pending'
-                ? 'No pending redemption requests.'
-                : status === 'approved'
-                  ? 'No approved redemption requests.'
-                  : status === 'rejected'
-                    ? 'No rejected redemption requests.'
-                    : 'No redemption requests found.'}
-            </p>
-          </div>
-        ) : (
-          paginatedData.map((request) => {
-            const { dateStr, timeStr } = formatDateTime(request.requestedAt);
-            const quantity = request.quantity || 1;
-            const totalCost = request.pointsCost * quantity;
-            const itemDisplay = `${quantity} x ${request.rewardName}`;
-            const userPoints = request.userPoints || 0;
-            const hasInsufficientPoints = userPoints < totalCost;
-            const hasRemarks = request.remarks && request.remarks.trim() !== '';
-            const userName = request.userName || 'N/A';
-            const isOutOfStock = request.remarks === 'Item is out of stock';
-
-            return (
-              <div
-                key={request.id}
-                className={cn(
-                  'grid gap-4 px-6 py-4 transition-colors hover:bg-accent-secondary/25 cursor-pointer',
-                  tableGridClass
-                )}
-                onClick={() => openRequestModal(request)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    openRequestModal(request);
-                  }
-                }}
-              >
-                <div className="flex flex-col justify-center">
-                  <p className="text-sm font-medium text-foreground">{dateStr}</p>
-                  <p className="text-xs text-muted-foreground">{timeStr}</p>
-                </div>
-                <div className="flex items-center">
-                  <p className="text-sm text-foreground truncate">{userName}</p>
-                </div>
-                <div className="flex items-center min-w-0">
-                  <p className="text-sm text-foreground truncate flex-1 text-left">{itemDisplay}</p>
-                </div>
-                <div className="flex items-center justify-center">
-                  <p className="text-sm font-medium text-foreground">{totalCost} Pts</p>
-                </div>
-                <div className="flex items-center gap-2 justify-center">
-                  {status === 'pending' ? (
-                    <>
+                return (
+                  <TableRow
+                    key={request.id}
+                    className="bg-background transition-colors hover:bg-accent-secondary/10"
+                  >
+                    <TableCell className="px-2 sm:px-4">
+                      <p className="text-xs sm:text-sm font-medium text-foreground">{dateStr}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">{timeStr}</p>
+                    </TableCell>
+                    <TableCell className="px-2 sm:px-4">
+                      <p className="text-xs sm:text-sm text-foreground truncate max-w-36 sm:max-w-48">
+                        {userName}
+                      </p>
+                    </TableCell>
+                    <TableCell className="px-2 sm:px-4">
+                      <p className="text-xs sm:text-sm text-foreground truncate max-w-48 sm:max-w-64">
+                        {itemDisplay}
+                      </p>
+                    </TableCell>
+                    <TableCell className="px-2 sm:px-4 text-center">
+                      <p className="text-xs sm:text-sm font-medium text-foreground whitespace-nowrap">
+                        {totalCost} Pts
+                      </p>
+                    </TableCell>
+                    <TableCell className="px-2 sm:px-4 text-center">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 shrink-0 text-emerald-700 hover:bg-emerald-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          handleAcceptClick(request.id);
-                        }}
-                        disabled={
-                          declineMutation.isPending ||
-                          acceptMutation.isPending ||
-                          hasInsufficientPoints
-                        }
-                        title={
-                          hasInsufficientPoints
-                            ? `Insufficient points: User has ${userPoints} but needs ${totalCost}`
-                            : 'Accept request'
-                        }
+                        className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-blue-600 hover:bg-blue-100 hover:text-blue-700 relative"
+                        onClick={() => openRequestModal(request)}
+                        title="View details"
                       >
-                        <Check className="h-4 w-4" />
+                        <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        {status !== 'pending' && hasRemarks && (
+                          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-orange-500 ring-1 ring-background" />
+                        )}
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          handleDeclineClick(request.id);
-                        }}
-                        disabled={declineMutation.isPending || acceptMutation.isPending}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </>
-                  ) : (
-                    <div
-                      className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 ${
-                        status === 'approved'
-                          ? 'bg-green-100 text-green-700'
-                          : isOutOfStock
-                            ? 'bg-orange-100 text-orange-700'
-                            : 'bg-red-100 text-red-700'
-                      }`}
-                    >
-                      {status === 'approved'
-                        ? 'Approved'
-                        : isOutOfStock
-                          ? 'Out of Stock'
-                          : 'Rejected'}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
+                    </TableCell>
+                    <TableCell className="px-2 sm:px-4 sticky right-0 bg-background">
+                      <div className="flex items-center justify-center gap-1 sm:gap-2">
+                        {status === 'pending' ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-emerald-700 hover:bg-emerald-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleAcceptClick(request.id);
+                              }}
+                              disabled={
+                                declineMutation.isPending ||
+                                acceptMutation.isPending ||
+                                hasInsufficientPoints
+                              }
+                              title={
+                                hasInsufficientPoints
+                                  ? `Insufficient points: User has ${userPoints} but needs ${totalCost}`
+                                  : 'Accept request'
+                              }
+                            >
+                              <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleDeclineClick(request.id);
+                              }}
+                              disabled={declineMutation.isPending || acceptMutation.isPending}
+                            >
+                              <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <div
+                            className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap shrink-0 ${
+                              status === 'approved'
+                                ? 'bg-green-100 text-green-700'
+                                : isOutOfStock
+                                  ? 'bg-orange-100 text-orange-700'
+                                  : 'bg-red-100 text-red-700'
+                            }`}
+                          >
+                            {status === 'approved'
+                              ? 'Approved'
+                              : isOutOfStock
+                                ? 'Out of Stock'
+                                : 'Rejected'}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
       </div>
 
-      {/* Pagination */}
+      {/* Pagination - parent will position with mt-auto */}
       {totalPages > 1 && (
-        <div className="fixed bottom-6 z-40 flex justify-center" style={contentAreaStyle}>
+        <div className="mt-auto pt-3 sm:pt-4">
           <Pagination
             totalPages={totalPages}
             currentPage={currentPage}
@@ -350,6 +379,6 @@ export function RedemptionTable({
             })()}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

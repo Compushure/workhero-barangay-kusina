@@ -12,6 +12,7 @@ import {
 import { HelpCircle, Coins, Search, ArrowUpDown } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { BadgeAssignmentUser, BadgeSummary } from '@/types/manager/badge-assignment';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 interface QuickAssignmentPanelProps {
   badges: BadgeSummary[];
@@ -50,22 +51,28 @@ export default function QuickAssignmentPanel({
 
   // Note: badges are already paginated from parent, just filter them locally
   const filteredBadges = useMemo(
-    () =>
-      badges.filter(
+    () => {
+      const normalizedSearch = normalizeSearchQuery(debouncedBadgeSearch);
+      return badges.filter(
         (badge) =>
-          badge.name.toLowerCase().includes(debouncedBadgeSearch.toLowerCase()) ||
-          badge.description?.toLowerCase().includes(debouncedBadgeSearch.toLowerCase())
-      ),
+          !normalizedSearch ||
+          badge.name.toLowerCase().includes(normalizedSearch) ||
+          badge.description?.toLowerCase().includes(normalizedSearch)
+      );
+    },
     [badges, debouncedBadgeSearch]
   );
 
   // Filter users
   const filteredUsers = useMemo(() => {
+    const normalizedSearch = normalizeSearchQuery(debouncedUserSearch);
+
     const filtered = users.filter(
       (user) =>
-        user.name.toLowerCase().includes(debouncedUserSearch.toLowerCase()) ||
-        user.email.toLowerCase().includes(debouncedUserSearch.toLowerCase()) ||
-        (user.employee_id || '').toLowerCase().includes(debouncedUserSearch.toLowerCase())
+        !normalizedSearch ||
+        user.name.toLowerCase().includes(normalizedSearch) ||
+        user.email.toLowerCase().includes(normalizedSearch) ||
+        (user.employee_id || '').toLowerCase().includes(normalizedSearch)
     );
 
     return [...filtered].sort((a, b) => {
@@ -116,9 +123,9 @@ export default function QuickAssignmentPanel({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
             <Input
-              placeholder="Search badges..."
+              placeholder="Search by badge name or description"
               value={badgeSearchTerm}
-              onChange={(e) => setBadgeSearchTerm(e.target.value)}
+              onChange={(e) => setBadgeSearchTerm(sanitizeSearchInput(e.target.value))}
               className="pl-10 bg-card border-accent/25 focus:border-accent h-9 text-sm shadow-sm/25"
             />
           </div>
@@ -126,7 +133,7 @@ export default function QuickAssignmentPanel({
 
         {/* Badge List with Pagination */}
         <div className="space-y-3">
-          <div className="border border-accent/25 rounded-lg overflow-hidden max-h-96 overflow-y-auto shadow-sm/25">
+          <div className="border border-accent/25 rounded-lg overflow-hidden max-h-96 overflow-y-auto shadow-sm/25 [scrollbar-width:none] sm:[scrollbar-width:auto] [-ms-overflow-style:none] sm:[-ms-overflow-style:auto] [&::-webkit-scrollbar]:hidden sm:[&::-webkit-scrollbar]:block">
             {filteredBadges.length > 0 ? (
               <div className="divide-y divide-accent/25">
                 {filteredBadges.map((badge) => (
@@ -136,7 +143,7 @@ export default function QuickAssignmentPanel({
                     className={`w-full px-4 py-3 text-left transition-colors ${
                       selectedBadge?.id === badge.id
                         ? 'bg-accent/15 border-l-4 border-accent'
-                        : 'bg-card hover:bg-row-hover'
+                        : 'bg-background-soft hover:bg-row-hover'
                     }`}
                   >
                     <div className="flex items-start gap-3">
@@ -241,7 +248,7 @@ export default function QuickAssignmentPanel({
 
             {/* User Selection */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
                 <h2 className="text-lg font-semibold text-foreground">
                   Assign To Users ({selectedUsers.size} selected)
                 </h2>
@@ -250,7 +257,7 @@ export default function QuickAssignmentPanel({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex justify-between items-center py-4 w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
+                      className="flex justify-between items-center py-4 w-full sm:w-64 md:w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
                     >
                       {USER_SORT_OPTIONS.find((option) => option.value === userSortOption)?.label || 'Sort'}
                       <ArrowUpDown className='text-accent'/>
@@ -269,20 +276,20 @@ export default function QuickAssignmentPanel({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <div className="relative">
+              <div className="relative w-full sm:w-64 md:w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                 <Input
-                  placeholder="Search users..."
+                  placeholder="Search by employee name, email, or ID"
                   value={userSearchTerm}
-                  onChange={(e) => setUserSearchTerm(e.target.value)}
-                  className="pl-10 bg-card border-accent/25 focus:border-accent h-9 text-sm shadow-sm/25"
+                  onChange={(e) => setUserSearchTerm(sanitizeSearchInput(e.target.value))}
+                  className="pl-10 bg-card border-accent/25 focus:border-accent h-9 text-sm shadow-sm/25 w-full sm:w-64 md:w-full"
                 />
               </div>
             </div>
 
             {/* Users Grid */}
             <div className="border border-accent/25 rounded-lg overflow-hidden shadow-sm/25">
-              <div className="max-h-64 overflow-y-auto">
+              <div className="max-h-64 overflow-y-auto [scrollbar-width:none] sm:[scrollbar-width:auto] [-ms-overflow-style:none] sm:[-ms-overflow-style:auto] [&::-webkit-scrollbar]:hidden sm:[&::-webkit-scrollbar]:block">
                 {filteredUsers.length > 0 ? (
                   <div className="divide-y divide-accent/25">
                     {filteredUsers.map((user) => (
@@ -338,7 +345,7 @@ export default function QuickAssignmentPanel({
             </div>
           </>
         ) : (
-          <div className="bg-card border border-dashed border-accent/25 rounded-lg p-12 text-center">
+          <div className="bg-background-soft border border-dashed border-accent/25 rounded-lg p-12 text-center">
             <p className="text-secondary text-lg">Select a badge to assign to users</p>
           </div>
         )}

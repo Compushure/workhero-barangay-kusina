@@ -2,8 +2,10 @@
 
 import dynamic from 'next/dynamic';
 import { Plus } from 'lucide-react';
+import { Suspense } from 'react';
 import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
+import { MercadoHeaderSkeleton } from '@/components/hr/mercado/mercado-header-skeleton';
 import { MercadoSearchBar } from '@/components/hr/mercado/mercado-search-bar';
 import { Button } from '@/components/ui/button';
 import { MercadoSortToggle } from '@/components/hr/mercado/mercado-sort-toggle';
@@ -26,7 +28,6 @@ const ViewItemModal = dynamic(() =>
 
 export function MercadoPageContent() {
   const {
-    contentAreaStyle,
     isLoading,
     totalPages,
     currentPage,
@@ -69,47 +70,60 @@ export function MercadoPageContent() {
 
   return (
     // Page shell section.
-    <main className="min-h-screen bg-white text-foreground p-6 pb-6 flex flex-col">
-      <div className="mx-auto w-full max-w-7xl flex-1 flex flex-col p-2">
-        <div className="space-y-5">
-          <MercadoHeader
-            title="Mercado Manager"
-            description="Manage items visible in mercado"
-            showAddButton={false}
-          />
-
-          <div className="flex flex-col gap-4 md:flex-row md:items-center">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="w-full md:w-auto md:min-w-[320px] md:max-w-md">
-                <MercadoSearchBar
-                  value={search}
-                  onChange={setSearch}
-                  placeholder="Search by employee or items"
-                />
-              </div>
-              <MercadoSortToggle value={sortOrder} onChange={setSortOrder} />
-              <MercadoFilterToggle
-                stockFilter={stockFilter}
-                visibilityFilter={visibilityFilter}
-                intervalFilter={intervalFilter}
-                onStockFilterChange={setStockFilter}
-                onVisibilityFilterChange={setVisibilityFilter}
-                onIntervalFilterChange={setIntervalFilter}
+    <main className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
+      <div className="mx-auto w-full max-w-7xl 2xl:max-w-440 flex-1 flex flex-col gap-4 sm:gap-6">
+        {isLoading ? (
+          <MercadoHeaderSkeleton />
+        ) : (
+          <Suspense fallback={<MercadoHeaderSkeleton />}>
+            <div className="space-y-4 sm:space-y-6">
+              <MercadoHeader
+                title="Mercado Manager"
+                description="Manage items visible in mercado"
+                showAddButton={false}
               />
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 sm:justify-end">
+                <div className="w-full sm:min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
+                  <div className="w-full">
+                    <MercadoSearchBar
+                      value={search}
+                      onChange={setSearch}
+                      placeholder="Search by item name"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <MercadoSortToggle value={sortOrder} onChange={setSortOrder} />
+                    <MercadoFilterToggle
+                      stockFilter={stockFilter}
+                      visibilityFilter={visibilityFilter}
+                      intervalFilter={intervalFilter}
+                      onStockFilterChange={setStockFilter}
+                      onVisibilityFilterChange={setVisibilityFilter}
+                      onIntervalFilterChange={setIntervalFilter}
+                    />
+                  </div>
+                  <Button
+                    onClick={openAddModal}
+                    className="w-full sm:w-auto h-10 px-4 rounded-lg bg-primary-gradient text-zinc-50 hover:opacity-95"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Item
+                  </Button>
+                </div>
+              </div>
             </div>
-            <Button
-              onClick={openAddModal}
-              className="h-10 px-4 rounded-lg bg-primary-gradient text-zinc-50 hover:opacity-95 md:ml-auto"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
-          </div>
+          </Suspense>
+        )}
+
+        <div className="flex-1 flex flex-col">
           {/* Catalog grid section. */}
           {isLoading ? (
             <MercadoSkeleton />
           ) : (
-            <div className="grid auto-rows-fr grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid auto-rows-fr grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {paginatedRewards.length > 0 ? (
                 paginatedRewards.map((item) => (
                   <MercadoCard
@@ -144,19 +158,19 @@ export function MercadoPageContent() {
               )}
             </div>
           )}
-        </div>
 
-        {/* Centered pagination section. */}
-        {totalPages > 1 && (
-          <div className="fixed bottom-6 z-40 flex justify-center pb-4" style={contentAreaStyle}>
-            <Pagination
-              totalPages={totalPages}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-              isFixed={false}
-            />
-          </div>
-        )}
+          {/* Pagination - pushed to bottom with mt-auto */}
+          {totalPages > 1 && (
+            <div className="mt-auto pt-3 sm:pt-4">
+              <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                isFixed={false}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <AddItemsModal

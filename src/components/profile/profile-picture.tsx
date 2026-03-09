@@ -90,6 +90,10 @@ function ProfilePictureComponent({
               alt={`${userName} profile picture`}
               className="h-full w-full object-cover"
               loading="eager"
+              onLoad={(e) => {
+                e.currentTarget.style.opacity = '1';
+              }}
+              style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
             />
           ) : (
             <span className="text-4xl font-semibold text-primary/60">

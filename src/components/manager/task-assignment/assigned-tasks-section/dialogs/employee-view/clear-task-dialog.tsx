@@ -44,7 +44,7 @@ function ClearTaskDialog({
       onOpenChange={(open) => !open && setShowRemoveConfirm(null)}
     >
       <DialogTitle className="hidden">Unassign Task to Employee</DialogTitle>
-      <DialogContent className="bg-white">
+      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white">
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-foreground">Unassign Task?</h3>
           <p className="text-gray-600">

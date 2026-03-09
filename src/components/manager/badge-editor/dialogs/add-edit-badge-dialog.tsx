@@ -305,7 +305,7 @@ export default function AddEditBadgeDialog({
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
-      <DialogContent className="bg-background border-none max-w-[92vw] md:max-w-xl lg:max-w-2xl rounded-2xl p-4 sm:p-5 max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-card border-none max-w-[95vw] sm:max-w-md md:max-w-xl lg:max-w-2xl xl:max-w-3xl 2xl:max-w-4xl rounded-2xl p-4 sm:p-5 max-h-[85vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-primary text-base sm:text-lg font-semibold">
@@ -525,23 +525,23 @@ export default function AddEditBadgeDialog({
             )}
 
             {!isConditionsCollapsed && conditions.length === 0 ? (
-              <div className="bg-white rounded-lg p-4 border border-[#e0cfcf] text-center text-gray-500">
+              <div className="bg-background-soft rounded-lg p-4 border border-[#e0cfcf] text-center text-gray-500">
                 <p className="text-sm">No conditions - Badge will be awarded manually</p>
               </div>
             ) : !isConditionsCollapsed ? (
               <div className="border border-[#e0cfcf] rounded-lg overflow-hidden bg-white">
-                <div className="max-h-96 overflow-y-auto space-y-0 divide-y divide-[#e0cfcf]">
+                <div className="max-h-96 overflow-y-auto space-y-0 divide-y divide-[#e0cfcf] [scrollbar-width:none] sm:[scrollbar-width:auto] [-ms-overflow-style:none] sm:[-ms-overflow-style:auto] [&::-webkit-scrollbar]:hidden sm:[&::-webkit-scrollbar]:block">
                   {conditions.map((condition, idx) => {
                     const isExpanded = expandedConditions[condition.id] ?? true;
 
                     return (
                       <div
                         key={condition.id}
-                        className="p-4 space-y-3 hover:bg-gray-50 transition-colors"
+                        className="bg-background-soft p-4 space-y-3 hover:bg-amber-50 transition-colors"
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-[#5a2a2a]">
+                            <span className="text-sm font-medium text-primary">
                               Condition {idx + 1}
                             </span>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded ${
@@ -579,7 +579,7 @@ export default function AddEditBadgeDialog({
                             <div className="grid grid-cols-2 gap-3">
                               {/* Logic Type */}
                               <div className="space-y-1">
-                                <Label className="text-xs font-medium text-[#5a2a2a]">Logic Type</Label>
+                                <Label className="text-xs font-medium text-primary">Logic Type</Label>
                                 <Select
                                   value={condition.logic_type}
                                   onValueChange={(value) =>

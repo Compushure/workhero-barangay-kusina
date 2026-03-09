@@ -3,7 +3,7 @@
 import React from 'react';
 
 import { useState } from 'react';
-import { Plus, Search, ArrowUpDown, Coins } from 'lucide-react';
+import { Plus, Search, ArrowUpDown, Coins, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import { BadgeFilterToggle, type BadgeFilterMode } from './badge-filter-toggle';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { Pagination } from '../task-verification/pagination';
 import type { Badge } from '@/types/manager/badge-editor';
+import { BadgeEditorHeaderSkeleton } from './badge-editor-header-skeleton';
 import {
   useAddBadge,
   useDeleteBadgeImage,
@@ -28,6 +29,7 @@ import {
   useGetBadges,
   useUploadBadgeImage,
 } from '@/hooks/tanstack';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 type BadgeSortOption = 'name-asc' | 'points-desc' | 'created-desc' | 'created-asc';
 
@@ -62,7 +64,8 @@ export function BadgeEditorPage() {
 
   // Mock data filtering and sorting
   let filteredBadges = badges.filter((badge) => {
-    const searchLower = debouncedSearchTerm.toLowerCase();
+    const searchLower = normalizeSearchQuery(debouncedSearchTerm);
+    if (!searchLower) return true;
     return (
       badge.name.toLowerCase().includes(searchLower) ||
       badge.description?.toLowerCase().includes(searchLower)
@@ -216,7 +219,7 @@ export function BadgeEditorPage() {
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+    setSearchTerm(sanitizeSearchInput(e.target.value));
     setPage(1);
   };
 
@@ -238,16 +241,20 @@ export function BadgeEditorPage() {
     SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Name (A-Z)';
 
   return (
-    <main className="w-full min-h-screen bg-zinc-100 p-10">
-      <div className="mx-auto w-full max-w-500 space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">Badge Editor</h1>
-          <p className="text-md text-secondary">Create, edit, and manage badges with conditions.</p>
-        </div>
+    <main className="w-full min-h-screen bg-zinc-100 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl space-y-5 sm:space-y-6 lg:space-y-8">
+        {isLoading ? (
+          <BadgeEditorHeaderSkeleton />
+        ) : (
+          <>
+            <div className="space-y-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Badge Editor</h1>
+              <p className="text-sm sm:text-base lg:text-lg text-secondary">Create, edit, and manage badges with conditions.</p>
+            </div>
 
-        <section className="flex justify-between">
-          {/* Badge Count Display */}
-          <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
+            <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+              {/* Badge Count Display */}
+              <div className="flex gap-3 sm:gap-4 text-base sm:text-lg font-bold text-foreground pl-1 sm:pl-2">
             <h5 className="flex items-center gap-2">
               <Coins size={20} className="text-accent" />
               Badges{' '}
@@ -258,13 +265,13 @@ export function BadgeEditorPage() {
           </div>
 
           {/* Search, Sort, and Add Button */}
-          <div className="flex gap-4 items-center justify-end">
+          <div className="flex flex-wrap gap-2 sm:gap-3 items-center justify-start lg:justify-end">
             {/* Search Input */}
             <div className="relative flex">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search badges..."
+                placeholder="Search by badge name or description"
                 value={searchTerm}
                 onChange={handleSearchChange}
                 className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
@@ -279,7 +286,7 @@ export function BadgeEditorPage() {
                 <Button
                   variant="default"
                   size="default"
-                  className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-48 py-2 justify-between border border-gray-200"
+                  className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-full sm:w-48 py-2 justify-between border border-gray-200"
                 >
                   <span className="truncate">{currentSortLabel}</span>
                   <ArrowUpDown size={18} className='text-accent'/>
@@ -303,14 +310,16 @@ export function BadgeEditorPage() {
             {/* Add New Badge Button */}
             <Button
               onClick={handleOpenAddDialog}
-              className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-6 py-2 rounded-full shadow-sm/25 font-semibold text-sm shrink-0"
+              className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-3 sm:px-4 py-2 rounded-full shadow-sm/25 font-semibold text-sm w-full sm:w-48 justify-between"
             >
               <Coins size={18} />
-              <span>Add New Badge</span>
-              <Plus size={18} className="ml-4" />
+              <span className="inline">Add New Badge</span>
+              <Plus size={18} />
             </Button>
           </div>
         </section>
+          </>
+        )}
 
         <BadgeTable
           badges={paginatedBadges}

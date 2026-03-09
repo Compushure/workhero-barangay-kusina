@@ -15,7 +15,7 @@ export function LoginPage({ onSubmit, isBusy }: LoginPageProps) {
       <LoginBackground />
 
       {/* Form Container with Z-indexing */}
-      <div className="relative z-20 min-h-dvh flex items-center justify-center px-3 py-4 sm:px-4 sm:py-6">
+      <div className="relative z-20 min-h-dvh flex items-center justify-center px-0.5 py-1.5 sm:px-4 sm:py-6 lg:px-8 lg:py-10">
         <LoginFormWrapper onSubmit={onSubmit} isBusy={isBusy} />
       </div>
     </div>

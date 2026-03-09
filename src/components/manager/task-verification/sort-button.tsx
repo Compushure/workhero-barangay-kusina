@@ -33,8 +33,8 @@ export function SortButton({
   const isMercadoStyle = styleVariant === 'mercado';
 
   const triggerClassName = isMercadoStyle
-    ? 'group border border-gray-300 bg-zinc-50/75 text-[#131C2A] hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-35'
-    : 'bg-foreground hover:bg-[#af3b3f] rounded-full text-white w-35';
+    ? 'group border border-gray-300 bg-zinc-50/75 text-[#131C2A] hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-32 sm:flex-1 sm:min-w-[160px]'
+    : 'bg-card hover:bg-gray-200 rounded-full text-primary w-32 sm:flex-1 sm:min-w-[160px]';
 
   const itemClassName = (isActive: boolean) =>
     isMercadoStyle
@@ -50,15 +50,15 @@ export function SortButton({
       <DropdownMenuTrigger asChild>
         <Button
           variant="default"
-          size="default"
-          className={`${triggerClassName} cursor-pointer shadow-sm/50 flex justify-between transition-all duration-500 ease-in-out`}
+          size="sm"
+          className={`${triggerClassName} cursor-pointer shadow-sm/50 flex justify-between items-center transition-all duration-500 ease-in-out h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 text-xs sm:text-sm`}
         >
-          {/* Label on the left */}
-          <span className="truncate">{currentLabel}</span>
-          {/* Arrow on the right */}
+          {/* Label with fixed character width */}
+          <span className="max-w-20 sm:max-w-32 truncate">{currentLabel}</span>
+          {/* Arrow icon */}
           <ArrowUpDown
-            size={18}
-            className={isMercadoStyle ? 'text-[#131C2A] group-hover:text-white' : undefined}
+            size={14}
+            className={isMercadoStyle ? 'text-[#131C2A] group-hover:text-white ml-1 shrink-0' : 'text-accent ml-1 shrink-0'}
           />
         </Button>
       </DropdownMenuTrigger>

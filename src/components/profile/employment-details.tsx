@@ -23,27 +23,27 @@ interface EmploymentDetailsProps {
 
 export function EmploymentDetails({ profile }: EmploymentDetailsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4 w-full max-w-full">
       {profile.employmentStatus && (
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
+        <div className="space-y-1.5 sm:space-y-2 min-w-0 max-w-full">
+          <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
             Employment Status
           </Label>
-          <div className="p-2">
+          <div className="p-1.5 sm:p-2">
             <Badge
               variant={profile.employmentStatus === 'regular' ? 'default' : 'secondary'}
-              className="font-semibold capitalize"
+              className="font-semibold capitalize text-xs sm:text-sm"
             >
               {profile.employmentStatus}
             </Badge>
           </div>
         </div>
       )}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-muted-foreground">
+      <div className="space-y-1.5 sm:space-y-2 min-w-0 max-w-full">
+        <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
           Date Added
         </Label>
-        <p className="text-base font-semibold text-title p-2 bg-white rounded-md">
+        <p className="text-xs sm:text-sm md:text-base font-semibold text-title p-1.5 sm:p-2 bg-white rounded-md wrap-break-word">
           {formatDate(profile.date_added || profile.createdAt)}
         </p>
       </div>
