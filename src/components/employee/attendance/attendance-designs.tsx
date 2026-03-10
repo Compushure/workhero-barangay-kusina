@@ -76,12 +76,12 @@ export default function AttendanceDesign() {
       </div>
 
       {/* Center column: main card + dashboard button */}
-      <div className="flex flex-col items-center gap-4 mt-10 sm:mt-20 px-4 text-center w-full max-w-4xl pb-12">
+      <div className="flex flex-col items-center px-4 text-center w-full max-w-4xl pb-12">
         {/* Main card */}
         {isAttendanceLoading ? (
           <AttendanceCardSkeleton />
         ) : (
-          <div className="relative flex bg-[#E8DBBF] border-3 border-[#47331F] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[6px_6px_0px_#000] shadow-[#47331F]/50 animate-fadeIn">
+          <div className="relative flex bg-[#E8DBBF] border-3 border-[#47331F] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full overflow-visible md:overflow-auto max-h-none md:max-h-[85vh] shadow-[6px_6px_0px_#000] shadow-[#47331F]/50 animate-fadeIn">
             {/* Header */}
             <h1 className="font-jersey text-3xl text-[#252525d8] text-center mb-1">
               ⏰ Attendance Station
