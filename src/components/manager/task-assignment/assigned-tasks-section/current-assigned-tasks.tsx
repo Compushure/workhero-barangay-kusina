@@ -148,7 +148,7 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
   return (
     <div className="rounded-3xl bg-background px-4 md:px-5 2xl:px-6 pt-3 sm:pt-5 shadow-sm/50 flex flex-col w-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 mb-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 mb-4">
         <h2 className="text-base sm:text-lg font-bold text-foreground pb-2 pl-2">Task List</h2>
 
         {/* View Toggle */}
@@ -185,18 +185,18 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
       </div>
 
       {/* View Cards Number Display & Controls: Search, Sort, Clear */}
-      <section className="flex flex-col gap-2">
+      <section className="flex flex-col lg:flex-row justify-between gap-2">
         {/* Counts */}
-        <div className="flex gap-2 md:gap-3 text-xs md:text-base font-semibold text-primary bg-card/75 inset-shadow-xs/15 border-b border-accent/25 px-2 md:px-3 py-0.5 rounded-full w-fit">
+        <div className="flex gap-2 md:gap-3 text-xs md:text-sm font-semibold text-primary bg-card/75 inset-shadow-xs/15 border-b border-accent/25 px-2 md:px-3 py-2 rounded-full w-fit">
           <h5>
             Tasks{' '}
-            <span className="bg-accent/75 text-primary-foreground px-1.5 md:px-2 py-0.5 rounded-full text-2xs md:text-xs ml-0.5 shadow-sm/25">
+            <span className="bg-accent/75 text-primary-foreground text-xs px-1.5 md:px-2 py-0.5 rounded-full ml-0.5 shadow-sm/25">
               {totalTasksCount ?? 0}
             </span>
           </h5>
           <h5>
             Employees{' '}
-            <span className="bg-accent/75 text-primary-foreground px-1.5 md:px-2 py-0.5 rounded-full text-2xs md:text-xs ml-0.5 shadow-sm/25">
+            <span className="bg-accent/75 text-primary-foreground text-xs px-1.5 md:px-2 py-0.5 rounded-full ml-0.5 shadow-sm/25">
               {totalEmployeesCount ?? 0}
             </span>
           </h5>
@@ -205,7 +205,7 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
         {/* Filters Row - Always visible, stacked nicely */}
         <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 lg:gap-3 items-stretch sm:items-center">
           {/* Search */}
-          <div className="relative flex-1 min-w-30">
+          <div className="relative flex-1 min-w-70 md:max-w-full">
             <Search className="absolute left-2 sm:left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <input
               type="text"
@@ -216,7 +216,7 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
               }
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-7 sm:pl-8 pr-1.5 sm:pr-2 py-1 sm:py-1.5 rounded-full bg-card shadow-sm/25 text-2xs sm:text-xs focus:outline-none transition-all duration-500 ease-in-out focus:border focus:border-accent"
+              className="w-full pl-8 pr-1.5 sm:pr-2 py-2 rounded-full bg-card shadow-sm/25 text-xs focus:outline-none transition-all duration-500 ease-in-out border focus:border-accent"
             />
           </div>
 

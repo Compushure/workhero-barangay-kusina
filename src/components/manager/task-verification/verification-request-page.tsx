@@ -278,7 +278,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
               </div>
             </div>
             <div className="flex gap-2 shrink-0">
-              <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="mercado" />
+              <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="default" />
               <SortButton
                 sortBy={dateSortBy as any}
                 onSortChange={(value) =>
@@ -292,7 +292,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
                   { value: 'employee-asc' as any, label: 'Employee Name (A-Z)' },
                   { value: 'employee-desc' as any, label: 'Employee Name (Z-A)' },
                 ]}
-                styleVariant="mercado"
+                styleVariant="default"
               />
               {/* <DropdownMenu>
                 <DropdownMenuTrigger asChild>

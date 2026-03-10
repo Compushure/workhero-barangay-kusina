@@ -46,7 +46,7 @@ function SidebarUserProfile({
   return (
     <div
       className={`flex w-full items-center rounded-2xl py-3 ${
-        isCollapsed ? 'justify-center' : 'bg-[#FAA938]/25 pl-2'
+        isCollapsed ? 'justify-center' : 'bg-gray-200 pl-2'
       }`}
     >
       <ProfilePic user={user} disabled={disabled} isLoading={isProfileLoading} />
@@ -59,7 +59,7 @@ function SidebarUserProfile({
             </>
           ) : user ? (
             <>
-              <p className="truncate text-sm font-semibold">{user.name}</p>
+              <p className="truncate text-xs font-semibold">{user.name}</p>
               <p className="truncate text-xs text-zinc-600">{user.email}</p>
             </>
           ) : null}
@@ -132,8 +132,8 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
   return (
     <>
       <aside
-        className={`hidden overflow-hidden bg-background text-[#131C2A] transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between z-50 shadow-sm/25 ${
-          isCollapsed ? 'w-18' : 'w-52 lg:w-56'
+        className={`hidden overflow-hidden bg-gray-100 text-[#131C2A] transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between z-50 shadow-sm/25 ${
+          isCollapsed ? 'w-17' : 'w-48 lg:w-52'
         }`}
       >
         <div className="mt-6 px-3 py-7">
@@ -161,7 +161,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                 </div>
                 {!isCollapsed && (
                   <div className="flex flex-col items-baseline">
-                    <h1 className="whitespace-nowrap text-2xl font-bold transition-all duration-400 ease-in-out">
+                    <h1 className="whitespace-nowrap text-xl font-bold transition-all duration-400 ease-in-out">
                       WorkHero
                     </h1>
                     <p className="block whitespace-nowrap pl-0.5 text-xs text-[#f47812] transition-all duration-400 ease-in-out">
@@ -182,7 +182,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
 
         <TooltipProvider>
           <nav
-            className={`flex-1 space-y-3 pb-6 ${
+            className={`flex-1 space-y-2.5 pb-6 ${
               isCollapsed
                 ? 'overflow-hidden px-3.5'
                 : 'overflow-y-auto px-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
@@ -194,7 +194,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
             const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
             const Icon = item.icon;
 
-            const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-full px-4 py-3 text-sm font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
+            const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-full px-3 py-2.5 text-sm font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
               isCollapsed ? 'justify-center' : 'justify-start'
             } ${
               isActive
@@ -261,57 +261,6 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
         </div>
       </aside>
 
-      {/* <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#f47812]/20 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 md:hidden">
-        <div className="px-2 py-2">
-          <div className="grid grid-cols-6 gap-1">
-            {navItems.map((item) => {
-              const isActive = isNavLinkActive(item.href);
-              const isNavigatingItem = pendingHref === item.href;
-              const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
-              const Icon = item.icon;
-
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  onClick={() => {
-                    if (pathname !== item.href) {
-                      setPendingHref(item.href);
-                      startNavigation();
-                    }
-                  }}
-                  aria-disabled={isDisabled}
-                  className={`flex flex-col items-center justify-center rounded-xl py-1.5 transition-all duration-300 ${
-                    isActive ? 'bg-accent/20 text-[#f47812]' : 'text-[#131C2A]'
-                  } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`}
-                >
-                  {isNavigatingItem ? (
-                    <NavigationDisplay
-                      isNavigating={isNavigatingItem}
-                      className="inline-flex h-5 items-center justify-center"
-                      iconClassName="size-4 animate-spin text-primary"
-                    />
-                  ) : (
-                    <Icon className="size-4" strokeWidth={1.9} />
-                  )}
-                  <span className="mt-1 w-full truncate text-center text-[10px] leading-none">
-                    {item.label.split(' ')[0]}
-                  </span>
-                </Link>
-              );
-            })}
-
-            <button
-              onClick={handleProfileClick}
-              disabled={isLoggingOut}
-              className={`flex flex-col items-center justify-center rounded-xl px-1 py-1.5 text-[#131C2A] transition-all duration-300 hover:bg-accent/20 hover:text-[#f47812] ${isLoggingOut ? 'pointer-events-none opacity-50' : ''}`}
-            >
-              <UserCircle2 className="size-4" strokeWidth={1.9} />
-              <span className="mt-1 text-[10px] leading-none">Profile</span>
-            </button>
-          </div>
-        </div>
-      </nav> */}
 
       {/* Profile Modal */}
       <ProfileModal 
