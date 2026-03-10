@@ -40,10 +40,10 @@ function UnassignEmployeeDialog({
 
   return (
     <Dialog open={!!showRemoveConfirm} onOpenChange={(open) => !open && setShowRemoveConfirm(null)}>
-      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white">
+      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white p-4 sm:p-5">
         <DialogHeader>
-          <DialogTitle className="text-foreground">Unassign Employee?</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-foreground text-base">Unassign Employee?</DialogTitle>
+          <DialogDescription className="text-sm">
             Are you sure you want to unassign this employee from this task?
           </DialogDescription>
         </DialogHeader>

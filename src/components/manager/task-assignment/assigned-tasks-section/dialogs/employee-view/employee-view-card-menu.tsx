@@ -24,12 +24,12 @@ function EmployeeViewCardMenu({
       onOpenChange={(open) => setOpenPopoverId(open ? employee.id : null)}
     >
       <PopoverTrigger asChild>
-        <button className="text-primary rounded-full hover:text-accent hover:bg-accent-secondary/25 hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer p-1.5 relative z-50">
-          <MoreVertical className="size-6" />
+        <button className="text-primary rounded-full hover:text-accent hover:bg-accent-secondary/25 hover:scale-110 transition-all duration-500 ease-in-out cursor-pointer p-1 relative z-50">
+          <MoreVertical className="size-5" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-40 p-2 z-100" align="end">
-        <div className="flex flex-col gap-2">
+      <PopoverContent className="w-32 p-1.5 z-100" align="end">
+        <div className="flex flex-col gap-1.5">
           <Button
             onClick={() => {
               setShowClearConfirm(employee.id);

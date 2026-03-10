@@ -23,8 +23,7 @@ export function EmployeeSortingBar({ sortBy, onSortChange }: EmployeeSortingBarP
   ];
 
   // Find the label for the current sort value
-  const currentLabel =
-    options.find((opt) => opt.value === sortBy)?.label || 'Sort';
+  const currentLabel = options.find((opt) => opt.value === sortBy)?.label || 'Sort';
 
   return (
     <DropdownMenu>
@@ -32,10 +31,10 @@ export function EmployeeSortingBar({ sortBy, onSortChange }: EmployeeSortingBarP
         <Button
           variant="default"
           size="default"
-          className="bg-card text-foreground shadow-sm/25 hover:bg-card hover:text-foreground hover:brightness-90 transition-all duration-400 ease-in-out cursor-pointer w-24 sm:w-32 justify-between text-xs sm:text-sm px-2 sm:px-4"
+          className="bg-card text-foreground shadow-sm/25 hover:bg-card hover:text-foreground hover:brightness-90 transition-all duration-400 ease-in-out cursor-pointer w-20 sm:w-28 justify-between text-2xs sm:text-xs px-1.5 sm:px-3"
         >
           <span className="truncate">{currentLabel}</span>
-          <ArrowUpDown size={16} className="sm:size-[18px] text-accent" />
+          <ArrowUpDown size={14} className="sm:size-4 text-accent" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

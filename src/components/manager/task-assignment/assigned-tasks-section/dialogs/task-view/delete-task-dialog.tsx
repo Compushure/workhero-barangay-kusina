@@ -39,10 +39,10 @@ function DeleteTaskDialog({
   };
   return (
     <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white">
+      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white p-4 sm:p-5">
         <DialogHeader>
-          <DialogTitle className="text-foreground">Delete Task?</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-foreground text-base">Delete Task?</DialogTitle>
+          <DialogDescription className="text-sm">
             Are you sure you want to delete this task and unassign all employees? This action cannot
             be undone.
           </DialogDescription>

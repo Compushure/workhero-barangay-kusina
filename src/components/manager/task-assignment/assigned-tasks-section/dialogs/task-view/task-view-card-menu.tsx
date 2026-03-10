@@ -20,12 +20,12 @@ export default function TaskViewCardMenu({
   return (
     <Popover open={openPopover} onOpenChange={setOpenPopover}>
       <PopoverTrigger asChild>
-        <button className="text-primary rounded-full py-1 hover:text-accent hover:bg-accent-secondary/25 hover:scale-110 transition-all duration-400 ease-in-out cursor-pointer">
-          <MoreVertical className="size-6" />
+        <button className="text-primary rounded-full py-0.5 hover:text-accent hover:bg-accent-secondary/25 hover:scale-110 transition-all duration-400 ease-in-out cursor-pointer">
+          <MoreVertical className="size-5" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-40 p-2" align="end">
-        <div className="flex flex-col gap-1">
+      <PopoverContent className="w-32 p-1.5" align="end">
+        <div className="flex flex-col gap-0.5">
           <Button
             onClick={handleOpenEditDialog}
             variant="ghost"
