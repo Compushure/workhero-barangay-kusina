@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/manager/task-verification/page-header';
 import { SearchBar } from '@/components/manager/task-verification/search-bar';
 import { SortButton } from '@/components/manager/task-verification/sort-button';
 import { RequestsTable } from '@/components/manager/task-verification/requests-table';
 import { RequestsTableSkeleton } from '@/components/manager/task-verification/requests-table-skeleton';
-import type { VerificationRequest, SortOption } from '@/types';
+import type { VerificationRequest, SortOption, PaginatedResponse } from '@/types';
 import { ConfirmationDialog } from '@/components/manager/task-verification/confirmation-modal';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,58 +18,111 @@ import {
   useApproveTask,
   useRejectTask,
 } from '@/hooks/tanstack';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface VerificationRequestsPageProps {
   initialRequests: VerificationRequest[];
 }
 
 export function VerificationRequestsPage({ initialRequests }: VerificationRequestsPageProps) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('pending');
-  const [dateSortBy, setDateSortBy] = useState<'date-desc' | 'date-asc' | 'employee'>('date-desc');
+  const [dateSortBy, setDateSortBy] = useState<
+    'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
+  >('date-desc');
   const [pendingPage, setPendingPage] = useState(1);
   const [remark, setRemark] = useState('');
   const [approvedPage, setApprovedPage] = useState(1);
   const [deniedPage, setDeniedPage] = useState(1);
   const isSubmittingRef = useRef(false);
 
+  // Keep last fetched page per category so UI does not flash/skeleton while searching
+  const [pendingCache, setPendingCache] = useState<PaginatedResponse<VerificationRequest> | null>(
+    null
+  );
+  const [approvedCache, setApprovedCache] = useState<PaginatedResponse<VerificationRequest> | null>(
+    null
+  );
+  const [deniedCache, setDeniedCache] = useState<PaginatedResponse<VerificationRequest> | null>(
+    null
+  );
+
+  // Debounce search to avoid refetching on every keystroke
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
   // Use paginated Tanstack Query hooks with separate pagination for each category
-  const { data: pendingData, isLoading: isLoadingPending } =
-    useGetTasksToReviewPaginated(pendingPage);
-  const { data: approvedData, isLoading: isLoadingApproved } =
-    useGetApprovedTasksPaginated(approvedPage);
-  const { data: deniedData, isLoading: isLoadingDenied } = useGetDeniedTasksPaginated(deniedPage);
+  const {
+    data: pendingData,
+    isLoading: isLoadingPending,
+    isError: isPendingError,
+  } = useGetTasksToReviewPaginated(pendingPage, debouncedSearch, dateSortBy);
+  const {
+    data: approvedData,
+    isLoading: isLoadingApproved,
+    isError: isApprovedError,
+  } = useGetApprovedTasksPaginated(approvedPage, debouncedSearch, dateSortBy);
+  const {
+    data: deniedData,
+    isLoading: isLoadingDenied,
+    isError: isDeniedError,
+  } = useGetDeniedTasksPaginated(deniedPage, debouncedSearch, dateSortBy);
 
   const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
+
+  useEffect(() => {
+    if (pendingData) setPendingCache(pendingData);
+  }, [pendingData]);
+
+  useEffect(() => {
+    if (approvedData) setApprovedCache(approvedData);
+  }, [approvedData]);
+
+  useEffect(() => {
+    if (deniedData) setDeniedCache(deniedData);
+  }, [deniedData]);
+
+  const pendingDisplay = pendingData ?? pendingCache;
+  const approvedDisplay = approvedData ?? approvedCache;
+  const deniedDisplay = deniedData ?? deniedCache;
+
+  useEffect(() => {
+    if (isPendingError && isApprovedError && isDeniedError) {
+      router.push(
+        `/error?status=500&cause=${encodeURIComponent('Failed to load verification requests')}&recommendation=${encodeURIComponent('Please refresh the page or try again later.')}`
+      );
+    }
+  }, [isPendingError, isApprovedError, isDeniedError, router]);
 
   // Extract tasks based on current sort category - memoized to prevent unnecessary recalculations
   const getCurrentTasks = useMemo(() => {
     switch (sortBy) {
       case 'pending':
-        return pendingData?.data ?? [];
+        return pendingDisplay?.data ?? [];
       case 'approved':
-        return approvedData?.data ?? [];
+        return approvedDisplay?.data ?? [];
       case 'denied':
-        return deniedData?.data ?? [];
+        return deniedDisplay?.data ?? [];
       default:
         return [];
     }
-  }, [sortBy, pendingData, approvedData, deniedData]);
+  }, [sortBy, pendingDisplay, approvedDisplay, deniedDisplay]);
 
   // Get total pages for current category - memoized to prevent unnecessary recalculations
   const getTotalPages = useMemo(() => {
     switch (sortBy) {
       case 'pending':
-        return pendingData?.totalPages ?? 1;
+        return pendingDisplay?.totalPages ?? 1;
       case 'approved':
-        return approvedData?.totalPages ?? 1;
+        return approvedDisplay?.totalPages ?? 1;
       case 'denied':
-        return deniedData?.totalPages ?? 1;
+        return deniedDisplay?.totalPages ?? 1;
       default:
         return 1;
     }
-  }, [sortBy, pendingData, approvedData, deniedData]);
+  }, [sortBy, pendingDisplay, approvedDisplay, deniedDisplay]);
 
   // Get current page based on sort category - memoized to prevent unnecessary recalculations
   const getCurrentPage = useMemo(() => {
@@ -103,21 +157,22 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const totalPages = getTotalPages;
   const currentPage = getCurrentPage;
   const isCurrentCategoryLoading =
-    (sortBy === 'pending' && isLoadingPending) ||
-    (sortBy === 'approved' && isLoadingApproved) ||
-    (sortBy === 'denied' && isLoadingDenied);
+    (sortBy === 'pending' && isLoadingPending && !pendingDisplay) ||
+    (sortBy === 'approved' && isLoadingApproved && !approvedDisplay) ||
+    (sortBy === 'denied' && isLoadingDenied && !deniedDisplay);
 
   // Filter and sort requests based on search term and date/employee sorting
   const filteredRequests = useMemo(() => {
     let filtered = currentTasks;
+    const normalizedSearch = normalizeSearchQuery(debouncedSearch);
 
     // Apply search filter
-    if (searchTerm) {
+    if (normalizedSearch) {
       filtered = filtered.filter(
         (req) =>
-          req.assigned_to_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          req.assigned_to_employee_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          req.category_name?.toLowerCase().includes(searchTerm.toLowerCase())
+          req.assigned_to_name?.toLowerCase().includes(normalizedSearch) ||
+          req.assigned_to_employee_id?.toLowerCase().includes(normalizedSearch) ||
+          req.category_name?.toLowerCase().includes(normalizedSearch)
       );
     }
 
@@ -134,16 +189,21 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           const dateB = new Date(b.kpitask_completed_at || b.kpitask_created_at || 0).getTime();
           return dateA - dateB; // Oldest first
         }
-        case 'employee': {
+        case 'employee-asc': {
           const nameA = a.assigned_to_name || '';
           const nameB = b.assigned_to_name || '';
           return nameA.localeCompare(nameB); // Alphabetical by employee name
+        }
+        case 'employee-desc': {
+          const nameA = a.assigned_to_name || '';
+          const nameB = b.assigned_to_name || '';
+          return nameB.localeCompare(nameA);
         }
         default:
           return 0;
       }
     });
-  }, [currentTasks, searchTerm, dateSortBy]);
+  }, [currentTasks, debouncedSearch, dateSortBy]);
 
   const resetConfirmState = () => setConfirmAction({ type: null, id: null });
 
@@ -229,17 +289,26 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
         ) : (
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-4 sm:mt-5 sm:justify-end">
             <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
-              <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+              <SearchBar
+                searchTerm={searchTerm}
+                onSearchChange={(value) => setSearchTerm(sanitizeSearchInput(value))}
+                placeholder="Search by employee name or employee ID"
+              />
             </div>
             <div className="flex gap-2 shrink-0">
               <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="mercado" />
               <SortButton
                 sortBy={dateSortBy as any}
-                onSortChange={(value) => setDateSortBy(value as 'date-desc' | 'date-asc' | 'employee')}
+                onSortChange={(value) =>
+                  setDateSortBy(
+                    value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
+                  )
+                }
                 options={[
                   { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
                   { value: 'date-asc' as any, label: 'Date (Oldest)' },
-                  { value: 'employee' as any, label: 'Employee Name' },
+                  { value: 'employee-asc' as any, label: 'Employee Name (A-Z)' },
+                  { value: 'employee-desc' as any, label: 'Employee Name (Z-A)' },
                 ]}
                 styleVariant="mercado"
               />

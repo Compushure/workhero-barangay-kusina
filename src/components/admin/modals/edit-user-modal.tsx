@@ -119,7 +119,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
     setValue,
     reset,
     setError,
-    formState: { errors, isDirty },
+    formState: { errors, isDirty, isValid },
   } = useForm<EditUserFormValues>({
     resolver: zodResolver(editUserSchema) as any,
     mode: 'onChange',
@@ -796,7 +796,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
             <Button
               type="submit"
               form="edit-user-form"
-              disabled={isPending || !hasActiveChanges()}
+              disabled={isPending || !hasActiveChanges() || !isValid}
               className="flex-1 bg-foreground cursor-pointer text-white hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 ease-in-out shadow-sm/25"
             >
               {isPending ? 'Saving...' : 'Save Changes'}

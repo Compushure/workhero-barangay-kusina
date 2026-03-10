@@ -10,10 +10,12 @@ import {
   getEmployeeLevel,
   getEmployeePoints,
   getEmployeeRank,
+  getEmployeeTopRanksByPeriod,
+  getEmployeeTopWeeklyRanks,
   getEmployeeXP,
 } from '@/actions/employee/stats';
 import { toast } from 'sonner';
-import type { EmployeePointsData, EmployeeRank, EmployeeXP } from '@/types';
+import type { EmployeePointsData, EmployeeRank, EmployeeTopRankEntry, EmployeeXP } from '@/types';
 // import type { TimePeriod } from '@/lib/utils/time-period-utils';
 
 /**
@@ -82,6 +84,54 @@ export async function handleFetchEmployeeRank(): Promise<EmployeeRank | null> {
   }
 
   return result.data;
+}
+
+/**
+ * Fetches the top 10 weekly rankings for the latest visible period.
+ * Returns null on failure or when no ranking exists (no toast for empty data).
+ */
+export async function handleFetchEmployeeTopWeeklyRanks(): Promise<
+  EmployeeTopRankEntry[] | null
+> {
+  const result = await getEmployeeTopWeeklyRanks();
+
+  if (!result.success) {
+    toast.error('Failed to load top rankings', {
+      description: result.error ?? 'Unknown error',
+    });
+    return null;
+  }
+
+  return result.data ?? null;
+}
+
+export type EmployeePeriodParams =
+  | { periodType: 'weekly'; year: number; week: number }
+  | { periodType: 'monthly'; year: number; month: number }
+  | { periodType: 'yearly'; year: number };
+
+/**
+ * Fetches the top 10 rankings for a specific period (weekly, monthly, or yearly).
+ * Returns null on failure or when no visible ranking exists for that period.
+ */
+export async function handleFetchEmployeeTopRanksByPeriod(
+  params: EmployeePeriodParams
+): Promise<EmployeeTopRankEntry[] | null> {
+  const result =
+    params.periodType === 'weekly'
+      ? await getEmployeeTopRanksByPeriod(params.periodType, params.year, undefined, params.week)
+      : params.periodType === 'monthly'
+        ? await getEmployeeTopRanksByPeriod(params.periodType, params.year, params.month)
+        : await getEmployeeTopRanksByPeriod(params.periodType, params.year);
+
+  if (!result.success) {
+    toast.error('Failed to load rankings', {
+      description: result.error ?? 'Unknown error',
+    });
+    return null;
+  }
+
+  return result.data ?? null;
 }
 
 /**

@@ -16,7 +16,8 @@ export async function fetchTaskCategoriesPaginated(
   page: number = 1,
   pageSize: number = 10,
   sortBy: string = 'type-name',
-  searchTerm: string = ''
+  searchTerm: string = '',
+  repeatabilityFilter: 'all' | 'repeatable' | 'non-repeatable' = 'all'
 ): Promise<
   ServerActionResponse<{
     data: TaskCategory[];
@@ -35,6 +36,14 @@ export async function fetchTaskCategoriesPaginated(
   let ascending = false;
 
   switch (sortBy) {
+    case 'name-asc':
+      orderByColumn = 'name';
+      ascending = true;
+      break;
+    case 'name-desc':
+      orderByColumn = 'name';
+      ascending = false;
+      break;
     case 'type-name':
       // Sort by type first, then by name
       orderByColumn = 'type';
@@ -52,18 +61,8 @@ export async function fetchTaskCategoriesPaginated(
       orderByColumn = 'xp';
       ascending = false;
       break;
-    case 'repeatable-only':
-      // Filter for repeatable only, then sort by name
-      orderByColumn = 'name';
-      ascending = true;
-      break;
-    case 'non-repeatable-only':
-      // Filter for non-repeatable only, then sort by name
-      orderByColumn = 'name';
-      ascending = true;
-      break;
     default:
-      orderByColumn = 'type';
+      orderByColumn = 'name';
       ascending = true;
   }
 
@@ -80,10 +79,10 @@ export async function fetchTaskCategoriesPaginated(
     );
   }
 
-  // Apply repeatable/non-repeatable filters
-  if (sortBy === 'repeatable-only') {
+  // Apply repeatable/non-repeatable filter category
+  if (repeatabilityFilter === 'repeatable') {
     query = query.eq('is_repeatable', true);
-  } else if (sortBy === 'non-repeatable-only') {
+  } else if (repeatabilityFilter === 'non-repeatable') {
     query = query.eq('is_repeatable', false);
   }
 
@@ -98,10 +97,10 @@ export async function fetchTaskCategoriesPaginated(
     );
   }
   
-  // Apply repeatable/non-repeatable filters to count query
-  if (sortBy === 'repeatable-only') {
+  // Apply repeatable/non-repeatable filter category to count query
+  if (repeatabilityFilter === 'repeatable') {
     countQuery = countQuery.eq('is_repeatable', true);
-  } else if (sortBy === 'non-repeatable-only') {
+  } else if (repeatabilityFilter === 'non-repeatable') {
     countQuery = countQuery.eq('is_repeatable', false);
   }
   

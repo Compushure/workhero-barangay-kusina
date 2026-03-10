@@ -10,6 +10,7 @@ import type {
   PaginatedResponse,
 } from '@/types';
 import { addUserSchema, editUserSchema } from '@/zod/schemas';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 // ============================================
 // Route helpers
@@ -89,8 +90,10 @@ function buildQueryParams(params: UserQueryParams): string {
   searchParams.set('order', order);
 
   // search
-  if (params.searchQuery) {
-    searchParams.set('query', params.searchQuery.trim());
+  const sanitizedSearch = sanitizeSearchInput(params.searchQuery ?? '');
+  const normalizedSearch = normalizeSearchQuery(sanitizedSearch);
+  if (normalizedSearch) {
+    searchParams.set('query', normalizedSearch);
     searchParams.set('queryby', params.searchType ?? 'name');
   }
 

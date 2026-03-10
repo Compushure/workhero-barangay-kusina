@@ -1,6 +1,16 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import EmployeeDashboardClient from '@/components/employee/dashboard/employee-dashboard';
 import { CookingPot } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'WorkHero | Dashboard',
+  icons: {
+    icon: '/assets/website-logo.svg',
+    shortcut: '/assets/website-logo.svg',
+    apple: '/assets/website-logo.svg',
+  },
+};
 
 function LoadingFallback() {
   return (
