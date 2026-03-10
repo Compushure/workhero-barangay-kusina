@@ -88,14 +88,16 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
     currentView === 'past' && !isPastViewing ? await getAllRankingPeriods() : null;
 
   return (
-    <div className="h-screen p-4  bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto mt-6 sm:mt-4">
+    <div className="min-h-screen overflow-x-hidden bg-white px-3 py-3 sm:px-4 sm:py-4">
+      <div className="mx-auto mt-2 w-full max-w-7xl sm:mt-4">
         <div className="mb-2 sm:mb-3">
-          <div className="flex items-center justify-between gap-3 sm:gap-4 mb-4">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <div className="flex flex-col gap-1">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">Leaderboards</h1>
-              <p className="text-sm text-muted-foreground">
-              Generate new rankings or review past results across different periods.
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Leaderboards
+              </h1>
+              <p className="text-xs text-muted-foreground sm:text-sm">
+                Generate new rankings or review past results across different periods.
               </p>
             </div>
             <LeaderboardViewToggle currentView={currentView} />
@@ -124,7 +126,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
           <div className="flex flex-col">
             <Link
               href="/hr/leaderboard?view=past"
-              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3"
+              className="mb-3 inline-flex min-h-10 items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Past Ranks

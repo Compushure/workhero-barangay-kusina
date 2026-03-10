@@ -178,12 +178,12 @@ export function PeriodSelector({
   };
 
   return (
-    <div className="flex w-full flex-wrap items-end gap-3">
+    <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
       {/* Period Type */}
-      <div className="flex flex-col gap-1.5">
+      <div className="flex w-full flex-col gap-1.5 sm:w-auto">
         <label className="text-xs font-medium text-muted-foreground">Period Type</label>
         <Select value={currentType} onValueChange={handlePeriodTypeChange}>
-          <SelectTrigger className="w-25 bg-white border-gray-300 text-foreground transition-all duration-200  hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
+          <SelectTrigger className="w-full bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white sm:w-28">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -195,13 +195,13 @@ export function PeriodSelector({
       </div>
 
       {/* Period value: dropdown for weekly (two previous weeks), read-only for monthly/yearly */}
-      <div className="flex flex-col gap-1.5">
+      <div className="flex w-full flex-col gap-1.5 sm:w-auto sm:min-w-56">
         <label className="text-xs font-medium text-muted-foreground uppercase">
           {periodFieldLabel}
         </label>
         {currentType === 'weekly' ? (
           <Select value={currentWeeklyKey} onValueChange={handleWeeklyPeriodChange}>
-            <SelectTrigger className="min-w-56 bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white">
+            <SelectTrigger className="w-full bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white sm:min-w-56">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -217,7 +217,7 @@ export function PeriodSelector({
             </SelectContent>
           </Select>
         ) : (
-          <div className="flex min-h-9 min-w-40 items-center gap-2 rounded-md border border-gray-300 bg-muted/50 px-3 py-2 text-sm font-medium text-foreground">
+          <div className="flex min-h-10 w-full items-center gap-2 rounded-md border border-gray-300 bg-muted/50 px-3 py-2 text-sm font-medium text-foreground sm:min-w-40 sm:w-auto">
             <span>{periodLabel}</span>
           </div>
         )}
@@ -225,8 +225,8 @@ export function PeriodSelector({
 
       {/* Show Rankings or "Already generated" indicator */}
       {currentPeriodRankingExists ? (
-        <div className="flex items-center self-end">
-          <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-800">
+        <div className="flex w-full items-center self-start sm:w-auto sm:self-end">
+          <div className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-800 sm:w-auto sm:justify-start">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
             Ranking already generated
           </div>
@@ -235,7 +235,7 @@ export function PeriodSelector({
         <Button
           onClick={handleGenerateRank}
           disabled={isPending}
-          className="bg-primary-gradient text-white hover:opacity-95 self-end"
+          className="self-start min-h-10 w-full bg-primary-gradient text-white hover:opacity-95 sm:w-auto sm:self-end"
         >
           {isPending ? 'Generating…' : 'Generate Rank'}
         </Button>

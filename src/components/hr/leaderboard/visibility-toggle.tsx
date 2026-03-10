@@ -35,14 +35,14 @@ export default function VisibilityToggle({ rankingPeriodId, isVisible }: Visibil
       onClick={handleClick}
       disabled={isPending}
       className={[
-        'inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
+        'inline-flex min-h-10 items-center gap-1.5 rounded-md border px-2.5 py-2 text-xs font-medium transition-colors sm:px-3 sm:text-sm',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         isVisible
           ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300'
           : 'border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:border-gray-300',
       ].join(' ')}
     >
-      {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+      {isVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
       {isVisible ? 'Visible to employee' : 'Hidden from employee'}
     </button>
   );
