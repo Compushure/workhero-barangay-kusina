@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function TaskEditorHeaderSkeleton() {
   return (
-    <div className="space-y-5 sm:space-y-6 lg:space-y-8">
+    <div className="space-y-5 sm:space-y-4 lg:space-y-6">
       {/* Title Section */}
       <div className="space-y-2">
         <Skeleton className="h-9 w-40 bg-muted" />
@@ -17,12 +17,12 @@ export function TaskEditorHeaderSkeleton() {
       {/* Search, Sort, and Add Button */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center justify-start sm:justify-end">
         {/* Search */}
-        <Skeleton className="h-10 w-full sm:w-64 bg-muted rounded-full" />
+        <Skeleton className="h-8 w-full sm:w-64 bg-muted rounded-full" />
 
         {/* Sort and Add Button Row */}
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-          <Skeleton className="h-10 w-full sm:w-48 bg-muted rounded-lg" />
-          <Skeleton className="h-10 w-full sm:w-52 bg-muted rounded-full" />
+          <Skeleton className="h-8 w-full sm:w-48 bg-muted rounded-lg" />
+          <Skeleton className="h-8 w-full sm:w-52 bg-muted rounded-full" />
         </div>
       </div>
     </div>

@@ -22,9 +22,9 @@ import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 function CurrentAssignedTasksSkeleton() {
   return (
-    <div className="rounded-3xl bg-background px-3 sm:px-4 md:px-6 2xl:px-8 pt-4 sm:pt-6 shadow-sm/50 flex flex-col w-full">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 sm:mb-5">
-        <Skeleton className="h-8 w-40 bg-muted" />
+    <div className="rounded-3xl bg-background px-4 md:px-5 2xl:px-6 pt-3 sm:pt-5 shadow-sm/50 flex flex-col w-full">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 mb-4">
+        <Skeleton className="h-6 sm:h-7 w-40 bg-muted" />
         <div className="flex rounded-xl overflow-hidden w-40 sm:w-56 border border-accent/25">
           <Skeleton className="h-9 flex-1 bg-muted rounded-l-xl" />
           <Skeleton className="h-9 flex-1 bg-muted rounded-r-xl" />
@@ -47,7 +47,7 @@ function CurrentAssignedTasksSkeleton() {
         <SkeletonCard />
       </section>
 
-      <div className="my-10">
+      <div className="my-8">
         <Skeleton className="h-8 w-48 mx-auto bg-muted rounded-full" />
       </div>
     </div>

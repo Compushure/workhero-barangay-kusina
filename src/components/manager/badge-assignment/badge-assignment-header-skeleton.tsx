@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function BadgeAssignmentHeaderSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6 lg:space-y-8">
       {/* Title Section */}
       <div className="space-y-2">
         <Skeleton className="h-9 w-56 bg-muted" />
@@ -11,8 +11,8 @@ export function BadgeAssignmentHeaderSkeleton() {
 
       {/* Tabs */}
       <div className="flex rounded-xl overflow-hidden shadow-md border border-accent/25">
-        <Skeleton className="h-12 flex-1 bg-muted rounded-l-xl" />
-        <Skeleton className="h-12 flex-1 bg-muted rounded-r-xl" />
+        <Skeleton className="h-10 flex-1 bg-muted rounded-l-xl" />
+        <Skeleton className="h-10 flex-1 bg-muted rounded-r-xl" />
       </div>
 
       {/* Search and Sort Controls */}
@@ -22,8 +22,8 @@ export function BadgeAssignmentHeaderSkeleton() {
 
         {/* Search and Sort */}
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center w-full sm:w-auto">
-          <Skeleton className="h-10 w-full sm:w-64 bg-muted rounded-full" />
-          <Skeleton className="h-10 w-full sm:w-40 bg-muted rounded-lg" />
+          <Skeleton className="h-8 w-full sm:w-64 bg-muted rounded-full" />
+          <Skeleton className="h-8 w-full sm:w-40 bg-muted rounded-lg" />
         </div>
       </div>
     </div>
