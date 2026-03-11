@@ -5,10 +5,10 @@ export default function BadgeTableSkeleton() {
   return (
     <>
       {[1, 2, 3, 4, 5].map((i) => (
-        <TableRow key={i} className="bg-background-soft border-b border-accent/50">
+        <TableRow key={i} className="bg-background-soft hover:bg-background-soft border-b border-accent/50">
           <TableCell className="py-2 sm:py-3">
             <div className="flex items-baseline gap-1.5 sm:gap-2 pl-3 sm:pl-4">
-              <Skeleton className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-300" />
+              <Skeleton className="size-12 sm:size-14 bg-gray-300" />
               <div className="space-y-2">
                 <Skeleton className="h-4 w-32 bg-gray-300" />
                 <Skeleton className="h-3 w-48 bg-gray-300" />

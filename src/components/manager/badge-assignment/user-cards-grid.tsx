@@ -96,7 +96,7 @@ export default function UserCardsGrid({
                           </div>
                           {/* Tooltip */}
                           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
-                            <div className="bg-background text-primary text-xs rounded px-1.5 py-0.5 whitespace-nowrap border-b-2 border-x border-accent-secondary/25">
+                            <div className="bg-card text-primary text-xs rounded px-1.5 py-0.5 whitespace-nowrap border-b-2 border-x border-accent-secondary/25">
                               {badge?.name}
                             </div>
                           </div>

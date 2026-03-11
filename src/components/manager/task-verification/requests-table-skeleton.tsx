@@ -12,8 +12,8 @@ export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border shadow-md [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <Table>
-        <TableHeader className="bg-muted">
-          <TableRow className="border-b border-border bg-muted">
+        <TableHeader className="bg-background">
+          <TableRow className="border-b border-border bg-background">
             <TableHead className="px-4 w-45">
               <Skeleton className="h-4 w-24 bg-gray-300" />
             </TableHead>
@@ -42,7 +42,7 @@ export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
         </TableHeader>
         <TableBody>
           {Array.from({ length: rows }).map((_, index) => (
-            <TableRow key={index} className="bg-background-soft">
+            <TableRow key={index} className="bg-background-soft hover:bg-background-soft">
               <TableCell className="px-4">
                 <div className="h-4 w-28 bg-gray-300 rounded animate-pulse" />
               </TableCell>

@@ -60,7 +60,7 @@ export default function TaskCategoryTable({
 
   if (isLoading) {
     return (
-      <div className="bg-card rounded-2xl border-2 border-accent/25 overflow-x-auto overflow-y-hidden shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="bg-card rounded-2xl overflow-x-auto overflow-y-hidden shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-background border-b border-border hover:bg-background">
@@ -91,7 +91,7 @@ export default function TaskCategoryTable({
 
   return (
     <>
-      <div className="bg-card rounded-2xl border-2 border-accent/25 overflow-x-auto overflow-y-hidden shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="bg-card rounded-2xl overflow-x-auto overflow-y-hidden shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-primary-gradient">

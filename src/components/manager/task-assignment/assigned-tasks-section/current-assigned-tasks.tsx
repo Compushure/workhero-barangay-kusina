@@ -152,13 +152,13 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
         <h2 className="text-lg font-bold text-foreground pb-2 pl-2">Tasks List</h2>
 
         {/* View Toggle */}
-        <div className="flex bg-card/75 rounded-xl self-end sm:self-auto">
+        <div className="flex bg-card/75 rounded-full self-end sm:self-auto">
           <button
             onClick={() => handleViewModeChange('task')}
-            className={`flex w-18 sm:w-24 md:w-32 justify-center items-center gap-1.5 py-2.5 cursor-pointer rounded-l-xl text-[0.5rem] sm:text-xs font-medium transition-all duration-400 ease-in-out ${
+            className={`flex w-18 sm:w-24 md:w-32 justify-center items-center gap-1.5 py-2.5 cursor-pointer rounded-l-full text-[0.5rem] sm:text-xs font-medium transition-all duration-400 ease-in-out ${
               viewMode === 'task'
                 ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
-                : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-xs/25'
+                : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-xs/25 border-b border-gray-300'
             }`}
           >
             <ListTodo
@@ -169,10 +169,10 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
           </button>
           <button
             onClick={() => handleViewModeChange('employee')}
-            className={`flex w-18 sm:w-24 md:w-32 justify-center items-center gap-1.5 py-1.5 cursor-pointer rounded-r-xl text-[0.5rem] sm:text-xs  font-medium transition-all duration-400 ease-in-out ${
+            className={`flex w-18 sm:w-24 md:w-32 justify-center items-center gap-1.5 py-1.5 cursor-pointer rounded-r-full text-[0.5rem] sm:text-xs  font-medium transition-all duration-400 ease-in-out ${
               viewMode === 'employee'
                 ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
-                : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-xs/25'
+                : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-xs/25 border-b border-gray-300'
             }`}
           >
             <Users
@@ -187,7 +187,7 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
       {/* View Cards Number Display & Controls: Search, Sort, Clear */}
       <section className="flex flex-col lg:flex-row justify-between gap-2">
         {/* Counts */}
-        <div className="flex gap-2 md:gap-3 text-xs md:text-sm font-semibold text-primary bg-card/75 inset-shadow-xs/15 border-b border-accent/25 px-2 md:px-3 py-2 rounded-full w-fit">
+        <div className="flex gap-2 md:gap-3 text-xs md:text-sm font-semibold text-primary bg-card/75 inset-shadow-xs/25 border-b border-gray-300 px-2 md:px-3 py-2 rounded-full w-fit">
           <h5>
             Tasks{' '}
             <span className="bg-accent/75 text-primary-foreground text-xs px-1.5 md:px-2 py-0.5 rounded-full ml-0.5 shadow-sm/25">

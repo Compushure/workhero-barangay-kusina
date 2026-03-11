@@ -349,7 +349,7 @@ export default function QuickAssignmentPanel({
             </div>
           </>
         ) : (
-          <div className="bg-background-soft border border-dashed border-accent/25 rounded-lg p-12 text-center">
+          <div className="bg-card border border-dashed border-accent/25 rounded-lg p-12 text-center">
             <p className="text-secondary text-lg">Select a badge to assign to users</p>
           </div>
         )}

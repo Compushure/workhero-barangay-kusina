@@ -130,7 +130,7 @@ export default function BadgeTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-primary-gradient">
-              <TableHead className="min-w-48 sm:min-w-64 md:min-w-96 pl-3 sm:pl-4 py-2 sm:py-3 text-left text-2xs sm:text-xs font-bold text-card">
+              <TableHead className="min-w-48 sm:min-w-64 md:min-w-84 pl-3 sm:pl-5 py-2 sm:py-3 text-left text-2xs sm:text-xs font-bold text-card">
                 BADGE
               </TableHead>
               <TableHead className="hidden md:table-cell min-w-20 max-w-20 w-20 text-center text-2xs sm:text-xs font-bold text-card">
@@ -142,7 +142,7 @@ export default function BadgeTable({
               <TableHead className="hidden sm:table-cell min-w-20 sm:min-w-24 text-center text-2xs sm:text-xs font-bold text-card">
                 CONDITIONS
               </TableHead>
-              <TableHead className="text-card text-center px-1.5 sm:px-3 w-20 sm:w-24 text-2xs sm:text-xs sticky right-0">
+              <TableHead className="text-card text-center px-3 sm:px-6 w-20 sm:w-24 text-2xs sm:text-xs sticky right-0">
                 ACTIONS
               </TableHead>
             </TableRow>
@@ -152,10 +152,10 @@ export default function BadgeTable({
               {badges.map((badge) => (
                 <React.Fragment key={badge.id}>
                   <TableRow className="bg-card hover:bg-row-hover transition-colors">
-                    <TableCell className="min-w-48 sm:min-w-64 md:min-w-96 pl-3 sm:pl-4 py-2 sm:py-3 align-middle">
-                      <div className="flex items-start gap-1.5 sm:gap-2">
+                    <TableCell className="min-w-48 sm:min-w-64 md:min-w-84 pl-3 sm:pl-4 py-2 sm:py-3 align-middle">
+                      <div className="flex items-start gap-1.5 sm:gap-3">
                         {/* Badge Icon */}
-                        <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-accent/25">
+                        <div className="shrink-0 size-12 sm:size-14 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-accent/25">
                           {badge.img_link ? (
                             <img
                               src={badge.img_link || '/placeholder.svg'}
@@ -223,9 +223,27 @@ export default function BadgeTable({
                         )}
                       </Button>
                     </TableCell>
-                    <TableCell className="text-center align-middle sticky right-0 px-1.5 sm:px-3">
+                    <TableCell className="text-center align-middle sticky right-0 px-4 sm:px-6">
                       <div className="flex justify-center items-center gap-0.5 sm:gap-1">
                         <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(badge)}
+                        className="size-7 sm:size-9 hover:bg-card hover:text-foreground border hover:border-accent/50 transition-colors"
+                        title="Edit task"
+                      >
+                        <Pencil className="size-3 sm:size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteClick(badge)}
+                        className="size-7 sm:size-9 hover:bg-card hover:text-red-600 border hover:border-accent/50 transition-colors"
+                        title="Delete task"
+                      >
+                        <Trash2 className="size-3 sm:size-4" />
+                      </Button>
+                        {/* <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => onEdit(badge)}
@@ -242,7 +260,7 @@ export default function BadgeTable({
                           title="Delete badge"
                         >
                           <Trash2 className="size-4 sm:size-5" />
-                        </Button>
+                        </Button> */}
                       </div>
                     </TableCell>
                   </TableRow>

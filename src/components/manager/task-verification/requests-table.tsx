@@ -53,7 +53,7 @@ export function RequestsTable({
   const isShowingActions = sortBy === 'pending';
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-accent/50 shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div className="overflow-x-auto rounded-lg shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <Table>
         <TableHeader className="bg-primary-gradient">
           <TableRow className="bg-primary-gradient">

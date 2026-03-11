@@ -209,10 +209,10 @@ export default function BadgeAssignmentPage() {
             <PageHeader title="Badge Assignment" subtitle="Manually award badges to employees." />
 
             {/* Tabs */}
-            <div className="flex bg-card/75 rounded-2xl shadow-sm/25 w-full sm:w-fit h-fit border border-accent/25 overflow-hidden text-sm">
+            <div className="flex bg-card/75 rounded-full shadow-sm/25 w-full sm:w-fit h-fit border border-accent/25 overflow-hidden text-sm">
               <button
                 onClick={() => setActiveTab('users')}
-                className={`flex flex-1 sm:w-36 justify-center items-center gap-1.5 py-2 cursor-pointer rounded-l-xl text-sm font-medium transition-all duration-500 ease-in-out ${
+                className={`flex flex-1 sm:w-48 justify-center items-center gap-1.5 py-2.5 cursor-pointer rounded-l-full text-sm font-medium transition-all duration-500 ease-in-out ${
                   activeTab === 'users'
                     ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
                     : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25'
@@ -226,7 +226,7 @@ export default function BadgeAssignmentPage() {
               </button>
               <button
                 onClick={() => setActiveTab('quick-assign')}
-                className={`flex flex-1 sm:w-40 justify-center items-center gap-1.5 py-2.5 sm:py-3 cursor-pointer rounded-r-xl text-sm font-medium transition-all duration-500 ease-in-out ${
+                className={`flex flex-1 sm:w-48 justify-center items-center gap-1.5 py-2.5 cursor-pointer rounded-r-full text-sm font-medium transition-all duration-500 ease-in-out ${
                   activeTab === 'quick-assign'
                     ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
                     : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25'
