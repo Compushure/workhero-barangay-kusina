@@ -27,7 +27,7 @@ function ClearAllAssignedDialog({ setShowClearConfirm }: ClearAllDialogProps) {
 
   return (
     <Dialog open={true} onOpenChange={setShowClearConfirm}>
-      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white rounded-lg p-4 sm:p-5 shadow-lg transition-all duration-300 ease-in-out shadow-sm/50">
+      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-card rounded-lg p-4 sm:p-5 shadow-lg transition-all duration-300 ease-in-out shadow-sm/50">
         <DialogHeader>
           <DialogTitle className="flex flex-col text-base font-bold text-foreground">
             <span className="flex text-red-700 text-sm leading-none items-center gap-1.5 mb-1.5">

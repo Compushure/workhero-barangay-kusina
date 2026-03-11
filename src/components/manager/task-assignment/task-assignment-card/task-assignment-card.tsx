@@ -203,7 +203,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
       )}
 
       {/* Action Buttons */}
-      <div className="mt-3 flex flex-col sm:flex-row gap-2 sm:justify-end">
+      <div className="mt-3 flex flex-col md:flex-row gap-2 sm:justify-end">
         <Button
           onClick={() => setShowAssignConfirm(true)}
           disabled={
@@ -212,7 +212,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
             selectedTask.length === 0 ||
             !selectedDeadline
           }
-          className="w-full sm:w-auto bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out disabled:bg-foreground disabled:opacity-50 disabled:brightness-50 disabled:cursor-not-allowed px-4 sm:px-8 shadow-sm/25 h-8 text-xs"
+          className="w-full sm:w-auto bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card px-6 sm:px-12 cursor-pointer transition-all duration-500 ease-in-out disabled:bg-foreground disabled:opacity-50 disabled:brightness-50 disabled:cursor-not-allowed shadow-sm/25 h-8 text-xs"
         >
           {isAssigning ? 'Assigning...' : 'Assign'}
         </Button>
@@ -220,7 +220,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
         <Button
           variant="outline"
           onClick={() => setShowClearConfirm(true)}
-          className="w-full sm:w-auto text-primary bg-white hover:bg-gray-100 hover:text-accent px-4 sm:px-8 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25 h-8 text-xs"
+          className="w-full sm:w-auto text-primary bg-white hover:bg-gray-100 hover:text-accent px-6 sm:px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25 h-8 text-xs"
         >
           Clear
         </Button>

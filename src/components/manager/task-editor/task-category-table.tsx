@@ -65,19 +65,19 @@ export default function TaskCategoryTable({
           <TableHeader>
             <TableRow className="bg-background border-b border-border hover:bg-background">
               <TableHead className="min-w-48 max-w-48 w-48 sm:min-w-64 sm:max-w-64 sm:w-64 md:min-w-96 md:max-w-96 md:w-96 pl-3 sm:pl-6 py-3 sm:py-4">
-                <Skeleton className="h-4 w-16 bg-background" />
+                <Skeleton className="h-4 w-16 bg-gray-300" />
               </TableHead>
               <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center hidden md:table-cell">
-                <Skeleton className="h-4 w-12 mx-auto bg-background" />
+                <Skeleton className="h-4 w-12 mx-auto bg-gray-300" />
               </TableHead>
               <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center hidden md:table-cell">
-                <Skeleton className="h-4 w-8 mx-auto bg-background" />
+                <Skeleton className="h-4 w-8 mx-auto bg-gray-300" />
               </TableHead>
               <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-32 sm:max-w-32 sm:w-32 text-center hidden sm:table-cell">
-                <Skeleton className="h-4 w-18 mx-auto bg-background" />
+                <Skeleton className="h-4 w-18 mx-auto bg-gray-300" />
               </TableHead>
-              <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-36 sm:max-w-36 sm:w-36 text-center sticky right-0 bg-background">
-                <Skeleton className="h-4 w-14 mx-auto bg-background" />
+              <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-36 sm:max-w-36 sm:w-36 text-center sticky right-0">
+                <Skeleton className="h-4 w-14 mx-auto bg-gray-300" />
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -115,10 +115,7 @@ export default function TaskCategoryTable({
           <TableBody>
             <>
               {tasks.map((task) => (
-                <TableRow
-                  key={task.id}
-                  className="bg-card hover:bg-row-hover transition-colors"
-                >
+                <TableRow key={task.id} className="bg-card hover:bg-row-hover transition-colors">
                   <TableCell className="min-w-40 max-w-40 w-40 sm:min-w-56 sm:max-w-56 sm:w-56 md:min-w-80 md:max-w-80 md:w-80 pl-3 sm:pl-5 py-2 sm:py-3 align-middle">
                     <div className="truncate space-y-0.5">
                       <div className="font-semibold text-xs sm:text-sm text-foreground truncate">

@@ -2,29 +2,38 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function TaskEditorHeaderSkeleton() {
   return (
-    <div className="space-y-5 sm:space-y-4 lg:space-y-6">
+    <>
       {/* Title Section */}
       <div className="space-y-2">
-        <Skeleton className="h-9 w-40 bg-background" />
-        <Skeleton className="h-5 w-96 bg-background" />
+        <Skeleton className="h-9 w-40 bg-gray-300" />
+        <Skeleton className="h-5 w-96 bg-gray-300" />
       </div>
 
-      {/* Task Count */}
-      <div className="flex gap-3 sm:gap-4 pl-1 sm:pl-2">
-        <Skeleton className="h-7 w-36 bg-background rounded-full" />
-      </div>
-
-      {/* Search, Sort, and Add Button */}
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center justify-start sm:justify-end">
-        {/* Search */}
-        <Skeleton className="h-8 w-full sm:w-64 bg-background rounded-full" />
-
-        {/* Sort and Add Button Row */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-          <Skeleton className="h-8 w-full sm:w-48 bg-background rounded-lg" />
-          <Skeleton className="h-8 w-full sm:w-52 bg-background rounded-full" />
+      {/* Search, Sort, and Add Button - Always visible, stacked on mobile */}
+      <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+        {/* Category Count Display */}
+        <div className="flex gap-2 sm:gap-3 pl-0.5 sm:pl-1">
+          <Skeleton className="h-7 w-36 bg-gray-300 rounded-full" />
         </div>
-      </div>
-    </div>
+
+        {/* Search, Sort, and Add Button */}
+        <div className="flex flex-wrap gap-2 sm:gap-3 items-center justify-start lg:justify-end">
+          {/* Search Input */}
+          <Skeleton className="h-7 w-full sm:w-auto sm:min-w-64 bg-gray-300 rounded-full" />
+
+          {/* Filter Toggle */}
+          <Skeleton className="h-7 w-16 bg-gray-300 rounded-lg" />
+
+          {/* Sort and Add Button Row */}
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            {/* Sort Dropdown */}
+            <Skeleton className="h-7 w-full sm:w-40 bg-gray-300 rounded-lg" />
+
+            {/* Add New Category Button */}
+            <Skeleton className="h-7 w-full sm:w-52 bg-gray-300 rounded-full" />
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

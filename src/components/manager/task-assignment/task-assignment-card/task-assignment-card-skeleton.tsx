@@ -4,7 +4,7 @@ export function TaskAssignmentCardSkeleton() {
   return (
     <div className="rounded-3xl bg-background-soft p-4 sm:p-6 shadow-sm/25">
       {/* Title skeleton */}
-      <Skeleton className="h-7 sm:h-8 w-48 sm:w-60 mb-5 sm:mb-7 bg-gray-300" />
+      <Skeleton className="h-5 sm:h-6 w-48 sm:w-60 mb-5 bg-gray-300" />
 
       {/* Button group skeleton */}
       <div className="flex flex-wrap gap-2 sm:gap-3">
@@ -20,7 +20,7 @@ export function TaskAssignmentCardSkeleton() {
       </div>
 
       {/* Action buttons skeleton */}
-      <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
+      <div className="mt-2 flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
         <Skeleton className="h-7 w-full sm:w-32 bg-gray-300" />
         <Skeleton className="h-7 w-full sm:w-32 bg-gray-300" />
       </div>

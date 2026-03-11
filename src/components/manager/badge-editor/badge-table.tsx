@@ -100,19 +100,19 @@ export default function BadgeTable({
           <TableHeader>
             <TableRow className="bg-background border-b border-border hover:bg-background">
               <TableHead className="min-w-48 sm:min-w-64 md:min-w-96 pl-4 sm:pl-6 py-3 sm:py-4">
-                <Skeleton className="h-4 w-20 bg-background" />
+                <Skeleton className="h-4 w-20 bg-gray-300" />
               </TableHead>
               <TableHead className="hidden md:table-cell min-w-20 max-w-20 w-20 text-center">
-                <Skeleton className="h-4 w-12 mx-auto bg-background" />
+                <Skeleton className="h-4 w-12 mx-auto bg-gray-300" />
               </TableHead>
               <TableHead className="hidden lg:table-cell min-w-32 max-w-32 w-32 text-center">
-                <Skeleton className="h-4 w-16 mx-auto bg-background" />
+                <Skeleton className="h-4 w-16 mx-auto bg-gray-300" />
               </TableHead>
               <TableHead className="hidden sm:table-cell min-w-20 sm:min-w-24 text-center">
-                <Skeleton className="h-4 w-16 mx-auto bg-background" />
+                <Skeleton className="h-4 w-16 mx-auto bg-gray-300" />
               </TableHead>
-              <TableHead className="text-center px-2 sm:px-4 w-24 sm:w-30 sticky right-0 bg-background">
-                <Skeleton className="h-4 w-14 mx-auto bg-background" />
+              <TableHead className="text-center px-2 sm:px-4 w-24 sm:w-30 sticky right-0">
+                <Skeleton className="h-4 w-14 mx-auto bg-gray-300" />
               </TableHead>
             </TableRow>
           </TableHeader>

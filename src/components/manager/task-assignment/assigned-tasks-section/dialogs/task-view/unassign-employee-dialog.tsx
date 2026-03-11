@@ -40,7 +40,7 @@ function UnassignEmployeeDialog({
 
   return (
     <Dialog open={!!showRemoveConfirm} onOpenChange={(open) => !open && setShowRemoveConfirm(null)}>
-      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white p-4 sm:p-5">
+      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-card p-4 sm:p-5">
         <DialogHeader>
           <DialogTitle className="text-foreground text-base">Unassign Employee?</DialogTitle>
           <DialogDescription className="text-sm">

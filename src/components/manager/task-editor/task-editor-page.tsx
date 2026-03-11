@@ -169,10 +169,6 @@ export default function TaskEditorPage() {
           <TaskEditorHeaderSkeleton />
         ) : (
           <>
-            {/* <div className="space-y-1.5">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Task Editor</h1>
-              <p className="text-xs sm:text-sm lg:text-base text-secondary">Add, Edit, Delete assignable tasks in this page.</p>
-            </div> */}
             <PageHeader
               title="Task Editor"
               subtitle="Add, Edit, Delete assignable tasks in this page."

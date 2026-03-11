@@ -25,27 +25,35 @@ function AssignEmployeesTable({
   return (
     <div className="rounded-2xl border border-accent/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full table-fixed">
-        <thead className="bg-primary-gradient text-primary/75 border-b border-accent/50 sticky top-0 z-10">
-          <tr className='text-card'>
+        <thead
+          className={`${isLoading ? 'bg-muted text-primary/75' : 'bg-primary-gradient text-card'} border-b border-accent/50 sticky top-0 z-10`}
+        >
+          <tr>
             <th className="w-[10%] p-1.5 text-center align-middle">
-              <input
-                type="checkbox"
-                checked={allFilteredSelected}
-                onChange={handleSelectAll}
-                className="size-4 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  backgroundImage: !!allFilteredSelected
-                    ? "url(\"data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e\")"
-                    : 'none',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'center',
-                  backgroundSize: '1rem',
-                }}
-              />
+              {!isLoading && (
+                <input
+                  type="checkbox"
+                  checked={allFilteredSelected}
+                  onChange={handleSelectAll}
+                  className="size-4 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    backgroundImage: !!allFilteredSelected
+                      ? "url(\"data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e\")"
+                      : 'none',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    backgroundSize: '1rem',
+                  }}
+                />
+              )}
             </th>
-            <th className="w-[60%] px-1.5 text-left font-bold text-xs">NAME</th>
-            <th className="w-[30%] px-1.5 text-left font-bold text-xs">ID NO.</th>
+            <th className="w-[60%] px-1.5 text-left font-bold text-xs">
+              {isLoading ? <Skeleton className="h-3 w-12 bg-gray-300" /> : 'NAME'}
+            </th>
+            <th className="w-[30%] px-1.5 text-left font-bold text-xs">
+              {isLoading ? <Skeleton className="h-3 w-14 bg-gray-300" /> : 'ID NO.'}
+            </th>
           </tr>
         </thead>
         {isLoading ? (
@@ -78,7 +86,7 @@ function AssignEmployeesTable({
                       ? 'brightness-75 opacity-50 cursor-not-allowed'
                       : isSelected
                         ? 'bg-row-hover'
-                        : 'bg-background-soft hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
+                        : 'bg-card hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
                   }`}
                   onClick={() => !isDisabled && toggleEmployee(employee)}
                 >

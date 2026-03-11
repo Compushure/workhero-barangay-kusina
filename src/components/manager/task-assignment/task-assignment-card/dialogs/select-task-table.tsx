@@ -27,13 +27,23 @@ function SelectTasksTable({
   return (
     <div className="rounded-2xl border-2 border-accent-secondary/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full table-fixed">
-        <thead className="bg-primary-gradient text-card border-b border-accent-secondary/50 sticky top-0 z-10">
+        <thead
+          className={`${isLoading ? 'bg-muted' : 'bg-primary-gradient text-card'} border-b border-accent-secondary/50 sticky top-0 z-10`}
+        >
           <tr className="text-xs font-semibold">
             <th className="w-[8%] sm:w-[5%] py-1.5"></th>
-            <th className="w-[52%] sm:w-[35%] text-left pl-3 py-1.5">TASK</th>
-            <th className="hidden sm:table-cell w-[17%] text-center py-1.5">POINTS</th>
-            <th className="hidden sm:table-cell w-[17%] text-center py-1.5">XP</th>
-            <th className="w-[40%] sm:w-[26%] text-center py-1.5">MAX ORDERS</th>
+            <th className="w-[52%] sm:w-[35%] text-left pl-3 py-1.5">
+              {isLoading ? <Skeleton className="h-3 w-12 bg-gray-300" /> : 'TASK'}
+            </th>
+            <th className="hidden sm:table-cell w-[17%] text-center py-1.5">
+              {isLoading ? <Skeleton className="h-3 w-14 mx-auto bg-gray-300" /> : 'POINTS'}
+            </th>
+            <th className="hidden sm:table-cell w-[17%] text-center py-1.5">
+              {isLoading ? <Skeleton className="h-3 w-8 mx-auto bg-gray-300" /> : 'XP'}
+            </th>
+            <th className="w-[40%] sm:w-[26%] text-center py-1.5">
+              {isLoading ? <Skeleton className="h-3 w-20 mx-auto bg-gray-300" /> : 'MAX ORDERS'}
+            </th>
           </tr>
         </thead>
         {isLoading ? (
@@ -148,7 +158,7 @@ function SelectTasksTable({
                             updateMaxOrders(task.id, value);
                           }}
                           onClick={(e) => e.stopPropagation()}
-                          className="remove-arrow w-10 bg-background-soft text-center border border-accent-secondary/75 rounded px-1.5 py-1 text-xs"
+                          className="remove-arrow w-10 bg-white text-center border border-accent-secondary/75 rounded px-1.5 py-1 text-xs"
                           min="1"
                           max="99"
                         />

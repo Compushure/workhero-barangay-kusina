@@ -95,7 +95,7 @@ export default function EditTaskDialog({
 
   return (
     <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>
-      <DialogContent className="bg-background max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-2xl max-h-[90vh] flex flex-col p-4 sm:p-5">
+      <DialogContent className="bg-card max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-2xl max-h-[90vh] flex flex-col p-4 sm:p-5">
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-xl text-foreground">Edit Task</DialogTitle>
         </DialogHeader>
@@ -108,7 +108,7 @@ export default function EditTaskDialog({
               <div className="flex items-end gap-1.5">
                 <p className="flex gap-0.5 items-end text-base font-medium">
                   <Coins strokeWidth={1.5} className="size-4" />
-                  <span className="inline-block font-semibold pb-0.5 text-base leading-none pb-0.5">{task.points}</span>
+                  <span className="inline-block font-semibold text-base leading-none pb-0.5">{task.points}</span>
                 </p>
 
                 <p className="flex gap-1 items-end font-medium pb-0.5">
@@ -129,7 +129,7 @@ export default function EditTaskDialog({
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setEditMaxOrders(Math.max(1, Math.min(99, editMaxOrders - 1)))}
-                    className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent/50 hover:text-card text-primary size-7 rounded flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out"
+                    className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent hover:text-card text-primary size-7 rounded flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out"
                   >
                     −
                   </button>
@@ -147,7 +147,7 @@ export default function EditTaskDialog({
                   />
                   <button
                     onClick={() => setEditMaxOrders(Math.max(1, Math.min(99, editMaxOrders + 1)))}
-                    className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent/50 hover:text-card text-primary size-7 rounded flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out"
+                    className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent hover:text-card text-primary size-7 rounded flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out"
                   >
                     +
                   </button>
