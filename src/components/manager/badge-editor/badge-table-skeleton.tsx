@@ -5,7 +5,7 @@ export default function BadgeTableSkeleton() {
   return (
     <>
       {[1, 2, 3, 4, 5].map((i) => (
-        <TableRow key={i} className="bg-background-soft hover:bg-background-soft border-b border-accent/50">
+        <TableRow key={i} className="bg-background-soft hover:bg-background-soft border-b border-gray-300">
           <TableCell className="py-2 sm:py-3">
             <div className="flex items-baseline gap-1.5 sm:gap-2 pl-3 sm:pl-4">
               <Skeleton className="size-12 sm:size-14 bg-gray-300" />

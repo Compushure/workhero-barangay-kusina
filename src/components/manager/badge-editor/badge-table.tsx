@@ -95,7 +95,7 @@ export default function BadgeTable({
 
   if (isLoading) {
     return (
-      <div className="bg-card rounded-2xl border-2 border-accent/25 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-sm/25">
+      <div className="bg-card rounded-2xl overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-sm/25">
         <Table>
           <TableHeader>
             <TableRow className="bg-background border-b border-border hover:bg-background">
@@ -126,7 +126,7 @@ export default function BadgeTable({
 
   return (
     <>
-      <div className="bg-card rounded-2xl border-2 border-accent/25 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-sm/25">
+      <div className="bg-card rounded-2xl overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-sm/25">
         <Table>
           <TableHeader>
             <TableRow className="bg-primary-gradient">

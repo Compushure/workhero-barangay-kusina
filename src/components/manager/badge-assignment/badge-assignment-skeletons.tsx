@@ -2,7 +2,7 @@ export function BadgeAssignmentUsersSkeleton() {
   return (
     <div className="space-y-4">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="bg-card rounded-xl border border-accent/25 p-3 shadow-sm/25">
+        <div key={i} className="bg-card rounded-xl border-b border-gray-300 p-3 shadow-sm/25">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             {/* Avatar and User Info Section */}
             <div className="shrink-0 flex items-center gap-3 min-w-0 sm:min-w-48">

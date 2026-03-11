@@ -201,11 +201,6 @@ export default function BadgeAssignmentPage() {
           <BadgeAssignmentHeaderSkeleton />
         ) : (
           <section className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-3 sm:gap-4">
-            {/* Title */}
-            {/* <div className="space-y-2">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Badge Assignment</h1>
-            <p className="text-sm sm:text-base lg:text-lg text-secondary">Manually award badges to employees.</p>
-          </div> */}
             <PageHeader title="Badge Assignment" subtitle="Manually award badges to employees." />
 
             {/* Tabs */}

@@ -28,7 +28,7 @@ function SelectTasksTable({
     <div className="rounded-2xl border-2 border-accent-secondary/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full table-fixed">
         <thead
-          className={`${isLoading ? 'bg-muted' : 'bg-primary-gradient text-card'} border-b border-accent-secondary/50 sticky top-0 z-10`}
+          className={`${isLoading ? 'bg-background' : 'bg-primary-gradient text-card'} border-b border-accent-secondary/50 sticky top-0 z-10`}
         >
           <tr className="text-xs font-semibold">
             <th className="w-[8%] sm:w-[5%] py-1.5"></th>

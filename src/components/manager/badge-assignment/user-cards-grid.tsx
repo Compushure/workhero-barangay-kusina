@@ -41,7 +41,7 @@ export default function UserCardsGrid({
         return (
           <div
             key={user.id}
-            className="bg-card rounded-xl border border-accent/25 p-3 hover:shadow-lg transition-shadow duration-300 shadow-sm/25"
+            className="bg-card rounded-xl border-t border-gray-300 p-3 hover:shadow-lg transition-shadow duration-300 shadow-sm/25"
           >
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
               {/* Avatar and User Info */}

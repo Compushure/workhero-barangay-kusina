@@ -26,7 +26,7 @@ function AssignEmployeesTable({
     <div className="rounded-2xl border border-accent/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full table-fixed">
         <thead
-          className={`${isLoading ? 'bg-muted text-primary/75' : 'bg-primary-gradient text-card'} border-b border-accent/50 sticky top-0 z-10`}
+          className={`${isLoading ? 'bg-background text-primary/75' : 'bg-primary-gradient text-card'} border-b border-accent/50 sticky top-0 z-10`}
         >
           <tr>
             <th className="w-[10%] p-1.5 text-center align-middle">
