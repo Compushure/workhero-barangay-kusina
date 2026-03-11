@@ -144,7 +144,7 @@ export default function QuickAssignmentPanel({
                     className={`w-full px-4 py-3 text-left transition-colors ${
                       selectedBadge?.id === badge.id
                         ? 'bg-accent/15 border-l-4 border-accent'
-                        : 'bg-background-soft hover:bg-row-hover'
+                        : 'bg-card hover:bg-row-hover'
                     }`}
                   >
                     <div className="flex items-start gap-3">

@@ -65,19 +65,19 @@ export default function TaskCategoryTable({
           <TableHeader>
             <TableRow className="bg-background border-b border-border hover:bg-background">
               <TableHead className="min-w-48 max-w-48 w-48 sm:min-w-64 sm:max-w-64 sm:w-64 md:min-w-96 md:max-w-96 md:w-96 pl-3 sm:pl-6 py-3 sm:py-4">
-                <Skeleton className="h-4 w-16 bg-muted" />
+                <Skeleton className="h-4 w-16 bg-background" />
               </TableHead>
               <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center hidden md:table-cell">
-                <Skeleton className="h-4 w-12 mx-auto bg-muted" />
+                <Skeleton className="h-4 w-12 mx-auto bg-background" />
               </TableHead>
               <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center hidden md:table-cell">
-                <Skeleton className="h-4 w-8 mx-auto bg-muted" />
+                <Skeleton className="h-4 w-8 mx-auto bg-background" />
               </TableHead>
               <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-32 sm:max-w-32 sm:w-32 text-center hidden sm:table-cell">
-                <Skeleton className="h-4 w-18 mx-auto bg-muted" />
+                <Skeleton className="h-4 w-18 mx-auto bg-background" />
               </TableHead>
               <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-36 sm:max-w-36 sm:w-36 text-center sticky right-0 bg-background">
-                <Skeleton className="h-4 w-14 mx-auto bg-muted" />
+                <Skeleton className="h-4 w-14 mx-auto bg-background" />
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -94,20 +94,20 @@ export default function TaskCategoryTable({
       <div className="bg-card rounded-2xl border-2 border-accent/25 overflow-x-auto overflow-y-hidden shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted hover:bg-muted">
-              <TableHead className="min-w-40 max-w-40 w-40 sm:min-w-56 sm:max-w-56 sm:w-56 md:min-w-80 md:max-w-80 md:w-80 pl-3 sm:pl-5 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-bold text-primary/75">
+            <TableRow className="bg-primary-gradient">
+              <TableHead className="min-w-40 max-w-40 w-40 sm:min-w-56 sm:max-w-56 sm:w-56 md:min-w-80 md:max-w-80 md:w-80 pl-3 sm:pl-5 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-bold text-card">
                 TASK
               </TableHead>
-              <TableHead className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-center text-[10px] sm:text-xs font-bold text-primary/75 hidden md:table-cell">
+              <TableHead className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-center text-[10px] sm:text-xs font-bold text-card hidden md:table-cell">
                 POINTS
               </TableHead>
-              <TableHead className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-center text-[10px] sm:text-xs font-bold text-primary/75 hidden md:table-cell">
+              <TableHead className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-center text-[10px] sm:text-xs font-bold text-card hidden md:table-cell">
                 XP
               </TableHead>
-              <TableHead className="min-w-20 max-w-20 w-20 sm:min-w-28 sm:max-w-28 sm:w-28 text-center text-[10px] sm:text-xs font-bold text-primary/75 hidden sm:table-cell">
+              <TableHead className="min-w-20 max-w-20 w-20 sm:min-w-28 sm:max-w-28 sm:w-28 text-center text-[10px] sm:text-xs font-bold text-card hidden sm:table-cell">
                 REPEATABLE
               </TableHead>
-              <TableHead className="min-w-20 max-w-20 w-20 sm:min-w-32 sm:max-w-32 sm:w-32 text-center text-[10px] sm:text-xs font-bold text-primary/75 sticky right-0">
+              <TableHead className="min-w-20 max-w-20 w-20 sm:min-w-32 sm:max-w-32 sm:w-32 text-center text-[10px] sm:text-xs font-bold text-card sticky right-0">
                 ACTIONS
               </TableHead>
             </TableRow>
@@ -117,7 +117,7 @@ export default function TaskCategoryTable({
               {tasks.map((task) => (
                 <TableRow
                   key={task.id}
-                  className="bg-background-soft hover:bg-row-hover transition-colors"
+                  className="bg-card hover:bg-row-hover transition-colors"
                 >
                   <TableCell className="min-w-40 max-w-40 w-40 sm:min-w-56 sm:max-w-56 sm:w-56 md:min-w-80 md:max-w-80 md:w-80 pl-3 sm:pl-5 py-2 sm:py-3 align-middle">
                     <div className="truncate space-y-0.5">

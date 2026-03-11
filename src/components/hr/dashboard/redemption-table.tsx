@@ -141,135 +141,135 @@ export function RedemptionTable({
                 </TableHead>
               </TableRow>
             </TableHeader>
-          <TableBody>
-            {paginatedData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="py-12 text-center text-foreground">
-                  <p className="text-sm">
-                    {status === 'pending'
-                      ? 'No pending redemption requests.'
-                      : status === 'approved'
-                        ? 'No approved redemption requests.'
-                        : status === 'rejected'
-                          ? 'No rejected redemption requests.'
-                          : 'No redemption requests found.'}
-                  </p>
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedData.map((request) => {
-                const { dateStr, timeStr } = formatDateTime(request.requestedAt);
-                const quantity = request.quantity || 1;
-                const totalCost = request.pointsCost * quantity;
-                const itemDisplay = `${quantity} x ${request.rewardName}`;
-                const userPoints = request.userPoints || 0;
-                const hasInsufficientPoints = userPoints < totalCost;
-                const userName = request.userName || 'N/A';
-                const isOutOfStock = request.remarks === 'Item is out of stock';
-                const hasRemarks = request.remarks && request.remarks.trim() !== '';
+            <TableBody>
+              {paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-12 text-center text-foreground">
+                    <p className="text-sm">
+                      {status === 'pending'
+                        ? 'No pending redemption requests.'
+                        : status === 'approved'
+                          ? 'No approved redemption requests.'
+                          : status === 'rejected'
+                            ? 'No rejected redemption requests.'
+                            : 'No redemption requests found.'}
+                    </p>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedData.map((request) => {
+                  const { dateStr, timeStr } = formatDateTime(request.requestedAt);
+                  const quantity = request.quantity || 1;
+                  const totalCost = request.pointsCost * quantity;
+                  const itemDisplay = `${quantity} x ${request.rewardName}`;
+                  const userPoints = request.userPoints || 0;
+                  const hasInsufficientPoints = userPoints < totalCost;
+                  const userName = request.userName || 'N/A';
+                  const isOutOfStock = request.remarks === 'Item is out of stock';
+                  const hasRemarks = request.remarks && request.remarks.trim() !== '';
 
-                return (
-                  <TableRow
-                    key={request.id}
-                    className="bg-background transition-colors hover:bg-accent-secondary/10"
-                  >
-                    <TableCell className="px-2 sm:px-4">
-                      <p className="text-xs sm:text-sm font-medium text-foreground">{dateStr}</p>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground">{timeStr}</p>
-                    </TableCell>
-                    <TableCell className="px-2 sm:px-4">
-                      <p className="text-xs sm:text-sm text-foreground truncate max-w-36 sm:max-w-48">
-                        {userName}
-                      </p>
-                    </TableCell>
-                    <TableCell className="px-2 sm:px-4">
-                      <p className="text-xs sm:text-sm text-foreground truncate max-w-48 sm:max-w-64">
-                        {itemDisplay}
-                      </p>
-                    </TableCell>
-                    <TableCell className="px-2 sm:px-4 text-center">
-                      <p className="text-xs sm:text-sm font-medium text-foreground whitespace-nowrap">
-                        {totalCost} Pts
-                      </p>
-                    </TableCell>
-                    <TableCell className="px-2 sm:px-4 text-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-blue-600 hover:bg-blue-100 hover:text-blue-700 relative"
-                        onClick={() => openRequestModal(request)}
-                        title="View details"
-                      >
-                        <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        {status !== 'pending' && hasRemarks && (
-                          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-orange-500 ring-1 ring-background" />
-                        )}
-                      </Button>
-                    </TableCell>
-                    <TableCell className="px-2 sm:px-4 sticky right-0 bg-background">
-                      <div className="flex items-center justify-center gap-1 sm:gap-2">
-                        {status === 'pending' ? (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-emerald-700 hover:bg-emerald-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                handleAcceptClick(request.id);
-                              }}
-                              disabled={
-                                declineMutation.isPending ||
-                                acceptMutation.isPending ||
-                                hasInsufficientPoints
-                              }
-                              title={
-                                hasInsufficientPoints
-                                  ? `Insufficient points: User has ${userPoints} but needs ${totalCost}`
-                                  : 'Accept request'
-                              }
+                  return (
+                    <TableRow
+                      key={request.id}
+                      className="bg-background transition-colors hover:bg-accent-secondary/10"
+                    >
+                      <TableCell className="px-2 sm:px-4">
+                        <p className="text-xs sm:text-sm font-medium text-foreground">{dateStr}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">{timeStr}</p>
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4">
+                        <p className="text-xs sm:text-sm text-foreground truncate max-w-36 sm:max-w-48">
+                          {userName}
+                        </p>
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4">
+                        <p className="text-xs sm:text-sm text-foreground truncate max-w-48 sm:max-w-64">
+                          {itemDisplay}
+                        </p>
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4 text-center">
+                        <p className="text-xs sm:text-sm font-medium text-foreground whitespace-nowrap">
+                          {totalCost} Pts
+                        </p>
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4 text-center">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-blue-600 hover:bg-blue-100 hover:text-blue-700 relative"
+                          onClick={() => openRequestModal(request)}
+                          title="View details"
+                        >
+                          <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          {status !== 'pending' && hasRemarks && (
+                            <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-orange-500 ring-1 ring-background" />
+                          )}
+                        </Button>
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4 sticky right-0 bg-background">
+                        <div className="flex items-center justify-center gap-1 sm:gap-2">
+                          {status === 'pending' ? (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-emerald-700 hover:bg-emerald-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleAcceptClick(request.id);
+                                }}
+                                disabled={
+                                  declineMutation.isPending ||
+                                  acceptMutation.isPending ||
+                                  hasInsufficientPoints
+                                }
+                                title={
+                                  hasInsufficientPoints
+                                    ? `Insufficient points: User has ${userPoints} but needs ${totalCost}`
+                                    : 'Accept request'
+                                }
+                              >
+                                <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleDeclineClick(request.id);
+                                }}
+                                disabled={declineMutation.isPending || acceptMutation.isPending}
+                              >
+                                <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <div
+                              className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap shrink-0 ${
+                                status === 'approved'
+                                  ? 'bg-green-100 text-green-700'
+                                  : isOutOfStock
+                                    ? 'bg-orange-100 text-orange-700'
+                                    : 'bg-red-100 text-red-700'
+                              }`}
                             >
-                              <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                handleDeclineClick(request.id);
-                              }}
-                              disabled={declineMutation.isPending || acceptMutation.isPending}
-                            >
-                              <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            </Button>
-                          </>
-                        ) : (
-                          <div
-                            className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap shrink-0 ${
-                              status === 'approved'
-                                ? 'bg-green-100 text-green-700'
+                              {status === 'approved'
+                                ? 'Approved'
                                 : isOutOfStock
-                                  ? 'bg-orange-100 text-orange-700'
-                                  : 'bg-red-100 text-red-700'
-                            }`}
-                          >
-                            {status === 'approved'
-                              ? 'Approved'
-                              : isOutOfStock
-                                ? 'Out of Stock'
-                                : 'Rejected'}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                                  ? 'Out of Stock'
+                                  : 'Rejected'}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Pagination - parent will position with mt-auto */}
@@ -329,7 +329,7 @@ export function RedemptionTable({
                   </div>
 
                   <div className="flex flex-col items-center gap-2">
-                    <div className="h-24 w-24 rounded-xl bg-muted flex items-center justify-center overflow-hidden">
+                    <div className="h-24 w-24 rounded-xl bg-background flex items-center justify-center overflow-hidden">
                       {requestImageUrl && !requestImageError ? (
                         <img
                           src={requestImageUrl}

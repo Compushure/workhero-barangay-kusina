@@ -10,7 +10,7 @@ export function TaskAssignmentPage() {
   // This eliminates unnecessary re-renders that cause the "fraction of a second" delay
   return (
     <TaskAssignmentProvider>
-      <main className="w-full min-h-screen bg-zinc-100 px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6">
+      <main className="w-full min-h-screen bg-background px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6">
         <div className="mx-auto w-full max-w-7xl 2xl:max-w-440 space-y-3 sm:space-y-4 lg:space-y-5">
           {/* <div className="space-y-1.5">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Task Assignment</h1>

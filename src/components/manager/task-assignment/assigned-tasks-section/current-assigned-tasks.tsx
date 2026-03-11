@@ -22,22 +22,22 @@ import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 function CurrentAssignedTasksSkeleton() {
   return (
-    <div className="rounded-3xl bg-background px-4 md:px-5 2xl:px-6 pt-3 sm:pt-5 shadow-sm/50 flex flex-col w-full">
+    <div className="rounded-3xl bg-background-soft px-4 md:px-5 2xl:px-6 pt-3 sm:pt-5 shadow-sm/50 flex flex-col w-full">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 mb-4">
-        <Skeleton className="h-6 sm:h-7 w-40 bg-muted" />
+        <Skeleton className="h-6 sm:h-7 w-40 bg-gray-300" />
         <div className="flex rounded-xl overflow-hidden w-40 sm:w-56 border border-accent/25">
-          <Skeleton className="h-9 flex-1 bg-muted rounded-l-xl" />
-          <Skeleton className="h-9 flex-1 bg-muted rounded-r-xl" />
+          <Skeleton className="h-9 flex-1 bg-gray-300 rounded-l-xl" />
+          <Skeleton className="h-9 flex-1 bg-gray-300 rounded-r-xl" />
         </div>
       </div>
 
       <section className="flex flex-col gap-2">
-        <Skeleton className="h-6 w-48 rounded-full bg-muted" />
+        <Skeleton className="h-6 w-48 rounded-full bg-gray-300" />
         <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 lg:gap-3 items-stretch sm:items-center">
-          <Skeleton className="h-7 w-full rounded-full bg-muted" />
+          <Skeleton className="h-7 w-full rounded-full bg-gray-300" />
           <div className="flex gap-1.5 sm:gap-2">
-            <Skeleton className="h-7 w-28 rounded-lg bg-muted" />
-            <Skeleton className="h-7 w-28 rounded-lg bg-muted" />
+            <Skeleton className="h-7 w-28 rounded-lg bg-gray-300" />
+            <Skeleton className="h-7 w-28 rounded-lg bg-gray-300" />
           </div>
         </div>
       </section>
@@ -48,7 +48,7 @@ function CurrentAssignedTasksSkeleton() {
       </section>
 
       <div className="my-8">
-        <Skeleton className="h-8 w-48 mx-auto bg-muted rounded-full" />
+        <Skeleton className="h-8 w-48 mx-auto bg-gray-300 rounded-full" />
       </div>
     </div>
   );
@@ -80,7 +80,7 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
 
   const employeeQuery = useGetCurrentAssignedEmployeesPaginated(
     page,
-    4,
+    10,
     sortBy,
     debouncedSearchTerm,
     viewMode === 'employee' // Only fetch when employee view is active
@@ -146,10 +146,10 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
   }
 
   return (
-    <div className="rounded-3xl bg-background px-4 md:px-5 2xl:px-6 pt-3 sm:pt-5 shadow-sm/50 flex flex-col w-full">
+    <div className="rounded-3xl bg-gray-100 px-4 md:px-5 2xl:px-6 pt-3 sm:pt-5 shadow-sm/50 flex flex-col w-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 mb-4">
-        <h2 className="text-base sm:text-lg font-bold text-foreground pb-2 pl-2">Task List</h2>
+      <div className="flex items-start sm:items-center justify-between gap-1.5 mb-4">
+        <h2 className="text-lg font-bold text-foreground pb-2 pl-2">Tasks List</h2>
 
         {/* View Toggle */}
         <div className="flex bg-card/75 rounded-xl self-end sm:self-auto">

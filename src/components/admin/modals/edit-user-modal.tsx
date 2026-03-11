@@ -87,12 +87,19 @@ const EMPLOYMENT_STATUS_OPTIONS = [
   { value: 'regular', label: 'Regular' },
 ] as const;
 
-export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpload, onImageClear }: EditUserModalProps) {
+export function EditUserModal({
+  open,
+  onOpenChange,
+  user,
+  onEditUser,
+  onImageUpload,
+  onImageClear,
+}: EditUserModalProps) {
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
   const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(null);
   const [imageKey, setImageKey] = useState(Date.now());
-  
+
   // Track which fields are activated for editing
   const [activeFields, setActiveFields] = useState<{
     name: boolean;
@@ -186,7 +193,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
   const toggleField = (field: keyof typeof activeFields) => {
     setActiveFields((prev) => {
       const newState = { ...prev, [field]: !prev[field] };
-      
+
       // When activating, populate with current user value
       if (newState[field]) {
         switch (field) {
@@ -217,7 +224,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
         // Clear the field value when deactivating
         setValue(field, '');
       }
-      
+
       return newState;
     });
   };
@@ -259,7 +266,7 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
   const hasActiveChanges = () => {
     const values = watch();
     const normalize = (v?: string | null) => (v ?? '').trim();
-    
+
     if (activeFields.name && normalize(values.name)) return true;
     if (activeFields.password && normalize(values.password)) return true;
     if (activeFields.contactNumber && normalize(values.contactNumber)) return true;
@@ -270,15 +277,18 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
     if (values.employeeType !== 'no-change') return true;
     if (values.employmentStatus !== 'no-change') return true;
     if (selectedProfileImage) return true;
-    
+
     return false;
   };
 
-  const getProfileUrl = useCallback((userId: string) => {
-    const supabase = createClient();
-    const { data } = supabase.storage.from('employees').getPublicUrl(`${userId}/profile.png`);
-    return data.publicUrl + `?v=${imageKey}`;
-  }, [imageKey]);
+  const getProfileUrl = useCallback(
+    (userId: string) => {
+      const supabase = createClient();
+      const { data } = supabase.storage.from('employees').getPublicUrl(`${userId}/profile.png`);
+      return data.publicUrl + `?v=${imageKey}`;
+    },
+    [imageKey]
+  );
 
   const handleImageSelect = async (file: File) => {
     setSelectedProfileImage(file);
@@ -287,18 +297,22 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
   const onSubmit = (data: EditUserInput) => {
     // Only include fields that are activated
     const filteredData: Partial<EditUserInput> = {};
-    
+
     if (activeFields.name && data.name) filteredData.name = data.name;
     if (activeFields.password && data.password) filteredData.password = data.password;
-    if (activeFields.contactNumber && data.contactNumber) filteredData.contactNumber = data.contactNumber;
+    if (activeFields.contactNumber && data.contactNumber)
+      filteredData.contactNumber = data.contactNumber;
     if (activeFields.address && data.address) filteredData.address = data.address;
     if (activeFields.tin && data.tin) filteredData.tin = data.tin;
     if (activeFields.sss && data.sss) filteredData.sss = data.sss;
     if (activeFields.pagibig && data.pagibig) filteredData.pagibig = data.pagibig;
-    if (data.employeeType && data.employeeType !== 'no-change') filteredData.employeeType = data.employeeType;
-    if (data.employmentStatus && data.employmentStatus !== 'no-change') filteredData.employmentStatus = data.employmentStatus;
+    if (data.employeeType && data.employeeType !== 'no-change')
+      filteredData.employeeType = data.employeeType;
+    if (data.employmentStatus && data.employmentStatus !== 'no-change')
+      filteredData.employmentStatus = data.employmentStatus;
 
-    if (data.employmentStatus && data.employmentStatus !== 'no-change') filteredData.employmentStatus = data.employmentStatus;
+    if (data.employmentStatus && data.employmentStatus !== 'no-change')
+      filteredData.employmentStatus = data.employmentStatus;
 
     startTransition(async () => {
       await onEditUser(user.id, filteredData as EditUserInput);
@@ -314,7 +328,9 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
         <DialogHeader className="px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 lg:pt-7 pb-3 sm:pb-4 lg:pb-5 border-b border-[#f47812]/15 shrink-0">
           <div className="flex items-start justify-between gap-2 sm:gap-3 lg:gap-4">
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-base sm:text-xl lg:text-2xl font-bold text-foreground">Edit User</DialogTitle>
+              <DialogTitle className="text-base sm:text-xl lg:text-2xl font-bold text-foreground">
+                Edit User
+              </DialogTitle>
               <DialogDescription className="text-xs sm:text-sm lg:text-base text-gray-600 hidden sm:block">
                 Leave fields blank to keep current values. Only filled fields will be updated.
               </DialogDescription>
@@ -347,13 +363,17 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
           <div className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
             {/* Read-only information section */}
             <div className="space-y-2 sm:space-y-3 lg:space-y-4 p-3 sm:p-4 lg:p-5 bg-background rounded-lg border border-[#f47812]/15">
-              <p className="text-xs lg:text-sm font-semibold text-foreground uppercase hidden sm:block">Read-Only Information</p>
+              <p className="text-xs lg:text-sm font-semibold text-foreground uppercase hidden sm:block">
+                Read-Only Information
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
                 <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
                   <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-accent shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs lg:text-sm text-gray-600">Email</p>
-                    <p className="text-xs sm:text-sm font-medium text-foreground truncate">{user.email}</p>
+                    <p className="text-xs sm:text-sm font-medium text-foreground truncate">
+                      {user.email}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 sm:gap-2">
@@ -381,10 +401,12 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
             <div className="p-3 bg-background rounded-lg border border-[#f47812]/15 text-sm space-y-1 mt-4">
               <p className="text-xs text-foreground font-medium">Current Values:</p>
               <p>
-                <span className="text-gray-600">Name:</span> <span className="text-foreground">{user.name}</span>
+                <span className="text-gray-600">Name:</span>{' '}
+                <span className="text-foreground">{user.name}</span>
               </p>
               <p>
-                <span className="text-gray-600">Role:</span> <span className="text-foreground">{user.employeeType}</span>
+                <span className="text-gray-600">Role:</span>{' '}
+                <span className="text-foreground">{user.employeeType}</span>
               </p>
             </div>
 
@@ -410,381 +432,433 @@ export function EditUserModal({ open, onOpenChange, user, onEditUser, onImageUpl
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-6" id="edit-user-form">
               {/* Collapsible Sections */}
-              <Accordion type="multiple" defaultValue={["basic", "employment", "address", "ids"]} className="space-y-4">
-              {/* Basic Information */}
-              <AccordionItem value="basic" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
-                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
-                  Basic Information (Optional)
-                </AccordionTrigger>
-                <AccordionContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                  {/* New Name */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="edit-name" className="text-foreground">
-                        New Name
-                      </Label>
-                      <button
-                        type="button"
-                        onClick={() => toggleField('name')}
-                        className={`p-1 rounded-md transition-colors ${
-                          activeFields.name
-                            ? 'bg-accent text-white hover:bg-accent/90'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                        title={activeFields.name ? 'Deactivate field' : 'Activate field'}
-                      >
-                        {activeFields.name ? <X className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
-                      <Input
-                        id="edit-name"
-                        placeholder={`Current: ${user.name}`}
-                        className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
-                        disabled={isPending || !activeFields.name}
-                        {...register('name')}
-                      />
-                    </div>
-                    {errors.name && (
-                      <p className="text-sm text-destructive">{errors.name.message}</p>
-                    )}
-                  </div>
-
-                  {/* New Password */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="edit-password" className="text-foreground">
-                        New Password (Optional)
-                      </Label>
-                      <button
-                        type="button"
-                        onClick={() => toggleField('password')}
-                        className={`p-1 rounded-md transition-colors ${
-                          activeFields.password
-                            ? 'bg-accent text-white hover:bg-accent/90'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                        title={activeFields.password ? 'Deactivate field' : 'Activate field'}
-                      >
-                        {activeFields.password ? <X className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
-                      <Input
-                        id="edit-password"
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="Leave blank to keep current (min 6 chars)"
-                        className="pl-10 pr-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
-                        disabled={isPending || !activeFields.password}
-                        {...register('password')}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-foreground transition-colors"
-                        disabled={isPending || !activeFields.password}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                    {errors.password && (
-                      <p className="text-sm text-destructive">{errors.password.message}</p>
-                    )}
-                  </div>
-
-                  {/* New Contact Number */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="edit-contact" className="text-foreground">
-                        New Contact Number
-                      </Label>
-                      <button
-                        type="button"
-                        onClick={() => toggleField('contactNumber')}
-                        className={`p-1 rounded-md transition-colors ${
-                          activeFields.contactNumber
-                            ? 'bg-accent text-white hover:bg-accent/90'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                        title={activeFields.contactNumber ? 'Deactivate field' : 'Activate field'}
-                      >
-                        {activeFields.contactNumber ? <X className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
-                      <Input
-                        id="edit-contact"
-                        placeholder={`Current: ${(user as any).contactNumber || 'Not set'}`}
-                        className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
-                        disabled={isPending || !activeFields.contactNumber}
-                        {...register('contactNumber')}
-                      />
-                    </div>
-                    {errors.contactNumber && (
-                      <p className="text-sm text-destructive">{errors.contactNumber.message}</p>
-                    )}
-                  </div>
-                </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Employment Details */}
-              <AccordionItem value="employment" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
-                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
-                  Employment Details (Optional)
-                </AccordionTrigger>
-                <AccordionContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                  {/* New Role */}
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-type" className="text-foreground">
-                      New Role
-                    </Label>
-                    <Select
-                      value={selectedType || 'no-change'}
-                      onValueChange={(value) =>
-                        setValue('employeeType', value as EmployeeTypeValue | 'no-change')
-                      }
-                      disabled={isPending}
-                    >
-                      <SelectTrigger
-                        id="edit-type"
-                        className="border-border bg-white focus:border-accent focus:ring-accent"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Briefcase className="h-4 w-4 text-accent" />
-                          <SelectValue placeholder={`Current: ${user.employeeType}`} />
+              <Accordion
+                type="multiple"
+                defaultValue={['basic', 'employment', 'address', 'ids']}
+                className="space-y-4"
+              >
+                {/* Basic Information */}
+                <AccordionItem
+                  value="basic"
+                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                >
+                  <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
+                    Basic Information (Optional)
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                      {/* New Name */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="edit-name" className="text-foreground">
+                            New Name
+                          </Label>
+                          <button
+                            type="button"
+                            onClick={() => toggleField('name')}
+                            className={`p-1 rounded-md transition-colors ${
+                              activeFields.name
+                                ? 'bg-accent text-white hover:bg-accent/90'
+                                : 'bg-background text-muted-foreground hover:bg-background/80'
+                            }`}
+                            title={activeFields.name ? 'Deactivate field' : 'Activate field'}
+                          >
+                            {activeFields.name ? (
+                              <X className="h-3 w-3" />
+                            ) : (
+                              <Pencil className="h-3 w-3" />
+                            )}
+                          </button>
                         </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="no-change">
-                          No change (keep {user.employeeType})
-                        </SelectItem>
-                        {EMPLOYEE_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.employeeType && (
-                      <p className="text-sm text-destructive">{errors.employeeType.message}</p>
-                    )}
-                  </div>
-
-                  {/* New Employment Status */}
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-status" className="text-foreground">
-                      New Employment Status
-                    </Label>
-                    <Select
-                      value={watch('employmentStatus') || 'no-change'}
-                      onValueChange={(value) =>
-                        setValue(
-                          'employmentStatus',
-                          value as '' | 'regular' | 'no-change' | 'probational' | undefined
-                        )
-                      }
-                      disabled={isPending}
-                    >
-                      <SelectTrigger
-                        id="edit-status"
-                        className="border-border bg-white focus:border-accent focus:ring-accent"
-                      >
-                        <div className="flex items-center gap-2">
-                          <BadgeCheck className="h-4 w-4 text-accent" />
-                          <SelectValue
-                            placeholder={`Current: ${(user as any).employmentStatus || 'Not set'}`}
+                        <div className="relative">
+                          <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
+                          <Input
+                            id="edit-name"
+                            placeholder={`Current: ${user.name}`}
+                            className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
+                            disabled={isPending || !activeFields.name}
+                            {...register('name')}
                           />
                         </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="no-change">
-                          No change (keep {(user as any).employmentStatus || 'current'})
-                        </SelectItem>
-                        {EMPLOYMENT_STATUS_OPTIONS.map((status) => (
-                          <SelectItem key={status.value} value={status.value}>
-                            {status.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.employmentStatus && (
-                      <p className="text-sm text-destructive">{errors.employmentStatus.message}</p>
-                    )}
-                  </div>
-                </div>
-                </AccordionContent>
-              </AccordionItem>
+                        {errors.name && (
+                          <p className="text-sm text-destructive">{errors.name.message}</p>
+                        )}
+                      </div>
 
-              {/* Address */}
-              <AccordionItem value="address" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
-                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
-                  Home Address (Optional)
-                </AccordionTrigger>
-                <AccordionContent>
-              <div className="space-y-2 pt-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="edit-address" className="text-foreground">
-                    New Address (10-250 characters)
-                  </Label>
-                  <button
-                    type="button"
-                    onClick={() => toggleField('address')}
-                    className={`p-1 rounded-md transition-colors ${
-                      activeFields.address
-                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    }`}
-                    title={activeFields.address ? 'Deactivate field' : 'Activate field'}
-                  >
-                    {activeFields.address ? <X className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
-                  </button>
-                </div>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-accent" />
-                  <Textarea
-                    id="edit-address"
-                    placeholder={`Current: ${(user as any).address || 'Not set'}`}
-                    className="pl-10 min-h-20 resize-none border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
-                    disabled={isPending || !activeFields.address}
-                    {...register('address')}
-                  />
-                </div>
-                {errors.address && (
-                  <p className="text-sm text-destructive">{errors.address.message}</p>
-                )}
-              </div>
-                </AccordionContent>
-              </AccordionItem>
+                      {/* New Password */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="edit-password" className="text-foreground">
+                            New Password (Optional)
+                          </Label>
+                          <button
+                            type="button"
+                            onClick={() => toggleField('password')}
+                            className={`p-1 rounded-md transition-colors ${
+                              activeFields.password
+                                ? 'bg-accent text-white hover:bg-accent/90'
+                                : 'bg-background text-muted-foreground hover:bg-background/80'
+                            }`}
+                            title={activeFields.password ? 'Deactivate field' : 'Activate field'}
+                          >
+                            {activeFields.password ? (
+                              <X className="h-3 w-3" />
+                            ) : (
+                              <Pencil className="h-3 w-3" />
+                            )}
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
+                          <Input
+                            id="edit-password"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Leave blank to keep current (min 6 chars)"
+                            className="pl-10 pr-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
+                            disabled={isPending || !activeFields.password}
+                            {...register('password')}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-foreground transition-colors"
+                            disabled={isPending || !activeFields.password}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+                        {errors.password && (
+                          <p className="text-sm text-destructive">{errors.password.message}</p>
+                        )}
+                      </div>
 
-              {/* Government IDs */}
-              <AccordionItem value="ids" className="border border-[#f47812]/15 rounded-lg px-4 bg-background">
-                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
-                  Government IDs (Optional)
-                </AccordionTrigger>
-                <AccordionContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-                  {/* TIN */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="edit-tin" className="text-foreground">
-                        New TIN
-                      </Label>
-                      <button
-                        type="button"
-                        onClick={() => toggleField('tin')}
-                        className={`p-1 rounded-md transition-colors ${
-                          activeFields.tin
-                            ? 'bg-accent text-white hover:bg-accent/90'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                        title={activeFields.tin ? 'Deactivate field' : 'Activate field'}
-                      >
-                        {activeFields.tin ? <X className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
-                      </button>
+                      {/* New Contact Number */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="edit-contact" className="text-foreground">
+                            New Contact Number
+                          </Label>
+                          <button
+                            type="button"
+                            onClick={() => toggleField('contactNumber')}
+                            className={`p-1 rounded-md transition-colors ${
+                              activeFields.contactNumber
+                                ? 'bg-accent text-white hover:bg-accent/90'
+                                : 'bg-background text-muted-foreground hover:bg-background/80'
+                            }`}
+                            title={
+                              activeFields.contactNumber ? 'Deactivate field' : 'Activate field'
+                            }
+                          >
+                            {activeFields.contactNumber ? (
+                              <X className="h-3 w-3" />
+                            ) : (
+                              <Pencil className="h-3 w-3" />
+                            )}
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
+                          <Input
+                            id="edit-contact"
+                            placeholder={`Current: ${(user as any).contactNumber || 'Not set'}`}
+                            className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
+                            disabled={isPending || !activeFields.contactNumber}
+                            {...register('contactNumber')}
+                          />
+                        </div>
+                        {errors.contactNumber && (
+                          <p className="text-sm text-destructive">{errors.contactNumber.message}</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="relative">
-                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
-                      <Input
-                        id="edit-tin"
-                        placeholder={`Current: ${(user as any).tin || 'Not set'}`}
-                        className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
-                        disabled={isPending || !activeFields.tin}
-                        onInput={(e) => {
-                          const target = e.target as HTMLInputElement;
-                          target.value = target.value.replace(/\D/g, '');
-                        }}
-                        {...register('tin')}
-                      />
-                    </div>
-                    {errors.tin && <p className="text-sm text-destructive">{errors.tin.message}</p>}
-                  </div>
+                  </AccordionContent>
+                </AccordionItem>
 
-                  {/* SSS */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="edit-sss" className="text-foreground">
-                        New SSS
-                      </Label>
-                      <button
-                        type="button"
-                        onClick={() => toggleField('sss')}
-                        className={`p-1 rounded-md transition-colors ${
-                          activeFields.sss
-                            ? 'bg-accent text-white hover:bg-accent/90'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                        title={activeFields.sss ? 'Deactivate field' : 'Activate field'}
-                      >
-                        {activeFields.sss ? <X className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
-                      <Input
-                        id="edit-sss"
-                        placeholder={`Current: ${(user as any).sss || 'Not set'}`}
-                        className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
-                        disabled={isPending || !activeFields.sss}
-                        onInput={(e) => {
-                          const target = e.target as HTMLInputElement;
-                          target.value = target.value.replace(/\D/g, '');
-                        }}
-                        {...register('sss')}
-                      />
-                    </div>
-                    {errors.sss && <p className="text-sm text-destructive">{errors.sss.message}</p>}
-                  </div>
+                {/* Employment Details */}
+                <AccordionItem
+                  value="employment"
+                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                >
+                  <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
+                    Employment Details (Optional)
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                      {/* New Role */}
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-type" className="text-foreground">
+                          New Role
+                        </Label>
+                        <Select
+                          value={selectedType || 'no-change'}
+                          onValueChange={(value) =>
+                            setValue('employeeType', value as EmployeeTypeValue | 'no-change')
+                          }
+                          disabled={isPending}
+                        >
+                          <SelectTrigger
+                            id="edit-type"
+                            className="border-border bg-white focus:border-accent focus:ring-accent"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Briefcase className="h-4 w-4 text-accent" />
+                              <SelectValue placeholder={`Current: ${user.employeeType}`} />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="no-change">
+                              No change (keep {user.employeeType})
+                            </SelectItem>
+                            {EMPLOYEE_TYPES.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.employeeType && (
+                          <p className="text-sm text-destructive">{errors.employeeType.message}</p>
+                        )}
+                      </div>
 
-                  {/* Pag-IBIG */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="edit-pagibig" className="text-foreground">
-                        New Pag-IBIG
-                      </Label>
-                      <button
-                        type="button"
-                        onClick={() => toggleField('pagibig')}
-                        className={`p-1 rounded-md transition-colors ${
-                          activeFields.pagibig
-                            ? 'bg-accent text-white hover:bg-accent/90'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                        title={activeFields.pagibig ? 'Deactivate field' : 'Activate field'}
-                      >
-                        {activeFields.pagibig ? <X className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
-                      </button>
+                      {/* New Employment Status */}
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-status" className="text-foreground">
+                          New Employment Status
+                        </Label>
+                        <Select
+                          value={watch('employmentStatus') || 'no-change'}
+                          onValueChange={(value) =>
+                            setValue(
+                              'employmentStatus',
+                              value as '' | 'regular' | 'no-change' | 'probational' | undefined
+                            )
+                          }
+                          disabled={isPending}
+                        >
+                          <SelectTrigger
+                            id="edit-status"
+                            className="border-border bg-white focus:border-accent focus:ring-accent"
+                          >
+                            <div className="flex items-center gap-2">
+                              <BadgeCheck className="h-4 w-4 text-accent" />
+                              <SelectValue
+                                placeholder={`Current: ${(user as any).employmentStatus || 'Not set'}`}
+                              />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="no-change">
+                              No change (keep {(user as any).employmentStatus || 'current'})
+                            </SelectItem>
+                            {EMPLOYMENT_STATUS_OPTIONS.map((status) => (
+                              <SelectItem key={status.value} value={status.value}>
+                                {status.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.employmentStatus && (
+                          <p className="text-sm text-destructive">
+                            {errors.employmentStatus.message}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="relative">
-                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
-                      <Input
-                        id="edit-pagibig"
-                        placeholder={`Current: ${(user as any).pagibig || 'Not set'}`}
-                        className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
-                        disabled={isPending || !activeFields.pagibig}
-                        onInput={(e) => {
-                          const target = e.target as HTMLInputElement;
-                          target.value = target.value.replace(/\D/g, '');
-                        }}
-                        {...register('pagibig')}
-                      />
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Address */}
+                <AccordionItem
+                  value="address"
+                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                >
+                  <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
+                    Home Address (Optional)
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2 pt-4">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="edit-address" className="text-foreground">
+                          New Address (10-250 characters)
+                        </Label>
+                        <button
+                          type="button"
+                          onClick={() => toggleField('address')}
+                          className={`p-1 rounded-md transition-colors ${
+                            activeFields.address
+                              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                              : 'bg-background text-muted-foreground hover:bg-background/80'
+                          }`}
+                          title={activeFields.address ? 'Deactivate field' : 'Activate field'}
+                        >
+                          {activeFields.address ? (
+                            <X className="h-3 w-3" />
+                          ) : (
+                            <Pencil className="h-3 w-3" />
+                          )}
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-3 h-4 w-4 text-accent" />
+                        <Textarea
+                          id="edit-address"
+                          placeholder={`Current: ${(user as any).address || 'Not set'}`}
+                          className="pl-10 min-h-20 resize-none border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
+                          disabled={isPending || !activeFields.address}
+                          {...register('address')}
+                        />
+                      </div>
+                      {errors.address && (
+                        <p className="text-sm text-destructive">{errors.address.message}</p>
+                      )}
                     </div>
-                    {errors.pagibig && (
-                      <p className="text-sm text-destructive">{errors.pagibig.message}</p>
-                    )}
-                  </div>
-                </div>
-                </AccordionContent>
-              </AccordionItem>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Government IDs */}
+                <AccordionItem
+                  value="ids"
+                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                >
+                  <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
+                    Government IDs (Optional)
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                      {/* TIN */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="edit-tin" className="text-foreground">
+                            New TIN
+                          </Label>
+                          <button
+                            type="button"
+                            onClick={() => toggleField('tin')}
+                            className={`p-1 rounded-md transition-colors ${
+                              activeFields.tin
+                                ? 'bg-accent text-white hover:bg-accent/90'
+                                : 'bg-background text-muted-foreground hover:bg-background/80'
+                            }`}
+                            title={activeFields.tin ? 'Deactivate field' : 'Activate field'}
+                          >
+                            {activeFields.tin ? (
+                              <X className="h-3 w-3" />
+                            ) : (
+                              <Pencil className="h-3 w-3" />
+                            )}
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
+                          <Input
+                            id="edit-tin"
+                            placeholder={`Current: ${(user as any).tin || 'Not set'}`}
+                            className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
+                            disabled={isPending || !activeFields.tin}
+                            onInput={(e) => {
+                              const target = e.target as HTMLInputElement;
+                              target.value = target.value.replace(/\D/g, '');
+                            }}
+                            {...register('tin')}
+                          />
+                        </div>
+                        {errors.tin && (
+                          <p className="text-sm text-destructive">{errors.tin.message}</p>
+                        )}
+                      </div>
+
+                      {/* SSS */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="edit-sss" className="text-foreground">
+                            New SSS
+                          </Label>
+                          <button
+                            type="button"
+                            onClick={() => toggleField('sss')}
+                            className={`p-1 rounded-md transition-colors ${
+                              activeFields.sss
+                                ? 'bg-accent text-white hover:bg-accent/90'
+                                : 'bg-background text-muted-foreground hover:bg-background/80'
+                            }`}
+                            title={activeFields.sss ? 'Deactivate field' : 'Activate field'}
+                          >
+                            {activeFields.sss ? (
+                              <X className="h-3 w-3" />
+                            ) : (
+                              <Pencil className="h-3 w-3" />
+                            )}
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
+                          <Input
+                            id="edit-sss"
+                            placeholder={`Current: ${(user as any).sss || 'Not set'}`}
+                            className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
+                            disabled={isPending || !activeFields.sss}
+                            onInput={(e) => {
+                              const target = e.target as HTMLInputElement;
+                              target.value = target.value.replace(/\D/g, '');
+                            }}
+                            {...register('sss')}
+                          />
+                        </div>
+                        {errors.sss && (
+                          <p className="text-sm text-destructive">{errors.sss.message}</p>
+                        )}
+                      </div>
+
+                      {/* Pag-IBIG */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="edit-pagibig" className="text-foreground">
+                            New Pag-IBIG
+                          </Label>
+                          <button
+                            type="button"
+                            onClick={() => toggleField('pagibig')}
+                            className={`p-1 rounded-md transition-colors ${
+                              activeFields.pagibig
+                                ? 'bg-accent text-white hover:bg-accent/90'
+                                : 'bg-background text-muted-foreground hover:bg-background/80'
+                            }`}
+                            title={activeFields.pagibig ? 'Deactivate field' : 'Activate field'}
+                          >
+                            {activeFields.pagibig ? (
+                              <X className="h-3 w-3" />
+                            ) : (
+                              <Pencil className="h-3 w-3" />
+                            )}
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
+                          <Input
+                            id="edit-pagibig"
+                            placeholder={`Current: ${(user as any).pagibig || 'Not set'}`}
+                            className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
+                            disabled={isPending || !activeFields.pagibig}
+                            onInput={(e) => {
+                              const target = e.target as HTMLInputElement;
+                              target.value = target.value.replace(/\D/g, '');
+                            }}
+                            {...register('pagibig')}
+                          />
+                        </div>
+                        {errors.pagibig && (
+                          <p className="text-sm text-destructive">{errors.pagibig.message}</p>
+                        )}
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
               </Accordion>
             </form>
           </div>

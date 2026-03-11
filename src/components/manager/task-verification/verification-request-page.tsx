@@ -244,8 +244,8 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
     <div className="px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6 bg-zinc-100 min-h-screen flex flex-col">
       {showInitialSkeleton ? (
         <div className="space-y-2">
-          <Skeleton className="h-8 w-64 bg-muted" />
-          <Skeleton className="h-4 w-80 bg-muted" />
+          <Skeleton className="h-8 w-64 bg-background" />
+          <Skeleton className="h-4 w-80 bg-background" />
         </div>
       ) : (
         <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
@@ -256,11 +256,11 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
         {showInitialSkeleton ? (
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-3 sm:mt-4 sm:justify-end">
             <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
-              <Skeleton className="h-9 w-full bg-muted rounded-full" />
+              <Skeleton className="h-9 w-full bg-background rounded-full" />
             </div>
             <div className="flex gap-2 shrink-0">
-              <Skeleton className="h-9 w-24 bg-muted rounded-lg" />
-              <Skeleton className="h-9 w-32 bg-muted rounded-lg" />
+              <Skeleton className="h-9 w-24 bg-background rounded-lg" />
+              <Skeleton className="h-9 w-32 bg-background rounded-lg" />
             </div>
           </div>
         ) : (

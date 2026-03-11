@@ -48,7 +48,7 @@ export async function handleFetchCurrentAssignedTasksPaginated(
  */
 export async function handleFetchCurrentAssignedEmployeesPaginated(
   page: number = 1,
-  pageSize: number = 7,
+  pageSize: number = 10,
   sortBy: string = 'recently added',
   searchTerm: string = ''
 ): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number }> {

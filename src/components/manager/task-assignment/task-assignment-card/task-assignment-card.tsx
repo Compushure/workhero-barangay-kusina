@@ -166,7 +166,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
   }
 
   return (
-    <div className="rounded-3xl bg-background p-3 sm:p-4 md:px-7 py-5 shadow-sm/25">
+    <div className="rounded-3xl bg-background-soft p-3 sm:p-4 md:px-7 py-5 shadow-sm/25">
       <h2 className="mb-4 sm:mb-5 text-base sm:text-lg font-semibold text-[#131C2A]">
         Assign Employees for Task
       </h2>

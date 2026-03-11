@@ -8,25 +8,25 @@ export function BadgeAssignmentUsersSkeleton() {
         >
           {/* Avatar skeleton */}
           <div className="flex items-center gap-3 mb-3">
-            <div className="size-12 rounded-full bg-muted" />
+            <div className="size-12 rounded-full bg-background" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-muted rounded w-3/4" />
-              <div className="h-3 bg-muted rounded w-1/2" />
+              <div className="h-4 bg-background rounded w-3/4" />
+              <div className="h-3 bg-background rounded w-1/2" />
             </div>
           </div>
-          
+
           {/* Badges skeleton */}
           <div className="space-y-2">
-            <div className="h-3 bg-muted rounded w-1/3" />
+            <div className="h-3 bg-background rounded w-1/3" />
             <div className="flex flex-wrap gap-1">
-              <div className="h-6 w-16 bg-muted rounded-full" />
-              <div className="h-6 w-20 bg-muted rounded-full" />
-              <div className="h-6 w-14 bg-muted rounded-full" />
+              <div className="h-6 w-16 bg-background rounded-full" />
+              <div className="h-6 w-20 bg-background rounded-full" />
+              <div className="h-6 w-14 bg-background rounded-full" />
             </div>
           </div>
-          
+
           {/* Button skeleton */}
-          <div className="mt-4 h-9 bg-muted rounded-full" />
+          <div className="mt-4 h-9 bg-background rounded-full" />
         </div>
       ))}
     </div>
@@ -43,17 +43,17 @@ export function BadgeAssignmentQuickSkeleton() {
         >
           {/* Badge icon skeleton */}
           <div className="flex justify-center mb-3">
-            <div className="size-16 rounded-full bg-muted" />
+            <div className="size-16 rounded-full bg-background" />
           </div>
-          
+
           {/* Badge name */}
           <div className="space-y-2 mb-4">
-            <div className="h-4 bg-muted rounded w-full" />
-            <div className="h-3 bg-muted rounded w-3/4 mx-auto" />
+            <div className="h-4 bg-background rounded w-full" />
+            <div className="h-3 bg-background rounded w-3/4 mx-auto" />
           </div>
-          
+
           {/* Button skeleton */}
-          <div className="h-9 bg-muted rounded-full" />
+          <div className="h-9 bg-background rounded-full" />
         </div>
       ))}
     </div>

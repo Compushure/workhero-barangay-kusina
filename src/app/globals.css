@@ -7,8 +7,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #fcf6e3; /* Soft pastel yellow */
-  --background-soft: #fffdf5;
+  --background: #eceef0; /* Soft pastel yellow */
+  --background-soft: #f3f4f6;
   --foreground: #131c2a;
   --card: #fafafa;
   --card-foreground: #131c2a;

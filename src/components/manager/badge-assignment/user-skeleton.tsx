@@ -5,27 +5,27 @@ export function UserSkeleton() {
     <div className="bg-backgorund-soft rounded-xl border border-border p-5 space-y-4">
       {/* Avatar skeleton */}
       <div className="flex justify-center">
-        <Skeleton className="w-16 h-16 rounded-full bg-muted" />
+        <Skeleton className="w-16 h-16 rounded-full bg-background" />
       </div>
 
       {/* Name skeleton */}
-      <Skeleton className="h-5 w-3/4 mx-auto bg-muted" />
+      <Skeleton className="h-5 w-3/4 mx-auto bg-background" />
 
       {/* Email skeleton */}
-      <Skeleton className="h-4 w-2/3 mx-auto bg-muted" />
+      <Skeleton className="h-4 w-2/3 mx-auto bg-background" />
 
       {/* Badges section */}
       <div className="space-y-2">
-        <Skeleton className="h-4 w-20 bg-muted" />
+        <Skeleton className="h-4 w-20 bg-background" />
         <div className="flex gap-2 flex-wrap justify-center">
           {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="w-10 h-10 rounded-lg bg-muted" />
+            <Skeleton key={i} className="w-10 h-10 rounded-lg bg-background" />
           ))}
         </div>
       </div>
 
       {/* Button skeleton */}
-      <Skeleton className="h-9 w-full rounded-lg bg-muted" />
+      <Skeleton className="h-9 w-full rounded-lg bg-background" />
     </div>
   );
 }

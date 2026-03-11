@@ -71,7 +71,7 @@ export default function TaskViewEmployeeBadges({
         {uniqueDisplayedEmployees.map((emp) => (
           <div
             key={emp.id}
-            className="flex items-center gap-1 bg-background-soft px-1.5 py-1 rounded-full border-2 border-accent/25 min-w-0 w-full sm:w-auto max-w-full sm:max-w-72 lg:max-w-80 2xl:max-w-96"
+            className="flex items-center gap-1 bg-card px-1.5 py-1 rounded-full border-2 border-accent/25 min-w-0 w-full sm:w-auto max-w-full sm:max-w-72 lg:max-w-80 2xl:max-w-96"
           >
             {emp.status === 'in review' ? (
               <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400" />
@@ -83,7 +83,7 @@ export default function TaskViewEmployeeBadges({
               <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" />
             )}
 
-            <span className="text-xs bg-muted text-amber-700 px-1 py-2 leading-0 rounded-full">
+            <span className="text-xs bg-background text-amber-700 px-1 py-2 leading-0 rounded-full">
               {emp.completedOrders}
             </span>
 

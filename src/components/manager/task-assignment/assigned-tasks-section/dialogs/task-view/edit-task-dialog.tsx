@@ -198,7 +198,7 @@ export default function EditTaskDialog({
                         isDisabled
                           ? 'brightness-75 opacity-50 cursor-not-allowed'
                           : isSelected
-                            ? 'bg-accent-secondary/25'
+                            ? 'bg-accent-secondary/25  border-b border-accent/50'
                             : 'bg-card hover:brightness-96 hover:bg-accent-secondary/25 cursor-pointer transition-all duration-300 ease-in-out border-b border-accent/25'
                       }`}
                       onClick={() => !isDisabled && toggleEmployee(emp.id)}

@@ -55,30 +55,30 @@ export function RequestsTable({
   return (
     <div className="overflow-x-auto rounded-lg border border-accent/50 shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <Table>
-        <TableHeader className="">
-          <TableRow className="bg-muted hover:bg-muted">
-            <TableHead className="text-primary/75 px-2 sm:px-3 w-24 sm:w-40 text-[10px] sm:text-xs">
+        <TableHeader className="bg-primary-gradient">
+          <TableRow className="bg-primary-gradient">
+            <TableHead className="text-card px-2 sm:px-3 w-24 sm:w-40 text-[10px] sm:text-xs">
               REQUEST DATE
             </TableHead>
-            <TableHead className="text-primary/75 px-2 sm:px-3 w-28 sm:w-44 text-[10px] sm:text-xs">
+            <TableHead className="text-card px-2 sm:px-3 w-28 sm:w-44 text-[10px] sm:text-xs">
               EMPLOYEE
             </TableHead>
-            <TableHead className="text-primary/75 px-2 sm:px-3 w-32 sm:w-56 text-[10px] sm:text-xs">
+            <TableHead className="text-card px-2 sm:px-3 w-32 sm:w-56 text-[10px] sm:text-xs">
               TASK
             </TableHead>
-            <TableHead className="text-primary/75 text-center px-2 sm:px-3 w-20 sm:w-28 text-[10px] sm:text-xs hidden md:table-cell">
+            <TableHead className="text-card text-center px-2 sm:px-3 w-20 sm:w-28 text-[10px] sm:text-xs hidden md:table-cell">
               COMPLETED
             </TableHead>
-            <TableHead className="text-primary/75 text-center px-2 sm:px-3 w-14 sm:w-14 text-[10px] sm:text-xs hidden lg:table-cell">
+            <TableHead className="text-card text-center px-2 sm:px-3 w-14 sm:w-14 text-[10px] sm:text-xs hidden lg:table-cell">
               POINTS
             </TableHead>
-            <TableHead className="text-primary/75 text-center px-2 sm:px-3 w-14 sm:w-14 text-[10px] sm:text-xs hidden lg:table-cell">
+            <TableHead className="text-card text-center px-2 sm:px-3 w-14 sm:w-14 text-[10px] sm:text-xs hidden lg:table-cell">
               XP
             </TableHead>
-            <TableHead className="text-primary/75 text-center px-2 sm:px-3 w-12 sm:w-16 text-[10px] sm:text-xs">
+            <TableHead className="text-card text-center px-2 sm:px-3 w-12 sm:w-16 text-[10px] sm:text-xs">
               REMARK
             </TableHead>
-            <TableHead className="text-primary/75 text-center px-2 sm:px-3 w-24 sm:w-28 text-[10px] sm:text-xs sticky right-0 bg-muted">
+            <TableHead className="text-card text-center px-2 sm:px-3 w-24 sm:w-28 text-[10px] sm:text-xs sticky right-0">
               ACTION
             </TableHead>
           </TableRow>
@@ -93,7 +93,7 @@ export function RequestsTable({
             return (
               <TableRow
                 key={request.kpitask_id}
-                className="bg-background-soft hover:bg-row-hover transition-all duration-400 ease-in-out"
+                className="bg-card hover:bg-row-hover transition-all duration-400 ease-in-out"
               >
                 <TableCell className="text-[10px] sm:text-xs font-medium px-2 sm:px-3 w-24 sm:w-40">
                   {formatDate(request.kpitask_completed_at || request.kpitask_created_at)}
@@ -219,7 +219,7 @@ export function RequestsTable({
 
       {/* Empty State */}
       {requests.length === 0 && (
-        <div className="text-center bg-background-soft py-8 text-secondary">
+        <div className="text-center bg-card py-8 text-secondary">
           <p className="text-xs">No requests found</p>
         </div>
       )}

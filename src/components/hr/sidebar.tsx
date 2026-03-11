@@ -1,6 +1,13 @@
 'use client';
 
-import { ChevronLeft, LayoutDashboard, ShoppingCart, Trophy, UserCircle2, type LucideIcon } from 'lucide-react';
+import {
+  ChevronLeft,
+  LayoutDashboard,
+  ShoppingCart,
+  Trophy,
+  UserCircle2,
+  type LucideIcon,
+} from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -61,8 +68,8 @@ function SidebarUserProfile({
         <div className="min-w-0 px-2">
           {isProfileLoading ? (
             <>
-              <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-              <div className="h-3 w-28 bg-muted rounded mt-1 animate-pulse" />
+              <div className="h-4 w-20 bg-background rounded animate-pulse" />
+              <div className="h-3 w-28 bg-background rounded mt-1 animate-pulse" />
             </>
           ) : (
             <>
@@ -80,9 +87,7 @@ function SidebarUserProfile({
   );
 }
 
-export function Sidebar({
-  navItems = defaultNavItems,
-}: SidebarProps) {
+export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [hoveredNavKey, setHoveredNavKey] = useState<string | null>(null);
@@ -119,7 +124,7 @@ export function Sidebar({
   return (
     <>
       <aside
-        className={`hidden overflow-hidden bg-muted text-[#131C2A] transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between ${
+        className={`hidden overflow-hidden bg-background text-[#131C2A] transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between ${
           isCollapsed ? 'w-20' : 'w-60 lg:w-64'
         }`}
       >
@@ -319,10 +324,10 @@ export function Sidebar({
       </nav>
 
       {/* Profile Modal */}
-      <ProfileModal 
-        open={showProfileModal} 
-        onOpenChange={setShowProfileModal} 
-        user={user ?? null} 
+      <ProfileModal
+        open={showProfileModal}
+        onOpenChange={setShowProfileModal}
+        user={user ?? null}
       />
     </>
   );

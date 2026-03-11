@@ -25,9 +25,9 @@ function AssignEmployeesTable({
   return (
     <div className="rounded-2xl border border-accent/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full table-fixed">
-        <thead className="bg-muted text-primary/75 border-b border-accent/50 sticky top-0 z-10">
-          <tr>
-            <th className="w-[12%] p-1.5 text-center align-middle">
+        <thead className="bg-primary-gradient text-primary/75 border-b border-accent/50 sticky top-0 z-10">
+          <tr className='text-card'>
+            <th className="w-[10%] p-1.5 text-center align-middle">
               <input
                 type="checkbox"
                 checked={allFilteredSelected}
@@ -44,7 +44,7 @@ function AssignEmployeesTable({
                 }}
               />
             </th>
-            <th className="w-[58%] px-1.5 text-left font-bold text-xs">NAME</th>
+            <th className="w-[60%] px-1.5 text-left font-bold text-xs">NAME</th>
             <th className="w-[30%] px-1.5 text-left font-bold text-xs">ID NO.</th>
           </tr>
         </thead>
@@ -52,14 +52,14 @@ function AssignEmployeesTable({
           <tbody>
             {[...Array(4)].map((_, i) => (
               <tr key={i} className="border-b border-accent/25">
-                <td className="w-[12%] p-3 text-center">
-                  <Skeleton className="h-4 w-4 mx-auto bg-muted rounded" />
+                <td className="w-[10%] p-3 text-center">
+                  <Skeleton className="h-4 w-4 mx-auto bg-background rounded" />
                 </td>
-                <td className="w-[58%] px-1.5 py-2">
-                  <Skeleton className="h-5 w-3/4 bg-muted" />
+                <td className="w-[60%] px-1.5 py-2">
+                  <Skeleton className="h-5 w-3/4 bg-background" />
                 </td>
                 <td className="w-[30%] px-1.5 py-2">
-                  <Skeleton className="h-5 w-1/2 bg-muted" />
+                  <Skeleton className="h-5 w-1/2 bg-background" />
                 </td>
               </tr>
             ))}

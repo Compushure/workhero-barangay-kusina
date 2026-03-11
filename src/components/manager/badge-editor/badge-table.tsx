@@ -100,19 +100,19 @@ export default function BadgeTable({
           <TableHeader>
             <TableRow className="bg-background border-b border-border hover:bg-background">
               <TableHead className="min-w-48 sm:min-w-64 md:min-w-96 pl-4 sm:pl-6 py-3 sm:py-4">
-                <Skeleton className="h-4 w-20 bg-muted" />
+                <Skeleton className="h-4 w-20 bg-background" />
               </TableHead>
               <TableHead className="hidden md:table-cell min-w-20 max-w-20 w-20 text-center">
-                <Skeleton className="h-4 w-12 mx-auto bg-muted" />
+                <Skeleton className="h-4 w-12 mx-auto bg-background" />
               </TableHead>
               <TableHead className="hidden lg:table-cell min-w-32 max-w-32 w-32 text-center">
-                <Skeleton className="h-4 w-16 mx-auto bg-muted" />
+                <Skeleton className="h-4 w-16 mx-auto bg-background" />
               </TableHead>
               <TableHead className="hidden sm:table-cell min-w-20 sm:min-w-24 text-center">
-                <Skeleton className="h-4 w-16 mx-auto bg-muted" />
+                <Skeleton className="h-4 w-16 mx-auto bg-background" />
               </TableHead>
               <TableHead className="text-center px-2 sm:px-4 w-24 sm:w-30 sticky right-0 bg-background">
-                <Skeleton className="h-4 w-14 mx-auto bg-muted" />
+                <Skeleton className="h-4 w-14 mx-auto bg-background" />
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -129,20 +129,20 @@ export default function BadgeTable({
       <div className="bg-card rounded-2xl border-2 border-accent/25 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-sm/25">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted">
-              <TableHead className="min-w-48 sm:min-w-64 md:min-w-96 pl-3 sm:pl-4 py-2 sm:py-3 text-left text-2xs sm:text-xs font-bold text-primary/75">
+            <TableRow className="bg-primary-gradient">
+              <TableHead className="min-w-48 sm:min-w-64 md:min-w-96 pl-3 sm:pl-4 py-2 sm:py-3 text-left text-2xs sm:text-xs font-bold text-card">
                 BADGE
               </TableHead>
-              <TableHead className="hidden md:table-cell min-w-20 max-w-20 w-20 text-center text-2xs sm:text-xs font-bold text-primary/75">
+              <TableHead className="hidden md:table-cell min-w-20 max-w-20 w-20 text-center text-2xs sm:text-xs font-bold text-card">
                 POINTS
               </TableHead>
-              <TableHead className="hidden lg:table-cell min-w-32 max-w-32 w-32 text-center text-2xs sm:text-xs font-bold text-primary/75">
+              <TableHead className="hidden lg:table-cell min-w-32 max-w-32 w-32 text-center text-2xs sm:text-xs font-bold text-card">
                 INTERVAL
               </TableHead>
-              <TableHead className="hidden sm:table-cell min-w-20 sm:min-w-24 text-center text-2xs sm:text-xs font-bold text-primary/75">
+              <TableHead className="hidden sm:table-cell min-w-20 sm:min-w-24 text-center text-2xs sm:text-xs font-bold text-card">
                 CONDITIONS
               </TableHead>
-              <TableHead className="text-primary/75 text-center px-1.5 sm:px-3 w-20 sm:w-24 text-2xs sm:text-xs sticky right-0">
+              <TableHead className="text-card text-center px-1.5 sm:px-3 w-20 sm:w-24 text-2xs sm:text-xs sticky right-0">
                 ACTIONS
               </TableHead>
             </TableRow>
@@ -151,7 +151,7 @@ export default function BadgeTable({
             <>
               {badges.map((badge) => (
                 <React.Fragment key={badge.id}>
-                  <TableRow className="bg-background-soft hover:bg-row-hover transition-colors">
+                  <TableRow className="bg-card hover:bg-row-hover transition-colors">
                     <TableCell className="min-w-48 sm:min-w-64 md:min-w-96 pl-3 sm:pl-4 py-2 sm:py-3 align-middle">
                       <div className="flex items-start gap-1.5 sm:gap-2">
                         {/* Badge Icon */}

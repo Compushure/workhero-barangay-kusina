@@ -62,7 +62,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
         <div className="flex flex-col gap-4 py-2">
           {/* Image Preview */}
           <div className="flex justify-center">
-            <div className="h-28 w-28 sm:h-32 sm:w-32 bg-muted rounded-xl flex items-center justify-center overflow-hidden">
+            <div className="h-28 w-28 sm:h-32 sm:w-32 bg-background rounded-xl flex items-center justify-center overflow-hidden">
               {item.imageUrl && !imageError ? (
                 <img
                   src={item.imageUrl}

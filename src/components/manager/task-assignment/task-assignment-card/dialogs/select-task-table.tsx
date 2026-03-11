@@ -27,7 +27,7 @@ function SelectTasksTable({
   return (
     <div className="rounded-2xl border-2 border-accent-secondary/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full table-fixed">
-        <thead className="bg-muted text-primary/50 border-b border-accent-secondary/50 sticky top-0 z-10">
+        <thead className="bg-primary-gradient text-card border-b border-accent-secondary/50 sticky top-0 z-10">
           <tr className="text-xs font-semibold">
             <th className="w-[8%] sm:w-[5%] py-1.5"></th>
             <th className="w-[52%] sm:w-[35%] text-left pl-3 py-1.5">TASK</th>
@@ -42,16 +42,16 @@ function SelectTasksTable({
               <tr key={i} className="border-b border-accent/25">
                 <td className="w-[8%] sm:w-[5%] p-3"></td>
                 <td className="w-[52%] sm:w-[35%] px-3 py-2">
-                  <Skeleton className="h-6 w-full bg-muted" />
+                  <Skeleton className="h-6 w-full bg-background" />
                 </td>
                 <td className="hidden sm:table-cell w-[17%] py-3 text-center">
-                  <Skeleton className="h-5 w-10 mx-auto bg-muted" />
+                  <Skeleton className="h-5 w-10 mx-auto bg-background" />
                 </td>
                 <td className="hidden sm:table-cell w-[17%] py-3 text-center">
-                  <Skeleton className="h-5 w-10 mx-auto bg-muted" />
+                  <Skeleton className="h-5 w-10 mx-auto bg-background" />
                 </td>
                 <td className="w-[40%] sm:w-[26%] p-3 text-center">
-                  <Skeleton className="h-6 w-16 mx-auto bg-muted" />
+                  <Skeleton className="h-6 w-16 mx-auto bg-background" />
                 </td>
               </tr>
             ))}
@@ -72,7 +72,7 @@ function SelectTasksTable({
                       ? 'brightness-75 opacity-50 cursor-not-allowed'
                       : isSelected
                         ? 'bg-accent-secondary/25'
-                        : 'bg-background-soft hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
+                        : 'bg-card hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
                   } ${!isDisabled && 'cursor-pointer'}`}
                   onClick={(e) => {
                     if (isDisabled) return;
@@ -148,7 +148,7 @@ function SelectTasksTable({
                             updateMaxOrders(task.id, value);
                           }}
                           onClick={(e) => e.stopPropagation()}
-                          className="remove-arrow w-10 bg-background-soft text-center border border-accent-secondary/75 rounded px-1.5 py-0.5 text-xs"
+                          className="remove-arrow w-10 bg-background-soft text-center border border-accent-secondary/75 rounded px-1.5 py-1 text-xs"
                           min="1"
                           max="99"
                         />

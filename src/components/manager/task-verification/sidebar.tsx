@@ -46,7 +46,7 @@ function SidebarUserProfile({
   return (
     <div
       className={`flex w-full items-center rounded-2xl py-3 ${
-        isCollapsed ? 'justify-center' : 'bg-gray-200 pl-2'
+        isCollapsed ? 'justify-center' : 'bg-accent-secondary/25 pl-2'
       }`}
     >
       <ProfilePic user={user} disabled={disabled} isLoading={isProfileLoading} />
@@ -54,8 +54,8 @@ function SidebarUserProfile({
         <div className="min-w-0 px-2">
           {isProfileLoading ? (
             <>
-              <div className="h-4 w-20 animate-pulse rounded bg-muted" />
-              <div className="mt-1 h-3 w-28 animate-pulse rounded bg-muted" />
+              <div className="h-4 w-20 animate-pulse rounded bg-background" />
+              <div className="mt-1 h-3 w-28 animate-pulse rounded bg-background" />
             </>
           ) : user ? (
             <>
@@ -188,34 +188,34 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                 : 'overflow-y-auto px-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
             }`}
           >
-          {navItems.map((item) => {
-            const isActive = isNavLinkActive(item.href);
-            const isNavigatingItem = pendingHref === item.href;
-            const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
-            const Icon = item.icon;
+            {navItems.map((item) => {
+              const isActive = isNavLinkActive(item.href);
+              const isNavigatingItem = pendingHref === item.href;
+              const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
+              const Icon = item.icon;
 
-            const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-full px-3 py-2.5 text-sm font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
-              isCollapsed ? 'justify-center' : 'justify-start'
-            } ${
-              isActive
-                ? 'bg-primary-gradient text-zinc-50'
-                : 'bg-card text-[#131C2A] hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
-            } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`;
+              const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-full px-3 py-2.5 text-sm font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
+                isCollapsed ? 'justify-center' : 'justify-start'
+              } ${
+                isActive
+                  ? 'bg-primary-gradient text-zinc-50'
+                  : 'bg-card text-[#131C2A] hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
+              } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`;
 
-            const navLink = (
-              <Link
-                key={item.key}
-                href={item.href}
-                onClick={() => {
-                  if (pathname !== item.href) {
-                    setPendingHref(item.href);
-                    startNavigation();
-                  }
-                }}
-                aria-disabled={isDisabled}
-                className={navLinkClassName}
-              >
-                {isNavigatingItem ? (
+              const navLink = (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  onClick={() => {
+                    if (pathname !== item.href) {
+                      setPendingHref(item.href);
+                      startNavigation();
+                    }
+                  }}
+                  aria-disabled={isDisabled}
+                  className={navLinkClassName}
+                >
+                  {isNavigatingItem ? (
                     <NavigationDisplay
                       isNavigating={isNavigatingItem}
                       className="inline-flex items-center justify-center"
@@ -228,23 +228,27 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                       className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-accent'}`}
                     />
                   )}
-                {!isCollapsed && <span className="block whitespace-nowrap">{item.label}</span>}
-              </Link>
-            );
+                  {!isCollapsed && <span className="block whitespace-nowrap">{item.label}</span>}
+                </Link>
+              );
 
-            if (!isCollapsed) {
-              return navLink;
-            }
+              if (!isCollapsed) {
+                return navLink;
+              }
 
-            return (
-              <Tooltip key={item.key}>
-                <TooltipTrigger asChild>{navLink}</TooltipTrigger>
-                <TooltipContent side="right" align="center" className="border border-accent/25 bg-card text-foreground shadow-sm/25">
-                  {item.label}
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
+              return (
+                <Tooltip key={item.key}>
+                  <TooltipTrigger asChild>{navLink}</TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    align="center"
+                    className="border border-accent/25 bg-card text-foreground shadow-sm/25"
+                  >
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
           </nav>
         </TooltipProvider>
 
@@ -261,14 +265,64 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
         </div>
       </aside>
 
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-background/95 backdrop-blur supports-backdrop-filter:bg-gray-50 md:hidden">
+        <div className="px-2 py-2">
+          <div className="grid grid-cols-6 gap-1">
+            {navItems.map((item) => {
+              const isActive = isNavLinkActive(item.href);
+              const isNavigatingItem = pendingHref === item.href;
+              const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  onClick={() => {
+                    if (pathname !== item.href) {
+                      setPendingHref(item.href);
+                      startNavigation();
+                    }
+                  }}
+                  aria-disabled={isDisabled}
+                  className={`flex flex-col items-center justify-center rounded-xl py-1.5 transition-all duration-300 ${
+                    isActive ? 'bg-accent/20 text-[#f47812]' : 'text-[#131C2A]'
+                  } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`}
+                >
+                  {isNavigatingItem ? (
+                    <NavigationDisplay
+                      isNavigating={isNavigatingItem}
+                      className="inline-flex h-5 items-center justify-center"
+                      iconClassName="size-4 animate-spin text-primary"
+                    />
+                  ) : (
+                    <Icon className="size-4" strokeWidth={1.9} />
+                  )}
+                  <span className="mt-1 w-full truncate text-center text-[10px] leading-none">
+                    {item.label.split(' ')[0]}
+                  </span>
+                </Link>
+              );
+            })}
+
+            <button
+              onClick={handleProfileClick}
+              disabled={isLoggingOut}
+              className={`flex flex-col items-center justify-center rounded-xl px-1 py-1.5 text-[#131C2A] transition-all duration-300 hover:bg-accent/20 hover:text-[#f47812] ${isLoggingOut ? 'pointer-events-none opacity-50' : ''}`}
+            >
+              <UserCircle2 className="size-4" strokeWidth={1.9} />
+              <span className="mt-1 text-[10px] leading-none">Profile</span>
+            </button>
+          </div>
+        </div>
+      </nav>
 
       {/* Profile Modal */}
-      <ProfileModal 
-        open={showProfileModal} 
-        onOpenChange={setShowProfileModal} 
-        user={user ?? null} 
+      <ProfileModal
+        open={showProfileModal}
+        onOpenChange={setShowProfileModal}
+        user={user ?? null}
       />
     </>
   );
 }
-
