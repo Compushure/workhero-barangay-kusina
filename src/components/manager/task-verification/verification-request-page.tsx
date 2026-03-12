@@ -8,7 +8,7 @@ import { SearchBar } from '@/components/manager/task-verification/search-bar';
 import { SortButton } from '@/components/manager/task-verification/sort-button';
 import { RequestsTable } from '@/components/manager/task-verification/requests-table';
 import { RequestsTableSkeleton } from '@/components/manager/task-verification/requests-table-skeleton';
-import type { VerificationRequest, SortOption } from '@/types';
+import type { VerificationRequest, SortOption, PaginatedResponse } from '@/types';
 import { ConfirmationDialog } from '@/components/manager/task-verification/confirmation-modal';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,6 +27,7 @@ import {
   useRejectTask,
 } from '@/hooks/tanstack';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface VerificationRequestsPageProps {
   initialRequests: VerificationRequest[];
@@ -45,25 +46,55 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const [deniedPage, setDeniedPage] = useState(1);
   const isSubmittingRef = useRef(false);
 
+  // Keep last fetched page per category so UI does not flash/skeleton while searching
+  const [pendingCache, setPendingCache] = useState<PaginatedResponse<VerificationRequest> | null>(
+    null
+  );
+  const [approvedCache, setApprovedCache] = useState<PaginatedResponse<VerificationRequest> | null>(
+    null
+  );
+  const [deniedCache, setDeniedCache] = useState<PaginatedResponse<VerificationRequest> | null>(
+    null
+  );
+
+  // Debounce search to avoid refetching on every keystroke
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
   // Use paginated Tanstack Query hooks with separate pagination for each category
   const {
     data: pendingData,
     isLoading: isLoadingPending,
     isError: isPendingError,
-  } = useGetTasksToReviewPaginated(pendingPage);
+  } = useGetTasksToReviewPaginated(pendingPage, debouncedSearch, dateSortBy);
   const {
     data: approvedData,
     isLoading: isLoadingApproved,
     isError: isApprovedError,
-  } = useGetApprovedTasksPaginated(approvedPage);
+  } = useGetApprovedTasksPaginated(approvedPage, debouncedSearch, dateSortBy);
   const {
     data: deniedData,
     isLoading: isLoadingDenied,
     isError: isDeniedError,
-  } = useGetDeniedTasksPaginated(deniedPage);
+  } = useGetDeniedTasksPaginated(deniedPage, debouncedSearch, dateSortBy);
 
   const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
+
+  useEffect(() => {
+    if (pendingData) setPendingCache(pendingData);
+  }, [pendingData]);
+
+  useEffect(() => {
+    if (approvedData) setApprovedCache(approvedData);
+  }, [approvedData]);
+
+  useEffect(() => {
+    if (deniedData) setDeniedCache(deniedData);
+  }, [deniedData]);
+
+  const pendingDisplay = pendingData ?? pendingCache;
+  const approvedDisplay = approvedData ?? approvedCache;
+  const deniedDisplay = deniedData ?? deniedCache;
 
   useEffect(() => {
     if (isPendingError && isApprovedError && isDeniedError) {
@@ -77,29 +108,29 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const getCurrentTasks = useMemo(() => {
     switch (sortBy) {
       case 'pending':
-        return pendingData?.data ?? [];
+        return pendingDisplay?.data ?? [];
       case 'approved':
-        return approvedData?.data ?? [];
+        return approvedDisplay?.data ?? [];
       case 'denied':
-        return deniedData?.data ?? [];
+        return deniedDisplay?.data ?? [];
       default:
         return [];
     }
-  }, [sortBy, pendingData, approvedData, deniedData]);
+  }, [sortBy, pendingDisplay, approvedDisplay, deniedDisplay]);
 
   // Get total pages for current category - memoized to prevent unnecessary recalculations
   const getTotalPages = useMemo(() => {
     switch (sortBy) {
       case 'pending':
-        return pendingData?.totalPages ?? 1;
+        return pendingDisplay?.totalPages ?? 1;
       case 'approved':
-        return approvedData?.totalPages ?? 1;
+        return approvedDisplay?.totalPages ?? 1;
       case 'denied':
-        return deniedData?.totalPages ?? 1;
+        return deniedDisplay?.totalPages ?? 1;
       default:
         return 1;
     }
-  }, [sortBy, pendingData, approvedData, deniedData]);
+  }, [sortBy, pendingDisplay, approvedDisplay, deniedDisplay]);
 
   // Get current page based on sort category - memoized to prevent unnecessary recalculations
   const getCurrentPage = useMemo(() => {
@@ -134,14 +165,14 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const totalPages = getTotalPages;
   const currentPage = getCurrentPage;
   const isCurrentCategoryLoading =
-    (sortBy === 'pending' && isLoadingPending) ||
-    (sortBy === 'approved' && isLoadingApproved) ||
-    (sortBy === 'denied' && isLoadingDenied);
+    (sortBy === 'pending' && isLoadingPending && !pendingDisplay) ||
+    (sortBy === 'approved' && isLoadingApproved && !approvedDisplay) ||
+    (sortBy === 'denied' && isLoadingDenied && !deniedDisplay);
 
   // Filter and sort requests based on search term and date/employee sorting
   const filteredRequests = useMemo(() => {
     let filtered = currentTasks;
-    const normalizedSearch = normalizeSearchQuery(searchTerm);
+    const normalizedSearch = normalizeSearchQuery(debouncedSearch);
 
     // Apply search filter
     if (normalizedSearch) {
@@ -180,7 +211,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           return 0;
       }
     });
-  }, [currentTasks, searchTerm, dateSortBy]);
+  }, [currentTasks, debouncedSearch, dateSortBy]);
 
   const resetConfirmState = () => setConfirmAction({ type: null, id: null });
 

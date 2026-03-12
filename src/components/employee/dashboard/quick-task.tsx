@@ -1,7 +1,7 @@
 'use client';
 
 import { type ComponentProps, useMemo, useState } from 'react';
-import { AwardIcon, XIcon } from 'lucide-react';
+import { XIcon } from 'lucide-react';
 import TasksTable from './quick-task-table';
 import {
   Dialog,

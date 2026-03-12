@@ -8,9 +8,14 @@ import ProfileAndLevel from './profile-level';
 import DashboardRedirectButton from './kitchen-redirection';
 import { Card, CardContent } from '@/components/ui/card';
 import { useGetTodayAttendanceStatus } from '@/hooks/tanstack';
+import { AttendanceCardSkeleton } from './skeletons';
 
 export default function AttendanceDesign() {
-  const { data: status } = useGetTodayAttendanceStatus();
+  const {
+    data: status,
+    isLoading: statusLoading,
+    isFetching: statusFetching,
+  } = useGetTodayAttendanceStatus();
   const [dateLabel, setDateLabel] = useState('');
 
   useEffect(() => {
@@ -38,8 +43,10 @@ export default function AttendanceDesign() {
     hasTimedOut: status?.hasTimedOut ?? false,
   };
 
+  const isAttendanceLoading = statusLoading || statusFetching;
+
   return (
-    <div className="flex font-jersey tracking-widest min-h-screen items-center justify-center bg-cover bg-center pixelated relative">
+    <div className="flex flex-col font-jersey tracking-widest min-h-screen items-center bg-cover bg-center pixelated relative overflow-y-auto">
       {/* Background */}
       <div className="absolute inset-0 -z-10">
         <img
@@ -50,36 +57,43 @@ export default function AttendanceDesign() {
         <div className="absolute inset-0 bg-[#0e0d0c]/30"></div>
       </div>
 
-      {/* Top‑left: Profile + Level */}
-      <div className="absolute top-4 left-4 flex flex-row items-center gap-6">
-        <ProfileAndLevel />
-        <XPProgressAndPoints />
-      </div>
+      {/* Responsive top bar for widgets */}
+      <div className="sticky top-0 left-0 right-0 w-full px-2 sm:px-4 pt-2 z-20 pointer-events-none">
+        <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-4 p-1">
+          <div className="pointer-events-auto flex items-center gap-3 sm:gap-4 flex-nowrap overflow-x-auto">
+            <ProfileAndLevel />
+            <XPProgressAndPoints />
+          </div>
 
-      {/* Top‑right: Weekly / Rank (same wrapper as employee dashboard) */}
-      <div className="absolute top-4 right-4">
-        <Card className="bg-transparent shadow-none border-none">
-          <CardContent>
-            <RankWidget />
-          </CardContent>
-        </Card>
+          <div className="pointer-events-auto w-full sm:w-auto flex justify-end">
+            <Card className="bg-transparent shadow-none border-none w-full sm:w-auto p-0 gap-0">
+              <CardContent className="p-0">
+                <RankWidget />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
 
       {/* Center column: main card + dashboard button */}
-      <div className="flex flex-col items-center gap-4 mt-10">
+      <div className="flex flex-col items-center gap-4 mt-10 sm:mt-20 px-4 text-center w-full max-w-4xl pb-12">
         {/* Main card */}
-        <div className="relative flex bg-[#E8DBBF] border-3 border-[#47331F] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[6px_6px_0px_#000] shadow-[#47331F]/50 animate-fadeIn">
-          {/* Header */}
-          <h1 className="font-jersey text-3xl text-[#252525d8] text-center mb-1">
-            ⏰ Attendance Station
-          </h1>
-          <p className="font-jersey text-xl text-[#474747d8] text-center text-parchment-foreground/70">
-            {dateLabel || 'Loading time…'}
-          </p>
+        {isAttendanceLoading ? (
+          <AttendanceCardSkeleton />
+        ) : (
+          <div className="relative flex bg-[#E8DBBF] border-3 border-[#47331F] flex-col items-center parchment-card rounded-xl p-6 max-w-md w-full shadow-[6px_6px_0px_#000] shadow-[#47331F]/50 animate-fadeIn">
+            {/* Header */}
+            <h1 className="font-jersey text-3xl text-[#252525d8] text-center mb-1">
+              ⏰ Attendance Station
+            </h1>
+            <p className="font-jersey text-xl text-[#474747d8] text-center text-parchment-foreground/70">
+              {dateLabel || 'Loading time…'}
+            </p>
 
-          {/* Attendance controls */}
-          <AttendanceIcon config={{}} />
-        </div>
+            {/* Attendance controls */}
+            <AttendanceIcon config={{}} />
+          </div>
+        )}
 
         {/* Dashboard Redirect Button directly under the card */}
         <DashboardRedirectButton status={redirectStatus} />
