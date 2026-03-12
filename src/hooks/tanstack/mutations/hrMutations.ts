@@ -11,13 +11,148 @@ import {
 } from '@/action-handlers/hr/rewards';
 import { handleCreateRedemptionRequestAction } from '@/action-handlers/employee/redemptions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AddRewardInput, EditRewardInput, Reward } from '@/types';
+import { AddRewardInput, EditRewardInput, RedemptionRequest, Reward } from '@/types';
 import { rewardKeys } from '../queries/rewardQueries';
 import { redemptionKeys } from '../queries/redemptionQueries';
 
 interface RedemptionRequestParams {
   id: string;
   remarks?: string;
+}
+
+interface RedemptionOptimisticContext {
+  previousRedemptionLists: Array<[readonly unknown[], RedemptionRequest[] | undefined]>;
+  previousMyRequests: Array<[readonly unknown[], RedemptionRequest[] | undefined]>;
+  previousRewards: Array<[readonly unknown[], Reward[] | undefined]>;
+}
+
+function getStatusFromKey(key: readonly unknown[]): string | undefined {
+  const maybeStatusFilter = key[2];
+  if (
+    maybeStatusFilter &&
+    typeof maybeStatusFilter === 'object' &&
+    'status' in maybeStatusFilter
+  ) {
+    const status = (maybeStatusFilter as { status?: string }).status;
+    return status;
+  }
+  return undefined;
+}
+
+function shouldIncludeStatus(filterStatus: string | undefined, itemStatus: string): boolean {
+  return !filterStatus || filterStatus === 'all' || filterStatus === itemStatus;
+}
+
+function getMyStatusFromKey(key: readonly unknown[]): string | undefined {
+  const maybeStatusFilter = key[2];
+  if (
+    maybeStatusFilter &&
+    typeof maybeStatusFilter === 'object' &&
+    'status' in maybeStatusFilter
+  ) {
+    return (maybeStatusFilter as { status?: string }).status;
+  }
+  return undefined;
+}
+
+async function optimisticUpdateRedemptionStatus(
+  queryClient: ReturnType<typeof useQueryClient>,
+  params: RedemptionRequestParams,
+  nextStatus: 'approved' | 'rejected'
+): Promise<RedemptionOptimisticContext> {
+  await queryClient.cancelQueries({ queryKey: redemptionKeys.lists() });
+  await queryClient.cancelQueries({ queryKey: redemptionKeys.myRequests() });
+
+  const previousRedemptionLists = queryClient.getQueriesData<RedemptionRequest[]>({
+    queryKey: redemptionKeys.lists(),
+  });
+  const previousMyRequests = queryClient.getQueriesData<RedemptionRequest[]>({
+    queryKey: redemptionKeys.myRequests(),
+  });
+  const previousRewards = queryClient.getQueriesData<Reward[]>({
+    queryKey: rewardKeys.all,
+  });
+
+  const allKnownRequests = [
+    ...previousRedemptionLists.flatMap(([, data]) => data ?? []),
+    ...previousMyRequests.flatMap(([, data]) => data ?? []),
+  ];
+  const existingRequest = allKnownRequests.find((request) => request.id === params.id);
+
+  if (!existingRequest) {
+    return { previousRedemptionLists, previousMyRequests, previousRewards };
+  }
+
+  const remarks = params.remarks?.trim();
+  const updatedRequest: RedemptionRequest = {
+    ...existingRequest,
+    status: nextStatus,
+    remarks: remarks && remarks.length > 0 ? remarks : existingRequest.remarks,
+  };
+
+  for (const [queryKey, currentList] of previousRedemptionLists) {
+    if (!currentList) continue;
+
+    const statusFilter = getStatusFromKey(queryKey);
+    const listWithoutRequest = currentList.filter((request) => request.id !== params.id);
+    const shouldInclude = shouldIncludeStatus(statusFilter, nextStatus);
+
+    queryClient.setQueryData<RedemptionRequest[]>(
+      queryKey,
+      shouldInclude ? [updatedRequest, ...listWithoutRequest] : listWithoutRequest
+    );
+  }
+
+  for (const [queryKey, currentList] of previousMyRequests) {
+    if (!currentList) continue;
+
+    const statusFilter = getMyStatusFromKey(queryKey);
+    const listWithoutRequest = currentList.filter((request) => request.id !== params.id);
+    const shouldInclude = shouldIncludeStatus(statusFilter, nextStatus);
+
+    queryClient.setQueryData<RedemptionRequest[]>(
+      queryKey,
+      shouldInclude ? [updatedRequest, ...listWithoutRequest] : listWithoutRequest
+    );
+  }
+
+  if (nextStatus === 'approved') {
+    const deductedQuantity = existingRequest.quantity || 1;
+    queryClient.setQueriesData<Reward[]>({ queryKey: rewardKeys.all }, (currentRewards) => {
+      if (!currentRewards) return currentRewards;
+
+      return currentRewards.map((reward) => {
+        if (reward.id !== existingRequest.rewardId) return reward;
+        if (typeof reward.quantity !== 'number') return reward;
+
+        const nextQuantity = Math.max(0, reward.quantity - deductedQuantity);
+        return {
+          ...reward,
+          quantity: nextQuantity,
+          isOutOfStock: nextQuantity <= 0,
+        };
+      });
+    });
+  }
+
+  return { previousRedemptionLists, previousMyRequests, previousRewards };
+}
+
+function rollbackOptimisticRedemptionUpdate(
+  queryClient: ReturnType<typeof useQueryClient>,
+  context?: RedemptionOptimisticContext
+) {
+  if (!context) return;
+
+  for (const [queryKey, data] of context.previousRedemptionLists) {
+    queryClient.setQueryData(queryKey, data);
+  }
+  for (const [queryKey, data] of context.previousMyRequests) {
+    queryClient.setQueryData(queryKey, data);
+  }
+  for (const [queryKey, data] of context.previousRewards) {
+    queryClient.setQueryData(queryKey, data);
+  }
 }
 
 export function useDeclineRedemptionRequest() {
@@ -27,11 +162,16 @@ export function useDeclineRedemptionRequest() {
     mutationFn: async (params: RedemptionRequestParams): Promise<void> => {
       await handleDeclineRedemptionRequestAction(params);
     },
-    onSuccess: () => {
-      // Invalidate redemption queries to refetch the list
+    onMutate: async (params) => {
+      return await optimisticUpdateRedemptionStatus(queryClient, params, 'rejected');
+    },
+    onError: (_error, _params, context) => {
+      rollbackOptimisticRedemptionUpdate(queryClient, context);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
-      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
       queryClient.invalidateQueries({ queryKey: rewardKeys.all });
       queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
@@ -45,11 +185,16 @@ export function useAcceptRedemptionRequest() {
     mutationFn: async (params: RedemptionRequestParams): Promise<void> => {
       await handleAcceptRedemptionRequestAction(params);
     },
-    onSuccess: () => {
-      // Invalidate redemption queries to refetch the list
+    onMutate: async (params) => {
+      return await optimisticUpdateRedemptionStatus(queryClient, params, 'approved');
+    },
+    onError: (_error, _params, context) => {
+      rollbackOptimisticRedemptionUpdate(queryClient, context);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
-      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
       queryClient.invalidateQueries({ queryKey: rewardKeys.all });
       queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
