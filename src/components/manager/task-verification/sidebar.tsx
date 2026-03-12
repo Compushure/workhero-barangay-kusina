@@ -139,7 +139,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
         <div className="mt-6 px-3 py-7">
           <button
             onClick={() => setIsCollapsed((prev) => !prev)}
-            className={`group h-full w-full cursor-pointer rounded-sm p-1 transition-colors hover:bg-zinc-50 ${
+            className={`group h-full w-full cursor-pointer rounded-sm p-1 transition-colors ${
               isCollapsed ? 'flex items-center justify-center' : 'flex flex-col items-baseline'
             }`}
             aria-label="Toggle sidebar"

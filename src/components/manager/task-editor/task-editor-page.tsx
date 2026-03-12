@@ -194,7 +194,7 @@ export default function TaskEditorPage() {
                 <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by task name, type, or description"
+                  placeholder="Search assignable task"
                   value={searchTerm}
                   onChange={handleSearchChange}
                   className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"

@@ -179,7 +179,7 @@ export function SelectTasksDialog({
     <>
       <Button
         onClick={() => setOpen(true)}
-        className={`w-full sm:w-auto bg-zinc-50 shadow-sm/25 flex items-center justify-between cursor-pointer transition-all duration-400 ease-in-out hover:bg-accent/15 h-8 text-sm`}
+        className={`w-full sm:w-auto bg-zinc-50 shadow-sm/25 flex items-center justify-between cursor-pointer transition-all duration-400 ease-in-out hover:bg-accent/15 h-7 text-xs`}
       >
         <div className="flex items-center gap-2 min-w-0 sm:min-w-40 max-w-full sm:max-w-70 pr-1">
           <ListTodo size={14} className="text-accent" />

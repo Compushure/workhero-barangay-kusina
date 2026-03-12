@@ -167,7 +167,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
 
   return (
     <div className="rounded-3xl bg-background-soft p-3 sm:p-4 md:px-7 py-5 shadow-sm/25">
-      <h2 className="mb-4 sm:mb-5 text-base sm:text-lg font-semibold text-[#131C2A]">
+      <h2 className="mb-4 text-base sm:text-lg font-semibold text-[#131C2A]">
         Assign Employees for Task
       </h2>
 
@@ -197,13 +197,13 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
       </div>
 
       {showTaskWarning && (
-        <p className="text-red-600 text-xs mb-3 font-medium transition-all duration-500 ease-in-out">
+        <p className="text-red-600 text-xs my-2 font-medium transition-all duration-500 ease-in-out">
           Select a task first before assigning employees.
         </p>
       )}
 
       {/* Action Buttons */}
-      <div className="mt-3 flex flex-col md:flex-row gap-2 sm:justify-end">
+      <div className="mt-2 flex flex-col md:flex-row gap-2 sm:justify-end">
         <Button
           onClick={() => setShowAssignConfirm(true)}
           disabled={

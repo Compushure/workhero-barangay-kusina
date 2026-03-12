@@ -14,7 +14,7 @@ interface SearchBarProps {
 export function SearchBar({
   searchTerm,
   onSearchChange,
-  placeholder = 'Search by employee name or employee ID',
+  placeholder = 'Search by employee name or ID',
   width = 'w-full',
 }: SearchBarProps) {
   return (

@@ -211,8 +211,8 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
               type="text"
               placeholder={
                 viewMode === 'task'
-                  ? 'Search by task name, type, or assignee'
-                  : 'Search by employee name or employee ID'
+                  ? 'Search tasks'
+                  : 'Search employees'
               }
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
