@@ -14,15 +14,15 @@ export default function TaskTableSkeleton() {
             </div>
           </TableCell>
 
-          <TableCell className="text-center">
+          <TableCell className="hidden md:table-cell text-center">
             <Skeleton className="h-6 bg-gray-300 mx-auto w-12" />
           </TableCell>
 
-          <TableCell className="text-center">
+          <TableCell className="hidden md:table-cell text-center">
             <Skeleton className="h-6 bg-gray-300 mx-auto w-12" />
           </TableCell>
 
-          <TableCell className="text-center">
+          <TableCell className="hidden sm:table-cell text-center">
             <Skeleton className="h-6 bg-gray-300 mx-auto w-15" />
           </TableCell>
 

@@ -41,17 +41,17 @@ export default function UserCardsGrid({
         return (
           <div
             key={user.id}
-            className="bg-card rounded-xl border-t border-gray-300 p-3 hover:shadow-lg transition-shadow duration-300 shadow-sm/25"
+            className="bg-card rounded-xl border-t border-gray-300 p-3 sm:p-3 hover:shadow-lg transition-shadow duration-300 shadow-sm/25"
           >
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
               {/* Avatar and User Info */}
-              <div className="shrink-0 flex items-center gap-3 min-w-0 sm:min-w-48">
+              <div className="shrink-0 flex items-center gap-2 sm:gap-3 min-w-0 sm:min-w-48">
                 {/* Avatar */}
                 {user.profilePictureUrl && !brokenAvatars[user.id] ? (
                   <img
                     src={user.profilePictureUrl}
                     alt={user.name}
-                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-accent/25"
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-accent/25 shrink-0"
                     onError={() =>
                       setBrokenAvatars((prev) => ({
                         ...prev,
@@ -60,7 +60,7 @@ export default function UserCardsGrid({
                     }
                   />
                 ) : (
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary-gradient flex items-center justify-center text-white font-bold text-2xs sm:text-xs border-2 border-accent/25">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary-gradient flex items-center justify-center text-white font-bold text-2xs sm:text-xs border-2 border-accent/25 shrink-0">
                     {getInitials(user.name)}
                   </div>
                 )}
@@ -81,7 +81,7 @@ export default function UserCardsGrid({
                       return (
                         <div key={badgeId} className="group relative">
                           <div
-                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-accent/25 hover:border-accent transition-colors cursor-pointer"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-accent/25 hover:border-accent transition-colors cursor-pointer shrink-0"
                             title={badge?.name}
                           >
                             {badge?.img_link ? (
@@ -110,7 +110,7 @@ export default function UserCardsGrid({
                         onClick={() => onViewAllBadges(user)}
                         variant="outline"
                         size="sm"
-                        className="h-8 sm:h-10 px-1.5 sm:px-2 border-accent/25 text-primary bg-card hover:bg-accent/15 text-2xs font-medium shadow-sm/25"
+                        className="h-8 sm:h-10 px-1.5 sm:px-2 border-accent/25 text-primary bg-card hover:bg-accent/15 text-2xs font-medium shadow-sm/25 shrink-0"
                       >
                         +{remainingBadgesCount}
                       </Button>
