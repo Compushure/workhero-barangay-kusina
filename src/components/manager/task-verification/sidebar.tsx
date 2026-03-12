@@ -25,6 +25,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 interface NavItem {
   key: string;
   label: string;
+  mobileLabel: string;
   icon: LucideIcon;
   href: string;
 }
@@ -73,30 +74,35 @@ const defaultNavItems: NavItem[] = [
   {
     key: 'assignment',
     label: 'Task Assignment',
+    mobileLabel: 'Assign',
     icon: FileText,
     href: '/manager/dashboard/task-assignment',
   },
   {
     key: 'verification',
     label: 'Task Verification',
+    mobileLabel: 'Verify',
     icon: CheckCircle,
     href: '/manager/dashboard/task-verification',
   },
   {
     key: 'editor',
     label: 'Task Editor',
+    mobileLabel: 'Tasks',
     icon: SquarePen,
     href: '/manager/dashboard/task-editor',
   },
   {
     key: 'badge-assignment',
     label: 'Badge Assignment',
+    mobileLabel: 'Award',
     icon: Medal,
     href: '/manager/dashboard/badge-assignment',
   },
   {
     key: 'badge-editor',
     label: 'Badge Editor',
+    mobileLabel: 'Badges',
     icon: Award,
     href: '/manager/dashboard/badge-editor',
   },
@@ -266,55 +272,83 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
       </aside>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-background/95 backdrop-blur supports-backdrop-filter:bg-gray-50 md:hidden">
-        <div className="px-2 py-2">
-          <div className="grid grid-cols-6 gap-1">
-            {navItems.map((item) => {
-              const isActive = isNavLinkActive(item.href);
-              const isNavigatingItem = pendingHref === item.href;
-              const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
-              const Icon = item.icon;
+        <TooltipProvider>
+          <div className="px-2 py-2">
+            <div className="grid grid-cols-6 gap-1">
+              {navItems.map((item) => {
+                const isActive = isNavLinkActive(item.href);
+                const isNavigatingItem = pendingHref === item.href;
+                const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
+                const Icon = item.icon;
 
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  onClick={() => {
-                    if (pathname !== item.href) {
-                      setPendingHref(item.href);
-                      startNavigation();
-                    }
-                  }}
-                  aria-disabled={isDisabled}
-                  className={`flex flex-col items-center justify-center rounded-xl py-1.5 transition-all duration-300 ${
-                    isActive ? 'bg-accent/20 text-[#f47812]' : 'text-[#131C2A]'
-                  } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`}
+                const navButton = (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    onClick={() => {
+                      if (pathname !== item.href) {
+                        setPendingHref(item.href);
+                        startNavigation();
+                      }
+                    }}
+                    aria-disabled={isDisabled}
+                    className={`flex flex-col items-center justify-center rounded-xl py-2 pb-2.5 transition-all duration-300 ${
+                      isActive
+                        ? 'bg-primary-gradient text-card shadow-xs/25'
+                        : 'text-primary hover:bg-accent/20 hover:text-orange-500'
+                    } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`}
+                  >
+                    {isNavigatingItem ? (
+                      <NavigationDisplay
+                        isNavigating={isNavigatingItem}
+                        className="inline-flex h-5 items-center justify-center"
+                        iconClassName="size-4 animate-spin text-primary"
+                      />
+                    ) : (
+                      <Icon className="size-4" strokeWidth={1.9} />
+                    )}
+                    <span className="mt-1 w-full truncate text-center text-xs leading-tight">
+                      {item.mobileLabel}
+                    </span>
+                  </Link>
+                );
+
+                return (
+                  <Tooltip key={item.key}>
+                    <TooltipTrigger asChild>{navButton}</TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="center"
+                      className="border border-accent/25 bg-card text-foreground shadow-sm/25"
+                    >
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleProfileClick}
+                    disabled={isLoggingOut}
+                    className={`flex flex-col items-center justify-center rounded-xl px-1 py-2 pb-2.5 text-primary transition-all duration-300 hover:bg-accent/20 hover:text-orange-500 ${isLoggingOut ? 'pointer-events-none opacity-50' : ''}`}
+                  >
+                    <UserCircle2 className="size-4" strokeWidth={1.9} />
+                    <span className="mt-1 text-[10px] leading-tight">Me</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="center"
+                  className="border border-accent/25 bg-card text-foreground shadow-sm/25"
                 >
-                  {isNavigatingItem ? (
-                    <NavigationDisplay
-                      isNavigating={isNavigatingItem}
-                      className="inline-flex h-5 items-center justify-center"
-                      iconClassName="size-4 animate-spin text-primary"
-                    />
-                  ) : (
-                    <Icon className="size-4" strokeWidth={1.9} />
-                  )}
-                  <span className="mt-1 w-full truncate text-center text-[10px] leading-none">
-                    {item.label.split(' ')[0]}
-                  </span>
-                </Link>
-              );
-            })}
-
-            <button
-              onClick={handleProfileClick}
-              disabled={isLoggingOut}
-              className={`flex flex-col items-center justify-center rounded-xl px-1 py-1.5 text-[#131C2A] transition-all duration-300 hover:bg-accent/20 hover:text-[#f47812] ${isLoggingOut ? 'pointer-events-none opacity-50' : ''}`}
-            >
-              <UserCircle2 className="size-4" strokeWidth={1.9} />
-              <span className="mt-1 text-[10px] leading-none">Profile</span>
-            </button>
+                  Profile
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
-        </div>
+        </TooltipProvider>
       </nav>
 
       {/* Profile Modal */}
