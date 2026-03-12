@@ -2,6 +2,16 @@ import { protectHRRoute } from '@/actions/shared/auth';
 import { HRThemeBodySync } from '@/components/hr/hr-theme-body-sync';
 import { Sidebar } from '@/components/hr/sidebar';
 import { NavigationOverlay } from '@/components/shared/navigation-overlay';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'WorkHero | HR',
+  icons: {
+    icon: '/assets/website-logo.svg',
+    shortcut: '/assets/website-logo.svg',
+    apple: '/assets/website-logo.svg',
+  },
+};
 
 export default async function HRLayout({ children }: { children: React.ReactNode }) {
   await protectHRRoute();

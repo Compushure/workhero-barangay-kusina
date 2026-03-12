@@ -51,15 +51,19 @@ export function NotificationsPopover({
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="ghost"
-          size="icon"
           className={cn(
-            'relative h-10 w-10 rounded-full border border-border bg-white shadow-sm transition hover:border-primary/40 hover:text-primary',
-            unreadCount > 0 ? 'text-primary' : 'text-muted-foreground',
-            triggerClassName
+            'relative h-14 w-14 rounded-full bg-[#6F4C2E] cursor-pointer border-3 border-[#47331F] text-[#F4B925] shadow-[4px_4px_0px_#000] shadow-[#47331F]/50 transition-transform hover:scale-105 active:scale-100 data-[state=open]:scale-100 hover:bg-[#6F4C2E] hover:text-[#F4B925] hover:border-[#47331F] flex items-center justify-center',
+            unreadCount > 0 ? 'text-[#F4B925]' : 'text-[#F4B925]'
           )}
         >
-          <Bell className={cn('h-5 w-5', iconClassName)} />
+          <Bell
+            className={cn('h-6 w-6', iconClassName)}
+            style={
+              unreadCount > 0
+                ? { animation: 'bell-shake 3s ease-in-out infinite', transformOrigin: '50% 10%' }
+                : undefined
+            }
+          />
           {unreadCount > 0 && (
             <span
               className={cn(
@@ -189,6 +193,34 @@ export function NotificationsPopover({
           </ScrollArea>
         </div>
       </PopoverContent>
+      <style jsx>{`
+        @keyframes bell-shake {
+          0% {
+            transform: rotate(0deg);
+          }
+          40% {
+            transform: rotate(0deg);
+          }
+          44% {
+            transform: rotate(12deg);
+          }
+          48% {
+            transform: rotate(-12deg);
+          }
+          52% {
+            transform: rotate(8deg);
+          }
+          56% {
+            transform: rotate(-8deg);
+          }
+          60% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(0deg);
+          }
+        }
+      `}</style>
     </Popover>
   );
 }

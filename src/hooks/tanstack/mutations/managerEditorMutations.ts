@@ -67,7 +67,7 @@ export function useAddTaskCategory(): UseMutationResult<
     onSuccess: (data) => {
       // Update paginated cache with new category
       if (data) {
-        queryClient.setQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''), (old: any) => {
+        queryClient.setQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', '', 'all'), (old: any) => {
           if (!old) return { tasks: [], count: 0, totalPages: 0 };
           return {
             ...old,
@@ -79,7 +79,9 @@ export function useAddTaskCategory(): UseMutationResult<
     onSettled: () => {
       // Invalidate all task category queries to refetch updated data
       queryClient.invalidateQueries({ queryKey: taskCategoryKeys.all });
-      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '') });
+      queryClient.invalidateQueries({
+        queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '', 'all'),
+      });
       // Also invalidate types cache
       queryClient.invalidateQueries({ queryKey: [...taskCategoryKeys.all, 'types'] });
     },
@@ -129,11 +131,16 @@ export function useEditTaskCategory(): UseMutationResult<
     onMutate: async ({ id, input }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: taskCategoryKeys.lists() });
-      await queryClient.cancelQueries({ queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '') });
+      await queryClient.cancelQueries({
+        queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '', 'all'),
+      });
 
       // Snapshot previous value
-      const previousCategories = queryClient.getQueryData<TaskCategory[]>(taskCategoryKeys.list());
-      const previousPaginatedData = queryClient.getQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''));
+      const previousCategories =
+        queryClient.getQueryData<TaskCategory[]>(taskCategoryKeys.list());
+      const previousPaginatedData = queryClient.getQueryData(
+        taskCategoryKeys.paginatedList(1, 10, 'type-name', '', 'all'),
+      );
 
       // Optimistically update both list and paginated cache
       queryClient.setQueryData<TaskCategory[]>(taskCategoryKeys.list(), (old) => {
@@ -155,7 +162,9 @@ export function useEditTaskCategory(): UseMutationResult<
 
       // Also update paginated data optimistically
       if (previousPaginatedData) {
-        queryClient.setQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''), (old: any) => {
+        queryClient.setQueryData(
+          taskCategoryKeys.paginatedList(1, 10, 'type-name', '', 'all'),
+          (old: any) => {
           if (!old) return { tasks: [], count: 0, totalPages: 0 };
           return {
             ...old,
@@ -173,7 +182,8 @@ export function useEditTaskCategory(): UseMutationResult<
                 : task
             ),
           };
-        });
+          },
+        );
       }
 
       return { previousCategories };
@@ -193,21 +203,24 @@ export function useEditTaskCategory(): UseMutationResult<
         });
 
         // Update paginated cache with server response
-        queryClient.setQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''), (old: any) => {
+        queryClient.setQueryData(
+          taskCategoryKeys.paginatedList(1, 10, 'type-name', '', 'all'),
+          (old: any) => {
           if (!old) return { tasks: [], count: 0, totalPages: 0 };
           return {
             ...old,
-            tasks: old.tasks?.map((task: any) =>
-              task.id === id ? data : task
-            ),
+            tasks: old.tasks?.map((task: any) => (task.id === id ? data : task)),
           };
-        });
+        },
+        );
       }
     },
     onSettled: () => {
       // Invalidate all task category queries to refetch updated data
       queryClient.invalidateQueries({ queryKey: taskCategoryKeys.all });
-      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '') });
+      queryClient.invalidateQueries({
+        queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '', 'all'),
+      });
       // Also invalidate types cache in case type changed
       queryClient.invalidateQueries({ queryKey: [...taskCategoryKeys.all, 'types'] });
     },
@@ -251,11 +264,16 @@ export function useDeleteTaskCategory(): UseMutationResult<
     onMutate: async (id) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: taskCategoryKeys.lists() });
-      await queryClient.cancelQueries({ queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '') });
+      await queryClient.cancelQueries({
+        queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '', 'all'),
+      });
 
       // Snapshot previous value
-      const previousCategories = queryClient.getQueryData<TaskCategory[]>(taskCategoryKeys.list());
-      const previousPaginatedData = queryClient.getQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''));
+      const previousCategories =
+        queryClient.getQueryData<TaskCategory[]>(taskCategoryKeys.list());
+      const previousPaginatedData = queryClient.getQueryData(
+        taskCategoryKeys.paginatedList(1, 10, 'type-name', '', 'all'),
+      );
 
       // Optimistically remove from both caches
       queryClient.setQueryData<TaskCategory[]>(taskCategoryKeys.list(), (old) => {
@@ -265,13 +283,16 @@ export function useDeleteTaskCategory(): UseMutationResult<
 
       // Also remove from paginated cache optimistically
       if (previousPaginatedData) {
-        queryClient.setQueryData(taskCategoryKeys.paginatedList(1, 10, 'type-name', ''), (old: any) => {
+        queryClient.setQueryData(
+          taskCategoryKeys.paginatedList(1, 10, 'type-name', '', 'all'),
+          (old: any) => {
           if (!old) return { tasks: [], count: 0, totalPages: 0 };
           return {
             ...old,
             tasks: old.tasks?.filter((task: any) => task.id !== id),
           };
-        });
+        },
+        );
       }
 
       return { previousCategories };
@@ -288,7 +309,9 @@ export function useDeleteTaskCategory(): UseMutationResult<
     onSettled: () => {
       // Invalidate all task category queries to refetch updated data
       queryClient.invalidateQueries({ queryKey: taskCategoryKeys.all });
-      queryClient.invalidateQueries({ queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '') });
+      queryClient.invalidateQueries({
+        queryKey: taskCategoryKeys.paginatedList(1, 10, 'type-name', '', 'all'),
+      });
       // Also invalidate types cache in case this was the last of a type
       queryClient.invalidateQueries({ queryKey: [...taskCategoryKeys.all, 'types'] });
     },

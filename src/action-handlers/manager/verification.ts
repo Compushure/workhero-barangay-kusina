@@ -86,9 +86,11 @@ export async function handleFetchDeniedTasks(): Promise<VerificationRequest[]> {
  * @returns Paginated response with data array, count, and total pages
  */
 export async function handleFetchTasksToReviewPaginated(
-  page: number = 1
+  page: number = 1,
+  searchTerm: string = '',
+  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc'
 ): Promise<PaginatedResponse<VerificationRequest>> {
-  const result = await safeAction(() => fetchTasksToReviewPaginated(page));
+  const result = await safeAction(() => fetchTasksToReviewPaginated(page, 8, searchTerm, sort));
 
   if (!result.success) {
     toast.error('Failed to load tasks: ' + result.error);
@@ -109,9 +111,11 @@ export async function handleFetchTasksToReviewPaginated(
  * @returns Paginated response with data array, count, and total pages
  */
 export async function handleFetchApprovedTasksPaginated(
-  page: number = 1
+  page: number = 1,
+  searchTerm: string = '',
+  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc'
 ): Promise<PaginatedResponse<VerificationRequest>> {
-  const result = await safeAction(() => fetchApprovedTasksPaginated(page));
+  const result = await safeAction(() => fetchApprovedTasksPaginated(page, 8, searchTerm, sort));
 
   if (!result.success) {
     toast.error('Failed to load approved tasks: ' + result.error);
@@ -132,9 +136,11 @@ export async function handleFetchApprovedTasksPaginated(
  * @returns Paginated response with data array, count, and total pages
  */
 export async function handleFetchDeniedTasksPaginated(
-  page: number = 1
+  page: number = 1,
+  searchTerm: string = '',
+  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc'
 ): Promise<PaginatedResponse<VerificationRequest>> {
-  const result = await safeAction(() => fetchDeniedTasksPaginated(page));
+  const result = await safeAction(() => fetchDeniedTasksPaginated(page, 8, searchTerm, sort));
 
   if (!result.success) {
     toast.error('Failed to load denied tasks: ' + result.error);
