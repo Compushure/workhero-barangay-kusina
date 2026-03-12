@@ -2,7 +2,15 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Pencil, Plus, X, Loader2, Camera } from 'lucide-react';
-import { format } from 'date-fns';
+import {
+  format,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -83,6 +91,34 @@ export function AddItemsModal({
   const [availabilityInterval, setAvailabilityInterval] = useState<'none' | AvailabilityInterval>(
     'none'
   );
+
+  // Derived disabled-date matcher based on chosen interval
+  const disabledDateMatcher = useMemo((): ((date: Date) => boolean) | undefined => {
+    if (availabilityInterval === 'none') return undefined;
+    const now = new Date();
+    if (availabilityInterval === 'weekly') {
+      const start = startOfWeek(now, { weekStartsOn: 1 });
+      const end = endOfWeek(now, { weekStartsOn: 1 });
+      return (date: Date) => date < start || date > end;
+    }
+    if (availabilityInterval === 'monthly') {
+      const start = startOfMonth(now);
+      const end = endOfMonth(now);
+      return (date: Date) => date < start || date > end;
+    }
+    if (availabilityInterval === 'yearly') {
+      const start = startOfYear(now);
+      const end = endOfYear(now);
+      return (date: Date) => date < start || date > end;
+    }
+    return undefined;
+  }, [availabilityInterval]);
+
+  const handleIntervalChange = (value: 'none' | AvailabilityInterval) => {
+    setAvailabilityInterval(value);
+    // Reset date whenever interval changes to avoid stale/invalid selection
+    setAvailableDate(undefined);
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [iconValidationError, setIconValidationError] = useState<string>('');
 
@@ -490,38 +526,13 @@ export function AddItemsModal({
                 {unformatNumber(itemCost).length === 6}
               </div>
               <div className="flex-1 space-y-2">
-                <Label className="text-sm font-medium text-foreground">Availability Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full justify-start text-left font-normal bg-background border-border hover:bg-muted',
-                        !availableDate && 'text-muted-foreground'
-                      )}
-                    >
-                      {availableDate ? format(availableDate, 'PPP') : 'Select date (optional)'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={availableDate}
-                      onSelect={setAvailableDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="flex-1 space-y-2">
                 <Label htmlFor="available-month" className="text-sm font-medium text-foreground">
                   Availability Interval
                 </Label>
                 <Select
                   value={availabilityInterval}
                   onValueChange={(value) =>
-                    setAvailabilityInterval(value as 'none' | AvailabilityInterval)
+                    handleIntervalChange(value as 'none' | AvailabilityInterval)
                   }
                 >
                   <SelectTrigger
@@ -539,10 +550,41 @@ export function AddItemsModal({
                     <SelectItem value="yearly">Yearly</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="flex-1 space-y-2">
+                <Label className="text-sm font-medium text-foreground">Availability Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      disabled={availabilityInterval === 'none'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal bg-background border-border hover:bg-muted',
+                        !availableDate && 'text-muted-foreground'
+                      )}
+                    >
+                      {availableDate ? format(availableDate, 'PPP') : 'Select date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={availableDate}
+                      onSelect={setAvailableDate}
+                      disabled={disabledDateMatcher}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                {availabilityInterval === 'none' && (
+                  <p className="text-xs text-muted-foreground italic">
+                    Choose an interval to unlock the date picker
+                  </p>
+                )}
                 {availabilityInterval !== 'none' && (
                   <p className="text-xs text-muted-foreground italic">
-                    Item will use {availabilityInterval} interval from{' '}
-                    {availableDate ? format(availableDate, 'MMM d, yyyy') : 'the selected date'}
+                    Only dates within the current {availabilityInterval} are selectable
                   </p>
                 )}
                 {isIntervalDateMissing && (
