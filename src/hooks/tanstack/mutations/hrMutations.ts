@@ -24,7 +24,13 @@ import { buildPeriodLabel, getISOWeekDateRangeLabel } from '@/lib/utils/time-per
 import { toast } from 'sonner';
 import type { QueryKey } from '@tanstack/react-query';
 import type { EnrichedLeaderboardResult } from '@/actions/hr/leaderboard';
-import type { LeaderboardPlayer, RankLogPeriodType, RankingLeaderboardViewRow, RankingPeriodWithTop } from '@/types';
+import type {
+  LeaderboardPlayer,
+  RankLogPeriodType,
+  RankingLeaderboardViewRow,
+  RankingPeriodWithTop,
+} from '@/types';
+import type { LatestPeriods } from '@/components/employee/leaderboard/period-nav';
 
 interface RedemptionRequestParams {
   id: string;
