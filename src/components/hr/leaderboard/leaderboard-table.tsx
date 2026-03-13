@@ -91,7 +91,7 @@ export default function LeaderboardTable({
                   Name
                 </TableHead>
                 <TableHead className="whitespace-nowrap pr-1.5 text-right text-[10px] font-bold tracking-wide text-white uppercase sm:pr-4 sm:text-xs">
-                  <span className="sm:hidden">Tasks</span>
+                  <span className="sm:hidden">Tasks Completed</span>
                   <span className="hidden sm:inline">Total Completed Tasks</span>
                 </TableHead>
                 <TableHead className="whitespace-nowrap pr-1.5 text-right text-[10px] font-bold tracking-wide text-white uppercase sm:pr-4 sm:text-xs">
