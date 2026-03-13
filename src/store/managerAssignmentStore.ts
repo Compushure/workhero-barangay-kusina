@@ -29,6 +29,30 @@ interface ManagerAssignmentState {
   ) => void;
 }
 
+function areAssignedTasksEquivalent(a: AssignedTask[], b: AssignedTask[]): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+
+  for (let i = 0; i < a.length; i += 1) {
+    const left = a[i];
+    const right = b[i];
+
+    if (
+      left.id !== right.id ||
+      left.taskId !== right.taskId ||
+      left.taskName !== right.taskName ||
+      left.maxOrders !== right.maxOrders ||
+      left.points !== right.points ||
+      left.xp !== right.xp ||
+      left.assignedEmployees.length !== right.assignedEmployees.length
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 const buildOptimisticEmployees = (
   existingEmployees: AssignedEmployee[],
   employeeIds: string[]
@@ -59,6 +83,7 @@ export const useManagerAssignmentStore = create<ManagerAssignmentState>((set, ge
     set((state) => ({ assignedTasks: [...state.assignedTasks, ...tasks] })),
   hydrateFromServer: (tasks) => {
     if (get().isOptimistic) return;
+    if (areAssignedTasksEquivalent(get().assignedTasks, tasks)) return;
     set({ assignedTasks: tasks });
   },
   startOptimistic: () => {

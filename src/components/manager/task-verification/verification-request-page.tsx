@@ -19,6 +19,7 @@ import {
   useRejectTask,
 } from '@/hooks/tanstack';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
+import { useTaskStore } from '@/store/taskStore';
 
 interface VerificationRequestsPageProps {
   initialRequests: VerificationRequest[];
@@ -26,6 +27,7 @@ interface VerificationRequestsPageProps {
 
 export function VerificationRequestsPage({ initialRequests }: VerificationRequestsPageProps) {
   const router = useRouter();
+  const { tasks, hydrateFromServer } = useTaskStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('pending');
   const [dateSortBy, setDateSortBy] = useState<'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'>('date-desc');
@@ -111,6 +113,11 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
 
   // Use memoized values directly instead of calling functions
   const currentTasks = getCurrentTasks;
+
+  useEffect(() => {
+    hydrateFromServer(currentTasks);
+  }, [currentTasks, hydrateFromServer]);
+
   const totalPages = getTotalPages;
   const currentPage = getCurrentPage;
   const isCurrentCategoryLoading =
@@ -120,7 +127,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
 
   // Filter and sort requests based on search term and date/employee sorting
   const filteredRequests = useMemo(() => {
-    let filtered = currentTasks;
+    let filtered = tasks;
     const normalizedSearch = normalizeSearchQuery(searchTerm);
 
     // Apply search filter
@@ -160,7 +167,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           return 0;
       }
     });
-  }, [currentTasks, searchTerm, dateSortBy]);
+  }, [tasks, searchTerm, dateSortBy]);
 
   const resetConfirmState = () => setConfirmAction({ type: null, id: null });
 

@@ -42,7 +42,7 @@ const SORT_OPTIONS: { value: BadgeSortOption; label: string }[] = [
 ];
 
 export function BadgeEditorPage() {
-  const { data: badgesData = [], isLoading, isFetching, isError } = useGetBadges();
+  const { data: badgesData, isLoading, isFetching, isError } = useGetBadges();
   const { data: taskOptions = [] } = useGetBadgeTaskOptions();
   const { data: attributeOptions = [] } = useGetBadgeAttributeOptions();
   const { data: attendanceOptions = [] } = useGetBadgeAttendanceOptions();

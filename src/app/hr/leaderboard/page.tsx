@@ -1,73 +1,142 @@
-import LeaderboardCard from '@/components/hr/leaderboard/leaderboard-podium-card';
-import LeaderboardList from '@/components/hr/leaderboard/leaderboard-list';
-import LeaderboardFilters from '@/components/hr/leaderboard/leaderboard-filters';
-import { getTopPlayers } from '@/actions/hr/leaderboard';
-import { Suspense } from 'react';
-import { MarketSuspense } from '@/components/shared/market-suspense';
+import { getISOWeek, getISOWeekYear } from 'date-fns';
+import { checkRankingExists, getAllRankingPeriods } from '@/actions/hr/leaderboard';
+import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-content';
+import { LeaderboardViewToggle } from '@/components/hr/leaderboard/leaderboard-view-toggle';
+import { PastRanksList } from '@/components/hr/leaderboard/past-ranks-list';
+import { PeriodSelector } from '@/components/hr/leaderboard/period-selector';
+import { getISOWeeksInYear } from '@/lib/utils/time-period-utils';
+import type { RankLogPeriodType } from '@/types';
 
-export default async function LeaderboardPage() {
-  const result = await getTopPlayers();
+type SearchParams = {
+  type?: string;
+  year?: string;
+  week?: string;
+  month?: string;
+  show?: string;
+  view?: string;
+};
 
-  // Handle error or empty data
-  if (result.error || !result.data || result.data.length === 0) {
-    return (
-      <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-        <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-background text-foreground min-h-screen">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-8">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Leaderboard Slide</h1>
-                <p className="text-xs sm:text-sm text-muted-foreground">List of ranks for this week.</p>
-              </div>
-              <LeaderboardFilters />
-            </div>
-            <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">
-                {result.error || 'No leaderboard data available at the moment.'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </Suspense>
-    );
+interface LeaderboardPageProps {
+  searchParams?: Promise<SearchParams>;
+}
+
+function toPositiveInt(value: string | undefined): number | null {
+  if (!value) return null;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function getPreviousWeek() {
+  const now = new Date();
+  const nowWeek = getISOWeek(now);
+  const nowYear = getISOWeekYear(now);
+
+  if (nowWeek <= 1) {
+    const previousYear = nowYear - 1;
+    return { year: previousYear, week: getISOWeeksInYear(previousYear) };
   }
 
-  // Map database results to include rank
-  const playersWithRank = result.data.map((player, index) => ({
-    ...player,
-    rank: index + 1,
-    image: player.image ?? undefined,
-  }));
+  return { year: nowYear, week: nowWeek - 1 };
+}
 
-  const topPlayer = playersWithRank[0];
-  const others = playersWithRank.slice(1);
+function getPreviousMonth() {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+
+  if (month <= 1) {
+    return { year: now.getFullYear() - 1, month: 12 };
+  }
+
+  return { year: now.getFullYear(), month: month - 1 };
+}
+
+function getPreviousYear() {
+  return new Date().getFullYear() - 1;
+}
+
+function parsePeriodType(value: string | undefined): RankLogPeriodType {
+  if (value === 'monthly' || value === 'yearly') return value;
+  return 'weekly';
+}
+
+export default async function LeaderboardPage({ searchParams }: LeaderboardPageProps) {
+  const resolvedParams = (await searchParams) ?? {};
+  const periodType = parsePeriodType(resolvedParams.type);
+
+  const previousWeek = getPreviousWeek();
+  const previousMonth = getPreviousMonth();
+  const previousYear = getPreviousYear();
+
+  const selectedYear = toPositiveInt(resolvedParams.year);
+  const selectedWeek = toPositiveInt(resolvedParams.week);
+  const selectedMonth = toPositiveInt(resolvedParams.month);
+
+  const year =
+    selectedYear ??
+    (periodType === 'weekly'
+      ? previousWeek.year
+      : periodType === 'monthly'
+        ? previousMonth.year
+        : previousYear);
+
+  const week = selectedWeek ?? previousWeek.week;
+  const month = selectedMonth ?? previousMonth.month;
+
+  const currentView = resolvedParams.view === 'past' ? 'past' : 'generate';
+  const show = resolvedParams.show === '1' || resolvedParams.show === 'true';
+
+  const currentPeriodRankingExistsResult = await checkRankingExists(
+    periodType,
+    year,
+    periodType === 'monthly' ? month : undefined,
+    periodType === 'weekly' ? week : undefined
+  );
+
+  const currentPeriodRankingExists =
+    currentPeriodRankingExistsResult.success && !!currentPeriodRankingExistsResult.data;
+
+  const initialPastRanksData =
+    currentView === 'past' ? await getAllRankingPeriods() : null;
 
   return (
-    <Suspense fallback={<MarketSuspense label="Loading leaderboard..." />}>
-      <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-background text-foreground min-h-screen">
-        <div className="max-w-6xl mx-auto">
-          {/* Header Section */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-8">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Leaderboard Slide</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">List of ranks for this week.</p>
+    <div className="min-h-screen overflow-x-hidden bg-white px-3 py-3 sm:px-4 sm:py-4">
+      <div className="mx-auto mt-2 w-full max-w-7xl sm:mt-4">
+        <div className="mb-2 sm:mb-3">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Leaderboard
+              </h1>
+              <p className="text-xs text-muted-foreground sm:text-sm">
+                Generate rankings by period and control employee visibility.
+              </p>
             </div>
-            <LeaderboardFilters />
+            <LeaderboardViewToggle currentView={currentView} />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* 1st Place Highlight */}
-            <div className="lg:col-span-4 flex justify-center">
-              <LeaderboardCard player={topPlayer} />
-            </div>
-
-            {/* Scrollable List for 2nd - 10th */}
-            <div className="lg:col-span-8">
-              <LeaderboardList players={others} />
-            </div>
-          </div>
+          {currentView === 'generate' ? (
+            <PeriodSelector
+              currentType={periodType}
+              currentYear={year}
+              currentWeek={week}
+              currentMonth={month}
+              currentPeriodRankingExists={currentPeriodRankingExists}
+            />
+          ) : null}
         </div>
+
+        {currentView === 'past' ? (
+          <PastRanksList initialData={initialPastRanksData} />
+        ) : (
+          <LeaderboardContent
+            periodType={periodType}
+            year={year}
+            week={week}
+            month={month}
+            show={show}
+          />
+        )}
       </div>
-    </Suspense>
+    </div>
   );
 }

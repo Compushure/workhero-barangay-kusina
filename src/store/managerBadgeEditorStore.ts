@@ -16,6 +16,30 @@ interface ManagerBadgeEditorState {
   optimisticDeleteBadge: (id: string) => void;
 }
 
+function areBadgesEquivalent(a: Badge[], b: Badge[]): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+
+  for (let i = 0; i < a.length; i += 1) {
+    const left = a[i];
+    const right = b[i];
+
+    if (
+      left.id !== right.id ||
+      left.name !== right.name ||
+      left.description !== right.description ||
+      left.points !== right.points ||
+      left.award_at_interval !== right.award_at_interval ||
+      left.img_link !== right.img_link ||
+      left.conditions.length !== right.conditions.length
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function toConditions(conditions: AddBadgeInput['conditions']): BadgeCondition[] {
   return conditions.map((condition, index) => ({
     id: condition.id ?? `optimistic-condition-${Date.now()}-${index}`,
@@ -36,6 +60,7 @@ export const useManagerBadgeEditorStore = create<ManagerBadgeEditorState>((set, 
 
   hydrateFromServer: (badges) => {
     if (get().isOptimistic) return;
+    if (areBadgesEquivalent(get().badges, badges)) return;
     set({ badges });
   },
 

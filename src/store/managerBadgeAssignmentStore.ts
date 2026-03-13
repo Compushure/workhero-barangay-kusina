@@ -14,6 +14,37 @@ interface ManagerBadgeAssignmentState {
   optimisticAssignBadgeToUsers: (userIds: string[], badgeId: string) => void;
 }
 
+function areBadgeAssignmentUsersEquivalent(
+  a: BadgeAssignmentUser[],
+  b: BadgeAssignmentUser[]
+): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+
+  for (let i = 0; i < a.length; i += 1) {
+    const left = a[i];
+    const right = b[i];
+
+    if (
+      left.id !== right.id ||
+      left.name !== right.name ||
+      left.email !== right.email ||
+      left.employee_id !== right.employee_id ||
+      left.badge_ids.length !== right.badge_ids.length
+    ) {
+      return false;
+    }
+
+    for (let badgeIndex = 0; badgeIndex < left.badge_ids.length; badgeIndex += 1) {
+      if (left.badge_ids[badgeIndex] !== right.badge_ids[badgeIndex]) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 function applyBadge(users: BadgeAssignmentUser[], userIds: Set<string>, badgeId: string) {
   return users.map((user) => {
     if (!userIds.has(user.id) || user.badge_ids.includes(badgeId)) {
@@ -36,6 +67,7 @@ export const useManagerBadgeAssignmentStore = create<ManagerBadgeAssignmentState
 
   hydrateFromServer: (users) => {
     if (get().isOptimistic) return;
+    if (areBadgeAssignmentUsersEquivalent(get().users, users)) return;
     set({ users });
   },
 

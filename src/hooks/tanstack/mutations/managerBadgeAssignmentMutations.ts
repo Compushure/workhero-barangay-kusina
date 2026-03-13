@@ -51,9 +51,12 @@ export function useAssignManualBadgeToUser(): UseMutationResult<
       queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.allBadges() });
       queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.debug() });
       // Invalidate ALL employee badge queries to refresh badge displays everywhere
-      queryClient.invalidateQueries({ queryKey: employeeKeys.badges() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.badges(), refetchType: 'all' });
       if (variables?.userId) {
-        queryClient.invalidateQueries({ queryKey: employeeKeys.userBadges(variables.userId) });
+        queryClient.invalidateQueries({
+          queryKey: employeeKeys.userBadges(variables.userId),
+          refetchType: 'all',
+        });
       }
     },
   });
@@ -114,9 +117,12 @@ export function useAssignManualBadgesToUsersBulk(): UseMutationResult<
       queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.manualBadges() });
       queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.allBadges() });
       queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.debug() });
-      queryClient.invalidateQueries({ queryKey: employeeKeys.badges() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.badges(), refetchType: 'all' });
       variables?.userIds.forEach((userId) => {
-        queryClient.invalidateQueries({ queryKey: employeeKeys.userBadges(userId) });
+        queryClient.invalidateQueries({
+          queryKey: employeeKeys.userBadges(userId),
+          refetchType: 'all',
+        });
       });
     },
   });
@@ -136,7 +142,7 @@ export function useRemoveBadgeAward(): UseMutationResult<
       queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.manualBadges() });
       queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.allBadges() });
       queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.debug() });
-      queryClient.invalidateQueries({ queryKey: employeeKeys.badges() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.badges(), refetchType: 'all' });
     },
   });
 }

@@ -92,15 +92,15 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
             <div className={`relative flex flex-col lg:flex-row w-full items-start lg:justify-between rounded-2xl bg-[#FAFAFA] p-4 sm:p-6 gap-3 sm:gap-4 transition-all ease-in-out duration-400 
           ${isExpanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`} key={employee.id}>
               {/* Employee Details + Menu */}
-              <div className="flex items-start justify-between w-full lg:w-auto lg:min-w-50 lg:max-w-60 shrink-0 pr-0 lg:pr-4">
-                <div className="flex flex-col min-w-0">
-                  <h3 className="text-base sm:text-lg font-bold text-foreground wrap-break-word">{employee.name}</h3>
-                  <p className="text-xs sm:text-sm text-gray-600">{employee.empId}</p>
-                  {employee.tenure && <p className="text-xs sm:text-sm text-gray-500">{employee.tenure}</p>}
+              <div className="flex items-start justify-between w-full min-w-0 lg:w-auto lg:min-w-50 lg:max-w-60 shrink-0 pr-0 lg:pr-4">
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <h3 className="truncate text-base font-bold text-foreground sm:text-lg">{employee.name}</h3>
+                  <p className="truncate text-xs text-gray-600 sm:text-sm">{employee.empId}</p>
+                  {employee.tenure && <p className="truncate text-xs text-gray-500 sm:text-sm">{employee.tenure}</p>}
                 </div>
                 
                 {/* Triple dots menu - single instance for all breakpoints */}
-                <div className="flex relative z-50 lg:absolute lg:top-5 lg:right-5">
+                <div className="ml-3 flex shrink-0 relative z-50 lg:absolute lg:top-5 lg:right-5">
                   <EmployeeViewCardMenu
                     openPopoverId={openPopoverId}
                     setOpenPopoverId={setOpenPopoverId}

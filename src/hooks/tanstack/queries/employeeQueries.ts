@@ -256,6 +256,7 @@ export function useGetUserBadges(
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
     retry: 1,
+    refetchOnMount: true,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<UserBadge[] | null, Error>;
 }

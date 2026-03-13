@@ -21,9 +21,14 @@ import { useManagerBadgeEditorStore } from '@/store/managerBadgeEditorStore';
 
 function invalidateBadgeCaches(queryClient: ReturnType<typeof useQueryClient>) {
   queryClient.invalidateQueries({ queryKey: badgeKeys.lists() });
-  queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.manualBadges() });
-  queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.allBadges() });
-  queryClient.invalidateQueries({ queryKey: employeeKeys.badges() });
+  // refetchType: 'all' forces a background refetch even when badge-assignment is not
+  // currently mounted (no active observers). This ensures its cache is fresh before
+  // the user navigates there so the global refetchOnMount:false default doesn't serve stale data.
+  queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.manualBadges(), refetchType: 'all' });
+  queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.allBadges(), refetchType: 'all' });
+  // Also refresh users so their badge_ids reflect any deleted badges (cascade on server).
+  queryClient.invalidateQueries({ queryKey: badgeAssignmentKeys.users(), refetchType: 'all' });
+  queryClient.invalidateQueries({ queryKey: employeeKeys.badges(), refetchType: 'all' });
 }
 
 export function useAddBadge(): UseMutationResult<Badge | null, Error, AddBadgeInput> {

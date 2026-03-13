@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, lazy, Suspense, useCallback } from 'react';
+import { useState, useTransition, lazy, Suspense, useCallback, useEffect } from 'react';
 import { useGetUsersPaginated } from '@/hooks/tanstack/queries/userQueries';
 import {
   useAddUser,
@@ -36,6 +36,9 @@ import { handleSignOut } from '@/action-handlers/shared/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
+import { useAdminUserStore } from '@/store/adminUserStore';
+
+const EMPTY_PAGINATED_USERS = { data: [] as User[], count: 0, totalPages: 0 };
 
 export function ManagerPage() {
   const router = useRouter();
@@ -59,7 +62,7 @@ export function ManagerPage() {
 
   // TanStack Query hook with debounced parameters and pagination
   const {
-    data: paginatedData = { data: [], count: 0, totalPages: 0 },
+    data: paginatedData,
     isLoading,
     error,
   } = useGetUsersPaginated(
@@ -73,8 +76,16 @@ export function ManagerPage() {
     page
   );
 
-  const users = paginatedData.data;
-  const totalPages = paginatedData.totalPages;
+  const { users: localUsers, hydrateFromServer } = useAdminUserStore();
+  const resolvedPaginatedData = paginatedData ?? EMPTY_PAGINATED_USERS;
+
+  useEffect(() => {
+    if (!paginatedData) return;
+    hydrateFromServer(paginatedData.data);
+  }, [paginatedData, hydrateFromServer]);
+
+  const users = localUsers;
+  const totalPages = resolvedPaginatedData.totalPages;
 
   // TanStack Query mutation hooks
   const addUserMutation = useAddUser();

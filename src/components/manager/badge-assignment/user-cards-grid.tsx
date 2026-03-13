@@ -34,8 +34,11 @@ export default function UserCardsGrid({
   return (
     <div className="space-y-4">
       {users.map((user) => {
-        const displayedBadges = user.badge_ids.slice(0, 3);
-        const remainingBadgesCount = user.badge_ids.length - 3;
+        // Filter to only badge IDs that resolve to a known badge — deleted badges
+        // are excluded so the overflow count stays accurate.
+        const knownBadgeIds = user.badge_ids.filter((id) => getBadgeById(id));
+        const displayedBadges = knownBadgeIds.slice(0, 3);
+        const remainingBadgesCount = knownBadgeIds.length - 3;
         const hasMoreBadges = remainingBadgesCount > 0;
 
         return (
@@ -74,7 +77,7 @@ export default function UserCardsGrid({
 
               {/* Badges Section */}
               <div className="flex-1 flex items-center gap-3 px-0 sm:px-4 min-w-0">
-                {user.badge_ids.length > 0 ? (
+                {knownBadgeIds.length > 0 ? (
                   <div className="flex items-center gap-2 flex-wrap">
                     {displayedBadges.map((badgeId) => {
                       const badge = getBadgeById(badgeId);
