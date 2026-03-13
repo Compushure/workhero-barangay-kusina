@@ -1,6 +1,25 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+/**
+ * User Filtering and Search API Route
+ * =====================================
+ * Still actively used by /src/actions/manage.ts fetchUsersAction()
+ * This route provides filtered, sorted, and paginated user data
+ * 
+ * Performance Optimizations Applied:
+ * - Uses user_attributes view for efficient queries
+ * - Implements pagination to limit data transfer
+ * - Escapes special characters to prevent SQL injection
+ * - Single database query per request (except multi-field search)
+ * 
+ * Future Optimization Opportunities:
+ * - Add Redis caching for frequently accessed pages
+ * - Implement search debouncing on client side (already done via useDebounce)
+ * - Consider full-text search for better query performance
+ * - Add query result caching with SWR revalidation
+ */
+
 type SortOrder = 'asc' | 'desc';
 
 const SORT_MAP: Record<string, string> = {
@@ -14,6 +33,7 @@ const SEARCH_MAP: Record<string, string> = {
   name: 'user_name',
   email: 'user_email',
   employeeid: 'employee_id',
+  employee_id: 'employee_id',
 };
 
 function normalizeOrder(input?: string): SortOrder {
@@ -103,13 +123,16 @@ export async function GET(req: Request) {
       const dataPrimary = primary.data ?? [];
       if (dataPrimary.length > 0) {
         const users = mapRowsToUsers(dataPrimary);
-        return NextResponse.json({ users, page, pageSize }, { status: 200 });
+        const totalCount = primary.count ?? users.length;
+        const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+        return NextResponse.json({ users, page, pageSize, count: totalCount, totalPages }, { status: 200 });
       }
       // fallback to email
       const fallback = await supabase
-        .from('user_role_attribute')
+        .from('user_attributes')
         .select(
-          'user_id, user_name, user_email, role_type, user_date_added, employee_id, contact_details, home_address, tin_id, sss_id, employment_status, pagibig_id'
+          'user_id, user_name, user_email, role_type, user_date_added, employee_id, contact_details, home_address, tin_id, sss_id, employment_status, pagibig_id',
+          { count: 'exact' }
         )
         .ilike('user_email', `${query}%`)
         .order(sortColumn, { ascending: order === 'asc' })
@@ -119,7 +142,9 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: fallback.error.message }, { status: 500 });
       }
       const users = mapRowsToUsers(fallback.data ?? []);
-      return NextResponse.json({ users, page, pageSize }, { status: 200 });
+      const totalCount = fallback.count ?? users.length;
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+      return NextResponse.json({ users, page, pageSize, count: totalCount, totalPages }, { status: 200 });
     }
 
     // If we reach here, no special multi-column search fallback needed — execute accumulated query with pagination
@@ -132,8 +157,10 @@ export async function GET(req: Request) {
 
     const rows = result.data ?? [];
     const users = mapRowsToUsers(rows);
+    const totalCount = result.count ?? users.length;
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
-    return NextResponse.json({ users, page, pageSize }, { status: 200 });
+    return NextResponse.json({ users, page, pageSize, count: totalCount, totalPages }, { status: 200 });
   } catch (err) {
     console.error('Unexpected error', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -1,75 +1,58 @@
+@import 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
+@import 'https://fonts.googleapis.com/css2?family=Jersey+10&display=swap';
+
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #fff8f5; /* Soft warm beige */
-  --foreground: #5a2a2a; /* Deep reddish brown */
-  --card: #ffffff;
-  --card-foreground: #514937;
-  --popover: #ffffff;
-  --popover-foreground: #514937;
+  --background: #fcf6e3; /* Soft pastel yellow */
+  --background-soft: #fffdf5;
+  --foreground: #131c2a;
+  --card: #fafafa;
+  --card-foreground: #131c2a;
+  --popover: #fbf4e8;
+  --popover-foreground: #131c2a;
 
-  /* Primary: Dark olive brown */
-  --primary-foreground: #ffffff;
-  --primary: #a83232;
-  --primary-foreground: #ffffff;
+  /* main color for heading and main text elements */
+  --title: #131c2a;
 
-  /* Secondary: Bright chili red */
-  --secondary-foreground: #ffffff;
-  --secondary: #d94f4f; /* Bright chili red */
-  --secondary-foreground: #ffffff;
+  --primary-foreground: #fafafa;
+  --primary: #131c2a;
 
-  /* Accent: Light beige */
-  /* --accent: #f2d0a7;
-  --accent-foreground: #514937; */
-  --accent: #f2a29c; /* Rosy coral */
-  --accent-foreground: #5a2a2a;
+  --secondary-foreground: #fafafa;
+  --secondary: #545f6e;
+
+  /* this is the main accent color to be used */
+  --accent: #f47812; /* Deep citrus orange */
+  --accent-secondary: #faa938; /* Light citrus orange */
+  --primary-gradient: linear-gradient(180deg, #faa938 0%, #f47812 100%);
+
+  --row-hover: #fce4bf;
 
   /* Muted: Light neutral */
-  /* --muted: #e5e5e5;
-  --muted-foreground: #6b6b6b; */
-  --muted: #fbeaea; /* Light pinkish neutral */
-  --muted-foreground: #7a3d3d;
+  --muted: #fff2cc; /* Light pinkish neutral */
+  --muted-foreground: #26344b;
 
   /* Destructive: Dark red */
-  /* --destructive: #730202;
-  --destructive-foreground: #ffffff; */
   --destructive: #8b0000; /* Dark red */
   --destructive-foreground: #ffffff;
 
   /* Success: Olive green */
-  /* --success: #4c5e3a;
-  --success-foreground: #ffffff; */
   --success: #b85c38; /* Burnt sienna */
   --success-foreground: #ffffff;
 
   /* Info: Coral red for highlights */
-  /* --info: #d94141;
-  --info-foreground: #ffffff; */
-  --info: #e07b7b; /* Soft tomato red */
+  --info: #e0a87b; /* Soft tomato red */
   --info-foreground: #ffffff;
 
-  /* --border: #e0e0e0;
-  --input: #e0e0e0;
-  --ring: #f28705; */
   --border: #e0cfcf;
   --input: #f5e5e5;
-  --ring: #a83232;
+  --ring: #f47812;
 
   /* --radius: 0.5rem; */
   --radius: 0.625rem;
-
-  /* Sidebar specific colors */
-  /* --sidebar: #fafafa;
-  --sidebar-foreground: #514937;
-  --sidebar-primary: #514937;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f2d0a7;
-  --sidebar-accent-foreground: #514937;
-  --sidebar-border: #e0e0e0;
-  --sidebar-ring: #f28705; */
 
   --sidebar: #fff0ec;
   --sidebar-foreground: #5a2a2a;
@@ -79,12 +62,39 @@
   --sidebar-accent-foreground: #5a2a2a;
   --sidebar-border: #e0cfcf;
   --sidebar-ring: #a83232;
+
+  --wood: #5c3b23;
+  --wood-light: #7d5936;
+  --pixel-border: #47331f;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 @theme inline {
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-jersey: 'Jersey 10', monospace;
   --font-sans: 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
+  --color-background-soft: var(--background-soft);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -97,12 +107,17 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
+  --color-accent-secondary: var(--accent-secondary);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-row-hover: var(--row-hover);
+  --color-wood: var(--wood);
+  --color-wood-light: var(--wood-light);
+  --color-pixel-border: var(--pixel-border);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -119,6 +134,7 @@
   --color-success-foreground: var(--success-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-title: var(--title);
 }
 
 .admin-theme {
@@ -158,6 +174,55 @@
   }
 }
 
+.hr-theme {
+  /* Soft off-white/cream background */
+  --background: oklch(0.98 0.01 80);
+
+  /* Dark charcoal for main text */
+  --foreground: oklch(0.25 0.02 90);
+
+  /* The distinct light yellow/cream card color */
+  --card: oklch(0.96 0.04 85);
+  --card-foreground: oklch(0.25 0.02 90);
+
+  /* Popovers matching the card style */
+  --popover: oklch(0.96 0.04 85);
+  --popover-foreground: oklch(0.25 0.02 90);
+
+  /* The signature WorkHero Orange */
+  --primary: oklch(0.7 0.19 45);
+  --primary-foreground: oklch(0.99 0 0);
+
+  /* Muted elements and secondary buttons */
+  --secondary: oklch(0.92 0.02 85);
+  --secondary-foreground: oklch(0.4 0.05 45);
+
+  /* Soft borders or disabled states */
+  --muted: oklch(0.9 0.02 85);
+  --muted-foreground: oklch(0.5 0.05 45);
+
+  /* Hover states and accents (Lighter orange/gold) */
+  --accent: oklch(0.85 0.12 75);
+  --accent-foreground: oklch(0.3 0.1 45);
+
+  /* Standard destructive red */
+  --destructive: oklch(0.6 0.2 25);
+  --destructive-foreground: oklch(0.99 0 0);
+}
+
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.pixel-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}
+.pixel-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000;
+}
+
 .remove-arrow::-webkit-inner-spin-button,
 .remove-arrow::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -165,4 +230,59 @@
 }
 .remove-arrow {
   -moz-appearance: textfield;
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@layer utilities {
+  .bg-primary-gradient {
+    background-image: var(--primary-gradient);
+  }
+
+  .wood-panel {
+    background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 100%);
+    border: 3px solid var(--pixel-border);
+  }
+
+  .animate-launcher-shadow {
+    animation: launcher-shadow-blink 1.6s ease-in-out infinite;
+  }
+}
+
+@layer components {
+}
+
+@keyframes launcher-shadow-blink {
+  0% {
+    box-shadow: 0 0 8px 2px rgba(244, 185, 37, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 16px 8px rgba(244, 185, 37, 0.75);
+  }
+  100% {
+    box-shadow: 0 0 8px 2px rgba(244, 185, 37, 0.35);
+  }
 }

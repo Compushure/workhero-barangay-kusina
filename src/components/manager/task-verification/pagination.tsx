@@ -8,44 +8,59 @@ interface PaginationProps {
   totalPages: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  isFixed?: boolean;
 }
 
-function PaginationComponent({ totalPages, currentPage, onPageChange }: PaginationProps) {
+function PaginationComponent({
+  totalPages,
+  currentPage,
+  onPageChange,
+  isFixed = false,
+}: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const pages: (number | string)[] = [];
 
-  // Always show first page
-  pages.push(1);
+  if (totalPages <= 8) {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    const firstBlockEnd = 4;
+    const lastBlockStart = totalPages - 3;
 
-  // Ellipsis before current if not near start
-  if (currentPage > 2) {
-    pages.push('...');
-  }
+    for (let i = 1; i <= firstBlockEnd; i++) {
+      pages.push(i);
+    }
 
-  // Current page (if not first or last)
-  if (currentPage !== 1 && currentPage !== totalPages) {
-    pages.push(currentPage);
-  }
+    if (currentPage > firstBlockEnd + 1 && currentPage < lastBlockStart - 1) {
+      pages.push('...');
+      pages.push(currentPage);
+      pages.push('...');
+    } else {
+      pages.push('...');
+    }
 
-  // Ellipsis after current if not near end
-  if (currentPage < totalPages - 1) {
-    pages.push('...');
-  }
-
-  // Always show last page
-  if (totalPages > 1) {
-    pages.push(totalPages);
+    for (let i = lastBlockStart; i <= totalPages; i++) {
+      if (!pages.includes(i)) {
+        pages.push(i);
+      }
+    }
   }
 
   return (
-    <div className="flex justify-center items-center gap-2 mt-4">
+    <div
+      className={`flex items-center justify-center gap-1 sm:gap-2 scale-100 sm:scale-110 lg:scale-115 xl:scale-125 2xl:scale-150 ${
+        isFixed ? 'sm:fixed bottom-6 lg:bottom-8 left-1/2 z-40 sm:-translate-x-1/2' : ''
+      }`}
+    >
       {/* Left arrow */}
       <Button
         variant="outline"
         size="sm"
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
+        className="bg-card text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out h-8 w-8 sm:h-9 sm:w-9 p-0"
       >
         <ChevronLeft size={16} />
       </Button>
@@ -53,15 +68,17 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
       {/* Page numbers */}
       {pages.map((page, idx) =>
         page === '...' ? (
-          <span key={`ellipsis-${idx}`} className="px-2">
+          <span key={`ellipsis-${idx}`} className="px-1 sm:px-2 text-sm">
             …
           </span>
         ) : (
           <Button
             key={page}
-            variant={page === currentPage ? 'default' : 'outline'}
+            variant="outline"
             size="sm"
             onClick={() => onPageChange(page as number)}
+            className={`transition-all ease-in-out shadow-sm/15 border border-accent/50 h-8 w-8 sm:h-9 sm:w-9 p-0 text-sm
+              ${page === currentPage ? 'bg-accent-secondary text-white hover:bg-accent-secondary hover:text-white' : 'bg-card text-foreground hover:bg-accent-secondary/80 hover:text-white hover:scale-110 hover:shadow-xs/25'}`}
           >
             {page}
           </Button>
@@ -74,6 +91,7 @@ function PaginationComponent({ totalPages, currentPage, onPageChange }: Paginati
         size="sm"
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
+        className="bg-card text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out h-8 w-8 sm:h-9 sm:w-9 p-0"
       >
         <ChevronRight size={16} />
       </Button>

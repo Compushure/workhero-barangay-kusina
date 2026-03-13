@@ -9,10 +9,11 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Users } from 'lucide-react';
 import type { AssignedEmployee, AssignedTask } from '@/types';
 import AssignEmployeesTable from './assign-employees-table';
-import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 interface AssignEmployeesDialogProps {
   selectedEmployees: AssignedEmployee[];
@@ -34,21 +35,28 @@ export function AssignEmployeesDialog({
   const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const activeStatuses = useMemo(() => new Set(['assigned', 'in review', 'rejected']), []);
+
   const disabledEmployeeIds = useMemo(() => {
     const disabledIds = new Set<string>();
 
     selectedTaskIds.forEach((taskId) => {
       assignedTasks.forEach((assignedTask) => {
         if (assignedTask.taskId === taskId) {
+          const taskStatus = (assignedTask.status ?? '').toLowerCase();
+
           assignedTask.assignedEmployees.forEach((emp) => {
-            disabledIds.add(emp.id);
+            const employeeStatus = (emp.status ?? taskStatus ?? '').toLowerCase();
+            if (activeStatuses.has(employeeStatus)) {
+              disabledIds.add(emp.id);
+            }
           });
         }
       });
     });
 
     return disabledIds;
-  }, [assignedTasks, selectedTaskIds]);
+  }, [activeStatuses, assignedTasks, selectedTaskIds]);
 
   useEffect(() => {
     async function loadEmployees() {
@@ -60,9 +68,10 @@ export function AssignEmployeesDialog({
   }, []);
 
   const filteredEmployees = useMemo(() => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = normalizeSearchQuery(searchTerm);
     return employees.filter(
       (emp) =>
+        !searchLower ||
         emp.name.toLowerCase().includes(searchLower) ||
         emp.empId.toLowerCase().includes(searchLower)
     );
@@ -96,11 +105,6 @@ export function AssignEmployeesDialog({
     }
   };
 
-  const handleConfirm = () => {
-    setOpen(false);
-    setSearchTerm('');
-  };
-
   const handleOpenChange = (newOpen: boolean) => {
     if (!disabled) {
       if (!newOpen) {
@@ -115,18 +119,27 @@ export function AssignEmployeesDialog({
       <Button
         onClick={() => !disabled && setOpen(true)}
         disabled={disabled}
-        className="bg-white shadow-sm/25 text-black cursor-pointer transition-all duration-500 ease-in-out hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className={`w-full sm:w-auto bg-zinc-50 transform-gpu shadow-sm/25 cursor-pointer transition-all duration-400 ease-in-out flex items-center 
+          disabled:shadow hover:bg-accent/15 disabled:cursor-not-allowed`}
       >
-        <div className="flex items-center gap-2">
-          <span>{selectedEmployees.length} selected</span>
-          <Plus className="w-4 h-4" />
+        <div className="flex items-center gap-2 min-w-0 sm:min-w-45 max-w-full sm:max-w-75 max-9/10">
+          <Users size={16} className="text-accent" />
+          <span
+            className={`truncate ${selectedEmployees.length === 0 ? 'text-secondary' : 'text-primary'}`}
+          >
+            {selectedEmployees.length} employee/s selected
+          </span>
         </div>
+        <Plus className="size-4 text-primary" />
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="bg-[#FBF4E8] max-h-[90vh] flex flex-col rounded-3xl pt-12">
+        <DialogContent className="bg-card max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl max-h-[90vh] flex flex-col rounded-3xl p-4 sm:p-6 pt-10 sm:pt-12">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[#690003]">Assign Employees for Task</DialogTitle>
+            <DialogTitle className="flex gap-2 text-xl sm:text-2xl text-foreground text-left items-center">
+              <Users className="size-7 p-1.25 bg-primary-gradient text-card rounded-full" />
+              Assign Employees for Task
+            </DialogTitle>
           </DialogHeader>
 
           {/* Search Bar */}
@@ -134,18 +147,18 @@ export function AssignEmployeesDialog({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Enter in Employee Name or ID"
+              placeholder="Search by employee name or employee ID"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-white shadow-sm/25 focus:outline-none focus:border focus:border-[#690003]"
+              onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
+              className="w-full pl-10 pr-4 py-2 rounded-full bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent"
             />
           </div>
 
           {/* Employees Selected Badge */}
           <div className="mb-1">
-            <h4 className="text-lg font-bold text-[#690003]">
+            <h4 className="text-lg font-bold text-foreground">
               Employees Selected{' '}
-              <span className="bg-gray-50 px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
+              <span className="bg-accent text-card px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
                 {selectedEmployees.length}
               </span>
             </h4>
@@ -153,6 +166,7 @@ export function AssignEmployeesDialog({
 
           {/* Employees Table */}
           <AssignEmployeesTable
+            isLoading={isLoading}
             allFilteredSelected={allFilteredSelected}
             handleSelectAll={handleSelectAll}
             filteredEmployees={filteredEmployees}
@@ -164,16 +178,9 @@ export function AssignEmployeesDialog({
           {/* Dialog Footer */}
           <DialogFooter>
             <Button
-              onClick={handleConfirm}
-              disabled={selectedEmployees.length === 0}
-              className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50"
-            >
-              Confirm
-            </Button>
-            <Button
               variant="outline"
               onClick={() => setOpen(false)}
-              className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+              className="w-full sm:w-auto px-6 sm:px-12 bg-card text-foreground hover:bg-accent hover:text-card cursor-pointer transition-all duration-400 ease-in-out"
             >
               Close
             </Button>

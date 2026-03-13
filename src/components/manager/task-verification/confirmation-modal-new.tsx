@@ -74,7 +74,7 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[95vw] sm:max-w-md lg:max-w-lg xl:max-w-xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -126,7 +126,7 @@ export function ConfirmationDialog({
             variant={type === 'approve' ? 'default' : 'destructive'}
             onClick={handleConfirm}
             disabled={isDisabled}
-            className={type === 'approve' ? 'bg-[#690003] hover:bg-[#af3b3f]' : ''}
+            className={type === 'approve' ? 'bg-foreground hover:bg-[#af3b3f]' : ''}
           >
             {isProcessing || isConfirming ? 'Processing...' : 'Confirm'}
           </Button>

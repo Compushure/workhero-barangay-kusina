@@ -52,6 +52,17 @@ export interface User {
   sss?: string;
   pagibig?: string;
   createdAt?: Date;
+  profilePictureUrl?: string;
+  // Gamified stats
+  xp?: number;
+  user_level?: number;
+  level?: number;
+  total_xp?: number;
+  total_points_earned?: number;
+  points?: number;
+  deducted_points?: number;
+  is_tenured?: boolean;
+  performance_score?: number;
 }
 
 // ============================================
@@ -94,6 +105,12 @@ export type EditUserInput = z.infer<typeof import('@/zod/schemas').editUserSchem
  */
 export type LoginInput = z.infer<typeof import('@/zod/schemas').loginSchema>;
 
+// ============================================
+// Attendance Types
+// ============================================
+
+export * from './attendance';
+
 /**
  * Type for adding a reward/mercado item
  * Inferred from addRewardSchema in @/zod/schemas
@@ -105,6 +122,18 @@ export type AddRewardInput = z.infer<typeof import('@/zod/schemas').addRewardSch
  * Inferred from editRewardSchema in @/zod/schemas
  */
 export type EditRewardInput = z.infer<typeof import('@/zod/schemas').editRewardSchema>;
+
+/**
+ * Type for adding a badge input
+ * Inferred from addBadgeSchema in @/zod/schemas
+ */
+export type AddBadgeInput = z.infer<typeof import('@/zod/schemas').addBadgeSchema>;
+
+/**
+ * Type for editing a badge input
+ * Inferred from editBadgeSchema in @/zod/schemas
+ */
+export type EditBadgeInput = z.infer<typeof import('@/zod/schemas').editBadgeSchema>;
 
 /**
  * Type for server action responses
@@ -130,9 +159,15 @@ export interface Reward {
   redeemingLimit?: number;
   category?: string;
   isActive: boolean;
+  availableDate?: string | Date | null;
+  availableMonth?: 'weekly' | 'monthly' | 'yearly' | null;
+  monthName?: string | null;
   createdAt?: string | Date;
   createdBy?: string;
   imageUrl?: string;
+  // Stock tracking properties
+  redeemedCount?: number; // Total number of items redeemed
+  isOutOfStock?: boolean; // Whether the item is out of stock (quantity <= 0)
 }
 
 // ============================================
@@ -154,6 +189,19 @@ export type UserWithExtras = User & {
   pagibig?: string;
   createdAt?: string | Date;
   profilePictureUrl?: string;
+  xp?: number;
+  user_level?: number;
+  level?: number;
+  total_xp?: number;
+  total_points_earned?: number;
+  points?: number;
+  deducted_points?: number;
+  is_tenured?: boolean;
+  performance_score?: number;
+  total_absences?: number;
+  total_lates?: number;
+  total_undertimes?: number;
+  total_overtimes?: number;
 };
 // Re-export all domain types for convenience
 export * from './shared';
@@ -161,3 +209,4 @@ export * from './manager';
 export * from './hr';
 export * from './employee';
 export * from './admin';
+export * from './notification';

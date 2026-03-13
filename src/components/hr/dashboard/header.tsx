@@ -10,6 +10,8 @@ interface HeaderSectionProps {
   onSearch?: (value: string) => void;
   onSort?: (value: string) => void;
   sortBy?: string;
+  statusFilter?: string;
+  onStatusChange?: (value: string) => void;
 }
 
 export function HeaderSection({
@@ -19,32 +21,54 @@ export function HeaderSection({
   onSearch,
   onSort,
   sortBy = 'date-desc',
+  statusFilter,
+  onStatusChange,
 }: HeaderSectionProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Title Section */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-[#5a2a2a]">{title}</h1>
-        {description && <p className="mt-1 text-sm text-[#7a3d3d]">{description}</p>}
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">{title}</h1>
+        {description && <p className="mt-1 text-xs sm:text-sm text-muted-foreground">{description}</p>}
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="flex items-center justify-end gap-3">
-        <SearchBar
-          searchTerm={searchTerm}
-          onSearchChange={(value) => onSearch?.(value)}
-          placeholder="Search by employee or items"
-          width="w-[320px]"
-        />
-        <SortButton
-          sortBy={sortBy as any}
-          onSortChange={(value) => onSort?.(value)}
-          options={[
-            { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
-            { value: 'date-asc' as any, label: 'Date (Oldest)' },
-            { value: 'employee' as any, label: 'Employee Name' },
-          ]}
-        />
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 sm:justify-end">
+        <div className="w-full sm:min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
+          <SearchBar
+            searchTerm={searchTerm}
+            onSearchChange={(value) => onSearch?.(value)}
+            placeholder="Search by employee name or item name"
+            width="w-full"
+          />
+        </div>
+        <div className="flex gap-2 shrink-0">
+          {/* Status Filter (if provided) */}
+          {statusFilter && onStatusChange && (
+            <SortButton
+              sortBy={statusFilter as any}
+              onSortChange={(value) => onStatusChange(value as string)}
+              styleVariant="mercado"
+              options={[
+                { value: 'pending' as any, label: 'Pending Requests' },
+                { value: 'approved' as any, label: 'Approved Requests' },
+                { value: 'rejected' as any, label: 'Rejected Requests' },
+              ]}
+            />
+          )}
+          {/* Sort Dropdown */}
+          <SortButton
+            sortBy={sortBy as any}
+            onSortChange={(value) => onSort?.(value)}
+            styleVariant="mercado"
+            options={[
+              { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
+              { value: 'date-asc' as any, label: 'Date (Oldest)' },
+              { value: 'employee-asc' as any, label: 'Employee Name (A-Z)' },
+              { value: 'employee-desc' as any, label: 'Employee Name (Z-A)' },
+            ]}
+          />
+        </div>
       </div>
     </div>
   );

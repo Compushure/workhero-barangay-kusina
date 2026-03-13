@@ -35,10 +35,10 @@ function ClearSelectionDialog({
 
   return (
     <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
-      <DialogContent className="bg-white">
+      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white">
         <DialogHeader>
-          <DialogTitle className="text-[#690003]">Clear Selection?</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-foreground">Clear Selection?</DialogTitle>
+          <DialogDescription className=''>
             This will clear all selected employees, tasks, and deadline.
           </DialogDescription>
         </DialogHeader>
@@ -46,7 +46,7 @@ function ClearSelectionDialog({
           <Button
             onClick={handleClearSelection}
             disabled={isClearing}
-            className="bg-[#690003] hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out"
+            className="bg-foreground hover:bg-red-700 text-white cursor-pointer transition-all duration-500 ease-in-out px-6"
           >
             {isClearing ? 'Clearing...' : 'Clear'}
           </Button>
@@ -54,7 +54,7 @@ function ClearSelectionDialog({
             variant="outline"
             onClick={() => setShowClearConfirm(false)}
             disabled={isClearing}
-            className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+            className="border-gray-400 bg-card hover:bg-zinc-300 cursor-pointer transition-all duration-500 ease-in-out"
           >
             Cancel
           </Button>

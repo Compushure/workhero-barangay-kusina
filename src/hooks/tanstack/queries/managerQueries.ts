@@ -13,7 +13,7 @@ import {
   handleFetchTasksToReviewPaginated,
   handleFetchApprovedTasksPaginated,
   handleFetchDeniedTasksPaginated,
-} from '@/action-handlers/manager';
+} from '@/action-handlers/manager/verification';
 import type { VerificationRequest, PaginatedResponse } from '@/types';
 
 /**
@@ -29,8 +29,8 @@ export const managerTaskKeys = {
   lists: () => [...managerTaskKeys.all, 'list'] as const,
   list: (status?: string, page?: number) => [...managerTaskKeys.lists(), status, page] as const,
   paginatedLists: () => [...managerTaskKeys.all, 'paginated'] as const,
-  paginatedList: (status: string, page: number) =>
-    [...managerTaskKeys.paginatedLists(), status, page] as const,
+  paginatedList: (status: string, page: number, search: string, sort: string) =>
+    [...managerTaskKeys.paginatedLists(), status, page, search, sort] as const,
   details: () => [...managerTaskKeys.all, 'detail'] as const,
   detail: (id: string) => [...managerTaskKeys.details(), id] as const,
 };
@@ -83,12 +83,14 @@ export function useGetTasksToReview(
  */
 export function useGetTasksToReviewPaginated(
   page: number = 1,
+  searchTerm: string = '',
+  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc',
   queryOptions: { enabled?: boolean } = {}
 ): UseQueryResult<PaginatedResponse<VerificationRequest>, Error> {
   return useQuery({
-    queryKey: managerTaskKeys.paginatedList('in-review', page),
+    queryKey: managerTaskKeys.paginatedList('in-review', page, searchTerm, sort),
     queryFn: async () => {
-      const response = await handleFetchTasksToReviewPaginated(page);
+      const response = await handleFetchTasksToReviewPaginated(page, searchTerm, sort);
       return response;
     },
     enabled: queryOptions.enabled !== false && page >= 1,
@@ -131,12 +133,14 @@ export function useGetApprovedTasks(
  */
 export function useGetApprovedTasksPaginated(
   page: number = 1,
+  searchTerm: string = '',
+  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc',
   queryOptions: { enabled?: boolean } = {}
 ): UseQueryResult<PaginatedResponse<VerificationRequest>, Error> {
   return useQuery({
-    queryKey: managerTaskKeys.paginatedList('approved', page),
+    queryKey: managerTaskKeys.paginatedList('approved', page, searchTerm, sort),
     queryFn: async () => {
-      const response = await handleFetchApprovedTasksPaginated(page);
+      const response = await handleFetchApprovedTasksPaginated(page, searchTerm, sort);
       return response;
     },
     enabled: queryOptions.enabled !== false && page >= 1,
@@ -179,12 +183,14 @@ export function useGetDeniedTasks(
  */
 export function useGetDeniedTasksPaginated(
   page: number = 1,
+  searchTerm: string = '',
+  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc',
   queryOptions: { enabled?: boolean } = {}
 ): UseQueryResult<PaginatedResponse<VerificationRequest>, Error> {
   return useQuery({
-    queryKey: managerTaskKeys.paginatedList('rejected', page),
+    queryKey: managerTaskKeys.paginatedList('rejected', page, searchTerm, sort),
     queryFn: async () => {
-      const response = await handleFetchDeniedTasksPaginated(page);
+      const response = await handleFetchDeniedTasksPaginated(page, searchTerm, sort);
       return response;
     },
     enabled: queryOptions.enabled !== false && page >= 1,

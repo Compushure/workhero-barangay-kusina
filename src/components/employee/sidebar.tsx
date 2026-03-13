@@ -1,22 +1,17 @@
 'use client';
 
-import {
-  FileText,
-  ChevronLeft,
-  ChevronRight,
-  LayoutDashboard,
-  ShoppingCart,
-} from 'lucide-react';
+import { FileText, ChevronLeft, ChevronRight, LayoutDashboard, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogOutBtn } from '../sidebar/logout-btn';
 import { ProfilePic } from '../sidebar/profile-pic';
 import { RankWidget } from '../sidebar/rank-widget';
+import { ProfileModal } from '../sidebar/profile-modal';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
 import { useQuery } from '@tanstack/react-query';
-import { getEmployeeXP } from '@/actions/employees/get-xp';
+import { getEmployeeXP } from '@/actions/employee/stats';
 
 interface NavItem {
   key: string;
@@ -53,9 +48,11 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Fetch current session user
-  const { data: user } = useGetSessionUser();
+  const { data: user, isLoading: isUserLoading, isFetching: isUserFetching } = useGetSessionUser();
+  const isProfileLoading = isUserLoading || isUserFetching;
 
   // Fetch employee rank
   const { data: rankData, isLoading: isRankLoading } = useGetEmployeeRank();
@@ -69,6 +66,10 @@ export function Sidebar({
     },
     staleTime: 5 * 60 * 1000,
   });
+
+  const handleProfileClick = () => {
+    setShowProfileModal(true);
+  };
 
   return (
     <aside
@@ -123,9 +124,9 @@ export function Sidebar({
         }`}
       >
         {/* Rank Widget */}
-        <RankWidget 
-          rankData={rankData ?? null} 
-          isLoading={isRankLoading} 
+        <RankWidget
+          rankData={rankData ?? null}
+          isLoading={isRankLoading}
           isCollapsed={isCollapsed}
           totalXP={xpResult?.totalXP}
         />
@@ -135,17 +136,37 @@ export function Sidebar({
             isCollapsed ? 'w-16 h-16 justify-center' : 'p-4 gap-3 mb-4'
           }`}
         >
-          <ProfilePic user={user} />
-          {!isCollapsed && user && (
+          <ProfilePic user={user} onClick={handleProfileClick} isLoading={isProfileLoading} />
+          {!isCollapsed && (
             <div className="min-w-0">
-              <p className="font-semibold text-sm">{user.name}</p>
-              <p className="text-xs text-red-200 truncate">{user.email}</p>
+              {isProfileLoading ? (
+                <>
+                  <div className="h-4 w-20 bg-white/20 rounded animate-pulse" />
+                  <div className="h-3 w-28 bg-white/10 rounded mt-1 animate-pulse" />
+                </>
+              ) : (
+                <>
+                  {user && (
+                    <>
+                      <p className="font-semibold text-sm truncate">{user.name}</p>
+                      <p className="text-xs text-red-200 truncate">{user.email}</p>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>
 
         {!isCollapsed && <LogOutBtn />}
       </div>
+
+      {/* Profile Modal */}
+      <ProfileModal
+        open={showProfileModal}
+        onOpenChange={setShowProfileModal}
+        user={user ?? null}
+      />
     </aside>
   );
 }

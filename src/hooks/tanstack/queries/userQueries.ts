@@ -7,9 +7,10 @@
  */
 
 import { useQuery, keepPreviousData, type UseQueryResult } from '@tanstack/react-query';
-import { handleFetchUsers, handleFetchUsersPaginated } from '@/action-handlers/manage';
-import { handleFetchSessionUser } from '@/action-handlers/sidebar';
+import { handleFetchUsers, handleFetchUsersPaginated } from '@/action-handlers/superadmin/users';
+import { handleFetchSessionUser } from '@/action-handlers/shared/sidebar';
 import type { User, UserQueryParams, UserWithExtras, PaginatedResponse } from '@/types';
+import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 /**
  * Query key factory for user-related queries
@@ -75,7 +76,7 @@ export function useGetUsers(
 ): UseQueryResult<User[], Error> {
   // Merge with defaults
   const queryParams: UserQueryParams = {
-    searchQuery: params.searchQuery ?? '',
+    searchQuery: sanitizeSearchInput(params.searchQuery ?? ''),
     searchType: params.searchType ?? 'name',
     employeeTypeFilter: params.employeeTypeFilter ?? 'all',
     employmentStatusFilter: params.employmentStatusFilter ?? 'all',
@@ -131,9 +132,11 @@ export function useGetSessionUser(
       return result.data;
     },
     enabled: queryOptions.enabled !== false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000,
     gcTime: 30 * 60 * 1000, // 30 minutes
-    retry: 1,
+    retry: 2,
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnMount: 'always',
   }) as UseQueryResult<UserWithExtras | null, Error>;
 }
 
@@ -180,7 +183,7 @@ export function useGetUsersPaginated(
 ): UseQueryResult<PaginatedResponse<User>, Error> {
   // Merge with defaults
   const queryParams: UserQueryParams = {
-    searchQuery: params.searchQuery ?? '',
+    searchQuery: sanitizeSearchInput(params.searchQuery ?? ''),
     searchType: params.searchType ?? 'name',
     employeeTypeFilter: params.employeeTypeFilter ?? 'all',
     employmentStatusFilter: params.employmentStatusFilter ?? 'all',

@@ -8,11 +8,14 @@
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import {
   handleDeleteTask,
-  handleClearAllTasks,
+  handleDeleteTaskForAllEmployees,
+  handleClearAssignedTasks,
   handleClearAllEmployeeTasks,
   handleUpdateTaskAssignment,
-} from '@/action-handlers/manager-current-assigned-task';
+} from '@/action-handlers/manager/assigned-tasks';
 import { managerAssignmentKeys } from '../queries/managerAssignmentQueries';
+import { useManagerAssignmentStore } from '@/store/managerAssignmentStore';
+import { toast } from 'sonner';
 
 /**
  * Mutation for deleting a task assignment
@@ -21,49 +24,74 @@ import { managerAssignmentKeys } from '../queries/managerAssignmentQueries';
 export function useDeleteTaskMutation(): UseMutationResult<
   boolean,
   Error,
-  { taskId: string }
+  { assignmentId: string }
 > {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ taskId }: { taskId: string }) => {
-      return await handleDeleteTask(taskId);
+    mutationFn: async ({ assignmentId }: { assignmentId: string }) => {
+      return await handleDeleteTask(assignmentId);
     },
     onSuccess: () => {
-      // Invalidate both task and employee views
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
-      queryClient.invalidateQueries({
-        queryKey: managerAssignmentKeys.employees(),
-      });
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
     },
     onError: (error) => {
+      toast.error('Failed to delete task assignment.');
       console.error('Error deleting task:', error);
     },
   });
 }
 
 /**
- * Mutation for clearing all task assignments
- * Automatically invalidates all assignment queries on success
+ * Mutation for deleting all assignments for a task group
+ * This removes the task card and unassigns all employees in that group
  */
-export function useClearAllTasksMutation(): UseMutationResult<
+export function useDeleteTaskGroupMutation(): UseMutationResult<
   boolean,
   Error,
-  void
+  { categoryId: string; deadlineDate: string; maxOrders: number; createdAt: string }
 > {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
-      return await handleClearAllTasks();
+    mutationFn: async ({ categoryId, deadlineDate, maxOrders, createdAt }) => {
+      return await handleDeleteTaskForAllEmployees(categoryId, deadlineDate, maxOrders, createdAt);
     },
     onSuccess: () => {
-      // Invalidate all assignment data
-      queryClient.invalidateQueries({
-        queryKey: managerAssignmentKeys.all,
-      });
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
     },
     onError: (error) => {
+      toast.error('Failed to delete task group.');
+      console.error('Error deleting task group:', error);
+    },
+  });
+}
+
+/**
+ * Mutation for clearing all 'assigned' task assignments
+ * Automatically invalidates all assignment queries on success
+ */
+export function useClearAssignedTasksMutation(): UseMutationResult<boolean, Error, void> {
+  const queryClient = useQueryClient();
+  const { startOptimistic, optimisticClearAll, rollback, commit } = useManagerAssignmentStore();
+
+  return useMutation({
+    mutationFn: async () => {
+      return await handleClearAssignedTasks();
+    },
+    onMutate: async () => {
+      startOptimistic();
+      optimisticClearAll();
+    },
+    onSuccess: () => {
+      commit();
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.all });
+    },
+    onError: (error) => {
+      rollback();
+      toast.error('Failed to clear assigned tasks. Rolling back changes.');
       console.error('Error clearing all tasks:', error);
     },
   });
@@ -79,19 +107,25 @@ export function useClearAllEmployeeTasksMutation(): UseMutationResult<
   { employeeId: string }
 > {
   const queryClient = useQueryClient();
+  const { startOptimistic, optimisticClearAllEmployeeTasks, rollback, commit } =
+    useManagerAssignmentStore();
 
   return useMutation({
     mutationFn: async ({ employeeId }: { employeeId: string }) => {
       return await handleClearAllEmployeeTasks(employeeId);
     },
+    onMutate: async ({ employeeId }) => {
+      startOptimistic();
+      optimisticClearAllEmployeeTasks(employeeId);
+    },
     onSuccess: () => {
-      // Invalidate both task and employee views
+      commit();
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
-      queryClient.invalidateQueries({
-        queryKey: managerAssignmentKeys.employees(),
-      });
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
     },
     onError: (error) => {
+      rollback();
+      toast.error('Failed to clear employee tasks. Rolling back changes.');
       console.error('Error clearing employee tasks:', error);
     },
   });
@@ -107,6 +141,7 @@ export function useUpdateTaskAssignmentMutation(): UseMutationResult<
   { taskId: string; maxOrders: number; newDueDate: string; employeeIds: string[] }
 > {
   const queryClient = useQueryClient();
+  const { startOptimistic, optimisticUpdateTask, rollback, commit } = useManagerAssignmentStore();
 
   return useMutation({
     mutationFn: async ({
@@ -120,21 +155,20 @@ export function useUpdateTaskAssignmentMutation(): UseMutationResult<
       newDueDate: string;
       employeeIds: string[];
     }) => {
-      return await handleUpdateTaskAssignment(
-        taskId,
-        maxOrders,
-        newDueDate,
-        employeeIds
-      );
+      return await handleUpdateTaskAssignment(taskId, maxOrders, newDueDate, employeeIds);
+    },
+    onMutate: async ({ taskId, maxOrders, newDueDate, employeeIds }) => {
+      startOptimistic();
+      optimisticUpdateTask(taskId, { maxOrders, newDueDate, employeeIds });
     },
     onSuccess: () => {
-      // Invalidate both task and employee views
+      commit();
       queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
-      queryClient.invalidateQueries({
-        queryKey: managerAssignmentKeys.employees(),
-      });
+      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
     },
     onError: (error) => {
+      rollback();
+      toast.error('Failed to update task assignment. Rolling back changes.');
       console.error('Error updating task assignment:', error);
     },
   });

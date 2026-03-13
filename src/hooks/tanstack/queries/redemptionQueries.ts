@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRedemptionRequestsAction, getMyRedemptionRequestsAction } from '@/actions/hr';
+import { handleGetRedemptionRequestsAction } from '@/action-handlers/hr/redemptions';
+import { handleGetMyRedemptionRequestsAction } from '@/action-handlers/employee/redemptions';
 import { RedemptionRequest } from '@/types';
 
 /**
@@ -21,13 +22,7 @@ export function useGetRedemptionRequests(status?: string) {
   return useQuery<RedemptionRequest[], Error>({
     queryKey: redemptionKeys.list(status),
     queryFn: async () => {
-      const result = await getRedemptionRequestsAction(status);
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      return result.data || [];
+      return await handleGetRedemptionRequestsAction(status);
     },
     staleTime: 2 * 60 * 1000, // Consider data fresh for 2 minutes (more frequent for pending requests)
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
@@ -44,13 +39,7 @@ export function useGetMyRedemptionRequests(status?: string) {
   return useQuery<RedemptionRequest[], Error>({
     queryKey: redemptionKeys.myRequestsByStatus(status),
     queryFn: async () => {
-      const result = await getMyRedemptionRequestsAction(status);
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      return result.data || [];
+      return await handleGetMyRedemptionRequestsAction(status);
     },
     staleTime: 2 * 60 * 1000, // Consider data fresh for 2 minutes
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes

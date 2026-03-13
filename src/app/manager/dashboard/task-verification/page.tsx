@@ -1,6 +1,17 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { VerificationRequestsPage } from '@/components/manager/task-verification/verification-request-page';
-import { fetchTasksToReview } from '@/actions/manager';
+import { CookingPotSuspense } from '@/components/shared/cooking-pot-suspense';
+import { fetchTasksToReview } from '@/actions/manager/verification';
+
+export const metadata: Metadata = {
+  title: 'WorkHero | Task Verification',
+  icons: {
+    icon: '/assets/website-logo.svg',
+    shortcut: '/assets/website-logo.svg',
+    apple: '/assets/website-logo.svg',
+  },
+};
 
 export default async function TaskVerification() {
   const { data, error } = await fetchTasksToReview();
@@ -13,7 +24,7 @@ export default async function TaskVerification() {
   }
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<CookingPotSuspense label="Loading Requests from Employees..." />}>
       <VerificationRequestsPage initialRequests={initialRequests} />
     </Suspense>
   );

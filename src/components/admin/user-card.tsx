@@ -5,8 +5,8 @@ import * as React from 'react';
 import type { EmployeeTypeValue, User, UserWithExtras } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { WhiteCard } from '@/components/ui/white-card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Award as IdCard,
   BadgeCheck,
@@ -21,27 +21,30 @@ import {
   Edit2,
   UserIcon,
   Upload,
+  Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
+import { ProfileAvatar } from '@/components/shared/ProfileAvatar';
+import { useProfileImage } from '@/hooks/useProfileImage';
 
 interface UserCardProps {
   user: UserWithExtras;
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
-  onHandleProfilePictureUpload?: (userid: string, file: File, username: string) => Promise<boolean>;
+  onHandleProfilePictureUpload?: (userid: string, file: File, username: string) => Promise<void>;
 }
 
 const EMPLOYEE_TYPE_STYLES: Record<EmployeeTypeValue, string> = {
-  manager: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  hr: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  regular: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-  superadmin: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  manager: 'bg-accent text-white font-semibold',
+  hr: 'bg-[#faa938] text-foreground font-semibold',
+  regular: 'bg-gray-200 text-foreground font-semibold',
+  superadmin: 'bg-foreground text-white font-semibold border-2 border-accent',
 };
 
 const EMPLOYMENT_STATUS_STYLES: Record<string, string> = {
-  probational: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-  regular: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+  probational: 'bg-[#faa938] text-foreground font-semibold',
+  regular: 'bg-accent text-white font-semibold',
 };
 
 function formatDate(value?: Date | string) {
@@ -56,15 +59,19 @@ const globalImageVersions = new Map<string, number>();
 export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload }: UserCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isHoveringAvatar, setIsHoveringAvatar] = useState(false);
-  const [hasImage, setHasImage] = useState(true);
+  const [showImageModal, setShowImageModal] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [imageKey, setImageKey] = useState<number>(() => globalImageVersions.get(user.id) || 0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Use optimized profile image hook
+  const { exists: hasImage, imageUrl, key: imageKey, refresh: refreshImage } = useProfileImage({
+    userId: user.id,
+    profilePictureUrl: user.profilePictureUrl,
+  });
 
   function handleAvatarClick(e: React.MouseEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
-    fileInputRef.current?.click();
+    setShowImageModal(true);
   }
 
   function getProfileUrl(userId: string) {
@@ -74,34 +81,28 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
     return data.publicUrl;
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  function getInitials(name: string): string {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  async function handleImageSelect(file: File) {
     console.log('Selected file:', file?.name);
     if (!file) return;
     // Optimistic preview
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
-    setHasImage(true);
-    if (onHandleProfilePictureUpload) {
-      const success = await onHandleProfilePictureUpload(user.id, file, user.name);
-      if (success) {
-        // Update global version and local state immediately
-        const newKey = Date.now();
-        globalImageVersions.set(user.id, newKey);
-        setImageKey(newKey);
-        setHasImage(true);
 
-        // Clear preview after brief delay for new image to load
-        setTimeout(() => {
-          if (objectUrl) URL.revokeObjectURL(objectUrl);
-          setPreviewUrl(null);
-        }, 1500);
-      } else {
-        if (objectUrl) URL.revokeObjectURL(objectUrl);
-        setPreviewUrl(null);
-        setHasImage(false);
-      }
-    }
+    // Clear preview after brief delay for new image to load
+    setTimeout(() => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      setPreviewUrl(null);
+      refreshImage(); // Refresh after upload completes
+    }, 1500);
   }
 
   const employmentStatus = user.employmentStatus || 'unknown';
@@ -111,21 +112,18 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <WhiteCard className="overflow-hidden border border-border hover:scale-101">
-        <div className="w-full p-4 sm:p-6 flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+      <div className="rounded-3xl bg-background overflow-hidden border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 hover:shadow-lg transition-all duration-300">
+        <div className="w-full p-3 sm:p-4 lg:p-6 xl:p-7 2xl:p-8 flex items-start justify-between gap-2 sm:gap-3 lg:gap-4 xl:gap-5">
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 min-w-0 flex-1">
             <div
-              className="relative group cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering collapsible
-                handleAvatarClick(e);
-              }}
+              className="relative group cursor-zoom-in hover:opacity-90 transition-opacity"
+              onClick={handleAvatarClick}
               onMouseEnter={() => setIsHoveringAvatar(true)}
               onMouseLeave={() => setIsHoveringAvatar(false)}
             >
               <div
-                className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 transition-colors ${
-                  isHoveringAvatar ? 'bg-primary/20' : ''
+                className={`w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-full bg-accent/10 flex items-center justify-center shrink-0 transition-colors ${
+                  isHoveringAvatar ? 'bg-accent/20' : ''
                 }`}
               >
                 {previewUrl ? (
@@ -133,69 +131,72 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   <img
                     src={previewUrl}
                     alt={`${user.name}'s profile (preview)`}
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-full object-cover"
                   />
-                ) : hasImage ? (
+                ) : hasImage === true ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={`${user.id}-${imageKey}`}
-                    src={`${getProfileUrl(user.id)}?t=${imageKey}`}
+                    src={imageUrl}
                     alt={`${user.name}'s profile`}
-                    className="w-10 h-10 rounded-full object-cover"
-                    onError={() => setHasImage(false)}
+                    className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-full object-cover"
+                    loading="lazy"
+                    onLoad={(e) => {
+                      e.currentTarget.style.opacity = '1';
+                    }}
+                    style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
                   />
                 ) : (
-                  <UserIcon className="h-5 w-5 text-primary" />
+                  <span className="text-xs sm:text-sm lg:text-base xl:text-lg font-semibold text-foreground">
+                    {getInitials(user.name)}
+                  </span>
                 )}
               </div>
               {isHoveringAvatar && (
-                <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center ">
-                  <Upload className="h-4 w-4 text-white" />
+                <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
                 </div>
               )}
             </div>
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              hidden
-              onChange={handleFileChange}
-            />
+            
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <p className="font-semibold truncate">{user.name}</p>
+              <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 mb-0.5 sm:mb-1 lg:mb-2">
+                <p className="font-semibold text-sm sm:text-base lg:text-lg xl:text-xl truncate text-foreground">{user.name}</p>
                 {user.employeeId ? (
-                  <Badge variant="outline" className="hidden sm:inline-flex text-xs">
+                  <Badge
+                    variant="outline"
+                    className="hidden md:inline-flex text-xs lg:text-sm border-gray-300 text-gray-700 bg-white"
+                  >
                     {user.employeeId}
                   </Badge>
                 ) : null}
               </div>
-              <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-              <div className="flex gap-2 mt-2 sm:hidden">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-600 truncate">{user.email}</p>
+              <div className="flex gap-1.5 sm:gap-2 lg:gap-3 mt-1.5 sm:mt-2 lg:mt-3 md:hidden">
                 <span
-                  className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                  className={`inline-block px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium capitalize ${
                     EMPLOYEE_TYPE_STYLES[user.employeeType]
                   }`}
                 >
                   {user.employeeType}
                 </span>
                 <span
-                  className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${employmentStatusClass}`}
+                  className={`inline-block px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium capitalize ${employmentStatusClass}`}
                 >
                   {employmentStatus}
                 </span>
               </div>
             </div>
-            <div className="hidden sm:flex items-center gap-2 shrink-0">
+            <div className="hidden md:flex items-center gap-2 lg:gap-3 xl:gap-4 shrink-0">
               <span
-                className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                className={`px-2.5 py-1 lg:px-3.5 lg:py-1.5 rounded-full text-xs lg:text-sm font-medium capitalize ${
                   EMPLOYEE_TYPE_STYLES[user.employeeType]
                 }`}
               >
                 {user.employeeType}
               </span>
               <span
-                className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${employmentStatusClass}`}
+                className={`px-2.5 py-1 lg:px-3.5 lg:py-1.5 rounded-full text-xs lg:text-sm font-medium capitalize ${employmentStatusClass}`}
               >
                 {employmentStatus}
               </span>
@@ -205,10 +206,10 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
             <button
               type="button"
               aria-label={isOpen ? 'Collapse user' : 'Expand user'}
-              className="p-2 rounded-full hover:bg-muted transition-colors shrink-0"
+              className="p-1.5 sm:p-2 lg:p-2.5 rounded-full hover:bg-gray-100 transition-colors shrink-0"
             >
               <ChevronDown
-                className={`h-5 w-5 text-muted-foreground transition-transform ${
+                className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-gray-600 transition-transform ${
                   isOpen ? 'rotate-180' : ''
                 }`}
               />
@@ -217,132 +218,162 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
         </div>
 
         <CollapsibleContent>
-          <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-border pt-4 space-y-6">
+          <div className="px-3 sm:px-4 lg:px-6 xl:px-7 2xl:px-8 pb-3 sm:pb-4 lg:pb-6 xl:pb-7 2xl:pb-8 border-t border-[#f47812]/15 pt-3 sm:pt-4 lg:pt-6 xl:pt-7 space-y-4 sm:space-y-6 lg:space-y-8">
             <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">
+              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">
                 Basic Information
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="flex items-start gap-3">
-                  <UserIcon className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <UserIcon className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Name</p>
-                    <p className="text-sm font-medium truncate">{user.name}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Name</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground truncate">{user.name}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <Mail className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <Mail className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="text-sm font-medium break-all">{user.email}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Email</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground break-all">{user.email}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <Phone className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <Phone className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Contact</p>
-                    <p className="text-sm font-medium">{user.contactNumber || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Contact</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{user.contactNumber || 'N/A'}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">
+              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">
                 Employment Details
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="flex items-start gap-3">
-                  <Building2 className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <Building2 className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Company ID</p>
-                    <p className="text-sm font-medium text-gray-400">{user.companyId || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Company ID</p>
+                    <p className="text-sm lg:text-base font-medium text-gray-600">{user.companyId || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <IdCard className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <IdCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Employee ID</p>
-                    <p className="text-sm font-medium">{user.employeeId || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Employee ID</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{user.employeeId || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <BadgeCheck className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <BadgeCheck className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Status</p>
-                    <p className="text-sm font-medium capitalize">{employmentStatus}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Status</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground capitalize">{employmentStatus}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <Calendar className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Date Created</p>
-                    <p className="text-sm font-medium">{dateCreated}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Date Created</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{dateCreated}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Address</p>
-              <div className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                <p className="text-sm">{user.address || 'N/A'}</p>
+              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">Address</p>
+              <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                <MapPin className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
+                <p className="text-sm lg:text-base text-foreground">{user.address || 'N/A'}</p>
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">
+              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">
                 Philippine Government IDs
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="flex items-start gap-3">
-                  <CreditCard className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">TIN</p>
-                    <p className="text-sm font-medium font-mono">{user.tin || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">TIN</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{user.tin || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <CreditCard className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">SSS</p>
-                    <p className="text-sm font-medium font-mono">{user.sss || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">SSS</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{user.sss || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <CreditCard className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+                  <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Pag-IBIG</p>
-                    <p className="text-sm font-medium font-mono">{user.pagibig || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-gray-600">Pag-IBIG</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{user.pagibig || 'N/A'}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 pt-2 lg:pt-4">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(user)}
-                className="gap-2 flex-1 sm:flex-none cursor-pointer"
+                className="gap-2 flex-1 sm:flex-none cursor-pointer bg-white hover:bg-gray-100 hover:text-foreground border-zinc-300 transition-all duration-500 ease-in-out text-xs sm:text-sm"
               >
-                <Edit2 className="h-4 w-4" />
+                <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Edit User
               </Button>
               <Button
                 variant="destructive"
                 size="sm"
                 onClick={() => onDelete(user)}
-                className="gap-2 flex-1 sm:flex-none bg-primary cursor-pointer"
+                className="gap-2 flex-1 sm:flex-none bg-destructive cursor-pointer text-white hover:bg-destructive/90 transition-all duration-500 ease-in-out text-xs sm:text-sm"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Delete User
               </Button>
             </div>
           </div>
         </CollapsibleContent>
-      </WhiteCard>
+      </div>
+      
+      {/* Image Preview Modal */}
+      <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
+        <DialogContent className="max-w-2xl lg:max-w-4xl bg-card">
+          <DialogHeader>
+            <DialogTitle className="text-base lg:text-lg text-foreground">{user.name}&apos;s Profile Picture</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center p-4">
+            {hasImage === true ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imageUrl}
+                alt={`${user.name}'s profile`}
+                className="max-w-full max-h-[70vh] rounded-lg object-contain"
+                loading="eager"
+                onLoad={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                }}
+                style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
+              />
+            ) : (
+              <div className="w-64 h-64 lg:w-80 lg:h-80 rounded-lg bg-accent/10 flex items-center justify-center">
+                <span className="text-8xl lg:text-9xl font-semibold text-foreground/60">
+                  {getInitials(user.name)}
+                </span>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Collapsible>
   );
 }

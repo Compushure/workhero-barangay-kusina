@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { parseISO, format } from 'date-fns';
 import type { AssignedTask, AssignedEmployee } from '@/types';
-import { ChevronDown, X } from 'lucide-react';
+import { Coins, Soup } from 'lucide-react';
 import TaskViewCardMenu from './dialogs/task-view/task-view-card-menu';
 import EditTaskDialog from './dialogs/task-view/edit-task-dialog';
 import DeleteTaskDialog from './dialogs/task-view/delete-task-dialog';
 import UnassignEmployeeDialog from './dialogs/task-view/unassign-employee-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
 import { useUpdateTaskAssignmentMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
-import { handleFetchEmployeeList } from '@/action-handlers/manager-assignment';
+import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
+import TaskViewEmployeeBadges from './task-view-employee-badges';
+import { isTaskOverdue } from '@/utils/date-utils';
 
 interface TaskViewCardProps {
   task: AssignedTask;
@@ -21,27 +23,62 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   const updateTaskMutation = useUpdateTaskAssignmentMutation();
 
   const [expanded, setExpanded] = useState(false);
-  const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(null);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState<{
+    assignmentId?: string;
+    employeeId: string;
+  } | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editMaxOrders, setEditMaxOrders] = useState(task.maxOrders);
-  const [editDueDate, setEditDueDate] = useState<Date>(() => parseISO(task.dateRange.end));
+  const [editDueDate, setEditDueDate] = useState<Date>(() =>
+    task.dateRange?.end ? parseISO(task.dateRange.end) : new Date()
+  );
   const [editAssignedEmployees, setEditAssignedEmployees] = useState<string[]>(
     (task.assignedEmployees ?? []).map((e) => e.id)
   );
   const [openPopover, setOpenPopover] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
   const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const badgesContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     handleFetchEmployeeList().then(setEmployees);
   }, []);
 
-  const displayedEmployees = expanded
-    ? (task.assignedEmployees ?? [])
-    : (task.assignedEmployees ?? []).slice(0, 4);
-  const hiddenCount = Math.max(0, (task.assignedEmployees ?? []).length - 4);
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (badgesContainerRef.current) {
+        // Temporarily remove the height restriction to check natural overflow
+        const originalClasses = badgesContainerRef.current.className;
+        badgesContainerRef.current.className = badgesContainerRef.current.className.replace(
+          'max-h-12 overflow-hidden',
+          ''
+        );
 
-  const formatDate = (dateString: string) => {
+        const scrollHeight = badgesContainerRef.current.scrollHeight;
+        const clientHeight = badgesContainerRef.current.clientHeight;
+        const hasNaturalOverflow = scrollHeight > clientHeight;
+
+        // Restore original classes
+        badgesContainerRef.current.className = originalClasses;
+
+        setHasOverflow(hasNaturalOverflow);
+      }
+    };
+
+    checkOverflow();
+
+    const resizeObserver = new ResizeObserver(checkOverflow);
+    if (badgesContainerRef.current) {
+      resizeObserver.observe(badgesContainerRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, [task.assignedEmployees]);
+
+  const displayedEmployees = task.assignedEmployees ?? [];
+
+  const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
     const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
     return new Date(year, month - 1, day).toLocaleDateString('en-US', {
@@ -86,7 +123,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   const handleOpenEditDialog = () => {
     setEditMaxOrders(task.maxOrders);
-    setEditDueDate(parseISO(task.dateRange.end));
+    setEditDueDate(task.dateRange?.end ? parseISO(task.dateRange.end) : new Date());
     setEditAssignedEmployees((task.assignedEmployees ?? []).map((e) => e.id));
     setShowEditDialog(true);
     setOpenPopover(false);
@@ -94,7 +131,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   const handleCancelEdit = () => {
     setEditMaxOrders(task.maxOrders);
-    setEditDueDate(parseISO(task.dateRange.end));
+    setEditDueDate(task.dateRange?.end ? parseISO(task.dateRange.end) : new Date());
     setEditAssignedEmployees((task.assignedEmployees ?? []).map((e) => e.id));
     setShowEditDialog(false);
   };
@@ -106,26 +143,78 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   };
 
   return (
-    <div className="rounded-xl bg-[#FAFAFA] p-4 shadow-sm/25">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1 ">
-          <div className="flex items-center gap-3">
-            <h3 className="text-lg font-bold text-[#690003]">{task.taskName}</h3>
-          </div>
-          <p className="text-sm text-gray-500 mb-2">{task.taskType}</p>
-          <div className="flex gap-6 text-sm text-black">
-            <span>
-              {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
-            </span>
-            <span>Max Orders: {task.maxOrders}</span>
-            <span className="flex items-center gap-2">
-              <span>{task.points} pts</span>
-              <span>XP {task.xp}</span>
-            </span>
-          </div>
-        </div>
+    <div
+      className={`relative flex flex-col lg:flex-row items-start lg:items-start justify-between rounded-2xl bg-card p-3 sm:p-4 md:p-6 gap-4 sm:gap-6 md:gap-8 transition-all ease-in-out duration-400
+        ${expanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`}
+    >
+      <main className="flex flex-col w-full gap-4 sm:gap-5 md:gap-7 min-w-0 flex-1 pr-8 sm:pr-10 lg:pr-0">
+        <section className="flex flex-col lg:flex-row lg:justify-between gap-3 sm:gap-4 min-w-0">
+          {/* Task name, description, and date range */}
+          <header className="flex flex-col gap-1.5 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-end gap-1 sm:gap-0 min-w-0">
+              <h3 className="text-lg sm:text-xl font-bold text-primary truncate shrink-0 max-w-full sm:max-w-125">{task.taskName}</h3>
+              <p className="text-xs sm:text-sm text-gray-500 sm:ml-2 sm:mr-8 sm:pb-0.5 truncate min-w-0 flex-1">{task.taskDescription}</p>
+            </div>
 
+            <p className="flex items-center text-xs sm:text-sm font-medium text-secondary flex-wrap gap-1 sm:gap-2">
+              <span className="bg-accent-secondary/25 w-fit rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-sm">
+                {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
+              </span>
+              {isTaskOverdue(task.dateRange.end) && (
+                <span className="bg-red-100 text-red-500 text-[10px] sm:text-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                  Task is Overdue
+                </span>
+              )}
+            </p>
+          </header>
+
+          {/* Task max orders, fiesta points and XP */}
+          <div className="flex gap-3 sm:gap-4 text-secondary/85 items-baseline shrink-0">
+            <div className="flex flex-col items-end">
+              <div className="flex text-sm sm:text-base font-medium items-end gap-1">
+                <Soup strokeWidth={1.5} className="size-5 sm:size-7 mb-2 sm:mb-3.5" />
+                <p className="flex flex-col items-center">
+                  <span className="inline-block font-semibold pb-1 leading-none text-xs sm:text-base">
+                    {task.maxOrders} max order/s
+                  </span>
+                  <span className="text-[10px] sm:text-xs font-extralight text-zinc-400 leading-none">
+                    per employee
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center">
+              <div className="flex items-end gap-1.5 sm:gap-2">
+                <p className="flex gap-0.5 sm:gap-1 items-end text-base sm:text-xl font-medium leading-none">
+                  <Coins strokeWidth={1.75} className="size-4 sm:size-6" />
+                  <span className="inline-block font-semibold pb-0.5 text-sm sm:text-base">{task.points}</span>
+                </p>
+
+                <p className="flex gap-1 sm:gap-1.5 items-end font-medium pb-0.5">
+                  <span className="inline-block italic text-sm sm:text-lg leading-none">XP</span>
+                  <span className="inline-block font-semibold text-base sm:text-xl leading-none">{task.xp}</span>
+                </p>
+              </div>
+
+              <p className="text-[10px] sm:text-xs font-extralight text-zinc-400 pl-2 sm:pl-3">per order</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Assigned To Section */}
+        <TaskViewEmployeeBadges
+          task={task}
+          hasOverflow={hasOverflow}
+          expanded={expanded}
+          setExpanded={setExpanded}
+          badgesContainerRef={badgesContainerRef}
+          displayedEmployees={displayedEmployees}
+          setShowRemoveConfirm={setShowRemoveConfirm}
+        />
+      </main>
+
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:static flex shrink-0 self-start lg:pt-1">
         <TaskViewCardMenu
           openPopover={openPopover}
           setOpenPopover={setOpenPopover}
@@ -134,74 +223,34 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         />
       </div>
 
-      {/* Assigned To Section */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-lg font-bold text-[#690003]">
-            Assigned to{' '}
-            <span className="bg-gray-300 text-gray-700 w-7 h-6 px-1 rounded-full text-sm ml-1.5 inline-flex items-center justify-center">
-              {(task.assignedEmployees ?? []).length}
-            </span>
-          </h4>
-          {hiddenCount > 0 && (
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="text-[#690003] font-medium flex items-center gap-1 hover:underline"
-            >
-              See All{' '}
-              <ChevronDown className={`w-4 h-4 transition ${expanded ? 'rotate-180' : ''}`} />
-            </button>
-          )}
-        </div>
+      {/* Unassign Employee Dialog */}
+      <UnassignEmployeeDialog
+        showRemoveConfirm={showRemoveConfirm}
+        setShowRemoveConfirm={setShowRemoveConfirm}
+        task={task}
+      />
 
-        {/* Employee Assigned Badges */}
-        <div className="flex flex-wrap gap-3">
-          {(displayedEmployees ?? []).map((emp) => (
-            <div
-              key={emp.id}
-              className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border-2 border-gray-300"
-            >
-              <span className="font-medium text-sm text-black">{emp.name}</span>
-              <span className="text-gray-500 font-light text-sm">{emp.empId}</span>
-              <button
-                onClick={() => setShowRemoveConfirm(emp.id)}
-                className="text-gray-400 hover:text-red-500 ml-2 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130"
-              >
-                <X className="w-4 h-4 text-red-500" />
-              </button>
-            </div>
-          ))}
-        </div>
+      {/* Delete Task Dialog */}
+      <DeleteTaskDialog
+        showDeleteConfirm={showDeleteConfirm}
+        setShowDeleteConfirm={setShowDeleteConfirm}
+        task={task}
+      />
 
-        {/* Unassign Employee Dialog */}
-        <UnassignEmployeeDialog
-          showRemoveConfirm={showRemoveConfirm}
-          setShowRemoveConfirm={setShowRemoveConfirm}
-          task={task}
-        />
-
-        {/* Delete Task Dialog */}
-        <DeleteTaskDialog
-          showDeleteConfirm={showDeleteConfirm}
-          setShowDeleteConfirm={setShowDeleteConfirm}
-          task={task}
-        />
-
-        {/* Edit Task Dialog */}
-        <EditTaskDialog
-          showEditDialog={showEditDialog}
-          handleCancelEdit={handleCancelEdit}
-          handleEditTask={handleEditTask}
-          isProcessing={updateTaskMutation.isPending}
-          task={task}
-          editMaxOrders={editMaxOrders}
-          setEditMaxOrders={setEditMaxOrders}
-          editDueDate={editDueDate}
-          setEditDueDate={setEditDueDate}
-          editAssignedEmployees={editAssignedEmployees}
-          toggleEmployee={toggleEmployee}
-        />
-      </div>
+      {/* Edit Task Dialog */}
+      <EditTaskDialog
+        showEditDialog={showEditDialog}
+        handleCancelEdit={handleCancelEdit}
+        handleEditTask={handleEditTask}
+        isProcessing={updateTaskMutation.isPending}
+        task={task}
+        editMaxOrders={editMaxOrders}
+        setEditMaxOrders={setEditMaxOrders}
+        editDueDate={editDueDate}
+        setEditDueDate={setEditDueDate}
+        editAssignedEmployees={editAssignedEmployees}
+        toggleEmployee={toggleEmployee}
+      />
     </div>
   );
 }

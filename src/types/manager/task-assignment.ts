@@ -21,12 +21,16 @@ export interface Task {
  * Assigned employee in a task
  */
 export interface AssignedEmployee {
+  /** KPITask row id for this specific assignment */
+  assignmentId?: string;
   id: string;
   name: string;
   empId: string;
   tenure?: string;
   assignedTasks: AssignedTask[];
   completedOrders: number;
+  status?: string;
+  pendingOrders?: number;
 }
 
 /**
@@ -36,14 +40,14 @@ export interface AssignedTask {
   id: string;
   taskId: string;
   taskName: string;
-  taskType: string;
+  taskDescription: string;
   isRepeatable: boolean;
   points: number;
   xp: number;
   status?: string;
   dateRange: {
     start: string;
-    end: string;
+    end: string | null;
   };
   maxOrders: number;
   assignedEmployees: AssignedEmployee[];
@@ -98,7 +102,7 @@ export interface SelectedFilters {
 //   id: string; // KPITask.id
 //   taskId: string; // KPICategory.id
 //   taskName: string; // KPICategory.name
-//   taskType: string; // KPICategory.type or description
+//   taskDescription: string; // KPICategory.type or description
 //   isRepeatable: boolean; // KPICategory.is_repeatable
 //   points: number; // KPICategory.points
 //   xp?: number; // optional
