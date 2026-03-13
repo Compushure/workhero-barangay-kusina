@@ -174,8 +174,8 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
           {/* Task max orders, fiesta points and XP */}
           <div className="flex flex-col shrink-0 pt-2">
-            {/* Icons and values row - all aligned at baseline */}
-            <div className="text-meta flex gap-2 sm:gap-3 text-secondary/85 items-baseline">
+            {/* Keep both rows on the same column template so labels stay aligned to their stats */}
+            <div className="grid grid-cols-[auto_auto_auto_auto] gap-x-2 sm:gap-x-3 items-baseline text-meta text-secondary/85">
               {/* Soup icon + max orders */}
               <div className="flex items-baseline gap-0.5">
                 <Soup strokeWidth={1.5} className="size-4 sm:size-5 shrink-0" />
@@ -204,11 +204,10 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
               </div>
             </div>
 
-            {/* Descriptive text row - aligned */}
-            <div className="flex gap-2 sm:gap-3 text-[12px] font-normal text-zinc-500">
-              <span className="pl-5 sm:pl-6">per employee</span>
+            <div className="mt-0.5 grid grid-cols-[auto_auto_auto_auto] gap-x-2 sm:gap-x-3 text-[12px] font-normal text-zinc-500">
+              <span className="justify-self-end">per employee</span>
               <span className="invisible">|</span>
-              <span className="pl-6 sm:pl-12">per order</span>
+              <span className="col-span-2 justify-self-center">per order</span>
             </div>
           </div>
         </section>
