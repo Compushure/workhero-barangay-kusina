@@ -45,6 +45,9 @@ export default function ErrorPageLayout({
           </div>
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
+            <Button variant="outline" className="w-full sm:w-auto" onClick={() => router.back()}>
+              Go Back
+            </Button>
             <Button className="w-full sm:w-auto" variant="standard" asChild>
               <Link href="/auth/login">Back to Login</Link>
             </Button>
