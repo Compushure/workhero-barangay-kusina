@@ -255,7 +255,7 @@ export function BadgeEditorPage() {
 
             <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
               {/* Badge Count Display */}
-              <div className="flex shrink-0 self-start gap-2 whitespace-nowrap pl-0.5 text-h2 text-foreground sm:gap-3 sm:pl-1">
+              <div className="flex shrink-0 self-start xl:self-center gap-2 whitespace-nowrap pl-0.5 text-h2 text-foreground sm:gap-3 sm:pl-1">
                 <h5 className="flex items-center gap-1.5">
                   <Coins size={16} className="text-accent" />
                   Badges

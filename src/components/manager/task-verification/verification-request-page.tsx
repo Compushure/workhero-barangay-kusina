@@ -291,7 +291,7 @@ export function VerificationRequestsPage({
             </div>
           </div>
         ) : (
-          <div className="manager-sticky-controls mt-3 mb-3 rounded-xl px-3 py-3 sm:mb-4 sm:mt-4 sm:px-4">
+          <div className="manager-sticky-controls my-3 rounded-xl p-3 sm:mb-4 sm:mt-4 sm:px-4">
             <div className="flex min-w-0 flex-col items-stretch gap-2 lg:flex-row lg:items-center lg:justify-end">
               <div className="relative min-w-0 flex-1 xl:max-w-xs">
                 <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />

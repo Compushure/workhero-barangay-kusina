@@ -31,8 +31,8 @@ function CurrentAssignedTasksSkeleton() {
         </div>
       </div>
 
-      <section className="manager-sticky-controls rounded-xl px-2.5 py-2.5 sm:px-3 sm:py-3 flex min-w-0 flex-col gap-2 sm:gap-2.5">
-        <Skeleton className="h-7 w-52 rounded-md bg-gray-300" />
+      <section className="manager-sticky-controls rounded-xl px-2.5 py-2.5 sm:px-3 sm:py-3 flex min-w-0 flex-col gap-2 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between">
+        <Skeleton className="h-7 w-52 shrink-0 rounded-md bg-gray-300" />
         <div className="flex w-full min-w-0 flex-col items-stretch gap-1.5 sm:gap-2 lg:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
           <Skeleton className="control-skeleton-h w-full flex-1 xl:max-w-md rounded-md bg-gray-300" />
           <div className="flex min-w-0 flex-wrap gap-1.5 sm:gap-2 sm:flex-nowrap">
@@ -187,7 +187,7 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
       {/* View Cards Number Display & Controls: Search, Sort, Clear */}
       <section className="manager-sticky-controls mt-1 rounded-xl px-2.5 py-2.5 sm:px-3 sm:py-3 flex min-w-0 flex-col gap-2 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between">
         {/* Counts */}
-        <div className="flex w-fit shrink-0 self-start gap-2 whitespace-nowrap rounded-md border border-gray-200 bg-card/75 px-2.5 py-2 text-meta text-primary shadow-sm/25 md:gap-3 md:px-3">
+        <div className="flex w-fit shrink-0 self-start xl:self-center gap-2 whitespace-nowrap rounded-md border border-gray-200 bg-card/75 px-2.5 py-2 text-meta text-primary shadow-sm/25 md:gap-3 md:px-3">
           <h5 className="leading-none">
             Tasks{' '}
             <span className="bg-accent/75 text-primary-foreground text-[13px] px-1.5 md:px-2 py-0.5 rounded-md ml-0.5 shadow-sm/25">

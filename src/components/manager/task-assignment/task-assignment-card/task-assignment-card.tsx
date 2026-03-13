@@ -202,7 +202,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
 
       {/* Action Buttons */}
       <div className="mt-3 flex justify-end">
-        <div className="manager-action-cluster w-full sm:w-auto">
+        <div className="flex gap-3 w-full sm:w-auto">
           <Button
             onClick={() => setShowAssignConfirm(true)}
             disabled={

@@ -60,7 +60,7 @@ function PaginationComponent({
         size="sm"
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="bg-card text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out h-7 w-7 sm:h-8 sm:w-8 p-0"
+        className="bg-white text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out h-7 w-7 sm:h-8 sm:w-8 p-0"
       >
         <ChevronLeft size={14} />
       </Button>
@@ -78,7 +78,7 @@ function PaginationComponent({
             size="sm"
             onClick={() => onPageChange(page as number)}
             className={`transition-all ease-in-out shadow-sm/15 border border-accent/50 h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs
-              ${page === currentPage ? 'bg-accent-secondary text-white hover:bg-accent-secondary hover:text-white' : 'bg-card text-foreground hover:bg-accent-secondary/80 hover:text-white hover:scale-110 hover:shadow-xs/25'}`}
+              ${page === currentPage ? 'bg-accent-secondary text-white hover:bg-accent-secondary hover:text-white' : 'bg-white text-foreground hover:bg-accent-secondary/80 hover:text-white hover:scale-110 hover:shadow-xs/25'}`}
           >
             {page}
           </Button>
@@ -91,7 +91,7 @@ function PaginationComponent({
         size="sm"
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className="bg-card text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out h-7 w-7 sm:h-8 sm:w-8 p-0"
+        className="bg-white text-foreground hover:bg-accent-secondary hover:text-white not-disabled:shadow-sm/15 border border-accent/50 transition-all duration-400 ease-in-out h-7 w-7 sm:h-8 sm:w-8 p-0"
       >
         <ChevronRight size={14} />
       </Button>

@@ -51,7 +51,7 @@ export function SortButton({
         <Button
           variant="default"
           size="sm"
-          className={`${triggerClassName} text-button control-h cursor-pointer shadow-sm/50 flex justify-between items-center transition-all duration-500 ease-in-out px-2.5 sm:px-3`}
+          className={`${triggerClassName} control-h cursor-pointer shadow-sm/50 flex justify-between items-center transition-all duration-500 ease-in-out px-2.5 sm:px-3`}
         >
           {/* Label with fixed character width */}
           <span className="max-w-18 sm:max-w-28 truncate">{currentLabel}</span>

@@ -250,7 +250,7 @@ export default function BadgeAssignmentPage() {
           ) : activeTab === 'users' ? (
             <div className="space-y-4">
               <div className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-                <div className="flex shrink-0 self-start gap-4 whitespace-nowrap pl-2 text-h2 text-foreground">
+                <div className="flex shrink-0 self-start xl:self-center gap-4 whitespace-nowrap pl-2 text-h2 text-foreground">
                   <h5 className="flex items-center gap-2">
                     <Users size={20} className="text-accent" />
                     Employees{' '}

@@ -1,5 +1,13 @@
 import { AssignedEmployee, AssignedTask } from '@/types';
-import { ChevronDown, CircleCheck, CircleDashed, CircleX, Target, X } from 'lucide-react';
+import {
+  ChevronDown,
+  CircleCheck,
+  CircleDashed,
+  CircleX,
+  HandCoins,
+  Target,
+  X,
+} from 'lucide-react';
 import { RefObject, SetStateAction } from 'react';
 import { useMemo } from 'react';
 
@@ -83,6 +91,11 @@ export default function TaskViewEmployeeBadges({
               <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" />
             )}
 
+            {emp?.pendingOrders === 0 && task.status === 'approved' && (
+              <span className="flex px-1 py-0.5 rounded-full items-center bg-green-100 text-green-600">
+                <HandCoins strokeWidth={2.5} className="size-3.5" />
+              </span>
+            )}
             <span className="text-xs bg-background text-amber-700 px-1 py-2 leading-0 rounded-full">
               {emp.completedOrders}
             </span>

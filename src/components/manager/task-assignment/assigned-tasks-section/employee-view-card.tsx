@@ -101,7 +101,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {employees.map((employee) => {
         const isExpanded = expandedEmployees.has(employee.id);
         const displayedTasks = isExpanded
@@ -111,8 +111,8 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
 
         return (
           <div
-            className={`relative flex flex-col lg:flex-row w-full items-start lg:justify-between rounded-lg bg-[#FAFAFA] p-3 sm:p-4 gap-2 sm:gap-3 transition-all ease-in-out duration-400 
-          ${isExpanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`}
+            className={`relative flex flex-col lg:flex-row w-full items-start lg:justify-between rounded-lg bg-[#FAFAFA] p-4 sm:p-5 gap-2 sm:gap-3 transition-all ease-in-out duration-400 border-2 border-gray-200
+          ${isExpanded ? 'scale-102 shadow-md/25' : 'shadow-sm/15'}`}
             key={employee.id}
           >
             {/* Employee Details + Menu */}

@@ -144,8 +144,8 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   return (
     <div
-      className={`relative flex flex-col lg:flex-row items-start lg:items-start justify-between rounded-lg bg-card p-4 md:p-5 gap-3 sm:gap-4 md:gap-6 transition-all ease-in-out duration-400
-        ${expanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`}
+      className={`relative flex flex-col lg:flex-row items-start lg:items-start justify-between rounded-lg bg-card p-4 md:p-5 gap-3 sm:gap-4 md:gap-6 transition-all ease-in-out duration-400 border-2 border-gray-200
+        ${expanded ? 'scale-102 shadow-md/25' : 'shadow-sm/15'}`}
     >
       <main className="flex flex-col w-full gap-3 sm:gap-4 md:gap-5 min-w-0 flex-1 pr-6 sm:pr-8 lg:pr-0">
         <section className="flex flex-col lg:flex-row lg:justify-between gap-2 sm:gap-3 min-w-0">

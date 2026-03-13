@@ -344,10 +344,11 @@
     position: sticky;
     top: var(--sticky-top-gap);
     z-index: 20;
-    border: 1px solid color-mix(in oklab, var(--accent) 18%, transparent);
-    background: color-mix(in oklab, var(--background) 78%, white 22%);
+    border: 1px solid color-mix(in oklab, var(--secondary) 18%, transparent);
+    background: var(--background);
+    /* background: color-mix(in oklab, var(--background) 25%, white 15%); */
     backdrop-filter: blur(8px);
-    box-shadow: 0 6px 16px rgba(17, 24, 39, 0.08);
+    box-shadow: 0 1px 4px rgba(7, 24, 39, 0.15);
   }
 
   .manager-action-cluster {

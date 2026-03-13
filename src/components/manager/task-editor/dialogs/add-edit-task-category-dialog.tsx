@@ -278,7 +278,7 @@ export default function AddEditTaskCategoryDialog({
             </div>
           </div>
 
-          <section className="flex gap-4 sm:gap-6">
+          <section className="flex gap-4">
             {/* Points and XP Row */}
             <div className="grid grid-cols-1 gap-3 flex-1/2 mb-4">
               {/* Points */}
@@ -291,7 +291,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setPoints(Math.max(1, points - 1))}
                     disabled={points <= 1 || isLoading}
-                    className="bg-foreground text-card size-7 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
+                    className="bg-foreground text-card h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
                   >
                     −
                   </button>
@@ -304,13 +304,13 @@ export default function AddEditTaskCategoryDialog({
                     }}
                     min={1}
                     max={10000}
-                    className="text-center bg-white border-[#e0cfcf] focus:border-foreground remove-arrow h-7 text-xs"
+                    className="w-36 text-center bg-white border-[#e0cfcf] focus:border-foreground remove-arrow h-7 text-xs"
                   />
                   <button
                     type="button"
                     onClick={() => setPoints(Math.min(10000, points + 1))}
                     disabled={points >= 10000 || isLoading}
-                    className="bg-foreground text-white size-7 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
+                    className="bg-foreground text-white h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
                   >
                     +
                   </button>
@@ -330,7 +330,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setXp(Math.max(1, xp - 1))}
                     disabled={xp <= 1 || isLoading}
-                    className="bg-foreground text-white size-7 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
+                    className="bg-foreground text-white h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
                   >
                     −
                   </button>
@@ -343,13 +343,13 @@ export default function AddEditTaskCategoryDialog({
                     }}
                     min={1}
                     max={5000}
-                    className="text-center bg-white border-[#e0cfcf] focus:border-foreground remove-arrow h-7 text-xs"
+                    className="w-36 text-center bg-white border-[#e0cfcf] focus:border-foreground remove-arrow h-7 text-xs"
                   />
                   <button
                     type="button"
                     onClick={() => setXp(Math.min(5000, xp + 1))}
                     disabled={xp >= 5000 || isLoading}
-                    className="bg-foreground text-white size-7 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
+                    className="bg-foreground text-white h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
                   >
                     +
                   </button>
@@ -361,7 +361,7 @@ export default function AddEditTaskCategoryDialog({
             </div>
 
             {/* Is Repeatable Toggle */}
-            <div className="flex flex-col flex-1/2 items-center justify-between p-3 bg-background-soft rounded-lg border border-[#e0cfcf]">
+            <div className="flex flex-col items-center justify-between p-3 bg-background-soft rounded-lg border border-[#e0cfcf]">
               <div className="space-y-0.5">
                 <Label className="text-sm font-medium text-primary">Repeatable Task</Label>
                 <p className="text-xs text-secondary">
