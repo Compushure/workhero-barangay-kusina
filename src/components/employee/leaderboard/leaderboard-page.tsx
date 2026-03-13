@@ -89,7 +89,7 @@ export function LeaderboardPageClient({
   const showingPastDetail = view === 'history' && selectedPastPeriod !== null;
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col font-jersey tracking-widest">
+    <div className="relative h-screen w-full flex flex-col font-jersey tracking-widest overflow-hidden">
       {/* Fixed background layer (keeps image sizing stable across content height changes) */}
       <div
         className="fixed inset-0 -z-10 bg-cover bg-center"
@@ -132,7 +132,7 @@ export function LeaderboardPageClient({
       {/* Spacer so content doesn't hide under the fixed HUD on sm+ */}
       <div className="hidden sm:block sm:h-[calc(max(0.75rem,env(safe-area-inset-top))+6.5rem)]" aria-hidden="true" />
 
-      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-7xl flex-col items-center px-3 pb-6 pt-4 sm:px-4 sm:pb-8 sm:pt-6 md:pt-8">
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-col items-center px-3 pb-6 pt-4 sm:px-4 sm:pb-8 sm:pt-6 md:pt-8">
         {/* ── History list view ── */}
         {view === 'history' && !selectedPastPeriod && (
           <div className="flex w-full flex-1 flex-col items-center">
