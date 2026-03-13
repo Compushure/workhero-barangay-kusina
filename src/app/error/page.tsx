@@ -3,7 +3,6 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { Suspense } from 'react';
 
 function ErrorPageContent() {
@@ -13,6 +12,28 @@ function ErrorPageContent() {
   const status = params.get('status') || '500';
   const cause = params.get('cause') || 'Unknown error';
   const recommendation = params.get('recommendation') || 'Please try again later.';
+  const returnTo = params.get('returnTo');
+
+  const safeReturnTo =
+    returnTo && returnTo.startsWith('/') && !returnTo.startsWith('/error') ? returnTo : null;
+
+  const handleGoBack = () => {
+    if (safeReturnTo) {
+      router.push(safeReturnTo);
+      return;
+    }
+
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+      return;
+    }
+
+    router.push('/auth/login');
+  };
+
+  const handleBackToLogin = () => {
+    router.push('/auth/login');
+  };
 
   // http://localhost:3008/error?status=404&cause=Page%20not%20found&recommendation=Check%20the%20URL%20or%20go%20back.
   let title = 'Something went wrong';
@@ -63,16 +84,16 @@ function ErrorPageContent() {
             <div className="flex flex-col gap-2 pt-4">
               {status === '404' ? (
                 <>
-                  <Button variant="default" className="w-full" onClick={() => router.back()}>
+                  <Button variant="default" className="w-full" onClick={handleGoBack}>
                     Go Back
                   </Button>
-                  <Button variant="outline" className="w-full" asChild>
-                    <Link href="/auth/login">Back to Login</Link>
+                  <Button variant="outline" className="w-full" onClick={handleBackToLogin}>
+                    Back to Login
                   </Button>
                 </>
               ) : (
-                <Button variant="default" className="w-full" asChild>
-                  <Link href="/auth/login">Back to Login</Link>
+                <Button variant="default" className="w-full" onClick={handleBackToLogin}>
+                  Back to Login
                 </Button>
               )}
             </div>
@@ -85,7 +106,13 @@ function ErrorPageContent() {
 
 export default function ErrorPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+          Loading...
+        </div>
+      }
+    >
       <ErrorPageContent />
     </Suspense>
   );

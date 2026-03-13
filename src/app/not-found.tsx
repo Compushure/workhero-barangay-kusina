@@ -10,8 +10,25 @@ export default function NotFound() {
     const cause = encodeURIComponent('Page not found');
     const status = encodeURIComponent('404');
     const recommendation = encodeURIComponent('Check the URL or return to the login page.');
+    let returnTo = '';
 
-    router.replace(`/error?cause=${cause}&status=${status}&recommendation=${recommendation}`);
+    if (typeof window !== 'undefined' && document.referrer) {
+      try {
+        const refUrl = new URL(document.referrer);
+        if (refUrl.origin === window.location.origin && refUrl.pathname !== '/error') {
+          returnTo = `${refUrl.pathname}${refUrl.search}${refUrl.hash}`;
+        }
+      } catch {
+        returnTo = '';
+      }
+    }
+
+    const baseErrorUrl = `/error?cause=${cause}&status=${status}&recommendation=${recommendation}`;
+    const errorUrl = returnTo
+      ? `${baseErrorUrl}&returnTo=${encodeURIComponent(returnTo)}`
+      : baseErrorUrl;
+
+    router.replace(errorUrl);
   }, [router]);
 
   return (

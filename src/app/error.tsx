@@ -18,6 +18,18 @@ export default function GlobalError({
     let status = '500';
     const cause = error.message || 'Unknown';
     let recommendation = 'Please try again later or contact support.';
+    let returnTo = '';
+
+    if (typeof window !== 'undefined' && document.referrer) {
+      try {
+        const refUrl = new URL(document.referrer);
+        if (refUrl.origin === window.location.origin && refUrl.pathname !== '/error') {
+          returnTo = `${refUrl.pathname}${refUrl.search}${refUrl.hash}`;
+        }
+      } catch {
+        returnTo = '';
+      }
+    }
 
     if (cause.startsWith('404')) {
       status = '404';
@@ -30,11 +42,15 @@ export default function GlobalError({
       recommendation = 'Please log in again.';
     }
 
-    router.replace(
-      `/error?cause=${encodeURIComponent(cause)}&status=${encodeURIComponent(
-        status
-      )}&recommendation=${encodeURIComponent(recommendation)}`
-    );
+    const baseErrorUrl = `/error?cause=${encodeURIComponent(cause)}&status=${encodeURIComponent(
+      status
+    )}&recommendation=${encodeURIComponent(recommendation)}`;
+
+    const errorUrl = returnTo
+      ? `${baseErrorUrl}&returnTo=${encodeURIComponent(returnTo)}`
+      : baseErrorUrl;
+
+    router.replace(errorUrl);
   }, [error, router]);
 
   return (
