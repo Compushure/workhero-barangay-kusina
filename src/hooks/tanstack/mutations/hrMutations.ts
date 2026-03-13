@@ -446,12 +446,16 @@ export function useToggleRankingVisibility() {
     onMutate: async ({ rankingPeriodId, isVisible }) => {
       await queryClient.cancelQueries({ queryKey: hrLeaderboardKeys.all });
       await queryClient.cancelQueries({ queryKey: employeeKeys.visiblePeriods() });
+      await queryClient.cancelQueries({ queryKey: employeeKeys.latestPeriods() });
 
       const previousHrData = queryClient.getQueriesData<EnrichedLeaderboardResult | null>({
         queryKey: hrLeaderboardKeys.all,
       });
       const previousVisiblePeriods = queryClient.getQueryData<RankingPeriodWithTop[] | null>(
         employeeKeys.visiblePeriods()
+      );
+      const previousLatestPeriods = queryClient.getQueryData<LatestPeriods | null>(
+        employeeKeys.latestPeriods()
       );
 
       queryClient.setQueriesData<EnrichedLeaderboardResult | null>(
@@ -492,7 +496,6 @@ export function useToggleRankingVisibility() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: hrLeaderboardKeys.all });
       queryClient.invalidateQueries({ queryKey: employeeKeys.visiblePeriods() });
-      queryClient.invalidateQueries({ queryKey: employeeKeys.latestPeriods() });
       queryClient.invalidateQueries({ queryKey: employeeKeys.topWeeklyRanks() });
       queryClient.invalidateQueries({ queryKey: [...employeeKeys.all, 'top-ranks-by-period'] });
     },

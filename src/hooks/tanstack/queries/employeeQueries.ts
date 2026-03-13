@@ -164,6 +164,10 @@ export function useGetEmployeeTopRanksByPeriod(
 /**
  * Fetches all HR-generated ranking periods that are visible to employees.
  * Used by the employee leaderboard "Past Rankings" history list.
+ *
+ * - staleTime: 0 so data is always considered stale and refetches on mount.
+ * - refetchInterval: polls every 30 s while the tab is focused so HR visibility
+ *   toggles (possibly in another tab) are reflected without a full page refresh.
  */
 export function useGetEmployeeVisiblePeriods(): UseQueryResult<RankingPeriodWithTop[] | null, Error> {
   return useQuery({
@@ -173,10 +177,13 @@ export function useGetEmployeeVisiblePeriods(): UseQueryResult<RankingPeriodWith
       if (!result.success) return null;
       return result.data ?? null;
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
     gcTime: 30 * 60 * 1000,
     retry: 1,
+    refetchOnMount: true,
     refetchOnWindowFocus: true,
+    refetchInterval: 10 * 1000,
+    refetchIntervalInBackground: false,
   }) as UseQueryResult<RankingPeriodWithTop[] | null, Error>;
 }
 
