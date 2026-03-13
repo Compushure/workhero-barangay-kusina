@@ -31,7 +31,7 @@ export function NavigationOverlay({ className }: NavigationOverlayProps) {
 
   return (
     <div
-      className={cn('fixed inset-0 bg-black/15 backdrop-blur-[1px] z-40', className)}
+      className={cn('fixed inset-0 bg-black/15 backdrop-blur-[1px] z-50', className)}
       aria-hidden="true"
     />
   );

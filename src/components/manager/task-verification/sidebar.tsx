@@ -190,7 +190,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
           <nav
             className={`flex-1 space-y-2.5 pb-6 ${
               isCollapsed
-                ? 'overflow-hidden px-3.5'
+                ? 'overflow-hidden px-3.5 pt-3'
                 : 'overflow-y-auto px-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
             }`}
           >
