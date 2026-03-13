@@ -253,9 +253,9 @@ export function BadgeEditorPage() {
               subtitle="Create, edit, and manage badges with conditions."
             />
 
-            <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+            <section className="flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
               {/* Badge Count Display */}
-              <div className="flex gap-2 sm:gap-3 text-sm sm:text-base font-bold text-foreground pl-0.5 sm:pl-1">
+              <div className="flex shrink-0 self-start gap-2 whitespace-nowrap pl-0.5 text-sm font-bold text-foreground sm:gap-3 sm:pl-1 sm:text-base">
                 <h5 className="flex items-center gap-1.5">
                   <Coins size={16} className="text-accent" />
                   Badges
@@ -266,58 +266,64 @@ export function BadgeEditorPage() {
               </div>
 
               {/* Search, Sort, and Add Button */}
-              <div className="flex flex-wrap gap-2 sm:gap-3 items-center justify-start lg:justify-end">
+              <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
                 {/* Search Input */}
-                <div className="relative flex">
+                <div className="relative min-w-0 flex-1 xl:max-w-md">
                   <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Search badges"
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors sm:w-50 md:w-75"
+                    className="w-full min-w-0 rounded-full bg-card py-2 pr-3 pl-9 text-xs shadow-sm/25 transition-colors focus:border focus:border-accent focus:outline-none"
                   />
                 </div>
 
-                <BadgeFilterToggle filterMode={filterMode} onFilterChange={handleFilterChange} />
+                <div className="flex min-w-0 flex-wrap gap-2 sm:gap-3 xl:flex-nowrap xl:justify-end">
+                  <div className="shrink-0">
+                    <BadgeFilterToggle
+                      filterMode={filterMode}
+                      onFilterChange={handleFilterChange}
+                    />
+                  </div>
 
-                {/* Sort Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="default"
-                      size="default"
-                      className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-40 py-1.5 justify-between border border-gray-200 h-8 text-xs"
-                    >
-                      <span className="truncate">{currentSortLabel}</span>
-                      <ArrowUpDown size={14} className="text-accent" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background w-56">
-                    {SORT_OPTIONS.map((option) => (
-                      <DropdownMenuItem
-                        key={option.value}
-                        onClick={() => handleSortChange(option.value)}
-                        className={`cursor-pointer transition-all duration-300 ease-in-out text-xs ${
-                          sortOption === option.value ? 'bg-accent/15' : ''
-                        }`}
+                  {/* Sort Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="default"
+                        size="default"
+                        className="h-8 w-full justify-between border border-gray-200 bg-card py-1.5 text-xs text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-40"
                       >
-                        {option.label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                        <span className="truncate">{currentSortLabel}</span>
+                        <ArrowUpDown size={14} className="text-accent" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-background w-56">
+                      {SORT_OPTIONS.map((option) => (
+                        <DropdownMenuItem
+                          key={option.value}
+                          onClick={() => handleSortChange(option.value)}
+                          className={`cursor-pointer transition-all duration-300 ease-in-out text-xs ${
+                            sortOption === option.value ? 'bg-accent/15' : ''
+                          }`}
+                        >
+                          {option.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-                {/* Add New Badge Button */}
-                <Button
-                  onClick={handleOpenAddDialog}
-                  className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out w-full sm:w-auto px-3 sm:px-4 py-1.5 rounded-full shadow-sm/25 font-semibold text-xs whitespace-nowrap justify-center h-8"
-                >
-                  <Coins size={14} />
-                  <span className="hidden sm:inline">Add New Badge</span>
-                  <span className="sm:hidden">Add New Badge</span>
-                  <Plus size={14} className="ml-1 sm:ml-3" />
-                </Button>
+                  {/* Add New Badge Button */}
+                  <Button
+                    onClick={handleOpenAddDialog}
+                    className="h-8 w-full justify-center rounded-full bg-primary-gradient px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 sm:w-auto sm:px-4"
+                  >
+                    <Coins size={14} />
+                    <span>Add New Badge</span>
+                    <Plus size={14} className="ml-1 sm:ml-3" />
+                  </Button>
+                </div>
               </div>
             </section>
           </>

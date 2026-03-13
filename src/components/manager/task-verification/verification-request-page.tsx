@@ -285,30 +285,28 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       <div className="flex-1 flex flex-col max-w-7xl 2xl:max-w-440 w-full mx-auto">
         {/* Filter Controls - Compact horizontal layout aligned to right */}
         {showInitialSkeleton ? (
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-3 sm:mt-4 sm:justify-end">
-            <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
+          <div className="mt-3 mb-3 flex min-w-0 flex-col items-stretch gap-2 sm:mb-4 sm:mt-4 lg:flex-row lg:items-center lg:justify-end">
+            <div className="min-w-0 flex-1 xl:max-w-md">
               <Skeleton className="h-9 w-full bg-background rounded-full" />
             </div>
-            <div className="flex gap-2 shrink-0">
-              <Skeleton className="h-9 w-24 bg-background rounded-lg" />
-              <Skeleton className="h-9 w-32 bg-background rounded-lg" />
+            <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap lg:shrink-0">
+              <Skeleton className="h-9 w-full sm:w-24 bg-background rounded-lg" />
+              <Skeleton className="h-9 w-full sm:w-32 bg-background rounded-lg" />
             </div>
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-3 sm:mt-4 sm:justify-end">
-            <div className="flex-1 min-w-80 md:max-w-2xl lg:max-w-3xl sm:flex-initial">
-              <div className="relative flex">
-                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search by employee name or ID"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
-                  className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors sm:w-50 md:w-75"
-                />
-              </div>
+          <div className="mt-3 mb-3 flex min-w-0 flex-col items-stretch gap-2 sm:mb-4 sm:mt-4 lg:flex-row lg:items-center lg:justify-end">
+            <div className="relative min-w-0 flex-1 xl:max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by employee name or ID"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
+                className="w-full min-w-0 rounded-full bg-card py-2 pr-3 pl-9 text-xs shadow-sm/25 transition-colors focus:border focus:border-accent focus:outline-none"
+              />
             </div>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap lg:shrink-0">
               <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="default" />
               <SortButton
                 sortBy={dateSortBy as any}
@@ -325,55 +323,6 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
                 ]}
                 styleVariant="default"
               />
-              {/* <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="default"
-                    size="default"
-                    className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-40 py-1.5 justify-between border border-gray-200 h-8 text-xs"
-                  >
-                    <span className="truncate">Default</span>
-                    <ArrowUpDown size={14} className="text-accent" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background w-48">
-                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
-                    Default
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
-                    Employee Name (A-Z)
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
-                    Employee Name (Z-A)
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="default"
-                    size="default"
-                    className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-40 py-1.5 justify-between border border-gray-200 h-8 text-xs"
-                  >
-                    <span className="truncate">Date (Newest)</span>
-                    <ArrowUpDown size={14} className="text-accent" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background w-48">
-                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
-                    Date (Newest) - Default
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
-                    Date (Oldest)
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
-                    Employee Name (A-Z)
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer transition-all duration-300 ease-in-out text-xs">
-                    Employee Name (Z-A)
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu> */}
             </div>
           </div>
         )}

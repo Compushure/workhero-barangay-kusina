@@ -20,7 +20,7 @@ export default function BadgeTableSkeleton() {
             </div>
           </TableCell>
 
-          <TableCell className="hidden md:table-cell text-center">
+          <TableCell className="hidden lg:table-cell text-center">
             <Skeleton className="h-6 mx-auto w-12 bg-gray-300" />
           </TableCell>
 
@@ -28,7 +28,7 @@ export default function BadgeTableSkeleton() {
             <Skeleton className="h-6 mx-auto w-12 bg-gray-300" />
           </TableCell>
 
-          <TableCell className="hidden sm:table-cell text-center">
+          <TableCell className="hidden md:table-cell text-center">
             <Skeleton className="h-6 mx-auto w-15 bg-gray-300" />
           </TableCell>
 

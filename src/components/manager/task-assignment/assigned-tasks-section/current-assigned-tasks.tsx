@@ -31,13 +31,13 @@ function CurrentAssignedTasksSkeleton() {
         </div>
       </div>
 
-      <section className="flex flex-col gap-2">
+      <section className="flex min-w-0 flex-col gap-2 sm:gap-2.5">
         <Skeleton className="h-6 w-48 rounded-full bg-gray-300" />
-        <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 lg:gap-3 items-stretch sm:items-center">
-          <Skeleton className="h-7 w-full rounded-full bg-gray-300" />
-          <div className="flex gap-1.5 sm:gap-2">
-            <Skeleton className="h-7 w-28 rounded-lg bg-gray-300" />
-            <Skeleton className="h-7 w-28 rounded-lg bg-gray-300" />
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-1.5 sm:gap-2 lg:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
+          <Skeleton className="h-7 w-full flex-1 xl:max-w-md rounded-full bg-gray-300" />
+          <div className="flex min-w-0 flex-wrap gap-1.5 sm:gap-2 sm:flex-nowrap">
+            <Skeleton className="h-7 w-full sm:w-28 rounded-lg bg-gray-300" />
+            <Skeleton className="h-7 w-full sm:w-28 rounded-lg bg-gray-300" />
           </div>
         </div>
       </section>
@@ -185,16 +185,16 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
       </div>
 
       {/* View Cards Number Display & Controls: Search, Sort, Clear */}
-      <section className="flex flex-col lg:flex-row justify-between gap-2">
+      <section className="flex min-w-0 flex-col gap-2 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between">
         {/* Counts */}
-        <div className="flex gap-2 md:gap-3 text-xs md:text-sm font-semibold text-primary bg-card/75 inset-shadow-xs/25 border-b border-gray-300 px-2 md:px-3 py-2 rounded-full w-fit">
-          <h5>
+        <div className="flex w-fit shrink-0 self-start gap-2 whitespace-nowrap rounded-full border-b border-gray-300 bg-card/75 px-2 py-2 text-xs font-semibold text-primary inset-shadow-xs/25 md:gap-3 md:px-3 md:text-sm">
+          <h5 className="leading-none">
             Tasks{' '}
             <span className="bg-accent/75 text-primary-foreground text-xs px-1.5 md:px-2 py-0.5 rounded-full ml-0.5 shadow-sm/25">
               {totalTasksCount ?? 0}
             </span>
           </h5>
-          <h5>
+          <h5 className="leading-none">
             Employees{' '}
             <span className="bg-accent/75 text-primary-foreground text-xs px-1.5 md:px-2 py-0.5 rounded-full ml-0.5 shadow-sm/25">
               {totalEmployeesCount ?? 0}
@@ -203,17 +203,13 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
         </div>
 
         {/* Filters Row - Always visible, stacked nicely */}
-        <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 lg:gap-3 items-stretch sm:items-center">
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-1.5 sm:gap-2 lg:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
           {/* Search */}
-          <div className="relative flex-1 min-w-70 md:max-w-full">
+          <div className="relative min-w-0 flex-1 xl:max-w-md">
             <Search className="absolute left-2 sm:left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <input
               type="text"
-              placeholder={
-                viewMode === 'task'
-                  ? 'Search tasks'
-                  : 'Search employees'
-              }
+              placeholder={viewMode === 'task' ? 'Search tasks' : 'Search employees'}
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full pl-8 pr-1.5 sm:pr-2 py-2 rounded-full bg-card shadow-sm/25 text-xs focus:outline-none transition-all duration-500 ease-in-out border focus:border-accent"
@@ -221,9 +217,9 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
           </div>
 
           {/* Sort Bar and Clear All in a row */}
-          <div className="flex gap-1.5 sm:gap-2">
+          <div className="flex min-w-0 flex-wrap gap-1.5 sm:flex-nowrap sm:gap-2">
             {/* Sort Bar */}
-            <div className="flex-1 sm:flex-initial">
+            <div className="min-w-0 flex-1 sm:flex-initial">
               {viewMode === 'task' ? (
                 <TaskSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
               ) : (

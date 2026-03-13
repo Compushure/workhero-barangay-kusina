@@ -252,9 +252,9 @@ export default function BadgeAssignmentPage() {
               {/* Users Tab */}
               {activeTab === 'users' && (
                 <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                  <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                     {/* Badge Count Display */}
-                    <div className="flex gap-4 text-lg font-bold text-foreground pl-2">
+                    <div className="flex shrink-0 self-start gap-4 whitespace-nowrap pl-2 text-lg font-bold text-foreground">
                       <h5 className="flex items-center gap-2">
                         <Users size={20} className="text-accent" />
                         Employees{' '}
@@ -265,44 +265,48 @@ export default function BadgeAssignmentPage() {
                     </div>
 
                     {/* Search and Sort Controls */}
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center w-full sm:w-auto">
-                      <div className="relative flex">
+                    <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
+                      <div className="relative min-w-0 flex-1 xl:max-w-md">
                         <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
                         <input
                           placeholder="Search employees"
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
-                          className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors sm:w-50 md:w-75"
+                          className="w-full min-w-0 rounded-full bg-card py-2 pr-3 pl-9 text-xs shadow-sm/25 transition-colors focus:border focus:border-accent focus:outline-none"
                         />
                       </div>
 
                       {/* Sort Dropdown */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="default"
-                            size="default"
-                            className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-40 py-1.5 justify-between border border-gray-200 h-8 text-xs"
-                          >
-                            <span className="truncate">{USER_SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label ||
-                              'Sort'}</span>
-                            <ArrowUpDown size={14} className="text-accent" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-background">
-                          {USER_SORT_OPTIONS.map((option) => (
-                            <DropdownMenuItem
-                              key={option.value}
-                              onClick={() => setSortOption(option.value)}
-                              className={`cursor-pointer transition-all duration-300 ease-in-out text-xs ${
-                                sortOption === option.value ? 'bg-accent/15' : ''
-                              }`}
+                      <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap sm:gap-3 xl:justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="default"
+                              size="default"
+                              className="h-8 w-full justify-between border border-gray-200 bg-card py-1.5 text-xs text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-40"
                             >
-                              {option.label}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                              <span className="truncate">
+                                {USER_SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label ||
+                                  'Sort'}
+                              </span>
+                              <ArrowUpDown size={14} className="text-accent" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-background">
+                            {USER_SORT_OPTIONS.map((option) => (
+                              <DropdownMenuItem
+                                key={option.value}
+                                onClick={() => setSortOption(option.value)}
+                                className={`cursor-pointer transition-all duration-300 ease-in-out text-xs ${
+                                  sortOption === option.value ? 'bg-accent/15' : ''
+                                }`}
+                              >
+                                {option.label}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -332,11 +336,13 @@ export default function BadgeAssignmentPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex justify-between items-center py-4 w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
+                        className="flex w-full justify-between items-center border-accent/25 bg-card py-4 text-primary shadow-sm/25 hover:bg-card hover:brightness-90 sm:w-40"
                       >
-                        {BADGE_SORT_OPTIONS.find((opt) => opt.value === badgeSortOption)?.label ||
-                          'Sort'}
-                        <ArrowUpDown className="text-accent" />
+                        <span className="truncate">
+                          {BADGE_SORT_OPTIONS.find((opt) => opt.value === badgeSortOption)?.label ||
+                            'Sort'}
+                        </span>
+                        <ArrowUpDown className="text-accent shrink-0" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="bg-background">

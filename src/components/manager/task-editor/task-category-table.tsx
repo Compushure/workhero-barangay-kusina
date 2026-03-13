@@ -98,13 +98,13 @@ export default function TaskCategoryTable({
               <TableHead className="min-w-40 max-w-40 w-40 sm:min-w-56 sm:max-w-56 sm:w-56 md:min-w-80 md:max-w-80 md:w-80 pl-3 sm:pl-5 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-bold text-card">
                 TASK
               </TableHead>
-              <TableHead className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-center text-[10px] sm:text-xs font-bold text-card hidden md:table-cell">
+              <TableHead className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-center text-[10px] sm:text-xs font-bold text-card hidden lg:table-cell">
                 POINTS
               </TableHead>
-              <TableHead className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-center text-[10px] sm:text-xs font-bold text-card hidden md:table-cell">
+              <TableHead className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-center text-[10px] sm:text-xs font-bold text-card hidden lg:table-cell">
                 XP
               </TableHead>
-              <TableHead className="min-w-20 max-w-20 w-20 sm:min-w-28 sm:max-w-28 sm:w-28 text-center text-[10px] sm:text-xs font-bold text-card hidden sm:table-cell">
+              <TableHead className="min-w-20 max-w-20 w-20 sm:min-w-28 sm:max-w-28 sm:w-28 text-center text-[10px] sm:text-xs font-bold text-card hidden md:table-cell">
                 REPEATABLE
               </TableHead>
               <TableHead className="min-w-20 max-w-20 w-20 sm:min-w-32 sm:max-w-32 sm:w-32 text-center text-[10px] sm:text-xs font-bold text-card sticky right-0">
@@ -129,13 +129,13 @@ export default function TaskCategoryTable({
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-xs sm:text-sm text-center align-middle font-medium text-foreground hidden md:table-cell">
+                  <TableCell className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-xs sm:text-sm text-center align-middle font-medium text-foreground hidden lg:table-cell">
                     <div className="flex items-center justify-center gap-0.5">
                       <Coins strokeWidth={1.75} className="size-4 sm:size-5" />
                       {task.points}
                     </div>
                   </TableCell>
-                  <TableCell className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-xs sm:text-sm text-center align-middle font-medium text-foreground hidden md:table-cell">
+                  <TableCell className="min-w-14 max-w-14 w-14 sm:min-w-16 sm:max-w-16 sm:w-16 text-xs sm:text-sm text-center align-middle font-medium text-foreground hidden lg:table-cell">
                     <div className="flex items-center justify-center gap-0.5 sm:gap-1">
                       <span className="inline-block italic text-xs sm:text-sm leading-none">
                         XP
@@ -143,7 +143,7 @@ export default function TaskCategoryTable({
                       {task.xp}
                     </div>
                   </TableCell>
-                  <TableCell className="min-w-20 max-w-20 w-20 sm:min-w-28 sm:max-w-28 sm:w-28 text-center align-middle text-xs sm:text-sm hidden sm:table-cell">
+                  <TableCell className="min-w-20 max-w-20 w-20 sm:min-w-28 sm:max-w-28 sm:w-28 text-center align-middle text-xs sm:text-sm hidden md:table-cell">
                     <div className="flex justify-center items-center">
                       {task.isRepeatable ? (
                         <div className="flex items-center gap-0.5 text-foreground font-medium">

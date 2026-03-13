@@ -133,13 +133,13 @@ export default function BadgeTable({
               <TableHead className="min-w-48 sm:min-w-64 md:min-w-84 pl-3 sm:pl-5 py-2 sm:py-3 text-left text-2xs sm:text-xs font-bold text-card">
                 BADGE
               </TableHead>
-              <TableHead className="hidden md:table-cell min-w-20 max-w-20 w-20 text-center text-2xs sm:text-xs font-bold text-card">
+              <TableHead className="hidden lg:table-cell min-w-20 max-w-20 w-20 text-center text-2xs sm:text-xs font-bold text-card">
                 POINTS
               </TableHead>
               <TableHead className="hidden lg:table-cell min-w-32 max-w-32 w-32 text-center text-2xs sm:text-xs font-bold text-card">
                 INTERVAL
               </TableHead>
-              <TableHead className="hidden sm:table-cell min-w-20 sm:min-w-24 text-center text-2xs sm:text-xs font-bold text-card">
+              <TableHead className="hidden md:table-cell min-w-20 sm:min-w-24 text-center text-2xs sm:text-xs font-bold text-card">
                 CONDITIONS
               </TableHead>
               <TableHead className="text-card text-center px-3 sm:px-6 w-20 sm:w-24 text-2xs sm:text-xs sticky right-0">
@@ -197,7 +197,7 @@ export default function BadgeTable({
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell min-w-20 max-w-20 w-20 text-xs sm:text-sm text-center align-middle font-medium text-foreground">
+                    <TableCell className="hidden lg:table-cell min-w-20 max-w-20 w-20 text-xs sm:text-sm text-center align-middle font-medium text-foreground">
                       <div className="flex items-center justify-center gap-0.5">
                         <Coins strokeWidth={1.75} className="size-3.5 sm:size-4" />
                         {badge.points}
@@ -208,7 +208,7 @@ export default function BadgeTable({
                         {formatIntervalLabel(badge.award_at_interval)}
                       </div>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell min-w-20 sm:min-w-24 text-center align-middle text-2xs sm:text-xs">
+                    <TableCell className="hidden md:table-cell min-w-20 sm:min-w-24 text-center align-middle text-2xs sm:text-xs">
                       <Button
                         variant="ghost"
                         size="sm"

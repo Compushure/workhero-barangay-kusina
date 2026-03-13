@@ -138,7 +138,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
   return (
     <>
       <aside
-        className={`hidden overflow-hidden bg-gray-100 text-[#131C2A] transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between z-50 shadow-sm/25 ${
+        className={`hidden overflow-hidden bg-zinc-100 text-primary transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between z-50 shadow-sm/25 ${
           isCollapsed ? 'w-17' : 'w-48 lg:w-52'
         }`}
       >
@@ -161,7 +161,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                     isCollapsed ? 'size-8 rounded-sm text-lg' : 'size-6 rounded text-sm'
                   }`}
                 >
-                  <span className="font-bold text-[#131C2A] transition-all duration-400 ease-in-out group-hover:text-[#f47812]">
+                  <span className="font-bold text-primary transition-all duration-400 ease-in-out group-hover:text-[#f47812]">
                     W
                   </span>
                 </div>
@@ -200,12 +200,12 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
               const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
               const Icon = item.icon;
 
-              const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-full px-3 py-2.5 text-sm font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
+              const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
                 isCollapsed ? 'justify-center' : 'justify-start'
               } ${
                 isActive
                   ? 'bg-primary-gradient text-zinc-50'
-                  : 'bg-card text-[#131C2A] hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
+                  : 'bg-card text-primary hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
               } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`;
 
               const navLink = (

@@ -33,7 +33,7 @@ export function SortButton({
   const isMercadoStyle = styleVariant === 'mercado';
 
   const triggerClassName = isMercadoStyle
-    ? 'group border border-gray-300 bg-zinc-50/75 text-[#131C2A] hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-28 sm:flex-1 sm:min-w-[140px]'
+    ? 'group border border-gray-300 bg-zinc-50/75 text-primary hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-28 sm:flex-1 sm:min-w-[140px]'
     : 'bg-card hover:bg-gray-200 rounded-md text-primary w-28 sm:flex-1 sm:min-w-[140px]';
 
   const itemClassName = (isActive: boolean) =>
@@ -60,7 +60,7 @@ export function SortButton({
             size={12}
             className={
               isMercadoStyle
-                ? 'text-[#131C2A] group-hover:text-white ml-1 shrink-0'
+                ? 'text-primary group-hover:text-white ml-1 shrink-0'
                 : 'text-accent ml-1 shrink-0'
             }
           />
