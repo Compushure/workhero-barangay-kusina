@@ -7,6 +7,8 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -63,20 +65,19 @@ export function AssignedTasksFilterBar({
         <DropdownMenuLabel className="text-xs font-semibold text-secondary uppercase tracking-wide px-2 py-1">
           Overdue
         </DropdownMenuLabel>
-        {overdueOptions.map((opt) => (
-          <DropdownMenuCheckboxItem
-            key={opt.value}
-            checked={overdueFilter === opt.value}
-            onCheckedChange={(checked) => {
-              if (checked) onOverdueFilterChange(opt.value);
-            }}
-            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out ${
-              overdueFilter === opt.value ? 'bg-accent/15 text-foreground font-medium' : ''
-            }`}
-          >
-            {opt.label}
-          </DropdownMenuCheckboxItem>
-        ))}
+        <DropdownMenuRadioGroup value={overdueFilter} onValueChange={onOverdueFilterChange}>
+          {overdueOptions.map((opt) => (
+            <DropdownMenuRadioItem
+              key={opt.value}
+              value={opt.value}
+              className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out ${
+                overdueFilter === opt.value ? 'bg-accent/15 text-foreground font-medium' : ''
+              }`}
+            >
+              {opt.label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-xs font-semibold text-secondary uppercase tracking-wide px-2 py-1">
           Status
