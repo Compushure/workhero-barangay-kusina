@@ -18,7 +18,7 @@ export default function Home() {
       <div className="absolute inset-0 bg-linear-to-r from-black/65 via-black/45 to-black/20" />
       <div className="absolute inset-0 bg-black/15" />
 
-      <section className="relative z-10 flex min-h-screen w-full items-start px-4 pt-6 pb-4 max-[380px]:px-3 max-[380px]:pt-5 sm:px-8 sm:pt-8 md:px-16 md:pt-8">
+      <section className="relative z-10 flex min-h-screen w-full items-center px-4 pt-6 pb-4 max-[380px]:px-3 max-[380px]:pt-5 sm:px-8 sm:pt-8 md:px-16 md:pt-8">
         <div className="flex min-h-[88svh] w-full max-w-full flex-col text-[#F7EFE4] sm:min-h-0 sm:max-w-xl md:max-w-2xl">
           <p className="font-pixel text-[10px] tracking-wider text-[#F4B31A] max-[380px]:text-[9px] sm:text-xs md:text-base">
             WORK HERO
