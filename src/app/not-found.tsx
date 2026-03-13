@@ -1,25 +1,21 @@
-'use client';
+import NotFound from '@/components/error/not-found';
+import type { Metadata } from 'next';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+export const metadata: Metadata = {
+  title: 'WorkHero | Error',
+  description: 'An unexpected error occurred in the WorkHero employee experience portal.',
+  icons: {
+    icon: '/assets/website-logo.svg',
+    shortcut: '/assets/website-logo.svg',
+    apple: '/assets/website-logo.svg',
+  },
+};
 
-export default function NotFound() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const cause = encodeURIComponent('Page not found');
-    const status = encodeURIComponent('404');
-    const recommendation = encodeURIComponent('Check the URL or return to the login page.');
-
-    router.replace(`/error?cause=${cause}&status=${status}&recommendation=${recommendation}`);
-  }, [router]);
-
+export default function NotFoundPage() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="flex flex-col items-center gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
-        <p className="text-gray-600">Redirecting to error page...</p>
-      </div>
-    </div>
+    <NotFound
+      cause="Page not found"
+      recommendation="Check the URL or return to the login page."
+    />
   );
 }
