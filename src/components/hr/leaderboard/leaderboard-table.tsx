@@ -38,6 +38,7 @@ export default function LeaderboardTable({
   isVisible,
 }: LeaderboardTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const isOptimisticRanking = rankingPeriodId.startsWith('optimistic-');
 
   const totalPages = Math.max(1, Math.ceil(players.length / PAGE_SIZE));
   const startIndex = (currentPage - 1) * PAGE_SIZE;
@@ -72,7 +73,11 @@ export default function LeaderboardTable({
               <p className="mt-0.5 text-xs text-gray-500 sm:text-sm">{dateRangeSubtitle}</p>
             )}
           </div>
-          <VisibilityToggle rankingPeriodId={rankingPeriodId} isVisible={isVisible} />
+          <VisibilityToggle
+            rankingPeriodId={rankingPeriodId}
+            isVisible={isVisible}
+            disabled={isOptimisticRanking}
+          />
         </div>
 
         <div className="w-full overflow-x-auto">
@@ -121,54 +126,80 @@ export default function LeaderboardTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedPlayers.map((player) => (
-                <TableRow
-                  key={player.id}
-                  className="bg-accent/5 border-0 transition-colors hover:bg-white"
-                >
-                  <TableCell className="py-2 pl-1 pr-1 sm:py-2.5 sm:pl-5 sm:pr-4">
-                    <RankCell rank={player.rank} />
-                  </TableCell>
-                  <TableCell className="py-2 sm:py-2.5">
-                    <div className="flex items-center gap-1 sm:gap-2.5">
-                      <Avatar className="h-8 w-8 border-2 border-gray-300 sm:h-10 sm:w-10">
-                        <AvatarImage src={player.image ?? undefined} alt={player.name} />
-                        <AvatarFallback className="bg-gray-200 text-sm font-semibold text-foreground">
-                          {player.name
-                            .split(' ')
-                            .map((n) => n[0])
-                            .join('')
-                            .toUpperCase()
-                            .slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                        <span className="line-clamp-1 font-medium text-xs text-foreground sm:text-base">
-                        {player.name}
-                      </span>
-                    </div>
-                  </TableCell>
-                    <TableCell className="whitespace-nowrap py-2 pr-1.5 text-right sm:py-2.5 sm:pr-4">
-                      <span className="text-xs text-foreground sm:text-base">
-                      {player.totalCompletedTasks.toLocaleString()}
-                    </span>
-                  </TableCell>
-                    <TableCell className="whitespace-nowrap py-2 pr-1.5 text-right sm:py-2.5 sm:pr-4">
-                      <span className="text-xs text-foreground sm:text-base">
-                      {player.taskPoints.toLocaleString()}
-                    </span>
-                  </TableCell>
-                    <TableCell className="whitespace-nowrap py-2 pr-1.5 text-right sm:py-2.5 sm:pr-4">
-                      <span className="text-xs text-foreground sm:text-base">
-                      {player.badgePoints.toLocaleString()}
-                    </span>
-                  </TableCell>
-                    <TableCell className="whitespace-nowrap py-2 pr-2 text-right sm:py-2.5 sm:pr-5">
-                      <span className="text-sm font-semibold text-primary sm:text-lg">
-                      {player.performanceScore.toLocaleString()}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {isOptimisticRanking
+                ? Array.from({ length: PAGE_SIZE }).map((_, index) => (
+                    <TableRow key={`optimistic-skeleton-${index}`} className="border-0 bg-accent/5">
+                      <TableCell className="py-2 pl-1 pr-1 sm:py-2.5 sm:pl-5 sm:pr-4">
+                        <div className="h-5 w-6 animate-pulse rounded bg-gray-200" />
+                      </TableCell>
+                      <TableCell className="py-2 sm:py-2.5">
+                        <div className="flex items-center gap-1 sm:gap-2.5">
+                          <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 sm:h-10 sm:w-10" />
+                          <div className="h-4 w-28 animate-pulse rounded bg-gray-200 sm:h-5 sm:w-40" />
+                        </div>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap py-2 pr-1.5 text-right sm:py-2.5 sm:pr-4">
+                        <div className="ml-auto h-4 w-12 animate-pulse rounded bg-gray-200 sm:h-5" />
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap py-2 pr-1.5 text-right sm:py-2.5 sm:pr-4">
+                        <div className="ml-auto h-4 w-14 animate-pulse rounded bg-gray-200 sm:h-5" />
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap py-2 pr-1.5 text-right sm:py-2.5 sm:pr-4">
+                        <div className="ml-auto h-4 w-14 animate-pulse rounded bg-gray-200 sm:h-5" />
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap py-2 pr-2 text-right sm:py-2.5 sm:pr-5">
+                        <div className="ml-auto h-5 w-16 animate-pulse rounded bg-gray-200" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : paginatedPlayers.map((player) => (
+                    <TableRow
+                      key={player.id}
+                      className="bg-accent/5 border-0 transition-colors hover:bg-white"
+                    >
+                      <TableCell className="py-2 pl-1 pr-1 sm:py-2.5 sm:pl-5 sm:pr-4">
+                        <RankCell rank={player.rank} />
+                      </TableCell>
+                      <TableCell className="py-2 sm:py-2.5">
+                        <div className="flex items-center gap-1 sm:gap-2.5">
+                          <Avatar className="h-8 w-8 border-2 border-gray-300 sm:h-10 sm:w-10">
+                            <AvatarImage src={player.image ?? undefined} alt={player.name} />
+                            <AvatarFallback className="bg-gray-200 text-sm font-semibold text-foreground">
+                              {player.name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')
+                                .toUpperCase()
+                                .slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="line-clamp-1 font-medium text-xs text-foreground sm:text-base">
+                            {player.name}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap py-2 pr-1.5 text-right sm:py-2.5 sm:pr-4">
+                        <span className="text-xs text-foreground sm:text-base">
+                          {player.totalCompletedTasks.toLocaleString()}
+                        </span>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap py-2 pr-1.5 text-right sm:py-2.5 sm:pr-4">
+                        <span className="text-xs text-foreground sm:text-base">
+                          {player.taskPoints.toLocaleString()}
+                        </span>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap py-2 pr-1.5 text-right sm:py-2.5 sm:pr-4">
+                        <span className="text-xs text-foreground sm:text-base">
+                          {player.badgePoints.toLocaleString()}
+                        </span>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap py-2 pr-2 text-right sm:py-2.5 sm:pr-5">
+                        <span className="text-sm font-semibold text-primary sm:text-lg">
+                          {player.performanceScore.toLocaleString()}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
               {Array.from({ length: PAGE_SIZE - paginatedPlayers.length }).map((_, i) => (
                 <TableRow
                   key={`placeholder-${i}`}

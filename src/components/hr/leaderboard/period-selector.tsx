@@ -1,8 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -18,8 +17,7 @@ import {
   buildPeriodLabel,
   getISOWeekDateRangeLabelShort,
 } from '@/lib/utils/time-period-utils';
-import { generateRankingByPeriod } from '@/actions/hr/leaderboard';
-import { hrLeaderboardKeys } from '@/hooks/tanstack/queries/hrQueries';
+import { useGenerateRankingByPeriod } from '@/hooks/tanstack/mutations/hrMutations';
 import type { RankLogPeriodType } from '@/types';
 
 function getPreviousWeek(): { year: number; week: number } {
@@ -124,8 +122,13 @@ export function PeriodSelector({
   currentPeriodRankingExists,
 }: PeriodSelectorProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
+  const [optimisticallyGenerated, setOptimisticallyGenerated] = useState(false);
+  const generateRankingMutation = useGenerateRankingByPeriod();
+
+  useEffect(() => {
+    setOptimisticallyGenerated(false);
+  }, [currentType, currentYear, currentWeek, currentMonth]);
 
   const periodLabel =
     currentType === 'monthly'
@@ -159,23 +162,37 @@ export function PeriodSelector({
   };
 
   const handleGenerateRank = () => {
-    startTransition(async () => {
-      const result = await generateRankingByPeriod(
-        currentType,
-        currentYear,
-        currentType === 'monthly' ? currentMonth : undefined,
-        currentType === 'weekly' ? currentWeek : undefined
-      );
+    const targetUrl = buildUrlForCurrentPeriod(
+      currentType,
+      currentYear,
+      currentWeek,
+      currentMonth
+    );
 
-      if (!result.success) {
-        return;
-      }
-
-      queryClient.invalidateQueries({ queryKey: hrLeaderboardKeys.all });
-      router.push(buildUrlForCurrentPeriod(currentType, currentYear, currentWeek, currentMonth));
-      router.refresh();
+    startTransition(() => {
+      router.push(targetUrl);
     });
+
+    generateRankingMutation.mutate(
+      {
+        periodType: currentType,
+        year: currentYear,
+        month: currentType === 'monthly' ? currentMonth : undefined,
+        week: currentType === 'weekly' ? currentWeek : undefined,
+      },
+      {
+        onSuccess: () => {
+          setOptimisticallyGenerated(true);
+        },
+        onError: () => {
+          setOptimisticallyGenerated(false);
+        },
+      }
+    );
   };
+
+  const hasRanking = currentPeriodRankingExists || optimisticallyGenerated;
+  const isGenerating = generateRankingMutation.isPending;
 
   return (
     <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
@@ -224,7 +241,7 @@ export function PeriodSelector({
       </div>
 
       {/* Show Rankings or "Already generated" indicator */}
-      {currentPeriodRankingExists ? (
+      {hasRanking ? (
         <div className="flex w-full items-center self-start sm:w-auto sm:self-end">
           <div className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-800 sm:w-auto sm:justify-start">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
@@ -234,10 +251,10 @@ export function PeriodSelector({
       ) : (
         <Button
           onClick={handleGenerateRank}
-          disabled={isPending}
+          disabled={isPending || isGenerating}
           className="self-start min-h-10 w-full bg-primary-gradient text-white hover:opacity-95 sm:w-auto sm:self-end"
         >
-          {isPending ? 'Generating…' : 'Generate Rank'}
+          {isGenerating ? 'Generating…' : 'Generate Rank'}
         </Button>
       )}
     </div>

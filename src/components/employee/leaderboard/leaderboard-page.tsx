@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { ChevronLeft, History } from 'lucide-react';
-import { useGetEmployeeTopRanksByPeriod } from '@/hooks/tanstack/queries/employeeQueries';
+import { useGetEmployeeTopRanksByPeriod, useGetLatestLeaderboardPeriods } from '@/hooks/tanstack/queries/employeeQueries';
 import { getISOWeekDateRangeLabel } from '@/lib/utils/time-period-utils';
 import type { RankLogPeriodType } from '@/types';
 import type { LatestPeriods } from './period-nav';
@@ -21,10 +21,12 @@ interface LeaderboardPageClientProps {
   latestPeriods: LatestPeriods;
 }
 
-export function LeaderboardPageClient({ latestPeriods }: LeaderboardPageClientProps) {
+export function LeaderboardPageClient({ latestPeriods: initialLatestPeriods }: LeaderboardPageClientProps) {
   const [periodType, setPeriodType] = useState<RankLogPeriodType>('weekly');
   const [view, setView] = useState<'current' | 'history'>('current');
   const [selectedPastPeriod, setSelectedPastPeriod] = useState<EmployeePeriodParams | null>(null);
+
+  const { data: latestPeriods = initialLatestPeriods } = useGetLatestLeaderboardPeriods(initialLatestPeriods);
 
   const currentPeriod = useMemo(
     () => getLatestPeriodParams(periodType, latestPeriods),
