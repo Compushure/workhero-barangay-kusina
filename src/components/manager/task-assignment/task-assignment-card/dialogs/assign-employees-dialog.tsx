@@ -119,7 +119,7 @@ export function AssignEmployeesDialog({
       <Button
         onClick={() => !disabled && setOpen(true)}
         disabled={disabled}
-        className={`w-full sm:w-auto bg-zinc-50 transform-gpu shadow-sm/25 cursor-pointer transition-all duration-400 ease-in-out flex items-center 
+        className={`w-full sm:w-auto bg-zinc-50 transform-gpu shadow-sm/25 cursor-pointer transition-all duration-400 ease-in-out flex items-center justify-between 
           disabled:shadow hover:bg-accent/15 disabled:cursor-not-allowed h-7 text-xs`}
       >
         <div className="flex items-center gap-2 min-w-0 sm:min-w-40 max-w-full sm:max-w-70 max-9/10">

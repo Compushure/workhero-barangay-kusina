@@ -238,7 +238,7 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
                 strokeWidth={2}
                 className="text-accent group-hover:text-card transition-all duration-400 ease-in-out size-3.5"
               />
-              <span className="hidden sm:inline">Clear Assigned</span>
+              <span className="">Clear Assigned</span>
             </Button>
           </div>
         </div>
