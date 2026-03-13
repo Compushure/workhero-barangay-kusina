@@ -44,6 +44,7 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
 
   const now = new Date();
   const defaultYear = now.getFullYear();
+  const defaultYearlyYear = defaultYear - 1;
   const defaultMonth = Math.max(1, now.getMonth()); // previous month (0-based → 1-based)
   const previousWeek = getPreviousWeek();
 
@@ -58,6 +59,8 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
       ? Math.max(2025, Number(params.year))
       : periodType === 'weekly'
         ? previousWeek.year
+        : periodType === 'yearly'
+          ? Math.max(2025, defaultYearlyYear)
         : (latestWeekly?.year ?? defaultYear);
   const week =
     params.week != null && params.week !== ''

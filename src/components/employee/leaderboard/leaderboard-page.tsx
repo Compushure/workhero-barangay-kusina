@@ -80,12 +80,15 @@ export function LeaderboardPageClient({ latestPeriods }: LeaderboardPageClientPr
   const showingPastDetail = view === 'history' && selectedPastPeriod !== null;
 
   return (
-    <div
-      className="relative min-h-screen w-full bg-cover bg-center flex flex-col font-jersey tracking-widest"
-      style={{ backgroundImage: 'url(/assets/leaderboard-bg.png)' }}
-    >
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+    <div className="relative min-h-screen w-full flex flex-col font-jersey tracking-widest">
+      {/* Fixed background layer (keeps image sizing stable across content height changes) */}
+      <div
+        className="fixed inset-0 -z-10 bg-cover bg-center"
+        style={{ backgroundImage: 'url(/assets/leaderboard-bg.png)' }}
+        aria-hidden="true"
+      />
+      {/* Fixed dark overlay */}
+      <div className="fixed inset-0 -z-10 bg-black/50 pointer-events-none" aria-hidden="true" />
       <div
         className="relative z-10 w-full"
         style={{
