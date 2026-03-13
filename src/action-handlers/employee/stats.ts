@@ -15,8 +15,21 @@ import {
   getEmployeeXP,
 } from '@/actions/employee/stats';
 import { toast } from 'sonner';
-import type { EmployeePointsData, EmployeeRank, EmployeeTopRankEntry, EmployeeXP } from '@/types';
+import type {
+  EmployeePointsData,
+  EmployeeRank,
+  EmployeeTopRankEntry,
+  EmployeeXP,
+  RankLogPeriodType,
+} from '@/types';
 // import type { TimePeriod } from '@/lib/utils/time-period-utils';
+
+export interface EmployeePeriodParams {
+  periodType: RankLogPeriodType;
+  year: number;
+  month?: number;
+  week?: number;
+}
 
 /**
  * Fetches the current employee's level
@@ -87,8 +100,7 @@ export async function handleFetchEmployeeRank(): Promise<EmployeeRank | null> {
 }
 
 /**
- * Fetches the top 10 weekly rankings for the latest visible period.
- * Returns null on failure or when no ranking exists (no toast for empty data).
+ * Fetches top 10 weekly rankings for the latest visible period.
  */
 export async function handleFetchEmployeeTopWeeklyRanks(): Promise<
   EmployeeTopRankEntry[] | null
@@ -96,7 +108,7 @@ export async function handleFetchEmployeeTopWeeklyRanks(): Promise<
   const result = await getEmployeeTopWeeklyRanks();
 
   if (!result.success) {
-    toast.error('Failed to load top rankings', {
+    toast.error('Failed to load top weekly ranks', {
       description: result.error ?? 'Unknown error',
     });
     return null;
@@ -105,27 +117,21 @@ export async function handleFetchEmployeeTopWeeklyRanks(): Promise<
   return result.data ?? null;
 }
 
-export type EmployeePeriodParams =
-  | { periodType: 'weekly'; year: number; week: number }
-  | { periodType: 'monthly'; year: number; month: number }
-  | { periodType: 'yearly'; year: number };
-
 /**
- * Fetches the top 10 rankings for a specific period (weekly, monthly, or yearly).
- * Returns null on failure or when no visible ranking exists for that period.
+ * Fetches top 10 rankings for a specific period (weekly, monthly, yearly).
  */
 export async function handleFetchEmployeeTopRanksByPeriod(
   params: EmployeePeriodParams
 ): Promise<EmployeeTopRankEntry[] | null> {
-  const result =
-    params.periodType === 'weekly'
-      ? await getEmployeeTopRanksByPeriod(params.periodType, params.year, undefined, params.week)
-      : params.periodType === 'monthly'
-        ? await getEmployeeTopRanksByPeriod(params.periodType, params.year, params.month)
-        : await getEmployeeTopRanksByPeriod(params.periodType, params.year);
+  const result = await getEmployeeTopRanksByPeriod(
+    params.periodType,
+    params.year,
+    params.month,
+    params.week
+  );
 
   if (!result.success) {
-    toast.error('Failed to load rankings', {
+    toast.error('Failed to load rankings for selected period', {
       description: result.error ?? 'Unknown error',
     });
     return null;

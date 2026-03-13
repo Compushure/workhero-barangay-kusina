@@ -7,7 +7,7 @@ import { SearchBar } from '@/components/manager/task-verification/search-bar';
 import { SortButton } from '@/components/manager/task-verification/sort-button';
 import { RequestsTable } from '@/components/manager/task-verification/requests-table';
 import { RequestsTableSkeleton } from '@/components/manager/task-verification/requests-table-skeleton';
-import type { VerificationRequest, SortOption, PaginatedResponse } from '@/types';
+import type { VerificationRequest, SortOption } from '@/types';
 import { ConfirmationDialog } from '@/components/manager/task-verification/confirmation-modal';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,7 +19,6 @@ import {
   useRejectTask,
 } from '@/hooks/tanstack';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
-import { useDebounce } from '@/hooks/useDebounce';
 
 interface VerificationRequestsPageProps {
   initialRequests: VerificationRequest[];
@@ -29,64 +28,22 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('pending');
-  const [dateSortBy, setDateSortBy] = useState<
-    'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
-  >('date-desc');
+  const [dateSortBy, setDateSortBy] = useState<'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'>('date-desc');
   const [pendingPage, setPendingPage] = useState(1);
   const [remark, setRemark] = useState('');
   const [approvedPage, setApprovedPage] = useState(1);
   const [deniedPage, setDeniedPage] = useState(1);
   const isSubmittingRef = useRef(false);
 
-  // Keep last fetched page per category so UI does not flash/skeleton while searching
-  const [pendingCache, setPendingCache] = useState<PaginatedResponse<VerificationRequest> | null>(
-    null
-  );
-  const [approvedCache, setApprovedCache] = useState<PaginatedResponse<VerificationRequest> | null>(
-    null
-  );
-  const [deniedCache, setDeniedCache] = useState<PaginatedResponse<VerificationRequest> | null>(
-    null
-  );
-
-  // Debounce search to avoid refetching on every keystroke
-  const debouncedSearch = useDebounce(searchTerm, 300);
-
   // Use paginated Tanstack Query hooks with separate pagination for each category
-  const {
-    data: pendingData,
-    isLoading: isLoadingPending,
-    isError: isPendingError,
-  } = useGetTasksToReviewPaginated(pendingPage, debouncedSearch, dateSortBy);
-  const {
-    data: approvedData,
-    isLoading: isLoadingApproved,
-    isError: isApprovedError,
-  } = useGetApprovedTasksPaginated(approvedPage, debouncedSearch, dateSortBy);
-  const {
-    data: deniedData,
-    isLoading: isLoadingDenied,
-    isError: isDeniedError,
-  } = useGetDeniedTasksPaginated(deniedPage, debouncedSearch, dateSortBy);
+  const { data: pendingData, isLoading: isLoadingPending, isError: isPendingError } =
+    useGetTasksToReviewPaginated(pendingPage);
+  const { data: approvedData, isLoading: isLoadingApproved, isError: isApprovedError } =
+    useGetApprovedTasksPaginated(approvedPage);
+  const { data: deniedData, isLoading: isLoadingDenied, isError: isDeniedError } = useGetDeniedTasksPaginated(deniedPage);
 
   const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
-
-  useEffect(() => {
-    if (pendingData) setPendingCache(pendingData);
-  }, [pendingData]);
-
-  useEffect(() => {
-    if (approvedData) setApprovedCache(approvedData);
-  }, [approvedData]);
-
-  useEffect(() => {
-    if (deniedData) setDeniedCache(deniedData);
-  }, [deniedData]);
-
-  const pendingDisplay = pendingData ?? pendingCache;
-  const approvedDisplay = approvedData ?? approvedCache;
-  const deniedDisplay = deniedData ?? deniedCache;
 
   useEffect(() => {
     if (isPendingError && isApprovedError && isDeniedError) {
@@ -100,29 +57,29 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const getCurrentTasks = useMemo(() => {
     switch (sortBy) {
       case 'pending':
-        return pendingDisplay?.data ?? [];
+        return pendingData?.data ?? [];
       case 'approved':
-        return approvedDisplay?.data ?? [];
+        return approvedData?.data ?? [];
       case 'denied':
-        return deniedDisplay?.data ?? [];
+        return deniedData?.data ?? [];
       default:
         return [];
     }
-  }, [sortBy, pendingDisplay, approvedDisplay, deniedDisplay]);
+  }, [sortBy, pendingData, approvedData, deniedData]);
 
   // Get total pages for current category - memoized to prevent unnecessary recalculations
   const getTotalPages = useMemo(() => {
     switch (sortBy) {
       case 'pending':
-        return pendingDisplay?.totalPages ?? 1;
+        return pendingData?.totalPages ?? 1;
       case 'approved':
-        return approvedDisplay?.totalPages ?? 1;
+        return approvedData?.totalPages ?? 1;
       case 'denied':
-        return deniedDisplay?.totalPages ?? 1;
+        return deniedData?.totalPages ?? 1;
       default:
         return 1;
     }
-  }, [sortBy, pendingDisplay, approvedDisplay, deniedDisplay]);
+  }, [sortBy, pendingData, approvedData, deniedData]);
 
   // Get current page based on sort category - memoized to prevent unnecessary recalculations
   const getCurrentPage = useMemo(() => {
@@ -157,14 +114,14 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const totalPages = getTotalPages;
   const currentPage = getCurrentPage;
   const isCurrentCategoryLoading =
-    (sortBy === 'pending' && isLoadingPending && !pendingDisplay) ||
-    (sortBy === 'approved' && isLoadingApproved && !approvedDisplay) ||
-    (sortBy === 'denied' && isLoadingDenied && !deniedDisplay);
+    (sortBy === 'pending' && isLoadingPending) ||
+    (sortBy === 'approved' && isLoadingApproved) ||
+    (sortBy === 'denied' && isLoadingDenied);
 
   // Filter and sort requests based on search term and date/employee sorting
   const filteredRequests = useMemo(() => {
     let filtered = currentTasks;
-    const normalizedSearch = normalizeSearchQuery(debouncedSearch);
+    const normalizedSearch = normalizeSearchQuery(searchTerm);
 
     // Apply search filter
     if (normalizedSearch) {
@@ -203,7 +160,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           return 0;
       }
     });
-  }, [currentTasks, debouncedSearch, dateSortBy]);
+  }, [currentTasks, searchTerm, dateSortBy]);
 
   const resetConfirmState = () => setConfirmAction({ type: null, id: null });
 
@@ -300,9 +257,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
               <SortButton
                 sortBy={dateSortBy as any}
                 onSortChange={(value) =>
-                  setDateSortBy(
-                    value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
-                  )
+                  setDateSortBy(value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc')
                 }
                 options={[
                   { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
