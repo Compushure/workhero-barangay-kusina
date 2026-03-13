@@ -1,16 +1,16 @@
-'use client';
+import type { Metadata } from 'next';
+import ErrorPageClient from '@/components/error/error-page';
 
-import { useSearchParams } from 'next/navigation';
-import ErrorRouter from '@/components/error/error-router';
+export const metadata: Metadata = {
+  title: 'WorkHero | Error',
+  description: 'An unexpected error occurred in the WorkHero employee experience portal.',
+  icons: {
+    icon: '/assets/website-logo.svg',
+    shortcut: '/assets/website-logo.svg',
+    apple: '/assets/website-logo.svg',
+  },
+};
 
 export default function ErrorPage() {
-  const params = useSearchParams();
-
-  return (
-    <ErrorRouter
-      status={params.get('status') ?? '500'}
-      cause={params.get('cause') ?? 'Unknown error'}
-      recommendation={params.get('recommendation') ?? 'Please try again later.'}
-    />
-  );
+  return <ErrorPageClient />;
 }
