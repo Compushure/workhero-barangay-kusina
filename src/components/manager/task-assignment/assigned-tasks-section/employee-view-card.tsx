@@ -15,6 +15,7 @@ interface EmployeeViewCardProps {
 
 export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeViewCardProps) {
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
+  const [firstRowCapacity, setFirstRowCapacity] = useState(1);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<{
     taskId?: string;
     assignmentId?: string;
@@ -38,6 +39,26 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
   });
 
   const employees = Array.from(employeeMap.values());
+
+  useEffect(() => {
+    const updateFirstRowCapacity = () => {
+      if (window.innerWidth >= 1536) {
+        setFirstRowCapacity(3);
+      } else if (window.innerWidth >= 1280) {
+        setFirstRowCapacity(2);
+      } else {
+        setFirstRowCapacity(1);
+      }
+    };
+
+    updateFirstRowCapacity();
+    window.addEventListener('resize', updateFirstRowCapacity);
+
+    return () => {
+      window.removeEventListener('resize', updateFirstRowCapacity);
+    };
+  }, []);
+
   useEffect(() => {
     if (showClearConfirm && !employees.some((emp) => emp.id === showClearConfirm)) {
       setShowClearConfirm(null);
@@ -85,8 +106,8 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
         const isExpanded = expandedEmployees.has(employee.id);
         const displayedTasks = isExpanded
           ? employee.assignedTasks
-          : employee.assignedTasks.slice(0, 2);
-        const hiddenCount = Math.max(0, employee.assignedTasks.length - 2);
+          : employee.assignedTasks.slice(0, firstRowCapacity);
+        const hiddenCount = Math.max(0, employee.assignedTasks.length - firstRowCapacity);
 
         return (
           <div

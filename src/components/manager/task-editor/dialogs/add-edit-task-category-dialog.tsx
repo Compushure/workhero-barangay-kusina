@@ -379,11 +379,11 @@ export default function AddEditTaskCategoryDialog({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-4">
+        <div className="flex flex-row justify-end gap-2 mt-4">
           <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="bg-primary-gradient hover:brightness-75 text-white hover:bg-accent px-4 sm:px-6 disabled:opacity-50 disabled:brightness-75 disabled:saturate-50 disabled:cursor-not-allowed w-full sm:w-auto transition-all duration-400 ease-in-out h-8 text-xs"
+            className="bg-primary-gradient hover:brightness-75 text-white hover:bg-accent px-3 sm:px-6 disabled:opacity-50 disabled:brightness-75 disabled:saturate-50 disabled:cursor-not-allowed flex-1 sm:flex-initial sm:w-auto transition-all duration-400 ease-in-out h-8 text-xs"
           >
             {isLoading ? (
               <>
@@ -400,7 +400,7 @@ export default function AddEditTaskCategoryDialog({
             variant="outline"
             onClick={handleClose}
             disabled={isLoading}
-            className="bg-white text-primary border-primary/50 hover:bg-white hover:brightness-90 px-4 sm:px-6 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto h-8 text-xs"
+            className="bg-white text-primary border-primary/50 hover:bg-white hover:brightness-90 px-3 sm:px-6 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-initial sm:w-auto h-8 text-xs"
           >
             Cancel
           </Button>

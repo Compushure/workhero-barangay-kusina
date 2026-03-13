@@ -71,7 +71,7 @@ export default function EmployeeViewTaskBadges({
             icon: any;
             className?: string;
           }) => (
-            <p className={`flex gap-0.5 ${className} px-1.5 py-0.5 rounded-full items-center`}>
+            <p className={`flex gap-1 ${className} px-1.5 py-0.5 rounded-full items-center`}>
               <Icon strokeWidth={2.5} className="size-3.5" />
               <span className="hidden sm:inline text-xs">
                 {task.status
@@ -97,7 +97,7 @@ export default function EmployeeViewTaskBadges({
                 </span>
                 <div className="flex flex-wrap items-center gap-0.5 sm:gap-1">
                   <p
-                    className={`block w-fit text-xs text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}
+                    className={`block w-fit text-[0.6rem] md:text-xs 2xl:text-[0.6rem] text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}
                   >
                     {formatDate(task.dateRange.start)} -{' '}
                     {formatDate(task.dateRange.end) || 'No deadline'}
