@@ -8,14 +8,14 @@ export function TaskAssignmentCardSkeleton() {
 
       {/* Button group skeleton */}
       <div className="flex flex-wrap gap-2 sm:gap-3">
-        <div className="w-full sm:w-auto sm:min-w-50">
-          <Skeleton className="control-skeleton-h w-full sm:w-50 bg-gray-300 rounded-md" />
+        <div className="w-full sm:w-auto sm:min-w-44">
+          <Skeleton className="control-skeleton-h w-full sm:w-44 md:w-50 bg-gray-300 rounded-md" />
         </div>
         <div className="w-full sm:w-auto">
-          <Skeleton className="control-skeleton-h w-full sm:w-50 bg-gray-300 rounded-md" />
+          <Skeleton className="control-skeleton-h w-full sm:w-44 md:w-50 bg-gray-300 rounded-md" />
         </div>
         <div className="w-full sm:w-auto">
-          <Skeleton className="control-skeleton-h w-full sm:w-50 bg-gray-300 rounded-md" />
+          <Skeleton className="control-skeleton-h w-full sm:w-44 md:w-50 bg-gray-300 rounded-md" />
         </div>
       </div>
 

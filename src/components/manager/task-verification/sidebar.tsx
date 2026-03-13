@@ -139,7 +139,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
     <>
       <aside
         className={`hidden overflow-hidden bg-zinc-100 text-primary transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between z-50 shadow-sm/25 ${
-          isCollapsed ? 'w-17' : 'w-48 lg:w-52'
+          isCollapsed ? 'w-17' : 'w-52'
         }`}
       >
         <div className="mt-6 px-3 py-7">

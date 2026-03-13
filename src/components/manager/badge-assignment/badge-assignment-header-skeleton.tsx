@@ -2,12 +2,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function BadgeAssignmentHeaderSkeleton() {
   return (
-    <div className="space-y-4 sm:space-y-5 lg:space-y-6 md:space-y-8">
+    <div className="space-y-4 sm:space-y-5 md:space-y-8 lg:space-y-6">
       <section className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-3 sm:gap-4">
         {/* Title Section */}
         <div className="space-y-2">
           <Skeleton className="h-8 sm:h-9 w-48 sm:w-56 bg-gray-300" />
-          <Skeleton className="h-4 sm:h-5 w-64 sm:w-80 bg-gray-300" />
+          <Skeleton className="h-4 sm:h-5 w-11/12 max-w-64 sm:max-w-80 bg-gray-300" />
         </div>
 
         {/* Tabs */}
@@ -24,7 +24,9 @@ export function BadgeAssignmentHeaderSkeleton() {
 
         {/* Search and Sort */}
         <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
-          <Skeleton className="control-skeleton-h w-full flex-1 xl:max-w-md bg-gray-300 rounded-md" />
+          <div className="min-w-0 flex-1 xl:w-54 xl:min-w-54 xl:max-w-64">
+            <Skeleton className="control-skeleton-h w-full bg-gray-300 rounded-md" />
+          </div>
           <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap sm:gap-3 xl:justify-end">
             <Skeleton className="control-skeleton-h w-full sm:w-44 bg-gray-300 rounded-md" />
           </div>

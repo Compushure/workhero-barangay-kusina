@@ -91,7 +91,7 @@ export default function TaskViewEmployeeBadges({
               <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" />
             )}
 
-            {emp?.pendingOrders === 0 && task.status === 'approved' && (
+            {emp.pendingOrders === 0 && emp.status === 'approved' && (
               <span className="flex px-1 py-0.5 rounded-full items-center bg-green-100 text-green-600">
                 <HandCoins strokeWidth={2.5} className="size-3.5" />
               </span>

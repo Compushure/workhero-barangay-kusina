@@ -10,12 +10,12 @@ export default function BadgeTableSkeleton() {
           className="bg-background-soft hover:bg-background-soft border-b border-gray-300"
         >
           <TableCell className="py-2 sm:py-3">
-            <div className="flex items-baseline gap-1.5 sm:gap-2 pl-3 sm:pl-4">
+            <div className="flex items-baseline gap-1.5 sm:gap-2 pl-2 sm:pl-4 min-w-0">
               <Skeleton className="size-12 sm:size-14 bg-gray-300" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-32 bg-gray-300" />
-                <Skeleton className="h-3 w-48 bg-gray-300" />
-                <Skeleton className="h-4 w-24 bg-gray-300" />
+              <div className="space-y-2 min-w-0 flex-1">
+                <Skeleton className="h-4 w-2/3 max-w-32 bg-gray-300" />
+                <Skeleton className="h-3 w-full max-w-48 bg-gray-300" />
+                <Skeleton className="h-4 w-1/2 max-w-24 bg-gray-300" />
               </div>
             </div>
           </TableCell>
@@ -34,8 +34,8 @@ export default function BadgeTableSkeleton() {
 
           <TableCell>
             <div className="flex justify-center gap-0.5 sm:gap-1">
-              <Skeleton className="h-9 w-9 rounded-md bg-gray-300" />
-              <Skeleton className="h-9 w-9 rounded-md bg-gray-300" />
+              <Skeleton className="h-8 w-8 sm:h-9 sm:w-9 rounded-md bg-gray-300" />
+              <Skeleton className="h-8 w-8 sm:h-9 sm:w-9 rounded-md bg-gray-300" />
             </div>
           </TableCell>
         </TableRow>

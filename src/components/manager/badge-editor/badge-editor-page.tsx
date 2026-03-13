@@ -272,7 +272,7 @@ export function BadgeEditorPage() {
                   <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Search badges"
+                    placeholder="Search assignable task"
                     value={searchTerm}
                     onChange={handleSearchChange}
                     className="text-meta control-h w-full min-w-0 rounded-md border border-zinc-200 bg-card pr-3 pl-9 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
@@ -287,42 +287,45 @@ export function BadgeEditorPage() {
                     />
                   </div>
 
-                  {/* Sort Dropdown */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="default"
-                        size="default"
-                        className="text-button control-h w-full justify-between border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44"
-                      >
-                        <span className="truncate">{currentSortLabel}</span>
-                        <ArrowUpDown size={14} className="text-accent" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="manager-dropdown-content w-56">
-                      {SORT_OPTIONS.map((option) => (
-                        <DropdownMenuItem
-                          key={option.value}
-                          onClick={() => handleSortChange(option.value)}
-                          className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
-                            sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
-                          }`}
+                  {/* Sort and Add Button Row */}
+                  <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
+                    {/* Sort Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="default"
+                          size="default"
+                          className="text-button control-h w-full justify-between border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44"
                         >
-                          {option.label}
-                        </DropdownMenuItem>
-                      ))}
+                          <span className="truncate">{currentSortLabel}</span>
+                          <ArrowUpDown size={14} className="text-accent" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="manager-dropdown-content w-56">
+                        {SORT_OPTIONS.map((option) => (
+                          <DropdownMenuItem
+                            key={option.value}
+                            onClick={() => handleSortChange(option.value)}
+                            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                              sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                            }`}
+                          >
+                            {option.label}
+                          </DropdownMenuItem>
+                        ))}
                     </DropdownMenuContent>
-                  </DropdownMenu>
+                    </DropdownMenu>
 
-                  {/* Add New Badge Button */}
-                  <Button
-                    onClick={handleOpenAddDialog}
-                    className="text-button control-h w-full justify-center rounded-md bg-primary-gradient px-3 py-1.5 whitespace-nowrap text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 sm:w-auto sm:px-4"
-                  >
-                    <Coins size={14} />
-                    <span>Add New Badge</span>
-                    <Plus size={14} className="ml-1 sm:ml-3" />
-                  </Button>
+                    {/* Add New Badge Button */}
+                    <Button
+                      onClick={handleOpenAddDialog}
+                      className="text-button control-h w-full justify-center rounded-md bg-primary-gradient px-3 py-1.5 whitespace-nowrap text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 sm:w-auto sm:px-4"
+                    >
+                      <Coins size={14} />
+                      <span>Add New Badge</span>
+                      <Plus size={14} className="ml-1 sm:ml-3" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </section>

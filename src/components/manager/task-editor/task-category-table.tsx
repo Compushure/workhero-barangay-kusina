@@ -67,13 +67,13 @@ export default function TaskCategoryTable({
               <TableHead className="min-w-48 max-w-48 w-48 sm:min-w-64 sm:max-w-64 sm:w-64 md:min-w-96 md:max-w-96 md:w-96 pl-3 sm:pl-6 py-3 sm:py-4">
                 <Skeleton className="h-4 w-16 bg-gray-300" />
               </TableHead>
-              <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center hidden md:table-cell">
+              <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center hidden lg:table-cell">
                 <Skeleton className="h-4 w-12 mx-auto bg-gray-300" />
               </TableHead>
-              <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center hidden md:table-cell">
+              <TableHead className="min-w-16 max-w-16 w-16 sm:min-w-20 sm:max-w-20 sm:w-20 text-center hidden lg:table-cell">
                 <Skeleton className="h-4 w-8 mx-auto bg-gray-300" />
               </TableHead>
-              <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-32 sm:max-w-32 sm:w-32 text-center hidden sm:table-cell">
+              <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-32 sm:max-w-32 sm:w-32 text-center hidden md:table-cell">
                 <Skeleton className="h-4 w-18 mx-auto bg-gray-300" />
               </TableHead>
               <TableHead className="min-w-24 max-w-24 w-24 sm:min-w-36 sm:max-w-36 sm:w-36 text-center sticky right-0">

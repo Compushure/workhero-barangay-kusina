@@ -5,12 +5,12 @@ export function BadgeAssignmentUsersSkeleton() {
         <div key={i} className="bg-card rounded-lg border-b border-gray-300 p-3 shadow-sm/25">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             {/* Avatar and User Info Section */}
-            <div className="shrink-0 flex items-center gap-3 min-w-0 sm:min-w-48">
+            <div className="shrink-0 flex items-center gap-3 min-w-0 sm:min-w-44">
               {/* Avatar skeleton */}
               <div className="size-8 sm:size-10 rounded-full bg-gray-300 animate-pulse" />
 
               {/* User Details */}
-              <div className="min-w-0 flex-1 sm:w-48 space-y-2">
+              <div className="min-w-0 flex-1 sm:w-44 space-y-2">
                 <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse" />
                 <div className="h-3 bg-gray-300 rounded w-1/2 animate-pulse" />
               </div>
@@ -68,10 +68,10 @@ export function BadgeAssignmentQuickSkeleton() {
       <div className="lg:col-span-2 space-y-4">
         {/* Selected Badge Details */}
         <div className="bg-card border border-accent/25 rounded-lg p-4 sm:p-6 shadow-sm/25">
-          <div className="flex items-start gap-3 sm:gap-4">
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
             <div className="size-16 sm:size-20 rounded-lg bg-gray-300 animate-pulse shrink-0" />
             <div className="flex-1 space-y-3 min-w-0">
-              <div className="h-6 bg-gray-300 rounded w-2/3 animate-pulse" />
+              <div className="h-6 bg-gray-300 rounded w-2/3 max-w-64 animate-pulse" />
               <div className="h-4 bg-gray-300 rounded w-full animate-pulse" />
               <div className="h-4 bg-gray-300 rounded w-24 animate-pulse" />
             </div>

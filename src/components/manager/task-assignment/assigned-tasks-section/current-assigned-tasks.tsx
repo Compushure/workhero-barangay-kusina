@@ -40,6 +40,7 @@ function CurrentAssignedTasksSkeleton() {
           <Skeleton className="control-skeleton-h w-full flex-1 xl:max-w-md rounded-md bg-gray-300" />
           <div className="flex min-w-0 flex-wrap gap-1.5 sm:gap-2 sm:flex-nowrap">
             <Skeleton className="control-skeleton-h w-full sm:w-40 rounded-md bg-gray-300" />
+            <Skeleton className="control-skeleton-h w-10 sm:w-22 rounded-md bg-gray-300" />
             <Skeleton className="control-skeleton-h w-full sm:w-36 rounded-md bg-gray-300" />
           </div>
         </div>

@@ -7,10 +7,10 @@ export default function TaskTableSkeleton() {
       {[1, 2, 3, 4, 5].map((i) => (
         <TableRow key={i} className="bg-background-soft hover:bg-background-soft">
           <TableCell>
-            <div className="space-y-2 pl-3 sm:pl-5">
-              <Skeleton className="h-4 bg-gray-300 w-1/2" />
-              <Skeleton className="h-3 bg-gray-300 w-2/3" />
-              <Skeleton className="h-4 bg-gray-300 w-1/3" />
+            <div className="space-y-2 pl-2 sm:pl-5 min-w-0">
+              <Skeleton className="h-4 bg-gray-300 w-2/3 max-w-48" />
+              <Skeleton className="h-3 bg-gray-300 w-full max-w-56" />
+              <Skeleton className="h-4 bg-gray-300 w-1/2 max-w-32" />
             </div>
           </TableCell>
 
@@ -28,8 +28,8 @@ export default function TaskTableSkeleton() {
 
           <TableCell>
             <div className="flex justify-center gap-1">
-              <Skeleton className="h-9 w-9 rounded-md bg-gray-300" />
-              <Skeleton className="h-9 w-9 rounded-md bg-gray-300" />
+              <Skeleton className="h-8 w-8 sm:h-9 sm:w-9 rounded-md bg-gray-300" />
+              <Skeleton className="h-8 w-8 sm:h-9 sm:w-9 rounded-md bg-gray-300" />
             </div>
           </TableCell>
         </TableRow>

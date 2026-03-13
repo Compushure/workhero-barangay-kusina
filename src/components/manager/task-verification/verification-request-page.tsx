@@ -282,11 +282,11 @@ export function VerificationRequestsPage({
           <div className="manager-sticky-controls mt-3 mb-3 rounded-xl px-3 py-3 sm:mb-4 sm:mt-4 sm:px-4">
             <div className="flex min-w-0 flex-col items-stretch gap-2 lg:flex-row lg:items-center lg:justify-end">
               <div className="min-w-0 flex-1 xl:max-w-md">
-                <Skeleton className="control-skeleton-h w-full bg-background rounded-md" />
+                <Skeleton className="control-skeleton-h w-full bg-gray-300 rounded-md" />
               </div>
               <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap lg:shrink-0">
-                <Skeleton className="control-skeleton-h w-full sm:w-40 bg-background rounded-md" />
-                <Skeleton className="control-skeleton-h w-full sm:w-40 bg-background rounded-md" />
+                <Skeleton className="control-skeleton-h w-full lg:w-40 bg-gray-300 rounded-md" />
+                <Skeleton className="control-skeleton-h w-full lg:w-40 bg-gray-300 rounded-md" />
               </div>
             </div>
           </div>

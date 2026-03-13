@@ -171,10 +171,10 @@ export default function BadgeTable({
                           <div className="font-semibold text-xs sm:text-sm text-foreground truncate">
                             {badge.name}
                           </div>
-                          <div className="text-2xs sm:text-xs text-secondary truncate mt-0.5">
+                          <div className="text-xs text-secondary truncate mt-0.5">
                             {badge.description || 'No description'}
                           </div>
-                          <div className="text-[8px] sm:text-2xs text-primary font-medium px-1.5 rounded-full bg-accent/15 w-fit mt-1.5">
+                          <div className="text-2xs sm:text-xs text-primary font-medium px-1.5 rounded-full bg-accent/15 w-fit mt-1.5">
                             {formatIntervalLabel(badge.award_at_interval)}
                           </div>
                           {badge.conditions.length === 0 && badge.award_at_interval !== 'none' && (
