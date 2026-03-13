@@ -83,7 +83,7 @@ function toOptimisticLeaderboardResult(params: GenerateRankingParams): EnrichedL
     periodLabel,
     dateRangeSubtitle,
     rankingPeriodId: `optimistic-${params.periodType}-${params.year}-${params.month ?? 0}-${params.week ?? 0}`,
-    isVisible: true,
+    isVisible: false,
   };
 }
 
