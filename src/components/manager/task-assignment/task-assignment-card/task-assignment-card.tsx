@@ -44,7 +44,9 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
     100,
     'recently added',
     '',
-    true
+    true,
+    [],
+    'all'
   );
   const assignedTasksForAssign = assignedTasksQuery.data?.tasks ?? assignedTasks;
 

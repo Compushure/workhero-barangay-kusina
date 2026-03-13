@@ -48,7 +48,9 @@ export default function EditTaskDialog({
     1000,
     'recently added',
     '',
-    showEditDialog
+    showEditDialog,
+    [],
+    'all'
   );
   const assignedTasks = assignedTasksQuery.data?.tasks ?? [];
 
@@ -108,7 +110,9 @@ export default function EditTaskDialog({
               <div className="flex items-end gap-1.5">
                 <p className="flex gap-0.5 items-end text-base font-medium">
                   <Coins strokeWidth={1.5} className="size-4" />
-                  <span className="inline-block font-semibold text-base leading-none pb-0.5">{task.points}</span>
+                  <span className="inline-block font-semibold text-base leading-none pb-0.5">
+                    {task.points}
+                  </span>
                 </p>
 
                 <p className="flex gap-1 items-end font-medium pb-0.5">

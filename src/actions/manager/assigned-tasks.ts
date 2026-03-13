@@ -16,7 +16,9 @@ export async function fetchCurrentAssignedTasksPaginated(
   page: number = 1,
   pageSize: number = 10,
   sortBy: string = 'recently added',
-  searchTerm: string = ''
+  searchTerm: string = '',
+  statusFilters: string[] = [],
+  overdueFilter: string = 'hide-overdue'
 ): Promise<
   ServerActionResponse<{
     data: AssignedTask[];
@@ -69,6 +71,19 @@ export async function fetchCurrentAssignedTasksPaginated(
   // Apply search filter if provided
   if (searchTerm && searchTerm.trim()) {
     query = query.ilike('category_name', `%${searchTerm.trim()}%`);
+  }
+
+  // Apply status filters (empty means all)
+  if (statusFilters.length > 0) {
+    query = query.in('status', statusFilters);
+  }
+
+  // Apply overdue filter
+  const today = new Date().toISOString().split('T')[0];
+  if (overdueFilter === 'hide-overdue') {
+    query = query.gte('k_deadline_date', today);
+  } else if (overdueFilter === 'only-overdue') {
+    query = query.lt('k_deadline_date', today);
   }
 
   const { data: allSortedData, error: allError } = await query.order(orderByColumn, { ascending });
@@ -193,7 +208,9 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   page: number = 1,
   pageSize: number = 10,
   sortBy: string = 'recently added',
-  searchTerm: string = ''
+  searchTerm: string = '',
+  statusFilters: string[] = [],
+  overdueFilter: string = 'hide-overdue'
 ): Promise<
   ServerActionResponse<{
     data: AssignedTask[];
@@ -246,6 +263,19 @@ export async function fetchCurrentAssignedEmployeesPaginated(
     query = query.or(
       `assigned_to_name.ilike.%${trimmedSearch}%,assigned_to_employee_id.ilike.%${trimmedSearch}%`
     );
+  }
+
+  // Apply status filters (empty means all)
+  if (statusFilters.length > 0) {
+    query = query.in('status', statusFilters);
+  }
+
+  // Apply overdue filter
+  const today = new Date().toISOString().split('T')[0];
+  if (overdueFilter === 'hide-overdue') {
+    query = query.gte('k_deadline_date', today);
+  } else if (overdueFilter === 'only-overdue') {
+    query = query.lt('k_deadline_date', today);
   }
 
   const { data: allSortedData, error } = await query.order(orderByColumn, { ascending });
@@ -424,10 +454,15 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   };
 }
 
-export async function clearAssignedTasks(): Promise<ServerActionResponse<boolean>> {
+export async function clearUnstartedAssignedTasks(): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
-  // Delete all KPITask entries that are not in 'done' status (i.e., all active assignments)
-  const { error } = await supabase.from('KPITask').delete().in('status', ['assigned']);
+  // Delete only KPITask entries that are 'assigned' AND have no progress
+  const { error } = await supabase
+    .from('KPITask')
+    .delete()
+    .eq('status', 'assigned')
+    .eq('completed_orders', 0)
+    .eq('pending_orders', 0);
 
   if (error) return { error: error.message, data: undefined };
   return { error: null, data: true };

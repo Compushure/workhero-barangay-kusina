@@ -14,6 +14,7 @@ interface ManagerAssignmentState {
   rollback: () => void;
   optimisticDeleteTask: (taskId: string) => void;
   optimisticClearAll: () => void;
+  optimisticClearUnstartedAssigned: () => void;
   optimisticClearAllEmployeeTasks: (employeeId: string) => void;
   optimisticUpdateTask: (
     taskId: string,
@@ -74,6 +75,22 @@ export const useManagerAssignmentStore = create<ManagerAssignmentState>((set, ge
       assignedTasks: state.assignedTasks.filter((task) => task.id !== taskId),
     })),
   optimisticClearAll: () => set({ assignedTasks: [] }),
+  optimisticClearUnstartedAssigned: () =>
+    set((state) => ({
+      assignedTasks: state.assignedTasks
+        .map((task) => ({
+          ...task,
+          assignedEmployees: task.assignedEmployees.filter(
+            (emp) =>
+              !(
+                (emp.status?.toLowerCase() ?? 'assigned') === 'assigned' &&
+                (emp.completedOrders ?? 0) === 0 &&
+                (emp.pendingOrders ?? 0) === 0
+              )
+          ),
+        }))
+        .filter((task) => task.assignedEmployees.length > 0),
+    })),
   optimisticClearAllEmployeeTasks: (employeeId) =>
     set((state) => ({
       assignedTasks: state.assignedTasks

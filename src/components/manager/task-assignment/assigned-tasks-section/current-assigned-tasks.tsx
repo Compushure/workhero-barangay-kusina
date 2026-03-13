@@ -7,6 +7,7 @@ import { MemoizedTaskViewCard as TaskViewCard } from './task-view-card';
 import { MemoizedEmployeeViewCard as EmployeeViewCard } from './employee-view-card';
 import { TaskSortingBar } from './task-sorting-bar';
 import { EmployeeSortingBar } from './employee-sorting-bar';
+import { AssignedTasksFilterBar } from './assigned-tasks-filter-bar';
 import ClearAllDialog from './dialogs/clear-all-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
 import { Pagination } from '@/components/manager/task-verification/pagination';
@@ -19,6 +20,8 @@ import { SkeletonCard } from '../card-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useManagerAssignmentStore } from '@/store/managerAssignmentStore';
 import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
+
+const STATUS_OPTIONS = ['assigned', 'in review', 'approved', 'rejected'] as const;
 
 function CurrentAssignedTasksSkeleton() {
   return (
@@ -54,17 +57,15 @@ function CurrentAssignedTasksSkeleton() {
   );
 }
 
-interface CurrentAssignedTasksProps {
-  // ✅ Removed onInitialLoadChange - component manages its own loading state
-}
-
-export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
+export function CurrentAssignedTasks() {
   const { viewMode, setViewMode } = useTaskAssignment();
   const { assignedTasks, hydrateFromServer, isOptimistic } = useManagerAssignmentStore();
 
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recently added');
+  const [statusFilters, setStatusFilters] = useState<string[]>([...STATUS_OPTIONS]);
+  const [overdueFilter, setOverdueFilter] = useState('hide-overdue');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
@@ -75,7 +76,9 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
     10,
     sortBy,
     debouncedSearchTerm,
-    viewMode === 'task' // Only fetch when task view is active
+    viewMode === 'task', // Only fetch when task view is active
+    statusFilters,
+    overdueFilter
   );
 
   const employeeQuery = useGetCurrentAssignedEmployeesPaginated(
@@ -83,7 +86,9 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
     10,
     sortBy,
     debouncedSearchTerm,
-    viewMode === 'employee' // Only fetch when employee view is active
+    viewMode === 'employee', // Only fetch when employee view is active
+    statusFilters,
+    overdueFilter
   );
 
   const isLoading = viewMode === 'task' ? taskQuery.isLoading : employeeQuery.isLoading;
@@ -132,14 +137,29 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
     setPage(1);
   };
 
+  const handleStatusFilterToggle = (value: string) => {
+    setStatusFilters((prev) => {
+      if (prev.includes(value)) {
+        // Keep at least one status selected to avoid impossible state
+        if (prev.length === 1) return prev;
+        return prev.filter((item) => item !== value);
+      }
+      return [...prev, value];
+    });
+    setPage(1);
+  };
+
+  const handleOverdueFilterChange = (value: string) => {
+    setOverdueFilter(value);
+    setPage(1);
+  };
+
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
   const memoizedTasks = useMemo(() => tasks || [], [tasks]);
   const isInteractiveLoading = isLoading && memoizedTasks.length === 0;
-
-  // ✅ Removed useEffect that notified parent - prevents unnecessary re-renders
 
   if (isInteractiveLoading) {
     return <CurrentAssignedTasksSkeleton />;
@@ -226,19 +246,25 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
                 <EmployeeSortingBar sortBy={sortBy} onSortChange={handleSortChange} />
               )}
             </div>
-
+            {/* Filter Bar */}
+            <AssignedTasksFilterBar
+              statusFilters={statusFilters}
+              overdueFilter={overdueFilter}
+              onStatusFilterToggle={handleStatusFilterToggle}
+              onOverdueFilterChange={handleOverdueFilterChange}
+            />
             {/* Clear All */}
             <Button
               onClick={() => setShowClearConfirm(true)}
               disabled={memoizedTasks.length === 0}
               className="text-button control-h group hover:text-card px-3 sm:px-5 md:px-7 py-1.5 bg-card shadow-sm/25 hover:bg-red-700 cursor-pointer text-primary disabled:opacity-50 transition-all duration-400 ease-in-out"
-              title="Clear All Assigned Tasks"
+              title="Clear Unstarted Assigned Tasks"
             >
               <CircleDashed
                 strokeWidth={2}
                 className="text-accent group-hover:text-card transition-all duration-400 ease-in-out size-3.5"
               />
-              <span className="">Clear Assigned</span>
+              <span className="">Clear Unstarted</span>
             </Button>
           </div>
         </div>

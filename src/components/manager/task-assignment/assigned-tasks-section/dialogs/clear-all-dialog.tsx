@@ -7,7 +7,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useClearAssignedTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
+import { useClearUnstartedAssignedTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 import { OctagonAlert } from 'lucide-react';
 
 interface ClearAllDialogProps {
@@ -15,7 +15,7 @@ interface ClearAllDialogProps {
 }
 
 function ClearAllAssignedDialog({ setShowClearConfirm }: ClearAllDialogProps) {
-  const clearAllMutation = useClearAssignedTasksMutation();
+  const clearAllMutation = useClearUnstartedAssignedTasksMutation();
 
   const handleClearAllAssigned = async () => {
     clearAllMutation.mutate(undefined, {
@@ -34,10 +34,10 @@ function ClearAllAssignedDialog({ setShowClearConfirm }: ClearAllDialogProps) {
               <OctagonAlert strokeWidth={2.5} size={16} />
               Danger Zone
             </span>
-            <span>Clear All Assigned Assignments?</span>
+            <span>Clear All Unstarted Assignments?</span>
           </DialogTitle>
           <DialogDescription className="text-gray-600 text-sm">
-            This will unassign all tasks with 'Assigned' status from all employees. This action
+            This will unassign all tasks that have not been started at all by employees. This action
             cannot be undone. Proceed with caution
           </DialogDescription>
         </DialogHeader>

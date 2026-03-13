@@ -2,7 +2,10 @@
 
 import React, { createContext, useContext, useState, useMemo } from 'react';
 import { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
-import { handleDeleteTask, handleClearAssignedTasks } from '@/action-handlers/manager/assigned-tasks';
+import {
+  handleDeleteTask,
+  handleClearUnstartedAssignedTasks,
+} from '@/action-handlers/manager/assigned-tasks';
 import { handleAddTaskAssignment } from '@/action-handlers/manager/assignments';
 import { useManagerAssignmentStore } from '@/store/managerAssignmentStore';
 
@@ -19,7 +22,7 @@ interface TaskAssignmentContextType {
     newDueDate: string,
     newEmployees: AssignedEmployee[]
   ) => void;
-  clearAll: () => Promise<void>;
+  clearUnstarted: () => Promise<void>;
   clearAllEmployeeTasks: (employeeId: string) => void;
   setAssignedTasks: (tasks: AssignedTask[]) => void;
   page: number;
@@ -31,12 +34,8 @@ interface TaskAssignmentContextType {
 const TaskAssignmentContext = createContext<TaskAssignmentContextType | undefined>(undefined);
 
 export function TaskAssignmentProvider({ children }: { children: React.ReactNode }) {
-  const {
-    assignedTasks,
-    setAssignedTasks,
-    updateAssignedTasks,
-    appendAssignedTasks,
-  } = useManagerAssignmentStore();
+  const { assignedTasks, setAssignedTasks, updateAssignedTasks, appendAssignedTasks } =
+    useManagerAssignmentStore();
   const [viewMode, setViewMode] = useState<'task' | 'employee'>('task');
 
   // ✅ Pagination state
@@ -55,7 +54,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
 
       // Create assignments for each task-employee combination
       for (const taskSelection of filters.tasks) {
-        const employeeIds = filters.employees.map(emp => emp.id);
+        const employeeIds = filters.employees.map((emp) => emp.id);
         const newAssignments = await handleAddTaskAssignment(
           taskSelection.id,
           employeeIds,
@@ -77,7 +76,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
   const removeAssignment = async (taskId: string, employeeId: string) => {
     // Call server action to delete from database
     const success = await handleDeleteTask(taskId);
-    
+
     if (success) {
       // Only update local state if server deletion succeeded
       updateAssignedTasks((prev) =>
@@ -124,9 +123,8 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
     );
   };
 
-  const clearAll = async () => {
-    const success = await handleClearAssignedTasks();
-    if (success) setAssignedTasks([]);
+  const clearUnstarted = async () => {
+    await handleClearUnstartedAssignedTasks();
   };
 
   const clearAllEmployeeTasks = (employeeId: string) => {
@@ -149,7 +147,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
       removeAssignment,
       deleteTask,
       editTask,
-      clearAll,
+      clearUnstarted,
       clearAllEmployeeTasks,
       setAssignedTasks,
       page,

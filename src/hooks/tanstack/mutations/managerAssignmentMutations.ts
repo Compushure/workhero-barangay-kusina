@@ -9,7 +9,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import {
   handleDeleteTask,
   handleDeleteTaskForAllEmployees,
-  handleClearAssignedTasks,
+  handleClearUnstartedAssignedTasks,
   handleClearAllEmployeeTasks,
   handleUpdateTaskAssignment,
 } from '@/action-handlers/manager/assigned-tasks';
@@ -70,20 +70,21 @@ export function useDeleteTaskGroupMutation(): UseMutationResult<
 }
 
 /**
- * Mutation for clearing all 'assigned' task assignments
- * Automatically invalidates all assignment queries on success
+ * Mutation for clearing unstarted (no progress) 'assigned' task assignments
+ * Only removes assignments with status='assigned', completed_orders=0, pending_orders=0
  */
-export function useClearAssignedTasksMutation(): UseMutationResult<boolean, Error, void> {
+export function useClearUnstartedAssignedTasksMutation(): UseMutationResult<boolean, Error, void> {
   const queryClient = useQueryClient();
-  const { startOptimistic, optimisticClearAll, rollback, commit } = useManagerAssignmentStore();
+  const { startOptimistic, optimisticClearUnstartedAssigned, rollback, commit } =
+    useManagerAssignmentStore();
 
   return useMutation({
     mutationFn: async () => {
-      return await handleClearAssignedTasks();
+      return await handleClearUnstartedAssignedTasks();
     },
     onMutate: async () => {
       startOptimistic();
-      optimisticClearAll();
+      optimisticClearUnstartedAssigned();
     },
     onSuccess: () => {
       commit();
@@ -91,8 +92,8 @@ export function useClearAssignedTasksMutation(): UseMutationResult<boolean, Erro
     },
     onError: (error) => {
       rollback();
-      toast.error('Failed to clear assigned tasks. Rolling back changes.');
-      console.error('Error clearing all tasks:', error);
+      toast.error('Failed to clear unstarted assignments. Rolling back changes.');
+      console.error('Error clearing unstarted tasks:', error);
     },
   });
 }
