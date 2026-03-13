@@ -266,7 +266,7 @@ export function VerificationRequestsPage({
   const showInitialSkeleton = isCurrentCategoryLoading && currentTasks.length === 0;
 
   return (
-    <div className="px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6 bg-zinc-100 min-h-screen flex flex-col">
+    <div className="px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6 min-h-screen flex flex-col">
       {showInitialSkeleton ? (
         <div className="space-y-2">
           <Skeleton className="h-8 w-64 bg-background" />

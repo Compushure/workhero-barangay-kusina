@@ -195,7 +195,7 @@ export default function BadgeAssignmentPage() {
   };
 
   return (
-    <main className="w-full min-h-screen bg-zinc-100 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+    <main className="w-full min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
       <div className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl space-y-5 sm:space-y-6 lg:space-y-8">
         {isHeaderLoading ? (
           <BadgeAssignmentHeaderSkeleton />

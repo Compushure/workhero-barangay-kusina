@@ -163,7 +163,7 @@ export default function TaskEditorPage() {
     SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Name (A-Z)';
 
   return (
-    <main className="w-full min-h-screen bg-zinc-100 px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6">
+    <main className="w-full min-h-screen px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6">
       <div className="mx-auto w-full max-w-7xl 2xl:max-w-440 space-y-3 sm:space-y-4 lg:space-y-5">
         {isLoading ? (
           <TaskEditorHeaderSkeleton />
