@@ -66,7 +66,7 @@ export default function AttendanceDesign() {
           </div>
 
           <div className="pointer-events-auto w-full sm:w-auto flex justify-end">
-            <Card className="bg-transparent shadow-none border-none w-full sm:w-auto p-0 gap-0">
+            <Card className="bg-transparent shadow-none border-none w-full sm:w-auto p-0 gap-0 mr-15">
               <CardContent className="p-0">
                 <RankWidget />
               </CardContent>
