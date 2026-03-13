@@ -32,7 +32,7 @@ export function TaskRepeatabilityFilterToggle({
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="gap-2 h-8 px-4 rounded-lg border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
+            className="text-button control-h gap-2 px-4 rounded-md border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
           >
             <Filter className="size-3 text-accent" />
             <span className="hidden sm:inline">Filter</span>
@@ -44,7 +44,7 @@ export function TaskRepeatabilityFilterToggle({
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="start" className="w-56 bg-background">
+        <DropdownMenuContent align="start" className="manager-dropdown-content w-56">
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Task Type Category
           </DropdownMenuLabel>
@@ -52,7 +52,7 @@ export function TaskRepeatabilityFilterToggle({
           <DropdownMenuCheckboxItem
             checked={value === 'repeatable'}
             onCheckedChange={(checked) => onChange(checked ? 'repeatable' : 'all')}
-            className="cursor-pointer"
+            className="manager-dropdown-item cursor-pointer"
           >
             Repeatable
           </DropdownMenuCheckboxItem>
@@ -60,7 +60,7 @@ export function TaskRepeatabilityFilterToggle({
           <DropdownMenuCheckboxItem
             checked={value === 'non-repeatable'}
             onCheckedChange={(checked) => onChange(checked ? 'non-repeatable' : 'all')}
-            className="cursor-pointer"
+            className="manager-dropdown-item cursor-pointer"
           >
             Non-Repeatable
           </DropdownMenuCheckboxItem>
@@ -69,7 +69,10 @@ export function TaskRepeatabilityFilterToggle({
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Quick Actions
           </DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => onChange('all')} className="cursor-pointer pl-8">
+          <DropdownMenuItem
+            onClick={() => onChange('all')}
+            className="manager-dropdown-item cursor-pointer pl-8"
+          >
             Clear Filters
           </DropdownMenuItem>
         </DropdownMenuContent>

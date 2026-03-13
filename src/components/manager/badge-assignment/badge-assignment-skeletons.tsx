@@ -2,7 +2,7 @@ export function BadgeAssignmentUsersSkeleton() {
   return (
     <div className="space-y-4">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="bg-card rounded-xl border-b border-gray-300 p-3 shadow-sm/25">
+        <div key={i} className="bg-card rounded-lg border-b border-gray-300 p-3 shadow-sm/25">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             {/* Avatar and User Info Section */}
             <div className="shrink-0 flex items-center gap-3 min-w-0 sm:min-w-48">
@@ -27,7 +27,7 @@ export function BadgeAssignmentUsersSkeleton() {
 
             {/* Button Section */}
             <div className="shrink-0 flex gap-2 sm:w-auto w-full">
-              <div className="h-7 bg-gray-300 rounded-lg flex-1 w-16 sm:w-20 animate-pulse" />
+              <div className="control-skeleton-h bg-gray-300 rounded-md flex-1 w-20 sm:w-24 animate-pulse" />
             </div>
           </div>
         </div>
@@ -42,8 +42,8 @@ export function BadgeAssignmentQuickSkeleton() {
       {/* Badges List - Left Side (1 column) */}
       <div className="lg:col-span-1 space-y-4">
         <div className="space-y-2">
-          <div className="h-7 bg-gray-300 rounded w-32 animate-pulse" />
-          <div className="h-9 bg-gray-300 rounded-full animate-pulse" />
+          <div className="h-7 bg-gray-300 rounded-md w-32 animate-pulse" />
+          <div className="control-skeleton-h bg-gray-300 rounded-md animate-pulse" />
         </div>
 
         {/* Badge List */}
@@ -81,8 +81,8 @@ export function BadgeAssignmentQuickSkeleton() {
         {/* User Selection Area */}
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row gap-2">
-            <div className="h-9 bg-gray-300 rounded-full flex-1 animate-pulse" />
-            <div className="h-9 bg-gray-300 rounded w-full sm:w-32 animate-pulse" />
+            <div className="control-skeleton-h bg-gray-300 rounded-md flex-1 animate-pulse" />
+            <div className="control-skeleton-h bg-gray-300 rounded-md w-full sm:w-44 animate-pulse" />
           </div>
 
           {/* Users Grid */}

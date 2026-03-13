@@ -37,7 +37,7 @@ type BadgeSortOption = 'name-asc' | 'name-desc' | 'points-desc' | 'points-asc';
 type TabType = 'users' | 'quick-assign';
 
 const USERS_PER_PAGE = 10;
-const BADGES_PER_PAGE = 8;
+const BADGES_PER_PAGE = 10;
 
 const USER_SORT_OPTIONS: { value: UserSortOption; label: string }[] = [
   { value: 'name-asc', label: 'Name (A-Z)' },
@@ -204,10 +204,10 @@ export default function BadgeAssignmentPage() {
             <PageHeader title="Badge Assignment" subtitle="Manually award badges to employees." />
 
             {/* Tabs */}
-            <div className="flex bg-card/75 rounded-full shadow-sm/25 w-full sm:w-fit h-fit border border-accent/25 overflow-hidden text-sm">
+            <div className="flex bg-card/75 rounded-md shadow-sm/25 w-full sm:w-fit h-fit border border-accent/25 overflow-hidden">
               <button
                 onClick={() => setActiveTab('users')}
-                className={`flex flex-1 sm:w-48 justify-center items-center gap-1.5 py-2.5 cursor-pointer rounded-l-full text-sm font-medium transition-all duration-500 ease-in-out ${
+                className={`text-button flex flex-1 sm:w-48 justify-center items-center gap-1.5 py-2.5 cursor-pointer rounded-l-md transition-all duration-500 ease-in-out ${
                   activeTab === 'users'
                     ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
                     : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25'
@@ -221,7 +221,7 @@ export default function BadgeAssignmentPage() {
               </button>
               <button
                 onClick={() => setActiveTab('quick-assign')}
-                className={`flex flex-1 sm:w-48 justify-center items-center gap-1.5 py-2.5 cursor-pointer rounded-r-full text-sm font-medium transition-all duration-500 ease-in-out ${
+                className={`text-button flex flex-1 sm:w-48 justify-center items-center gap-1.5 py-2.5 cursor-pointer rounded-r-md transition-all duration-500 ease-in-out ${
                   activeTab === 'quick-assign'
                     ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
                     : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25'
@@ -247,96 +247,111 @@ export default function BadgeAssignmentPage() {
             ) : (
               <BadgeAssignmentQuickSkeleton />
             )
-          ) : (
-            <>
-              {/* Users Tab */}
-              {activeTab === 'users' && (
-                <div className="space-y-4">
-                  <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-                    {/* Badge Count Display */}
-                    <div className="flex shrink-0 self-start gap-4 whitespace-nowrap pl-2 text-lg font-bold text-foreground">
-                      <h5 className="flex items-center gap-2">
-                        <Users size={20} className="text-accent" />
-                        Employees{' '}
-                        <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
-                          {filteredUsers.length ?? 0}
-                        </span>
-                      </h5>
-                    </div>
+          ) : activeTab === 'users' ? (
+            <div className="space-y-4">
+              <div className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                <div className="flex shrink-0 self-start gap-4 whitespace-nowrap pl-2 text-h2 text-foreground">
+                  <h5 className="flex items-center gap-2">
+                    <Users size={20} className="text-accent" />
+                    Employees{' '}
+                    <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-md text-[13px] ml-1 shadow-sm/25">
+                      {filteredUsers.length ?? 0}
+                    </span>
+                  </h5>
+                </div>
 
-                    {/* Search and Sort Controls */}
-                    <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
-                      <div className="relative min-w-0 flex-1 xl:max-w-md">
-                        <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
-                        <input
-                          placeholder="Search employees"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
-                          className="w-full min-w-0 rounded-full bg-card py-2 pr-3 pl-9 text-xs shadow-sm/25 transition-colors focus:border focus:border-accent focus:outline-none"
-                        />
-                      </div>
+                <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
+                  <div className="relative min-w-0 flex-1 xl:max-w-md">
+                    <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+                    <input
+                      placeholder="Search employees"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
+                      className="text-meta control-h w-full min-w-0 rounded-md border border-zinc-200 bg-card pr-3 pl-9 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
+                    />
+                  </div>
 
-                      {/* Sort Dropdown */}
-                      <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap sm:gap-3 xl:justify-end">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="default"
-                              size="default"
-                              className="h-8 w-full justify-between border border-gray-200 bg-card py-1.5 text-xs text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-40"
-                            >
-                              <span className="truncate">
-                                {USER_SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label ||
-                                  'Sort'}
-                              </span>
-                              <ArrowUpDown size={14} className="text-accent" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-background">
-                            {USER_SORT_OPTIONS.map((option) => (
-                              <DropdownMenuItem
-                                key={option.value}
-                                onClick={() => setSortOption(option.value)}
-                                className={`cursor-pointer transition-all duration-300 ease-in-out text-xs ${
-                                  sortOption === option.value ? 'bg-accent/15' : ''
-                                }`}
-                              >
-                                {option.label}
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
+                  <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap sm:gap-3 xl:justify-end">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="default"
+                          size="default"
+                          className="text-button control-h w-full justify-between border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44"
+                        >
+                          <span className="truncate">
+                            {USER_SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label ||
+                              'Sort'}
+                          </span>
+                          <ArrowUpDown size={14} className="text-accent" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="manager-dropdown-content">
+                        {USER_SORT_OPTIONS.map((option) => (
+                          <DropdownMenuItem
+                            key={option.value}
+                            onClick={() => setSortOption(option.value)}
+                            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                              sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                            }`}
+                          >
+                            {option.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
+              </div>
+
+              {usersQuery.isLoading ? (
+                <BadgeAssignmentUsersSkeleton />
+              ) : filteredUsers.length === 0 ? (
+                <div className="bg-background rounded-lg p-8 border border-accent/25 text-center">
+                  <p className="text-secondary text-base">No users found matching your search</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <UserCardsGrid
+                    users={paginatedUsers}
+                    badges={allBadges}
+                    onAwardClick={handleAwardClick}
+                    onViewAllBadges={handleBadgeViewAll}
+                  />
+
+                  {totalUserPages > 1 && (
+                    <Pagination
+                      totalPages={totalUserPages}
+                      currentPage={userPage}
+                      onPageChange={setUserPage}
+                    />
+                  )}
+                </div>
               )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex gap-3 text-h2 text-foreground pl-1">
+                  <h5 className="flex items-center gap-1.5">
+                    <Award size={16} className="text-accent" />
+                    Badges
+                    <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-md text-[13px] ml-0.5 shadow-sm/25">
+                      {manualBadges.length}
+                    </span>
+                  </h5>
+                </div>
 
-              {/* Quick Assignment Tab */}
-              {activeTab === 'quick-assign' && (
-                <div className="space-y-4">
-                  <div className="flex items-center">
-                    <div className="flex gap-3 text-base font-bold text-foreground pl-1">
-                      <h5 className="flex items-center gap-1.5">
-                        <Award size={16} className="text-accent" />
-                        Badges
-                        <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-full text-xs ml-0.5 shadow-sm/25">
-                          {manualBadges.length}
-                        </span>
-                      </h5>
-                    </div>
-                    <p className="text-2xs text-secondary ml-auto hidden sm:inline">
-                      Only manual badges (not conditional) appear here
-                    </p>
-                  </div>
-
-                  {/* Sort Dropdown for Badges */}
+                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                  <p className="text-meta text-secondary hidden lg:inline">
+                    Only manual badges (not conditional) appear here
+                  </p>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex w-full justify-between items-center border-accent/25 bg-card py-4 text-primary shadow-sm/25 hover:bg-card hover:brightness-90 sm:w-40"
+                        className="text-button control-h flex w-full justify-between items-center border-accent/25 bg-card py-1.5 text-primary shadow-sm/25 hover:bg-card hover:brightness-90 sm:w-44"
                       >
                         <span className="truncate">
                           {BADGE_SORT_OPTIONS.find((opt) => opt.value === badgeSortOption)?.label ||
@@ -345,12 +360,12 @@ export default function BadgeAssignmentPage() {
                         <ArrowUpDown className="text-accent shrink-0" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="bg-background">
+                    <DropdownMenuContent align="start" className="manager-dropdown-content">
                       {BADGE_SORT_OPTIONS.map((option) => (
                         <DropdownMenuItem
                           key={option.value}
                           onClick={() => setBadgeSortOption(option.value)}
-                          className={badgeSortOption === option.value ? 'bg-accent/15' : ''}
+                          className={`manager-dropdown-item text-meta ${badgeSortOption === option.value ? 'bg-accent/15 text-foreground' : ''}`}
                         >
                           {option.label}
                         </DropdownMenuItem>
@@ -358,39 +373,9 @@ export default function BadgeAssignmentPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              )}
+              </div>
 
-              {activeTab === 'users' ? (
-                <>
-                  {usersQuery.isLoading ? (
-                    <BadgeAssignmentUsersSkeleton />
-                  ) : filteredUsers.length === 0 ? (
-                    <div className="bg-background rounded-lg p-8 border border-accent/25 text-center">
-                      <p className="text-secondary text-base">
-                        No users found matching your search
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      <UserCardsGrid
-                        users={paginatedUsers}
-                        badges={allBadges}
-                        onAwardClick={handleAwardClick}
-                        onViewAllBadges={handleBadgeViewAll}
-                      />
-
-                      {/* Pagination for Users */}
-                      {totalUserPages > 1 && (
-                        <Pagination
-                          totalPages={totalUserPages}
-                          currentPage={userPage}
-                          onPageChange={setUserPage}
-                        />
-                      )}
-                    </div>
-                  )}
-                </>
-              ) : isQuickAssignLoading ? (
+              {isQuickAssignLoading ? (
                 <BadgeAssignmentQuickSkeleton />
               ) : (
                 <QuickAssignmentPanel
@@ -402,7 +387,7 @@ export default function BadgeAssignmentPage() {
                   onAwardBadge={handleAwardBadge}
                 />
               )}
-            </>
+            </div>
           )}
         </section>
       </div>

@@ -10,28 +10,28 @@ export function TaskEditorHeaderSkeleton() {
       </div>
 
       {/* Search, Sort, and Add Button - Always visible, stacked on mobile */}
-      <section className="flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
         {/* Category Count Display */}
         <div className="flex shrink-0 self-start gap-2 whitespace-nowrap pl-0.5 sm:gap-3 sm:pl-1">
-          <Skeleton className="h-6 sm:h-7 w-32 sm:w-36 bg-gray-300 rounded-full" />
+          <Skeleton className="h-7 sm:h-8 w-32 sm:w-36 bg-gray-300 rounded-md" />
         </div>
 
         {/* Search, Sort, and Add Button */}
         <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
           {/* Search Input */}
-          <Skeleton className="h-6 sm:h-7 w-full flex-1 xl:max-w-md bg-gray-300 rounded-full" />
+          <Skeleton className="control-skeleton-h w-full flex-1 xl:max-w-md bg-gray-300 rounded-md" />
 
           <div className="flex min-w-0 flex-wrap gap-2 sm:gap-3 xl:flex-nowrap xl:justify-end">
             {/* Filter Toggle */}
-            <Skeleton className="h-6 sm:h-7 w-14 sm:w-16 bg-gray-300 rounded-lg shrink-0" />
+            <Skeleton className="control-skeleton-h w-20 sm:w-24 bg-gray-300 rounded-md shrink-0" />
 
             {/* Sort and Add Button Row */}
             <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
               {/* Sort Dropdown */}
-              <Skeleton className="h-6 sm:h-7 w-full sm:w-36 md:w-40 bg-gray-300 rounded-lg" />
+              <Skeleton className="control-skeleton-h w-full sm:w-44 bg-gray-300 rounded-md" />
 
               {/* Add New Category Button */}
-              <Skeleton className="h-6 sm:h-7 w-full sm:w-44 md:w-52 bg-gray-300 rounded-full" />
+              <Skeleton className="control-skeleton-h w-full sm:w-44 md:w-52 bg-gray-300 rounded-md" />
             </div>
           </div>
         </div>

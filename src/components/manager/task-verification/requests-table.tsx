@@ -57,13 +57,13 @@ export function RequestsTable({
       <Table>
         <TableHeader className="bg-primary-gradient">
           <TableRow className="bg-primary-gradient">
-            <TableHead className="hidden sm:table-cell text-card px-2 sm:px-3 w-24 sm:w-40 text-[10px] sm:text-xs">
+            <TableHead className="hidden sm:table-cell text-card px-2 sm:px-3 w-24 sm:w-40 text-[11px] sm:text-xs">
               REQUEST DATE
             </TableHead>
-            <TableHead className="text-card px-2 sm:px-3 w-28 sm:w-44 text-[10px] sm:text-xs">
+            <TableHead className="text-card px-2 sm:px-3 w-28 sm:w-44 text-[11px] sm:text-xs">
               EMPLOYEE
             </TableHead>
-            <TableHead className="text-card px-2 sm:px-3 w-32 sm:w-56 text-[10px] sm:text-xs">
+            <TableHead className="text-card px-2 sm:px-3 w-32 sm:w-56 text-[11px] sm:text-xs">
               TASK
             </TableHead>
             <TableHead className="text-card text-center px-2 sm:px-3 w-20 sm:w-28 text-[10px] sm:text-xs hidden xl:table-cell">
@@ -95,17 +95,17 @@ export function RequestsTable({
                 key={request.kpitask_id}
                 className="bg-card hover:bg-row-hover transition-all duration-400 ease-in-out"
               >
-                <TableCell className="hidden sm:table-cell text-[10px] sm:text-xs font-medium px-2 sm:px-3 w-24 sm:w-40">
+                <TableCell className="hidden sm:table-cell text-[10px] sm:text-xs font-medium px-2 sm:px-3 py-6 w-24 sm:w-40">
                   {formatDate(request.kpitask_completed_at || request.kpitask_created_at)}
                 </TableCell>
-                <TableCell className="px-2 sm:px-3 max-w-28 sm:max-w-44">
+                <TableCell className="px-2 sm:px-3 py-2 max-w-28 sm:max-w-44">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
-                        <div className="text-[10px] sm:text-xs font-medium truncate">
+                        <div className="text-xs sm:text-sm font-medium truncate">
                           {employeeName}
                         </div>
-                        <div className="text-[9px] sm:text-[10px] text-muted-foreground truncate">
+                        <div className="text-[11px] sm:text-xs text-muted-foreground truncate">
                           {employeeId}
                         </div>
                       </div>
@@ -118,29 +118,29 @@ export function RequestsTable({
                     </TooltipContent>
                   </Tooltip>
                 </TableCell>
-                <TableCell className="text-[10px] sm:text-xs px-2 sm:px-3 max-w-32 sm:max-w-56">
+                <TableCell className="text-xs sm:text-sm px-2 sm:px-3 py-2 max-w-32 sm:max-w-56">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="truncate">{taskName}</div>
+                      <div className="font-medium truncate">{taskName}</div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <div className="max-w-xs text-xs">{taskName}</div>
+                      <div className="max-w-xs text-sm">{taskName}</div>
                     </TooltipContent>
                   </Tooltip>
                 </TableCell>
-                <TableCell className="text-[10px] sm:text-xs text-center px-2 sm:px-3 w-20 sm:w-28 hidden xl:table-cell">
+                <TableCell className="text-[10px] sm:text-xs text-center px-2 sm:px-3 py-2 w-20 sm:w-28 hidden xl:table-cell">
                   <div className="flex items-center justify-left gap-1 font-medium">
-                    <Soup strokeWidth={1.75} className="size-3 sm:size-4 ml-1 sm:ml-4 mr-0.5" />
+                    <Soup strokeWidth={1.75} className="size-3 sm:size-4 ml-1 sm:ml-9 mr-0.5" />
                     {request.completed_orders ?? 0} / {request.max_orders ?? 0}
                   </div>
                 </TableCell>
-                <TableCell className="text-[10px] sm:text-xs text-center font-medium px-2 sm:px-3 w-14 sm:w-14 hidden xl:table-cell">
+                <TableCell className="text-[10px] sm:text-xs text-center font-medium px-2 sm:px-3 py-2 w-14 sm:w-14 hidden xl:table-cell">
                   <div className="flex items-center justify-center gap-0.5">
                     <Coins strokeWidth={1.75} className="size-3 sm:size-4" />
                     {request.category_points ?? 0}
                   </div>
                 </TableCell>
-                <TableCell className="text-[10px] sm:text-xs text-center font-medium px-2 sm:px-3 w-14 sm:w-14 hidden xl:table-cell">
+                <TableCell className="text-[10px] sm:text-xs text-center font-medium px-2 sm:px-3 py-2 w-14 sm:w-14 hidden xl:table-cell">
                   <div className="flex items-center justify-center gap-0.5 sm:gap-1">
                     <span className="inline-block italic text-[10px] sm:text-xs leading-none">
                       XP
@@ -148,7 +148,7 @@ export function RequestsTable({
                     {request.category_xp ?? 0}
                   </div>
                 </TableCell>
-                <TableCell className="hidden lg:table-cell text-center px-1 sm:px-3 w-12 sm:w-16">
+                <TableCell className="hidden lg:table-cell text-center px-1 sm:px-3 py-2 w-12 sm:w-16">
                   {hasRemark ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -170,7 +170,7 @@ export function RequestsTable({
                     <span className="text-[10px] text-muted-foreground">-</span>
                   )}
                 </TableCell>
-                <TableCell className="text-center px-2 sm:px-3 w-24 sm:w-28 right-0">
+                <TableCell className="text-center px-2 sm:px-3 py-2 w-24 sm:w-28 right-0">
                   <div className="flex items-center justify-center gap-1">
                     {isShowingActions ? (
                       <>

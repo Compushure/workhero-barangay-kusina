@@ -58,7 +58,7 @@ export function BadgeEditorPage() {
   const [sortOption, setSortOption] = useState<BadgeSortOption>('name-asc');
   const [filterMode, setFilterMode] = useState<BadgeFilterMode>('all');
   const [page, setPage] = useState(1);
-  const pageSize = 8;
+  const pageSize = 10;
 
   // Debounce search term
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
@@ -253,13 +253,13 @@ export function BadgeEditorPage() {
               subtitle="Create, edit, and manage badges with conditions."
             />
 
-            <section className="flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
               {/* Badge Count Display */}
-              <div className="flex shrink-0 self-start gap-2 whitespace-nowrap pl-0.5 text-sm font-bold text-foreground sm:gap-3 sm:pl-1 sm:text-base">
+              <div className="flex shrink-0 self-start gap-2 whitespace-nowrap pl-0.5 text-h2 text-foreground sm:gap-3 sm:pl-1">
                 <h5 className="flex items-center gap-1.5">
                   <Coins size={16} className="text-accent" />
                   Badges
-                  <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-full text-xs ml-0.5 shadow-sm/25">
+                  <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-md text-[13px] ml-0.5 shadow-sm/25">
                     {totalCount ?? 0}
                   </span>
                 </h5>
@@ -275,7 +275,7 @@ export function BadgeEditorPage() {
                     placeholder="Search badges"
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    className="w-full min-w-0 rounded-full bg-card py-2 pr-3 pl-9 text-xs shadow-sm/25 transition-colors focus:border focus:border-accent focus:outline-none"
+                    className="text-meta control-h w-full min-w-0 rounded-md border border-zinc-200 bg-card pr-3 pl-9 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
                   />
                 </div>
 
@@ -293,19 +293,19 @@ export function BadgeEditorPage() {
                       <Button
                         variant="default"
                         size="default"
-                        className="h-8 w-full justify-between border border-gray-200 bg-card py-1.5 text-xs text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-40"
+                        className="text-button control-h w-full justify-between border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44"
                       >
                         <span className="truncate">{currentSortLabel}</span>
                         <ArrowUpDown size={14} className="text-accent" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-background w-56">
+                    <DropdownMenuContent align="end" className="manager-dropdown-content w-56">
                       {SORT_OPTIONS.map((option) => (
                         <DropdownMenuItem
                           key={option.value}
                           onClick={() => handleSortChange(option.value)}
-                          className={`cursor-pointer transition-all duration-300 ease-in-out text-xs ${
-                            sortOption === option.value ? 'bg-accent/15' : ''
+                          className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                            sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
                           }`}
                         >
                           {option.label}
@@ -317,7 +317,7 @@ export function BadgeEditorPage() {
                   {/* Add New Badge Button */}
                   <Button
                     onClick={handleOpenAddDialog}
-                    className="h-8 w-full justify-center rounded-full bg-primary-gradient px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 sm:w-auto sm:px-4"
+                    className="text-button control-h w-full justify-center rounded-md bg-primary-gradient px-3 py-1.5 whitespace-nowrap text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 sm:w-auto sm:px-4"
                   >
                     <Coins size={14} />
                     <span>Add New Badge</span>

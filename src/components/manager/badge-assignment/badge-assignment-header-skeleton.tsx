@@ -11,22 +11,22 @@ export function BadgeAssignmentHeaderSkeleton() {
         </div>
 
         {/* Tabs */}
-        <div className="flex rounded-xl overflow-hidden shadow-md border border-accent/25 w-full sm:w-fit">
-          <Skeleton className="h-9 sm:h-10 flex-1 sm:w-32 md:w-36 bg-gray-300 rounded-l-xl" />
-          <Skeleton className="h-9 sm:h-10 flex-1 sm:w-36 md:w-40 bg-gray-300 rounded-r-xl" />
+        <div className="flex rounded-md overflow-hidden shadow-md border border-accent/25 w-full sm:w-fit">
+          <Skeleton className="control-skeleton-h flex-1 sm:w-32 md:w-36 bg-gray-300 rounded-l-md" />
+          <Skeleton className="control-skeleton-h flex-1 sm:w-36 md:w-40 bg-gray-300 rounded-r-md" />
         </div>
       </section>
 
       {/* Search and Sort Controls */}
-      <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+      <div className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         {/* Badge/User Count */}
-        <Skeleton className="h-6 sm:h-7 w-36 sm:w-40 bg-gray-300 rounded-full shrink-0 self-start" />
+        <Skeleton className="h-7 sm:h-8 w-36 sm:w-40 bg-gray-300 rounded-md shrink-0 self-start" />
 
         {/* Search and Sort */}
         <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
-          <Skeleton className="h-7 sm:h-8 w-full flex-1 xl:max-w-md bg-gray-300 rounded-full" />
+          <Skeleton className="control-skeleton-h w-full flex-1 xl:max-w-md bg-gray-300 rounded-md" />
           <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap sm:gap-3 xl:justify-end">
-            <Skeleton className="h-7 sm:h-8 w-full sm:w-36 md:w-40 bg-gray-300 rounded-lg" />
+            <Skeleton className="control-skeleton-h w-full sm:w-44 bg-gray-300 rounded-md" />
           </div>
         </div>
       </div>

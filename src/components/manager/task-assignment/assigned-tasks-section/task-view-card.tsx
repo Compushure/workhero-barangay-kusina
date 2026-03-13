@@ -144,7 +144,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   return (
     <div
-      className={`relative flex flex-col lg:flex-row items-start lg:items-start justify-between rounded-2xl bg-card p-4 md:p-5 gap-3 sm:gap-4 md:gap-6 transition-all ease-in-out duration-400
+      className={`relative flex flex-col lg:flex-row items-start lg:items-start justify-between rounded-lg bg-card p-4 md:p-5 gap-3 sm:gap-4 md:gap-6 transition-all ease-in-out duration-400
         ${expanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`}
     >
       <main className="flex flex-col w-full gap-3 sm:gap-4 md:gap-5 min-w-0 flex-1 pr-6 sm:pr-8 lg:pr-0">
@@ -152,20 +152,20 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           {/* Task name, description, and date range */}
           <header className="flex flex-col gap-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-end gap-0.5 sm:gap-0 min-w-0">
-              <h3 className="text-base sm:text-lg font-bold text-primary truncate shrink-0 max-w-full sm:max-w-125">
+              <h3 className="text-task-title text-primary truncate shrink-0 max-w-full sm:max-w-125">
                 {task.taskName}
               </h3>
-              <p className="text-xs text-gray-500 sm:ml-1.5 sm:mr-6 sm:pb-1 truncate min-w-0 flex-1">
+              <p className="text-meta text-gray-500 sm:ml-1.5 sm:mr-6 truncate min-w-0 flex-1 leading-0">
                 {task.taskDescription}
               </p>
             </div>
 
-            <p className="flex items-center text-2xs sm:text-xs font-medium text-secondary flex-wrap gap-0.5 sm:gap-1">
-              <span className="bg-accent-secondary/25 w-fit rounded-full px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs">
+            <p className="text-meta flex items-center text-secondary flex-wrap gap-0.5 sm:gap-1">
+              <span className="bg-accent-secondary/20 w-fit rounded-md px-2 py-0.5">
                 {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
               </span>
               {isTaskOverdue(task.dateRange.end) && (
-                <span className="bg-red-100 text-red-500 text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.5 rounded-full">
+                <span className="bg-red-100 text-red-500 text-[13px] px-1.5 sm:px-2 py-0.5 rounded-md">
                   Task is Overdue
                 </span>
               )}
@@ -175,11 +175,11 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           {/* Task max orders, fiesta points and XP */}
           <div className="flex flex-col shrink-0 pt-2">
             {/* Icons and values row - all aligned at baseline */}
-            <div className="flex gap-2 sm:gap-3 text-secondary/85 items-baseline">
+            <div className="text-meta flex gap-2 sm:gap-3 text-secondary/85 items-baseline">
               {/* Soup icon + max orders */}
               <div className="flex items-baseline gap-0.5">
                 <Soup strokeWidth={1.5} className="size-4 sm:size-5 shrink-0" />
-                <span className="font-semibold text-xs sm:text-sm leading-none">
+                <span className="font-semibold text-[14px] sm:text-[15px] leading-none">
                   {task.maxOrders} max order/s
                 </span>
               </div>
@@ -190,18 +190,22 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
               {/* Coins icon + points */}
               <div className="flex items-baseline gap-0.5">
                 <Coins strokeWidth={1.75} className="size-3.5 sm:size-5 shrink-0" />
-                <span className="font-semibold text-sm sm:text-lg leading-none">{task.points}</span>
+                <span className="font-semibold text-[15px] sm:text-[18px] leading-none">
+                  {task.points}
+                </span>
               </div>
 
               {/* XP label + value */}
               <div className="flex items-baseline gap-0.5 sm:gap-1">
-                <span className="italic text-xs sm:text-base leading-none">XP</span>
-                <span className="font-semibold text-sm sm:text-lg leading-none">{task.xp}</span>
+                <span className="italic text-[14px] sm:text-base leading-none">XP</span>
+                <span className="font-semibold text-[15px] sm:text-[18px] leading-none">
+                  {task.xp}
+                </span>
               </div>
             </div>
 
             {/* Descriptive text row - aligned */}
-            <div className="flex gap-2 sm:gap-3 text-[10px] sm:text-2xs font-extralight text-zinc-400">
+            <div className="flex gap-2 sm:gap-3 text-[12px] font-normal text-zinc-500">
               <span className="pl-5 sm:pl-6">per employee</span>
               <span className="invisible">|</span>
               <span className="pl-6 sm:pl-12">per order</span>

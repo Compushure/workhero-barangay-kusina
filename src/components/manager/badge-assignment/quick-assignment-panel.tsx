@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -124,7 +123,7 @@ export default function QuickAssignmentPanel({
               placeholder="Search badges"
               value={badgeSearchTerm}
               onChange={(e) => setBadgeSearchTerm(sanitizeSearchInput(e.target.value))}
-              className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
+              className="text-meta control-h w-full pl-9 pr-3 rounded-md border border-zinc-200 bg-card shadow-sm/25 focus:outline-none focus:border-accent transition-colors"
             />
           </div>
         </div>
@@ -261,7 +260,7 @@ export default function QuickAssignmentPanel({
                     <Button
                       variant="default"
                       size="default"
-                      className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-40 py-1.5 justify-between border border-gray-200 h-8 text-xs"
+                      className="text-button control-h bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-44 py-1.5 justify-between border border-gray-200"
                     >
                       <span className="truncate">
                         {USER_SORT_OPTIONS.find((option) => option.value === userSortOption)
@@ -270,13 +269,13 @@ export default function QuickAssignmentPanel({
                       <ArrowUpDown size={14} className="text-accent shrink-0" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background w-48">
+                  <DropdownMenuContent align="end" className="manager-dropdown-content w-48">
                     {USER_SORT_OPTIONS.map((option) => (
                       <DropdownMenuItem
                         key={option.value}
                         onClick={() => setUserSortOption(option.value)}
-                        className={`cursor-pointer transition-all duration-300 ease-in-out text-xs ${
-                          userSortOption === option.value ? 'bg-accent/15' : ''
+                        className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                          userSortOption === option.value ? 'bg-accent/15 text-foreground' : ''
                         }`}
                       >
                         {option.label}
@@ -292,7 +291,7 @@ export default function QuickAssignmentPanel({
                   placeholder="Search employee"
                   value={userSearchTerm}
                   onChange={(e) => setUserSearchTerm(sanitizeSearchInput(e.target.value))}
-                  className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
+                  className="text-meta control-h w-full pl-9 pr-3 rounded-md border border-zinc-200 bg-card shadow-sm/25 focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
             </div>
@@ -341,14 +340,14 @@ export default function QuickAssignmentPanel({
               <Button
                 onClick={() => setSelectedBadge(null)}
                 variant="outline"
-                className="flex-1 border-accent/25 text-primary bg-card hover:bg-accent/15 shadow-sm/25"
+                className="text-button control-h flex-1 border-accent/25 text-primary bg-card hover:bg-accent/15 shadow-sm/25"
               >
                 Clear Selection
               </Button>
               <Button
                 onClick={handleAssignToSelected}
                 disabled={selectedUsers.size === 0}
-                className="flex-1 bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card disabled:opacity-50 shadow-sm/25"
+                className="text-button control-h flex-1 bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card disabled:opacity-50 shadow-sm/25"
               >
                 Assign to {selectedUsers.size} User{selectedUsers.size !== 1 ? 's' : ''}
               </Button>

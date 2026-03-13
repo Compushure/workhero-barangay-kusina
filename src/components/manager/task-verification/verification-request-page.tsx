@@ -2,9 +2,8 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, ArrowUpDown } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { PageHeader } from '@/components/manager/task-verification/page-header';
-import { SearchBar } from '@/components/manager/task-verification/search-bar';
 import { SortButton } from '@/components/manager/task-verification/sort-button';
 import { RequestsTable } from '@/components/manager/task-verification/requests-table';
 import { RequestsTableSkeleton } from '@/components/manager/task-verification/requests-table-skeleton';
@@ -12,13 +11,6 @@ import type { VerificationRequest, SortOption, PaginatedResponse } from '@/types
 import { ConfirmationDialog } from '@/components/manager/task-verification/confirmation-modal';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   useGetTasksToReviewPaginated,
   useGetApprovedTasksPaginated,
@@ -33,7 +25,9 @@ interface VerificationRequestsPageProps {
   initialRequests: VerificationRequest[];
 }
 
-export function VerificationRequestsPage({ initialRequests }: VerificationRequestsPageProps) {
+export function VerificationRequestsPage({
+  initialRequests: _initialRequests,
+}: VerificationRequestsPageProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('pending');
@@ -285,44 +279,48 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       <div className="flex-1 flex flex-col max-w-7xl 2xl:max-w-440 w-full mx-auto">
         {/* Filter Controls - Compact horizontal layout aligned to right */}
         {showInitialSkeleton ? (
-          <div className="mt-3 mb-3 flex min-w-0 flex-col items-stretch gap-2 sm:mb-4 sm:mt-4 lg:flex-row lg:items-center lg:justify-end">
-            <div className="min-w-0 flex-1 xl:max-w-md">
-              <Skeleton className="h-9 w-full bg-background rounded-full" />
-            </div>
-            <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap lg:shrink-0">
-              <Skeleton className="h-9 w-full sm:w-24 bg-background rounded-lg" />
-              <Skeleton className="h-9 w-full sm:w-32 bg-background rounded-lg" />
+          <div className="manager-sticky-controls mt-3 mb-3 rounded-xl px-3 py-3 sm:mb-4 sm:mt-4 sm:px-4">
+            <div className="flex min-w-0 flex-col items-stretch gap-2 lg:flex-row lg:items-center lg:justify-end">
+              <div className="min-w-0 flex-1 xl:max-w-md">
+                <Skeleton className="control-skeleton-h w-full bg-background rounded-md" />
+              </div>
+              <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap lg:shrink-0">
+                <Skeleton className="control-skeleton-h w-full sm:w-40 bg-background rounded-md" />
+                <Skeleton className="control-skeleton-h w-full sm:w-40 bg-background rounded-md" />
+              </div>
             </div>
           </div>
         ) : (
-          <div className="mt-3 mb-3 flex min-w-0 flex-col items-stretch gap-2 sm:mb-4 sm:mt-4 lg:flex-row lg:items-center lg:justify-end">
-            <div className="relative min-w-0 flex-1 xl:max-w-xs">
-              <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by employee name or ID"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
-                className="w-full min-w-0 rounded-full bg-card py-2 pr-3 pl-9 text-xs shadow-sm/25 transition-colors focus:border focus:border-accent focus:outline-none"
-              />
-            </div>
-            <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap lg:shrink-0">
-              <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="default" />
-              <SortButton
-                sortBy={dateSortBy as any}
-                onSortChange={(value) =>
-                  setDateSortBy(
-                    value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
-                  )
-                }
-                options={[
-                  { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
-                  { value: 'date-asc' as any, label: 'Date (Oldest)' },
-                  { value: 'employee-asc' as any, label: 'Employee Name (A-Z)' },
-                  { value: 'employee-desc' as any, label: 'Employee Name (Z-A)' },
-                ]}
-                styleVariant="default"
-              />
+          <div className="manager-sticky-controls mt-3 mb-3 rounded-xl px-3 py-3 sm:mb-4 sm:mt-4 sm:px-4">
+            <div className="flex min-w-0 flex-col items-stretch gap-2 lg:flex-row lg:items-center lg:justify-end">
+              <div className="relative min-w-0 flex-1 xl:max-w-xs">
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by employee name or ID"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
+                  className="text-meta control-h w-full min-w-0 rounded-md border border-zinc-200 bg-card pr-3 pl-9 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
+                />
+              </div>
+              <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap lg:shrink-0">
+                <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="default" />
+                <SortButton
+                  sortBy={dateSortBy as any}
+                  onSortChange={(value) =>
+                    setDateSortBy(
+                      value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
+                    )
+                  }
+                  options={[
+                    { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
+                    { value: 'date-asc' as any, label: 'Date (Oldest)' },
+                    { value: 'employee-asc' as any, label: 'Employee Name (A-Z)' },
+                    { value: 'employee-desc' as any, label: 'Employee Name (Z-A)' },
+                  ]}
+                  styleVariant="default"
+                />
+              </div>
             </div>
           </div>
         )}

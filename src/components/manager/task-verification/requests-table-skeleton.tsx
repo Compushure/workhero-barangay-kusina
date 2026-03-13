@@ -10,18 +10,18 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-border shadow-md [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div className="overflow-x-auto rounded-lg shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <Table>
         <TableHeader className="bg-background">
-          <TableRow className="border-b border-border bg-background">
+          <TableRow className="bg-background border-b border-border/10">
             <TableHead className="hidden sm:table-cell px-2 sm:px-4 w-24 sm:w-40">
-              <Skeleton className="h-4 w-20 sm:w-24 bg-gray-300" />
+              <Skeleton className="h-3 w-20 sm:w-24 bg-gray-300" />
             </TableHead>
             <TableHead className="px-2 sm:px-4 w-28 sm:w-44">
-              <Skeleton className="h-4 w-16 sm:w-20 bg-gray-300" />
+              <Skeleton className="h-3 w-16 sm:w-20 bg-gray-300" />
             </TableHead>
             <TableHead className="px-2 sm:px-4 w-32 sm:w-56">
-              <Skeleton className="h-4 w-14 sm:w-16 bg-gray-300" />
+              <Skeleton className="h-3 w-14 sm:w-16 bg-gray-300" />
             </TableHead>
             <TableHead className="hidden md:table-cell text-center px-2 sm:px-4 w-20 sm:w-28">
               <Skeleton className="h-4 w-16 sm:w-20 bg-gray-300 mx-auto" />
@@ -36,7 +36,7 @@ export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
               <Skeleton className="h-4 w-10 sm:w-16 bg-gray-300 mx-auto" />
             </TableHead>
             <TableHead className="text-center px-2 sm:px-4 w-24 sm:w-28">
-              <Skeleton className="h-4 w-9 sm:w-14 bg-gray-300 mx-auto" />
+              <Skeleton className="h-3 w-9 sm:w-14 bg-gray-300 mx-auto" />
             </TableHead>
           </TableRow>
         </TableHeader>

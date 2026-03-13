@@ -111,20 +111,16 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
 
         return (
           <div
-            className={`relative flex flex-col lg:flex-row w-full items-start lg:justify-between rounded-2xl bg-[#FAFAFA] p-3 sm:p-4 gap-2 sm:gap-3 transition-all ease-in-out duration-400 
+            className={`relative flex flex-col lg:flex-row w-full items-start lg:justify-between rounded-lg bg-[#FAFAFA] p-3 sm:p-4 gap-2 sm:gap-3 transition-all ease-in-out duration-400 
           ${isExpanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`}
             key={employee.id}
           >
             {/* Employee Details + Menu */}
             <div className="flex items-start justify-between w-full lg:w-auto lg:min-w-50 lg:max-w-60 shrink-0 pr-0 lg:pr-3">
               <div className="flex flex-col min-w-0">
-                <h3 className="text-sm sm:text-base font-bold text-foreground wrap-break-word">
-                  {employee.name}
-                </h3>
-                <p className="text-2xs sm:text-xs text-gray-600">{employee.empId}</p>
-                {employee.tenure && (
-                  <p className="text-2xs sm:text-xs text-gray-500">{employee.tenure}</p>
-                )}
+                <h3 className="text-task-title text-foreground wrap-break-word">{employee.name}</h3>
+                <p className="text-meta text-gray-600">{employee.empId}</p>
+                {employee.tenure && <p className="text-meta text-gray-500">{employee.tenure}</p>}
               </div>
 
               {/* Triple dots menu - single instance for all breakpoints */}

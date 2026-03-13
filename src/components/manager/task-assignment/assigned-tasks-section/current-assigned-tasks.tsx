@@ -22,22 +22,22 @@ import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 function CurrentAssignedTasksSkeleton() {
   return (
-    <div className="rounded-3xl bg-background-soft px-4 md:px-5 2xl:px-6 pt-3 sm:pt-5 shadow-sm/50 flex flex-col w-full">
+    <div className="rounded-2xl bg-background-soft px-4 md:px-5 2xl:px-6 pt-3 sm:pt-5 shadow-sm/50 flex flex-col w-full">
       <div className="flex items-start sm:items-center justify-between gap-1.5 mb-4">
         <Skeleton className="h-6 sm:h-7 w-40 bg-gray-300" />
-        <div className="flex rounded-xl overflow-hidden w-40 sm:w-56 border border-accent/25">
-          <Skeleton className="h-9 flex-1 bg-gray-300 rounded-l-xl" />
-          <Skeleton className="h-9 flex-1 bg-gray-300 rounded-r-xl" />
+        <div className="flex rounded-md overflow-hidden w-56 sm:w-72 border border-accent/25">
+          <Skeleton className="control-skeleton-h flex-1 bg-gray-300 rounded-l-md" />
+          <Skeleton className="control-skeleton-h flex-1 bg-gray-300 rounded-r-md" />
         </div>
       </div>
 
-      <section className="flex min-w-0 flex-col gap-2 sm:gap-2.5">
-        <Skeleton className="h-6 w-48 rounded-full bg-gray-300" />
+      <section className="manager-sticky-controls rounded-xl px-2.5 py-2.5 sm:px-3 sm:py-3 flex min-w-0 flex-col gap-2 sm:gap-2.5">
+        <Skeleton className="h-7 w-52 rounded-md bg-gray-300" />
         <div className="flex w-full min-w-0 flex-col items-stretch gap-1.5 sm:gap-2 lg:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
-          <Skeleton className="h-7 w-full flex-1 xl:max-w-md rounded-full bg-gray-300" />
+          <Skeleton className="control-skeleton-h w-full flex-1 xl:max-w-md rounded-md bg-gray-300" />
           <div className="flex min-w-0 flex-wrap gap-1.5 sm:gap-2 sm:flex-nowrap">
-            <Skeleton className="h-7 w-full sm:w-28 rounded-lg bg-gray-300" />
-            <Skeleton className="h-7 w-full sm:w-28 rounded-lg bg-gray-300" />
+            <Skeleton className="control-skeleton-h w-full sm:w-40 rounded-md bg-gray-300" />
+            <Skeleton className="control-skeleton-h w-full sm:w-36 rounded-md bg-gray-300" />
           </div>
         </div>
       </section>
@@ -146,16 +146,16 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
   }
 
   return (
-    <div className="rounded-3xl bg-gray-100 px-4 md:px-5 2xl:px-6 pt-3 sm:pt-5 shadow-sm/50 flex flex-col w-full">
+    <div className="rounded-2xl bg-gray-100 px-4 md:px-5 2xl:px-6 pt-3 sm:pt-5 shadow-sm/50 flex flex-col w-full">
       {/* Header */}
       <div className="flex items-start sm:items-center justify-between gap-1.5 mb-4">
-        <h2 className="text-lg font-bold text-foreground pb-2 pl-2">Tasks List</h2>
+        <h2 className="text-h2 text-foreground pb-2 pl-2">Tasks List</h2>
 
         {/* View Toggle */}
-        <div className="flex bg-card/75 rounded-full self-end sm:self-auto">
+        <div className="flex bg-card/75 rounded-md self-end sm:self-auto">
           <button
             onClick={() => handleViewModeChange('task')}
-            className={`flex w-18 sm:w-24 md:w-32 justify-center items-center gap-1.5 py-2.5 cursor-pointer rounded-l-full text-[0.5rem] sm:text-xs font-medium transition-all duration-400 ease-in-out ${
+            className={`text-sidebar-label flex w-32 md:w-36 justify-center items-center gap-1.5 py-2.5 cursor-pointer rounded-l-md transition-all duration-400 ease-in-out ${
               viewMode === 'task'
                 ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
                 : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-xs/25 border-b border-gray-300'
@@ -165,11 +165,11 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
               size={14}
               className={`${viewMode === 'task' ? 'text-zinc-50' : 'text-accent-secondary'}`}
             />
-            <span className="hidden md:inline">Task View</span>
+            <span className="">Task View</span>
           </button>
           <button
             onClick={() => handleViewModeChange('employee')}
-            className={`flex w-18 sm:w-24 md:w-32 justify-center items-center gap-1.5 py-1.5 cursor-pointer rounded-r-full text-[0.5rem] sm:text-xs  font-medium transition-all duration-400 ease-in-out ${
+            className={`text-sidebar-label flex w-32 md:w-36 justify-center items-center gap-1.5 py-2.5 cursor-pointer rounded-r-md transition-all duration-400 ease-in-out ${
               viewMode === 'employee'
                 ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
                 : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-xs/25 border-b border-gray-300'
@@ -179,24 +179,24 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
               size={14}
               className={`${viewMode === 'employee' ? 'text-zinc-50' : 'text-accent-secondary'}`}
             />
-            <span className="hidden md:inline">Employee View</span>
+            <span className="">Employee View</span>
           </button>
         </div>
       </div>
 
       {/* View Cards Number Display & Controls: Search, Sort, Clear */}
-      <section className="flex min-w-0 flex-col gap-2 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between">
+      <section className="manager-sticky-controls mt-1 rounded-xl px-2.5 py-2.5 sm:px-3 sm:py-3 flex min-w-0 flex-col gap-2 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between">
         {/* Counts */}
-        <div className="flex w-fit shrink-0 self-start gap-2 whitespace-nowrap rounded-full border-b border-gray-300 bg-card/75 px-2 py-2 text-xs font-semibold text-primary inset-shadow-xs/25 md:gap-3 md:px-3 md:text-sm">
+        <div className="flex w-fit shrink-0 self-start gap-2 whitespace-nowrap rounded-md border border-gray-200 bg-card/75 px-2.5 py-2 text-meta text-primary shadow-sm/25 md:gap-3 md:px-3">
           <h5 className="leading-none">
             Tasks{' '}
-            <span className="bg-accent/75 text-primary-foreground text-xs px-1.5 md:px-2 py-0.5 rounded-full ml-0.5 shadow-sm/25">
+            <span className="bg-accent/75 text-primary-foreground text-[13px] px-1.5 md:px-2 py-0.5 rounded-md ml-0.5 shadow-sm/25">
               {totalTasksCount ?? 0}
             </span>
           </h5>
           <h5 className="leading-none">
             Employees{' '}
-            <span className="bg-accent/75 text-primary-foreground text-xs px-1.5 md:px-2 py-0.5 rounded-full ml-0.5 shadow-sm/25">
+            <span className="bg-accent/75 text-primary-foreground text-[13px] px-1.5 md:px-2 py-0.5 rounded-md ml-0.5 shadow-sm/25">
               {totalEmployeesCount ?? 0}
             </span>
           </h5>
@@ -212,7 +212,7 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
               placeholder={viewMode === 'task' ? 'Search tasks' : 'Search employees'}
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-8 pr-1.5 sm:pr-2 py-2 rounded-full bg-card shadow-sm/25 text-xs focus:outline-none transition-all duration-500 ease-in-out border focus:border-accent"
+              className="text-meta control-h w-full pl-8 pr-2 sm:pr-3 rounded-md border border-zinc-200 bg-card shadow-sm/25 focus:outline-none transition-all duration-500 ease-in-out focus:border-accent"
             />
           </div>
 
@@ -231,7 +231,7 @@ export function CurrentAssignedTasks({}: CurrentAssignedTasksProps) {
             <Button
               onClick={() => setShowClearConfirm(true)}
               disabled={memoizedTasks.length === 0}
-              className="group hover:text-card text-2xs sm:text-xs px-2 sm:px-4 md:px-8 py-1 sm:py-1.5 bg-card shadow-sm/25 hover:bg-red-700 cursor-pointer text-primary disabled:opacity-50 transition-all duration-400 ease-in-out"
+              className="text-button control-h group hover:text-card px-3 sm:px-5 md:px-7 py-1.5 bg-card shadow-sm/25 hover:bg-red-700 cursor-pointer text-primary disabled:opacity-50 transition-all duration-400 ease-in-out"
               title="Clear All Assigned Tasks"
             >
               <CircleDashed

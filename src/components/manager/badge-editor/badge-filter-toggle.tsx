@@ -33,7 +33,7 @@ export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterTog
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="gap-2 h-8 px-4 rounded-lg border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
+            className="text-button control-h gap-2 px-4 rounded-md border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
           >
             <Filter className="h-4 w-4 text-accent" />
             <span className="hidden sm:inline">Filters</span>
@@ -44,21 +44,21 @@ export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterTog
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 bg-background">
+        <DropdownMenuContent align="start" className="manager-dropdown-content w-56">
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Badge Type
           </DropdownMenuLabel>
           <DropdownMenuCheckboxItem
             checked={filterMode === 'manual'}
             onCheckedChange={(checked) => onFilterChange(checked ? 'manual' : 'all')}
-            className="cursor-pointer"
+            className="manager-dropdown-item cursor-pointer"
           >
             Manual Only
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
             checked={filterMode === 'conditional'}
             onCheckedChange={(checked) => onFilterChange(checked ? 'conditional' : 'all')}
-            className="cursor-pointer"
+            className="manager-dropdown-item cursor-pointer"
           >
             Conditional Only
           </DropdownMenuCheckboxItem>
@@ -69,14 +69,14 @@ export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterTog
           </DropdownMenuLabel>
           <DropdownMenuItem
             onClick={clearFilters}
-            className="cursor-pointer text-secondary hover:text-foreground pl-8"
+            className="manager-dropdown-item cursor-pointer text-secondary hover:text-foreground pl-8"
           >
             Clear Filters
           </DropdownMenuItem>
           <DropdownMenuCheckboxItem
             checked={filterMode === 'all'}
             onCheckedChange={() => onFilterChange('all')}
-            className="cursor-pointer"
+            className="manager-dropdown-item cursor-pointer"
           >
             Show All
           </DropdownMenuCheckboxItem>

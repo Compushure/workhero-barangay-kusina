@@ -28,8 +28,8 @@ export default function TaskTableSkeleton() {
 
           <TableCell>
             <div className="flex justify-center gap-1">
-              <Skeleton className="size-7 sm:size-9 bg-gray-300" />
-              <Skeleton className="size-7 sm:size-9 bg-gray-300" />
+              <Skeleton className="h-9 w-9 rounded-md bg-gray-300" />
+              <Skeleton className="h-9 w-9 rounded-md bg-gray-300" />
             </div>
           </TableCell>
         </TableRow>

@@ -46,7 +46,7 @@ function SidebarUserProfile({
 
   return (
     <div
-      className={`flex w-full items-center rounded-2xl py-3 ${
+      className={`flex w-full items-center rounded-md py-3 ${
         isCollapsed ? 'justify-center' : 'bg-accent-secondary/25 pl-2'
       }`}
     >
@@ -234,7 +234,9 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                       className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-accent'}`}
                     />
                   )}
-                  {!isCollapsed && <span className="block whitespace-nowrap">{item.label}</span>}
+                  {!isCollapsed && (
+                    <span className="text-sidebar-label block whitespace-nowrap">{item.label}</span>
+                  )}
                 </Link>
               );
 
@@ -307,7 +309,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                     ) : (
                       <Icon className="size-4" strokeWidth={1.9} />
                     )}
-                    <span className="mt-1 w-full truncate text-center text-xs leading-tight">
+                    <span className="text-sidebar-label mt-1 w-full truncate text-center leading-tight">
                       {item.mobileLabel}
                     </span>
                   </Link>

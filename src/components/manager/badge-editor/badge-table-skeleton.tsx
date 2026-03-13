@@ -34,8 +34,8 @@ export default function BadgeTableSkeleton() {
 
           <TableCell>
             <div className="flex justify-center gap-0.5 sm:gap-1">
-              <Skeleton className="size-8 sm:size-10 bg-gray-300" />
-              <Skeleton className="size-8 sm:size-10 bg-gray-300" />
+              <Skeleton className="h-9 w-9 rounded-md bg-gray-300" />
+              <Skeleton className="h-9 w-9 rounded-md bg-gray-300" />
             </div>
           </TableCell>
         </TableRow>

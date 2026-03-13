@@ -225,12 +225,12 @@ export function SelectTasksDialog({
                   <ChevronDown size={14} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background">
+              <DropdownMenuContent align="end" className="manager-dropdown-content">
                 {taskTypes.map((type) => (
                   <DropdownMenuItem
                     key={type}
                     onClick={() => handleFilterChange(type)}
-                    className={`cursor-pointer transition-all duration-400 ease-in-out ${filterType === type ? 'bg-accent text-card' : 'hover:bg-accent/25!'}`}
+                    className={`manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out ${filterType === type ? 'bg-accent/15 text-foreground' : ''}`}
                   >
                     {type === 'all' ? 'All Types' : type}
                   </DropdownMenuItem>
