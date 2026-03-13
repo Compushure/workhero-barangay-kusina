@@ -199,7 +199,7 @@ export async function generateRankingByPeriod(
         period_type: periodType,
         period_start: periodStart,
         period_end: periodEnd,
-        is_visible: true,
+        is_visible: false,
       })
       .select()
       .single();
@@ -226,7 +226,7 @@ export async function generateRankingByPeriod(
         }
 
         // Recovery path: if the period exists but has no entries (for example, after a previous failed insert),
-        // backfill entries so the generated ranking becomes visible immediately in the UI.
+        // backfill entries so the generated ranking can still be loaded in HR UI.
         if (!winnerRows || winnerRows.length === 0) {
           const recoveryEntries = leaderboardRowsWithRank.map((row, idx) => toEntryInsert(raceWinner.id, row, idx));
 
