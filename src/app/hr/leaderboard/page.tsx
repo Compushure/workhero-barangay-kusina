@@ -1,4 +1,6 @@
 import { getISOWeek, getISOWeekYear } from 'date-fns';
+import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
 import { checkRankingExists, getAllRankingPeriods } from '@/actions/hr/leaderboard';
 import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-content';
 import { LeaderboardViewToggle } from '@/components/hr/leaderboard/leaderboard-view-toggle';
@@ -83,7 +85,13 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
   const month = selectedMonth ?? previousMonth.month;
 
   const currentView = resolvedParams.view === 'past' ? 'past' : 'generate';
-  const show = resolvedParams.show === '1' || resolvedParams.show === 'true';
+  // Default to showing rankings unless explicitly set to false.
+  // This ensures navigating back to the page (without params) still renders the table.
+  const show = resolvedParams.show !== '0' && resolvedParams.show !== 'false';
+
+  // When view=past AND a specific year is in the URL, the user clicked "View Ranking"
+  // from the past-ranks list — show the table, not the list.
+  const isViewingSpecificPastRank = currentView === 'past' && selectedYear !== null;
 
   const currentPeriodRankingExistsResult = await checkRankingExists(
     periodType,
@@ -95,8 +103,9 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
   const currentPeriodRankingExists =
     currentPeriodRankingExistsResult.success && !!currentPeriodRankingExistsResult.data;
 
+  // Only fetch the list when actually showing the past-ranks list, not the detail view.
   const initialPastRanksData =
-    currentView === 'past' ? await getAllRankingPeriods() : null;
+    currentView === 'past' && !isViewingSpecificPastRank ? await getAllRankingPeriods() : null;
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-white px-3 py-3 sm:px-4 sm:py-4">
@@ -123,9 +132,19 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
               currentPeriodRankingExists={currentPeriodRankingExists}
             />
           ) : null}
+
+          {isViewingSpecificPastRank ? (
+            <Link
+              href="/hr/leaderboard?view=past"
+              className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back to Past Rankings
+            </Link>
+          ) : null}
         </div>
 
-        {currentView === 'past' ? (
+        {currentView === 'past' && !isViewingSpecificPastRank ? (
           <PastRanksList initialData={initialPastRanksData} />
         ) : (
           <LeaderboardContent

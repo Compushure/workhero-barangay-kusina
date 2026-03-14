@@ -22,7 +22,7 @@ export function periodLabel(row: RankingPeriodWithTop): string {
 
 export function buildUrl(row: RankingPeriodWithTop): string {
   const start = new Date(row.period_start + 'T00:00:00');
-  const params = new URLSearchParams({ type: row.period_type, show: '1', view: 'past' });
+  const params = new URLSearchParams({ type: row.period_type, view: 'past', show: '1' });
 
   if (row.period_type === 'weekly') {
     params.set('year', String(start.getFullYear()));

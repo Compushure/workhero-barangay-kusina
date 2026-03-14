@@ -1,6 +1,6 @@
 'use client';
 
-import { BarChart2, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import LeaderboardTable from '@/components/hr/leaderboard/leaderboard-table';
 import LeaderboardTableSkeleton from '@/components/hr/leaderboard/leaderboard-table-skeleton';
 import { buildPeriodLabel } from '@/lib/utils/time-period-utils';
@@ -29,28 +29,6 @@ export function LeaderboardContent({
     month,
     show,
   });
-
-  if (!show) {
-    return (
-      <div className="flex justify-center py-8 sm:py-12">
-        <div className="w-full max-w-2xl bg-[#FBF4E8] rounded-2xl border border-[#E9C496] shadow-md overflow-hidden">
-          <div className="bg-linear-to-r from-[#EBCBA8] to-[#E9C496] px-6 py-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center">
-              <BarChart2 className="w-6 h-6 text-[#6D1616]" />
-            </div>
-            <h3 className="text-xl font-bold text-[#6D1616]">Select a Period</h3>
-          </div>
-          <div className="px-6 py-6">
-            <p className="text-[#5a2a2a] text-base">
-              Choose a period type, year, and week/month above, then click{' '}
-              <span className="font-semibold">Show Rankings</span> to view the leaderboard for that
-              period.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Show skeleton during initial load OR background refetch when there's no data yet
   if ((isPending || isFetching) && !data) {
