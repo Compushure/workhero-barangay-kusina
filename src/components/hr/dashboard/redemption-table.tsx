@@ -329,7 +329,7 @@ export function RedemptionTable({
                   </div>
 
                   <div className="flex flex-col items-center gap-2">
-                    <div className="h-24 w-24 rounded-xl bg-muted flex items-center justify-center overflow-hidden">
+                    <div className="h-24 w-24 rounded-xl bg-background flex items-center justify-center overflow-hidden">
                       {requestImageUrl && !requestImageError ? (
                         <img
                           src={requestImageUrl}

@@ -378,7 +378,7 @@ export function AddItemsModal({
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
-      <DialogContent className="bg-muted text-card-foreground border border-border max-w-[95vw] sm:max-w-137.5 md:max-w-162.5 lg:max-w-175 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-background text-card-foreground border border-border max-w-[95vw] sm:max-w-137.5 md:max-w-162.5 lg:max-w-175 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-primary text-base sm:text-lg font-semibold">

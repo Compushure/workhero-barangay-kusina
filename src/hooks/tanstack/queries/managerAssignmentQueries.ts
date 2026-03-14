@@ -19,11 +19,31 @@ import type { AssignedTask } from '@/types';
 export const managerAssignmentKeys = {
   all: ['manager-assignments'] as const,
   tasks: () => [...managerAssignmentKeys.all, 'tasks'] as const,
-  taskList: (page: number, pageSize: number, sortBy: string, searchTerm: string) =>
-    [...managerAssignmentKeys.tasks(), { page, pageSize, sortBy, searchTerm }] as const,
+  taskList: (
+    page: number,
+    pageSize: number,
+    sortBy: string,
+    searchTerm: string,
+    statusFilters: string[],
+    overdueFilter: string
+  ) =>
+    [
+      ...managerAssignmentKeys.tasks(),
+      { page, pageSize, sortBy, searchTerm, statusFilters, overdueFilter },
+    ] as const,
   employees: () => [...managerAssignmentKeys.all, 'employees'] as const,
-  employeeList: (page: number, pageSize: number, sortBy: string, searchTerm: string) =>
-    [...managerAssignmentKeys.employees(), { page, pageSize, sortBy, searchTerm }] as const,
+  employeeList: (
+    page: number,
+    pageSize: number,
+    sortBy: string,
+    searchTerm: string,
+    statusFilters: string[],
+    overdueFilter: string
+  ) =>
+    [
+      ...managerAssignmentKeys.employees(),
+      { page, pageSize, sortBy, searchTerm, statusFilters, overdueFilter },
+    ] as const,
 };
 
 /**
@@ -40,19 +60,30 @@ export function useGetCurrentAssignedTasksPaginated(
   pageSize: number = 10,
   sortBy: string = 'recently added',
   searchTerm: string = '',
-  enabled: boolean = true
+  enabled: boolean = true,
+  statusFilters: string[] = [],
+  overdueFilter: string = 'hide-overdue'
 ): UseQueryResult<
   { tasks: AssignedTask[]; count: number; totalPages: number; employeeCount: number },
   Error
 > {
   return useQuery({
-    queryKey: managerAssignmentKeys.taskList(page, pageSize, sortBy, searchTerm),
+    queryKey: managerAssignmentKeys.taskList(
+      page,
+      pageSize,
+      sortBy,
+      searchTerm,
+      statusFilters,
+      overdueFilter
+    ),
     queryFn: async () => {
       return await handleFetchCurrentAssignedTasksPaginated(
         page,
         pageSize,
         sortBy,
-        searchTerm
+        searchTerm,
+        statusFilters,
+        overdueFilter
       );
     },
     enabled: enabled && page >= 1,
@@ -80,19 +111,30 @@ export function useGetCurrentAssignedEmployeesPaginated(
   pageSize: number = 10,
   sortBy: string = 'recently added',
   searchTerm: string = '',
-  enabled: boolean = true
+  enabled: boolean = true,
+  statusFilters: string[] = [],
+  overdueFilter: string = 'hide-overdue'
 ): UseQueryResult<
   { tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number },
   Error
 > {
   return useQuery({
-    queryKey: managerAssignmentKeys.employeeList(page, pageSize, sortBy, searchTerm),
+    queryKey: managerAssignmentKeys.employeeList(
+      page,
+      pageSize,
+      sortBy,
+      searchTerm,
+      statusFilters,
+      overdueFilter
+    ),
     queryFn: async () => {
       return await handleFetchCurrentAssignedEmployeesPaginated(
         page,
         pageSize,
         sortBy,
-        searchTerm
+        searchTerm,
+        statusFilters,
+        overdueFilter
       );
     },
     enabled: enabled && page >= 1,

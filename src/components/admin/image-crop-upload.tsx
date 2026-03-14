@@ -9,7 +9,13 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -34,13 +40,10 @@ interface ImageCropUploadProps {
 /**
  * Helper function to create image file from cropped area
  */
-async function getCroppedImg(
-  imageSrc: string,
-  pixelCrop: Area
-): Promise<Blob> {
+async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<Blob> {
   const image = new Image();
   image.src = imageSrc;
-  
+
   await new Promise((resolve) => {
     image.onload = resolve;
   });
@@ -81,8 +84,8 @@ async function getCroppedImg(
   });
 }
 
-export function ImageCropUpload({ 
-  currentImageUrl, 
+export function ImageCropUpload({
+  currentImageUrl,
   userName,
   userId,
   onImageSelect,
@@ -90,7 +93,7 @@ export function ImageCropUpload({
   onImageClear,
   onImageClearLocal,
   onUploadProgress,
-  disabled = false 
+  disabled = false,
 }: ImageCropUploadProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -120,12 +123,10 @@ export function ImageCropUpload({
       setCheckingImage(true);
       try {
         const supabase = createClient();
-        const { data, error } = await supabase.storage
-          .from('employees')
-          .list(userId, {
-            limit: 1,
-            search: 'profile.png'
-          });
+        const { data, error } = await supabase.storage.from('employees').list(userId, {
+          limit: 1,
+          search: 'profile.png',
+        });
 
         setImageExists(!error && data && data.length > 0);
       } catch (error) {
@@ -172,7 +173,9 @@ export function ImageCropUpload({
     // Validate file size (1MB limit to match Supabase)
     const maxSize = 1 * 1024 * 1024; // 1MB
     if (file.size > maxSize) {
-      alert(`Image size must be less than 1MB. Your image is ${(file.size / 1024 / 1024).toFixed(2)}MB. Please compress the image and try again.`);
+      alert(
+        `Image size must be less than 1MB. Your image is ${(file.size / 1024 / 1024).toFixed(2)}MB. Please compress the image and try again.`
+      );
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -195,19 +198,21 @@ export function ImageCropUpload({
 
     try {
       const croppedBlob = await getCroppedImg(selectedImage, croppedAreaPixels);
-      
+
       // Validate cropped image size (1MB limit)
       const maxSize = 1 * 1024 * 1024; // 1MB
       if (croppedBlob.size > maxSize) {
-        alert(`Cropped image is too large (${(croppedBlob.size / 1024 / 1024).toFixed(2)}MB). Please zoom out or select a different image.`);
+        alert(
+          `Cropped image is too large (${(croppedBlob.size / 1024 / 1024).toFixed(2)}MB). Please zoom out or select a different image.`
+        );
         return;
       }
-      
+
       const croppedFile = new File([croppedBlob], 'profile.png', { type: 'image/png' });
-      
+
       // Call the onImageSelect callback (always)
       onImageSelect(croppedFile);
-      
+
       // Only upload immediately if userId exists (editing existing user)
       // For new users, upload happens after user creation in onAddUser
       if (onImageUpload && userId) {
@@ -226,16 +231,16 @@ export function ImageCropUpload({
           }, 200);
 
           await onImageUpload(userId, croppedFile, userName);
-          
+
           clearInterval(progressInterval);
           setUploadProgress(100);
           setUploadSuccess(true);
-          
+
           // Generate preview URL ONLY after successful upload
           const previewUrl = URL.createObjectURL(croppedBlob);
           setCroppedPreview(previewUrl);
           setImageExists(true); // Update state after successful upload
-          
+
           // Close dialog after showing success
           setTimeout(() => {
             setIsDialogOpen(false);
@@ -313,12 +318,17 @@ export function ImageCropUpload({
     <>
       <div className="flex flex-col items-center gap-4">
         <Avatar className="w-24 h-24 border-2 border-border">
-          <AvatarImage src={croppedPreview || (currentImageUrl ? `${currentImageUrl}?t=${Date.now()}` : undefined)} alt={userName} />
+          <AvatarImage
+            src={
+              croppedPreview || (currentImageUrl ? `${currentImageUrl}?t=${Date.now()}` : undefined)
+            }
+            alt={userName}
+          />
           <AvatarFallback className="bg-accent/10 text-foreground text-lg">
             {getInitials(userName)}
           </AvatarFallback>
         </Avatar>
-        
+
         <div className="flex gap-2">
           <Button
             type="button"
@@ -345,7 +355,7 @@ export function ImageCropUpload({
               {isDeleting ? 'Removing...' : 'Remove'}
             </Button>
           )}
-          
+
           <input
             ref={fileInputRef}
             type="file"
@@ -368,7 +378,7 @@ export function ImageCropUpload({
 
           <div className="space-y-6">
             {/* Crop Area */}
-            <div className="relative w-full h-72 bg-muted rounded-lg overflow-hidden">
+            <div className="relative w-full h-72 bg-background rounded-lg overflow-hidden">
               {selectedImage && (
                 <Cropper
                   image={selectedImage}
@@ -427,11 +437,7 @@ export function ImageCropUpload({
 
             {/* Action Buttons */}
             <div className="flex gap-3 justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-              >
+              <Button type="button" variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
               <Button

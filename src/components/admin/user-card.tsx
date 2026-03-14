@@ -107,7 +107,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
 
   const employmentStatus = user.employmentStatus || 'unknown';
   const employmentStatusClass =
-    EMPLOYMENT_STATUS_STYLES[employmentStatus] || 'bg-muted text-foreground';
+    EMPLOYMENT_STATUS_STYLES[employmentStatus] || 'bg-backgroundround text-foreground';
   const dateCreated = formatDate(user.createdAt || user.date_added);
 
   return (

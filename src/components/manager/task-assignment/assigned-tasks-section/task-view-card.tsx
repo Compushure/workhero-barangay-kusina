@@ -144,28 +144,28 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
 
   return (
     <div
-      className={`relative flex flex-col lg:flex-row items-start lg:items-start justify-between rounded-2xl bg-card p-3 sm:p-4 md:p-6 gap-4 sm:gap-6 md:gap-8 transition-all ease-in-out duration-400
-        ${expanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`}
+      className={`relative flex flex-col lg:flex-row items-start lg:items-start justify-between rounded-lg bg-card p-4 md:p-5 gap-3 sm:gap-4 md:gap-6 transition-all ease-in-out duration-400 border-2 border-gray-200
+        ${expanded ? 'scale-102 shadow-md/25' : 'shadow-sm/15'}`}
     >
-      <main className="flex flex-col w-full gap-4 sm:gap-5 md:gap-7 min-w-0 flex-1 pr-8 sm:pr-10 lg:pr-0">
-        <section className="flex min-w-0 flex-col gap-3 sm:gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <main className="flex flex-col w-full gap-3 sm:gap-4 md:gap-5 min-w-0 flex-1 pr-6 sm:pr-8 lg:pr-0">
+        <section className="flex flex-col lg:flex-row lg:justify-between gap-2 sm:gap-3 min-w-0">
           {/* Task name, description, and date range */}
-          <header className="flex min-w-0 flex-1 flex-col gap-1.5 lg:pr-6">
-            <div className="flex min-w-0 flex-col gap-1 sm:gap-1.5">
-              <h3 className="block min-w-0 max-w-full truncate text-lg font-bold text-primary sm:text-xl">
+          <header className="flex flex-col gap-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-end gap-0.5 sm:gap-0 min-w-0">
+              <h3 className="text-task-title text-primary truncate shrink-0 max-w-full sm:max-w-125">
                 {task.taskName}
               </h3>
-              <p className="block min-w-0 max-w-full truncate text-xs text-gray-500 sm:text-sm">
+              <p className="text-meta text-gray-500 sm:ml-1.5 sm:mr-6 truncate min-w-0 flex-1 leading-0">
                 {task.taskDescription}
               </p>
             </div>
 
-            <p className="flex items-center text-xs sm:text-sm font-medium text-secondary flex-wrap gap-1 sm:gap-2">
-              <span className="bg-accent-secondary/25 w-fit rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-sm">
+            <p className="text-meta flex items-center text-secondary flex-wrap gap-0.5 sm:gap-1">
+              <span className="bg-accent-secondary/20 w-fit rounded-md px-2 py-0.5">
                 {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
               </span>
               {isTaskOverdue(task.dateRange.end) && (
-                <span className="bg-red-100 text-red-500 text-[10px] sm:text-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                <span className="bg-red-100 text-red-500 text-[13px] px-1.5 sm:px-2 py-0.5 rounded-md">
                   Task is Overdue
                 </span>
               )}
@@ -173,35 +173,41 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           </header>
 
           {/* Task max orders, fiesta points and XP */}
-          <div className="flex shrink-0 items-baseline gap-3 text-secondary/85 sm:gap-4 lg:max-w-full">
-            <div className="flex flex-col items-end">
-              <div className="flex text-sm sm:text-base font-medium items-end gap-1">
-                <Soup strokeWidth={1.5} className="size-5 sm:size-7 mb-2 sm:mb-3.5" />
-                <p className="flex flex-col items-center">
-                  <span className="inline-block font-semibold pb-1 leading-none text-xs sm:text-base">
-                    {task.maxOrders} max order/s
-                  </span>
-                  <span className="text-[10px] sm:text-xs font-extralight text-zinc-400 leading-none">
-                    per employee
-                  </span>
-                </p>
+          <div className="flex flex-col shrink-0 pt-2">
+            {/* Keep both rows on the same column template so labels stay aligned to their stats */}
+            <div className="grid grid-cols-[auto_auto_auto_auto] gap-x-2 sm:gap-x-3 items-baseline text-meta text-secondary/85">
+              {/* Soup icon + max orders */}
+              <div className="flex items-baseline gap-0.5">
+                <Soup strokeWidth={1.5} className="size-4 sm:size-5 shrink-0" />
+                <span className="font-semibold text-[14px] sm:text-[15px] leading-none">
+                  {task.maxOrders} max order/s
+                </span>
+              </div>
+
+              {/* Divider */}
+              <span className="text-secondary/50">|</span>
+
+              {/* Coins icon + points */}
+              <div className="flex items-baseline gap-0.5">
+                <Coins strokeWidth={1.75} className="size-3.5 sm:size-5 shrink-0" />
+                <span className="font-semibold text-[15px] sm:text-[18px] leading-none">
+                  {task.points}
+                </span>
+              </div>
+
+              {/* XP label + value */}
+              <div className="flex items-baseline gap-0.5 sm:gap-1">
+                <span className="italic text-[14px] sm:text-base leading-none">XP</span>
+                <span className="font-semibold text-[15px] sm:text-[18px] leading-none">
+                  {task.xp}
+                </span>
               </div>
             </div>
 
-            <div className="flex flex-col items-center">
-              <div className="flex items-end gap-1.5 sm:gap-2">
-                <p className="flex gap-0.5 sm:gap-1 items-end text-base sm:text-xl font-medium leading-none">
-                  <Coins strokeWidth={1.75} className="size-4 sm:size-6" />
-                  <span className="inline-block font-semibold pb-0.5 text-sm sm:text-base">{task.points}</span>
-                </p>
-
-                <p className="flex gap-1 sm:gap-1.5 items-end font-medium pb-0.5">
-                  <span className="inline-block italic text-sm sm:text-lg leading-none">XP</span>
-                  <span className="inline-block font-semibold text-base sm:text-xl leading-none">{task.xp}</span>
-                </p>
-              </div>
-
-              <p className="text-[10px] sm:text-xs font-extralight text-zinc-400 pl-2 sm:pl-3">per order</p>
+            <div className="mt-0.5 grid grid-cols-[auto_auto_auto_auto] gap-x-2 sm:gap-x-3 text-[12px] font-normal text-zinc-500">
+              <span className="justify-self-end">per employee</span>
+              <span className="invisible">|</span>
+              <span className="col-span-2 justify-self-center">per order</span>
             </div>
           </div>
         </section>
@@ -218,7 +224,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         />
       </main>
 
-      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:static flex shrink-0 self-start lg:pt-1">
+      <div className="absolute top-2 right-2 sm:top-3 sm:right-3 lg:static flex shrink-0 self-start lg:pt-0.5">
         <TaskViewCardMenu
           openPopover={openPopover}
           setOpenPopover={setOpenPopover}

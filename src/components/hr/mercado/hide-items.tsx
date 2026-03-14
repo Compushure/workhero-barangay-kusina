@@ -40,7 +40,7 @@ export function HideRewardDialog({
         </button>
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
+            <div className="h-12 w-12 rounded-xl bg-background flex items-center justify-center">
               {isHidden ? (
                 <Eye className="h-6 w-6 text-primary" />
               ) : (
@@ -62,7 +62,7 @@ export function HideRewardDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="h-11 rounded-xl border-border text-foreground hover:bg-muted font-semibold text-base"
+            className="h-11 rounded-xl border-border text-foreground hover:bg-background font-semibold text-base"
           >
             Cancel
           </Button>

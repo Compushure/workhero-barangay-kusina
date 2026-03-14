@@ -33,7 +33,7 @@ export function DeleteModal({ open, onOpenChange, itemName, onConfirm }: DeleteM
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-muted text-card-foreground border border-border max-w-md rounded-2xl p-6">
+      <DialogContent className="bg-background text-card-foreground border border-border max-w-md rounded-2xl p-6">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center">
@@ -53,7 +53,7 @@ export function DeleteModal({ open, onOpenChange, itemName, onConfirm }: DeleteM
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isDeleting}
-            className="h-11 rounded-xl border-border text-foreground hover:bg-muted font-semibold text-base"
+            className="h-11 rounded-xl border-border text-foreground hover:bg-background font-semibold text-base"
           >
             Cancel
           </Button>

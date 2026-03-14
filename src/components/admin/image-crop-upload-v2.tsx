@@ -10,7 +10,13 @@
 
 import { useState, useCallback, useRef } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -32,13 +38,10 @@ interface ImageCropUploadProps {
 /**
  * Helper function to create image file from cropped area
  */
-async function getCroppedImg(
-  imageSrc: string,
-  pixelCrop: Area
-): Promise<Blob> {
+async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<Blob> {
   const image = new Image();
   image.src = imageSrc;
-  
+
   await new Promise((resolve) => {
     image.onload = resolve;
   });
@@ -76,15 +79,15 @@ async function getCroppedImg(
   });
 }
 
-export function ImageCropUpload({ 
-  currentImageUrl, 
+export function ImageCropUpload({
+  currentImageUrl,
   userName,
   userId,
   onImageSelect,
   onImageUpload,
   onImageClear,
   onUploadProgress,
-  disabled = false 
+  disabled = false,
 }: ImageCropUploadProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -135,14 +138,14 @@ export function ImageCropUpload({
     try {
       const croppedBlob = await getCroppedImg(selectedImage, croppedAreaPixels);
       const croppedFile = new File([croppedBlob], 'profile.png', { type: 'image/png' });
-      
+
       // Generate preview URL for optimistic update
       const previewUrl = URL.createObjectURL(croppedBlob);
       setCroppedPreview(previewUrl);
-      
+
       // Call the onImageSelect callback
       onImageSelect(croppedFile);
-      
+
       // If onImageUpload callback is provided and we have userId, handle the upload
       if (onImageUpload && userId) {
         setIsUploading(true);
@@ -160,11 +163,11 @@ export function ImageCropUpload({
           }, 200);
 
           await onImageUpload(userId, croppedFile, userName);
-          
+
           clearInterval(progressInterval);
           setUploadProgress(100);
           setUploadSuccess(true);
-          
+
           // Close dialog after showing success
           setTimeout(() => {
             setIsDialogOpen(false);
@@ -209,7 +212,7 @@ export function ImageCropUpload({
 
   const handleClearImage = async () => {
     if (!userId || !onImageClear) return;
-    
+
     if (window.confirm('Are you sure you want to remove this profile picture?')) {
       try {
         await onImageClear(userId, userName);
@@ -229,7 +232,7 @@ export function ImageCropUpload({
             {getInitials(userName)}
           </AvatarFallback>
         </Avatar>
-        
+
         <div className="flex gap-2">
           <Button
             type="button"
@@ -242,7 +245,7 @@ export function ImageCropUpload({
             <Camera className="h-4 w-4" />
             {currentImageUrl ? 'Change Photo' : 'Upload Photo'}
           </Button>
-          
+
           {currentImageUrl && userId && onImageClear && (
             <Button
               type="button"
@@ -256,7 +259,7 @@ export function ImageCropUpload({
               Remove
             </Button>
           )}
-          
+
           <input
             ref={fileInputRef}
             type="file"
@@ -279,7 +282,7 @@ export function ImageCropUpload({
 
           <div className="space-y-6">
             {/* Crop Area - Reduced height */}
-            <div className="relative w-full h-72 bg-muted rounded-lg overflow-hidden">
+            <div className="relative w-full h-72 bg-background rounded-lg overflow-hidden">
               {selectedImage && (
                 <Cropper
                   image={selectedImage}
@@ -338,11 +341,7 @@ export function ImageCropUpload({
 
             {/* Action Buttons */}
             <div className="flex gap-3 justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-              >
+              <Button type="button" variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
               <Button

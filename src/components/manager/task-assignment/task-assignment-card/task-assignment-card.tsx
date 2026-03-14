@@ -8,7 +8,10 @@ import { DatePickerPopover } from './date-picker-popover';
 import type { AssignedEmployee, Task } from '@/types';
 import ClearSelectionDialog from './dialogs/clear-selection-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
-import { handleFetchTaskList, handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
+import {
+  handleFetchTaskList,
+  handleFetchEmployeeList,
+} from '@/action-handlers/manager/assignments';
 import {
   useGetCurrentAssignedTasksPaginated,
 } from '@/hooks/tanstack/queries/managerAssignmentQueries';
@@ -38,7 +41,9 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
     100,
     'recently added',
     '',
-    true
+    true,
+    [],
+    'all'
   );
   const assignedTasksForAssign = assignedTasksQuery.data?.tasks ?? assignedTasks;
 
@@ -157,11 +162,11 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
   }
 
   return (
-    <div className="rounded-3xl bg-background p-4 sm:p-6 shadow-sm/25">
-      <h2 className="mb-5 sm:mb-7 text-xl sm:text-2xl font-semibold text-[#131C2A]">Assign Employees for Task</h2>
+    <div className="rounded-2xl bg-background-soft p-3 sm:p-4 md:px-7 py-5 shadow-sm/25">
+      <h2 className="text-h2 mb-4 text-primary">Assign Employees for Task</h2>
 
-      <div className="flex flex-wrap gap-3 sm:gap-4">
-        <div className="w-full sm:w-auto sm:min-w-50">
+      <div className="flex flex-wrap gap-2 sm:gap-3">
+        <div className="w-full sm:w-auto sm:min-w-44">
           <SelectTasksDialog
             selectedTask={selectedTask}
             onTasksChange={handleTasksChange}
@@ -186,33 +191,35 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
       </div>
 
       {showTaskWarning && (
-        <p className="text-red-600 text-sm mb-4 font-medium transition-all duration-500 ease-in-out">
+        <p className="text-meta text-red-600 my-2 transition-all duration-500 ease-in-out">
           Select a task first before assigning employees.
         </p>
       )}
 
       {/* Action Buttons */}
-      <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
-        <Button
-          onClick={() => setShowAssignConfirm(true)}
-          disabled={
-            isAssigning ||
-            selectedEmployees.length === 0 ||
-            selectedTask.length === 0 ||
-            !selectedDeadline
-          }
-          className="w-full sm:w-auto bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out disabled:bg-foreground disabled:opacity-50 disabled:brightness-50 disabled:cursor-not-allowed px-6 sm:px-12 shadow-sm/25"
-        >
-          {isAssigning ? 'Assigning...' : 'Assign'}
-        </Button>
+      <div className="mt-3 flex justify-end">
+        <div className="flex gap-3 w-full sm:w-auto">
+          <Button
+            onClick={() => setShowAssignConfirm(true)}
+            disabled={
+              isAssigning ||
+              selectedEmployees.length === 0 ||
+              selectedTask.length === 0 ||
+              !selectedDeadline
+            }
+            className="text-button flex-1 sm:flex-initial sm:w-auto bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card px-4 sm:px-10 cursor-pointer transition-all duration-500 ease-in-out disabled:bg-foreground disabled:opacity-50 disabled:brightness-50 disabled:cursor-not-allowed shadow-sm/25 h-9"
+          >
+            {isAssigning ? 'Assigning...' : 'Assign'}
+          </Button>
 
-        <Button
-          variant="outline"
-          onClick={() => setShowClearConfirm(true)}
-          className="w-full sm:w-auto text-primary bg-white hover:bg-gray-100 hover:text-accent px-6 sm:px-12 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
-        >
-          Clear
-        </Button>
+          <Button
+            variant="outline"
+            onClick={() => setShowClearConfirm(true)}
+            className="text-button flex-1 sm:flex-initial sm:w-auto text-primary bg-white hover:bg-gray-100 hover:text-accent px-4 sm:px-10 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25 h-9"
+          >
+            Clear
+          </Button>
+        </div>
       </div>
 
       {/* Clear Confirmation Dialog */}
@@ -224,20 +231,18 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
 
       {/* Assign Confirmation Dialog */}
       <Dialog open={showAssignConfirm} onOpenChange={setShowAssignConfirm}>
-        <DialogContent className="max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl transition-all duration-500 ease-in-out bg-card">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl transition-all duration-500 ease-in-out bg-card">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-foreground">
-              Confirm Assignment
-            </DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-h2 text-foreground">Confirm Assignment</DialogTitle>
+            <DialogDescription className="text-meta">
               Are you sure you want to assign this task to the selected employees?
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex gap-3 justify-end">
+          <DialogFooter className="flex gap-2 justify-end">
             <Button
               onClick={handleAssign}
               disabled={isAssigning}
-              className="bg-foreground hover:bg-accent text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed px-8 shadow-sm/25"
+              className="text-button bg-foreground hover:bg-accent text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed px-6 shadow-sm/25 h-9"
             >
               {isAssigning ? 'Assigning...' : 'Confirm'}
             </Button>
