@@ -1,6 +1,7 @@
 import { useState, useTransition, useEffect } from 'react';
 import { format, getISOWeek } from 'date-fns';
 import { getAllRankingPeriods } from '@/actions/hr/leaderboard';
+import { matchesDate } from '@/lib/utils/period-filter-utils';
 import type { ActionResult } from '@/lib/utils/safe-action';
 import type { RankingPeriodWithTop, RankingPeriodType } from '@/types';
 
@@ -12,12 +13,25 @@ export function periodLabel(row: RankingPeriodWithTop): string {
   const start = new Date(row.period_start + 'T00:00:00');
   switch (row.period_type) {
     case 'weekly':
-      return `Week ${getISOWeek(start)}, ${start.getFullYear()}`;
+      return `Week ${getISOWeek(start)}`;
     case 'monthly':
-      return format(start, 'MMMM yyyy');
+      return format(start, 'MMMM');
     case 'yearly':
       return `Year ${start.getFullYear()}`;
   }
+}
+
+/** Human-readable date range for the period (e.g. "Mar 2 – Mar 8, 2026"). */
+export function periodRangeLabel(row: RankingPeriodWithTop): string {
+  const start = new Date(row.period_start + 'T00:00:00');
+  const end = new Date(row.period_end + 'T00:00:00');
+  if (row.period_type === 'yearly') {
+    return `${format(start, 'MMM d')} – ${format(end, 'MMM d')}`;
+  }
+  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+  const startStr = format(start, 'MMM d');
+  const endStr = sameMonth ? format(end, 'd, yyyy') : format(end, 'MMM d, yyyy');
+  return `${startStr} – ${endStr}`;
 }
 
 export function buildUrl(row: RankingPeriodWithTop): string {
@@ -37,18 +51,11 @@ export function buildUrl(row: RankingPeriodWithTop): string {
   return `/hr/leaderboard?${params.toString()}`;
 }
 
-function matchesSearch(row: RankingPeriodWithTop, query: string, label: string): boolean {
-  if (!query.trim()) return true;
-  const q = query.trim().toLowerCase();
-  const generated = format(new Date(row.generated_at), 'MMM d, yyyy').toLowerCase();
-  return label.toLowerCase().includes(q) || generated.includes(q);
-}
-
 interface UsePastRanksFilterParams {
   initialData?: ActionResult<RankingPeriodWithTop[]> | null;
   activeTab: RankingPeriodType;
   currentPage: number;
-  searchQuery: string;
+  selectedDate: Date | null;
 }
 
 interface UsePastRanksFilterResult {
@@ -66,7 +73,7 @@ export function usePastRanksFilter({
   initialData,
   activeTab,
   currentPage,
-  searchQuery,
+  selectedDate,
 }: UsePastRanksFilterParams): UsePastRanksFilterResult {
   const [periods, setPeriods] = useState<RankingPeriodWithTop[] | null>(() =>
     initialData?.success === true ? initialData.data ?? [] : null
@@ -97,9 +104,9 @@ export function usePastRanksFilter({
   );
 
   const filteredGrouped: Record<RankingPeriodType, RankingPeriodWithTop[]> = {
-    weekly: grouped.weekly.filter((row) => matchesSearch(row, searchQuery, periodLabel(row))),
-    monthly: grouped.monthly.filter((row) => matchesSearch(row, searchQuery, periodLabel(row))),
-    yearly: grouped.yearly.filter((row) => matchesSearch(row, searchQuery, periodLabel(row))),
+    weekly: grouped.weekly.filter((row) => matchesDate(row, selectedDate, 'weekly')),
+    monthly: grouped.monthly.filter((row) => matchesDate(row, selectedDate, 'monthly')),
+    yearly: grouped.yearly.filter((row) => matchesDate(row, selectedDate, 'yearly')),
   };
 
   const list = periods !== null ? filteredGrouped[activeTab] : [];
