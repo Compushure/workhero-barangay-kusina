@@ -63,6 +63,16 @@ interface VisibilityMutationContext {
 
 const OPTIMISTIC_ROWS = 10;
 
+interface RewardMutationContext {
+  previousRewards: Reward[] | undefined;
+  temporaryRewardId?: string;
+}
+
+function invalidateRewardCaches(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+  queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
+}
+
 function updateRedemptionStatus(
   list: RedemptionRequest[] | undefined,
   params: RedemptionRequestParams,
@@ -292,18 +302,59 @@ export function useAddReward() {
     mutationFn: async (input: AddRewardInput): Promise<Reward | null> => {
       return await handleAddRewardAction(input);
     },
-    onSuccess: (newReward) => {
-      if (newReward) {
-        // Optimistically update the cache with the new reward
-        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
-          if (!existing) return [newReward];
-          return [...existing, newReward];
-        });
+    onMutate: async (input): Promise<RewardMutationContext> => {
+      await queryClient.cancelQueries({ queryKey: rewardKeys.lists() });
+
+      const previousRewards = queryClient.getQueryData<Reward[]>(rewardKeys.list());
+      const temporaryRewardId = `optimistic-reward-${Date.now()}`;
+
+      const optimisticReward: Reward = {
+        id: temporaryRewardId,
+        name: input.name,
+        pointsCost: input.pointsCost,
+        quantity: input.quantity,
+        redeemingLimit: input.redeemingLimit,
+        category: input.category,
+        isActive: input.isActive ?? true,
+        availableDate: input.availableDate ?? null,
+        availableMonth: input.availableMonth ?? null,
+        createdAt: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return [optimisticReward];
+        return [...existing, optimisticReward];
+      });
+
+      return { previousRewards, temporaryRewardId };
+    },
+    onSuccess: (newReward, _input, context) => {
+      if (!newReward) {
+        if (context?.previousRewards) {
+          queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+        }
+        return;
       }
 
-      // Invalidate both HR and Employee queries to ensure real-time updates
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return [newReward];
+
+        if (!context?.temporaryRewardId) {
+          return [...existing, newReward];
+        }
+
+        return existing.map((reward) =>
+          reward.id === context.temporaryRewardId ? newReward : reward
+        );
+      });
+    },
+    onError: (_error, _input, context) => {
+      if (context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onSettled: () => {
+      invalidateRewardCaches(queryClient);
     },
   });
 }
@@ -319,20 +370,59 @@ export function useEditReward() {
     mutationFn: async ({ id, input }: { id: string; input: EditRewardInput }): Promise<Reward | null> => {
       return await handleEditRewardAction(id, input);
     },
-    onSuccess: (updatedReward) => {
-      if (updatedReward) {
-        // Optimistically update the cache
-        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
-          if (!existing) return [updatedReward];
-          return existing.map((reward) =>
-            reward.id === updatedReward.id ? updatedReward : reward
-          );
-        });
+    onMutate: async ({ id, input }): Promise<RewardMutationContext> => {
+      await queryClient.cancelQueries({ queryKey: rewardKeys.lists() });
+
+      const previousRewards = queryClient.getQueryData<Reward[]>(rewardKeys.list());
+
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return existing;
+
+        return existing.map((reward) =>
+          reward.id === id
+            ? {
+                ...reward,
+                name: input.name ?? reward.name,
+                pointsCost: input.pointsCost ?? reward.pointsCost,
+                quantity: input.quantity ?? reward.quantity,
+                redeemingLimit: input.redeemingLimit ?? reward.redeemingLimit,
+                category: input.category ?? reward.category,
+                isActive: input.isActive ?? reward.isActive,
+                availableDate:
+                  input.availableDate === undefined ? reward.availableDate : input.availableDate,
+                availableMonth:
+                  input.availableMonth === undefined
+                    ? reward.availableMonth
+                    : input.availableMonth,
+              }
+            : reward
+        );
+      });
+
+      return { previousRewards };
+    },
+    onSuccess: (updatedReward, _variables, context) => {
+      if (!updatedReward) {
+        if (context?.previousRewards) {
+          queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+        }
+        return;
       }
 
-      // Invalidate both HR and Employee queries to ensure real-time updates
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return [updatedReward];
+        return existing.map((reward) =>
+          reward.id === updatedReward.id ? updatedReward : reward
+        );
+      });
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onSettled: () => {
+      invalidateRewardCaches(queryClient);
     },
   });
 }
@@ -348,18 +438,30 @@ export function useDeleteReward() {
     mutationFn: async (id: string): Promise<boolean> => {
       return await handleDeleteRewardAction(id);
     },
-    onSuccess: (success, deletedId) => {
-      if (success) {
-        // Optimistically remove from cache
-        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
-          if (!existing) return existing;
-          return existing.filter((reward) => reward.id !== deletedId);
-        });
-      }
+    onMutate: async (id): Promise<RewardMutationContext> => {
+      await queryClient.cancelQueries({ queryKey: rewardKeys.lists() });
 
-      // Invalidate both HR and Employee queries to ensure real-time updates
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
+      const previousRewards = queryClient.getQueryData<Reward[]>(rewardKeys.list());
+
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return existing;
+        return existing.filter((reward) => reward.id !== id);
+      });
+
+      return { previousRewards };
+    },
+    onSuccess: (success, _deletedId, context) => {
+      if (!success && context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onError: (_error, _deletedId, context) => {
+      if (context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onSettled: () => {
+      invalidateRewardCaches(queryClient);
     },
   });
 }
@@ -375,20 +477,32 @@ export function useHideReward() {
     mutationFn: async ({ id, isActive }: { id: string; isActive?: boolean }): Promise<boolean> => {
       return await handleHideRewardAction(id, isActive);
     },
-    onSuccess: (success, { id, isActive }) => {
-      if (success) {
-        // Optimistically update the cache
-        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
-          if (!existing) return existing;
-          return existing.map((reward) =>
-            reward.id === id ? { ...reward, isActive: isActive ?? false } : reward
-          );
-        });
-      }
+    onMutate: async ({ id, isActive }): Promise<RewardMutationContext> => {
+      await queryClient.cancelQueries({ queryKey: rewardKeys.lists() });
 
-      // Invalidate both HR and Employee queries to ensure real-time updates
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
+      const previousRewards = queryClient.getQueryData<Reward[]>(rewardKeys.list());
+
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return existing;
+        return existing.map((reward) =>
+          reward.id === id ? { ...reward, isActive: isActive ?? false } : reward
+        );
+      });
+
+      return { previousRewards };
+    },
+    onSuccess: (success, _variables, context) => {
+      if (!success && context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onSettled: () => {
+      invalidateRewardCaches(queryClient);
     },
   });
 }

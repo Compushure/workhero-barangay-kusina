@@ -68,6 +68,32 @@ export function MercadoPageContent() {
     handleSaveItem,
   } = useMercadoPageState();
 
+  const getEmptyStateMessage = () => {
+    if (search) {
+      return `No items found matching "${search}".`;
+    }
+
+    const filterLabels: string[] = [];
+
+    if (stockFilter === 'in-stock') filterLabels.push('In Stock');
+    if (stockFilter === 'out-of-stock') filterLabels.push('Out of Stock');
+    if (visibilityFilter === 'visible') filterLabels.push('Visible');
+    if (visibilityFilter === 'hidden') filterLabels.push('Hidden');
+    if (intervalFilter === 'weekly') filterLabels.push('Weekly');
+    if (intervalFilter === 'monthly') filterLabels.push('Monthly');
+    if (intervalFilter === 'yearly') filterLabels.push('Yearly');
+
+    if (filterLabels.length === 0) {
+      return 'No items yet. Click "Add Item" to create one.';
+    }
+
+    if (filterLabels.length === 1) {
+      return `No items found for the ${filterLabels[0]} filter.`;
+    }
+
+    return 'No items found. Please select other filters.';
+  };
+
   return (
     // Page shell section.
     <main className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
@@ -147,13 +173,7 @@ export function MercadoPageContent() {
                 ))
               ) : (
                 <div className="col-span-full py-12 text-center">
-                  {search ? (
-                    <p className="text-muted-foreground">No items found matching your search.</p>
-                  ) : (
-                    <p className="text-muted-foreground">
-                      No items yet. Click "Add Item" to create one.
-                    </p>
-                  )}
+                  <p className="text-muted-foreground">{getEmptyStateMessage()}</p>
                 </div>
               )}
             </div>

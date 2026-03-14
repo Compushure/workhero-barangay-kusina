@@ -120,9 +120,6 @@ export function HrAttendanceModal({
       <DialogContent className="max-w-md rounded-xl">
         <DialogHeader>
           <DialogTitle>HR Attendance</DialogTitle>
-          <DialogDescription>
-            Includes break controls using the same employee attendance rules.
-          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 pt-2">

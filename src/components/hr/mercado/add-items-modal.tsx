@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 type AvailabilityInterval = 'weekly' | 'monthly' | 'yearly';
 
@@ -241,17 +242,21 @@ export function AddItemsModal({
     const file = e.target.files?.[0];
     if (file) {
       if (!ALLOWED_REWARD_IMAGE_TYPES.includes(file.type)) {
+        const message = 'Only JPEG, PNG, and WebP images are allowed';
         setIconFile(null);
         setIconPreview('');
-        setIconValidationError('Only JPEG, PNG, and WebP images are allowed');
+        setIconValidationError(message);
+        toast.error(message);
         e.target.value = '';
         return;
       }
 
       if (file.size > MAX_REWARD_IMAGE_SIZE_BYTES) {
+        const message = 'Image size must be less than 5MB';
         setIconFile(null);
         setIconPreview('');
-        setIconValidationError('Image size must be less than 5MB');
+        setIconValidationError(message);
+        toast.error(message);
         e.target.value = '';
         return;
       }
@@ -267,6 +272,22 @@ export function AddItemsModal({
   };
 
   const handleSave = async () => {
+    if (iconFile) {
+      if (!ALLOWED_REWARD_IMAGE_TYPES.includes(iconFile.type)) {
+        const message = 'Only JPEG, PNG, and WebP images are allowed';
+        setIconValidationError(message);
+        toast.error(message);
+        return;
+      }
+
+      if (iconFile.size > MAX_REWARD_IMAGE_SIZE_BYTES) {
+        const message = 'Image size must be less than 5MB';
+        setIconValidationError(message);
+        toast.error(message);
+        return;
+      }
+    }
+
     if (iconValidationError) return;
 
     if (itemName && itemCost && hasChanges) {
@@ -337,6 +358,7 @@ export function AddItemsModal({
     unformatNumber(itemCost).length > 6;
 
   const isImageRequiredMissing = !editingItem && !iconFile;
+  const isIntervalSelectionMissing = availabilityInterval === 'none';
   const isIntervalDateMissing = availabilityInterval !== 'none' && !availableDate;
 
   const isSaveDisabled =
@@ -346,6 +368,7 @@ export function AddItemsModal({
     !quantity ||
     !redeemingLimit ||
     isImageRequiredMissing ||
+    isIntervalSelectionMissing ||
     isIntervalDateMissing ||
     isRedeemingLimitInvalid() ||
     hasCharacterLimitErrors ||
@@ -543,14 +566,14 @@ export function AddItemsModal({
                     id="available-month"
                     className="h-10 w-full rounded-lg bg-background border-border hover:bg-muted text-foreground"
                   >
-                    <SelectValue placeholder="Select interval (optional)" />
+                    <SelectValue placeholder="Select interval" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover text-popover-foreground rounded-lg">
                     <SelectItem
                       value="none"
                       className={cn(mercadoSelectItemClassName, 'text-muted-foreground italic')}
                     >
-                      No Interval selected
+                      No interval selected
                     </SelectItem>
                     <SelectItem value="weekly" className={mercadoSelectItemClassName}>
                       Weekly
@@ -593,9 +616,9 @@ export function AddItemsModal({
                         month_caption:
                           'flex items-center justify-center h-(--cell-size) w-full px-(--cell-size) text-sm font-semibold text-foreground',
                         button_previous:
-                          'size-(--cell-size) rounded-md p-0 select-none text-foreground hover:bg-accent-secondary/80 hover:text-white aria-disabled:opacity-50',
+                          'inline-flex items-center justify-center size-(--cell-size) rounded-md p-0 select-none text-foreground hover:bg-accent-secondary/80 hover:text-white aria-disabled:opacity-50',
                         button_next:
-                          'size-(--cell-size) rounded-md p-0 select-none text-foreground hover:bg-accent-secondary/80 hover:text-white aria-disabled:opacity-50',
+                          'inline-flex items-center justify-center size-(--cell-size) rounded-md p-0 select-none text-foreground hover:bg-accent-secondary/80 hover:text-white aria-disabled:opacity-50',
                         today:
                           'bg-accent-secondary/15 text-accent-secondary rounded-md data-[selected=true]:bg-accent-secondary data-[selected=true]:text-white',
                         outside: 'text-muted-foreground/60 aria-selected:text-muted-foreground/60',
@@ -619,9 +642,7 @@ export function AddItemsModal({
 
               <div className="md:col-span-2 space-y-1">
                 {availabilityInterval === 'none' && (
-                  <p className="text-xs text-muted-foreground italic">
-                    Choose an interval to select a date
-                  </p>
+                  <p className="text-xs text-red-600">Please select an availability interval</p>
                 )}
                 {availabilityInterval !== 'none' && (
                   <p className="text-xs text-muted-foreground italic">

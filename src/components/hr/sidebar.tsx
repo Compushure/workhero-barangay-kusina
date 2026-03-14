@@ -267,7 +267,13 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
         </nav>
 
         {/* User Profile Section */}
-        <div className={isCollapsed ? 'flex h-24 items-center justify-center' : 'px-3 py-4'}>
+        <div
+          className={
+            isCollapsed
+              ? 'flex flex-col items-center justify-center gap-2 px-2 py-3'
+              : 'flex flex-col px-3 py-4'
+          }
+        >
           <HrAttendanceTrigger
             isCollapsed={isCollapsed}
             disabled={isUiDisabled}

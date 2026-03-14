@@ -21,6 +21,9 @@ import { LogOutBtn } from '@/components/sidebar/logout-btn';
 import { ProfilePic } from '@/components/sidebar/profile-pic';
 import { ProfileModal } from '@/components/sidebar/profile-modal';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useGetTodayAttendanceStatus } from '@/hooks/tanstack/queries/attendanceQueries';
+import { HrAttendanceModal } from '@/components/hr/attendance/hr-attendance-modal';
+import { HrAttendanceTrigger } from '@/components/hr/attendance/hr-attendance-trigger';
 
 interface NavItem {
   key: string;
@@ -107,8 +110,10 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showAttendanceModal, setShowAttendanceModal] = useState(false);
   const { startNavigation, stopNavigation, isNavigating, isLoggingOut } = useNavigationStore();
   const { data: user } = useGetSessionUser();
+  const { data: attendanceStatus } = useGetTodayAttendanceStatus();
 
   useEffect(() => {
     if (pendingHref && pathname === pendingHref) {
@@ -124,6 +129,14 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
 
   const isUiDisabled = isNavigating || isLoggingOut;
   const isNavLinkActive = (href: string) => pathname === href;
+  const attendanceButtonLabel = attendanceStatus?.canTimeOut
+    ? 'Time Out'
+    : attendanceStatus?.canTimeIn
+      ? 'Time In'
+      : 'Attendance';
+  const shouldShowAttendanceReminder = !!(
+    attendanceStatus?.canTimeIn || attendanceStatus?.canTimeOut
+  );
 
   const handleProfileClick = () => {
     setShowProfileModal(true);
@@ -188,80 +201,98 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                 : 'overflow-y-auto px-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
             }`}
           >
-          {navItems.map((item) => {
-            const isActive = isNavLinkActive(item.href);
-            const isNavigatingItem = pendingHref === item.href;
-            const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
-            const Icon = item.icon;
+            {navItems.map((item) => {
+              const isActive = isNavLinkActive(item.href);
+              const isNavigatingItem = pendingHref === item.href;
+              const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
+              const Icon = item.icon;
 
-            const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-full py-3 font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
-              isCollapsed ? 'justify-center px-4' : 'justify-start px-5'
-            } ${
-              isActive
-                ? 'bg-primary-gradient text-zinc-50'
-                : 'bg-zinc-50/75 text-[#131C2A] hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
-            } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`;
+              const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-full py-3 font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
+                isCollapsed ? 'justify-center px-4' : 'justify-start px-5'
+              } ${
+                isActive
+                  ? 'bg-primary-gradient text-zinc-50'
+                  : 'bg-zinc-50/75 text-[#131C2A] hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
+              } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`;
 
-            const navLink = (
-              <Link
-                key={item.key}
-                href={item.href}
-                onClick={() => {
-                  if (pathname !== item.href) {
-                    setPendingHref(item.href);
-                    startNavigation();
-                  }
-                }}
-                aria-disabled={isDisabled}
-                className={navLinkClassName}
-              >
-                {isCollapsed ? (
-                  isNavigatingItem ? (
-                    <NavigationDisplay
-                      isNavigating={isNavigatingItem}
-                      className="inline-flex items-center justify-center"
-                      iconClassName="size-5 animate-spin text-primary"
-                    />
+              const navLink = (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  onClick={() => {
+                    if (pathname !== item.href) {
+                      setPendingHref(item.href);
+                      startNavigation();
+                    }
+                  }}
+                  aria-disabled={isDisabled}
+                  className={navLinkClassName}
+                >
+                  {isCollapsed ? (
+                    isNavigatingItem ? (
+                      <NavigationDisplay
+                        isNavigating={isNavigatingItem}
+                        className="inline-flex items-center justify-center"
+                        iconClassName="size-5 animate-spin text-primary"
+                      />
+                    ) : (
+                      <Icon
+                        strokeWidth={1.75}
+                        className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-[#f47812]'}`}
+                      />
+                    )
                   ) : (
-                    <Icon
-                      strokeWidth={1.75}
-                      className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-[#f47812]'}`}
-                    />
-                  )
-                ) : (
-                  <>
-                    <Icon
-                      strokeWidth={1.75}
-                      className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-[#f47812]'}`}
-                    />
-                    <span className="block whitespace-nowrap">{item.label}</span>
-                    <NavigationDisplay
-                      isNavigating={isNavigatingItem}
-                      className="ml-auto inline-flex items-center justify-center"
-                      iconClassName="size-4 animate-spin text-primary"
-                    />
-                  </>
-                )}
-              </Link>
-            );
+                    <>
+                      <Icon
+                        strokeWidth={1.75}
+                        className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-[#f47812]'}`}
+                      />
+                      <span className="block whitespace-nowrap">{item.label}</span>
+                      <NavigationDisplay
+                        isNavigating={isNavigatingItem}
+                        className="ml-auto inline-flex items-center justify-center"
+                        iconClassName="size-4 animate-spin text-primary"
+                      />
+                    </>
+                  )}
+                </Link>
+              );
 
-            if (!isCollapsed) {
-              return navLink;
-            }
+              if (!isCollapsed) {
+                return navLink;
+              }
 
-            return (
-              <Tooltip key={item.key}>
-                <TooltipTrigger asChild>{navLink}</TooltipTrigger>
-                <TooltipContent side="right" align="center" className="border border-accent/25 bg-card text-foreground shadow-sm/25">
-                  {item.label}
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
+              return (
+                <Tooltip key={item.key}>
+                  <TooltipTrigger asChild>{navLink}</TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    align="center"
+                    className="border border-accent/25 bg-card text-foreground shadow-sm/25"
+                  >
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
           </nav>
         </TooltipProvider>
 
-        <div className={isCollapsed ? 'flex h-24 items-center justify-center' : 'px-3 py-4'}>
+        <div
+          className={
+            isCollapsed
+              ? 'flex flex-col items-center justify-center gap-2 px-2 py-3'
+              : 'flex flex-col px-3 py-4'
+          }
+        >
+          <HrAttendanceTrigger
+            isCollapsed={isCollapsed}
+            disabled={isUiDisabled}
+            label={attendanceButtonLabel}
+            shouldRemind={shouldShowAttendanceReminder}
+            onClick={() => setShowAttendanceModal(true)}
+          />
+
           <div
             className={`flex w-full items-center rounded-full bg-white/10 ${
               isCollapsed ? 'h-16 w-16 justify-center' : 'mb-4 gap-3'
@@ -327,12 +358,13 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
       </nav>
 
       {/* Profile Modal */}
-      <ProfileModal 
-        open={showProfileModal} 
-        onOpenChange={setShowProfileModal} 
-        user={user ?? null} 
+      <ProfileModal
+        open={showProfileModal}
+        onOpenChange={setShowProfileModal}
+        user={user ?? null}
       />
+
+      <HrAttendanceModal open={showAttendanceModal} onOpenChange={setShowAttendanceModal} />
     </>
   );
 }
-
