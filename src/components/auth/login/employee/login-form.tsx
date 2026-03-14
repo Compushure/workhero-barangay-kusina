@@ -88,7 +88,7 @@ export function LoginForm({ onSubmit, isBusy }: LoginFormProps) {
         <button
           type="submit"
           disabled={isSubmitting || isBusy}
-          className="w-full bg-linear-to-br from-[#e89852] to-[#df8540] hover:from-[#de8b45] hover:to-[#d77b35] disabled:from-gray-400 disabled:to-gray-500 text-white font-jersey text-sm sm:text-lg lg:text-xl tracking-wide border-3 sm:border-4 border-orange-900 py-2.5 sm:py-3.5 lg:py-4 px-3 sm:px-4 transition-all duration-100 transform active:translate-y-1 cursor-pointer pixel-button disabled:cursor-not-allowed"
+          className="w-full bg-linear-to-br from-[#e89852] to-[#df8540] hover:from-[#de8b45] hover:to-[#d77b35] disabled:from-gray-400 disabled:to-gray-500 text-white font-jersey text-sm sm:text-base lg:text-xl tracking-wide border-3 sm:border-4 border-orange-900 py-1 sm:py-2 lg:py-2.5 px-3 sm:px-2 transition-all duration-100 transform active:translate-y-1 cursor-pointer pixel-button disabled:cursor-not-allowed"
           style={{
             boxShadow:
               isSubmitting || isBusy
