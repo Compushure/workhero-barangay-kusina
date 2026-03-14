@@ -75,7 +75,10 @@ export function MercadoFilterToggle({
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64 max-h-80 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <DropdownMenuContent
+          align="start"
+          className="w-64 max-h-80 rounded-xl overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Stock Status
           </DropdownMenuLabel>

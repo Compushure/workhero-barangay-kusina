@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -20,7 +20,8 @@ interface QuickAssignmentPanelProps {
   totalBadgePages: number;
   onBadgePageChange: (page: number) => void;
   users: BadgeAssignmentUser[];
-  onAwardBadge: (badgeId: string, user: BadgeAssignmentUser) => void;
+  onAwardBadgeToUsers: (badgeId: string, userIds: string[]) => void;
+  isAssigning?: boolean;
 }
 
 type UserSortOption = 'name-asc' | 'name-desc' | 'employee-asc' | 'employee-desc';
@@ -38,7 +39,8 @@ export default function QuickAssignmentPanel({
   totalBadgePages,
   onBadgePageChange,
   users,
-  onAwardBadge,
+  onAwardBadgeToUsers,
+  isAssigning = false,
 }: QuickAssignmentPanelProps) {
   const [selectedBadge, setSelectedBadge] = useState<BadgeSummary | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
@@ -90,6 +92,13 @@ export default function QuickAssignmentPanel({
   }, [users, debouncedUserSearch, userSortOption]);
 
   const toggleUserSelection = (userId: string) => {
+    if (selectedBadge) {
+      const matchedUser = users.find((user) => user.id === userId);
+      if (matchedUser?.badge_ids.includes(selectedBadge.id)) {
+        return;
+      }
+    }
+
     const newSelected = new Set(selectedUsers);
     if (newSelected.has(userId)) {
       newSelected.delete(userId);
@@ -99,16 +108,27 @@ export default function QuickAssignmentPanel({
     setSelectedUsers(newSelected);
   };
 
+  useEffect(() => {
+    if (!selectedBadge) {
+      return;
+    }
+
+    setSelectedUsers((previous) => {
+      const next = new Set(
+        Array.from(previous).filter((userId) => {
+          const matchedUser = users.find((user) => user.id === userId);
+          return matchedUser ? !matchedUser.badge_ids.includes(selectedBadge.id) : false;
+        })
+      );
+
+      return next;
+    });
+  }, [selectedBadge, users]);
+
   const handleAssignToSelected = () => {
     if (!selectedBadge || selectedUsers.size === 0) return;
 
-    const selectedBadgeId = selectedBadge.id;
-    selectedUsers.forEach((userId) => {
-      const user = users.find((u) => u.id === userId);
-      if (user) {
-        onAwardBadge(selectedBadgeId, user);
-      }
-    });
+    onAwardBadgeToUsers(selectedBadge.id, Array.from(selectedUsers));
 
     setSelectedBadge(null);
     setSelectedUsers(new Set());
@@ -296,21 +316,28 @@ export default function QuickAssignmentPanel({
                       <button
                         key={user.id}
                         onClick={() => toggleUserSelection(user.id)}
+                        disabled={selectedBadge ? user.badge_ids.includes(selectedBadge.id) : false}
                         className={`w-full px-4 py-3 flex items-center gap-3 transition-colors ${
-                          selectedUsers.has(user.id)
-                            ? 'bg-accent/15'
-                            : 'bg-card hover:bg-row-hover'
+                          selectedBadge && user.badge_ids.includes(selectedBadge.id)
+                            ? 'bg-zinc-100/80 opacity-65 cursor-not-allowed'
+                            : selectedUsers.has(user.id)
+                              ? 'bg-accent/15'
+                              : 'bg-card hover:bg-row-hover'
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={selectedUsers.has(user.id)}
                           onChange={() => {}}
-                          className="w-4 h-4 rounded border-accent/25 cursor-pointer"
+                          disabled={selectedBadge ? user.badge_ids.includes(selectedBadge.id) : false}
+                          className="w-4 h-4 rounded border-accent/25 cursor-pointer disabled:cursor-not-allowed"
                         />
                         <div className="flex-1 text-left min-w-0">
                           <p className="font-medium text-sm text-foreground">{user.name}</p>
                           <p className="text-xs text-secondary">{user.employee_id}</p>
+                          {selectedBadge && user.badge_ids.includes(selectedBadge.id) ? (
+                            <p className="text-[11px] text-muted-foreground">Already has selected badge</p>
+                          ) : null}
                         </div>
                         <span className="text-xs text-secondary shrink-0">
                           {user.badge_ids.length} badge{user.badge_ids.length !== 1 ? 's' : ''}
@@ -337,10 +364,12 @@ export default function QuickAssignmentPanel({
               </Button>
               <Button
                 onClick={handleAssignToSelected}
-                disabled={selectedUsers.size === 0}
+                disabled={selectedUsers.size === 0 || isAssigning}
                 className="flex-1 bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card disabled:opacity-50 shadow-sm/25"
               >
-                Assign to {selectedUsers.size} User{selectedUsers.size !== 1 ? 's' : ''}
+                {isAssigning
+                  ? 'Assigning...'
+                  : `Assign to ${selectedUsers.size} User${selectedUsers.size !== 1 ? 's' : ''}`}
               </Button>
             </div>
           </>

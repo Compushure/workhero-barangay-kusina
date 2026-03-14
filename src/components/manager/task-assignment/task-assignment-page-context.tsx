@@ -1,16 +1,16 @@
 'use client';
 
 import React, { createContext, useContext, useState, useMemo } from 'react';
-import { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
+import { AssignedTask, AssignedEmployee, SelectedFilters, Task } from '@/types';
 import { handleDeleteTask, handleClearAssignedTasks } from '@/action-handlers/manager/assigned-tasks';
-import { handleAddTaskAssignment } from '@/action-handlers/manager/assignments';
 import { useManagerAssignmentStore } from '@/store/managerAssignmentStore';
+import { useAddTaskAssignmentMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface TaskAssignmentContextType {
   assignedTasks: AssignedTask[];
   viewMode: 'task' | 'employee';
   setViewMode: (mode: 'task' | 'employee') => void;
-  assignTasks: (filters: SelectedFilters) => Promise<void>;
+  assignTasks: (filters: SelectedFilters, options?: { availableTasks?: Task[] }) => Promise<void>;
   removeAssignment: (taskId: string, employeeId: string) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   editTask: (
@@ -35,9 +35,9 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
     assignedTasks,
     setAssignedTasks,
     updateAssignedTasks,
-    appendAssignedTasks,
   } = useManagerAssignmentStore();
   const [viewMode, setViewMode] = useState<'task' | 'employee'>('task');
+  const addTaskAssignmentMutation = useAddTaskAssignmentMutation();
 
   // ✅ Pagination state
   const [page, setPage] = useState(1);
@@ -46,28 +46,48 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
   // Remove duplicate API call - let the component handle data fetching
 
   // Server action for assigning tasks
-  const assignTasks = async (filters: SelectedFilters) => {
+  const assignTasks = async (
+    filters: SelectedFilters,
+    options?: { availableTasks?: Task[] }
+  ) => {
     if (filters.employees.length === 0 || filters.tasks.length === 0) return;
 
     try {
       const startDate = new Date().toISOString();
       const endDate = filters.deadline ? filters.deadline.toISOString() : new Date().toISOString();
 
-      // Create assignments for each task-employee combination
       for (const taskSelection of filters.tasks) {
+        const selectedTask = options?.availableTasks?.find((task) => task.id === taskSelection.id);
         const employeeIds = filters.employees.map(emp => emp.id);
-        const newAssignments = await handleAddTaskAssignment(
-          taskSelection.id,
+        const optimisticTask: AssignedTask = {
+          id: `optimistic-${taskSelection.id}-${Date.now()}`,
+          taskId: taskSelection.id,
+          taskName: selectedTask?.name ?? 'Task',
+          taskDescription: selectedTask?.type ?? 'General',
+          isRepeatable: selectedTask?.isRepeatable ?? false,
+          points: selectedTask?.points ?? 0,
+          xp: selectedTask?.xp ?? 0,
+          status: 'assigned',
+          dateRange: {
+            start: startDate,
+            end: endDate,
+          },
+          maxOrders: taskSelection.maxOrders,
+          assignedEmployees: filters.employees.map((employee) => ({
+            ...employee,
+            assignedTasks: [],
+            status: 'assigned',
+          })),
+        };
+
+        await addTaskAssignmentMutation.mutateAsync({
+          taskId: taskSelection.id,
           employeeIds,
           startDate,
           endDate,
-          taskSelection.maxOrders
-        );
-
-        // Add the new assignments to local state for immediate UI update
-        if (newAssignments.length > 0) {
-          appendAssignedTasks(newAssignments);
-        }
+          maxOrders: taskSelection.maxOrders,
+          optimisticTasks: [optimisticTask],
+        });
       }
     } catch (error) {
       console.error('Error assigning tasks:', error);
@@ -164,7 +184,6 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
       totalPages,
       setAssignedTasks,
       updateAssignedTasks,
-      appendAssignedTasks,
     ]
   );
 

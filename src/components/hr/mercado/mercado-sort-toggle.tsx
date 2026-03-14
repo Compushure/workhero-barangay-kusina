@@ -38,7 +38,7 @@ export function MercadoSortToggle({ value, onChange }: MercadoSortToggleProps) {
           <ArrowUpDown className="h-4 w-4 text-accent group-hover:text-white transition-all duration-400 ease-in-out" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-48 rounded-xl">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           Sort by Date
         </DropdownMenuLabel>

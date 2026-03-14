@@ -15,7 +15,7 @@ import {
 } from '@/action-handlers/hr/rewards';
 import { handleCreateRedemptionRequestAction } from '@/action-handlers/employee/redemptions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AddRewardInput, EditRewardInput, Reward } from '@/types';
+import { AddRewardInput, EditRewardInput, RedemptionRequest, Reward } from '@/types';
 import { rewardKeys } from '../queries/rewardQueries';
 import { redemptionKeys } from '../queries/redemptionQueries';
 import { hrLeaderboardKeys } from '../queries/hrQueries';
@@ -31,10 +31,15 @@ import type {
   RankingPeriodWithTop,
 } from '@/types';
 import type { LatestPeriods } from '@/components/employee/leaderboard/period-nav';
+import { useHrRedemptionRequestStore } from '@/store/hrRedemptionRequestStore';
 
 interface RedemptionRequestParams {
   id: string;
   remarks?: string;
+}
+
+interface RedemptionMutationContext {
+  previousRedemptionQueries: Array<[QueryKey, import('@/types').RedemptionRequest[] | undefined]>;
 }
 
 interface GenerateRankingParams {
@@ -144,16 +149,44 @@ function toPeriodKey(params: GenerateRankingParams): readonly unknown[] {
 
 export function useDeclineRedemptionRequest() {
   const queryClient = useQueryClient();
+  const { startOptimistic, optimisticRemoveRequest, rollback, commit } = useHrRedemptionRequestStore();
 
   return useMutation({
+    mutationKey: ['hr-redemption', 'decline'],
     mutationFn: async (params: RedemptionRequestParams): Promise<void> => {
       await handleDeclineRedemptionRequestAction(params);
     },
+    onMutate: async ({ id }): Promise<RedemptionMutationContext> => {
+      await queryClient.cancelQueries({ queryKey: redemptionKeys.lists() });
+
+      const previousRedemptionQueries = queryClient.getQueriesData<import('@/types').RedemptionRequest[]>({
+        queryKey: redemptionKeys.lists(),
+      });
+
+      startOptimistic();
+      optimisticRemoveRequest(id);
+
+      previousRedemptionQueries.forEach(([queryKey]) => {
+        queryClient.setQueryData<import('@/types').RedemptionRequest[]>(queryKey, (old) => {
+          if (!old) return old;
+          return old.filter((request) => request.id !== id);
+        });
+      });
+
+      return { previousRedemptionQueries };
+    },
+    onError: (_error, _variables, context) => {
+      context?.previousRedemptionQueries.forEach(([queryKey, previousData]) => {
+        queryClient.setQueryData(queryKey, previousData);
+      });
+      rollback();
+    },
     onSuccess: () => {
+      commit();
       // Invalidate redemption queries to refetch the list
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
-      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
       queryClient.invalidateQueries({ queryKey: rewardKeys.all });
       queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
@@ -162,16 +195,44 @@ export function useDeclineRedemptionRequest() {
 
 export function useAcceptRedemptionRequest() {
   const queryClient = useQueryClient();
+  const { startOptimistic, optimisticRemoveRequest, rollback, commit } = useHrRedemptionRequestStore();
 
   return useMutation({
+    mutationKey: ['hr-redemption', 'accept'],
     mutationFn: async (params: RedemptionRequestParams): Promise<void> => {
       await handleAcceptRedemptionRequestAction(params);
     },
+    onMutate: async ({ id }): Promise<RedemptionMutationContext> => {
+      await queryClient.cancelQueries({ queryKey: redemptionKeys.lists() });
+
+      const previousRedemptionQueries = queryClient.getQueriesData<import('@/types').RedemptionRequest[]>({
+        queryKey: redemptionKeys.lists(),
+      });
+
+      startOptimistic();
+      optimisticRemoveRequest(id);
+
+      previousRedemptionQueries.forEach(([queryKey]) => {
+        queryClient.setQueryData<import('@/types').RedemptionRequest[]>(queryKey, (old) => {
+          if (!old) return old;
+          return old.filter((request) => request.id !== id);
+        });
+      });
+
+      return { previousRedemptionQueries };
+    },
+    onError: (_error, _variables, context) => {
+      context?.previousRedemptionQueries.forEach(([queryKey, previousData]) => {
+        queryClient.setQueryData(queryKey, previousData);
+      });
+      rollback();
+    },
     onSuccess: () => {
+      commit();
       // Invalidate redemption queries to refetch the list
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
-      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
       queryClient.invalidateQueries({ queryKey: rewardKeys.all });
       queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },

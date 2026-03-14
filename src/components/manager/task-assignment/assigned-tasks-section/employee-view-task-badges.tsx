@@ -89,9 +89,9 @@ export default function EmployeeViewTaskBadges({
           return (
             <div
               key={task.id}
-              className="relative flex flex-col md:flex-row md:items-start gap-2 md:gap-3 bg-white pl-3 pr-8 py-3 rounded-2xl border-2 border-accent/25 h-full"
+              className="relative flex min-w-0 flex-col gap-2 rounded-2xl border-2 border-accent/25 bg-white pl-3 pr-8 py-3 md:flex-row md:items-start md:gap-3 h-full"
             >
-              <div className="flex flex-col min-w-0 flex-1 gap-1">
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <span className="truncate text-zinc-700 text-sm sm:text-base font-semibold">
                   {task.taskName}
                 </span>
@@ -115,8 +115,8 @@ export default function EmployeeViewTaskBadges({
                 </div>
               </div>
 
-              <div className="flex w-full md:w-auto items-start md:items-end justify-between md:justify-start gap-0 md:gap-1 shrink-0">
-                <div className="flex md:flex-col items-center md:items-end gap-3 md:gap-1">
+              <div className="flex w-full shrink-0 items-start justify-between gap-0 md:w-auto md:justify-start md:gap-1 md:pl-2 lg:max-w-full">
+                <div className="flex min-w-0 items-center gap-3 md:flex-col md:items-end md:gap-1">
                   <div className="flex gap-1 flex-nowrap items-center">
                     {taskEmployee?.pendingOrders === 0 && task.status === 'approved' && (
                       <Tooltip>
@@ -143,7 +143,7 @@ export default function EmployeeViewTaskBadges({
                     </span>
                   </div>
 
-                  <div className="flex items-end gap-2 text-zinc-500 pr-0 sm:pr-2">
+                  <div className="flex items-end gap-2 whitespace-nowrap text-zinc-500 pr-0 sm:pr-2">
                     <p className="flex gap-1 items-end font-semibold text-xs sm:text-sm leading-none">
                       <Coins strokeWidth={2.5} className="size-3.5 sm:size-4" />
                       <span className="inline-block">{task.points}</span>

@@ -23,7 +23,7 @@ export function MercadoSearchBar({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(sanitizeSearchInput(e.target.value))}
-        className="pl-9 h-10 bg-white border-gray-200 rounded-lg"
+        className="pl-9 h-10 bg-white border-gray-200 rounded-xl"
       />
     </div>
   );
