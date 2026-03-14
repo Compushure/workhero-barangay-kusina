@@ -54,20 +54,20 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={(newOpen) => !newOpen && handleCancel()}>
-      <DialogContent className="max-w-[95vw] sm:max-w-md lg:max-w-lg xl:max-w-xl bg-card">
+      <DialogContent className="max-w-[95vw] sm:max-w-md lg:max-w-lg bg-card">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="text-base">{title}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="bg-background-soft border border-accent/50 rounded-lg p-4">
-            <p className="font-bold">
+        <div className="space-y-3">
+          <div className="bg-background-soft border border-accent/50 rounded-lg p-3">
+            <p className="text-sm font-bold">
               This action is permanent. Are you sure you want to proceed?
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="remarks" className="text-sm font-medium">
+          <div className="space-y-1.5">
+            <Label htmlFor="remarks" className="text-xs font-medium">
               Remarks {isRequired && <span className="text-red-600">*</span>}
             </Label>
             <Textarea
@@ -83,29 +83,34 @@ export function ConfirmationDialog({
                 if (error) setError('');
               }}
               disabled={isProcessing}
-              className="min-h-24 resize-none disabled:opacity-50 disabled:cursor-not-allowed bg-background-soft border border-accent/50"
+              className="min-h-20 resize-none disabled:opacity-50 disabled:cursor-not-allowed bg-background-soft border border-accent/50 text-sm"
               aria-required={isRequired}
               aria-invalid={!!error}
               aria-describedby={error ? 'remark-error' : undefined}
             />
             {error && (
-              <p id="remark-error" className="text-sm text-red-600">
+              <p id="remark-error" className="text-xs text-red-600">
                 {error}
               </p>
             )}
           </div>
         </div>
 
-        <DialogFooter className="mt-4 flex justify-end gap-2">
+        <DialogFooter className="mt-3 flex justify-end gap-2">
           <Button
             variant={type === 'approve' ? 'default' : 'destructive'}
             onClick={handleConfirm}
             disabled={isProcessing}
-            className={type === 'approve' ? 'bg-foreground hover:bg-accent transition-all duration-400 ease-in-out' : ''}
+            className={`h-8 text-xs px-3 ${type === 'approve' ? 'bg-foreground hover:bg-accent transition-all duration-400 ease-in-out' : ''}`}
           >
             {isProcessing ? 'Processing...' : 'Confirm'}
           </Button>
-          <Button variant="outline" onClick={handleCancel} disabled={isProcessing} className='bg-card border border-primary/50 hover:bg-card hover:brightness-85 transition-all duration-400 ease-in-out'>
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isProcessing}
+            className="h-8 text-xs px-3 bg-card border border-primary/50 hover:bg-card hover:brightness-85 transition-all duration-400 ease-in-out"
+          >
             Cancel
           </Button>
         </DialogFooter>

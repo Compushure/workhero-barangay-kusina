@@ -25,41 +25,49 @@ function AssignEmployeesTable({
   return (
     <div className="rounded-2xl border border-accent/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full table-fixed">
-        <thead className="bg-muted text-primary/75 border-b border-accent/50 sticky top-0 z-10">
+        <thead
+          className={`${isLoading ? 'bg-background text-primary/75' : 'bg-primary-gradient text-card'} border-b border-accent/50 sticky top-0 z-10`}
+        >
           <tr>
-            <th className="w-[12%] p-2 text-center align-middle">
-              <input
-                type="checkbox"
-                checked={allFilteredSelected}
-                onChange={handleSelectAll}
-                className="size-5 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  backgroundImage: !!allFilteredSelected
-                    ? "url(\"data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e\")"
-                    : 'none',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'center',
-                  backgroundSize: '1rem',
-                }}
-              />
+            <th className="w-[10%] p-1.5 text-center align-middle">
+              {!isLoading && (
+                <input
+                  type="checkbox"
+                  checked={allFilteredSelected}
+                  onChange={handleSelectAll}
+                  className="size-4 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    backgroundImage: !!allFilteredSelected
+                      ? "url(\"data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e\")"
+                      : 'none',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    backgroundSize: '1rem',
+                  }}
+                />
+              )}
             </th>
-            <th className="w-[58%] px-2 text-left font-bold">NAME</th>
-            <th className="w-[30%] px-2 text-left font-bold">ID NO.</th>
+            <th className="w-[60%] px-1.5 text-left font-bold text-xs">
+              {isLoading ? <Skeleton className="h-3 w-12 bg-gray-300" /> : 'NAME'}
+            </th>
+            <th className="w-[30%] px-1.5 text-left font-bold text-xs">
+              {isLoading ? <Skeleton className="h-3 w-14 bg-gray-300" /> : 'ID NO.'}
+            </th>
           </tr>
         </thead>
         {isLoading ? (
           <tbody>
             {[...Array(4)].map((_, i) => (
               <tr key={i} className="border-b border-accent/25">
-                <td className="w-[12%] p-4 text-center">
-                  <Skeleton className="h-5 w-5 mx-auto bg-muted rounded" />
+                <td className="w-[10%] p-3 text-center">
+                  <Skeleton className="h-4 w-4 mx-auto bg-background rounded" />
                 </td>
-                <td className="w-[58%] px-2 py-3">
-                  <Skeleton className="h-6 w-3/4 bg-muted" />
+                <td className="w-[60%] px-1.5 py-2">
+                  <Skeleton className="h-5 w-3/4 bg-background" />
                 </td>
-                <td className="w-[30%] px-2 py-3">
-                  <Skeleton className="h-6 w-1/2 bg-muted" />
+                <td className="w-[30%] px-1.5 py-2">
+                  <Skeleton className="h-5 w-1/2 bg-background" />
                 </td>
               </tr>
             ))}
@@ -78,18 +86,18 @@ function AssignEmployeesTable({
                       ? 'brightness-75 opacity-50 cursor-not-allowed'
                       : isSelected
                         ? 'bg-row-hover'
-                        : 'bg-background-soft hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
+                        : 'bg-card hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
                   }`}
                   onClick={() => !isDisabled && toggleEmployee(employee)}
                 >
-                  <td className="w-[12%] p-4 text-center align-middle">
+                  <td className="w-[12%] p-3 text-center align-middle">
                     <div className="flex items-center justify-center">
                       <input
                         type="checkbox"
                         checked={!!isSelected}
                         disabled={isDisabled}
                         onChange={() => !isDisabled && toggleEmployee(employee)}
-                        className="size-5 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
+                        className="size-4 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
                         onClick={(e) => e.stopPropagation()}
                         style={{
                           backgroundImage: !!isSelected
@@ -102,15 +110,17 @@ function AssignEmployeesTable({
                       />
                     </div>
                   </td>
-                  <td className="w-[58%] min-w-0 px-2 py-2 font-medium text-gray-800 align-middle truncate">
-                    <div className="flex flex-col gap-1">
+                  <td className="w-[58%] min-w-0 px-1.5 py-1.5 font-medium text-gray-800 align-middle truncate text-sm">
+                    <div className="flex flex-col gap-0.5">
                       <span>{employee.name}</span>
                       {isDisabled && (
-                        <span className="text-xs font-light text-gray-500">Already assigned</span>
+                        <span className="text-2xs font-light text-gray-500">Already assigned</span>
                       )}
                     </div>
                   </td>
-                  <td className="w-[30%] px-2 py-2 text-gray-600 align-middle">{employee.empId}</td>
+                  <td className="w-[30%] px-1.5 py-1.5 text-gray-600 align-middle text-xs">
+                    {employee.empId}
+                  </td>
                 </tr>
               );
             })}

@@ -266,12 +266,12 @@ export function ManagerPage() {
           {isLoading ? (
             <div className="animate-pulse flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
               <div className="space-y-2">
-                <div className="h-6 sm:h-7 lg:h-8 bg-muted rounded w-40 sm:w-52" />
-                <div className="h-4 sm:h-5 bg-muted rounded w-32 sm:w-44" />
+                <div className="h-6 sm:h-7 lg:h-8 bg-background rounded w-40 sm:w-52" />
+                <div className="h-4 sm:h-5 bg-background rounded w-32 sm:w-44" />
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-wrap">
-                <div className="h-9 sm:h-10 bg-muted rounded-xl w-24 sm:w-28 md:w-32" />
-                <div className="h-9 sm:h-10 bg-muted rounded-xl w-24 sm:w-28 md:w-32" />
+                <div className="h-9 sm:h-10 bg-background rounded-xl w-24 sm:w-28 md:w-32" />
+                <div className="h-9 sm:h-10 bg-background rounded-xl w-24 sm:w-28 md:w-32" />
               </div>
             </div>
           ) : (
@@ -336,17 +336,20 @@ export function ManagerPage() {
         {isLoading ? (
           <div className="grid gap-3 sm:gap-4 lg:gap-5">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="rounded-3xl bg-background p-3 sm:p-4 lg:p-6 xl:p-7 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 animate-pulse">
+              <div
+                key={i}
+                className="rounded-3xl bg-background p-3 sm:p-4 lg:p-6 xl:p-7 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 animate-pulse"
+              >
                 <div className="flex items-start justify-between gap-2 sm:gap-3 lg:gap-4">
                   <div className="flex-1 min-w-0 space-y-2 sm:space-y-3 lg:space-y-4">
-                    <div className="h-3.5 sm:h-4 lg:h-5 bg-muted rounded w-1/2 sm:w-2/5" />
-                    <div className="h-3.5 sm:h-4 lg:h-5 bg-muted rounded w-4/5 sm:w-3/5" />
+                    <div className="h-3.5 sm:h-4 lg:h-5 bg-background rounded w-1/2 sm:w-2/5" />
+                    <div className="h-3.5 sm:h-4 lg:h-5 bg-background rounded w-4/5 sm:w-3/5" />
                     <div className="flex gap-1.5 sm:gap-2 lg:gap-3 pt-1 sm:pt-2">
-                      <div className="h-5 sm:h-6 lg:h-7 bg-muted rounded-full w-16 sm:w-20 lg:w-24" />
-                      <div className="h-5 sm:h-6 lg:h-7 bg-muted rounded-full w-20 sm:w-24 lg:w-28" />
+                      <div className="h-5 sm:h-6 lg:h-7 bg-background rounded-full w-16 sm:w-20 lg:w-24" />
+                      <div className="h-5 sm:h-6 lg:h-7 bg-background rounded-full w-20 sm:w-24 lg:w-28" />
                     </div>
                   </div>
-                  <div className="h-7 sm:h-8 lg:h-10 bg-muted rounded-full w-7 sm:w-8 lg:w-10 shrink-0" />
+                  <div className="h-7 sm:h-8 lg:h-10 bg-background rounded-full w-7 sm:w-8 lg:w-10 shrink-0" />
                 </div>
               </div>
             ))}
@@ -368,7 +371,7 @@ export function ManagerPage() {
                 : 'Add your first user to get started'}
             </p>
             {!searchQuery && employeeTypeFilter === 'all' && employmentStatusFilter === 'all' && (
-              <Button 
+              <Button
                 onClick={() => setAddModalOpen(true)}
                 className="bg-foreground hover:bg-foreground/90 text-white transition-all duration-500 ease-in-out shadow-sm/25"
               >
@@ -400,11 +403,7 @@ export function ManagerPage() {
       {/* Modals */}
       {addModalOpen && (
         <Suspense fallback={<div className="hidden" />}>
-          <AddUserModal
-            open={addModalOpen}
-            onOpenChange={setAddModalOpen}
-            onAddUser={onAddUser}
-          />
+          <AddUserModal open={addModalOpen} onOpenChange={setAddModalOpen} onAddUser={onAddUser} />
         </Suspense>
       )}
 

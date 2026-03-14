@@ -52,7 +52,9 @@ export function DashboardPage() {
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2 text-foreground">Welcome{user?.name ? `, ${user.name}` : ''}</h2>
+          <h2 className="text-3xl font-bold mb-2 text-foreground">
+            Welcome{user?.name ? `, ${user.name}` : ''}
+          </h2>
           <p className="text-gray-600">
             Manage your organization&apos;s users and roles from here.
           </p>
@@ -81,7 +83,7 @@ export function DashboardPage() {
 
           <Card className="opacity-60 bg-background border-b-3 border-x-2 border-border/50 shadow-sm/25 rounded-3xl">
             <CardHeader>
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center mb-4">
                 <Shield className="h-6 w-6 text-muted-foreground" />
               </div>
               <CardTitle className="text-foreground text-xl">Settings</CardTitle>
@@ -90,7 +92,11 @@ export function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full bg-white hover:bg-gray-100 hover:text-foreground transition-all duration-500 ease-in-out border-zinc-300" disabled>
+              <Button
+                variant="outline"
+                className="w-full bg-white hover:bg-gray-100 hover:text-foreground transition-all duration-500 ease-in-out border-zinc-300"
+                disabled
+              >
                 Coming Soon
               </Button>
             </CardContent>

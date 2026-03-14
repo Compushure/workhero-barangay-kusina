@@ -1,8 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useState, useMemo } from 'react';
+// import { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
+import {
+  handleDeleteTask,
+  handleClearUnstartedTaskAssignments,
+} from '@/action-handlers/manager/assigned-tasks';
+import { handleAddTaskAssignment } from '@/action-handlers/manager/assignments';
 import { AssignedTask, AssignedEmployee, SelectedFilters, Task } from '@/types';
-import { handleDeleteTask, handleClearAssignedTasks } from '@/action-handlers/manager/assigned-tasks';
+// import { handleDeleteTask, handleClearAssignedTasks } from '@/action-handlers/manager/assigned-tasks';
 import { useManagerAssignmentStore } from '@/store/managerAssignmentStore';
 import { useAddTaskAssignmentMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
@@ -19,7 +25,7 @@ interface TaskAssignmentContextType {
     newDueDate: string,
     newEmployees: AssignedEmployee[]
   ) => void;
-  clearAll: () => Promise<void>;
+  clearUnstarted: () => Promise<void>;
   clearAllEmployeeTasks: (employeeId: string) => void;
   setAssignedTasks: (tasks: AssignedTask[]) => void;
   page: number;
@@ -31,11 +37,8 @@ interface TaskAssignmentContextType {
 const TaskAssignmentContext = createContext<TaskAssignmentContextType | undefined>(undefined);
 
 export function TaskAssignmentProvider({ children }: { children: React.ReactNode }) {
-  const {
-    assignedTasks,
-    setAssignedTasks,
-    updateAssignedTasks,
-  } = useManagerAssignmentStore();
+  const { assignedTasks, setAssignedTasks, updateAssignedTasks, appendAssignedTasks } =
+    useManagerAssignmentStore();
   const [viewMode, setViewMode] = useState<'task' | 'employee'>('task');
   const addTaskAssignmentMutation = useAddTaskAssignmentMutation();
 
@@ -97,7 +100,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
   const removeAssignment = async (taskId: string, employeeId: string) => {
     // Call server action to delete from database
     const success = await handleDeleteTask(taskId);
-    
+
     if (success) {
       // Only update local state if server deletion succeeded
       updateAssignedTasks((prev) =>
@@ -144,9 +147,8 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
     );
   };
 
-  const clearAll = async () => {
-    const success = await handleClearAssignedTasks();
-    if (success) setAssignedTasks([]);
+  const clearUnstarted = async () => {
+    await handleClearUnstartedTaskAssignments();
   };
 
   const clearAllEmployeeTasks = (employeeId: string) => {
@@ -169,7 +171,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
       removeAssignment,
       deleteTask,
       editTask,
-      clearAll,
+      clearUnstarted,
       clearAllEmployeeTasks,
       setAssignedTasks,
       page,

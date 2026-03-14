@@ -37,7 +37,7 @@ export async function handleUserRole({ router, setError, getUserRole }: HandleRo
       toast.success('Welcome Manager!', {
         description: 'You have successfully logged in.',
       });
-      router.push('/manager/dashboard/task-assignment');
+      router.push('/manager/task-assignment');
       break;
     case 'hr':
       toast.success('Welcome HR!', {
