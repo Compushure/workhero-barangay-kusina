@@ -15,7 +15,7 @@ import {
 } from '@/action-handlers/hr/rewards';
 import { handleCreateRedemptionRequestAction } from '@/action-handlers/employee/redemptions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AddRewardInput, EditRewardInput, Reward } from '@/types';
+import { AddRewardInput, EditRewardInput, RedemptionRequest, Reward } from '@/types';
 import { rewardKeys } from '../queries/rewardQueries';
 import { redemptionKeys } from '../queries/redemptionQueries';
 import { hrLeaderboardKeys } from '../queries/hrQueries';
@@ -186,7 +186,7 @@ export function useDeclineRedemptionRequest() {
       // Invalidate redemption queries to refetch the list
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
-      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
       queryClient.invalidateQueries({ queryKey: rewardKeys.all });
       queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
@@ -232,7 +232,7 @@ export function useAcceptRedemptionRequest() {
       // Invalidate redemption queries to refetch the list
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
-      // Invalidate rewards to update quantities and stock status
+      queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
       queryClient.invalidateQueries({ queryKey: rewardKeys.all });
       queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
