@@ -108,8 +108,8 @@ export function LoginForm({ onSubmit, isBusy }: LoginFormProps) {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-100 border-3 border-red-600 p-3 sm:p-4 pixel-box animate-shake">
-            <p className="text-red-900 font-pixel text-[8px] sm:text-[8px] lg:text-xs">{error}</p>
+          <div className="bg-red-100 border-3 border-red-600 p-2 sm:p-2 pixel-box animate-shake">
+            <p className="text-red-900 font-pixel text-center text-[8px] sm:text-[8px] lg:text-xs">{error}</p>
           </div>
         )}
       </form>

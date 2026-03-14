@@ -58,15 +58,6 @@ export function SuperadminLoginForm({ onSubmit }: SuperadminLoginFormProps) {
       {/* Form Content */}
       <div className="p-4 sm:p-5">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200/50 rounded-lg p-3">
-              <p className="text-red-700 text-sm font-medium">
-                {error}
-              </p>
-            </div>
-          )}
-
           {/* Form Fields */}
           <SuperadminLoginFormFields
             email={email}
@@ -90,6 +81,14 @@ export function SuperadminLoginForm({ onSubmit }: SuperadminLoginFormProps) {
               'Sign In'
             )}
           </button>
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200/50 rounded-lg p-3">
+              <p className="text-red-700 text-xs text-center font-medium">
+                {error}
+              </p>
+            </div>
+          )}
         </form>
 
         {/* Footer */}
