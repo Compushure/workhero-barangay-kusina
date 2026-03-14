@@ -12,8 +12,8 @@ export function RedemptionTableSkeleton({ rows = 6 }: { rows?: number }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border shadow-md [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <Table>
-        <TableHeader className="bg-background">
-          <TableRow className="border-b border-border hover:bg-background">
+        <TableHeader className="bg-background [&_tr]:border-0">
+          <TableRow className="border-0 hover:bg-background">
             <TableHead className="px-2 sm:px-4 w-32 sm:w-40 text-xs sm:text-sm">
               <Skeleton className="h-4 w-20 bg-background" />
             </TableHead>
@@ -31,9 +31,9 @@ export function RedemptionTableSkeleton({ rows = 6 }: { rows?: number }) {
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="[&_tr]:border-0">
           {Array.from({ length: rows }).map((_, index) => (
-            <TableRow key={index} className="bg-background">
+            <TableRow key={index} className="bg-background border-0">
               <TableCell className="px-2 sm:px-4">
                 <div className="h-4 w-24 sm:w-30 bg-background rounded animate-pulse" />
                 <div className="mt-1 h-3 w-16 sm:w-20 bg-background rounded animate-pulse" />

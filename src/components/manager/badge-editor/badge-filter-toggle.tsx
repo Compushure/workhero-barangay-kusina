@@ -1,17 +1,14 @@
 'use client';
 
-import { Filter } from 'lucide-react';
+import { Check, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuCheckboxItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
 
 export type BadgeFilterMode = 'all' | 'manual' | 'conditional';
 
@@ -20,68 +17,57 @@ interface BadgeFilterToggleProps {
   onFilterChange: (value: BadgeFilterMode) => void;
 }
 
-export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterToggleProps) {
-  const activeFilterCount = filterMode === 'all' ? 0 : 1;
+const badgeTypeOptions: Array<{ value: BadgeFilterMode; label: string }> = [
+  { value: 'all', label: 'Show All' },
+  { value: 'manual', label: 'Manual Only' },
+  { value: 'conditional', label: 'Conditional Only' },
+];
 
-  const clearFilters = () => {
-    onFilterChange('all');
-  };
+export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterToggleProps) {
+  const isActive = filterMode !== 'all';
 
   return (
-    <div className="flex items-center gap-2">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            className="text-button control-h gap-2 px-4 rounded-md border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
-          >
-            <Filter className="h-4 w-4 text-accent" />
-            <span className="hidden sm:inline">Filters</span>
-            {activeFilterCount > 0 && (
-              <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
-                {activeFilterCount}
-              </Badge>
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="manager-dropdown-content w-56">
-          <DropdownMenuLabel className="text-xs text-muted-foreground">
-            Badge Type
-          </DropdownMenuLabel>
-          <DropdownMenuCheckboxItem
-            checked={filterMode === 'manual'}
-            onCheckedChange={(checked) => onFilterChange(checked ? 'manual' : 'all')}
-            className="manager-dropdown-item cursor-pointer"
-          >
-            Manual Only
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={filterMode === 'conditional'}
-            onCheckedChange={(checked) => onFilterChange(checked ? 'conditional' : 'all')}
-            className="manager-dropdown-item cursor-pointer"
-          >
-            Conditional Only
-          </DropdownMenuCheckboxItem>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="default"
+          size="default"
+          className={`text-button control-h shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer w-10 sm:w-26 justify-around px-2 ${
+            isActive
+              ? 'bg-primary-gradient text-primary-foreground hover:brightness-90'
+              : 'bg-card text-foreground hover:bg-card hover:brightness-90'
+          }`}
+        >
+          <Filter
+            size={12}
+            className={`shrink-0 ${isActive ? 'text-primary-foreground' : 'text-accent'}`}
+          />
+          <span className="truncate hidden sm:inline">Filters{isActive ? ' •' : ''}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="manager-dropdown-content min-w-44">
+        <DropdownMenuLabel className="text-xs font-semibold text-secondary uppercase tracking-wide px-2 py-1">
+          Badge Type
+        </DropdownMenuLabel>
+        {badgeTypeOptions.map((option) => {
+          const selected = filterMode === option.value;
 
-          <DropdownMenuSeparator />
-          <DropdownMenuLabel className="text-xs text-muted-foreground">
-            Quick Actions
-          </DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={clearFilters}
-            className="manager-dropdown-item cursor-pointer text-secondary hover:text-foreground pl-8"
-          >
-            Clear Filters
-          </DropdownMenuItem>
-          <DropdownMenuCheckboxItem
-            checked={filterMode === 'all'}
-            onCheckedChange={() => onFilterChange('all')}
-            className="manager-dropdown-item cursor-pointer"
-          >
-            Show All
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+          return (
+            <DropdownMenuItem
+              key={option.value}
+              onSelect={() => onFilterChange(option.value)}
+              className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out my-1 ${
+                selected ? 'bg-accent/15 text-foreground font-medium' : ''
+              }`}
+            >
+              <span className="mr-2 inline-flex w-4 items-center justify-center">
+                {selected ? <Check size={14} className="text-foreground" /> : null}
+              </span>
+              {option.label}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

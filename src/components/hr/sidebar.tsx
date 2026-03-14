@@ -110,12 +110,6 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
   }, [isCollapsed]);
 
   useEffect(() => {
-    if (!isCollapsed) {
-      setHoveredNavKey(null);
-    }
-  }, [isCollapsed]);
-
-  useEffect(() => {
     if (pendingHref && pathname === pendingHref) {
       setPendingHref(null);
       stopNavigation();

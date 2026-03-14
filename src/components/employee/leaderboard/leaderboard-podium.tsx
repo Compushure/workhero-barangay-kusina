@@ -14,9 +14,9 @@ export function LeaderboardPodium({ entries }: LeaderboardPodiumProps) {
         : entries;
 
   return (
-    <div className="flex items-end justify-center gap-6">
+    <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:items-end sm:justify-center sm:gap-5 md:gap-6">
       {podiumOrder.map((entry) => (
-        <div key={entry.userId} className={entry.rank === 1 ? '-translate-y-8' : ''}>
+        <div key={entry.userId} className={entry.rank === 1 ? 'sm:-translate-y-6 md:-translate-y-8' : ''}>
           <PortraitCard entry={entry} size="large" />
         </div>
       ))}

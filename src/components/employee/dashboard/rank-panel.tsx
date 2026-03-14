@@ -13,7 +13,7 @@ export function RankWidget() {
   const rank = rankData?.rank ?? 1;
 
   const cardClassName =
-    'bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-4 mb-4 -ml-2 w-[320px] min-h-[140px] shrink-0 font-jersey tracking-widest';
+    'bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-2 mb-4 -ml-2 w-[320px] min-h-[90px] shrink-0 font-jersey tracking-widest';
 
   if (isRankLoading) {
     return (
@@ -50,22 +50,22 @@ export function RankWidget() {
 
   return (
     <div className={cardClassName}>
-      <h2 className="text-l text-white text-center mb-2">Weekly Rank</h2>
+      <h2 className="text-lg text-yellow-500 text-center mb-2">Weekly Rank</h2>
 
       <div className="border-t-2 border-white/30 mb-3" />
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-center">
         <div className="flex items-center justify-center gap-3">
           <div className="bg-white/20 rounded-full p-2">
-            <Trophy size={20} className="text-yellow-300" />
+            <Trophy size={20} className="text-yellow-500" />
           </div>
           <span className="text-2xl text-white">#{rank}</span>
         </div>
 
-        <div className="h-12 border-l-2 border-white/30 mx-4" />
+        <div className="h-12 border-l-2 border-white/30" />
 
         <div className="flex flex-col items-center justify-self-center">
-          <span className="text-xs leading-[1.05] text-white/85 text-center mb-1">
+          <span className="text-sm leading-[1.05] text-yellow-500 text-center mb-1">
             Performance Score
           </span>
           <Tooltip>

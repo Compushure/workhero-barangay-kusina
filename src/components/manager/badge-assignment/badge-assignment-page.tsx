@@ -21,16 +21,19 @@ import {
   BadgeAssignmentQuickSkeleton,
 } from './badge-assignment-skeletons';
 import { BadgeAssignmentHeaderSkeleton } from './badge-assignment-header-skeleton';
-import { Skeleton } from '@/components/ui/skeleton';
 import type { BadgeAssignmentUser, BadgeSummary } from '@/types/manager/badge-assignment';
 import {
   useGetAllBadges,
   useGetBadgeAssignmentUsers,
   useGetManualBadges,
 } from '@/hooks/tanstack/queries/managerBadgeAssignmentQueries';
-import { useAssignManualBadgeToUser } from '@/hooks/tanstack/mutations/managerBadgeAssignmentMutations';
+import {
+  useAssignManualBadgeToUser,
+  useAssignManualBadgesToUsersBulk,
+} from '@/hooks/tanstack/mutations/managerBadgeAssignmentMutations';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 import { PageHeader } from '../task-verification/page-header';
+import { useManagerBadgeAssignmentStore } from '@/store/managerBadgeAssignmentStore';
 
 type UserSortOption = 'name-asc' | 'name-desc' | 'employee-asc' | 'employee-desc';
 type BadgeSortOption = 'name-asc' | 'name-desc' | 'points-desc' | 'points-asc';
@@ -71,10 +74,11 @@ export default function BadgeAssignmentPage() {
   const allBadgesQuery = useGetAllBadges();
   const usersQuery = useGetBadgeAssignmentUsers();
   const assignBadgeMutation = useAssignManualBadgeToUser();
+  const assignBadgesBulkMutation = useAssignManualBadgesToUsersBulk();
+  const { users, hydrateFromServer, isOptimistic } = useManagerBadgeAssignmentStore();
 
   const manualBadges = manualBadgesQuery.data ?? [];
   const allBadges = allBadgesQuery.data ?? [];
-  const users = usersQuery.data ?? [];
   const isQuickAssignLoading = manualBadgesQuery.isLoading || usersQuery.isLoading;
   const isHeaderLoading =
     usersQuery.isLoading || manualBadgesQuery.isLoading || allBadgesQuery.isLoading;
@@ -118,6 +122,17 @@ export default function BadgeAssignmentPage() {
   useEffect(() => {
     setUserPage(1);
   }, [debouncedSearchTerm, sortOption]);
+
+  useEffect(() => {
+    if (usersQuery.data) {
+      hydrateFromServer(usersQuery.data);
+      return;
+    }
+
+    if (!usersQuery.isLoading) {
+      hydrateFromServer([]);
+    }
+  }, [usersQuery.data, usersQuery.isLoading, hydrateFromServer, isOptimistic]);
 
   const filteredUsers = useMemo(() => {
     const normalizedSearch = normalizeSearchQuery(debouncedSearchTerm);
@@ -201,6 +216,20 @@ export default function BadgeAssignmentPage() {
   const handleBadgeViewAll = (user: BadgeAssignmentUser) => {
     setSelectedUserForAllBadges(user);
     setAllBadgesModalOpen(true);
+  };
+
+  const handleAwardBadgesBulk = (badgeId: string, userIds: string[]) => {
+    const eligibleUserIds = userIds.filter((userId) => {
+      const matchedUser = users.find((user) => user.id === userId);
+      return matchedUser ? !matchedUser.badge_ids.includes(badgeId) : false;
+    });
+
+    if (eligibleUserIds.length === 0) {
+      toast.error('All selected users already have this badge');
+      return;
+    }
+
+    assignBadgesBulkMutation.mutate({ badgeId, userIds: eligibleUserIds });
   };
 
   return (
@@ -393,7 +422,8 @@ export default function BadgeAssignmentPage() {
                   totalBadgePages={totalBadgePages}
                   onBadgePageChange={setBadgePage}
                   users={users}
-                  onAwardBadge={handleAwardBadge}
+                  onAwardBadgeToUsers={handleAwardBadgesBulk}
+                  isAssigning={assignBadgesBulkMutation.isPending}
                 />
               )}
             </div>

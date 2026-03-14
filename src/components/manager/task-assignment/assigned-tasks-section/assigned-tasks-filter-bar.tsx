@@ -48,7 +48,7 @@ export function AssignedTasksFilterBar({
         <Button
           variant="default"
           size="default"
-          className={`text-button control-h shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer w-10 sm:w-22 justify-between px-2 sm:px-3 ${
+          className={`text-button control-h shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer w-10 sm:w-26 justify-around px-2 ${
             isActive
               ? 'bg-primary-gradient text-primary-foreground hover:brightness-90'
               : 'bg-card text-foreground hover:bg-card hover:brightness-90'
@@ -58,7 +58,7 @@ export function AssignedTasksFilterBar({
             size={12}
             className={`shrink-0 ${isActive ? 'text-primary-foreground' : 'text-accent'}`}
           />
-          <span className="truncate hidden sm:inline">Filter{isActive ? ' •' : ''}</span>
+          <span className="truncate hidden sm:inline">Filters{isActive ? ' •' : ''}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="manager-dropdown-content min-w-44">

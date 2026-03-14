@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
 import { SelectTasksDialog } from './dialogs/select-task-dialog';
@@ -15,7 +14,6 @@ import {
 } from '@/action-handlers/manager/assignments';
 import {
   useGetCurrentAssignedTasksPaginated,
-  managerAssignmentKeys,
 } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { TaskAssignmentCardSkeleton } from './task-assignment-card-skeleton';
 
@@ -35,7 +33,6 @@ interface TaskAssignmentCardProps {
 
 export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
   const { assignTasks, assignedTasks } = useTaskAssignment();
-  const queryClient = useQueryClient();
 
   // ✅ Reduced from 1000 to 100 - card only needs to check task assignment status
   // This significantly reduces network payload and processing time
@@ -136,10 +133,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
           maxOrders: taskMaxRepeats[id] || 1,
         })),
         deadline: selectedDeadline,
-      });
-
-      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
-      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
+      }, { availableTasks });
 
       // Call clear logic directly instead of through closure
       setSelectedEmployees([]);
@@ -149,7 +143,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
       setShowAssignConfirm(false);
       setIsAssigning(false);
     }
-  }, [selectedEmployees, selectedTask, selectedDeadline, taskMaxRepeats, assignTasks, queryClient]);
+  }, [selectedEmployees, selectedTask, selectedDeadline, taskMaxRepeats, assignTasks, availableTasks]);
 
   const handleEmployeesDialogAttempt = useCallback(() => {
     if (selectedTask.length === 0) {

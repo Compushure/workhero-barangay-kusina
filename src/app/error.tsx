@@ -1,7 +1,5 @@
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+"use client";
+import ErrorRouter from '@/components/error/error-router';
 
 export default function GlobalError({
   error,
@@ -10,58 +8,23 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const router = useRouter();
+  const cause = error.message || 'Unknown';
+  let status = '500';
+  let recommendation = 'Please try again later or contact support.';
 
-  useEffect(() => {
-    console.error('Caught by error.tsx:', error);
+  if (cause.startsWith('400')) {
+    status = '400';
+    recommendation = 'Bad request. Please verify your input.';
+  } else if (cause.includes('Unauthorized')) {
+    status = '401';
+    recommendation = 'Please log in again.';
+  } else if (cause.startsWith('403')) {
+    status = '403';
+    recommendation = 'You do not have permission to view this page.';
+  } else if (cause.startsWith('404')) {
+    status = '404';
+    recommendation = 'Check the URL or return to the login page.';
+  }
 
-    let status = '500';
-    const cause = error.message || 'Unknown';
-    let recommendation = 'Please try again later or contact support.';
-    let returnTo = '';
-
-    if (typeof window !== 'undefined' && document.referrer) {
-      try {
-        const refUrl = new URL(document.referrer);
-        if (refUrl.origin === window.location.origin && refUrl.pathname !== '/error') {
-          returnTo = `${refUrl.pathname}${refUrl.search}${refUrl.hash}`;
-        }
-      } catch {
-        returnTo = '';
-      }
-    }
-
-    if (cause.startsWith('404')) {
-      status = '404';
-      recommendation = 'Check the URL or return to the login page.';
-    } else if (cause.startsWith('400')) {
-      status = '400';
-      recommendation = 'Bad request. Please verify your input.';
-    } else if (cause.includes('Unauthorized')) {
-      status = '401';
-      recommendation = 'Please log in again.';
-    }
-
-    const baseErrorUrl = `/error?cause=${encodeURIComponent(cause)}&status=${encodeURIComponent(
-      status
-    )}&recommendation=${encodeURIComponent(recommendation)}`;
-
-    const errorUrl = returnTo
-      ? `${baseErrorUrl}&returnTo=${encodeURIComponent(returnTo)}`
-      : baseErrorUrl;
-
-    router.replace(errorUrl);
-  }, [error, router]);
-
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="flex flex-col items-center gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
-        <p className="text-gray-600">Redirecting to error page...</p>
-        <button onClick={() => reset()} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
-          Try again
-        </button>
-      </div>
-    </div>
-  );
+  return <ErrorRouter status={status} cause={cause} recommendation={recommendation} />;
 }

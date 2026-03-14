@@ -119,8 +119,8 @@ export function RedemptionTable({
       <div className="overflow-hidden rounded-lg border border-border bg-background shadow-md">
         <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <Table>
-            <TableHeader className="bg-primary-gradient">
-              <TableRow className="border-b border-border hover:bg-primary-gradient">
+            <TableHeader className="bg-primary-gradient [&_tr]:border-0">
+              <TableRow className="border-0 hover:bg-primary-gradient">
                 <TableHead className="text-card font-semibold px-2 sm:px-4 w-32 sm:w-40 text-xs sm:text-sm">
                   REQUEST DATE
                 </TableHead>
@@ -141,7 +141,7 @@ export function RedemptionTable({
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="[&_tr]:border-0">
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="py-12 text-center text-foreground">
@@ -171,7 +171,7 @@ export function RedemptionTable({
                   return (
                     <TableRow
                       key={request.id}
-                      className="bg-background transition-colors hover:bg-accent-secondary/10"
+                      className="bg-background border-0 transition-colors hover:bg-accent-secondary/10"
                     >
                       <TableCell className="px-2 sm:px-4">
                         <p className="text-xs sm:text-sm font-medium text-foreground">{dateStr}</p>
