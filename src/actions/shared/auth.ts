@@ -38,7 +38,7 @@ export async function redirectToCorrectDashboardServer() {
       redirect('/admin/manage');
       return;
     case 'manager':
-      redirect('/manager/dashboard/task-assignment');
+      redirect('/manager/task-assignment');
       return;
     case 'hr':
       redirect('/hr/reward-requests');

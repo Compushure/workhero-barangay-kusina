@@ -1,15 +1,37 @@
 export function BadgeAssignmentUsersSkeleton() {
   return (
-    <div className="space-y-4 animate-pulse">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-        <div className="h-8 w-36 rounded-full bg-muted" />
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center w-full sm:w-auto">
-          <div className="h-10 w-full sm:w-64 rounded-full bg-muted" />
-          <div className="h-10 w-full sm:w-40 rounded-md bg-muted" />
-        </div>
-      </div>
+    <><div className="space-y-4">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="bg-card rounded-lg border-b border-gray-300 p-3 shadow-sm/25">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            {/* Avatar and User Info Section */}
+            <div className="shrink-0 flex items-center gap-3 min-w-0 sm:min-w-44">
+              {/* Avatar skeleton */}
+              <div className="size-8 sm:size-10 rounded-full bg-gray-300 animate-pulse" />
 
-      <div className="space-y-4">
+              {/* User Details */}
+              <div className="min-w-0 flex-1 sm:w-44 space-y-2">
+                <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse" />
+                <div className="h-3 bg-gray-300 rounded w-1/2 animate-pulse" />
+              </div>
+            </div>
+
+            {/* Badges Section */}
+            <div className="flex-1 flex items-center gap-2 px-0 sm:px-3 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="size-8 sm:size-10 rounded-lg bg-gray-300 animate-pulse" />
+                <div className="size-8 sm:size-10 rounded-lg bg-gray-300 animate-pulse" />
+                <div className="size-8 sm:size-10 rounded-lg bg-gray-300 animate-pulse" />
+              </div>
+            </div>
+
+            {/* Button Section */}
+            <div className="shrink-0 flex gap-2 sm:w-auto w-full">
+              <div className="control-skeleton-h bg-gray-300 rounded-md flex-1 w-20 sm:w-24 animate-pulse" />
+            </div>
+          </div>
+        </div>))}
+    </div><div className="space-y-4">
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
@@ -35,57 +57,72 @@ export function BadgeAssignmentUsersSkeleton() {
             </div>
           </div>
         ))}
-      </div>
-    </div>
+      </div></>
   );
 }
 
 export function BadgeAssignmentQuickSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
-      <div className="space-y-4">
-        <div className="flex items-center">
-          <div className="h-8 w-44 rounded-full bg-muted" />
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      {/* Badges List - Left Side (1 column) */}
+      <div className="lg:col-span-1 space-y-4">
+        <div className="space-y-2">
+          <div className="h-7 bg-gray-300 rounded-md w-32 animate-pulse" />
+          <div className="control-skeleton-h bg-gray-300 rounded-md animate-pulse" />
         </div>
-        <div className="h-10 w-40 rounded-md bg-muted" />
+
+        {/* Badge List */}
+        <div className="border border-accent/25 rounded-lg overflow-hidden shadow-sm/25">
+          <div className="divide-y divide-accent/25">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="bg-card px-3 sm:px-4 py-3">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="size-8 sm:size-10 rounded-lg bg-gray-300 animate-pulse shrink-0" />
+                  <div className="flex-1 space-y-2 min-w-0">
+                    <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse" />
+                    <div className="h-3 bg-gray-300 rounded w-12 animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-4">
-          <div className="space-y-2">
-            <div className="h-6 w-28 rounded bg-muted" />
-            <div className="h-9 w-full rounded-md bg-muted" />
-          </div>
-
-          <div className="space-y-3">
-            <div className="border border-accent/25 rounded-lg overflow-hidden h-96 shadow-sm/25">
-              <div className="divide-y divide-accent/25">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="w-full px-4 py-3 bg-background-soft">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-muted shrink-0" />
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="h-4 w-24 rounded bg-muted" />
-                        <div className="h-3 w-12 rounded bg-muted" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center gap-1">
-              <div className="h-8 w-10 rounded-md bg-muted" />
-              <div className="h-8 w-8 rounded-md bg-muted" />
-              <div className="h-8 w-8 rounded-md bg-muted" />
-              <div className="h-8 w-10 rounded-md bg-muted" />
+      {/* Badge Details and User Assignment - Right Side (2 columns) */}
+      <div className="lg:col-span-2 space-y-4">
+        {/* Selected Badge Details */}
+        <div className="bg-card border border-accent/25 rounded-lg p-4 sm:p-6 shadow-sm/25">
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+            <div className="size-16 sm:size-20 rounded-lg bg-gray-300 animate-pulse shrink-0" />
+            <div className="flex-1 space-y-3 min-w-0">
+              <div className="h-6 bg-gray-300 rounded w-2/3 max-w-64 animate-pulse" />
+              <div className="h-4 bg-gray-300 rounded w-full animate-pulse" />
+              <div className="h-4 bg-gray-300 rounded w-24 animate-pulse" />
             </div>
           </div>
         </div>
 
-        <div className="lg:col-span-2 space-y-4">
-          <div className="bg-background-soft border border-dashed border-accent/25 rounded-lg p-12 text-center">
-            <div className="h-6 w-56 mx-auto rounded bg-muted" />
+        {/* User Selection Area */}
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="control-skeleton-h bg-gray-300 rounded-md flex-1 animate-pulse" />
+            <div className="control-skeleton-h bg-gray-300 rounded-md w-full sm:w-44 animate-pulse" />
+          </div>
+
+          {/* Users Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-card border border-accent/25 rounded-lg p-3 shadow-sm/25">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="size-8 sm:size-10 rounded-full bg-gray-300 animate-pulse shrink-0" />
+                  <div className="flex-1 space-y-2 min-w-0">
+                    <div className="h-4 bg-gray-300 rounded w-full animate-pulse" />
+                    <div className="h-3 bg-gray-300 rounded w-2/3 animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

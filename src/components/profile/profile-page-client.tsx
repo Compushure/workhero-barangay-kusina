@@ -6,7 +6,13 @@ import { createClient } from '@/lib/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProfileHeader } from './profile-header';
 import { ProfilePicture } from './profile-picture';
@@ -20,7 +26,10 @@ import { GovernmentIDs } from './government-ids';
 import { GamifiedStats } from './gamified-stats';
 import { ImageCropUpload } from '@/components/admin/image-crop-upload';
 import { useGetUserProfile } from '@/hooks/tanstack/queries/profileQueries';
-import { useUploadOwnProfilePicture, useDeleteOwnProfilePicture } from '@/hooks/tanstack/mutations/profileMutations';
+import {
+  useUploadOwnProfilePicture,
+  useDeleteOwnProfilePicture,
+} from '@/hooks/tanstack/mutations/profileMutations';
 import { useAntiSpam } from '@/hooks/useAntiSpam';
 
 const TAB_VALUES = ['basic', 'contact', 'employment', 'ids', 'stats', 'badges'] as const;
@@ -35,11 +44,11 @@ function ProfileLoadingSkeleton() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Skeleton className="h-10 w-32 bg-muted" />
+        <Skeleton className="h-10 w-32 bg-background" />
       </div>
       <div className="space-y-4">
-        <Skeleton className="h-40 w-full bg-muted" />
-        <Skeleton className="h-96 w-full bg-muted" />
+        <Skeleton className="h-40 w-full bg-background" />
+        <Skeleton className="h-96 w-full bg-background" />
       </div>
     </div>
   );
@@ -60,11 +69,11 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   const [activeTab, setActiveTab] = useState<TabValue>(DEFAULT_TAB);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
-  
+
   const { data: profile, isLoading } = useGetUserProfile(userId);
   const uploadPicture = useUploadOwnProfilePicture(userId);
   const deletePicture = useDeleteOwnProfilePicture(userId);
-  
+
   // Anti-spam protection for mutations
   const uploadAntiSpam = useAntiSpam({ cooldown: 1500, maxAttempts: 3 });
   const deleteAntiSpam = useAntiSpam({ cooldown: 1500, maxAttempts: 3 });
@@ -79,7 +88,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
       try {
         const supabase = createClient();
         const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
-        
+
         if (claimsError || !claimsData?.claims) {
           console.log('Failed to get user claims');
           setRoleLoading(false);
@@ -105,14 +114,14 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   useEffect(() => {
     const applyHash = () => {
       const hash = window.location.hash.replace('#', '') as TabValue;
-      
+
       // Check if the requested tab is 'stats' and user doesn't have access
       if (hash === 'stats' && !canAccessStats) {
         setActiveTab(DEFAULT_TAB);
         window.history.replaceState(null, '', `#${DEFAULT_TAB}`);
         return;
       }
-      
+
       if (TAB_VALUES.includes(hash)) {
         setActiveTab(hash);
       } else {
@@ -128,34 +137,40 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
     }
   }, [roleLoading, canAccessStats]);
 
-  const handleImageSelect = useCallback((croppedImage: File) => {
-    setShowCropDialog(false);
-    
-    // Upload immediately after crop
-    if (uploadAntiSpam.canExecute) {
-      uploadAntiSpam.execute(async () => {
-        try {
-          startTransition(() => {
-            uploadPicture.mutate(croppedImage);
-          });
-        } catch (error) {
-          console.error('Error uploading cropped image:', error);
-        }
-      });
-    }
-  }, [uploadPicture, uploadAntiSpam]);
+  const handleImageSelect = useCallback(
+    (croppedImage: File) => {
+      setShowCropDialog(false);
 
-  const handleFileChange = useCallback(async (file: File) => {
-    if (uploadAntiSpam.canExecute) {
-      await uploadAntiSpam.execute(async () => {
-        try {
-          await uploadPicture.mutateAsync(file);
-        } catch (error) {
-          console.error('Error uploading file:', error);
-        }
-      });
-    }
-  }, [uploadPicture, uploadAntiSpam]);
+      // Upload immediately after crop
+      if (uploadAntiSpam.canExecute) {
+        uploadAntiSpam.execute(async () => {
+          try {
+            startTransition(() => {
+              uploadPicture.mutate(croppedImage);
+            });
+          } catch (error) {
+            console.error('Error uploading cropped image:', error);
+          }
+        });
+      }
+    },
+    [uploadPicture, uploadAntiSpam]
+  );
+
+  const handleFileChange = useCallback(
+    async (file: File) => {
+      if (uploadAntiSpam.canExecute) {
+        await uploadAntiSpam.execute(async () => {
+          try {
+            await uploadPicture.mutateAsync(file);
+          } catch (error) {
+            console.error('Error uploading file:', error);
+          }
+        });
+      }
+    },
+    [uploadPicture, uploadAntiSpam]
+  );
 
   const handleDeletePicture = useCallback(async () => {
     if (deleteAntiSpam.canExecute) {
@@ -176,9 +191,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   }, [deletePicture, deleteAntiSpam]);
 
   const handleTabChange = (value: string) => {
-    const nextValue = TAB_VALUES.includes(value as TabValue)
-      ? (value as TabValue)
-      : DEFAULT_TAB;
+    const nextValue = TAB_VALUES.includes(value as TabValue) ? (value as TabValue) : DEFAULT_TAB;
     setActiveTab(nextValue);
     if (typeof window !== 'undefined') {
       window.history.replaceState(null, '', `#${nextValue}`);
@@ -194,8 +207,8 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
       <Card className="max-w-md mx-auto">
         <CardContent className="pt-6 text-center">
           <p className="text-lg font-semibold text-title">Profile not found</p>
-          <Button 
-            onClick={() => router.back()} 
+          <Button
+            onClick={() => router.back()}
             disabled={isPending}
             className="mt-4 cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
@@ -207,7 +220,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   }
 
   const handleBackClick = () => {
-    // Simple router.back() without startTransition 
+    // Simple router.back() without startTransition
     router.back();
   };
 
@@ -231,7 +244,9 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
             onOpenCropDialog={() => setShowCropDialog(true)}
           />
           <div className="space-y-1 w-full min-w-0">
-            <p className="text-base sm:text-lg md:text-xl font-semibold text-title wrap-break-word">{profile.name}</p>
+            <p className="text-base sm:text-lg md:text-xl font-semibold text-title wrap-break-word">
+              {profile.name}
+            </p>
             {profile.employeeId && (
               <p className="text-xs text-muted-foreground break-all">{profile.employeeId}</p>
             )}
@@ -248,33 +263,49 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
               variant="line"
               className="w-max min-w-max flex! flex-row bg-transparent p-0 gap-2 h-auto"
             >
-              <TabsTrigger value="basic" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+              <TabsTrigger
+                value="basic"
+                className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
+              >
                 Basic Information
               </TabsTrigger>
-              <TabsTrigger value="contact" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+              <TabsTrigger
+                value="contact"
+                className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
+              >
                 Contact Information
               </TabsTrigger>
-              <TabsTrigger value="employment" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+              <TabsTrigger
+                value="employment"
+                className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
+              >
                 Employment Details
               </TabsTrigger>
-              <TabsTrigger value="ids" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+              <TabsTrigger
+                value="ids"
+                className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
+              >
                 Government IDs
               </TabsTrigger>
               {canAccessStats && (
-                <TabsTrigger value="stats" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+                <TabsTrigger
+                  value="stats"
+                  className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
+                >
                   Gamified Stats
                 </TabsTrigger>
               )}
-              <TabsTrigger value="badges" className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft">
+              <TabsTrigger
+                value="badges"
+                className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
+              >
                 All Badges
               </TabsTrigger>
             </TabsList>
           </div>
         </Tabs>
 
-        <div
-          className="mt-4 space-y-4 pb-4 w-full max-w-full h-[50svh] sm:h-[52svh] md:h-auto min-h-64 sm:min-h-72 overflow-y-auto md:overflow-y-visible overscroll-y-contain min-w-0 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
-        >
+        <div className="mt-4 space-y-4 pb-4 w-full max-w-full h-[50svh] sm:h-[52svh] md:h-auto min-h-64 sm:min-h-72 overflow-y-auto md:overflow-y-visible overscroll-y-contain min-w-0 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
           {activeTab === 'basic' && <BasicInformation profile={profile} />}
           {activeTab === 'contact' && <ContactInformation profile={profile} />}
           {activeTab === 'employment' && <EmploymentDetails profile={profile} />}
@@ -293,9 +324,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
         <DialogContent className="w-[min(92vw,720px)] max-h-[88vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Crop Profile Picture</DialogTitle>
-            <DialogDescription>
-              Adjust your profile picture before uploading
-            </DialogDescription>
+            <DialogDescription>Adjust your profile picture before uploading</DialogDescription>
           </DialogHeader>
           {showCropDialog && (
             <ImageCropUpload

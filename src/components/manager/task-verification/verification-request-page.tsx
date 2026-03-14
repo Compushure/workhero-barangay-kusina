@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Search } from 'lucide-react';
 import { PageHeader } from '@/components/manager/task-verification/page-header';
-import { SearchBar } from '@/components/manager/task-verification/search-bar';
 import { SortButton } from '@/components/manager/task-verification/sort-button';
 import { RequestsTable } from '@/components/manager/task-verification/requests-table';
 import { RequestsTableSkeleton } from '@/components/manager/task-verification/requests-table-skeleton';
@@ -25,7 +25,9 @@ interface VerificationRequestsPageProps {
   initialRequests: VerificationRequest[];
 }
 
-export function VerificationRequestsPage({ initialRequests }: VerificationRequestsPageProps) {
+export function VerificationRequestsPage({
+  initialRequests: _initialRequests,
+}: VerificationRequestsPageProps) {
   const router = useRouter();
   const { tasks, hydrateFromServer } = useTaskStore();
   const [searchTerm, setSearchTerm] = useState('');
@@ -228,11 +230,11 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
   const showInitialSkeleton = isCurrentCategoryLoading && currentTasks.length === 0;
 
   return (
-    <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
+    <div className="px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6 min-h-screen flex flex-col">
       {showInitialSkeleton ? (
         <div className="space-y-2">
-          <Skeleton className="h-9 w-72 bg-muted" />
-          <Skeleton className="h-5 w-96 bg-muted" />
+          <Skeleton className="h-8 w-64 bg-background" />
+          <Skeleton className="h-4 w-80 bg-background" />
         </div>
       ) : (
         <PageHeader title="Verification Requests" subtitle="Verify task completion of employee" />
@@ -241,39 +243,48 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
       <div className="flex-1 flex flex-col max-w-7xl 2xl:max-w-440 w-full mx-auto">
         {/* Filter Controls - Compact horizontal layout aligned to right */}
         {showInitialSkeleton ? (
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-4 sm:mt-5 sm:justify-end">
-            <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
-              <Skeleton className="h-10 w-full bg-muted rounded-full" />
-            </div>
-            <div className="flex gap-2 shrink-0">
-              <Skeleton className="h-10 w-28 bg-muted rounded-lg" />
-              <Skeleton className="h-10 w-40 bg-muted rounded-lg" />
+          <div className="manager-sticky-controls mt-3 mb-3 rounded-xl px-3 py-3 sm:mb-4 sm:mt-4 sm:px-4">
+            <div className="flex min-w-0 flex-col items-stretch gap-2 lg:flex-row lg:items-center lg:justify-end">
+              <div className="min-w-0 flex-1 xl:max-w-md">
+                <Skeleton className="control-skeleton-h w-full bg-gray-300 rounded-md" />
+              </div>
+              <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap lg:shrink-0">
+                <Skeleton className="control-skeleton-h w-full lg:w-40 bg-gray-300 rounded-md" />
+                <Skeleton className="control-skeleton-h w-full lg:w-40 bg-gray-300 rounded-md" />
+              </div>
             </div>
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3 sm:mb-4 mt-4 sm:mt-5 sm:justify-end">
-            <div className="flex-1 min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
-              <SearchBar
-                searchTerm={searchTerm}
-                onSearchChange={(value) => setSearchTerm(sanitizeSearchInput(value))}
-                placeholder="Search by employee name or employee ID"
-              />
-            </div>
-            <div className="flex gap-2 shrink-0">
-              <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="mercado" />
-              <SortButton
-                sortBy={dateSortBy as any}
-                onSortChange={(value) =>
-                  setDateSortBy(value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc')
-                }
-                options={[
-                  { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
-                  { value: 'date-asc' as any, label: 'Date (Oldest)' },
-                  { value: 'employee-asc' as any, label: 'Employee Name (A-Z)' },
-                  { value: 'employee-desc' as any, label: 'Employee Name (Z-A)' },
-                ]}
-                styleVariant="mercado"
-              />
+          <div className="manager-sticky-controls my-3 rounded-xl p-3 sm:mb-4 sm:mt-4 sm:px-4">
+            <div className="flex min-w-0 flex-col items-stretch gap-2 lg:flex-row lg:items-center lg:justify-end">
+              <div className="relative min-w-0 flex-1 xl:max-w-xs">
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by employee name or ID"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
+                  className="text-meta control-h w-full min-w-0 rounded-md border border-zinc-200 bg-card pr-3 pl-9 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
+                />
+              </div>
+              <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap lg:shrink-0">
+                <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="default" />
+                <SortButton
+                  sortBy={dateSortBy as any}
+                  onSortChange={(value) =>
+                    setDateSortBy(
+                      value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
+                    )
+                  }
+                  options={[
+                    { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
+                    { value: 'date-asc' as any, label: 'Date (Oldest)' },
+                    { value: 'employee-asc' as any, label: 'Employee Name (A-Z)' },
+                    { value: 'employee-desc' as any, label: 'Employee Name (Z-A)' },
+                  ]}
+                  styleVariant="default"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -293,7 +304,7 @@ export function VerificationRequestsPage({ initialRequests }: VerificationReques
           )}
 
           {/* Pagination fixed at bottom */}
-          <div className="mt-auto pt-3 sm:pt-4">
+          <div className="mt-auto pt-2 sm:pt-3">
             <Pagination
               totalPages={totalPages}
               currentPage={currentPage}

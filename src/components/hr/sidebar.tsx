@@ -1,6 +1,13 @@
 'use client';
 
-import { ChevronLeft, LayoutDashboard, ShoppingCart, Trophy, UserCircle2, type LucideIcon } from 'lucide-react';
+import {
+  ChevronLeft,
+  LayoutDashboard,
+  ShoppingCart,
+  Trophy,
+  UserCircle2,
+  type LucideIcon,
+} from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -61,8 +68,8 @@ function SidebarUserProfile({
         <div className="min-w-0 px-2">
           {isProfileLoading ? (
             <>
-              <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-              <div className="h-3 w-28 bg-muted rounded mt-1 animate-pulse" />
+              <div className="h-4 w-20 bg-background rounded animate-pulse" />
+              <div className="h-3 w-28 bg-background rounded mt-1 animate-pulse" />
             </>
           ) : (
             <>
@@ -80,9 +87,7 @@ function SidebarUserProfile({
   );
 }
 
-export function Sidebar({
-  navItems = defaultNavItems,
-}: SidebarProps) {
+export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [hoveredNavKey, setHoveredNavKey] = useState<string | null>(null);
@@ -119,7 +124,7 @@ export function Sidebar({
   return (
     <>
       <aside
-        className={`hidden overflow-hidden bg-muted text-[#131C2A] transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between ${
+        className={`hidden overflow-hidden bg-background text-primary transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between ${
           isCollapsed ? 'w-20' : 'w-60 lg:w-64'
         }`}
       >
@@ -143,7 +148,7 @@ export function Sidebar({
                     isCollapsed ? 'size-8 rounded-sm text-lg' : 'size-6 rounded text-sm'
                   }`}
                 >
-                  <span className="font-bold text-[#131C2A] transition-all duration-400 ease-in-out group-hover:text-[#f47812]">
+                  <span className="font-bold text-primary transition-all duration-400 ease-in-out group-hover:text-[#f47812]">
                     W
                   </span>
                 </div>
@@ -187,7 +192,7 @@ export function Sidebar({
             } ${
               isActive
                 ? 'bg-primary-gradient text-zinc-50'
-                : 'bg-zinc-50/75 text-[#131C2A] hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
+                : 'bg-zinc-50/75 text-primary hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
             } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`;
 
             const navLink = (
@@ -287,7 +292,7 @@ export function Sidebar({
                   }}
                   aria-disabled={isDisabled}
                   className={`flex flex-col items-center justify-center rounded-xl px-1 py-1.5 transition-all duration-300 ${
-                    isActive ? 'bg-accent/20 text-[#f47812]' : 'text-[#131C2A]'
+                    isActive ? 'bg-accent/20 text-[#f47812]' : 'text-primary'
                   } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`}
                 >
                   {isNavigatingItem ? (
@@ -309,7 +314,7 @@ export function Sidebar({
             <button
               onClick={handleProfileClick}
               disabled={isLoggingOut}
-              className={`flex flex-col items-center justify-center rounded-xl px-1 py-1.5 text-[#131C2A] transition-all duration-300 hover:bg-accent/20 hover:text-[#f47812] ${isLoggingOut ? 'pointer-events-none opacity-50' : ''}`}
+              className={`flex flex-col items-center justify-center rounded-xl px-1 py-1.5 text-primary transition-all duration-300 hover:bg-accent/20 hover:text-[#f47812] ${isLoggingOut ? 'pointer-events-none opacity-50' : ''}`}
             >
               <UserCircle2 className="size-4" strokeWidth={1.9} />
               <span className="mt-1 text-[10px] leading-none">Profile</span>
@@ -319,10 +324,10 @@ export function Sidebar({
       </nav>
 
       {/* Profile Modal */}
-      <ProfileModal 
-        open={showProfileModal} 
-        onOpenChange={setShowProfileModal} 
-        user={user ?? null} 
+      <ProfileModal
+        open={showProfileModal}
+        onOpenChange={setShowProfileModal}
+        user={user ?? null}
       />
     </>
   );

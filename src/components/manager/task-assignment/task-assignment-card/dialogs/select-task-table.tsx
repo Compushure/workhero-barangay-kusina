@@ -27,31 +27,41 @@ function SelectTasksTable({
   return (
     <div className="rounded-2xl border-2 border-accent-secondary/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full table-fixed">
-        <thead className="bg-muted text-primary/50 border-b border-accent-secondary/50 sticky top-0 z-10">
-          <tr className="text-sm font-semibold">
-            <th className="w-[8%] sm:w-[5%] py-2"></th>
-            <th className="w-[52%] sm:w-[35%] text-left pl-4 py-2">TASK</th>
-            <th className="hidden sm:table-cell w-[17%] text-center py-2">POINTS</th>
-            <th className="hidden sm:table-cell w-[17%] text-center py-2">XP</th>
-            <th className="w-[40%] sm:w-[26%] text-center py-2">MAX ORDERS</th>
+        <thead
+          className={`${isLoading ? 'bg-background' : 'bg-primary-gradient text-card'} border-b border-accent-secondary/50 sticky top-0 z-10`}
+        >
+          <tr className="text-xs font-semibold">
+            <th className="w-[8%] sm:w-[5%] py-1.5"></th>
+            <th className="w-[52%] sm:w-[35%] text-left pl-3 py-1.5">
+              {isLoading ? <Skeleton className="h-3 w-12 bg-gray-300" /> : 'TASK'}
+            </th>
+            <th className="hidden sm:table-cell w-[17%] text-center py-1.5">
+              {isLoading ? <Skeleton className="h-3 w-14 mx-auto bg-gray-300" /> : 'POINTS'}
+            </th>
+            <th className="hidden sm:table-cell w-[17%] text-center py-1.5">
+              {isLoading ? <Skeleton className="h-3 w-8 mx-auto bg-gray-300" /> : 'XP'}
+            </th>
+            <th className="w-[40%] sm:w-[26%] text-center py-1.5">
+              {isLoading ? <Skeleton className="h-3 w-20 mx-auto bg-gray-300" /> : 'MAX ORDERS'}
+            </th>
           </tr>
         </thead>
         {isLoading ? (
           <tbody>
             {[...Array(4)].map((_, i) => (
               <tr key={i} className="border-b border-accent/25">
-                <td className="w-[8%] sm:w-[5%] p-4"></td>
-                <td className="w-[52%] sm:w-[35%] px-4 py-3">
-                  <Skeleton className="h-8 w-full bg-muted" />
+                <td className="w-[8%] sm:w-[5%] p-3"></td>
+                <td className="w-[52%] sm:w-[35%] px-3 py-2">
+                  <Skeleton className="h-6 w-full bg-background" />
                 </td>
-                <td className="hidden sm:table-cell w-[17%] py-4 text-center">
-                  <Skeleton className="h-6 w-12 mx-auto bg-muted" />
+                <td className="hidden sm:table-cell w-[17%] py-3 text-center">
+                  <Skeleton className="h-5 w-10 mx-auto bg-background" />
                 </td>
-                <td className="hidden sm:table-cell w-[17%] py-4 text-center">
-                  <Skeleton className="h-6 w-12 mx-auto bg-muted" />
+                <td className="hidden sm:table-cell w-[17%] py-3 text-center">
+                  <Skeleton className="h-5 w-10 mx-auto bg-background" />
                 </td>
-                <td className="w-[40%] sm:w-[26%] p-4 text-center">
-                  <Skeleton className="h-8 w-20 mx-auto bg-muted" />
+                <td className="w-[40%] sm:w-[26%] p-3 text-center">
+                  <Skeleton className="h-6 w-16 mx-auto bg-background" />
                 </td>
               </tr>
             ))}
@@ -72,7 +82,7 @@ function SelectTasksTable({
                       ? 'brightness-75 opacity-50 cursor-not-allowed'
                       : isSelected
                         ? 'bg-accent-secondary/25'
-                        : 'bg-background-soft hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
+                        : 'bg-card hover:bg-row-hover cursor-pointer transition-all duration-300 ease-in-out'
                   } ${!isDisabled && 'cursor-pointer'}`}
                   onClick={(e) => {
                     if (isDisabled) return;
@@ -80,7 +90,7 @@ function SelectTasksTable({
                     toggleTask(task.id);
                   }}
                 >
-                  <td className="w-[8%] sm:w-[5%] p-4 text-center align-middle">
+                  <td className="w-[8%] sm:w-[5%] p-3 text-center align-middle">
                     <input
                       type="radio"
                       checked={isSelected}
@@ -90,7 +100,7 @@ function SelectTasksTable({
                         e.stopPropagation();
                         toggleTask(task.id);
                       }}
-                      className="rounded-full p-2 cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
+                      className="rounded-full p-1.5 cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
                       onClick={(e) => e.stopPropagation()}
                       style={{
                         backgroundImage: !!isSelected
@@ -102,28 +112,28 @@ function SelectTasksTable({
                       }}
                     />
                   </td>
-                  <td className="w-[52%] sm:w-[37%] min-w-0 px-4 py-3 align-middle">
-                    <div className="font-medium truncate">{task.name}</div>
-                    <div className="text-sm text-primary/50 truncate">{task.type}</div>
+                  <td className="w-[52%] sm:w-[37%] min-w-0 px-3 py-2 align-middle">
+                    <div className="font-medium truncate text-sm">{task.name}</div>
+                    <div className="text-xs text-primary/50 truncate">{task.type}</div>
                   </td>
-                  <td className="hidden sm:table-cell w-[16%] group py-4 text-primary/75 font-medium text-center align-middle">
+                  <td className="hidden sm:table-cell w-[16%] group py-3 text-primary/75 font-medium text-center align-middle text-sm">
                     <div className="flex items-center justify-center gap-1">
-                      <Coins strokeWidth={1.75} className="size-6" />
+                      <Coins strokeWidth={1.75} className="size-5" />
                       {task.points}
                     </div>
                   </td>
-                  <td className="hidden sm:table-cell w-[16%] font-medium text-primary/75 text-center align-middle py-4">
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="inline-block italic text-base leading-none">XP</span>
+                  <td className="hidden sm:table-cell w-[16%] font-medium text-primary/75 text-center align-middle py-3 text-sm">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="inline-block italic text-sm leading-none">XP</span>
                       {task.xp}
                     </div>
                   </td>
                   <td
-                    className="w-[26%] p-4 text-center align-middle"
+                    className="w-[26%] p-3 text-center align-middle text-sm"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {task.isRepeatable ? (
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center justify-center gap-1.5">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -132,7 +142,7 @@ function SelectTasksTable({
                               Math.max(1, Math.min(99, currentMaxOrders - 1))
                             );
                           }}
-                          className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent/50 hover:text-card text-primary size-6 rounded flex items-center justify-center cursor-pointer transition-all duration-400 ease-in-out"
+                          className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent/50 hover:text-card text-primary size-5 rounded flex items-center justify-center cursor-pointer transition-all duration-400 ease-in-out text-xs"
                         >
                           −
                         </button>
@@ -148,7 +158,7 @@ function SelectTasksTable({
                             updateMaxOrders(task.id, value);
                           }}
                           onClick={(e) => e.stopPropagation()}
-                          className="remove-arrow w-12 bg-background-soft text-center border border-accent-secondary/75 rounded px-2 py-1"
+                          className="remove-arrow w-10 bg-white text-center border border-accent-secondary/75 rounded px-1.5 py-1 text-xs"
                           min="1"
                           max="99"
                         />
@@ -160,13 +170,13 @@ function SelectTasksTable({
                               Math.max(1, Math.min(99, currentMaxOrders + 1))
                             );
                           }}
-                          className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent/50 hover:text-card text-primary size-6 rounded flex items-center justify-center cursor-pointer transition-all duration-400 ease-in-out"
+                          className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent/50 hover:text-card text-primary size-5 rounded flex items-center justify-center cursor-pointer transition-all duration-400 ease-in-out text-xs"
                         >
                           +
                         </button>
                       </div>
                     ) : (
-                      <span className="text-zinc-800">1</span>
+                      <span className="text-zinc-800 text-sm">1</span>
                     )}
                   </td>
                 </tr>

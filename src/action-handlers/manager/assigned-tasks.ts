@@ -2,7 +2,7 @@ import { safeAction } from '@/lib/utils/safe-action';
 import {
   fetchCurrentAssignedTasksPaginated, // ✅ use only the paginated fetch
   fetchCurrentAssignedEmployeesPaginated, // ✅ new employee-specific fetch
-  clearAssignedTasks,
+  clearUnstartedTaskAssignments,
   clearAllEmployeeTasks,
   deleteTask,
   deleteTaskForAllEmployees,
@@ -18,7 +18,9 @@ export async function handleFetchCurrentAssignedTasksPaginated(
   page: number = 1,
   pageSize: number = 10,
   sortBy: string = 'recently added',
-  searchTerm: string = ''
+  searchTerm: string = '',
+  statusFilters: string[] = [],
+  overdueFilter: string = 'hide-overdue'
 ): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number; employeeCount: number }> {
   const result = await safeAction<
     ServerActionResponse<{
@@ -27,7 +29,16 @@ export async function handleFetchCurrentAssignedTasksPaginated(
       totalPages: number;
       employeeCount: number;
     }>
-  >(() => fetchCurrentAssignedTasksPaginated(page, pageSize, sortBy, searchTerm));
+  >(() =>
+    fetchCurrentAssignedTasksPaginated(
+      page,
+      pageSize,
+      sortBy,
+      searchTerm,
+      statusFilters,
+      overdueFilter
+    )
+  );
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
@@ -48,9 +59,11 @@ export async function handleFetchCurrentAssignedTasksPaginated(
  */
 export async function handleFetchCurrentAssignedEmployeesPaginated(
   page: number = 1,
-  pageSize: number = 7,
+  pageSize: number = 10,
   sortBy: string = 'recently added',
-  searchTerm: string = ''
+  searchTerm: string = '',
+  statusFilters: string[] = [],
+  overdueFilter: string = 'hide-overdue'
 ): Promise<{ tasks: AssignedTask[]; count: number; totalPages: number; taskCount: number }> {
   const result = await safeAction<
     ServerActionResponse<{
@@ -59,7 +72,16 @@ export async function handleFetchCurrentAssignedEmployeesPaginated(
       totalPages: number;
       taskCount: number;
     }>
-  >(() => fetchCurrentAssignedEmployeesPaginated(page, pageSize, sortBy, searchTerm));
+  >(() =>
+    fetchCurrentAssignedEmployeesPaginated(
+      page,
+      pageSize,
+      sortBy,
+      searchTerm,
+      statusFilters,
+      overdueFilter
+    )
+  );
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
@@ -76,17 +98,19 @@ export async function handleFetchCurrentAssignedEmployeesPaginated(
 }
 
 /**
- * Clear all tasks
+ * Clear unstarted (no progress) assigned tasks
  */
-export async function handleClearAssignedTasks(): Promise<boolean> {
-  const result = await safeAction<ServerActionResponse<boolean>>(() => clearAssignedTasks());
+export async function handleClearUnstartedTaskAssignments(): Promise<boolean> {
+  const result = await safeAction<ServerActionResponse<boolean>>(() =>
+    clearUnstartedTaskAssignments()
+  );
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
     return false;
   }
 
-  toast.success('All tasks cleared');
+  toast.success('Unstarted assignments cleared');
   return true;
 }
 
