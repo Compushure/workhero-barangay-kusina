@@ -33,7 +33,7 @@ export function SortButton({
   const isMercadoStyle = styleVariant === 'mercado';
 
   const triggerClassName = isMercadoStyle
-    ? 'group border border-gray-300 bg-zinc-50/75 text-[#131C2A] hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-32 sm:flex-1 sm:min-w-[160px]'
+    ? 'group border border-gray-300 bg-zinc-50/75 text-[#131C2A] hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-xl w-44 sm:flex-1 sm:min-w-[180px]'
     : 'bg-card hover:bg-gray-200 rounded-full text-primary w-32 sm:flex-1 sm:min-w-[160px]';
 
   const itemClassName = (isActive: boolean) =>
@@ -58,17 +58,20 @@ export function SortButton({
           {/* Arrow icon */}
           <ArrowUpDown
             size={14}
-            className={isMercadoStyle ? 'text-[#131C2A] group-hover:text-white ml-1 shrink-0' : 'text-accent ml-1 shrink-0'}
+            className={
+              isMercadoStyle
+                ? 'text-[#131C2A] group-hover:text-white ml-1 shrink-0'
+                : 'text-accent ml-1 shrink-0'
+            }
           />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-background">
+      <DropdownMenuContent align="end" className="bg-background rounded-xl">
         {options.map((opt) => (
           <DropdownMenuItem
             key={opt.value}
             onClick={() => onSortChange(opt.value)}
-            className={`cursor-pointer transition-all duration-400 ease-in-out ${sortBy === opt.value ? 'bg-accent text-card' : 'hover:bg-accent/25!'}
-            `}
+            className={itemClassName(sortBy === opt.value)}
           >
             {opt.label}
           </DropdownMenuItem>

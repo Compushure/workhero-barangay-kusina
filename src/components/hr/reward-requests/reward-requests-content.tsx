@@ -9,23 +9,16 @@ import { RedemptionTableSkeleton } from '@/components/hr/dashboard/redemption-ta
 import { useGetRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
 import { useDebounce } from '@/hooks/useDebounce';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
-import { useHrRedemptionRequestStore } from '@/store/hrRedemptionRequestStore';
 
 export function RewardRequestsContent() {
   const router = useRouter();
-  const { requests, hydrateFromServer } = useHrRedemptionRequestStore();
   const [statusFilter, setStatusFilter] = useState<string>('pending');
   const [sortBy, setSortBy] = useState<string>('date-desc');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
 
   // Fetch redemption requests from database with status filter
-  const { data: queryRequests, isLoading, error } = useGetRedemptionRequests(statusFilter);
-
-  useEffect(() => {
-    if (!queryRequests) return;
-    hydrateFromServer(queryRequests);
-  }, [queryRequests, hydrateFromServer]);
+  const { data: requests = [], isLoading, error } = useGetRedemptionRequests(statusFilter);
 
   useEffect(() => {
     if (error) {

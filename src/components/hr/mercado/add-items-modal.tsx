@@ -2,12 +2,20 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Pencil, Plus, X, Loader2, Camera } from 'lucide-react';
-import { format } from 'date-fns';
+import {
+  format,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar, CalendarDayButton } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
@@ -22,6 +30,8 @@ type AvailabilityInterval = 'weekly' | 'monthly' | 'yearly';
 
 const MAX_REWARD_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_REWARD_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const mercadoSelectItemClassName =
+  'cursor-pointer transition-all duration-500 ease-in-out hover:bg-accent-secondary/80 hover:text-white data-[highlighted]:bg-accent-secondary/80 data-[highlighted]:text-white data-[state=checked]:bg-accent-secondary data-[state=checked]:text-white';
 
 interface AddItemsModalProps {
   open: boolean;
@@ -83,6 +93,34 @@ export function AddItemsModal({
   const [availabilityInterval, setAvailabilityInterval] = useState<'none' | AvailabilityInterval>(
     'none'
   );
+
+  // Derived disabled-date matcher based on chosen interval
+  const disabledDateMatcher = useMemo((): ((date: Date) => boolean) | undefined => {
+    if (availabilityInterval === 'none') return undefined;
+    const now = new Date();
+    if (availabilityInterval === 'weekly') {
+      const start = startOfWeek(now, { weekStartsOn: 0 });
+      const end = endOfWeek(now, { weekStartsOn: 0 });
+      return (date: Date) => date < start || date > end;
+    }
+    if (availabilityInterval === 'monthly') {
+      const start = startOfMonth(now);
+      const end = endOfMonth(now);
+      return (date: Date) => date < start || date > end;
+    }
+    if (availabilityInterval === 'yearly') {
+      const start = startOfYear(now);
+      const end = endOfYear(now);
+      return (date: Date) => date < start || date > end;
+    }
+    return undefined;
+  }, [availabilityInterval]);
+
+  const handleIntervalChange = (value: 'none' | AvailabilityInterval) => {
+    setAvailabilityInterval(value);
+    // Reset date whenever interval changes to avoid stale/invalid selection
+    setAvailableDate(undefined);
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [iconValidationError, setIconValidationError] = useState<string>('');
 
@@ -344,7 +382,7 @@ export function AddItemsModal({
             <Label className="text-sm font-medium text-foreground">Select Icon</Label>
             <label
               htmlFor="icon-upload"
-              className="relative mx-auto w-full max-w-35 overflow-hidden rounded-lg border-2 border-dashed border-border bg-background aspect-square flex items-center justify-center cursor-pointer transition-colors hover:border-ring group md:mx-0 md:max-w-40 lg:max-w-45"
+              className="relative mx-auto w-full max-w-35 h-48 md:h-53 lg:h-51 overflow-hidden rounded-lg border-2 border-dashed border-border bg-background flex items-center justify-center cursor-pointer transition-colors hover:border-ring group md:mx-0 md:max-w-40 lg:max-w-45"
               style={
                 iconPreview || (editingItem && existingImageUrl && !existingImageError)
                   ? {
@@ -406,7 +444,7 @@ export function AddItemsModal({
                 }}
                 placeholder="Ex: Vacation ticket"
                 minLength={2}
-                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                className="h-10 rounded-lg bg-background border-border text-foreground placeholder:text-muted-foreground"
               />
               {itemName && !isItemNameValid && itemName.length < 2 && (
                 <p className="text-xs text-red-600">Item name must be at least 2 characters</p>
@@ -417,9 +455,29 @@ export function AddItemsModal({
               {itemName.length === 50}
             </div>
 
-            {/* Quantity and Redeeming Limit */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex-1 space-y-2">
+            {/* Item Cost | Quantity | Redeeming Limit */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+              <div className="space-y-2">
+                <Label htmlFor="item-cost" className="text-sm font-medium text-foreground">
+                  Item Cost
+                </Label>
+                <Input
+                  id="item-cost"
+                  type="text"
+                  value={itemCost}
+                  onChange={(e) => {
+                    const value = unformatNumber(e.target.value);
+                    if (value.length <= 6 && /^\d*$/.test(value)) {
+                      setItemCost(formatNumber(value));
+                    }
+                  }}
+                  placeholder="Fiesta Points"
+                  className="h-10 rounded-lg bg-background border-border text-foreground placeholder:text-muted-foreground"
+                />
+                {unformatNumber(itemCost).length === 6}
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="quantity" className="text-sm font-medium text-foreground">
                   Quantity
                 </Label>
@@ -435,11 +493,12 @@ export function AddItemsModal({
                   }}
                   placeholder="Enter quantity"
                   required
-                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                  className="h-10 rounded-lg bg-background border-border text-foreground placeholder:text-muted-foreground"
                 />
                 {unformatNumber(quantity).length === 6}
               </div>
-              <div className="flex-1 space-y-2">
+
+              <div className="space-y-2">
                 <Label htmlFor="redeeming-limit" className="text-sm font-medium text-foreground">
                   Redeeming limit
                 </Label>
@@ -455,7 +514,7 @@ export function AddItemsModal({
                   }}
                   placeholder="Enter limit"
                   required
-                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                  className="h-10 rounded-lg bg-background border-border text-foreground placeholder:text-muted-foreground"
                 />
                 {unformatNumber(redeemingLimit).length === 6}
               </div>
@@ -468,81 +527,105 @@ export function AddItemsModal({
               </p>
             )}
 
-            {/* Item Cost, Availability Date, and Interval */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex-1 space-y-2">
-                <Label htmlFor="item-cost" className="text-sm font-medium text-foreground">
-                  Item Cost
-                </Label>
-                <Input
-                  id="item-cost"
-                  type="text"
-                  value={itemCost}
-                  onChange={(e) => {
-                    const value = unformatNumber(e.target.value);
-                    if (value.length <= 6 && /^\d*$/.test(value)) {
-                      setItemCost(formatNumber(value));
-                    }
-                  }}
-                  placeholder="Fiesta Points"
-                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
-                />
-                {unformatNumber(itemCost).length === 6}
-              </div>
-              <div className="flex-1 space-y-2">
-                <Label className="text-sm font-medium text-foreground">Availability Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full justify-start text-left font-normal bg-background border-border hover:bg-muted',
-                        !availableDate && 'text-muted-foreground'
-                      )}
-                    >
-                      {availableDate ? format(availableDate, 'PPP') : 'Select date (optional)'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={availableDate}
-                      onSelect={setAvailableDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="flex-1 space-y-2">
+            {/* Availability Interval | Calendar */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
+              <div className="space-y-2">
                 <Label htmlFor="available-month" className="text-sm font-medium text-foreground">
                   Availability Interval
                 </Label>
                 <Select
                   value={availabilityInterval}
                   onValueChange={(value) =>
-                    setAvailabilityInterval(value as 'none' | AvailabilityInterval)
+                    handleIntervalChange(value as 'none' | AvailabilityInterval)
                   }
                 >
                   <SelectTrigger
                     id="available-month"
-                    className="w-full bg-background border-border hover:bg-muted text-foreground"
+                    className="h-10 w-full rounded-lg bg-background border-border hover:bg-muted text-foreground"
                   >
                     <SelectValue placeholder="Select interval (optional)" />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover text-popover-foreground">
-                    <SelectItem value="none" className="text-muted-foreground italic">
-                      No interval (always available)
+                  <SelectContent className="bg-popover text-popover-foreground rounded-lg">
+                    <SelectItem
+                      value="none"
+                      className={cn(mercadoSelectItemClassName, 'text-muted-foreground italic')}
+                    >
+                      No Interval selected
                     </SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="yearly">Yearly</SelectItem>
+                    <SelectItem value="weekly" className={mercadoSelectItemClassName}>
+                      Weekly
+                    </SelectItem>
+                    <SelectItem value="monthly" className={mercadoSelectItemClassName}>
+                      Monthly
+                    </SelectItem>
+                    <SelectItem value="yearly" className={mercadoSelectItemClassName}>
+                      Yearly
+                    </SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">Availability Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      disabled={availabilityInterval === 'none'}
+                      className={cn(
+                        'h-10 w-full rounded-lg justify-start text-left font-normal bg-background border-border hover:bg-muted',
+                        !availableDate && 'text-muted-foreground'
+                      )}
+                    >
+                      {availableDate ? format(availableDate, 'PPP') : 'Select date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-lg" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={availableDate}
+                      onSelect={setAvailableDate}
+                      disabled={disabledDateMatcher}
+                      className="rounded-lg bg-background"
+                      classNames={{
+                        weekday:
+                          'text-accent-secondary rounded-md flex-1 font-normal text-[0.8rem] select-none',
+                        month_caption:
+                          'flex items-center justify-center h-(--cell-size) w-full px-(--cell-size) text-sm font-semibold text-foreground',
+                        button_previous:
+                          'size-(--cell-size) rounded-md p-0 select-none text-foreground hover:bg-accent-secondary/80 hover:text-white aria-disabled:opacity-50',
+                        button_next:
+                          'size-(--cell-size) rounded-md p-0 select-none text-foreground hover:bg-accent-secondary/80 hover:text-white aria-disabled:opacity-50',
+                        today:
+                          'bg-accent-secondary/15 text-accent-secondary rounded-md data-[selected=true]:bg-accent-secondary data-[selected=true]:text-white',
+                        outside: 'text-muted-foreground/60 aria-selected:text-muted-foreground/60',
+                        disabled: 'text-muted-foreground/45 opacity-100',
+                      }}
+                      components={{
+                        DayButton: (props) => (
+                          <CalendarDayButton
+                            {...props}
+                            className={cn(
+                              'hover:bg-accent-secondary/80 hover:text-white data-[selected-single=true]:bg-accent-secondary data-[selected-single=true]:text-white data-[range-middle=true]:bg-accent-secondary/20 data-[range-middle=true]:text-foreground data-[range-start=true]:bg-accent-secondary data-[range-start=true]:text-white data-[range-end=true]:bg-accent-secondary data-[range-end=true]:text-white'
+                            )}
+                          />
+                        ),
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="md:col-span-2 space-y-1">
+                {availabilityInterval === 'none' && (
+                  <p className="text-xs text-muted-foreground italic">
+                    Choose an interval to select a date
+                  </p>
+                )}
                 {availabilityInterval !== 'none' && (
                   <p className="text-xs text-muted-foreground italic">
-                    Item will use {availabilityInterval} interval from{' '}
-                    {availableDate ? format(availableDate, 'MMM d, yyyy') : 'the selected date'}
+                    Only dates within the current {availabilityInterval} are selectable
                   </p>
                 )}
                 {isIntervalDateMissing && (
@@ -559,14 +642,14 @@ export function AddItemsModal({
             variant="outline"
             onClick={handleClose}
             disabled={isLoading}
-            className="h-10 rounded-xl border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white transition-all duration-400 ease-in-out px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="h-10 rounded-lg border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white transition-all duration-400 ease-in-out px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="h-10 rounded-xl bg-primary-gradient text-zinc-50 hover:opacity-95 px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="h-10 rounded-lg bg-primary-gradient text-zinc-50 hover:opacity-95 px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isLoading ? (
               <>

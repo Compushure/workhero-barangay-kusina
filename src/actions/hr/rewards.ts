@@ -12,6 +12,10 @@ import { addRewardSchema, editRewardSchema } from '@/zod/schemas';
 
 const ANCHOR_PREFIX = 'anchor:';
 
+/**
+ * Converts a Date into YYYY-MM-DD using local calendar values.
+ * Used to persist interval anchor dates without time components.
+ */
 function toDateOnlyIso(value: Date): string {
   const year = value.getFullYear();
   const month = String(value.getMonth() + 1).padStart(2, '0');
@@ -19,6 +23,10 @@ function toDateOnlyIso(value: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Parses the stored anchor date value into a local Date at start of day.
+ * Accepts raw dates and prefixed values like `anchor:YYYY-MM-DD`.
+ */
 function parseAnchorDate(value?: string | Date | null): Date | null {
   if (!value) return null;
   const raw = value instanceof Date ? toDateOnlyIso(value) : value;
@@ -27,6 +35,10 @@ function parseAnchorDate(value?: string | Date | null): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+/**
+ * Normalizes any supported date input into a date-only anchor string.
+ * Returns null when input is empty or invalid.
+ */
 function toAnchorString(date?: Date | string | null): string | null {
   if (!date) return null;
   const parsed = date instanceof Date ? date : new Date(date);
@@ -34,22 +46,38 @@ function toAnchorString(date?: Date | string | null): string | null {
   return toDateOnlyIso(parsed);
 }
 
-function startOfWeekMonday(date: Date): Date {
+/**
+ * Returns the Sunday-start beginning of the week for a given date.
+ * This is used for weekly interval comparisons.
+ */
+function startOfWeekSunday(date: Date): Date {
   const copy = new Date(date);
   const day = copy.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  copy.setDate(copy.getDate() + diff);
+  copy.setDate(copy.getDate() - day);
   copy.setHours(0, 0, 0, 0);
   return copy;
 }
 
+/**
+ * Truncates a Date to local midnight for day-level comparisons.
+ */
+function startOfDayLocal(date: Date): Date {
+  const copy = new Date(date);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+/**
+ * Checks whether an anchor date still belongs to the current interval window
+ * (current week, current month, or current year).
+ */
 function isDateInCurrentInterval(anchorDate: Date | null, interval: 'weekly' | 'monthly' | 'yearly'): boolean {
   if (!anchorDate) return true;
 
   const now = new Date();
 
   if (interval === 'weekly') {
-    return startOfWeekMonday(anchorDate).getTime() === startOfWeekMonday(now).getTime();
+    return startOfWeekSunday(anchorDate).getTime() === startOfWeekSunday(now).getTime();
   }
 
   if (interval === 'monthly') {
@@ -62,6 +90,34 @@ function isDateInCurrentInterval(anchorDate: Date | null, interval: 'weekly' | '
   return anchorDate.getFullYear() === now.getFullYear();
 }
 
+/**
+ * Checks whether today's date has reached/passed the anchor date.
+ * Used to keep future-dated rewards hidden until their start day.
+ */
+function isAnchorDateReached(anchorDate: Date | null): boolean {
+  if (!anchorDate) return true;
+  return startOfDayLocal(anchorDate).getTime() <= startOfDayLocal(new Date()).getTime();
+}
+
+/**
+ * Determines if a reward should be visible for an interval query.
+ * Rule: it must be inside the current interval and not before anchor date.
+ */
+function isRewardActiveForIntervalWindow(
+  anchorDate: Date | null,
+  interval: 'weekly' | 'monthly' | 'yearly'
+): boolean {
+  // Reward is visible only while we are still within the anchor's interval window.
+  if (!isDateInCurrentInterval(anchorDate, interval)) return false;
+
+  // If anchor date is in the future within this interval, keep it hidden until that date.
+  return isAnchorDateReached(anchorDate);
+}
+
+/**
+ * Normalizes availability interval values from DB/UI into supported literals.
+ * Returns null for unsupported legacy values.
+ */
 function normalizeAvailabilityIntervalValue(
   value?: number | string | null
 ): 'weekly' | 'monthly' | 'yearly' | null {
@@ -81,7 +137,10 @@ function normalizeAvailabilityIntervalValue(
   return null;
 }
 
-// Helper function to get public URL with cache busting
+/**
+ * Builds a public reward image URL with a cache-busting query string.
+ * Keeps recently uploaded images from appearing stale in the UI.
+ */
 function getRewardImageUrl(supabase: any, rewardId: string): string {
   const baseUrl = supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`)
     .data.publicUrl;
@@ -302,7 +361,7 @@ export async function getAvailableRewardsByIntervalAction(
 
     const rewards: Reward[] = (data || [])
       .filter((item) =>
-        isDateInCurrentInterval(parseAnchorDate(item.availability_anchor_date), interval)
+        isRewardActiveForIntervalWindow(parseAnchorDate(item.availability_anchor_date), interval)
       )
       .map((item) => {
       const redeemedCount = redeemedCounts.get(item.id) || 0;
