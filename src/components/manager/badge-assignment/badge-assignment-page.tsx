@@ -65,6 +65,7 @@ export default function BadgeAssignmentPage() {
   const [allBadgesModalOpen, setAllBadgesModalOpen] = useState(false);
   const [selectedUserForAllBadges, setSelectedUserForAllBadges] =
     useState<BadgeAssignmentUser | null>(null);
+  const [hasLoadedHeaderOnce, setHasLoadedHeaderOnce] = useState(false);
 
   const manualBadgesQuery = useGetManualBadges();
   const allBadgesQuery = useGetAllBadges();
@@ -77,6 +78,14 @@ export default function BadgeAssignmentPage() {
   const isQuickAssignLoading = manualBadgesQuery.isLoading || usersQuery.isLoading;
   const isHeaderLoading =
     usersQuery.isLoading || manualBadgesQuery.isLoading || allBadgesQuery.isLoading;
+
+  useEffect(() => {
+    if (!isHeaderLoading) {
+      setHasLoadedHeaderOnce(true);
+    }
+  }, [isHeaderLoading]);
+
+  const showHeaderSkeleton = !hasLoadedHeaderOnce && isHeaderLoading;
 
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
 
@@ -197,7 +206,7 @@ export default function BadgeAssignmentPage() {
   return (
     <main className="w-full min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
       <div className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl space-y-5 sm:space-y-6 lg:space-y-8">
-        {isHeaderLoading ? (
+        {showHeaderSkeleton ? (
           <BadgeAssignmentHeaderSkeleton />
         ) : (
           <section className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-3 sm:gap-4">
@@ -241,7 +250,7 @@ export default function BadgeAssignmentPage() {
 
         {/* Tab Content */}
         <section className="space-y-6">
-          {isHeaderLoading ? (
+          {showHeaderSkeleton ? (
             activeTab === 'users' ? (
               <BadgeAssignmentUsersSkeleton />
             ) : (

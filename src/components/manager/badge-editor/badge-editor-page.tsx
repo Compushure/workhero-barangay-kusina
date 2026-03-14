@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus, Search, ArrowUpDown, Coins, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -58,7 +58,16 @@ export function BadgeEditorPage() {
   const [sortOption, setSortOption] = useState<BadgeSortOption>('name-asc');
   const [filterMode, setFilterMode] = useState<BadgeFilterMode>('all');
   const [page, setPage] = useState(1);
+  const [hasLoadedHeaderOnce, setHasLoadedHeaderOnce] = useState(false);
   const pageSize = 10;
+
+  useEffect(() => {
+    if (!isLoading) {
+      setHasLoadedHeaderOnce(true);
+    }
+  }, [isLoading]);
+
+  const showHeaderSkeleton = !hasLoadedHeaderOnce && isLoading;
 
   // Debounce search term
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
@@ -244,7 +253,7 @@ export function BadgeEditorPage() {
   return (
     <main className="w-full min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
       <div className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl space-y-5 sm:space-y-4 lg:space-y-6">
-        {isLoading ? (
+        {showHeaderSkeleton ? (
           <BadgeEditorHeaderSkeleton />
         ) : (
           <>
@@ -313,7 +322,7 @@ export function BadgeEditorPage() {
                             {option.label}
                           </DropdownMenuItem>
                         ))}
-                    </DropdownMenuContent>
+                      </DropdownMenuContent>
                     </DropdownMenu>
 
                     {/* Add New Badge Button */}

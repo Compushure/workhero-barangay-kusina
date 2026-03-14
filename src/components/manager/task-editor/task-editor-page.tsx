@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, Search, ArrowUpDown, ChefHat, ListTodo } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,6 +49,7 @@ export default function TaskEditorPage() {
   const [sortOption, setSortOption] = useState<TaskCategorySortOption>('name-asc');
   const [repeatabilityFilter, setRepeatabilityFilter] = useState<TaskRepeatabilityFilter>('all');
   const [page, setPage] = useState(1);
+  const [hasLoadedHeaderOnce, setHasLoadedHeaderOnce] = useState(false);
   const pageSize = 10;
 
   // Debounce search term like current-assigned-tasks (900ms)
@@ -70,6 +71,14 @@ export default function TaskEditorPage() {
   const tasks = paginatedData?.tasks || [];
   const totalPages = paginatedData?.totalPages || 1;
   const totalCount = paginatedData?.count || 0;
+
+  useEffect(() => {
+    if (paginatedData) {
+      setHasLoadedHeaderOnce(true);
+    }
+  }, [paginatedData]);
+
+  const showHeaderSkeleton = !hasLoadedHeaderOnce && isLoading;
 
   // Fetch names/types only when dialog opens to keep initial page load fast.
   const { data: taskCategoryMeta } = useGetTaskCategoryMetadata({
@@ -165,7 +174,7 @@ export default function TaskEditorPage() {
   return (
     <main className="w-full min-h-screen px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6">
       <div className="mx-auto w-full max-w-7xl 2xl:max-w-440 space-y-3 sm:space-y-4 lg:space-y-5">
-        {isLoading ? (
+        {showHeaderSkeleton ? (
           <TaskEditorHeaderSkeleton />
         ) : (
           <>
