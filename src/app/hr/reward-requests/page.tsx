@@ -1,6 +1,16 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { RewardRequestsContent } from '@/components/hr/reward-requests/reward-requests-content';
 import { MarketSuspense } from '@/components/shared/market-suspense';
+
+export const metadata: Metadata = {
+  title: 'WorkHero | Reward Requests',
+  icons: {
+    icon: '/assets/website-logo.svg',
+    shortcut: '/assets/website-logo.svg',
+    apple: '/assets/website-logo.svg',
+  },
+};
 
 export default function RewardRequestsPage() {
   return (
