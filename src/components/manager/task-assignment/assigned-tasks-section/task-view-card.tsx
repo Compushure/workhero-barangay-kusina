@@ -148,12 +148,16 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
         ${expanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`}
     >
       <main className="flex flex-col w-full gap-4 sm:gap-5 md:gap-7 min-w-0 flex-1 pr-8 sm:pr-10 lg:pr-0">
-        <section className="flex flex-col lg:flex-row lg:justify-between gap-3 sm:gap-4 min-w-0">
+        <section className="flex min-w-0 flex-col gap-3 sm:gap-4 lg:flex-row lg:items-start lg:justify-between">
           {/* Task name, description, and date range */}
-          <header className="flex flex-col gap-1.5 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-end gap-1 sm:gap-0 min-w-0">
-              <h3 className="text-lg sm:text-xl font-bold text-primary truncate shrink-0 max-w-full sm:max-w-125">{task.taskName}</h3>
-              <p className="text-xs sm:text-sm text-gray-500 sm:ml-2 sm:mr-8 sm:pb-0.5 truncate min-w-0 flex-1">{task.taskDescription}</p>
+          <header className="flex min-w-0 flex-1 flex-col gap-1.5 lg:pr-6">
+            <div className="flex min-w-0 flex-col gap-1 sm:gap-1.5">
+              <h3 className="block min-w-0 max-w-full truncate text-lg font-bold text-primary sm:text-xl">
+                {task.taskName}
+              </h3>
+              <p className="block min-w-0 max-w-full truncate text-xs text-gray-500 sm:text-sm">
+                {task.taskDescription}
+              </p>
             </div>
 
             <p className="flex items-center text-xs sm:text-sm font-medium text-secondary flex-wrap gap-1 sm:gap-2">
@@ -169,7 +173,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           </header>
 
           {/* Task max orders, fiesta points and XP */}
-          <div className="flex gap-3 sm:gap-4 text-secondary/85 items-baseline shrink-0">
+          <div className="flex shrink-0 items-baseline gap-3 text-secondary/85 sm:gap-4 lg:max-w-full">
             <div className="flex flex-col items-end">
               <div className="flex text-sm sm:text-base font-medium items-end gap-1">
                 <Soup strokeWidth={1.5} className="size-5 sm:size-7 mb-2 sm:mb-3.5" />
