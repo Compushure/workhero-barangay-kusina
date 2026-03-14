@@ -454,7 +454,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   };
 }
 
-export async function clearUnstartedAssignedTasks(): Promise<ServerActionResponse<boolean>> {
+export async function clearUnstartedTaskAssignments(): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
   // Delete only KPITask entries that are 'assigned' AND have no progress
   const { error } = await supabase

@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useMemo } from 'react';
 import { AssignedTask, AssignedEmployee, SelectedFilters } from '@/types';
 import {
   handleDeleteTask,
-  handleClearUnstartedAssignedTasks,
+  handleClearUnstartedTaskAssignments,
 } from '@/action-handlers/manager/assigned-tasks';
 import { handleAddTaskAssignment } from '@/action-handlers/manager/assignments';
 import { useManagerAssignmentStore } from '@/store/managerAssignmentStore';
@@ -124,7 +124,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
   };
 
   const clearUnstarted = async () => {
-    await handleClearUnstartedAssignedTasks();
+    await handleClearUnstartedTaskAssignments();
   };
 
   const clearAllEmployeeTasks = (employeeId: string) => {

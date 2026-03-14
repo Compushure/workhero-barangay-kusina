@@ -8,7 +8,7 @@ import { MemoizedEmployeeViewCard as EmployeeViewCard } from './employee-view-ca
 import { TaskSortingBar } from './task-sorting-bar';
 import { EmployeeSortingBar } from './employee-sorting-bar';
 import { AssignedTasksFilterBar } from './assigned-tasks-filter-bar';
-import ClearAllDialog from './dialogs/clear-all-dialog';
+import ClearUnstartedDialog from './dialogs/clear-unstarted-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
 import { Pagination } from '@/components/manager/task-verification/pagination';
 import {
@@ -237,7 +237,7 @@ export function CurrentAssignedTasks() {
             />
           </div>
 
-          {/* Sort Bar and Clear All in a row */}
+          {/* Sort Bar and Clear Unstarted in a row */}
           <div className="flex min-w-0 flex-wrap gap-1.5 sm:flex-nowrap sm:gap-2">
             {/* Sort Bar */}
             <div className="min-w-0 flex-1 sm:flex-initial">
@@ -254,7 +254,7 @@ export function CurrentAssignedTasks() {
               onStatusFilterToggle={handleStatusFilterToggle}
               onOverdueFilterChange={handleOverdueFilterChange}
             />
-            {/* Clear All */}
+            {/* Clear Unstarted */}
             <Button
               onClick={() => setShowClearConfirm(true)}
               disabled={memoizedTasks.length === 0}
@@ -305,7 +305,7 @@ export function CurrentAssignedTasks() {
       )}
 
       {/* Clear Confirmation Dialog */}
-      {showClearConfirm && <ClearAllDialog setShowClearConfirm={setShowClearConfirm} />}
+      {showClearConfirm && <ClearUnstartedDialog setShowClearConfirm={setShowClearConfirm} />}
     </div>
   );
 }

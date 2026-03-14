@@ -2,7 +2,7 @@ import { safeAction } from '@/lib/utils/safe-action';
 import {
   fetchCurrentAssignedTasksPaginated, // ✅ use only the paginated fetch
   fetchCurrentAssignedEmployeesPaginated, // ✅ new employee-specific fetch
-  clearUnstartedAssignedTasks,
+  clearUnstartedTaskAssignments,
   clearAllEmployeeTasks,
   deleteTask,
   deleteTaskForAllEmployees,
@@ -100,9 +100,9 @@ export async function handleFetchCurrentAssignedEmployeesPaginated(
 /**
  * Clear unstarted (no progress) assigned tasks
  */
-export async function handleClearUnstartedAssignedTasks(): Promise<boolean> {
+export async function handleClearUnstartedTaskAssignments(): Promise<boolean> {
   const result = await safeAction<ServerActionResponse<boolean>>(() =>
-    clearUnstartedAssignedTasks()
+    clearUnstartedTaskAssignments()
   );
 
   if (!result.success || result.data?.error) {

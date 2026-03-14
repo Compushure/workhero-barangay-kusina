@@ -9,7 +9,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import {
   handleDeleteTask,
   handleDeleteTaskForAllEmployees,
-  handleClearUnstartedAssignedTasks,
+  handleClearUnstartedTaskAssignments,
   handleClearAllEmployeeTasks,
   handleUpdateTaskAssignment,
 } from '@/action-handlers/manager/assigned-tasks';
@@ -73,14 +73,14 @@ export function useDeleteTaskGroupMutation(): UseMutationResult<
  * Mutation for clearing unstarted (no progress) 'assigned' task assignments
  * Only removes assignments with status='assigned', completed_orders=0, pending_orders=0
  */
-export function useClearUnstartedAssignedTasksMutation(): UseMutationResult<boolean, Error, void> {
+export function useClearUnstartedTaskAssignmentsMutation(): UseMutationResult<boolean, Error, void> {
   const queryClient = useQueryClient();
   const { startOptimistic, optimisticClearUnstartedAssigned, rollback, commit } =
     useManagerAssignmentStore();
 
   return useMutation({
     mutationFn: async () => {
-      return await handleClearUnstartedAssignedTasks();
+      return await handleClearUnstartedTaskAssignments();
     },
     onMutate: async () => {
       startOptimistic();
