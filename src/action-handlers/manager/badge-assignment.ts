@@ -12,6 +12,10 @@ import {
 } from '@/actions/manager/badge-assignment';
 import type { BadgeAwardDebugEntry } from '@/types/manager/badge-assignment';
 
+interface BadgeAssignmentToastOptions {
+  notify?: boolean;
+}
+
 export async function handleFetchManualBadges(): Promise<BadgeSummary[]> {
   const result = await safeAction<ServerActionResponse<BadgeSummary[]>>(() => fetchManualBadges());
 
@@ -49,18 +53,24 @@ export async function handleFetchBadgeAssignmentUsers(): Promise<BadgeAssignment
 
 export async function handleAssignManualBadgeToUser(
   badgeId: string,
-  userId: string
+  userId: string,
+  options: BadgeAssignmentToastOptions = {}
 ): Promise<boolean> {
+  const { notify = true } = options;
   const result = await safeAction<ServerActionResponse<boolean>>(() =>
     assignManualBadgeToUser(badgeId, userId)
   );
 
   if (!result.success || result.data?.error) {
-    toast.error(result.error || result.data?.error);
+    if (notify) {
+      toast.error(result.error || result.data?.error);
+    }
     return false;
   }
 
-  toast.success('Badge awarded');
+  if (notify) {
+    toast.success('Badge awarded');
+  }
   return true;
 }
 

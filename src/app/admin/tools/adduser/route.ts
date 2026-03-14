@@ -35,7 +35,9 @@ export async function POST(req: Request) {
       pagibig_id,
     } = body;
 
-    if (!email || !password) {
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+
+    if (!normalizedEmail || !password) {
       return NextResponse.json({ error: 'email and password required' }, { status: 400 });
     }
 
@@ -43,7 +45,7 @@ export async function POST(req: Request) {
     const { data: existingUser, error: lookupError } = await supabaseAdmin
       .from('User')
       .select('id, email')
-      .eq('email', email)
+      .eq('email', normalizedEmail)
       .limit(1)
       .maybeSingle();
 
@@ -56,20 +58,28 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: `A user with email "${email}" already exists` },
+        { error: `A user with email "${normalizedEmail}" already exists` },
         { status: 400 }
       );
     }
 
     // Create auth user
     const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
-      email,
+      email: normalizedEmail,
       password,
       email_confirm: true,
       user_metadata: { name: name ?? null },
     });
 
     if (createError || !createData?.user) {
+      const errorText = (createError?.message || '').toLowerCase();
+      if (errorText.includes('already') || errorText.includes('exists') || errorText.includes('registered')) {
+        return NextResponse.json(
+          { error: `A user with email "${normalizedEmail}" already exists` },
+          { status: 400 }
+        );
+      }
+
       return NextResponse.json(
         { error: createError?.message ?? 'Failed to create auth user' },
         { status: 500 }
@@ -107,7 +117,7 @@ export async function POST(req: Request) {
     // Insert into public."User"
     const insertPayload: any = {
       id: newUser.id,
-      email: newUser.email,
+      email: normalizedEmail,
       name: name ?? newUser.email ?? null,
       date_added: new Date().toISOString(),
       employee_id: employee_id || null,

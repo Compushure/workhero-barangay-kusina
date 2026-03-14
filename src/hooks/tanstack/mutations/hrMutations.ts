@@ -31,6 +31,7 @@ import type {
   RankingPeriodWithTop,
 } from '@/types';
 import type { LatestPeriods } from '@/components/employee/leaderboard/period-nav';
+import { useHrRedemptionRequestStore } from '@/store/hrRedemptionRequestStore';
 
 interface RedemptionRequestParams {
   id: string;
@@ -213,8 +214,10 @@ function toPeriodKey(params: GenerateRankingParams): readonly unknown[] {
 
 export function useDeclineRedemptionRequest() {
   const queryClient = useQueryClient();
+  const { startOptimistic, optimisticRemoveRequest, rollback, commit } = useHrRedemptionRequestStore();
 
   return useMutation({
+    mutationKey: ['hr-redemption', 'decline'],
     mutationFn: async (params: RedemptionRequestParams): Promise<void> => {
       await handleDeclineRedemptionRequestAction(params);
     },
@@ -236,8 +239,10 @@ export function useDeclineRedemptionRequest() {
 
 export function useAcceptRedemptionRequest() {
   const queryClient = useQueryClient();
+  const { startOptimistic, optimisticRemoveRequest, rollback, commit } = useHrRedemptionRequestStore();
 
   return useMutation({
+    mutationKey: ['hr-redemption', 'accept'],
     mutationFn: async (params: RedemptionRequestParams): Promise<void> => {
       await handleAcceptRedemptionRequestAction(params);
     },

@@ -15,6 +15,10 @@ import {
 import type { Task, AssignedEmployee, AssignedTask } from '@/types';
 import { toast } from 'sonner';
 
+interface AssignmentToastOptions {
+  notify?: boolean;
+}
+
 /**
  * Fetches all available tasks for assignment with error handling and toast feedback
  * @returns Array of tasks or empty array on error
@@ -69,22 +73,30 @@ export async function handleAddTaskAssignment(
   employeeIds: string[],
   startDate: string,
   endDate: string,
-  maxOrders?: number
+  maxOrders?: number,
+  options: AssignmentToastOptions = {}
 ): Promise<AssignedTask[]> {
+  const { notify = true } = options;
   const result = await safeAction(() =>
     addTaskAssignmentAction(taskId, employeeIds, startDate, endDate, maxOrders)
   );
 
   if (!result.success) {
-    toast.error('Failed to assign task: ' + result.error);
+    if (notify) {
+      toast.error('Failed to assign task: ' + result.error);
+    }
     return [];
   }
 
   if (result.data?.error) {
-    toast.error(result.data.error);
+    if (notify) {
+      toast.error(result.data.error);
+    }
     return [];
   }
 
-  toast.success('Task assigned successfully');
+  if (notify) {
+    toast.success('Task assigned successfully');
+  }
   return result.data?.data ?? [];
 }

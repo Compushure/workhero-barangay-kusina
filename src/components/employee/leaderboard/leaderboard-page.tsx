@@ -47,14 +47,13 @@ export function LeaderboardPageClient({
   const activePeriod =
     view === 'history' && selectedPastPeriod ? selectedPastPeriod : currentPeriod;
 
-  let activeWeekNumber: number | null = null;
-  let activeWeekYear: number | null = null;
-  let activeWeekDateRange: string | null = null;
-  if (activePeriod && activePeriod.periodType === 'weekly') {
-    activeWeekNumber = activePeriod.week;
-    activeWeekYear = activePeriod.year;
-    activeWeekDateRange = getISOWeekDateRangeLabel(activePeriod.year, activePeriod.week);
-  }
+  const activeWeeklyPeriod = activePeriod && activePeriod.periodType === 'weekly' ? activePeriod : null;
+  const activeWeekNumber =
+    activeWeeklyPeriod && typeof activeWeeklyPeriod.week === 'number' ? activeWeeklyPeriod.week : null;
+  const activeWeekDateRange =
+    activeWeeklyPeriod && typeof activeWeeklyPeriod.week === 'number'
+      ? getISOWeekDateRangeLabel(activeWeeklyPeriod.year, activeWeeklyPeriod.week)
+      : null;
 
   const { data: entries, isLoading } = useGetEmployeeTopRanksByPeriod(
     view === 'history' && selectedPastPeriod ? activePeriod : currentPeriod
