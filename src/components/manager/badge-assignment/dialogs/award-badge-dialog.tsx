@@ -99,7 +99,7 @@ export default function AwardBadgeDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="bg-background border-none max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl rounded-2xl p-6 max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-card border-none max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl rounded-2xl p-6 max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-foreground">
             Award Badge to {user?.name}
@@ -162,8 +162,8 @@ export default function AwardBadgeDialog({
                         className={`p-4 cursor-pointer transition-colors ${
                           selectedBadgeId === badge.id
                             ? 'bg-foreground/10 border-l-4 border-foreground'
-                            : 'hover:bg-gray-50'
-                        } ${userHas ? 'bg-accent-secondary/25' : ''}`}
+                            : 'hover:bg-row-hover'
+                        } ${userHas ? 'bg-gray-100' : ''}`}
                       >
                         <div className="flex items-start gap-3">
                           {/* Badge Icon */}
@@ -239,18 +239,18 @@ export default function AwardBadgeDialog({
         {/* Footer Actions */}
         <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-[#e0cfcf]">
           <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            className="border-[#e0cfcf] text-[#5a2a2a] hover:bg-gray-50"
-          >
-            Cancel
-          </Button>
-          <Button
             onClick={handleAward}
             disabled={!selectedBadgeId}
-            className="bg-foreground hover:brightness-100 text-zinc-50 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-foreground hover:bg-accent text-zinc-50 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Award Badge
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            className="border-[#e0cfcf] bg-card text-primary hover:bg-gray-200 px-6"
+          >
+            Cancel
           </Button>
         </div>
       </DialogContent>

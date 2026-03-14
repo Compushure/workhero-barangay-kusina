@@ -77,7 +77,7 @@ export function SearchFilter({
               id="search"
               placeholder="Search by employee name"
               className={`pl-10 pr-9 border-border focus:border-accent focus:ring-accent text-sm sm:text-base lg:text-lg ${
-                isDebouncing ? 'bg-muted/50' : 'bg-white'
+                isDebouncing ? 'bg-background/50' : 'bg-white'
               }`}
               value={searchQuery}
               onChange={(e) => onSearchChange(sanitizeSearchInput(e.target.value))}
@@ -98,7 +98,11 @@ export function SearchFilter({
             <span className="inline md:hidden">Type</span>
             {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600" />}
           </Label>
-          <Select value={employeeTypeFilter} onValueChange={onEmployeeTypeChange} disabled={isLoading}>
+          <Select
+            value={employeeTypeFilter}
+            onValueChange={onEmployeeTypeChange}
+            disabled={isLoading}
+          >
             <SelectTrigger
               id="filter-type"
               className={`bg-white border-border focus:border-accent focus:ring-accent text-sm sm:text-base lg:text-lg ${
@@ -149,7 +153,10 @@ export function SearchFilter({
 
         {/* Sort - Full width on mobile, spans 2 cols on md/lg, spans 2 on xl/2xl */}
         <div className="space-y-2 md:col-span-2 xl:col-span-2 2xl:col-span-2">
-          <Label htmlFor="sort" className="flex items-center gap-2 text-xs sm:text-sm lg:text-base text-foreground">
+          <Label
+            htmlFor="sort"
+            className="flex items-center gap-2 text-xs sm:text-sm lg:text-base text-foreground"
+          >
             Sort By
             {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600" />}
           </Label>
@@ -179,29 +186,29 @@ export function SearchFilterSkeleton() {
   return (
     <div className="rounded-3xl bg-background p-3 sm:p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 overflow-x-hidden animate-pulse">
       <div className="flex items-center justify-between w-full mb-3 sm:mb-4 lg:mb-5">
-        <div className="h-5 sm:h-6 bg-muted rounded w-32 sm:w-40" />
-        <div className="h-5 w-5 rounded bg-muted md:hidden" />
+        <div className="h-5 sm:h-6 bg-background rounded w-32 sm:w-40" />
+        <div className="h-5 w-5 rounded bg-background md:hidden" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5">
         <div className="space-y-2 md:col-span-2 xl:col-span-2 2xl:col-span-2">
-          <div className="h-4 sm:h-5 bg-muted rounded w-28 sm:w-36" />
-          <div className="h-10 sm:h-11 lg:h-12 bg-muted rounded-xl w-full" />
+          <div className="h-4 sm:h-5 bg-background rounded w-28 sm:w-36" />
+          <div className="h-10 sm:h-11 lg:h-12 bg-background rounded-xl w-full" />
         </div>
 
         <div className="space-y-2">
-          <div className="h-4 sm:h-5 bg-muted rounded w-16 sm:w-24" />
-          <div className="h-10 sm:h-11 lg:h-12 bg-muted rounded-xl w-full" />
+          <div className="h-4 sm:h-5 bg-background rounded w-16 sm:w-24" />
+          <div className="h-10 sm:h-11 lg:h-12 bg-background rounded-xl w-full" />
         </div>
 
         <div className="space-y-2">
-          <div className="h-4 sm:h-5 bg-muted rounded w-20 sm:w-28" />
-          <div className="h-10 sm:h-11 lg:h-12 bg-muted rounded-xl w-full" />
+          <div className="h-4 sm:h-5 bg-background rounded w-20 sm:w-28" />
+          <div className="h-10 sm:h-11 lg:h-12 bg-background rounded-xl w-full" />
         </div>
 
         <div className="space-y-2 md:col-span-2 xl:col-span-2 2xl:col-span-2">
-          <div className="h-4 sm:h-5 bg-muted rounded w-16 sm:w-20" />
-          <div className="h-10 sm:h-11 lg:h-12 bg-muted rounded-xl w-full" />
+          <div className="h-4 sm:h-5 bg-background rounded w-16 sm:w-20" />
+          <div className="h-10 sm:h-11 lg:h-12 bg-background rounded-xl w-full" />
         </div>
       </div>
     </div>

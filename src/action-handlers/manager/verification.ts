@@ -90,7 +90,7 @@ export async function handleFetchTasksToReviewPaginated(
   searchTerm: string = '',
   sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc'
 ): Promise<PaginatedResponse<VerificationRequest>> {
-  const result = await safeAction(() => fetchTasksToReviewPaginated(page, 8, searchTerm, sort));
+  const result = await safeAction(() => fetchTasksToReviewPaginated(page, 10, searchTerm, sort));
 
   if (!result.success) {
     toast.error('Failed to load tasks: ' + result.error);
@@ -115,7 +115,7 @@ export async function handleFetchApprovedTasksPaginated(
   searchTerm: string = '',
   sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc'
 ): Promise<PaginatedResponse<VerificationRequest>> {
-  const result = await safeAction(() => fetchApprovedTasksPaginated(page, 8, searchTerm, sort));
+  const result = await safeAction(() => fetchApprovedTasksPaginated(page, 10, searchTerm, sort));
 
   if (!result.success) {
     toast.error('Failed to load approved tasks: ' + result.error);
@@ -140,7 +140,7 @@ export async function handleFetchDeniedTasksPaginated(
   searchTerm: string = '',
   sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc'
 ): Promise<PaginatedResponse<VerificationRequest>> {
-  const result = await safeAction(() => fetchDeniedTasksPaginated(page, 8, searchTerm, sort));
+  const result = await safeAction(() => fetchDeniedTasksPaginated(page, 10, searchTerm, sort));
 
   if (!result.success) {
     toast.error('Failed to load denied tasks: ' + result.error);

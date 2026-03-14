@@ -15,6 +15,7 @@ interface EmployeeViewCardProps {
 
 export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeViewCardProps) {
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
+  const [firstRowCapacity, setFirstRowCapacity] = useState(1);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<{
     taskId?: string;
     assignmentId?: string;
@@ -38,6 +39,26 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
   });
 
   const employees = Array.from(employeeMap.values());
+
+  useEffect(() => {
+    const updateFirstRowCapacity = () => {
+      if (window.innerWidth >= 1536) {
+        setFirstRowCapacity(3);
+      } else if (window.innerWidth >= 1280) {
+        setFirstRowCapacity(2);
+      } else {
+        setFirstRowCapacity(1);
+      }
+    };
+
+    updateFirstRowCapacity();
+    window.addEventListener('resize', updateFirstRowCapacity);
+
+    return () => {
+      window.removeEventListener('resize', updateFirstRowCapacity);
+    };
+  }, []);
+
   useEffect(() => {
     if (showClearConfirm && !employees.some((emp) => emp.id === showClearConfirm)) {
       setShowClearConfirm(null);
@@ -85,30 +106,33 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
         const isExpanded = expandedEmployees.has(employee.id);
         const displayedTasks = isExpanded
           ? employee.assignedTasks
-          : employee.assignedTasks.slice(0, 2);
-        const hiddenCount = Math.max(0, employee.assignedTasks.length - 2);
+          : employee.assignedTasks.slice(0, firstRowCapacity);
+        const hiddenCount = Math.max(0, employee.assignedTasks.length - firstRowCapacity);
 
         return (
-            <div className={`relative flex flex-col lg:flex-row w-full items-start lg:justify-between rounded-2xl bg-[#FAFAFA] p-4 sm:p-6 gap-3 sm:gap-4 transition-all ease-in-out duration-400 
-          ${isExpanded ? 'scale-102 shadow-md/25' : 'shadow-sm/25'}`} key={employee.id}>
-              {/* Employee Details + Menu */}
-              <div className="flex items-start justify-between w-full min-w-0 lg:w-auto lg:min-w-50 lg:max-w-60 shrink-0 pr-0 lg:pr-4">
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <h3 className="truncate text-base font-bold text-foreground sm:text-lg">{employee.name}</h3>
-                  <p className="truncate text-xs text-gray-600 sm:text-sm">{employee.empId}</p>
-                  {employee.tenure && <p className="truncate text-xs text-gray-500 sm:text-sm">{employee.tenure}</p>}
-                </div>
-                
-                {/* Triple dots menu - single instance for all breakpoints */}
-                <div className="ml-3 flex shrink-0 relative z-50 lg:absolute lg:top-5 lg:right-5">
-                  <EmployeeViewCardMenu
-                    openPopoverId={openPopoverId}
-                    setOpenPopoverId={setOpenPopoverId}
-                    employee={employee}
-                    setShowClearConfirm={setShowClearConfirm}
-                  />
-                </div>
+          <div
+            className={`relative flex flex-col lg:flex-row w-full items-start lg:justify-between rounded-lg bg-[#FAFAFA] p-4 sm:p-5 gap-2 sm:gap-3 transition-all ease-in-out duration-400 border-2 border-gray-200
+          ${isExpanded ? 'scale-102 shadow-md/25' : 'shadow-sm/15'}`}
+            key={employee.id}
+          >
+            {/* Employee Details + Menu */}
+            <div className="flex items-start justify-between w-full lg:w-auto lg:min-w-50 lg:max-w-60 shrink-0 pr-0 lg:pr-3">
+              <div className="flex flex-col min-w-0">
+                <h3 className="text-task-title text-foreground wrap-break-word">{employee.name}</h3>
+                <p className="text-meta text-gray-600">{employee.empId}</p>
+                {employee.tenure && <p className="text-meta text-gray-500">{employee.tenure}</p>}
               </div>
+
+              {/* Triple dots menu - single instance for all breakpoints */}
+              <div className="flex relative z-50 lg:absolute lg:top-4 lg:right-4">
+                <EmployeeViewCardMenu
+                  openPopoverId={openPopoverId}
+                  setOpenPopoverId={setOpenPopoverId}
+                  employee={employee}
+                  setShowClearConfirm={setShowClearConfirm}
+                />
+              </div>
+            </div>
 
             {/* Assigned Tasks - takes remaining space */}
             <EmployeeViewTaskBadges

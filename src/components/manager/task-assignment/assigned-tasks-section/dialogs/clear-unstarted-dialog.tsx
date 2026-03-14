@@ -10,15 +10,15 @@ import { Button } from '@/components/ui/button';
 import { useClearUnstartedTaskAssignmentsMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 import { OctagonAlert } from 'lucide-react';
 
-interface ClearAllDialogProps {
+interface ClearUnstartedDialogProps {
   setShowClearConfirm: (show: boolean) => void;
 }
 
-function ClearAllAssignedDialog({ setShowClearConfirm }: ClearAllDialogProps) {
-  const clearAllMutation = useClearUnstartedTaskAssignmentsMutation();
+function ClearUnstartedAssignedDialog({ setShowClearConfirm }: ClearUnstartedDialogProps) {
+  const clearUnstartedMutation = useClearUnstartedTaskAssignmentsMutation();
 
-  const handleClearAllAssigned = async () => {
-    clearAllMutation.mutate(undefined, {
+  const handleClearUnstartedAssigned = async () => {
+    clearUnstartedMutation.mutate(undefined, {
       onSuccess: () => {
         setShowClearConfirm(false);
       },
@@ -34,7 +34,7 @@ function ClearAllAssignedDialog({ setShowClearConfirm }: ClearAllDialogProps) {
               <OctagonAlert strokeWidth={2.5} size={16} />
               Danger Zone
             </span>
-            <span>Clear All Unstarted Assignments?</span>
+            <span>Clear Unstarted Assignments?</span>
           </DialogTitle>
           <DialogDescription className="text-gray-600 text-sm">
             This will unassign all tasks that have not been started at all by employees. This action
@@ -43,16 +43,16 @@ function ClearAllAssignedDialog({ setShowClearConfirm }: ClearAllDialogProps) {
         </DialogHeader>
         <DialogFooter className="flex gap-3 justify-end">
           <Button
-            onClick={handleClearAllAssigned}
-            disabled={clearAllMutation.isPending}
+            onClick={handleClearUnstartedAssigned}
+            disabled={clearUnstartedMutation.isPending}
             className="bg-red-700 hover:bg-red-500 text-white cursor-pointer transition-all duration-400 ease-in-out"
           >
-            {clearAllMutation.isPending ? 'Clearing...' : 'Clear All'}
+            {clearUnstartedMutation.isPending ? 'Clearing...' : 'Clear Unstarted'}
           </Button>
           <Button
             variant="outline"
             onClick={() => setShowClearConfirm(false)}
-            disabled={clearAllMutation.isPending}
+            disabled={clearUnstartedMutation.isPending}
             className="border-zinc-400 bg-white hover:bg-gray-300 cursor-pointer transition-all duration-400 ease-in-out"
           >
             Cancel
@@ -63,4 +63,4 @@ function ClearAllAssignedDialog({ setShowClearConfirm }: ClearAllDialogProps) {
   );
 }
 
-export default ClearAllAssignedDialog;
+export default ClearUnstartedAssignedDialog;
