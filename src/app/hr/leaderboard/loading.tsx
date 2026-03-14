@@ -1,5 +1,9 @@
+'use client';
+
+import { useSearchParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import LeaderboardTableSkeleton from '@/components/hr/leaderboard/leaderboard-table-skeleton';
+import { PastRanksListSkeleton } from '@/components/hr/leaderboard/past-ranks-list-skeleton';
 
 function ViewToggleSkeleton() {
   return (
@@ -32,6 +36,10 @@ function PeriodSelectorSkeleton() {
 }
 
 export default function LeaderboardLoading() {
+  const searchParams = useSearchParams();
+  const view = searchParams.get('view');
+  const isPastView = view === 'past';
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-white px-3 py-3 sm:px-4 sm:py-4">
       <div className="mx-auto mt-2 w-full max-w-7xl sm:mt-4">
@@ -45,12 +53,13 @@ export default function LeaderboardLoading() {
             <ViewToggleSkeleton />
           </div>
 
-          {/* Period selector */}
-          <PeriodSelectorSkeleton />
+          {/* When navigating to "View Past Rankings", show the Past Ranks list skeleton instead
+              of the generate-period selector skeleton. */}
+          {isPastView ? <></> : <PeriodSelectorSkeleton />}
         </div>
 
-        {/* Table content */}
-        <LeaderboardTableSkeleton />
+        {/* Main content area */}
+        {isPastView ? <PastRanksListSkeleton /> : <LeaderboardTableSkeleton />}
       </div>
     </div>
   );
