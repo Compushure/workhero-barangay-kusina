@@ -181,8 +181,12 @@ export function PeriodSelector({
         week: currentType === 'weekly' ? currentWeek : undefined,
       },
       {
-        onSuccess: () => {
-          setOptimisticallyGenerated(true);
+        onSuccess: (data) => {
+          if (data && data.length > 0) {
+            setOptimisticallyGenerated(true);
+          } else {
+            setOptimisticallyGenerated(false);
+          }
         },
         onError: () => {
           setOptimisticallyGenerated(false);
