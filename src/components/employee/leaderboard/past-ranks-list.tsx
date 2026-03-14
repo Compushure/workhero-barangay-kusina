@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Trophy, Users, CalendarIcon, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trophy, CalendarIcon, X } from 'lucide-react';
 import { format, getISOWeek } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { MonthPicker, YearPicker, WeekCalendar } from '@/components/shared/period-date-pickers';
-import { getTriggerLabel, matchesDate } from '@/lib/utils/period-filter-utils';
+import { getTriggerLabel, matchesDate, periodRangeLabel } from '@/lib/utils/period-filter-utils';
 import { useGetEmployeeVisiblePeriods } from '@/hooks/tanstack/queries/employeeQueries';
 import type { EmployeePeriodParams } from '@/action-handlers/employee/stats';
 import type { RankingPeriodWithTop, RankingPeriodType } from '@/types';
@@ -23,9 +23,9 @@ function periodLabel(row: RankingPeriodWithTop): string {
   const start = new Date(row.period_start + 'T00:00:00');
   switch (row.period_type) {
     case 'weekly':
-      return `Week ${getISOWeek(start)}, ${start.getFullYear()}`;
+      return `Week ${getISOWeek(start)}`;
     case 'monthly':
-      return format(start, 'MMMM yyyy');
+      return format(start, 'MMMM');
     case 'yearly':
       return `Year ${start.getFullYear()}`;
   }
@@ -221,17 +221,9 @@ export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
                 <p className="font-jersey text-sm leading-tight tracking-widest text-[#F4B925] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] sm:text-base">
                   {periodLabel(row)}
                 </p>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  {row.top_performer_name && (
-                    <span className="font-jersey text-[11px] tracking-widest text-white/70 sm:text-xs">
-                      Top: {row.top_performer_name}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1 font-jersey text-[11px] tracking-widest text-white/50 sm:text-xs">
-                    <Users className="h-3 w-3" />
-                    {row.participant_count}
-                  </span>
-                </div>
+                <p className="font-jersey text-[11px] leading-tight tracking-widest text-white/70 sm:text-xs">
+                  {periodRangeLabel(row)}
+                </p>
               </div>
 
               <ChevronRight className="h-4 w-4 shrink-0 text-[#F4B925]/60" />
@@ -255,14 +247,9 @@ export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
                 <p className="font-jersey text-sm leading-tight tracking-widest text-[#F4B925] sm:text-base">
                   placeholder
                 </p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-jersey text-xs tracking-widest text-white/70">
-                    placeholder
-                  </span>
-                  <span className="font-jersey text-xs tracking-widest text-white/50">
-                    placeholder
-                  </span>
-                </div>
+                <p className="font-jersey text-[11px] leading-tight tracking-widest text-white/70 sm:text-xs">
+                  placeholder
+                </p>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-[#F4B925]/60" />
             </button>

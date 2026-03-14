@@ -56,6 +56,20 @@ export function getTriggerLabel(
   }
 }
 
+/** Human-readable date range for a period (e.g. "Mar 2 – 8, 2026" for weekly). */
+export function periodRangeLabel(row: RankingPeriodWithTop): string {
+  const start = new Date(row.period_start + 'T00:00:00');
+  const end = new Date(row.period_end + 'T00:00:00');
+  if (row.period_type === 'yearly') {
+    return `${format(start, 'MMM d')} – ${format(end, 'MMM d')}`;
+  }
+  const sameMonth =
+    start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+  const startStr = format(start, 'MMM d');
+  const endStr = sameMonth ? format(end, 'd, yyyy') : format(end, 'MMM d, yyyy');
+  return `${startStr} – ${endStr}`;
+}
+
 export function matchesDate(
   row: RankingPeriodWithTop,
   selectedDate: Date | null,
