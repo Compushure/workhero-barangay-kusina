@@ -7,6 +7,7 @@ import {
   Award,
   CheckCircle,
   ChevronLeft,
+  Clock3,
   FileText,
   Medal,
   SquarePen,
@@ -140,6 +141,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
     : attendanceStatus?.canTimeIn
       ? 'Time In'
       : 'Attendance';
+  const mobileAttendanceLabel = 'Attendance';
   const shouldShowAttendanceReminder = !!(
     attendanceStatus?.canTimeIn || attendanceStatus?.canTimeOut
   );
@@ -152,7 +154,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
     <>
       <aside
         className={`hidden overflow-hidden bg-zinc-100 text-primary transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between z-50 shadow-sm/25 ${
-          isCollapsed ? 'w-17' : 'w-52'
+          isCollapsed ? 'w-17' : 'w-60 lg:w-64'
         }`}
       >
         <div className="mt-6 px-3 py-7">
@@ -212,14 +214,9 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
               const isNavigatingItem = pendingHref === item.href;
               const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
               const Icon = item.icon;
-            {navItems.map((item) => {
-              const isActive = isNavLinkActive(item.href);
-              const isNavigatingItem = pendingHref === item.href;
-              const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
-              const Icon = item.icon;
 
-              const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-full py-3 font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
-                isCollapsed ? 'justify-center px-4' : 'justify-start px-5'
+              const navLinkClassName = `group flex w-full cursor-pointer items-center gap-2.5 rounded-full py-3 font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
+                isCollapsed ? 'justify-center px-4' : 'justify-start px-4'
               } ${
                 isActive
                   ? 'bg-primary-gradient text-zinc-50'
@@ -258,10 +255,12 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                         strokeWidth={1.75}
                         className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-[#f47812]'}`}
                       />
-                      <span className="block whitespace-nowrap">{item.label}</span>
+                      <span className="min-w-0 flex-1 truncate text-sm leading-tight">
+                        {item.label}
+                      </span>
                       <NavigationDisplay
                         isNavigating={isNavigatingItem}
-                        className="ml-auto inline-flex items-center justify-center"
+                        className="ml-auto inline-flex shrink-0 items-center justify-center"
                         iconClassName="size-4 animate-spin text-primary"
                       />
                     </>
@@ -272,23 +271,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
               if (!isCollapsed) {
                 return navLink;
               }
-              if (!isCollapsed) {
-                return navLink;
-              }
 
-              return (
-                <Tooltip key={item.key}>
-                  <TooltipTrigger asChild>{navLink}</TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    align="center"
-                    className="border border-accent/25 bg-card text-foreground shadow-sm/25"
-                  >
-                    {item.label}
-                  </TooltipContent>
-                </Tooltip>
-              );
-            })}
               return (
                 <Tooltip key={item.key}>
                   <TooltipTrigger asChild>{navLink}</TooltipTrigger>
@@ -391,6 +374,30 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
+                    onClick={() => setShowAttendanceModal(true)}
+                    disabled={isUiDisabled}
+                    className={`flex flex-col items-center justify-center rounded-xl px-1 py-2 pb-2.5 text-primary transition-all duration-300 hover:bg-accent/20 hover:text-orange-500 ${
+                      isUiDisabled ? 'pointer-events-none opacity-50' : ''
+                    } ${shouldShowAttendanceReminder ? 'animate-pulse' : ''}`}
+                  >
+                    <Clock3 className="size-4" strokeWidth={1.9} />
+                    <span className="text-sidebar-label mt-1 w-full truncate text-center leading-tight">
+                      {mobileAttendanceLabel}
+                    </span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="center"
+                  className="border border-accent/25 bg-card text-foreground shadow-sm/25"
+                >
+                  {attendanceButtonLabel}
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
                     onClick={handleProfileClick}
                     disabled={isLoggingOut}
                     className={`flex flex-col items-center justify-center rounded-xl px-1 py-2 pb-2.5 text-primary transition-all duration-300 hover:bg-accent/20 hover:text-orange-500 ${isLoggingOut ? 'pointer-events-none opacity-50' : ''}`}
@@ -413,10 +420,6 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
       </nav>
 
       {/* Profile Modal */}
-      <ProfileModal
-        open={showProfileModal}
-        onOpenChange={setShowProfileModal}
-        user={user ?? null}
       <ProfileModal
         open={showProfileModal}
         onOpenChange={setShowProfileModal}

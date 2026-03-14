@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Clock3,
   ChevronLeft,
   LayoutDashboard,
   ShoppingCart,
@@ -108,6 +109,10 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
     : attendanceStatus?.canTimeIn
       ? 'Time In'
       : 'Attendance';
+  const mobileAttendanceLabel = 'Attendance';
+  const shouldShowAttendanceReminder = !!(
+    attendanceStatus?.canTimeIn || attendanceStatus?.canTimeOut
+  );
 
   const handleProfileClick = () => {
     setShowProfileModal(true);
@@ -278,6 +283,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
             isCollapsed={isCollapsed}
             disabled={isUiDisabled}
             label={attendanceButtonLabel}
+            shouldRemind={shouldShowAttendanceReminder}
             onClick={() => setShowAttendanceModal(true)}
           />
 
@@ -296,7 +302,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
       {/* Mobile Tab Bar */}
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#f47812]/20 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 md:hidden">
         <div className="px-2 py-2">
-          <div className="grid grid-cols-4 gap-1">
+          <div className="grid grid-cols-5 gap-1">
             {navItems.map((item) => {
               const isActive = isNavLinkActive(item.href);
               const isNavigatingItem = pendingHref === item.href;
@@ -333,6 +339,19 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                 </Link>
               );
             })}
+
+            <button
+              onClick={() => setShowAttendanceModal(true)}
+              disabled={isUiDisabled}
+              className={`flex flex-col items-center justify-center rounded-xl px-1 py-1.5 text-primary transition-all duration-300 hover:bg-accent/20 hover:text-[#f47812] ${
+                isUiDisabled ? 'pointer-events-none opacity-50' : ''
+              } ${shouldShowAttendanceReminder ? 'animate-pulse' : ''}`}
+            >
+              <Clock3 className="size-4" strokeWidth={1.9} />
+              <span className="mt-1 w-full truncate text-center text-[10px] leading-none">
+                {mobileAttendanceLabel}
+              </span>
+            </button>
 
             <button
               onClick={handleProfileClick}
