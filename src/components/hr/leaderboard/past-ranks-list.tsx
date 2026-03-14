@@ -58,7 +58,7 @@ function PeriodRow({ row, onSelect }: PeriodRowProps) {
           onClick={() => onSelect(buildUrl(row))}
           className="min-h-10 w-full shrink-0 font-semibold sm:w-auto"
         >
-          View Ranking
+          View Rankings
         </Button>
       </div>
     </div>
@@ -80,7 +80,7 @@ function PeriodRowPlaceholder() {
       </div>
       <div className="flex w-full shrink-0 items-center gap-4 sm:w-auto">
         <Button variant="outline" size="sm" className="min-h-10 w-full shrink-0 font-semibold sm:w-auto">
-          View Ranking
+          View Rankings
         </Button>
       </div>
     </div>
