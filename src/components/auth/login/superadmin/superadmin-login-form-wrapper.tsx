@@ -34,7 +34,7 @@ export function SuperadminLoginFormWrapper({
   }, []);
 
   return (
-    <div ref={wrapperRef} className="w-full max-w-[24rem] sm:max-w-md lg:max-w-xl xl:max-w-2xl px-1 sm:px-0">
+    <div ref={wrapperRef} className="w-full max-w-md px-3 sm:px-0">
       <SuperadminLoginForm onSubmit={onSubmit} />
     </div>
   );

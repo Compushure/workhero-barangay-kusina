@@ -26,19 +26,16 @@ function getLogDisplay(action: AttendanceLog['action']) {
 }
 
 export default function AttendanceLogs({ logs = [] }: AttendanceLogsProps) {
-  // Calculate today's reset threshold (7 AM today)
-  const now = new Date();
-  const resetTime = new Date(now);
-  resetTime.setHours(7, 0, 0, 0);
-
-  // Filter logs: only keep those after today's reset
+  // Keep only logs from today; avoid hard-coded hour so early shifts still show
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const filteredLogs = logs.filter((log) => {
     const logTime = new Date(log.time);
-    return logTime >= resetTime;
+    return !Number.isNaN(logTime.getTime()) && logTime.toDateString() === today.toDateString();
   });
 
   return (
-    <div className="mt-4 w-full max-h-56 overflow-y-auto space-y-3 bg-[#E8DBBF] rounded">
+    <div className="mt-2 w-full max-h-none md:max-h-54 overflow-visible md:overflow-y-auto space-y-2 bg-[#E8DBBF] rounded">
       {filteredLogs.length === 0 ? (
         <p className="text-md text-gray-700 text-center">🚫 No logs yet</p>
       ) : (
@@ -49,11 +46,13 @@ export default function AttendanceLogs({ logs = [] }: AttendanceLogsProps) {
               key={idx}
               className="flex flex-col text-black/70 bg-[#DECFB4] rounded px-3 py-2 border border-black/10"
             >
-              {/* Top row: Icon + Label + Timestamp */}
-              <div className="flex justify-between items-center">
-                <span className="text-lg flex items-center gap-2">
-                  {icon} {label}
-                </span>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-1">
+                  <span className="text-lg flex items-center gap-2">
+                    {icon} {label}
+                  </span>
+                  {log.note && <span className="text-sm text-red-500">{log.note}</span>}
+                </div>
                 <span className="text-sm text-gray-500">
                   {new Date(log.time).toLocaleTimeString([], {
                     hour: 'numeric',
@@ -62,14 +61,6 @@ export default function AttendanceLogs({ logs = [] }: AttendanceLogsProps) {
                   })}
                 </span>
               </div>
-
-              {/* Status Indicator directly under */}
-              <span className="text-xs text-gray-700 mt-1"></span>
-
-              {/* Warning note */}
-              {log.note && (
-                <span className="text-md text-red-500 mt-1"> {log.note}</span>
-              )}
             </div>
           );
         })
