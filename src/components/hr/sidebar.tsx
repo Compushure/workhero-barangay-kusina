@@ -1,6 +1,13 @@
 'use client';
 
-import { ChevronLeft, LayoutDashboard, ShoppingCart, Trophy, UserCircle2, type LucideIcon } from 'lucide-react';
+import {
+  ChevronLeft,
+  LayoutDashboard,
+  ShoppingCart,
+  Trophy,
+  UserCircle2,
+  type LucideIcon,
+} from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -11,6 +18,9 @@ import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import { NavigationDisplay } from '@/components/manager/navigation-display';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNavigationStore } from '@/store/navigationStore';
+import { useGetTodayAttendanceStatus } from '@/hooks/tanstack/queries/attendanceQueries';
+import { HrAttendanceModal } from '@/components/hr/attendance/hr-attendance-modal';
+import { HrAttendanceTrigger } from '@/components/hr/attendance/hr-attendance-trigger';
 
 interface NavItem {
   key: string;
@@ -80,19 +90,24 @@ function SidebarUserProfile({
   );
 }
 
-export function Sidebar({
-  navItems = defaultNavItems,
-}: SidebarProps) {
+export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [hoveredNavKey, setHoveredNavKey] = useState<string | null>(null);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showAttendanceModal, setShowAttendanceModal] = useState(false);
   const { startNavigation, stopNavigation, isNavigating, isLoggingOut } = useNavigationStore();
   const { data: user } = useGetSessionUser();
+  const { data: attendanceStatus } = useGetTodayAttendanceStatus();
 
   const isUiDisabled = isNavigating || isLoggingOut;
   const isNavLinkActive = (href: string) => pathname === href;
+  const attendanceButtonLabel = attendanceStatus?.canTimeOut
+    ? 'Time Out'
+    : attendanceStatus?.canTimeIn
+      ? 'Time In'
+      : 'Attendance';
 
   const handleProfileClick = () => {
     setShowProfileModal(true);
@@ -259,6 +274,13 @@ export function Sidebar({
 
         {/* User Profile Section */}
         <div className={isCollapsed ? 'flex h-24 items-center justify-center' : 'px-3 py-4'}>
+          <HrAttendanceTrigger
+            isCollapsed={isCollapsed}
+            disabled={isUiDisabled}
+            label={attendanceButtonLabel}
+            onClick={() => setShowAttendanceModal(true)}
+          />
+
           <div
             className={`flex w-full items-center rounded-full bg-white/10 ${
               isCollapsed ? 'h-16 w-16 justify-center' : 'mb-4 gap-3'
@@ -325,11 +347,13 @@ export function Sidebar({
       </nav>
 
       {/* Profile Modal */}
-      <ProfileModal 
-        open={showProfileModal} 
-        onOpenChange={setShowProfileModal} 
-        user={user ?? null} 
+      <ProfileModal
+        open={showProfileModal}
+        onOpenChange={setShowProfileModal}
+        user={user ?? null}
       />
+
+      <HrAttendanceModal open={showAttendanceModal} onOpenChange={setShowAttendanceModal} />
     </>
   );
 }
