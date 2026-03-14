@@ -2,8 +2,8 @@
 
 import React from 'react';
 
-import { useState } from 'react';
-import { Plus, Search, ArrowUpDown, Coins, Menu } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Plus, Search, ArrowUpDown, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -30,6 +30,7 @@ import {
   useUploadBadgeImage,
 } from '@/hooks/tanstack';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
+import { useManagerBadgeEditorStore } from '@/store/managerBadgeEditorStore';
 
 type BadgeSortOption = 'name-asc' | 'points-desc' | 'created-desc' | 'created-asc';
 
@@ -41,7 +42,7 @@ const SORT_OPTIONS: { value: BadgeSortOption; label: string }[] = [
 ];
 
 export function BadgeEditorPage() {
-  const { data: badges = [], isLoading, isFetching, isError } = useGetBadges();
+  const { data: badgesData, isLoading, isFetching, isError } = useGetBadges();
   const { data: taskOptions = [] } = useGetBadgeTaskOptions();
   const { data: attributeOptions = [] } = useGetBadgeAttributeOptions();
   const { data: attendanceOptions = [] } = useGetBadgeAttendanceOptions();
@@ -50,6 +51,7 @@ export function BadgeEditorPage() {
   const deleteBadge = useDeleteBadge();
   const uploadBadgeImage = useUploadBadgeImage();
   const deleteBadgeImage = useDeleteBadgeImage();
+  const { badges, hydrateFromServer, isOptimistic } = useManagerBadgeEditorStore();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
   const [saveError, setSaveError] = useState('');
@@ -58,6 +60,17 @@ export function BadgeEditorPage() {
   const [filterMode, setFilterMode] = useState<BadgeFilterMode>('all');
   const [page, setPage] = useState(1);
   const pageSize = 8;
+
+  useEffect(() => {
+    if (badgesData) {
+      hydrateFromServer(badgesData);
+      return;
+    }
+
+    if (!isLoading) {
+      hydrateFromServer([]);
+    }
+  }, [badgesData, hydrateFromServer, isLoading, isOptimistic]);
 
   // Debounce search term
   const debouncedSearchTerm = useDebounce(searchTerm, 900);

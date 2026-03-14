@@ -143,7 +143,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 pt-3 sm:pt-4 lg:pt-6">
                 {/* Full Name */}
                 <div className="space-y-1.5 sm:space-y-2">
-                  <RequiredLabel htmlFor="add-name" filled={!!watch('name')?.trim()}><span className="text-xs sm:text-sm lg:text-base">Full Name</span></RequiredLabel>
+                  <RequiredLabel htmlFor="add-name" filled={!!watch('name')?.trim()}><span className="text-xs sm:text-sm lg:text-base min-h-6 sm:min-h-8 flex items-end">Full Name</span></RequiredLabel>
                   <div className="relative">
                     <User className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-accent" />
                     <Input
@@ -161,7 +161,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 {/* Email */}
                 <div className="space-y-1.5 sm:space-y-2">
-                  <RequiredLabel htmlFor="add-email" filled={!!watch('email')?.trim()}><span className="text-xs sm:text-sm lg:text-base">Email Address</span></RequiredLabel>
+                  <RequiredLabel htmlFor="add-email" filled={!!watch('email')?.trim()}><span className="text-xs sm:text-sm lg:text-base min-h-6 sm:min-h-8 flex items-end">Email Address</span></RequiredLabel>
                   <div className="relative">
                     <Mail className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-accent" />
                     <Input
@@ -182,10 +182,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 {/* Company ID */}
                 <div className="space-y-1.5 sm:space-y-2">
-                  <Label htmlFor="add-company-id" className="text-xs sm:text-sm lg:text-base text-gray-600 hidden sm:block">
+                  <Label htmlFor="add-company-id" className="text-xs sm:text-sm lg:text-base text-gray-600 hidden sm:flex sm:min-h-8 sm:items-end">
                     Company ID (Not Implemented)
                   </Label>
-                  <Label htmlFor="add-company-id" className="text-xs lg:text-base text-gray-600 block sm:hidden">
+                  <Label htmlFor="add-company-id" className="text-xs lg:text-base text-gray-600 flex min-h-6 items-end sm:hidden">
                     Company ID
                   </Label>
                   <div className="relative">
@@ -205,7 +205,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 {/* Employee ID */}
                 <div className="space-y-2">
-                  <Label htmlFor="add-employee-id" className="text-foreground">
+                  <Label htmlFor="add-employee-id" className="text-foreground min-h-6 sm:min-h-8 flex items-end">
                     Employee ID (Optional)
                   </Label>
                   <div className="relative">
@@ -213,7 +213,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                     <Input
                       id="add-employee-id"
                       placeholder="e.g., EMP-2024-001"
-                      className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400"
+                      className="pl-10 h-9 sm:h-10 lg:h-11 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400"
                       disabled={isPending}
                       {...register('employeeId')}
                     />
@@ -225,14 +225,14 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 {/* Password */}
                 <div className="space-y-2">
-                  <RequiredLabel htmlFor="add-password" filled={!!watch('password')?.trim()}>Password</RequiredLabel>
+                  <RequiredLabel htmlFor="add-password" filled={!!watch('password')?.trim()}><span className="min-h-6 sm:min-h-8 flex items-end">Password</span></RequiredLabel>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                     <Input
                       id="add-password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="At least 6 characters"
-                      className={`pl-10 pr-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
+                      className={`pl-10 pr-10 h-9 sm:h-10 lg:h-11 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
                         !watch('password')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
                       }`}
                       disabled={isPending}
@@ -259,14 +259,14 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                 {/* Contact Number */}
                 <div className="space-y-2">
                   <RequiredLabel htmlFor="add-contact" filled={!!watch('contactNumber')?.trim()}>
-                    Contact Number
+                    <span className="min-h-6 sm:min-h-8 flex items-end">Contact Number</span>
                   </RequiredLabel>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
                     <Input
                       id="add-contact"
                       placeholder="09XX-XXX-XXXX format"
-                      className={`pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
+                      className={`pl-10 h-9 sm:h-10 lg:h-11 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
                         !watch('contactNumber')?.trim() ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]' : ''
                       }`}
                       disabled={isPending}

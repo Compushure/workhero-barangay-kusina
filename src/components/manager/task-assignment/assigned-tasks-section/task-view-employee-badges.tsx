@@ -44,7 +44,7 @@ export default function TaskViewEmployeeBadges({
   );
 
   return (
-    <section className="">
+    <section className="min-w-0">
       <div className="flex items-center justify-start gap-5 mb-3">
         <h4 className="text-base font-semibold text-foreground">
           Assigned to{' '}
@@ -71,7 +71,7 @@ export default function TaskViewEmployeeBadges({
         {uniqueDisplayedEmployees.map((emp) => (
           <div
             key={emp.id}
-            className="flex items-center gap-1.5 bg-background-soft px-2 py-1.5 rounded-full border-2 border-accent/25 min-w-0 w-full sm:w-auto max-w-full sm:max-w-72 lg:max-w-80 2xl:max-w-96"
+            className="flex min-w-0 items-center gap-1.5 rounded-full border-2 border-accent/25 bg-background-soft px-2 py-1.5 w-full max-w-full sm:w-auto sm:max-w-72 lg:max-w-80 2xl:max-w-96"
           >
             {emp.status === 'in review' ? (
               <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400" />
@@ -83,16 +83,16 @@ export default function TaskViewEmployeeBadges({
               <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" />
             )}
             
-            <span className="text-sm bg-muted text-amber-700 px-1.5 py-2.5 leading-0 rounded-full">{emp.completedOrders}</span>
+            <span className="shrink-0 rounded-full bg-muted px-1.5 py-2.5 text-sm leading-0 text-amber-700">{emp.completedOrders}</span>
             
-            <span className="font-medium text-sm text-zinc-700 truncate min-w-0 flex-1 sm:flex-initial sm:max-w-28 lg:max-w-36 2xl:max-w-44">{emp.name}</span>
-            <span className="text-gray-500 font-normal text-xs truncate min-w-0 max-w-18 sm:max-w-24 lg:max-w-30 2xl:max-w-36">{emp.empId}</span>
+            <span className="min-w-0 flex-1 truncate font-medium text-sm text-zinc-700 sm:max-w-28 lg:max-w-36 2xl:max-w-44">{emp.name}</span>
+            <span className="min-w-0 max-w-18 truncate text-xs font-normal text-gray-500 sm:max-w-24 lg:max-w-30 2xl:max-w-36">{emp.empId}</span>
             <button
               onClick={() => {
                 if (!emp.assignmentId) return;
                 setShowRemoveConfirm({ assignmentId: emp.assignmentId, employeeId: emp.id });
               }}
-              className="ml-2 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130 shrink-0"
+              className="ml-2 shrink-0 cursor-pointer transition-all duration-500 ease-in-out hover:scale-130"
               title="Unassign Employee"
             >
               <X className="size-3.5 text-foreground hover:text-red-500" />

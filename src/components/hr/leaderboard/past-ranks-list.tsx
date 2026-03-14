@@ -24,14 +24,14 @@ interface PeriodRowProps {
 
 function PeriodRow({ row, onSelect }: PeriodRowProps) {
   return (
-    <div className="w-full flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 transition-colors hover:border-primary/30">
-      <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 shrink-0">
+    <div className="flex w-full flex-col gap-3 rounded-xl border border-gray-200 bg-white px-3 py-3 transition-colors hover:border-primary/30 sm:flex-row sm:items-center sm:gap-4 sm:px-5 sm:py-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50">
         <Calendar className="w-5 h-5 text-gray-500" />
       </div>
 
-      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="font-bold text-base text-foreground">{periodLabel(row)}</p>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-sm font-bold text-foreground sm:text-base">{periodLabel(row)}</p>
           {row.is_visible ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
               <Eye className="w-3 h-3" />
@@ -51,12 +51,12 @@ function PeriodRow({ row, onSelect }: PeriodRowProps) {
         </p>
       </div>
 
-      <div className="flex items-center gap-4 shrink-0">
+      <div className="flex w-full shrink-0 items-center gap-4 sm:w-auto">
         <Button
           variant="outline"
           size="sm"
           onClick={() => onSelect(buildUrl(row))}
-          className="shrink-0 font-semibold"
+          className="min-h-10 w-full shrink-0 font-semibold sm:w-auto"
         >
           View Ranking
         </Button>
@@ -68,18 +68,18 @@ function PeriodRow({ row, onSelect }: PeriodRowProps) {
 function PeriodRowPlaceholder() {
   return (
     <div
-      className="w-full flex items-center gap-4 rounded-xl border border-transparent bg-transparent px-5 py-4 opacity-0 pointer-events-none select-none"
+      className="pointer-events-none flex w-full select-none flex-col gap-3 rounded-xl border border-transparent bg-transparent px-3 py-3 opacity-0 sm:flex-row sm:items-center sm:gap-4 sm:px-5 sm:py-4"
       aria-hidden="true"
     >
-      <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 shrink-0" />
-      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="font-bold text-base text-foreground">Placeholder</p>
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50" />
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-sm font-bold text-foreground sm:text-base">Placeholder</p>
         </div>
         <p className="text-xs text-muted-foreground">Placeholder</p>
       </div>
-      <div className="flex items-center gap-4 shrink-0">
-        <Button variant="outline" size="sm" className="shrink-0 font-semibold">
+      <div className="flex w-full shrink-0 items-center gap-4 sm:w-auto">
+        <Button variant="outline" size="sm" className="min-h-10 w-full shrink-0 font-semibold sm:w-auto">
           View Ranking
         </Button>
       </div>
@@ -146,12 +146,12 @@ export function PastRanksList({ initialData }: PastRanksListProps) {
 
       {showContent ? (
         <div className="flex flex-col gap-4 flex-1 min-h-0">
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 flex flex-col gap-5 h-full">
+          <div className="flex h-full flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-3 sm:p-4">
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-foreground">
+              <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
                 Past Generated Ranks
               </h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground sm:text-sm">
                 Browse previously generated rankings by period.
               </p>
             </div>

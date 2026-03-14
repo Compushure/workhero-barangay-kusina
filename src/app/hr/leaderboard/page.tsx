@@ -1,107 +1,120 @@
 import { getISOWeek, getISOWeekYear } from 'date-fns';
+import { checkRankingExists, getAllRankingPeriods } from '@/actions/hr/leaderboard';
 import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-content';
-import { PeriodSelector } from '@/components/hr/leaderboard/period-selector';
 import { LeaderboardViewToggle } from '@/components/hr/leaderboard/leaderboard-view-toggle';
 import { PastRanksList } from '@/components/hr/leaderboard/past-ranks-list';
-import {
-  getLatestWeeklyPeriod,
-  checkRankingExists,
-  getAllRankingPeriods,
-} from '@/actions/hr/leaderboard';
+import { PeriodSelector } from '@/components/hr/leaderboard/period-selector';
 import { getISOWeeksInYear } from '@/lib/utils/time-period-utils';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 import type { RankLogPeriodType } from '@/types';
 
-function getPreviousWeek(): { year: number; week: number } {
+type SearchParams = {
+  type?: string;
+  year?: string;
+  week?: string;
+  month?: string;
+  show?: string;
+  view?: string;
+};
+
+interface LeaderboardPageProps {
+  searchParams?: Promise<SearchParams>;
+}
+
+function toPositiveInt(value: string | undefined): number | null {
+  if (!value) return null;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function getPreviousWeek() {
   const now = new Date();
-  const nowYear = getISOWeekYear(now);
   const nowWeek = getISOWeek(now);
+  const nowYear = getISOWeekYear(now);
+
   if (nowWeek <= 1) {
-    return { year: nowYear - 1, week: getISOWeeksInYear(nowYear - 1) };
+    const previousYear = nowYear - 1;
+    return { year: previousYear, week: getISOWeeksInYear(previousYear) };
   }
+
   return { year: nowYear, week: nowWeek - 1 };
 }
 
-interface LeaderboardPageProps {
-  searchParams: Promise<{
-    type?: string;
-    year?: string;
-    week?: string;
-    month?: string;
-    show?: string;
-    view?: string;
-  }>;
+function getPreviousMonth() {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+
+  if (month <= 1) {
+    return { year: now.getFullYear() - 1, month: 12 };
+  }
+
+  return { year: now.getFullYear(), month: month - 1 };
+}
+
+function getPreviousYear() {
+  return new Date().getFullYear() - 1;
+}
+
+function parsePeriodType(value: string | undefined): RankLogPeriodType {
+  if (value === 'monthly' || value === 'yearly') return value;
+  return 'weekly';
 }
 
 export default async function LeaderboardPage({ searchParams }: LeaderboardPageProps) {
-  const params = await searchParams;
+  const resolvedParams = (await searchParams) ?? {};
+  const periodType = parsePeriodType(resolvedParams.type);
 
-  const periodType: RankLogPeriodType =
-    params.type && ['weekly', 'monthly', 'yearly'].includes(params.type)
-      ? (params.type as RankLogPeriodType)
-      : 'weekly';
-
-  const now = new Date();
-  const defaultYear = now.getFullYear();
-  const defaultMonth = Math.max(1, now.getMonth()); // previous month (0-based → 1-based)
   const previousWeek = getPreviousWeek();
+  const previousMonth = getPreviousMonth();
+  const previousYear = getPreviousYear();
 
-  // When no period is selected (show≠1), default to the latest generated weekly ranking for show=1 hint only
-  const hasExplicitShow = params.show === '1';
-  const latestResult = !hasExplicitShow ? await getLatestWeeklyPeriod() : null;
-  const latestWeekly = latestResult?.success && latestResult.data ? latestResult.data : null;
+  const selectedYear = toPositiveInt(resolvedParams.year);
+  const selectedWeek = toPositiveInt(resolvedParams.week);
+  const selectedMonth = toPositiveInt(resolvedParams.month);
 
-  // Weekly: always use previous week when no URL params (WEEK shows previous week only)
   const year =
-    params.year != null && params.year !== ''
-      ? Math.max(2025, Number(params.year))
-      : periodType === 'weekly'
-        ? previousWeek.year
-        : (latestWeekly?.year ?? defaultYear);
-  const week =
-    params.week != null && params.week !== ''
-      ? Number(params.week)
-      : periodType === 'weekly'
-        ? previousWeek.week
-        : (latestWeekly?.week ?? Math.max(1, getISOWeek(now) - 1));
-  const month = params.month ? Number(params.month) : defaultMonth;
+    selectedYear ??
+    (periodType === 'weekly'
+      ? previousWeek.year
+      : periodType === 'monthly'
+        ? previousMonth.year
+        : previousYear);
 
-  // Whether the period we're actually displaying has a ranking (for selector badge + auto-show)
-  const currentExistsResult = await checkRankingExists(
+  const week = selectedWeek ?? previousWeek.week;
+  const month = selectedMonth ?? previousMonth.month;
+
+  const currentView = resolvedParams.view === 'past' ? 'past' : 'generate';
+  const show = resolvedParams.show === '1' || resolvedParams.show === 'true';
+
+  const currentPeriodRankingExistsResult = await checkRankingExists(
     periodType,
     year,
     periodType === 'monthly' ? month : undefined,
     periodType === 'weekly' ? week : undefined
   );
+
   const currentPeriodRankingExists =
-    currentExistsResult.success && currentExistsResult.data === true;
+    currentPeriodRankingExistsResult.success && !!currentPeriodRankingExistsResult.data;
 
-  // Show content when user asked for it, we have a latest weekly, or this period has a ranking (auto-show)
-  const show = hasExplicitShow || !!latestWeekly || currentPeriodRankingExists;
-
-  const currentView = params.view === 'past' ? 'past' : 'generate';
-  const isPastViewing = currentView === 'past' && hasExplicitShow;
-
-  // Fetch past ranks on the server when showing the list so the client can render immediately
-  const pastRanksResult =
-    currentView === 'past' && !isPastViewing ? await getAllRankingPeriods() : null;
+  const initialPastRanksData =
+    currentView === 'past' ? await getAllRankingPeriods() : null;
 
   return (
-    <div className="h-screen p-4  bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto mt-6 sm:mt-4">
+    <div className="min-h-screen overflow-x-hidden bg-white px-3 py-3 sm:px-4 sm:py-4">
+      <div className="mx-auto mt-2 w-full max-w-7xl sm:mt-4">
         <div className="mb-2 sm:mb-3">
-          <div className="flex items-center justify-between gap-3 sm:gap-4 mb-4">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <div className="flex flex-col gap-1">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">Leaderboards</h1>
-              <p className="text-sm text-muted-foreground">
-              Generate new rankings or review past results across different periods.
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Leaderboard
+              </h1>
+              <p className="text-xs text-muted-foreground sm:text-sm">
+                Generate rankings by period and control employee visibility.
               </p>
             </div>
             <LeaderboardViewToggle currentView={currentView} />
           </div>
 
-          {currentView === 'generate' && (
+          {currentView === 'generate' ? (
             <PeriodSelector
               currentType={periodType}
               currentYear={year}
@@ -109,10 +122,12 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
               currentMonth={month}
               currentPeriodRankingExists={currentPeriodRankingExists}
             />
-          )}
+          ) : null}
         </div>
 
-        {currentView === 'generate' ? (
+        {currentView === 'past' ? (
+          <PastRanksList initialData={initialPastRanksData} />
+        ) : (
           <LeaderboardContent
             periodType={periodType}
             year={year}
@@ -120,25 +135,6 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
             month={month}
             show={show}
           />
-        ) : isPastViewing ? (
-          <div className="flex flex-col">
-            <Link
-              href="/hr/leaderboard?view=past"
-              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Past Ranks
-            </Link>
-            <LeaderboardContent
-              periodType={periodType}
-              year={year}
-              week={week}
-              month={month}
-              show={show}
-            />
-          </div>
-        ) : (
-          <PastRanksList initialData={pastRanksResult} />
         )}
       </div>
     </div>
