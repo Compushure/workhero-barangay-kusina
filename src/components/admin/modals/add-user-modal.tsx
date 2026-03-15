@@ -124,12 +124,12 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="bg-card w-[95vw] max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col border-2 border-[#f47812]/20">
+      <DialogContent className="bg-card w-[95vw] max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col border border-gray-300 shadow-sm/25">
         <DialogHeader className="px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 lg:pt-7 pb-2 lg:pb-3 border-b border-[#f47812]/15 shrink-0">
-          <DialogTitle className="text-base sm:text-xl lg:text-2xl font-bold text-foreground">
+          <DialogTitle className="text-base sm:text-xl lg:text-2xl font-bold text-meta text-foreground">
             Add New User
           </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm lg:text-base text-gray-600 hidden sm:block">
+          <DialogDescription className="text-xs sm:text-sm lg:text-base text-meta text-gray-500 hidden sm:block">
             Create a new employee account with complete details and Philippine government IDs
           </DialogDescription>
         </DialogHeader>
@@ -148,16 +148,16 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
               >
                 <AccordionItem
                   value="basic"
-                  className="border border-[#f47812]/15 rounded-lg px-3 sm:px-4 bg-background"
+                  className="border border-gray-300 shadow-sm/25 rounded-2xl px-3 sm:px-4 bg-background"
                 >
                   <AccordionTrigger className="text-xs sm:text-sm lg:text-base font-semibold text-foreground hover:no-underline py-3">
                     Basic Information
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 pt-3 sm:pt-4 lg:pt-6">
-                      <div className="space-y-1.5 sm:space-y-2">
+                      <div className="space-y-1.5 sm:space-y-2 pr-1 pl-1">
                         <RequiredLabel htmlFor="add-name" filled={!!watch('name')?.trim()}>
-                          <span className="text-xs sm:text-sm lg:text-base min-h-6 sm:min-h-8 flex items-end">
+                          <span className="text-foreground min-h-6 sm:min-h-8 flex items-end">
                             Full Name
                           </span>
                         </RequiredLabel>
@@ -182,9 +182,9 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                         )}
                       </div>
 
-                      <div className="space-y-1.5 sm:space-y-2">
+                      <div className="space-y-1.5 sm:space-y-2 pr-1 pl-1">
                         <RequiredLabel htmlFor="add-email" filled={!!watch('email')?.trim()}>
-                          <span className="text-xs sm:text-sm lg:text-base min-h-6 sm:min-h-8 flex items-end">
+                          <span className="text-foreground min-h-6 sm:min-h-8 flex items-end">
                             Email Address
                           </span>
                         </RequiredLabel>
@@ -210,10 +210,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                         )}
                       </div>
 
-                      <div className="space-y-1.5 sm:space-y-2">
+                      <div className="space-y-1.5 sm:space-y-2 pr-1 pl-1">
                         <Label
                           htmlFor="add-company-id"
-                          className="text-xs sm:text-sm lg:text-base text-gray-600 hidden sm:flex sm:min-h-8 sm:items-end"
+                          className="text-foreground min-h-6 sm:min-h-8 flex items-end"
                         >
                           Company ID (Not Implemented)
                         </Label>
@@ -235,7 +235,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                         </div>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-2 pr-1 pl-1">
                         <Label
                           htmlFor="add-employee-id"
                           className="text-foreground min-h-6 sm:min-h-8 flex items-end"
@@ -257,9 +257,11 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                         )}
                       </div>
 
-                      <div className="space-y-2 md:col-span-2">
+                      <div className="space-y-2 md:col-span-2 pr-1 pl-1">
                         <RequiredLabel htmlFor="add-password" filled={!!watch('password')?.trim()}>
-                          <span className="min-h-6 sm:min-h-8 flex items-end">Password</span>
+                          <span className="text-foreground min-h-6 sm:min-h-8 flex items-end">
+                            Password
+                          </span>
                         </RequiredLabel>
                         <div className="relative">
                           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
@@ -298,16 +300,18 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 <AccordionItem
                   value="employment"
-                  className="border border-[#f47812]/15 rounded-lg px-3 sm:px-4 lg:px-5 bg-background"
+                  className="border border-gray-300 shadow-sm/25 rounded-2xl px-3 sm:px-4 lg:px-5 bg-background"
                 >
-                  <AccordionTrigger className="text-xs sm:text-sm lg:text-base font-semibold text-foreground hover:no-underline">
+                  <AccordionTrigger className="text-xs sm:text-sm lg:text-base font-semibold text-meta text-foreground hover:no-underline">
                     Employment Details
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 lg:gap-5 pt-3 sm:pt-4 lg:pt-6">
-                      <div className="space-y-2">
+                      <div className="space-y-2 pr-1 pl-1">
                         <RequiredLabel htmlFor="add-type" filled={!!watch('employeeType')}>
-                          <span className="text-xs sm:text-sm lg:text-base">Employee Type</span>
+                          <span className="text-foreground min-h-6 sm:min-h-8 flex items-end">
+                            Employee Type
+                          </span>
                         </RequiredLabel>
                         <Select
                           value={watch('employeeType') || 'regular'}
@@ -338,13 +342,15 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <Label
+                      <div className="space-y-2 pr-1 pl-1">
+                        <RequiredLabel
                           htmlFor="add-employment-status"
-                          className="text-xs sm:text-sm lg:text-base text-foreground"
+                          filled={!!watch('employmentStatus')}
                         >
-                          Employment Status
-                        </Label>
+                          <span className="text-foreground min-h-6 sm:min-h-8 flex items-end">
+                            Employment Status
+                          </span>
+                        </RequiredLabel>
                         <Select
                           value={watch('employmentStatus') || 'probational'}
                           onValueChange={(value: 'probational' | 'regular') =>
@@ -373,12 +379,12 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                         )}
                       </div>
 
-                      <div className="space-y-2 md:col-span-2">
+                      <div className="space-y-2 md:col-span-2 pl-1 pr-1">
                         <RequiredLabel
                           htmlFor="add-contact"
                           filled={!!watch('contactNumber')?.trim()}
                         >
-                          <span className="min-h-6 sm:min-h-8 flex items-end">Contact Number</span>
+                          <span className="text-foreground min-h-6 sm:min-h-8 flex items-end">Contact Number</span>
                         </RequiredLabel>
                         <div className="relative">
                           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
@@ -405,22 +411,24 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 <AccordionItem
                   value="address"
-                  className="border border-[#f47812]/15 rounded-lg px-3 sm:px-4 lg:px-5 bg-background"
+                  className="border border-gray-300 shadow-sm/25 rounded-2xl px-3 sm:px-4 bg-background"
                 >
-                  <AccordionTrigger className="text-xs sm:text-sm lg:text-base font-semibold text-foreground hover:no-underline">
+                  <AccordionTrigger className="text-xs sm:text-sm lg:text-base font-semibold text-meta text-foreground hover:no-underline">
                     Address Information
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="space-y-2 pt-3 sm:pt-4 lg:pt-6">
+                    <div className="space-y-2 pr-1 pl-1">
                       <RequiredLabel htmlFor="add-address" filled={!!watch('address')?.trim()}>
-                        <span className="text-xs sm:text-sm lg:text-base">Home Address</span>
+                        <span className="text-foreground min-h-6 sm:min-h-8 flex items-end">
+                          Home Address
+                        </span>
                       </RequiredLabel>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-3.5 h-4 w-4 text-accent" />
                         <Textarea
                           id="add-address"
                           placeholder="Enter complete home address (minimum 10 characters)"
-                          className={`pl-10 min-h-24 resize-y border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
+                          className={`pl-10 min-h-24 resize-y bg-white placeholder:text-gray-400 ${
                             !watch('address')?.trim()
                               ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]'
                               : ''
@@ -438,17 +446,17 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 <AccordionItem
                   value="ids"
-                  className="border border-[#f47812]/15 rounded-lg px-3 sm:px-4 lg:px-5 bg-background"
+                  className="border border-gray-300 shadow-sm/25 rounded-2xl px-3 sm:px-4 bg-background"
                 >
-                  <AccordionTrigger className="text-xs sm:text-sm lg:text-base font-semibold text-foreground hover:no-underline">
+                  <AccordionTrigger className="text-xs sm:text-sm lg:text-base font-semibold text-meta text-foreground hover:no-underline">
                     Government IDs
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 pt-3 sm:pt-4 lg:pt-6">
-                      <div className="space-y-2">
+                      <div className="space-y-2 pl-1 pr-1">
                         <Label
                           htmlFor="add-tin"
-                          className="text-xs sm:text-sm lg:text-base text-foreground"
+                          className="text-foreground min-h-6 sm:min-h-8 flex items-end"
                         >
                           TIN (Optional)
                         </Label>
@@ -468,10 +476,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                         )}
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-2 pr-1 pl-1">
                         <Label
                           htmlFor="add-sss"
-                          className="text-xs sm:text-sm lg:text-base text-foreground"
+                          className="text-foreground min-h-6 sm:min-h-8 flex items-end"
                         >
                           SSS (Optional)
                         </Label>
@@ -491,10 +499,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                         )}
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-2 pl-1 pr-1">
                         <Label
                           htmlFor="add-pagibig"
-                          className="text-xs sm:text-sm lg:text-base text-foreground"
+                          className="text-foreground min-h-6 sm:min-h-8 flex items-end"
                         >
                           Pag-IBIG (Optional)
                         </Label>
@@ -527,7 +535,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
               type="submit"
               form="add-user-form"
               disabled={isPending || !isValid}
-              className="flex-1 bg-foreground cursor-pointer text-white hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 ease-in-out shadow-sm/25"
+              className="flex-1 bg-accent cursor-pointer text-white hover:bg-accent-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 ease-in-out shadow-sm/25"
             >
               {isPending ? 'Adding...' : 'Add User'}
             </Button>
