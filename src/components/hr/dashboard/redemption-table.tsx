@@ -120,7 +120,7 @@ export function RedemptionTable({
         <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <Table className="min-w-full">
             <TableHeader className="bg-primary-gradient [&_tr]:border-0">
-              <TableRow className="border-0">
+              <TableRow className="border-0 bg-primary-gradient">
                 <TableHead className="px-2 py-3 text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
                   Request Date
                 </TableHead>
@@ -136,7 +136,7 @@ export function RedemptionTable({
                 <TableHead className="px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
                   Details
                 </TableHead>
-                <TableHead className="sticky right-0 bg-primary-gradient px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                <TableHead className="sticky right-0 px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
                   Action
                 </TableHead>
               </TableRow>
@@ -169,7 +169,7 @@ export function RedemptionTable({
                   const hasRemarks = request.remarks && request.remarks.trim() !== '';
 
                   return (
-                    <TableRow key={request.id} className="border-0 bg-card hover:bg-background">
+                    <TableRow key={request.id} className="border-0 bg-card hover:bg-accent-secondary/25">
                       <TableCell className="px-2 py-3 sm:px-4">
                         <p className="text-meta font-semibold text-foreground">{dateStr}</p>
                         <p className="text-[11px] text-muted-foreground">{timeStr}</p>
@@ -203,7 +203,7 @@ export function RedemptionTable({
                           )}
                         </Button>
                       </TableCell>
-                      <TableCell className="sticky right-0 bg-card px-2 py-3 sm:px-4">
+                      <TableCell className="sticky right-0 px-2 py-3 sm:px-4">
                         <div className="flex items-center justify-center gap-2">
                           {status === 'pending' ? (
                             <>

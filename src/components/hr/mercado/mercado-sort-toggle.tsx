@@ -36,16 +36,18 @@ export function MercadoSortToggle({ value, onChange, className }: MercadoSortTog
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
+          variant="default"
+          size="default"
           className={cn(
-            'control-h text-button group inline-flex w-full items-center justify-between rounded-xl border border-accent/25 bg-card px-3 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out hover:bg-accent-secondary hover:text-white sm:w-44',
+            'text-button control-h w-full justify-between rounded-md border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44',
             className
           )}
         >
-          <span className="truncate font-medium">{sortLabels[value]}</span>
-          <ArrowUpDown className="h-4 w-4 text-accent group-hover:text-white transition-all duration-400 ease-in-out" />
+          <span className="truncate">{sortLabels[value]}</span>
+          <ArrowUpDown size={14} className="text-accent" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="manager-dropdown-content w-48 rounded-xl">
+      <DropdownMenuContent align="end" className="manager-dropdown-content w-48">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           Sort by Date
         </DropdownMenuLabel>

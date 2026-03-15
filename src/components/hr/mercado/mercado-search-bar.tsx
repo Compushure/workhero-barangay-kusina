@@ -20,13 +20,13 @@ export function MercadoSearchBar({
 }: MercadoSearchBarProps) {
   return (
     <div className={cn('relative min-w-0', className)}>
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-400" />
       <Input
         type="text"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(sanitizeSearchInput(e.target.value))}
-        className="control-h w-full rounded-lg border border-zinc-200 bg-card pl-10 pr-3 text-meta text-foreground shadow-sm/25 transition-colors placeholder:text-muted-foreground focus-visible:border-accent focus-visible:ring-0"
+        className="text-meta control-h w-full min-w-0 rounded-md border border-zinc-200 bg-card pr-3 pl-9 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
       />
     </div>
   );

@@ -136,7 +136,7 @@ export function MercadoPageContent() {
                     </div>
                     <Button
                       onClick={openAddModal}
-                      className="control-h text-button inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary-gradient px-4 text-zinc-50 shadow-sm/25 transition-all duration-300 hover:opacity-95 sm:w-auto sm:min-w-36"
+                      className="text-button control-h w-full justify-center rounded-md bg-primary-gradient px-3 py-1.5 whitespace-nowrap text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 sm:w-auto sm:px-4"
                     >
                       <Plus className="h-4 w-4" />
                       Add Item

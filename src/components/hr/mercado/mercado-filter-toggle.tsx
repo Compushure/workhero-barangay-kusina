@@ -55,7 +55,7 @@ export function MercadoFilterToggle({
   };
 
   const checkboxItemClassName = (isActive: boolean) =>
-    `group cursor-pointer transition-all duration-500 ease-in-out ${
+    `group cursor-pointer py-1.5 transition-all duration-500 ease-in-out ${
       isActive
         ? 'bg-accent-secondary text-white'
         : 'hover:bg-accent-secondary/80 hover:text-white data-[highlighted]:bg-accent-secondary/80 data-[highlighted]:text-white'
@@ -66,23 +66,26 @@ export function MercadoFilterToggle({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
+            size="default"
             variant="outline"
-            className="control-h text-button group inline-flex gap-2 rounded-xl border border-accent/25 bg-card px-4 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out hover:bg-accent-secondary hover:text-white"
+            className="text-button control-h w-full justify-between rounded-md border border-gray-200 bg-card px-3 py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-auto"
           >
-            <Filter className="h-4 w-4 text-accent group-hover:text-white transition-all duration-400 ease-in-out" />
+            <Filter className="h-4 w-4 text-accent" />
             <span className="hidden sm:inline">Filter</span>
             {activeFilterCount > 0 && (
-              <Badge className="ml-1 h-5 min-w-5 rounded-full px-1.5 py-0 text-[11px] leading-none bg-accent-secondary text-white flex items-center justify-center group-hover:bg-white group-hover:text-accent-secondary transition-all duration-400 ease-in-out">
+              <Badge className="ml-1 h-5 min-w-5 rounded-full bg-accent/75 px-1.5 py-0 text-[11px] leading-none text-primary-foreground">
                 {activeFilterCount}
               </Badge>
             )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          align="start"
-          className="manager-dropdown-content w-64 max-h-80 rounded-xl overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          align="center"
+          sideOffset={8}
+          collisionPadding={12}
+          className="manager-dropdown-content w-72 max-h-136 overflow-visible p-1"
         >
-          <DropdownMenuLabel className="text-xs text-muted-foreground">
+          <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
             Stock Status
           </DropdownMenuLabel>
           <DropdownMenuCheckboxItem
@@ -104,7 +107,7 @@ export function MercadoFilterToggle({
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuLabel className="text-xs text-muted-foreground">
+          <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
             Visibility
           </DropdownMenuLabel>
           <DropdownMenuCheckboxItem
@@ -126,7 +129,7 @@ export function MercadoFilterToggle({
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuLabel className="text-xs text-muted-foreground">
+          <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
             Availability Interval
           </DropdownMenuLabel>
           <DropdownMenuCheckboxItem
@@ -154,12 +157,12 @@ export function MercadoFilterToggle({
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuLabel className="text-xs text-muted-foreground">
+          <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
             Quick Actions
           </DropdownMenuLabel>
           <DropdownMenuItem
             onClick={clearFilters}
-            className="cursor-pointer text-secondary hover:text-foreground pl-8"
+            className="cursor-pointer py-1.5 pl-8 text-secondary hover:text-foreground"
           >
             Clear Filters
           </DropdownMenuItem>
