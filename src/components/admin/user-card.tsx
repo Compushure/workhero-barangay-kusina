@@ -209,7 +209,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
               className="p-1.5 sm:p-2 lg:p-2.5 rounded-full hover:bg-gray-100 transition-colors shrink-0"
             >
               <ChevronDown
-                className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-gray-600 transition-transform ${
+                className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-gray-600 cursor-pointer transition-transform ${
                   isOpen ? 'rotate-180' : ''
                 }`}
               />
@@ -220,28 +220,28 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
         <CollapsibleContent>
           <div className="px-3 sm:px-4 lg:px-6 xl:px-7 2xl:px-8 pb-3 sm:pb-4 lg:pb-6 xl:pb-7 2xl:pb-8 border-t border-[#f47812]/15 pt-3 sm:pt-4 lg:pt-6 xl:pt-7 space-y-4 sm:space-y-6 lg:space-y-8">
             <div>
-              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">
+              <p className="text-xs lg:text-sm font-semibold text-foregorund uppercase mb-2 sm:mb-3 lg:mb-4">
                 Basic Information
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
                   <UserIcon className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs lg:text-sm text-gray-600">Name</p>
+                    <p className="text-xs lg:text-sm text-meta text-gray-600">Name</p>
                     <p className="text-sm lg:text-base font-medium text-foreground truncate">{user.name}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
                   <Mail className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs lg:text-sm text-gray-600">Email</p>
+                    <p className="text-xs lg:text-sm text-meta text-gray-600">Email</p>
                     <p className="text-sm lg:text-base font-medium text-foreground break-all">{user.email}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
                   <Phone className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs lg:text-sm text-gray-600">Contact</p>
+                    <p className="text-xs lg:text-sm text-meta text-gray-600">Contact</p>
                     <p className="text-sm lg:text-base font-medium text-foreground">{user.contactNumber || 'N/A'}</p>
                   </div>
                 </div>
@@ -249,35 +249,35 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
             </div>
 
             <div>
-              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">
+              <p className="text-xs lg:text-sm font-semibold text-foreground uppercase mb-2 sm:mb-3 lg:mb-4">
                 Employment Details
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
                   <Building2 className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs lg:text-sm text-gray-600">Company ID</p>
-                    <p className="text-sm lg:text-base font-medium text-gray-600">{user.companyId || 'N/A'}</p>
+                    <p className="text-xs lg:text-sm text-meta text-gray-600">Company ID</p>
+                    <p className="text-sm lg:text-base font-medium text-foreground">{user.companyId || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
                   <IdCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs lg:text-sm text-gray-600">Employee ID</p>
+                    <p className="text-xs lg:text-sm text-meta text-gray-600">Employee ID</p>
                     <p className="text-sm lg:text-base font-medium text-foreground">{user.employeeId || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
                   <BadgeCheck className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs lg:text-sm text-gray-600">Status</p>
+                    <p className="text-xs lg:text-sm text-meta text-gray-600">Status</p>
                     <p className="text-sm lg:text-base font-medium text-foreground capitalize">{employmentStatus}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
                   <Calendar className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs lg:text-sm text-gray-600">Date Created</p>
+                    <p className="text-xs lg:text-sm text-meta text-gray-600">Date Created</p>
                     <p className="text-sm lg:text-base font-medium text-foreground">{dateCreated}</p>
                   </div>
                 </div>
@@ -285,7 +285,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
             </div>
 
             <div>
-              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">Address</p>
+              <p className="text-xs lg:text-sm font-semibold text-foreground uppercase mb-2 sm:mb-3 lg:mb-4">Address</p>
               <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
                 <MapPin className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                 <p className="text-sm lg:text-base text-foreground">{user.address || 'N/A'}</p>
@@ -293,28 +293,28 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
             </div>
 
             <div>
-              <p className="text-xs lg:text-sm font-semibold text-gray-600 uppercase mb-2 sm:mb-3 lg:mb-4">
+              <p className="text-xs lg:text-sm font-semibold text-foreground uppercase mb-2 sm:mb-3 lg:mb-4">
                 Philippine Government IDs
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
                   <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs lg:text-sm text-gray-600">TIN</p>
+                    <p className="text-xs lg:text-sm text-meta text-gray-600">TIN</p>
                     <p className="text-sm lg:text-base font-medium text-foreground">{user.tin || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
                   <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs lg:text-sm text-gray-600">SSS</p>
+                    <p className="text-xs lg:text-sm text-meta text-gray-600">SSS</p>
                     <p className="text-sm lg:text-base font-medium text-foreground">{user.sss || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
                   <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs lg:text-sm text-gray-600">Pag-IBIG</p>
+                    <p className="text-xs lg:text-sm text-meta text-gray-600">Pag-IBIG</p>
                     <p className="text-sm lg:text-base font-medium text-foreground">{user.pagibig || 'N/A'}</p>
                   </div>
                 </div>
