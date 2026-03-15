@@ -8,6 +8,16 @@ import { PastRanksList } from '@/components/hr/leaderboard/past-ranks-list';
 import { PeriodSelector } from '@/components/hr/leaderboard/period-selector';
 import { getISOWeeksInYear } from '@/lib/utils/time-period-utils';
 import type { RankLogPeriodType } from '@/types';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'WorkHero | Leaderboard',
+  icons: {
+    icon: '/assets/website-logo.svg',
+    shortcut: '/assets/website-logo.svg',
+    apple: '/assets/website-logo.svg',
+  },
+};
 
 type SearchParams = {
   type?: string;
