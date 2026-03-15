@@ -56,6 +56,7 @@ import {
   EyeOff,
   Pencil,
   X,
+  Trash2,
 } from 'lucide-react';
 
 type EditUserFormValues = EditUserInput & {
@@ -324,14 +325,14 @@ export function EditUserModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card w-[95vw] max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col border-2 border-[#f47812]/20">
+      <DialogContent className="bg-card w-[95vw] max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col border border-gray-300 shadow-sm/25">
         <DialogHeader className="px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 lg:pt-7 pb-3 sm:pb-4 lg:pb-5 border-b border-[#f47812]/15 shrink-0">
           <div className="flex items-start justify-between gap-2 sm:gap-3 lg:gap-4">
             <div className="flex-1 min-w-0">
               <DialogTitle className="text-base sm:text-xl lg:text-2xl font-bold text-foreground">
                 Edit User
               </DialogTitle>
-              <DialogDescription className="text-xs sm:text-sm lg:text-base text-gray-600 hidden sm:block">
+              <DialogDescription className="text-xs sm:text-sm lg:text-base text-gray-500 hidden sm:block">
                 Leave fields blank to keep current values. Only filled fields will be updated.
               </DialogDescription>
             </div>
@@ -348,11 +349,12 @@ export function EditUserModal({
               </Button>
               <Button
                 type="button"
-                variant="outline"
+                variant="destructive"
                 size="sm"
                 onClick={handleClearAll}
-                className="whitespace-nowrap bg-white hover:bg-gray-100 hover:text-foreground border-zinc-300 text-xs sm:text-sm lg:text-base h-7 sm:h-8 lg:h-9 px-2 sm:px-3 lg:px-4"
+                className="gap-2 flex-1 sm:flex-none bg-destructive cursor-pointer text-white hover:bg-destructive/90 transition-all duration-500 ease-in-out text-xs sm:text-sm lg:text-base h-7 sm:h-8 lg:h-9 px-2 sm:px-3 lg:px-4"
               >
+                <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Clear All
               </Button>
             </div>
@@ -362,7 +364,7 @@ export function EditUserModal({
         <ScrollArea className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden md:[&::-webkit-scrollbar]:block">
           <div className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
             {/* Read-only information section */}
-            <div className="space-y-2 sm:space-y-3 lg:space-y-4 p-3 sm:p-4 lg:p-5 bg-background rounded-lg border border-[#f47812]/15">
+            <div className="space-y-2 sm:space-y-3 lg:space-y-4 p-3 sm:p-4 lg:p-5 bg-background rounded-lg border border-gray-300 shadow-sm/25">
               <p className="text-xs lg:text-sm font-semibold text-foreground uppercase hidden sm:block">
                 Read-Only Information
               </p>
@@ -398,7 +400,7 @@ export function EditUserModal({
             </div>
 
             {/* Current values */}
-            <div className="p-3 bg-background rounded-lg border border-[#f47812]/15 text-sm space-y-1 mt-4">
+            <div className="p-3 bg-background rounded-lg border border-gray-300 shadow-sm/25 text-sm space-y-1 mt-4">
               <p className="text-xs text-foreground font-medium">Current Values:</p>
               <p>
                 <span className="text-gray-600">Name:</span>{' '}
@@ -411,7 +413,7 @@ export function EditUserModal({
             </div>
 
             {/* Profile Picture */}
-            <div className="mt-6 pb-6 border-b border-border">
+            <div className="mt-6 pb-6 border-b border-[#f47812]/15">
               <h3 className="text-sm font-semibold text-foreground mb-4">Profile Picture</h3>
               <ImageCropUpload
                 currentImageUrl={getProfileUrl(user.id)}
@@ -440,7 +442,7 @@ export function EditUserModal({
                 {/* Basic Information */}
                 <AccordionItem
                   value="basic"
-                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                  className="border border-gray-300 shadow-sm/25 rounded-lg px-4 bg-background"
                 >
                   <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                     Basic Information (Optional)
@@ -448,7 +450,7 @@ export function EditUserModal({
                   <AccordionContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                       {/* New Name */}
-                      <div className="space-y-2">
+                      <div className="space-y-2 pr-1 pl-1">
                         <div className="flex items-center justify-between">
                           <Label htmlFor="edit-name" className="text-foreground">
                             New Name
@@ -486,7 +488,7 @@ export function EditUserModal({
                       </div>
 
                       {/* New Password */}
-                      <div className="space-y-2">
+                      <div className="space-y-2 pr-1 pl-1">
                         <div className="flex items-center justify-between">
                           <Label htmlFor="edit-password" className="text-foreground">
                             New Password (Optional)
@@ -537,7 +539,7 @@ export function EditUserModal({
                       </div>
 
                       {/* New Contact Number */}
-                      <div className="space-y-2">
+                      <div className="space-y-2 pr-1 pl-1">
                         <div className="flex items-center justify-between">
                           <Label htmlFor="edit-contact" className="text-foreground">
                             New Contact Number
@@ -582,7 +584,7 @@ export function EditUserModal({
                 {/* Employment Details */}
                 <AccordionItem
                   value="employment"
-                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                  className="border border-gray-300 shadow-sm/25 rounded-lg px-4 bg-background"
                 >
                   <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                     Employment Details (Optional)
@@ -590,7 +592,7 @@ export function EditUserModal({
                   <AccordionContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                       {/* New Role */}
-                      <div className="space-y-2">
+                      <div className="space-y-2 pr-1 pl-1">
                         <Label htmlFor="edit-type" className="text-foreground">
                           New Role
                         </Label>
@@ -603,7 +605,7 @@ export function EditUserModal({
                         >
                           <SelectTrigger
                             id="edit-type"
-                            className="border-border bg-white focus:border-accent focus:ring-accent"
+                            className="border-border bg-white focus:border-accent focus:ring-accent mt-2"
                           >
                             <div className="flex items-center gap-2">
                               <Briefcase className="h-4 w-4 text-accent" />
@@ -627,7 +629,7 @@ export function EditUserModal({
                       </div>
 
                       {/* New Employment Status */}
-                      <div className="space-y-2">
+                      <div className="space-y-2 pr-1 pl-1">
                         <Label htmlFor="edit-status" className="text-foreground">
                           New Employment Status
                         </Label>
@@ -643,7 +645,7 @@ export function EditUserModal({
                         >
                           <SelectTrigger
                             id="edit-status"
-                            className="border-border bg-white focus:border-accent focus:ring-accent"
+                            className="border-border bg-white focus:border-accent focus:ring-accent mt-2"
                           >
                             <div className="flex items-center gap-2">
                               <BadgeCheck className="h-4 w-4 text-accent" />
@@ -676,13 +678,13 @@ export function EditUserModal({
                 {/* Address */}
                 <AccordionItem
                   value="address"
-                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                  className="border border-gray-300 shadow-sm/25 rounded-lg px-4 bg-background"
                 >
                   <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                     Home Address (Optional)
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="space-y-2 pt-4">
+                    <div className="space-y-2 pt-4 pr-1 pl-1">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="edit-address" className="text-foreground">
                           New Address (10-250 characters)
@@ -724,7 +726,7 @@ export function EditUserModal({
                 {/* Government IDs */}
                 <AccordionItem
                   value="ids"
-                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                  className="border border-gray-300 shadow-sm/25 rounded-lg px-4 bg-background"
                 >
                   <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                     Government IDs (Optional)
@@ -732,7 +734,7 @@ export function EditUserModal({
                   <AccordionContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                       {/* TIN */}
-                      <div className="space-y-2">
+                      <div className="space-y-2 pr-1 pl-1">
                         <div className="flex items-center justify-between">
                           <Label htmlFor="edit-tin" className="text-foreground">
                             New TIN
@@ -871,7 +873,7 @@ export function EditUserModal({
               type="submit"
               form="edit-user-form"
               disabled={isPending || !hasActiveChanges() || !isValid}
-              className="flex-1 bg-foreground cursor-pointer text-white hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 ease-in-out shadow-sm/25"
+              className="flex-1 bg-accent cursor-pointer text-white hover:bg-accent-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 ease-in-out shadow-sm/25"
             >
               {isPending ? 'Saving...' : 'Save Changes'}
             </Button>
