@@ -214,9 +214,27 @@ export function SearchFilter({
                 focus:outline-none focus:ring-0 focus:border-transparent
                 ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
-                <SelectValue className="text-meta" placeholder="Select Sort" />
+                <span className="truncate">
+                  <SelectValue className="text-meta" placeholder="Select Sort" />
+                </span>
               </SelectTrigger>
               <SelectContent className="manager-dropdown-content rounded-lg shadow-md">
+                <SelectItem
+                  value="date-desc"
+                  className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
+                  hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                  data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
+                >
+                  Date Created (Newest)
+                </SelectItem>
+                <SelectItem
+                  value="date-asc"
+                  className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
+                  hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                  data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
+                >
+                  Date Created (Oldest)
+                </SelectItem>
                 <SelectItem
                   value="name-asc"
                   className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
@@ -232,22 +250,6 @@ export function SearchFilter({
                   data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
                 >
                   Name (Z to A)
-                </SelectItem>
-                <SelectItem
-                  value="date-asc"
-                  className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
-                  hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
-                  data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
-                >
-                  Date Created (Oldest)
-                </SelectItem>
-                <SelectItem
-                  value="date-desc"
-                  className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
-                  hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
-                  data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
-                >
-                  Date Created (Newest)
                 </SelectItem>
               </SelectContent>
             </Select>
