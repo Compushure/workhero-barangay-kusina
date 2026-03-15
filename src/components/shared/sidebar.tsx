@@ -129,7 +129,7 @@ const hrNavItems: NavItem[] = [
   {
     key: 'leaderboard',
     label: 'Leaderboard',
-    mobileLabel: 'Ranks',
+    mobileLabel: 'Leaderboard',
     icon: Trophy,
     href: '/hr/leaderboard',
   },
@@ -304,7 +304,7 @@ export function Sidebar({ view }: SidebarProps) {
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-background/95 backdrop-blur supports-backdrop-filter:bg-gray-50 md:hidden">
         <TooltipProvider>
           <div className="px-2 py-2">
-            <div className="grid grid-cols-6 gap-1">
+            <div className={`grid gap-1 ${view === 'manager' ? 'grid-cols-6' : 'grid-cols-4'}`}>
               {navItems.map((item) => {
                 const isActive = isNavLinkActive(item.href);
                 const isNavigatingItem = pendingHref === item.href;
@@ -365,7 +365,7 @@ export function Sidebar({ view }: SidebarProps) {
                     className={`flex flex-col items-center justify-center rounded-xl px-1 py-2 pb-2.5 text-primary transition-all duration-300 hover:bg-accent/20 hover:text-orange-500 ${isLoggingOut ? 'pointer-events-none opacity-50' : ''}`}
                   >
                     <UserCircle2 className="size-4" strokeWidth={1.9} />
-                    <span className="mt-1 text-[10px] leading-tight">Me</span>
+                    <span className="text-sidebar-label mt-1 w-full truncate text-center leading-tight">Profile</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Calendar, Eye, EyeOff, History } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Pagination as PastRanksPagination } from '@/components/manager/task-verification/pagination';
+import { Pagination as PastRanksPagination } from '@/components/shared/pagination';
 import { PastRanksListSkeleton } from '@/components/hr/leaderboard/past-ranks-list-skeleton';
 import { PeriodFilters, TAB_LABELS } from '@/components/hr/leaderboard/period-filters';
 import {

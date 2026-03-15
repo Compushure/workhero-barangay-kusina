@@ -349,6 +349,7 @@
     /* background: color-mix(in oklab, var(--background) 25%, white 15%); */
     backdrop-filter: blur(8px);
     box-shadow: 0 1px 4px rgba(7, 24, 39, 0.15);
+    margin-inline: 0.5rem;
   }
 
   .manager-action-cluster {

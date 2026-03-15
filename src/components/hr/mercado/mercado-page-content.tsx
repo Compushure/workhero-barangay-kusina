@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { MercadoSortToggle } from '@/components/hr/mercado/mercado-sort-toggle';
 import { MercadoFilterToggle } from '@/components/hr/mercado/mercado-filter-toggle';
 import { MercadoSkeleton } from '@/components/hr/mercado/mercado-skeleton';
-import { Pagination } from '@/components/manager/task-verification/pagination';
+import { Pagination } from '@/components/shared/pagination';
 import { useMercadoPageState } from '@/actions/hr/use-mercado-page-state';
 
 const AddItemsModal = dynamic(() =>

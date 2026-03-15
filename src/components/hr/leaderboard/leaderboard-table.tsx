@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
-import { Pagination } from '@/components/manager/task-verification/pagination';
+import { Pagination } from '@/components/shared/pagination';
 import VisibilityToggle from '@/components/hr/leaderboard/visibility-toggle';
 import type { LeaderboardPlayer } from '@/types';
 

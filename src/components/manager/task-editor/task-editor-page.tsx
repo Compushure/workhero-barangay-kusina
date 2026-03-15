@@ -22,7 +22,7 @@ import {
   useDeleteTaskCategory,
 } from '@/hooks/tanstack/mutations/managerEditorMutations';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Pagination } from '@/components/manager/task-verification/pagination';
+import { Pagination } from '@/components/shared/pagination';
 import type { TaskCategory } from '@/types/manager/task-editor';
 import type { AddTaskInput } from '@/zod/schemas/task';
 import { TaskEditorHeaderSkeleton } from './task-editor-header-skeleton';
@@ -31,7 +31,7 @@ import {
   type TaskRepeatabilityFilter,
 } from './task-repeatability-filter-toggle';
 import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
-import { PageHeader } from '../task-verification/page-header';
+import { PageHeader } from '@/components/shared/page-header';
 
 const SORT_OPTIONS: { value: TaskCategorySortOption; label: string }[] = [
   { value: 'name-asc', label: 'Name (A-Z)' },

@@ -10,7 +10,7 @@ import { EmployeeSortingBar } from './employee-sorting-bar';
 import { AssignedTasksFilterBar } from './assigned-tasks-filter-bar';
 import ClearUnstartedDialog from './dialogs/clear-unstarted-dialog';
 import { useTaskAssignment } from '../task-assignment-page-context';
-import { Pagination } from '@/components/manager/task-verification/pagination';
+import { Pagination } from '@/components/shared/pagination';
 import {
   useGetCurrentAssignedTasksPaginated,
   useGetCurrentAssignedEmployeesPaginated,
