@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Clock3,
   ChevronLeft,
   LayoutDashboard,
   ShoppingCart,
@@ -18,6 +19,9 @@ import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import { NavigationDisplay } from '@/components/manager/navigation-display';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNavigationStore } from '@/store/navigationStore';
+import { useGetTodayAttendanceStatus } from '@/hooks/tanstack/queries/attendanceQueries';
+import { HrAttendanceModal } from '@/components/hr/attendance/hr-attendance-modal';
+import { HrAttendanceTrigger } from '@/components/hr/attendance/hr-attendance-trigger';
 
 interface NavItem {
   key: string;
@@ -93,11 +97,22 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
   const [hoveredNavKey, setHoveredNavKey] = useState<string | null>(null);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showAttendanceModal, setShowAttendanceModal] = useState(false);
   const { startNavigation, stopNavigation, isNavigating, isLoggingOut } = useNavigationStore();
   const { data: user } = useGetSessionUser();
+  const { data: attendanceStatus } = useGetTodayAttendanceStatus();
 
   const isUiDisabled = isNavigating || isLoggingOut;
   const isNavLinkActive = (href: string) => pathname === href;
+  const attendanceButtonLabel = attendanceStatus?.canTimeOut
+    ? 'Time Out'
+    : attendanceStatus?.canTimeIn
+      ? 'Time In'
+      : 'Attendance';
+  const mobileAttendanceLabel = 'Attendance';
+  const shouldShowAttendanceReminder = !!(
+    attendanceStatus?.canTimeIn || attendanceStatus?.canTimeOut
+  );
 
   const handleProfileClick = () => {
     setShowProfileModal(true);
@@ -257,7 +272,21 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
         </nav>
 
         {/* User Profile Section */}
-        <div className={isCollapsed ? 'flex h-24 items-center justify-center' : 'px-3 py-4'}>
+        <div
+          className={
+            isCollapsed
+              ? 'flex flex-col items-center justify-center gap-2 px-2 py-3'
+              : 'flex flex-col px-3 py-4'
+          }
+        >
+          <HrAttendanceTrigger
+            isCollapsed={isCollapsed}
+            disabled={isUiDisabled}
+            label={attendanceButtonLabel}
+            shouldRemind={shouldShowAttendanceReminder}
+            onClick={() => setShowAttendanceModal(true)}
+          />
+
           <div
             className={`flex w-full items-center rounded-full bg-white/10 ${
               isCollapsed ? 'h-16 w-16 justify-center' : 'mb-4 gap-3'
@@ -273,7 +302,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
       {/* Mobile Tab Bar */}
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#f47812]/20 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 md:hidden">
         <div className="px-2 py-2">
-          <div className="grid grid-cols-4 gap-1">
+          <div className="grid grid-cols-5 gap-1">
             {navItems.map((item) => {
               const isActive = isNavLinkActive(item.href);
               const isNavigatingItem = pendingHref === item.href;
@@ -312,6 +341,19 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
             })}
 
             <button
+              onClick={() => setShowAttendanceModal(true)}
+              disabled={isUiDisabled}
+              className={`flex flex-col items-center justify-center rounded-xl px-1 py-1.5 text-primary transition-all duration-300 hover:bg-accent/20 hover:text-[#f47812] ${
+                isUiDisabled ? 'pointer-events-none opacity-50' : ''
+              } ${shouldShowAttendanceReminder ? 'animate-pulse' : ''}`}
+            >
+              <Clock3 className="size-4" strokeWidth={1.9} />
+              <span className="mt-1 w-full truncate text-center text-[10px] leading-none">
+                {mobileAttendanceLabel}
+              </span>
+            </button>
+
+            <button
               onClick={handleProfileClick}
               disabled={isLoggingOut}
               className={`flex flex-col items-center justify-center rounded-xl px-1 py-1.5 text-primary transition-all duration-300 hover:bg-accent/20 hover:text-[#f47812] ${isLoggingOut ? 'pointer-events-none opacity-50' : ''}`}
@@ -329,6 +371,8 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
         onOpenChange={setShowProfileModal}
         user={user ?? null}
       />
+
+      <HrAttendanceModal open={showAttendanceModal} onOpenChange={setShowAttendanceModal} />
     </>
   );
 }
