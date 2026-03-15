@@ -182,7 +182,7 @@ export function useGetEmployeeVisiblePeriods(): UseQueryResult<RankingPeriodWith
     retry: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    refetchInterval: 10 * 1000,
+    refetchInterval: 30 * 1000,
     refetchIntervalInBackground: false,
   }) as UseQueryResult<RankingPeriodWithTop[] | null, Error>;
 }
@@ -214,7 +214,7 @@ export function useGetLatestLeaderboardPeriods(
     retry: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    refetchInterval: 5 * 1000,
+    refetchInterval: 30 * 1000,
     refetchIntervalInBackground: false,
   }) as UseQueryResult<LatestPeriods, Error>;
 }
