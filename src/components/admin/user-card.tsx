@@ -112,8 +112,8 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="rounded-3xl bg-background overflow-hidden border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 hover:shadow-lg transition-all duration-300">
-        <div className="w-full p-3 sm:p-4 lg:p-6 xl:p-7 2xl:p-8 flex items-start justify-between gap-2 sm:gap-3 lg:gap-4 xl:gap-5">
+      <div className="rounded-2xl bg-background-soft overflow-hidden border-t border-gray-300 shadow-sm/25 hover:shadow-lg transition-all duration-300">
+        <div className="w-full p-3 sm:p-4 lg:p-2 xl:p-3 2xl:p-4 flex items-start justify-between gap-2 sm:gap-3 lg:gap-4 xl:gap-5">
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 min-w-0 flex-1">
             <div
               className="relative group cursor-zoom-in hover:opacity-90 transition-opacity"
@@ -160,28 +160,28 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
             </div>
             
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 mb-0.5 sm:mb-1 lg:mb-2">
-                <p className="font-semibold text-sm sm:text-base lg:text-lg xl:text-xl truncate text-foreground">{user.name}</p>
+              <div className="flex items-center gap-1 sm:gap-1 lg:gap-2 mb-0.5 sm:mb-1 lg:mb-1">
+                <p className="font-semibold text-sm sm:text-sm lg:text-sm xl:text-sm truncate text-foreground">{user.name}</p>
                 {user.employeeId ? (
                   <Badge
                     variant="outline"
-                    className="hidden md:inline-flex text-xs lg:text-sm border-gray-300 text-gray-700 bg-white"
+                    className="hidden md:inline-flex text-xs lg:text-xs rounded-lg border-gray-300 text-gray-500 bg-white"
                   >
                     {user.employeeId}
                   </Badge>
                 ) : null}
               </div>
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600 truncate">{user.email}</p>
+              <p className="text-xs sm:text-xs lg:text-xs text-gray-600 truncate">{user.email}</p>
               <div className="flex gap-1.5 sm:gap-2 lg:gap-3 mt-1.5 sm:mt-2 lg:mt-3 md:hidden">
                 <span
-                  className={`inline-block px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium capitalize ${
+                  className={`inline-block px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-sm font-medium capitalize ${
                     EMPLOYEE_TYPE_STYLES[user.employeeType]
                   }`}
                 >
                   {user.employeeType}
                 </span>
                 <span
-                  className={`inline-block px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium capitalize ${employmentStatusClass}`}
+                  className={`inline-block px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-meta font-medium capitalize ${employmentStatusClass}`}
                 >
                   {employmentStatus}
                 </span>

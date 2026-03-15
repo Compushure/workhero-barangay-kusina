@@ -42,7 +42,7 @@ export function SearchFilter({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="rounded-2xl bg-background p-3 sm:p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8 shadow-sm/25 overflow-x-hidden">
+    <div className="rounded-2xl bg-background-soft p-3 sm:p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8 shadow-sm/25 overflow-x-hidden">
       {/* Header */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
@@ -81,7 +81,7 @@ export function SearchFilter({
                 className={`bg-card border border-border rounded-md control-h pl-10 pr-9 text-primary 
                   shadow-sm/50 transition-all duration-500 ease-in-out 
                   focus:outline-none focus:ring-0 focus-visible:ring-0 focus:border-border
-                  text-sm sm:text-base lg:text-base placeholder:text-sm
+                  text-sm sm:text-base lg:text-base placeholder:text-sm placeholder:text-gray-400
                   ${isDebouncing ? 'bg-background/50' : 'bg-white'}`}
                 value={searchQuery}
                 onChange={(e) => onSearchChange(sanitizeSearchInput(e.target.value))}
