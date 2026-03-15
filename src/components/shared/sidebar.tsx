@@ -333,7 +333,7 @@ export function Sidebar({ view }: SidebarProps) {
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-background/95 backdrop-blur supports-backdrop-filter:bg-gray-50 md:hidden">
         <TooltipProvider>
           <div className="px-2 py-2">
-            <div className={`grid gap-1 ${view === 'manager' ? 'grid-cols-7' : 'grid-cols-5'}`}>
+            <div className={`grid ${view === 'manager' ? 'grid-cols-7 gap-1' : 'grid-cols-5 gap-5'}`}>
               {navItems.map((item) => {
                 const isActive = isNavLinkActive(item.href);
                 const isNavigatingItem = pendingHref === item.href;

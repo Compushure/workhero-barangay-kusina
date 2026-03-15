@@ -116,28 +116,28 @@ export function RedemptionTable({
 
   return (
     <>
-      <div className="overflow-hidden rounded-lg border border-border bg-background shadow-md">
+      <div className="overflow-hidden rounded-2xl border border-accent/20 bg-card shadow-sm/25">
         <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <Table>
+          <Table className="min-w-full">
             <TableHeader className="bg-primary-gradient [&_tr]:border-0">
-              <TableRow className="border-0 hover:bg-transparent">
-                <TableHead className="text-card font-semibold px-2 sm:px-4 w-32 sm:w-40 text-xs sm:text-sm">
-                  REQUEST DATE
+              <TableRow className="border-0">
+                <TableHead className="px-2 py-3 text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                  Request Date
                 </TableHead>
-                <TableHead className="text-card font-semibold px-2 sm:px-4 w-36 sm:w-48 text-xs sm:text-sm">
-                  EMPLOYEE
+                <TableHead className="px-2 py-3 text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                  Employee
                 </TableHead>
-                <TableHead className="text-card font-semibold px-2 sm:px-4 w-48 sm:w-64 text-xs sm:text-sm">
-                  REQUESTED ITEM/S
+                <TableHead className="px-2 py-3 text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                  Requested Item/s
                 </TableHead>
-                <TableHead className="text-card font-semibold text-center px-2 sm:px-4 w-20 sm:w-28 text-xs sm:text-sm">
-                  TOTAL COST
+                <TableHead className="px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                  Total Cost
                 </TableHead>
-                <TableHead className="text-card font-semibold text-center px-2 sm:px-4 w-24 sm:w-28 text-xs sm:text-sm">
-                  DETAILS
+                <TableHead className="px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                  Details
                 </TableHead>
-                <TableHead className="text-card font-semibold text-center px-2 sm:px-4 w-28 sm:w-32 text-xs sm:text-sm sticky right-0 bg-primary-gradient">
-                  ACTION
+                <TableHead className="sticky right-0 bg-primary-gradient px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                  Action
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -169,34 +169,31 @@ export function RedemptionTable({
                   const hasRemarks = request.remarks && request.remarks.trim() !== '';
 
                   return (
-                    <TableRow
-                      key={request.id}
-                      className="bg-background border-0 hover:bg-transparent"
-                    >
-                      <TableCell className="px-2 sm:px-4">
-                        <p className="text-xs sm:text-sm font-medium text-foreground">{dateStr}</p>
-                        <p className="text-[10px] sm:text-xs text-muted-foreground">{timeStr}</p>
+                    <TableRow key={request.id} className="border-0 bg-card hover:bg-background">
+                      <TableCell className="px-2 py-3 sm:px-4">
+                        <p className="text-meta font-semibold text-foreground">{dateStr}</p>
+                        <p className="text-[11px] text-muted-foreground">{timeStr}</p>
                       </TableCell>
-                      <TableCell className="px-2 sm:px-4">
-                        <p className="text-xs sm:text-sm text-foreground truncate max-w-36 sm:max-w-48">
+                      <TableCell className="px-2 py-3 sm:px-4">
+                        <p className="text-meta text-foreground truncate max-w-36 sm:max-w-48">
                           {userName}
                         </p>
                       </TableCell>
-                      <TableCell className="px-2 sm:px-4">
-                        <p className="text-xs sm:text-sm text-foreground truncate max-w-48 sm:max-w-64">
+                      <TableCell className="px-2 py-3 sm:px-4">
+                        <p className="text-meta text-foreground truncate max-w-48 sm:max-w-64">
                           {itemDisplay}
                         </p>
                       </TableCell>
-                      <TableCell className="px-2 sm:px-4 text-center">
-                        <p className="text-xs sm:text-sm font-medium text-foreground whitespace-nowrap">
+                      <TableCell className="px-2 py-3 text-center sm:px-4">
+                        <p className="text-button font-semibold text-foreground whitespace-nowrap">
                           {totalCost} Pts
                         </p>
                       </TableCell>
-                      <TableCell className="px-2 sm:px-4 text-center">
+                      <TableCell className="px-2 py-3 text-center sm:px-4">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-blue-600 hover:bg-blue-100 hover:text-blue-700 relative"
+                          className="size-8 shrink-0 rounded-xl border border-accent/30 bg-accent/10 text-accent transition-all duration-200 hover:bg-accent hover:text-white"
                           onClick={() => openRequestModal(request)}
                           title="View details"
                         >
@@ -206,14 +203,14 @@ export function RedemptionTable({
                           )}
                         </Button>
                       </TableCell>
-                      <TableCell className="px-2 sm:px-4 sticky right-0 bg-background">
-                        <div className="flex items-center justify-center gap-1 sm:gap-2">
+                      <TableCell className="sticky right-0 bg-card px-2 py-3 sm:px-4">
+                        <div className="flex items-center justify-center gap-2">
                           {status === 'pending' ? (
                             <>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-emerald-700 hover:bg-emerald-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="size-8 shrink-0 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 transition-all duration-200 hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                                 onClick={(event) => {
                                   event.stopPropagation();
                                   handleAcceptClick(request.id);
@@ -234,7 +231,7 @@ export function RedemptionTable({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                className="size-8 shrink-0 rounded-xl border border-destructive/30 bg-destructive/10 text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground"
                                 onClick={(event) => {
                                   event.stopPropagation();
                                   handleDeclineClick(request.id);
@@ -246,9 +243,9 @@ export function RedemptionTable({
                             </>
                           ) : (
                             <div
-                              className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap shrink-0 ${
+                              className={`px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap shrink-0 ${
                                 status === 'approved'
-                                  ? 'bg-green-100 text-green-700'
+                                  ? 'bg-emerald-100 text-emerald-700'
                                   : isOutOfStock
                                     ? 'bg-orange-100 text-orange-700'
                                     : 'bg-red-100 text-red-700'

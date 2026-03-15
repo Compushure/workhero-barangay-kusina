@@ -3,23 +3,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function MercadoHeaderSkeleton() {
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Title and description */}
       <div className="space-y-2">
-        <Skeleton className="h-8 w-64 bg-background" />
-        <Skeleton className="h-5 w-96 bg-background" />
+        <Skeleton className="h-8 w-64 rounded-lg bg-gray-300" />
+        <Skeleton className="h-4 w-80 rounded-lg bg-gray-300" />
       </div>
 
-      {/* Search, sort, filter, and add button */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 sm:justify-end">
-        <div className="w-full sm:min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
-          <Skeleton className="h-10 w-full bg-background" />
-        </div>
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-10 w-24 bg-background" />
-            <Skeleton className="h-10 w-24 bg-background" />
+      <div className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5">
+        <div className="flex min-w-0 flex-col items-stretch gap-2 xl:flex-row xl:items-center xl:justify-end">
+          <div className="min-w-0 flex-1 xl:max-w-xs">
+            <Skeleton className="control-skeleton-h w-full rounded-lg bg-gray-300" />
           </div>
-          <Skeleton className="h-10 w-32 bg-background" />
+          <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap xl:shrink-0">
+            <Skeleton className="control-skeleton-h rounded-lg bg-gray-300 sm:w-40" />
+            <Skeleton className="control-skeleton-h rounded-lg bg-gray-300 sm:w-44" />
+            <Skeleton className="control-skeleton-h rounded-xl bg-gray-300 sm:w-36" />
+          </div>
         </div>
       </div>
     </div>

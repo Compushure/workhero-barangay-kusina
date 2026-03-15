@@ -95,56 +95,60 @@ export function MercadoPageContent() {
   };
 
   return (
-    // Page shell section.
-    <main className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
-      <div className="mx-auto w-full max-w-7xl 2xl:max-w-440 flex-1 flex flex-col gap-4 sm:gap-6">
+    <main className="w-full min-h-screen bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-5 sm:gap-6 2xl:max-w-screen-2xl">
         {isLoading ? (
           <MercadoHeaderSkeleton />
         ) : (
           <Suspense fallback={<MercadoHeaderSkeleton />}>
-            <div className="space-y-4 sm:space-y-6">
+            <div className="space-y-4 sm:space-y-5">
               <MercadoHeader
                 title="Mercado Manager"
                 description="Manage items visible in mercado"
                 showAddButton={false}
               />
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 sm:justify-end">
-                <div className="w-full sm:min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
-                  <div className="w-full">
+              <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5">
+                <div className="flex min-w-0 flex-col items-stretch gap-2 xl:flex-row xl:items-center xl:justify-end">
+                  <div className="min-w-0 flex-1 xl:max-w-xs">
                     <MercadoSearchBar
                       value={search}
                       onChange={setSearch}
                       placeholder="Search by item name"
+                      className="w-full"
                     />
                   </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <MercadoSortToggle value={sortOrder} onChange={setSortOrder} />
-                    <MercadoFilterToggle
-                      stockFilter={stockFilter}
-                      visibilityFilter={visibilityFilter}
-                      intervalFilter={intervalFilter}
-                      onStockFilterChange={setStockFilter}
-                      onVisibilityFilterChange={setVisibilityFilter}
-                      onIntervalFilterChange={setIntervalFilter}
-                    />
+                  <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap xl:shrink-0">
+                    <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
+                      <MercadoSortToggle
+                        value={sortOrder}
+                        onChange={setSortOrder}
+                        className="sm:w-44"
+                      />
+                      <MercadoFilterToggle
+                        stockFilter={stockFilter}
+                        visibilityFilter={visibilityFilter}
+                        intervalFilter={intervalFilter}
+                        onStockFilterChange={setStockFilter}
+                        onVisibilityFilterChange={setVisibilityFilter}
+                        onIntervalFilterChange={setIntervalFilter}
+                      />
+                    </div>
+                    <Button
+                      onClick={openAddModal}
+                      className="control-h text-button inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary-gradient px-4 text-zinc-50 shadow-sm/25 transition-all duration-300 hover:opacity-95 sm:w-auto sm:min-w-36"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Item
+                    </Button>
                   </div>
-                  <Button
-                    onClick={openAddModal}
-                    className="w-full sm:w-auto h-10 px-4 rounded-lg bg-primary-gradient text-zinc-50 hover:opacity-95"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Item
-                  </Button>
                 </div>
-              </div>
+              </section>
             </div>
           </Suspense>
         )}
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex flex-1 flex-col">
           {/* Catalog grid section. */}
           {isLoading ? (
             <MercadoSkeleton />
@@ -172,8 +176,8 @@ export function MercadoPageContent() {
                   />
                 ))
               ) : (
-                <div className="col-span-full py-12 text-center">
-                  <p className="text-muted-foreground">{getEmptyStateMessage()}</p>
+                <div className="col-span-full rounded-2xl border border-dashed border-accent/20 bg-card/40 py-14 text-center shadow-sm/25">
+                  <p className="text-button text-muted-foreground">{getEmptyStateMessage()}</p>
                 </div>
               )}
             </div>

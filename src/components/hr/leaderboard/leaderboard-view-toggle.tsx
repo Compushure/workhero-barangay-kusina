@@ -33,14 +33,14 @@ export function LeaderboardViewToggle({ currentView }: LeaderboardViewToggleProp
   };
 
   return (
-    <div className="flex w-full flex-wrap items-center rounded-full border border-gray-200 bg-gray-100 p-1 gap-1 sm:w-auto sm:flex-nowrap sm:gap-0.5">
+    <div className="flex w-full flex-wrap items-center gap-1 rounded-full border border-accent/30 bg-background/80 p-1 shadow-sm sm:w-auto sm:flex-nowrap">
       <button
         onClick={() => handleSwitch('generate')}
         className={cn(
-          'min-h-10 flex-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all sm:flex-none sm:px-4 sm:text-sm',
+          'control-h flex-1 rounded-full px-4 text-sm font-semibold transition-all sm:flex-none',
           currentView === 'generate'
-            ? 'bg-[#E07C24] shadow-sm text-white'
-            : 'text-muted-foreground hover:text-foreground',
+            ? 'bg-primary-gradient text-white shadow-sm'
+            : 'text-muted-foreground hover:text-foreground'
         )}
       >
         Generate Rankings
@@ -48,10 +48,10 @@ export function LeaderboardViewToggle({ currentView }: LeaderboardViewToggleProp
       <button
         onClick={() => handleSwitch('past')}
         className={cn(
-          'min-h-10 flex-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all sm:flex-none sm:px-4 sm:text-sm',
+          'control-h flex-1 rounded-full px-4 text-sm font-semibold transition-all sm:flex-none',
           currentView === 'past'
-            ? 'bg-[#E07C24] shadow-sm text-white'
-            : 'text-muted-foreground hover:text-foreground',
+            ? 'bg-primary-gradient text-white shadow-sm'
+            : 'text-muted-foreground hover:text-foreground'
         )}
       >
         View Past Rankings

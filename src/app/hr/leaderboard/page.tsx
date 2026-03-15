@@ -6,6 +6,7 @@ import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-cont
 import { LeaderboardViewToggle } from '@/components/hr/leaderboard/leaderboard-view-toggle';
 import { PastRanksList } from '@/components/hr/leaderboard/past-ranks-list';
 import { PeriodSelector } from '@/components/hr/leaderboard/period-selector';
+import { PageHeader } from '@/components/shared/page-header';
 import { getISOWeeksInYear } from '@/lib/utils/time-period-utils';
 import type { RankLogPeriodType } from '@/types';
 
@@ -108,40 +109,43 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
     currentView === 'past' && !isViewingSpecificPastRank ? await getAllRankingPeriods() : null;
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-white px-3 py-3 sm:px-4 sm:py-4">
-      <div className="mx-auto mt-2 w-full max-w-7xl sm:mt-4">
-        <div className="mb-2 sm:mb-3">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            <div className="flex flex-col gap-1">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Leaderboard
-              </h1>
-              <p className="text-xs text-muted-foreground sm:text-sm">
-                Generate rankings by period and control employee visibility.
-              </p>
+    <main className="w-full min-h-screen bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-4 sm:gap-6 2xl:max-w-screen-2xl">
+        <div className="space-y-4 sm:space-y-5">
+          <PageHeader
+            title="Leaderboard"
+            subtitle="Generate rankings by period and control employee visibility."
+          />
+
+          <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5">
+            <div className="flex min-w-0 flex-col gap-3">
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <LeaderboardViewToggle currentView={currentView} />
+
+                {isViewingSpecificPastRank ? (
+                  <Link
+                    href="/hr/leaderboard?view=past"
+                    className="inline-flex items-center gap-1 self-start text-meta font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Back to Past Rankings
+                  </Link>
+                ) : null}
+              </div>
+
+              {currentView === 'generate' ? (
+                <div className="min-w-0 xl:max-w-4xl">
+                  <PeriodSelector
+                    currentType={periodType}
+                    currentYear={year}
+                    currentWeek={week}
+                    currentMonth={month}
+                    currentPeriodRankingExists={currentPeriodRankingExists}
+                  />
+                </div>
+              ) : null}
             </div>
-            <LeaderboardViewToggle currentView={currentView} />
-          </div>
-
-          {currentView === 'generate' ? (
-            <PeriodSelector
-              currentType={periodType}
-              currentYear={year}
-              currentWeek={week}
-              currentMonth={month}
-              currentPeriodRankingExists={currentPeriodRankingExists}
-            />
-          ) : null}
-
-          {isViewingSpecificPastRank ? (
-            <Link
-              href="/hr/leaderboard?view=past"
-              className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Back to Past Rankings
-            </Link>
-          ) : null}
+          </section>
         </div>
 
         {currentView === 'past' && !isViewingSpecificPastRank ? (
@@ -156,6 +160,6 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
           />
         )}
       </div>
-    </div>
+    </main>
   );
 }

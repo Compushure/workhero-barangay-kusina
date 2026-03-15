@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export type StockFilter = 'all' | 'in-stock' | 'out-of-stock';
 export type VisibilityFilter = 'all' | 'visible' | 'hidden';
@@ -30,6 +31,7 @@ interface MercadoFilterToggleProps {
   onStockFilterChange: (value: StockFilter) => void;
   onVisibilityFilterChange: (value: VisibilityFilter) => void;
   onIntervalFilterChange: (value: IntervalFilter) => void;
+  className?: string;
 }
 
 export function MercadoFilterToggle({
@@ -39,6 +41,7 @@ export function MercadoFilterToggle({
   onStockFilterChange,
   onVisibilityFilterChange,
   onIntervalFilterChange,
+  className,
 }: MercadoFilterToggleProps) {
   const activeFilterCount =
     (stockFilter !== 'all' ? 1 : 0) +
@@ -59,12 +62,12 @@ export function MercadoFilterToggle({
     }`;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn('flex items-center gap-2', className)}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="group gap-2 h-10 px-4 rounded-xl border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white transition-all duration-400 ease-in-out"
+            className="control-h text-button group inline-flex gap-2 rounded-xl border border-accent/25 bg-card px-4 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out hover:bg-accent-secondary hover:text-white"
           >
             <Filter className="h-4 w-4 text-accent group-hover:text-white transition-all duration-400 ease-in-out" />
             <span className="hidden sm:inline">Filter</span>
@@ -77,7 +80,7 @@ export function MercadoFilterToggle({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="start"
-          className="w-64 max-h-80 rounded-xl overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="manager-dropdown-content w-64 max-h-80 rounded-xl overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Stock Status

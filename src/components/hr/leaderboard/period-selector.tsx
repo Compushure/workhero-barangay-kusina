@@ -162,12 +162,7 @@ export function PeriodSelector({
   };
 
   const handleGenerateRank = () => {
-    const targetUrl = buildUrlForCurrentPeriod(
-      currentType,
-      currentYear,
-      currentWeek,
-      currentMonth
-    );
+    const targetUrl = buildUrlForCurrentPeriod(currentType, currentYear, currentWeek, currentMonth);
 
     startTransition(() => {
       router.push(targetUrl);
@@ -199,68 +194,72 @@ export function PeriodSelector({
   const isGenerating = generateRankingMutation.isPending;
 
   return (
-    <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-      {/* Period Type */}
-      <div className="flex w-full flex-col gap-1.5 sm:w-auto">
-        <label className="text-xs font-medium text-muted-foreground">Period Type</label>
-        <Select value={currentType} onValueChange={handlePeriodTypeChange}>
-          <SelectTrigger className="w-full bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white sm:w-28">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="weekly">Weekly</SelectItem>
-            <SelectItem value="monthly">Monthly</SelectItem>
-            <SelectItem value="yearly">Yearly</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Period value: dropdown for weekly (two previous weeks), read-only for monthly/yearly */}
-      <div className="flex w-full flex-col gap-1.5 sm:w-auto sm:min-w-56">
-        <label className="text-xs font-medium text-muted-foreground uppercase">
-          {periodFieldLabel}
-        </label>
-        {currentType === 'weekly' ? (
-          <Select value={currentWeeklyKey} onValueChange={handleWeeklyPeriodChange}>
-            <SelectTrigger className="w-full bg-white border-gray-300 text-foreground transition-all duration-200 hover:bg-[#E07C24] hover:text-white hover:border-[#E07C24] hover:shadow-md hover:[&_svg]:opacity-100 hover:[&_svg]:text-white sm:min-w-56">
+    <div className="rounded-3xl border border-accent/20 bg-card p-4 shadow-sm/40">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[280px_minmax(0,1fr)_auto]">
+        {/* Period Type */}
+        <div className="flex w-full flex-col gap-1.5">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Period Type
+          </span>
+          <Select value={currentType} onValueChange={handlePeriodTypeChange}>
+            <SelectTrigger className="control-h w-full rounded-full border border-border bg-background/80 px-4 text-sm font-semibold text-foreground shadow-sm focus-visible:ring-2 focus-visible:ring-primary">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {weeklySelectOptions.map(({ year: y, week: w }) => {
-                const key = `${y}-${w}`;
-                const label = `${buildPeriodLabel('weekly', y, undefined, w)} (${getISOWeekDateRangeLabelShort(y, w)})`;
-                return (
-                  <SelectItem key={key} value={key}>
-                    {label}
-                  </SelectItem>
-                );
-              })}
+              <SelectItem value="weekly">Weekly</SelectItem>
+              <SelectItem value="monthly">Monthly</SelectItem>
+              <SelectItem value="yearly">Yearly</SelectItem>
             </SelectContent>
           </Select>
-        ) : (
-          <div className="flex min-h-10 w-full items-center gap-2 rounded-md border border-gray-300 bg-muted/50 px-3 py-2 text-sm font-medium text-foreground sm:min-w-40 sm:w-auto">
-            <span>{periodLabel}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Show Rankings or "Already generated" indicator */}
-      {hasRanking ? (
-        <div className="flex w-full items-center self-start sm:w-auto sm:self-end">
-          <div className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-800 sm:w-auto sm:justify-start">
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
-            Ranking already generated
-          </div>
         </div>
-      ) : (
-        <Button
-          onClick={handleGenerateRank}
-          disabled={isPending || isGenerating}
-          className="self-start min-h-10 w-full bg-primary-gradient text-white hover:opacity-95 sm:w-auto sm:self-end"
-        >
-          {isGenerating ? 'Generating…' : 'Generate Rank'}
-        </Button>
-      )}
+
+        {/* Period value */}
+        <div className="flex w-full flex-col gap-1.5">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            {periodFieldLabel}
+          </span>
+          {currentType === 'weekly' ? (
+            <Select value={currentWeeklyKey} onValueChange={handleWeeklyPeriodChange}>
+              <SelectTrigger className="control-h w-full rounded-full border border-border bg-background/80 px-4 text-sm font-semibold text-foreground shadow-sm focus-visible:ring-2 focus-visible:ring-primary">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {weeklySelectOptions.map(({ year: y, week: w }) => {
+                  const key = `${y}-${w}`;
+                  const label = `${buildPeriodLabel('weekly', y, undefined, w)} (${getISOWeekDateRangeLabelShort(y, w)})`;
+                  return (
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          ) : (
+            <div className="control-h inline-flex items-center rounded-full border border-dashed border-accent/40 bg-background/60 px-4 text-sm font-semibold text-foreground">
+              <span>{periodLabel}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Status / Action */}
+        <div className="flex w-full items-center self-start">
+          {hasRanking ? (
+            <div className="control-h inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-700 lg:w-auto">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              Ranking ready
+            </div>
+          ) : (
+            <Button
+              onClick={handleGenerateRank}
+              disabled={isPending || isGenerating}
+              className="control-h w-full rounded-full bg-primary-gradient px-6 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 lg:w-auto"
+            >
+              {isGenerating ? 'Generating…' : 'Generate Rank'}
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

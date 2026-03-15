@@ -1,18 +1,21 @@
 'use client';
 
 import { Eye, EyeOff } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useToggleRankingVisibility } from '@/hooks/tanstack/mutations/hrMutations';
 
 interface VisibilityToggleProps {
   rankingPeriodId: string;
   isVisible: boolean;
   disabled?: boolean;
+  className?: string;
 }
 
 export default function VisibilityToggle({
   rankingPeriodId,
   isVisible,
   disabled = false,
+  className,
 }: VisibilityToggleProps) {
   const toggleVisibilityMutation = useToggleRankingVisibility();
 
@@ -23,17 +26,20 @@ export default function VisibilityToggle({
     });
   };
 
+  const variantClasses = isVisible
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300'
+    : 'border-border bg-background text-muted-foreground hover:text-foreground hover:border-accent/40';
+
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={disabled || toggleVisibilityMutation.isPending}
-      className={[
-        'inline-flex min-h-10 items-center gap-1.5 rounded-md border px-2.5 py-2 text-xs font-medium transition-colors sm:px-3 sm:text-sm',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
-        isVisible
-          ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300'
-          : 'border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:border-gray-300',
-      ].join(' ')}
+      className={cn(
+        'control-h inline-flex items-center gap-2 rounded-full border px-3 text-sm font-semibold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-60',
+        variantClasses,
+        className
+      )}
     >
       {isVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
       {isVisible ? 'Visible to employee' : 'Hidden from employee'}
