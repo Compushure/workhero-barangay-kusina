@@ -67,10 +67,7 @@ export function SearchFilter({
         <div className="flex flex-col md:flex-row items-stretch md:items-end gap-2 sm:gap-3 lg:gap-4 w-full">
           {/* Search (longer) */}
           <div className="flex-1 min-w-0">
-            <Label
-              htmlFor="search"
-              className="flex items-center text-meta mb-1"
-            >
+            <Label htmlFor="search" className="flex items-center text-meta mb-1">
               Employee Name
             </Label>
             <div className="relative">
@@ -263,31 +260,33 @@ export function SearchFilter({
 
 export function SearchFilterSkeleton() {
   return (
-    <div className="rounded-3xl bg-background p-3 sm:p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 overflow-x-hidden animate-pulse">
+    <div className="rounded-2xl bg-primary-gradient p-3 sm:p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8 shadow-sm/25 overflow-x-hidden animate-pulse">
+      {/* Header skeleton */}
       <div className="flex items-center justify-between w-full mb-3 sm:mb-4 lg:mb-5">
-        <div className="h-5 sm:h-6 bg-background rounded w-32 sm:w-40" />
+        <div className="h-5 w-32 sm:w-40 bg-background rounded" />
         <div className="h-5 w-5 rounded bg-background md:hidden" />
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5">
-        <div className="space-y-2 md:col-span-2 xl:col-span-2 2xl:col-span-2">
-          <div className="h-4 sm:h-5 bg-background rounded w-28 sm:w-36" />
-          <div className="h-10 sm:h-11 lg:h-12 bg-background rounded-xl w-full" />
+      {/* Single row skeleton layout */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-end gap-2 sm:gap-3 lg:gap-4 w-full">
+        {/* Search skeleton (longer) */}
+        <div className="flex-1 min-w-0">
+          <div className="h-4 w-24 bg-background rounded mb-1" />
+          <div className="h-10 bg-background rounded-md w-full" />
         </div>
-
-        <div className="space-y-2">
-          <div className="h-4 sm:h-5 bg-background rounded w-16 sm:w-24" />
-          <div className="h-10 sm:h-11 lg:h-12 bg-background rounded-xl w-full" />
+        {/* Employee Type Filter skeleton */}
+        <div className="w-full md:w-30 sm:md:w-35 lg:md:w-40 shrink-0">
+          <div className="h-4 w-20 bg-background rounded mb-1" />
+          <div className="h-10 bg-background rounded-md w-full" />
         </div>
-
-        <div className="space-y-2">
-          <div className="h-4 sm:h-5 bg-background rounded w-20 sm:w-28" />
-          <div className="h-10 sm:h-11 lg:h-12 bg-background rounded-xl w-full" />
+        {/* Employment Status Filter skeleton */}
+        <div className="w-full md:w-30 sm:md:w-35 lg:md:w-40 shrink-0">
+          <div className="h-4 w-20 bg-background rounded mb-1" />
+          <div className="h-10 bg-background rounded-md w-full" />
         </div>
-
-        <div className="space-y-2 md:col-span-2 xl:col-span-2 2xl:col-span-2">
-          <div className="h-4 sm:h-5 bg-background rounded w-16 sm:w-20" />
-          <div className="h-10 sm:h-11 lg:h-12 bg-background rounded-xl w-full" />
+        {/* Sort skeleton */}
+        <div className="w-full md:w-30 sm:md:w-35 lg:md:w-40 shrink-0">
+          <div className="h-4 w-16 bg-background rounded mb-1" />
+          <div className="h-10 bg-background rounded-md w-full" />
         </div>
       </div>
     </div>
