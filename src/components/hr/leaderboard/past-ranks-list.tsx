@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, Eye, EyeOff, History } from 'lucide-react';
-import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Pagination as PastRanksPagination } from '@/components/shared/pagination';
 import { PastRanksListSkeleton } from '@/components/hr/leaderboard/past-ranks-list-skeleton';
@@ -11,6 +10,7 @@ import { PeriodFilters, TAB_LABELS } from '@/components/hr/leaderboard/period-fi
 import {
   usePastRanksFilter,
   periodLabel,
+  periodRangeLabel,
   buildUrl,
   PAST_RANKS_PAGE_SIZE,
 } from '@/hooks/hr/usePastRanksFilter';
@@ -44,11 +44,7 @@ function PeriodRow({ row, onSelect }: PeriodRowProps) {
             </span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground">
-          Generated
-          <span className="mx-1">·</span>
-          {format(new Date(row.generated_at), 'MMM d, yyyy')}
-        </p>
+        <p className="text-xs font-normal text-muted-foreground">{periodRangeLabel(row)}</p>
       </div>
 
       <div className="flex w-full shrink-0 items-center gap-4 sm:w-auto">
@@ -115,20 +111,21 @@ export function PastRanksList({ initialData }: PastRanksListProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<RankingPeriodType>('weekly');
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const { periods, error, isPending, grouped, list, paginatedList, totalPages, page } =
-    usePastRanksFilter({ initialData, activeTab, currentPage, searchQuery });
+    usePastRanksFilter({ initialData, activeTab, currentPage, selectedDate });
 
   const placeholderCount = Math.max(0, PAST_RANKS_PAGE_SIZE - paginatedList.length);
 
   const handleTypeChange = (value: string) => {
     setActiveTab(value as RankingPeriodType);
     setCurrentPage(1);
+    setSelectedDate(null);
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
+  const handleDateChange = (date: Date | null) => {
+    setSelectedDate(date);
     setCurrentPage(1);
   };
 
@@ -152,16 +149,16 @@ export function PastRanksList({ initialData }: PastRanksListProps) {
                 Past Generated Ranks
               </h2>
               <p className="text-xs text-muted-foreground sm:text-sm">
-                Browse previously generated rankings by period.
+                Browse previously generated rankings.
               </p>
             </div>
 
             <PeriodFilters
               activeTab={activeTab}
-              searchQuery={searchQuery}
+              selectedDate={selectedDate}
               hasAnyPeriods={(periods?.length ?? 0) > 0}
               onTypeChange={handleTypeChange}
-              onSearchChange={handleSearchChange}
+              onDateChange={handleDateChange}
             />
 
             <div className="flex flex-col flex-1 overflow-hidden gap-2">

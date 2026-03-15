@@ -19,6 +19,8 @@ export function RewardRequestsContent() {
 
   // Fetch redemption requests from database with status filter
   const { data: requests = [], isLoading, error } = useGetRedemptionRequests(statusFilter);
+  // Show skeleton only on first load to avoid flicker during background refetch.
+  const isTableLoading = isLoading && requests.length === 0;
 
   useEffect(() => {
     if (error) {
@@ -75,27 +77,27 @@ export function RewardRequestsContent() {
   return (
     <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
       <div className="mx-auto max-w-7xl 2xl:max-w-440 w-full flex-1 flex flex-col">
-        {isLoading ? (
-          <HeaderSkeleton />
-        ) : (
-          <div className="flex-1 flex flex-col gap-4 sm:gap-6">
-            <Suspense fallback={<HeaderSkeleton />}>
-              <HeaderSection
-                title="Redemption Requests"
-                description="Manage employee's request of redemption"
-                searchTerm={searchTerm}
-                onSearch={handleSearch}
-                onSort={handleSort}
-                sortBy={sortBy}
-                statusFilter={statusFilter}
-                onStatusChange={handleStatusChange}
-              />
-            </Suspense>
-            <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col gap-4 sm:gap-6">
+          <Suspense fallback={<HeaderSkeleton />}>
+            <HeaderSection
+              title="Redemption Requests"
+              description="Manage employee's request of redemption"
+              searchTerm={searchTerm}
+              onSearch={handleSearch}
+              onSort={handleSort}
+              sortBy={sortBy}
+              statusFilter={statusFilter}
+              onStatusChange={handleStatusChange}
+            />
+          </Suspense>
+          <div className="flex-1 flex flex-col">
+            {isTableLoading ? (
+              <RedemptionTableSkeleton rows={8} />
+            ) : (
               <RedemptionTable data={filteredRequests} status={statusFilter} />
-            </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

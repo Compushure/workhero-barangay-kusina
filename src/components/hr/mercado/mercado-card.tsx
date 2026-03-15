@@ -44,6 +44,7 @@ export const MercadoCard = memo(function MercadoCard({
   onUnhide,
 }: MercadoCardProps) {
   const [hideDialogOpen, setHideDialogOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
@@ -68,8 +69,11 @@ export const MercadoCard = memo(function MercadoCard({
   }, [isHidden, item.id, onHide, onUnhide]);
 
   const handleCardClick = useCallback(() => {
+    if (isMenuOpen || hideDialogOpen) {
+      return;
+    }
     onClick?.(item.id);
-  }, [onClick, item.id]);
+  }, [onClick, item.id, isMenuOpen, hideDialogOpen]);
 
   const availableDateText = useMemo(() => {
     if (!item.availableDate) return null;
@@ -110,7 +114,9 @@ export const MercadoCard = memo(function MercadoCard({
       </div>
 
       <div className="flex-1 min-w-0 pr-10 flex flex-col gap-1">
-        <h3 className="text-base sm:text-lg font-semibold text-primary truncate leading-tight">{item.name}</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-primary truncate leading-tight">
+          {item.name}
+        </h3>
 
         <div className="flex min-h-5 items-center gap-1.5 flex-wrap">
           {availableDateText && (
@@ -152,7 +158,7 @@ export const MercadoCard = memo(function MercadoCard({
         </div>
 
         <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
+          <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
@@ -163,7 +169,12 @@ export const MercadoCard = memo(function MercadoCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32 rounded-xl">
-              <DropdownMenuItem onClick={() => setHideDialogOpen(true)}>
+              <DropdownMenuItem
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setHideDialogOpen(true);
+                }}
+              >
                 {isHidden ? (
                   <Eye className="mr-2 h-4 w-4 text-primary" />
                 ) : (
@@ -171,12 +182,20 @@ export const MercadoCard = memo(function MercadoCard({
                 )}
                 {isHidden ? 'Unhide' : 'Hide'}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit?.(item.id)}>
+              <DropdownMenuItem
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onEdit?.(item.id);
+                }}
+              >
                 <Pencil className="mr-2 h-4 w-4 text-primary" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => onDelete?.(item.id)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onDelete?.(item.id);
+                }}
                 className="text-red-600 font-semibold"
               >
                 <Trash2 className="mr-2 h-4 w-4 text-red-600" />
