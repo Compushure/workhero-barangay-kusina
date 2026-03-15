@@ -42,7 +42,7 @@ export function SearchFilter({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="rounded-3xl bg-background p-3 sm:p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 overflow-x-hidden">
+    <div className="rounded-2xl bg-background p-3 sm:p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8 shadow-sm/25 overflow-x-hidden">
       {/* Header */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
@@ -51,7 +51,7 @@ export function SearchFilter({
       >
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="h-4 w-4 text-accent-secondary" />
-          <p className="text-sm lg:text-base font-semibold text-foreground">Search & Filters</p>
+          <p className="text-sm lg:text-lg font-semibold text-foreground">Search & Filters</p>
         </div>
         <ChevronDown
           className={`h-4 w-4 text-gray-600 transition-transform md:hidden ${
@@ -69,7 +69,7 @@ export function SearchFilter({
           <div className="flex-1 min-w-0">
             <Label
               htmlFor="search"
-              className="flex items-center text-xs sm:text-sm lg:text-base text-meta mb-1"
+              className="flex items-center text-meta mb-1"
             >
               Employee Name
             </Label>

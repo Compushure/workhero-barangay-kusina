@@ -261,7 +261,7 @@ export function ManagerPage() {
   return (
     <div className="min-h-screen bg-zinc-100 overflow-x-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-background border-b-3 border-[#f47812]/15 shadow-sm/25">
+      <header className="sticky top-0 z-10 bg-primary-gradient shadow-sm/25">
         <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2.5 sm:py-3 md:py-4 lg:py-5">
           {isLoading ? (
             <div className="animate-pulse flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
@@ -278,10 +278,10 @@ export function ManagerPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
               <div className="flex items-center gap-3 sm:gap-4">
                 <div>
-                  <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-foreground">
+                  <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-white">
                     User Management
                   </h1>
-                  <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-gray-600">
+                  <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-meta text-white">
                     {users.length} total users on page {page}
                   </p>
                 </div>
@@ -290,7 +290,7 @@ export function ManagerPage() {
                 <Button
                   variant="default"
                   onClick={() => setAddModalOpen(true)}
-                  className="gap-0 md:gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-3 md:px-4 h-9 sm:h-10"
+                  className="gap-0 md:gap-2 bg-background text-foreground border-accent cursor-pointer hover:bg-accent-secondary hover:text-white transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-3 md:px-4 h-9 sm:h-10"
                   aria-label="Add User"
                 >
                   <UserPlus className="h-4 w-4" />
@@ -300,7 +300,7 @@ export function ManagerPage() {
                   variant="default"
                   onClick={handleLogout}
                   disabled={isPending}
-                  className="gap-0 md:gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-3 md:px-4 h-9 sm:h-10"
+                  className="gap-0 md:gap-2 bg-background text-foreground border-accent cursor-pointer hover:bg-accent-secondary hover:text-white transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-3 md:px-4 h-9 sm:h-10"
                   aria-label="Logout"
                 >
                   <LogOut className="h-4 w-4" />
