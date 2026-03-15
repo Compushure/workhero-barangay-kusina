@@ -8,8 +8,11 @@ import {
   CheckCircle,
   ChevronLeft,
   FileText,
+  LayoutDashboard,
   Medal,
+  ShoppingCart,
   SquarePen,
+  Trophy,
   UserCircle2,
   type LucideIcon,
 } from 'lucide-react';
@@ -31,7 +34,7 @@ interface NavItem {
 }
 
 interface SidebarProps {
-  navItems?: NavItem[];
+  view: 'manager' | 'hr';
 }
 
 function SidebarUserProfile({
@@ -70,7 +73,7 @@ function SidebarUserProfile({
   );
 }
 
-const defaultNavItems: NavItem[] = [
+const managerNavItems: NavItem[] = [
   {
     key: 'assignment',
     label: 'Task Assignment',
@@ -108,13 +111,38 @@ const defaultNavItems: NavItem[] = [
   },
 ];
 
-export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
+const hrNavItems: NavItem[] = [
+  {
+    key: 'reward-requests',
+    label: 'Rewards Requests',
+    mobileLabel: 'Requests',
+    icon: LayoutDashboard,
+    href: '/hr/reward-requests',
+  },
+  {
+    key: 'mercado',
+    label: 'Mercado',
+    mobileLabel: 'Mercado',
+    icon: ShoppingCart,
+    href: '/hr/mercado',
+  },
+  {
+    key: 'leaderboard',
+    label: 'Leaderboard',
+    mobileLabel: 'Ranks',
+    icon: Trophy,
+    href: '/hr/leaderboard',
+  },
+];
+
+export function Sidebar({ view }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { startNavigation, stopNavigation, isNavigating, isLoggingOut } = useNavigationStore();
   const { data: user } = useGetSessionUser();
+  const navItems = view === 'manager' ? managerNavItems : hrNavItems;
 
   useEffect(() => {
     if (pendingHref && pathname === pendingHref) {
