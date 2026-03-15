@@ -38,8 +38,9 @@ interface RedemptionRequestParams {
   remarks?: string;
 }
 
-interface RedemptionMutationContext {
-  previousRedemptionQueries: Array<[QueryKey, import('@/types').RedemptionRequest[] | undefined]>;
+interface OptimisticRedemptionContext {
+  previousListQueries: Array<[QueryKey, RedemptionRequest[] | undefined]>;
+  previousMyRequestQueries: Array<[QueryKey, RedemptionRequest[] | undefined]>;
 }
 
 interface GenerateRankingParams {
@@ -57,9 +58,83 @@ interface GenerateRankingContext {
 interface VisibilityMutationContext {
   previousHrData: Array<[QueryKey, EnrichedLeaderboardResult | null | undefined]>;
   previousVisiblePeriods: RankingPeriodWithTop[] | null | undefined;
+  previousLatestPeriods: LatestPeriods | null | undefined;
 }
 
 const OPTIMISTIC_ROWS = 10;
+
+interface RewardMutationContext {
+  previousRewards: Reward[] | undefined;
+  temporaryRewardId?: string;
+}
+
+function invalidateRewardCaches(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: rewardKeys.all });
+  queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
+}
+
+function updateRedemptionStatus(
+  list: RedemptionRequest[] | undefined,
+  params: RedemptionRequestParams,
+  status: RedemptionRequest['status']
+): RedemptionRequest[] | undefined {
+  if (!list) return list;
+
+  return list.map((item) =>
+    item.id === params.id
+      ? {
+          ...item,
+          status,
+          remarks: params.remarks ?? item.remarks,
+        }
+      : item
+  );
+}
+
+async function optimisticUpdateRedemptionStatus(
+  queryClient: ReturnType<typeof useQueryClient>,
+  params: RedemptionRequestParams,
+  status: RedemptionRequest['status']
+): Promise<OptimisticRedemptionContext> {
+  await queryClient.cancelQueries({ queryKey: redemptionKeys.lists() });
+  await queryClient.cancelQueries({ queryKey: redemptionKeys.myRequests() });
+
+  const previousListQueries = queryClient.getQueriesData<RedemptionRequest[]>({
+    queryKey: redemptionKeys.lists(),
+  });
+  const previousMyRequestQueries = queryClient.getQueriesData<RedemptionRequest[]>({
+    queryKey: redemptionKeys.myRequests(),
+  });
+
+  for (const [queryKey] of previousListQueries) {
+    queryClient.setQueryData<RedemptionRequest[]>(queryKey, (existing) =>
+      updateRedemptionStatus(existing, params, status)
+    );
+  }
+
+  for (const [queryKey] of previousMyRequestQueries) {
+    queryClient.setQueryData<RedemptionRequest[]>(queryKey, (existing) =>
+      updateRedemptionStatus(existing, params, status)
+    );
+  }
+
+  return { previousListQueries, previousMyRequestQueries };
+}
+
+function rollbackOptimisticRedemptionUpdate(
+  queryClient: ReturnType<typeof useQueryClient>,
+  context?: OptimisticRedemptionContext
+) {
+  if (!context) return;
+
+  for (const [queryKey, data] of context.previousListQueries) {
+    queryClient.setQueryData(queryKey, data);
+  }
+
+  for (const [queryKey, data] of context.previousMyRequestQueries) {
+    queryClient.setQueryData(queryKey, data);
+  }
+}
 
 function toOptimisticPlayers(): (LeaderboardPlayer & { rank: number })[] {
   return Array.from({ length: OPTIMISTIC_ROWS }, (_, index) => {
@@ -156,34 +231,13 @@ export function useDeclineRedemptionRequest() {
     mutationFn: async (params: RedemptionRequestParams): Promise<void> => {
       await handleDeclineRedemptionRequestAction(params);
     },
-    onMutate: async ({ id }): Promise<RedemptionMutationContext> => {
-      await queryClient.cancelQueries({ queryKey: redemptionKeys.lists() });
-
-      const previousRedemptionQueries = queryClient.getQueriesData<import('@/types').RedemptionRequest[]>({
-        queryKey: redemptionKeys.lists(),
-      });
-
-      startOptimistic();
-      optimisticRemoveRequest(id);
-
-      previousRedemptionQueries.forEach(([queryKey]) => {
-        queryClient.setQueryData<import('@/types').RedemptionRequest[]>(queryKey, (old) => {
-          if (!old) return old;
-          return old.filter((request) => request.id !== id);
-        });
-      });
-
-      return { previousRedemptionQueries };
+    onMutate: async (params) => {
+      return await optimisticUpdateRedemptionStatus(queryClient, params, 'rejected');
     },
-    onError: (_error, _variables, context) => {
-      context?.previousRedemptionQueries.forEach(([queryKey, previousData]) => {
-        queryClient.setQueryData(queryKey, previousData);
-      });
-      rollback();
+    onError: (_error, _params, context) => {
+      rollbackOptimisticRedemptionUpdate(queryClient, context);
     },
-    onSuccess: () => {
-      commit();
-      // Invalidate redemption queries to refetch the list
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
@@ -202,34 +256,13 @@ export function useAcceptRedemptionRequest() {
     mutationFn: async (params: RedemptionRequestParams): Promise<void> => {
       await handleAcceptRedemptionRequestAction(params);
     },
-    onMutate: async ({ id }): Promise<RedemptionMutationContext> => {
-      await queryClient.cancelQueries({ queryKey: redemptionKeys.lists() });
-
-      const previousRedemptionQueries = queryClient.getQueriesData<import('@/types').RedemptionRequest[]>({
-        queryKey: redemptionKeys.lists(),
-      });
-
-      startOptimistic();
-      optimisticRemoveRequest(id);
-
-      previousRedemptionQueries.forEach(([queryKey]) => {
-        queryClient.setQueryData<import('@/types').RedemptionRequest[]>(queryKey, (old) => {
-          if (!old) return old;
-          return old.filter((request) => request.id !== id);
-        });
-      });
-
-      return { previousRedemptionQueries };
+    onMutate: async (params) => {
+      return await optimisticUpdateRedemptionStatus(queryClient, params, 'approved');
     },
-    onError: (_error, _variables, context) => {
-      context?.previousRedemptionQueries.forEach(([queryKey, previousData]) => {
-        queryClient.setQueryData(queryKey, previousData);
-      });
-      rollback();
+    onError: (_error, _params, context) => {
+      rollbackOptimisticRedemptionUpdate(queryClient, context);
     },
-    onSuccess: () => {
-      commit();
-      // Invalidate redemption queries to refetch the list
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
@@ -269,18 +302,59 @@ export function useAddReward() {
     mutationFn: async (input: AddRewardInput): Promise<Reward | null> => {
       return await handleAddRewardAction(input);
     },
-    onSuccess: (newReward) => {
-      if (newReward) {
-        // Optimistically update the cache with the new reward
-        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
-          if (!existing) return [newReward];
-          return [...existing, newReward];
-        });
+    onMutate: async (input): Promise<RewardMutationContext> => {
+      await queryClient.cancelQueries({ queryKey: rewardKeys.lists() });
+
+      const previousRewards = queryClient.getQueryData<Reward[]>(rewardKeys.list());
+      const temporaryRewardId = `optimistic-reward-${Date.now()}`;
+
+      const optimisticReward: Reward = {
+        id: temporaryRewardId,
+        name: input.name,
+        pointsCost: input.pointsCost,
+        quantity: input.quantity,
+        redeemingLimit: input.redeemingLimit,
+        category: input.category,
+        isActive: input.isActive ?? true,
+        availableDate: input.availableDate ?? null,
+        availableMonth: input.availableMonth ?? null,
+        createdAt: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return [optimisticReward];
+        return [...existing, optimisticReward];
+      });
+
+      return { previousRewards, temporaryRewardId };
+    },
+    onSuccess: (newReward, _input, context) => {
+      if (!newReward) {
+        if (context?.previousRewards) {
+          queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+        }
+        return;
       }
 
-      // Invalidate both HR and Employee queries to ensure real-time updates
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return [newReward];
+
+        if (!context?.temporaryRewardId) {
+          return [...existing, newReward];
+        }
+
+        return existing.map((reward) =>
+          reward.id === context.temporaryRewardId ? newReward : reward
+        );
+      });
+    },
+    onError: (_error, _input, context) => {
+      if (context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onSettled: () => {
+      invalidateRewardCaches(queryClient);
     },
   });
 }
@@ -296,20 +370,59 @@ export function useEditReward() {
     mutationFn: async ({ id, input }: { id: string; input: EditRewardInput }): Promise<Reward | null> => {
       return await handleEditRewardAction(id, input);
     },
-    onSuccess: (updatedReward) => {
-      if (updatedReward) {
-        // Optimistically update the cache
-        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
-          if (!existing) return [updatedReward];
-          return existing.map((reward) =>
-            reward.id === updatedReward.id ? updatedReward : reward
-          );
-        });
+    onMutate: async ({ id, input }): Promise<RewardMutationContext> => {
+      await queryClient.cancelQueries({ queryKey: rewardKeys.lists() });
+
+      const previousRewards = queryClient.getQueryData<Reward[]>(rewardKeys.list());
+
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return existing;
+
+        return existing.map((reward) =>
+          reward.id === id
+            ? {
+                ...reward,
+                name: input.name ?? reward.name,
+                pointsCost: input.pointsCost ?? reward.pointsCost,
+                quantity: input.quantity ?? reward.quantity,
+                redeemingLimit: input.redeemingLimit ?? reward.redeemingLimit,
+                category: input.category ?? reward.category,
+                isActive: input.isActive ?? reward.isActive,
+                availableDate:
+                  input.availableDate === undefined ? reward.availableDate : input.availableDate,
+                availableMonth:
+                  input.availableMonth === undefined
+                    ? reward.availableMonth
+                    : input.availableMonth,
+              }
+            : reward
+        );
+      });
+
+      return { previousRewards };
+    },
+    onSuccess: (updatedReward, _variables, context) => {
+      if (!updatedReward) {
+        if (context?.previousRewards) {
+          queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+        }
+        return;
       }
 
-      // Invalidate both HR and Employee queries to ensure real-time updates
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return [updatedReward];
+        return existing.map((reward) =>
+          reward.id === updatedReward.id ? updatedReward : reward
+        );
+      });
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onSettled: () => {
+      invalidateRewardCaches(queryClient);
     },
   });
 }
@@ -325,18 +438,30 @@ export function useDeleteReward() {
     mutationFn: async (id: string): Promise<boolean> => {
       return await handleDeleteRewardAction(id);
     },
-    onSuccess: (success, deletedId) => {
-      if (success) {
-        // Optimistically remove from cache
-        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
-          if (!existing) return existing;
-          return existing.filter((reward) => reward.id !== deletedId);
-        });
-      }
+    onMutate: async (id): Promise<RewardMutationContext> => {
+      await queryClient.cancelQueries({ queryKey: rewardKeys.lists() });
 
-      // Invalidate both HR and Employee queries to ensure real-time updates
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
+      const previousRewards = queryClient.getQueryData<Reward[]>(rewardKeys.list());
+
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return existing;
+        return existing.filter((reward) => reward.id !== id);
+      });
+
+      return { previousRewards };
+    },
+    onSuccess: (success, _deletedId, context) => {
+      if (!success && context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onError: (_error, _deletedId, context) => {
+      if (context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onSettled: () => {
+      invalidateRewardCaches(queryClient);
     },
   });
 }
@@ -352,20 +477,32 @@ export function useHideReward() {
     mutationFn: async ({ id, isActive }: { id: string; isActive?: boolean }): Promise<boolean> => {
       return await handleHideRewardAction(id, isActive);
     },
-    onSuccess: (success, { id, isActive }) => {
-      if (success) {
-        // Optimistically update the cache
-        queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
-          if (!existing) return existing;
-          return existing.map((reward) =>
-            reward.id === id ? { ...reward, isActive: isActive ?? false } : reward
-          );
-        });
-      }
+    onMutate: async ({ id, isActive }): Promise<RewardMutationContext> => {
+      await queryClient.cancelQueries({ queryKey: rewardKeys.lists() });
 
-      // Invalidate both HR and Employee queries to ensure real-time updates
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
+      const previousRewards = queryClient.getQueryData<Reward[]>(rewardKeys.list());
+
+      queryClient.setQueryData<Reward[]>(rewardKeys.list(), (existing) => {
+        if (!existing) return existing;
+        return existing.map((reward) =>
+          reward.id === id ? { ...reward, isActive: isActive ?? false } : reward
+        );
+      });
+
+      return { previousRewards };
+    },
+    onSuccess: (success, _variables, context) => {
+      if (!success && context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousRewards) {
+        queryClient.setQueryData(rewardKeys.list(), context.previousRewards);
+      }
+    },
+    onSettled: () => {
+      invalidateRewardCaches(queryClient);
     },
   });
 }
@@ -451,13 +588,20 @@ export function useGenerateRankingByPeriod() {
   const queryClient = useQueryClient();
 
   return useMutation<RankingLeaderboardViewRow[] | null, Error, GenerateRankingParams, GenerateRankingContext>({
-    mutationFn: async (params) =>
-      handleGenerateRankingByPeriodAction(
+    mutationFn: async (params) => {
+      const rows = await handleGenerateRankingByPeriodAction(
         params.periodType,
         params.year,
         params.month,
         params.week
-      ),
+      );
+
+      if (!rows || rows.length === 0) {
+        throw new Error('No eligible employees found to generate ranking for this period');
+      }
+
+      return rows;
+    },
     onMutate: async (params) => {
       const periodKey = toPeriodKey(params);
       await queryClient.cancelQueries({ queryKey: periodKey });
@@ -478,11 +622,7 @@ export function useGenerateRankingByPeriod() {
         );
       }
 
-      if (rows && rows.length > 0) {
-        toast.success('Ranking generated successfully');
-      } else {
-        toast.error('No eligible employees found to generate ranking for this period');
-      }
+      toast.success('Ranking generated successfully');
     },
     onError: (error, _params, context) => {
       if (context) {
@@ -544,7 +684,7 @@ export function useToggleRankingVisibility() {
         }
       );
 
-      return { previousHrData, previousVisiblePeriods };
+      return { previousHrData, previousVisiblePeriods, previousLatestPeriods };
     },
     onSuccess: (_data, { isVisible }) => {
       toast.success(
@@ -557,6 +697,7 @@ export function useToggleRankingVisibility() {
           queryClient.setQueryData(queryKey, data);
         }
         queryClient.setQueryData(employeeKeys.visiblePeriods(), context.previousVisiblePeriods);
+        queryClient.setQueryData(employeeKeys.latestPeriods(), context.previousLatestPeriods);
       }
       toast.error(error.message || 'Failed to update ranking visibility');
     },

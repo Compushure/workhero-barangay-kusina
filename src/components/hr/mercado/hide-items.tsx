@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { EyeOff, Eye } from 'lucide-react';
+import { EyeOff, Eye, X } from 'lucide-react';
 
 interface HideRewardDialogProps {
   open: boolean;
@@ -25,7 +25,19 @@ export function HideRewardDialog({
 }: HideRewardDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-background text-card-foreground border border-border max-w-md rounded-2xl p-6">
+      <DialogContent className="bg-muted text-card-foreground border border-border max-w-md rounded-2xl p-6 [&>button]:hidden">
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onOpenChange(false);
+          }}
+          className="absolute right-4 top-4 rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        >
+          <X className="h-5 w-5 text-muted-foreground" />
+          <span className="sr-only">Close</span>
+        </button>
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="h-12 w-12 rounded-xl bg-background flex items-center justify-center">
