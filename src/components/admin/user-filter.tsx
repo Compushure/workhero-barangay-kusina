@@ -43,7 +43,7 @@ export function SearchFilter({
 
   return (
     <div className="rounded-3xl bg-background p-3 sm:p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 overflow-x-hidden">
-      {/* Header with collapse toggle - only on small screens */}
+      {/* Header */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="flex items-center justify-between w-full mb-3 sm:mb-4 lg:mb-5 md:pointer-events-none"
@@ -60,16 +60,16 @@ export function SearchFilter({
         />
       </button>
 
-      {/* Collapsible content - only on small screens */}
+      {/* Content */}
       <div
         className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5 transition-all duration-300 ease-in-out ${
           isCollapsed ? 'hidden md:grid' : 'grid'
         }`}
       >
-        {/* Search - Full width on mobile, spans 2 cols on md/lg, spans 2 on xl */}
+        {/* Search */}
         <div className="space-y-2 md:col-span-2 xl:col-span-2 2xl:col-span-2">
           <Label htmlFor="search" className="text-xs sm:text-sm lg:text-base text-foreground">
-            Search by Employee Name
+            Employee Name
           </Label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
@@ -105,17 +105,46 @@ export function SearchFilter({
           >
             <SelectTrigger
               id="filter-type"
-              className={`bg-white border-border focus:border-accent focus:ring-accent text-sm sm:text-base lg:text-lg ${
-                isLoading ? 'opacity-60 cursor-not-allowed' : ''
-              }`}
+              className={`bg-card hover:bg-gray-200 rounded-md text-primary w-30 sm:flex-1 sm:min-w-[152px] 
+              control-h cursor-pointer shadow-sm/50 flex justify-between items-center transition-all duration-500 ease-in-out px-2.5 sm:px-3
+              focus:outline-none focus:ring-0 focus:border-transparent
+              ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
-              <SelectValue />
+              <SelectValue placeholder="Select Type" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="manager">Manager</SelectItem>
-              <SelectItem value="hr">HR</SelectItem>
-              <SelectItem value="regular">Regular</SelectItem>
+            <SelectContent className="manager-dropdown-content rounded-lg shadow-md">
+              <SelectItem
+                value="all"
+                className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground"
+              >
+                All Types
+              </SelectItem>
+              <SelectItem
+                value="manager"
+                className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground"
+              >
+                Manager
+              </SelectItem>
+              <SelectItem
+                value="hr"
+                className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground"
+              >
+                HR
+              </SelectItem>
+              <SelectItem
+                value="regular"
+                className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground"
+              >
+                Regular
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -137,21 +166,34 @@ export function SearchFilter({
           >
             <SelectTrigger
               id="filter-status"
-              className={`bg-white border-border focus:border-accent focus:ring-accent text-sm sm:text-base lg:text-lg ${
-                isLoading ? 'opacity-60 cursor-not-allowed' : ''
-              }`}
+              className={`bg-card hover:bg-gray-200 rounded-md text-primary w-30 sm:flex-1 sm:min-w-[152px] 
+              control-h cursor-pointer shadow-sm/50 flex justify-between items-center transition-all duration-500 ease-in-out px-2.5 sm:px-3
+              focus:outline-none focus:ring-0 focus:border-transparent
+              ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
-              <SelectValue />
+              <SelectValue placeholder="Select Status" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="probational">Probational</SelectItem>
-              <SelectItem value="regular">Regular</SelectItem>
+            <SelectContent className="manager-dropdown-content rounded-lg shadow-md">
+              <SelectItem value="all" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+                All Statuses
+              </SelectItem>
+              <SelectItem value="probational" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+                Probational
+              </SelectItem>
+              <SelectItem value="regular" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+                Regular
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        {/* Sort - Full width on mobile, spans 2 cols on md/lg, spans 2 on xl/2xl */}
+        {/* Sort */}
         <div className="space-y-2 md:col-span-2 xl:col-span-2 2xl:col-span-2">
           <Label
             htmlFor="sort"
@@ -163,17 +205,34 @@ export function SearchFilter({
           <Select value={sortBy} onValueChange={onSortChange} disabled={isLoading}>
             <SelectTrigger
               id="sort"
-              className={`bg-white border-border focus:border-accent focus:ring-accent text-sm sm:text-base lg:text-lg ${
-                isLoading ? 'opacity-60 cursor-not-allowed' : ''
-              }`}
+              className={`bg-card hover:bg-gray-200 rounded-md text-primary w-30 sm:flex-1 sm:min-w-[152px] 
+              control-h cursor-pointer shadow-sm/50 flex justify-between items-center transition-all duration-500 ease-in-out px-2.5 sm:px-3
+              focus:outline-none focus:ring-0 focus:border-transparent
+              ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
-              <SelectValue />
+              <SelectValue placeholder="Select Sort" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name-asc">Name (A to Z)</SelectItem>
-              <SelectItem value="name-desc">Name (Z to A)</SelectItem>
-              <SelectItem value="date-asc">Date Created (Oldest)</SelectItem>
-              <SelectItem value="date-desc">Date Created (Newest)</SelectItem>
+            <SelectContent className="manager-dropdown-content rounded-lg shadow-md">
+              <SelectItem value="name-asc" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+                Name (A to Z)
+              </SelectItem>
+              <SelectItem value="name-desc" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+                Name (Z to A)
+              </SelectItem>
+              <SelectItem value="date-asc" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+                Date Created (Oldest)
+              </SelectItem>
+              <SelectItem value="date-desc" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+                Date Created (Newest)
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
