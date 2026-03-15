@@ -68,21 +68,23 @@ export function SearchFilter({
       >
         {/* Search */}
         <div className="space-y-2 md:col-span-2 xl:col-span-2 2xl:col-span-2">
-          <Label htmlFor="search" className="text-xs sm:text-sm lg:text-base text-foreground">
+          <Label htmlFor="search" className="flex items-center text-xs sm:text-sm lg:text-base text-meta">
             Employee Name
           </Label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               id="search"
               placeholder="Search by employee name"
-              className={`pl-10 pr-9 border-border focus:border-accent focus:ring-accent text-sm sm:text-base lg:text-lg ${
-                isDebouncing ? 'bg-background/50' : 'bg-white'
-              }`}
+              className={`bg-card border border-border rounded-md control-h pl-10 pr-9 text-primary 
+                shadow-sm/50 transition-all duration-500 ease-in-out 
+                focus:outline-none focus:ring-0 focus-visible:ring-0 focus:border-border
+                text-sm sm:text-base lg:text-base placeholder:text-sm
+                ${isDebouncing ? 'bg-background/50' : 'bg-white'}`}
               value={searchQuery}
               onChange={(e) => onSearchChange(sanitizeSearchInput(e.target.value))}
             />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400">
               {isDebouncing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             </div>
           </div>
@@ -92,11 +94,11 @@ export function SearchFilter({
         <div className="space-y-2">
           <Label
             htmlFor="filter-type"
-            className="flex items-center gap-2 text-xs sm:text-sm lg:text-base text-foreground"
+            className="flex items-center gap-2 text-meta"
           >
             <span className="hidden md:inline">Employee Type</span>
             <span className="inline md:hidden">Type</span>
-            {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600" />}
+            {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600 text-meta" />}
           </Label>
           <Select
             value={employeeTypeFilter}
@@ -105,43 +107,43 @@ export function SearchFilter({
           >
             <SelectTrigger
               id="filter-type"
-              className={`bg-card hover:bg-gray-200 rounded-md text-primary w-30 sm:flex-1 sm:min-w-[152px] 
+              className={`bg-card hover:bg-gray-200 rounded-md text-meta w-30 sm:flex-1 sm:min-w-[152px] 
               control-h cursor-pointer shadow-sm/50 flex justify-between items-center transition-all duration-500 ease-in-out px-2.5 sm:px-3
               focus:outline-none focus:ring-0 focus:border-transparent
               ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
-              <SelectValue placeholder="Select Type" />
+              <SelectValue className='text-meta' placeholder="Select Type" />
             </SelectTrigger>
             <SelectContent className="manager-dropdown-content rounded-lg shadow-md">
               <SelectItem
                 value="all"
-                className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
-                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
-                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground"
+                className="manager-dropdown-item cursor-pointer text-meta transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
               >
                 All Types
               </SelectItem>
               <SelectItem
                 value="manager"
-                className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
-                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
-                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground"
+                className="manager-dropdown-item cursor-pointer text-meta transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
               >
                 Manager
               </SelectItem>
               <SelectItem
                 value="hr"
-                className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
-                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
-                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground"
+                className="manager-dropdown-item cursor-pointer text-meta transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
               >
                 HR
               </SelectItem>
               <SelectItem
                 value="regular"
-                className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
-                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
-                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground"
+                className="manager-dropdown-item cursor-pointer text-meta transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
               >
                 Regular
               </SelectItem>
@@ -153,11 +155,11 @@ export function SearchFilter({
         <div className="space-y-2">
           <Label
             htmlFor="filter-status"
-            className="flex items-center gap-2 text-xs sm:text-sm lg:text-base text-foreground"
+            className="flex items-center gap-2 text-xs sm:text-sm lg:text-base text-meta"
           >
             <span className="hidden md:inline">Employment Status</span>
             <span className="inline md:hidden">Status</span>
-            {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600" />}
+            {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600 text-meta" />}
           </Label>
           <Select
             value={employmentStatusFilter}
@@ -166,27 +168,36 @@ export function SearchFilter({
           >
             <SelectTrigger
               id="filter-status"
-              className={`bg-card hover:bg-gray-200 rounded-md text-primary w-30 sm:flex-1 sm:min-w-[152px] 
+              className={`bg-card hover:bg-gray-200 rounded-md text-meta w-30 sm:flex-1 sm:min-w-[152px] 
               control-h cursor-pointer shadow-sm/50 flex justify-between items-center transition-all duration-500 ease-in-out px-2.5 sm:px-3
               focus:outline-none focus:ring-0 focus:border-transparent
               ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
-              <SelectValue placeholder="Select Status" />
+              <SelectValue className='text-meta' placeholder="Select Status" />
             </SelectTrigger>
             <SelectContent className="manager-dropdown-content rounded-lg shadow-md">
-              <SelectItem value="all" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
-                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
-                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+              <SelectItem
+                value="all"
+                className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
+              >
                 All Statuses
               </SelectItem>
-              <SelectItem value="probational" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
-                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
-                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+              <SelectItem
+                value="probational"
+                className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
+              >
                 Probational
               </SelectItem>
-              <SelectItem value="regular" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
-                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
-                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+              <SelectItem
+                value="regular"
+                className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
+              >
                 Regular
               </SelectItem>
             </SelectContent>
@@ -197,40 +208,52 @@ export function SearchFilter({
         <div className="space-y-2 md:col-span-2 xl:col-span-2 2xl:col-span-2">
           <Label
             htmlFor="sort"
-            className="flex items-center gap-2 text-xs sm:text-sm lg:text-base text-foreground"
+            className="flex items-center gap-2 text-xs sm:text-sm lg:text-base font-semibold text-meta"
           >
             Sort By
-            {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600" />}
+            {isLoading && <Loader2 className="h-3 w-3 animate-spin text-gray-600 text-meta" />}
           </Label>
           <Select value={sortBy} onValueChange={onSortChange} disabled={isLoading}>
             <SelectTrigger
               id="sort"
-              className={`bg-card hover:bg-gray-200 rounded-md text-primary w-30 sm:flex-1 sm:min-w-[152px] 
+              className={`bg-card hover:bg-gray-200 rounded-md text-meta w-30 sm:flex-1 sm:min-w-[152px] 
               control-h cursor-pointer shadow-sm/50 flex justify-between items-center transition-all duration-500 ease-in-out px-2.5 sm:px-3
               focus:outline-none focus:ring-0 focus:border-transparent
               ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
-              <SelectValue placeholder="Select Sort" />
+              <SelectValue className='text-meta' placeholder="Select Sort" />
             </SelectTrigger>
             <SelectContent className="manager-dropdown-content rounded-lg shadow-md">
-              <SelectItem value="name-asc" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
-                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
-                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+              <SelectItem
+                value="name-asc"
+                className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
+              >
                 Name (A to Z)
               </SelectItem>
-              <SelectItem value="name-desc" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
-                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
-                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+              <SelectItem
+                value="name-desc"
+                className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
+              >
                 Name (Z to A)
               </SelectItem>
-              <SelectItem value="date-asc" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
-                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
-                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+              <SelectItem
+                value="date-asc"
+                className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
+              >
                 Date Created (Oldest)
               </SelectItem>
-              <SelectItem value="date-desc" className="manager-dropdown-item cursor-pointer transition-all duration-400 ease-in-out 
-                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-foreground
-                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-foreground">
+              <SelectItem
+                value="date-desc"
+                className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out 
+                hover:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] hover:text-meta
+                data-[state=checked]:[background:color-mix(in_oklab,var(--accent)_16%,transparent)] data-[state=checked]:text-meta"
+              >
                 Date Created (Newest)
               </SelectItem>
             </SelectContent>
