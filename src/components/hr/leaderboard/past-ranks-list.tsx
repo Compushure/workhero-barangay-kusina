@@ -24,14 +24,14 @@ interface PeriodRowProps {
 
 function PeriodRow({ row, onSelect }: PeriodRowProps) {
   return (
-    <div className="flex w-full flex-col gap-3 rounded-2xl border border-accent/20 bg-card px-4 py-4 shadow-sm/30 transition-colors hover:border-primary/40 hover:bg-background sm:flex-row sm:items-center sm:gap-5">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <Calendar className="h-5 w-5" />
+    <div className="flex w-full flex-col gap-2.5 rounded-2xl border border-accent/20 bg-card px-3.5 py-3.5 shadow-sm/30 transition-colors hover:border-primary/40 hover:bg-background sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Calendar className="h-4.5 w-4.5" />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-base font-semibold text-foreground sm:text-lg">{periodLabel(row)}</p>
+          <p className="text-sm font-semibold text-foreground sm:text-base">{periodLabel(row)}</p>
           {row.is_visible ? (
             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700">
               <Eye className="h-3 w-3" />
@@ -51,7 +51,7 @@ function PeriodRow({ row, onSelect }: PeriodRowProps) {
         <Button
           size="sm"
           onClick={() => onSelect(buildUrl(row))}
-          className="control-h w-full shrink-0 rounded-full bg-primary-gradient px-6 text-sm font-semibold text-white shadow-sm hover:opacity-95 sm:w-auto"
+          className="control-h w-full shrink-0 rounded-full bg-primary-gradient px-5 text-xs font-semibold text-white shadow-sm hover:opacity-95 sm:w-auto sm:text-sm"
         >
           View Rankings
         </Button>
@@ -63,13 +63,13 @@ function PeriodRow({ row, onSelect }: PeriodRowProps) {
 function PeriodRowPlaceholder() {
   return (
     <div
-      className="pointer-events-none flex w-full select-none flex-col gap-3 rounded-2xl border border-transparent bg-transparent px-4 py-4 opacity-0 sm:flex-row sm:items-center sm:gap-5"
+      className="pointer-events-none flex w-full select-none flex-col gap-2.5 rounded-2xl border border-transparent bg-transparent px-3.5 py-3.5 opacity-0 sm:flex-row sm:items-center sm:gap-4"
       aria-hidden="true"
     >
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10" />
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10" />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-base font-semibold text-foreground sm:text-lg">Placeholder</p>
+          <p className="text-sm font-semibold text-foreground sm:text-base">Placeholder</p>
         </div>
         <p className="text-meta text-muted-foreground">Placeholder</p>
       </div>
@@ -131,7 +131,7 @@ export function PastRanksList({ initialData }: PastRanksListProps) {
   const showContent = !isPending && periods !== null;
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex h-full flex-col gap-4">
       {isPending ? <PastRanksListSkeleton /> : null}
 
       {!isPending && error ? (
@@ -142,9 +142,9 @@ export function PastRanksList({ initialData }: PastRanksListProps) {
 
       {showContent ? (
         <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <div className="flex h-full flex-col gap-5 rounded-3xl border border-accent/20 bg-card p-4 shadow-sm/40 sm:p-6">
+          <div className="flex h-full flex-col gap-4 rounded-2xl border border-accent/20 bg-card p-3.5 shadow-sm/40 sm:p-5">
             <div>
-              <h2 className="text-h1 text-foreground">Past Generated Ranks</h2>
+              <h2 className="text-h2 text-foreground">Past Generated Ranks</h2>
               <p className="text-meta text-muted-foreground">
                 Browse previously generated rankings.
               </p>

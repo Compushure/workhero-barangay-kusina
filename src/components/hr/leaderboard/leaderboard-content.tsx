@@ -44,12 +44,12 @@ export function LeaderboardContent({
       periodType === 'weekly' ? week : undefined
     );
     return (
-      <div className="flex min-h-[60vh] items-center justify-center py-6 sm:py-8">
-        <div className="flex max-w-lg flex-col items-center gap-5 rounded-3xl border border-accent/20 bg-card px-10 py-12 text-center shadow-sm/40">
-          <div className="rounded-full bg-primary/10 p-4 text-primary">
-            <Trophy className="h-16 w-16" />
+      <div className="flex min-h-[52vh] items-center justify-center py-5 sm:py-7">
+        <div className="flex max-w-md flex-col items-center gap-4 rounded-2xl border border-accent/20 bg-card px-8 py-10 text-center shadow-sm/40">
+          <div className="rounded-full bg-primary/10 p-3.5 text-primary">
+            <Trophy className="h-14 w-14" />
           </div>
-          <h3 className="text-h2 text-foreground">No Ranking Available</h3>
+          <h3 className="text-h3 text-foreground">No Ranking Available</h3>
           <p className="text-meta text-muted-foreground">
             The ranking for{' '}
             <span className="font-semibold text-foreground">{emptyStatePeriodLabel}</span> has not

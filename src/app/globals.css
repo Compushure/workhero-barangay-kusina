@@ -91,7 +91,7 @@
   :root {
     --text-h2: clamp(1.04rem, 0.95vw, 1.12rem);
     --text-task-title: clamp(0.97rem, 0.92vw, 1.06rem);
-    --text-meta: clamp(0.76rem, 0.65vw, 0.8rem);
+    --text-meta: clamp(1rem, 0.65vw, 0.8rem);
     --text-sidebar-label: 0.79rem;
     --text-button: 0.77rem;
     --control-height: 1.75rem;

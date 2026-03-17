@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Check, X, ImageIcon, Info, FileText } from 'lucide-react';
+import { Check, X, ImageIcon, Info, FileText, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/shared/pagination';
@@ -116,32 +116,32 @@ export function RedemptionTable({
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-accent/20 bg-card shadow-sm/25">
+      <div className="overflow-hidden rounded-2xl bg-card shadow-sm/25">
         <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <Table className="min-w-full">
             <TableHeader className="bg-primary-gradient [&_tr]:border-0">
               <TableRow className="border-0 bg-primary-gradient">
-                <TableHead className="px-2 py-3 text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                <TableHead className="hidden px-2 py-3 text-[10px] font-semibold uppercase tracking-wide text-card lg:table-cell sm:px-4 sm:text-xs">
                   Request Date
                 </TableHead>
-                <TableHead className="px-2 py-3 text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                <TableHead className="px-2 py-3 text-[10px] font-semibold uppercase tracking-wide text-card sm:px-4 sm:text-xs">
                   Employee
                 </TableHead>
-                <TableHead className="px-2 py-3 text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                <TableHead className="px-2 py-3 text-[10px] font-semibold uppercase tracking-wide text-card sm:px-4 sm:text-xs">
                   Requested Item/s
                 </TableHead>
-                <TableHead className="px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                <TableHead className="hidden px-2 py-3 text-center text-[10px] font-semibold uppercase tracking-wide text-card xl:table-cell sm:px-4 sm:text-xs">
                   Total Cost
                 </TableHead>
-                <TableHead className="px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                <TableHead className="hidden px-2 py-3 text-center text-[10px] font-semibold uppercase tracking-wide text-card lg:table-cell sm:px-4 sm:text-xs">
                   Details
                 </TableHead>
-                <TableHead className="sticky right-0 px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-card sm:px-4">
+                <TableHead className="sticky right-0 px-2 py-3 text-center text-[10px] font-semibold uppercase tracking-wide text-card sm:px-4 sm:text-xs">
                   Action
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="[&_tr]:border-0">
+            <TableBody className="">
               {paginatedData.length === 0 ? (
                 <TableRow className="hover:bg-transparent">
                   <TableCell colSpan={6} className="py-12 text-center text-foreground">
@@ -169,31 +169,32 @@ export function RedemptionTable({
                   const hasRemarks = request.remarks && request.remarks.trim() !== '';
 
                   return (
-                    <TableRow key={request.id} className="border-0 bg-card hover:bg-accent-secondary/25">
-                      <TableCell className="px-2 py-3 sm:px-4">
-                        <p className="text-meta font-semibold text-foreground">{dateStr}</p>
-                        <p className="text-[11px] text-muted-foreground">{timeStr}</p>
+                    <TableRow key={request.id} className="bg-card hover:bg-accent-secondary/25">
+                      <TableCell className="hidden px-2 py-2.5 lg:table-cell sm:px-4">
+                        <p className="text-xs font-medium text-foreground sm:text-sm">{dateStr}</p>
+                        <p className="text-[10px] text-muted-foreground sm:text-xs">{timeStr}</p>
                       </TableCell>
-                      <TableCell className="px-2 py-3 sm:px-4">
-                        <p className="text-meta text-foreground truncate max-w-36 sm:max-w-48">
+                      <TableCell className="px-2 py-2.5 sm:px-4">
+                        <p className="max-w-28 truncate text-xs font-medium text-foreground sm:max-w-48 sm:text-sm">
                           {userName}
                         </p>
                       </TableCell>
-                      <TableCell className="px-2 py-3 sm:px-4">
-                        <p className="text-meta text-foreground truncate max-w-48 sm:max-w-64">
+                      <TableCell className="px-2 py-2.5 sm:px-4">
+                        <p className="max-w-36 truncate text-xs text-foreground sm:max-w-64 sm:text-sm">
                           {itemDisplay}
                         </p>
                       </TableCell>
-                      <TableCell className="px-2 py-3 text-center sm:px-4">
-                        <p className="text-button font-semibold text-foreground whitespace-nowrap">
-                          {totalCost} Pts
-                        </p>
+                      <TableCell className="hidden px-2 py-2.5 text-center xl:table-cell sm:px-4">
+                        <div className="flex items-center justify-center gap-1">
+                          <Coins strokeWidth={1.75} className="size-3.5 sm:size-4" />
+                          <span className="text-xs font-semibold sm:text-sm">{totalCost}</span>
+                        </div>
                       </TableCell>
-                      <TableCell className="px-2 py-3 text-center sm:px-4">
+                      <TableCell className="hidden px-2 py-2.5 text-center lg:table-cell sm:px-4">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-8 shrink-0 rounded-xl border border-accent/30 bg-accent/10 text-accent transition-all duration-200 hover:bg-accent hover:text-white"
+                          className="size-7 shrink-0 rounded-full border border-accent/30 bg-accent/10 text-accent transition-all duration-200 hover:bg-accent hover:text-white sm:size-8"
                           onClick={() => openRequestModal(request)}
                           title="View details"
                         >
@@ -203,14 +204,14 @@ export function RedemptionTable({
                           )}
                         </Button>
                       </TableCell>
-                      <TableCell className="sticky right-0 px-2 py-3 sm:px-4">
+                      <TableCell className="sticky right-0 px-2 py-2.5 sm:px-4">
                         <div className="flex items-center justify-center gap-2">
                           {status === 'pending' ? (
                             <>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="size-8 shrink-0 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 transition-all duration-200 hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                className="size-7 shrink-0 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 transition-all duration-200 hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:size-8"
                                 onClick={(event) => {
                                   event.stopPropagation();
                                   handleAcceptClick(request.id);
@@ -231,7 +232,7 @@ export function RedemptionTable({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="size-8 shrink-0 rounded-xl border border-destructive/30 bg-destructive/10 text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground"
+                                className="size-7 shrink-0 rounded-md border border-destructive/30 bg-destructive/10 text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground sm:size-8"
                                 onClick={(event) => {
                                   event.stopPropagation();
                                   handleDeclineClick(request.id);
@@ -243,7 +244,7 @@ export function RedemptionTable({
                             </>
                           ) : (
                             <div
-                              className={`px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap shrink-0 ${
+                              className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide whitespace-nowrap shrink-0 ${
                                 status === 'approved'
                                   ? 'bg-emerald-100 text-emerald-700'
                                   : isOutOfStock

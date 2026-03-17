@@ -36,12 +36,16 @@ export default function VisibilityToggle({
       onClick={handleClick}
       disabled={disabled || toggleVisibilityMutation.isPending}
       className={cn(
-        'control-h inline-flex items-center gap-2 rounded-full border px-3 text-sm font-semibold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-60',
+        'control-h inline-flex items-center gap-1.5 rounded-full border px-3 text-xs font-semibold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm',
         variantClasses,
         className
       )}
     >
-      {isVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+      {isVisible ? (
+        <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+      ) : (
+        <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+      )}
       {isVisible ? 'Visible to employee' : 'Hidden from employee'}
     </button>
   );

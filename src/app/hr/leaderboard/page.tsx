@@ -112,41 +112,36 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
     <main className="w-full min-h-screen bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
       <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-4 sm:gap-6 2xl:max-w-screen-2xl">
         <div className="space-y-4 sm:space-y-5">
-          <PageHeader
-            title="Leaderboard"
-            subtitle="Generate rankings by period and control employee visibility."
-          />
+          <section className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <PageHeader
+              title="Leaderboard"
+              subtitle="Generate rankings by period and control employee visibility."
+            />
 
-          <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5">
-            <div className="flex min-w-0 flex-col gap-3">
-              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <LeaderboardViewToggle currentView={currentView} />
-
-                {isViewingSpecificPastRank ? (
-                  <Link
-                    href="/hr/leaderboard?view=past"
-                    className="inline-flex items-center gap-1 self-start text-meta font-semibold text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Back to Past Rankings
-                  </Link>
-                ) : null}
-              </div>
-
-              {currentView === 'generate' ? (
-                <div className="min-w-0 xl:max-w-4xl">
-                  <PeriodSelector
-                    currentType={periodType}
-                    currentYear={year}
-                    currentWeek={week}
-                    currentMonth={month}
-                    currentPeriodRankingExists={currentPeriodRankingExists}
-                  />
-                </div>
-              ) : null}
-            </div>
+            <LeaderboardViewToggle currentView={currentView} />
           </section>
+
+          {isViewingSpecificPastRank ? (
+            <Link
+              href="/hr/leaderboard?view=past"
+              className="inline-flex items-center gap-1 text-meta font-semibold text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Back to Past Rankings
+            </Link>
+          ) : null}
         </div>
+
+        {currentView === 'generate' ? (
+          <PeriodSelector
+            currentType={periodType}
+            currentYear={year}
+            currentWeek={week}
+            currentMonth={month}
+            currentPeriodRankingExists={currentPeriodRankingExists}
+            className="min-w-0 xl:max-w-4xl xl:mr-auto"
+          />
+        ) : null}
 
         {currentView === 'past' && !isViewingSpecificPastRank ? (
           <PastRanksList initialData={initialPastRanksData} />

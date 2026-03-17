@@ -18,6 +18,7 @@ import {
   getISOWeekDateRangeLabelShort,
 } from '@/lib/utils/time-period-utils';
 import { useGenerateRankingByPeriod } from '@/hooks/tanstack/mutations/hrMutations';
+import { cn } from '@/lib/utils';
 import type { RankLogPeriodType } from '@/types';
 
 function getPreviousWeek(): { year: number; week: number } {
@@ -66,6 +67,7 @@ interface PeriodSelectorProps {
   currentMonth: number;
   /** Whether the period we're currently viewing has a ranking (drives badge and buttons) */
   currentPeriodRankingExists: boolean;
+  className?: string;
 }
 
 function buildUrlForPeriod(type: RankLogPeriodType): string {
@@ -120,6 +122,7 @@ export function PeriodSelector({
   currentWeek,
   currentMonth,
   currentPeriodRankingExists,
+  className,
 }: PeriodSelectorProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -194,15 +197,15 @@ export function PeriodSelector({
   const isGenerating = generateRankingMutation.isPending;
 
   return (
-    <div className="rounded-3xl border border-accent/20 bg-card p-4 shadow-sm/40">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[280px_minmax(0,1fr)_auto]">
+    <div className={cn('manager-sticky-controls w-full rounded-2xl p-3 sm:p-3.5', className)}>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[240px_minmax(0,1fr)_auto]">
         {/* Period Type */}
         <div className="flex w-full flex-col gap-1.5">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Period Type
           </span>
           <Select value={currentType} onValueChange={handlePeriodTypeChange}>
-            <SelectTrigger className="control-h w-full rounded-full border border-border bg-background/80 px-4 text-sm font-semibold text-foreground shadow-sm focus-visible:ring-2 focus-visible:ring-primary">
+            <SelectTrigger className="control-h w-full rounded-lg border border-border bg-card px-3.5 text-xs font-medium text-primary shadow-sm sm:text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -215,12 +218,12 @@ export function PeriodSelector({
 
         {/* Period value */}
         <div className="flex w-full flex-col gap-1.5">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             {periodFieldLabel}
           </span>
           {currentType === 'weekly' ? (
             <Select value={currentWeeklyKey} onValueChange={handleWeeklyPeriodChange}>
-              <SelectTrigger className="control-h w-full rounded-full border border-border bg-background/80 px-4 text-sm font-semibold text-foreground shadow-sm focus-visible:ring-2 focus-visible:ring-primary">
+              <SelectTrigger className="control-h w-full rounded-lg border border-border bg-card px-3.5 text-xs font-medium text-primary shadow-sm sm:text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -236,7 +239,7 @@ export function PeriodSelector({
               </SelectContent>
             </Select>
           ) : (
-            <div className="control-h inline-flex items-center rounded-full border border-dashed border-accent/40 bg-background/60 px-4 text-sm font-semibold text-foreground">
+            <div className="control-h inline-flex items-center rounded-full border border-dashed border-accent/40 bg-background/60 px-3.5 text-xs font-semibold text-foreground sm:text-sm">
               <span>{periodLabel}</span>
             </div>
           )}
@@ -245,15 +248,15 @@ export function PeriodSelector({
         {/* Status / Action */}
         <div className="flex w-full items-center self-start">
           {hasRanking ? (
-            <div className="control-h inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-700 lg:w-auto">
-              <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <div className="control-h inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 text-xs font-semibold text-emerald-700 sm:text-sm lg:w-auto">
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
               Ranking ready
             </div>
           ) : (
             <Button
               onClick={handleGenerateRank}
               disabled={isPending || isGenerating}
-              className="control-h w-full rounded-full bg-primary-gradient px-6 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 lg:w-auto"
+              className="control-h w-full rounded-full bg-primary-gradient px-5 text-xs font-semibold text-white shadow-sm transition hover:opacity-95 sm:text-sm lg:w-auto"
             >
               {isGenerating ? 'Generating…' : 'Generate Rank'}
             </Button>

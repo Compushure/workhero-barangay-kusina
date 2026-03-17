@@ -26,8 +26,8 @@ import { ProfilePic } from '@/components/sidebar/profile-pic';
 import { ProfileModal } from '@/components/sidebar/profile-modal';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useGetTodayAttendanceStatus } from '@/hooks/tanstack/queries/attendanceQueries';
-import { HrAttendanceModal } from '@/components/hr/attendance/hr-attendance-modal';
-import { HrAttendanceTrigger } from '@/components/hr/attendance/hr-attendance-trigger';
+import { HrManagerAttendanceModal } from './attendance/hr-manager-attendance-modal';
+import { HrManagerAttendanceTrigger } from './attendance/hr-manager-attendance-trigger';
 
 interface NavItem {
   key: string;
@@ -306,11 +306,11 @@ export function Sidebar({ view }: SidebarProps) {
         <div
           className={
             isCollapsed
-              ? 'flex flex-col items-center justify-center gap-2 px-2 py-3'
+              ? 'flex flex-col items-center justify-center px-2 pt-3 pb-17'
               : 'flex flex-col px-3 py-4'
           }
         >
-          <HrAttendanceTrigger
+          <HrManagerAttendanceTrigger
             isCollapsed={isCollapsed}
             disabled={isUiDisabled}
             label={attendanceButtonLabel}
@@ -404,7 +404,7 @@ export function Sidebar({ view }: SidebarProps) {
                 <TooltipContent
                   side="top"
                   align="center"
-                  className="border border-accent/25 bg-card text-foreground shadow-sm/25"
+                  className="bg-card text-foreground shadow-sm/25"
                 >
                   {attendanceButtonLabel}
                 </TooltipContent>
@@ -441,7 +441,7 @@ export function Sidebar({ view }: SidebarProps) {
         user={user ?? null}
       />
 
-      <HrAttendanceModal open={showAttendanceModal} onOpenChange={setShowAttendanceModal} />
+      <HrManagerAttendanceModal view={view} open={showAttendanceModal} onOpenChange={setShowAttendanceModal} />
     </>
   );
 }

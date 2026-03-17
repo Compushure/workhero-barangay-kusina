@@ -33,14 +33,14 @@ export function LeaderboardViewToggle({ currentView }: LeaderboardViewToggleProp
   };
 
   return (
-    <div className="flex w-full flex-wrap items-center gap-1 rounded-full border border-accent/30 bg-background/80 p-1 shadow-sm sm:w-auto sm:flex-nowrap">
+    <div className="flex w-full overflow-hidden rounded-md border border-accent/25 bg-card/75 shadow-sm/25 sm:w-fit">
       <button
         onClick={() => handleSwitch('generate')}
         className={cn(
-          'control-h flex-1 rounded-full px-4 text-sm font-semibold transition-all sm:flex-none',
+          'flex flex-1 items-center justify-center gap-1 rounded-l-md px-2.5 py-2 text-xs font-semibold transition-all duration-500 ease-in-out sm:w-40 sm:flex-none sm:text-sm',
           currentView === 'generate'
-            ? 'bg-primary-gradient text-white shadow-sm'
-            : 'text-muted-foreground hover:text-foreground'
+            ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
+            : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25 hover:cursor-pointer'
         )}
       >
         Generate Rankings
@@ -48,10 +48,10 @@ export function LeaderboardViewToggle({ currentView }: LeaderboardViewToggleProp
       <button
         onClick={() => handleSwitch('past')}
         className={cn(
-          'control-h flex-1 rounded-full px-4 text-sm font-semibold transition-all sm:flex-none',
+          'flex flex-1 items-center justify-center gap-1 rounded-r-md px-2.5 py-2 text-xs font-semibold transition-all duration-500 ease-in-out sm:w-40 sm:flex-none sm:text-sm',
           currentView === 'past'
-            ? 'bg-primary-gradient text-white shadow-sm'
-            : 'text-muted-foreground hover:text-foreground'
+            ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
+            : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25 hover:cursor-pointer'
         )}
       >
         View Past Rankings

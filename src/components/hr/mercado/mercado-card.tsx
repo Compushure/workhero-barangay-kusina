@@ -82,7 +82,7 @@ export const MercadoCard = memo(function MercadoCard({
 
   return (
     <div
-      className="relative flex min-h-32 items-start gap-4 rounded-2xl border border-accent/15 bg-card px-3.5 py-3 shadow-sm/25 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/35 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      className="relative flex min-h-27 items-start gap-4 rounded-2xl border border-accent/15 bg-card px-3.5 py-3.5 shadow-sm/25 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/35 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -113,7 +113,7 @@ export const MercadoCard = memo(function MercadoCard({
         )}
       </div>
 
-      <div className="flex-1 min-w-0 pr-10 flex flex-col gap-1">
+      <div className="flex-1 min-w-0 pr-10 flex flex-col gap-1.5">
         <h3 className="text-task-title font-semibold text-foreground truncate">{item.name}</h3>
 
         <div className="flex min-h-5 flex-wrap items-center gap-1.5">
@@ -129,7 +129,7 @@ export const MercadoCard = memo(function MercadoCard({
           {isHidden && (
             <Badge
               variant="secondary"
-              className="shrink-0 rounded-lg border border-border bg-muted/60 px-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+              className="shrink-0 rounded-lg border border-border bg-background-soft px-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
             >
               <EyeOff className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
               Hidden

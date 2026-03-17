@@ -60,12 +60,12 @@ export function PeriodFilters({
   return (
     <div className="inline-flex w-full flex-col overflow-hidden rounded-2xl border border-accent/20 bg-card shadow-sm/30 sm:flex-row sm:items-stretch">
       {/* TYPE column */}
-      <div className="flex min-w-[140px] flex-col gap-0.5 px-4 py-3">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+      <div className="flex min-w-33 flex-col gap-0.5 px-3.5 py-2.5">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           Select Period
         </span>
         <Select value={activeTab} onValueChange={onTypeChange}>
-          <SelectTrigger className="h-auto gap-1.5 border-0 bg-transparent p-0 text-sm font-semibold text-foreground shadow-none focus-visible:ring-0 [&>svg]:text-muted-foreground">
+          <SelectTrigger className="h-auto gap-1.5 border-0 bg-transparent p-0 text-xs font-semibold text-foreground shadow-none focus-visible:ring-0 [&>svg]:text-muted-foreground sm:text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -86,16 +86,16 @@ export function PeriodFilters({
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="group flex min-w-[180px] flex-col gap-0.5 px-4 py-3 text-left transition-colors hover:bg-background/80"
+                className="group flex min-w-42.5 flex-col gap-0.5 px-3.5 py-2.5 text-left transition-colors hover:bg-background/80"
               >
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   Filter by {TAB_LABELS[activeTab]}
                 </span>
                 <span className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 shrink-0 text-primary" />
+                  <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-primary sm:h-4 sm:w-4" />
                   <span
                     className={cn(
-                      'text-sm font-semibold',
+                      'text-xs font-semibold sm:text-sm',
                       !hasSelection && 'text-muted-foreground'
                     )}
                   >
