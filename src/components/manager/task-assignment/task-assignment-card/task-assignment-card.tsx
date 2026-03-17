@@ -162,7 +162,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
   }
 
   return (
-    <div className="rounded-2xl bg-background-soft p-3 sm:p-4 md:px-7 py-5 shadow-sm/25">
+    <div className="rounded-2xl bg-background-soft p-3 sm:p-4 md:px-7 py-5 shadow-sm/25 max-w-230">
       <h2 className="text-h2 mb-4 text-primary">Assign Employees for Task</h2>
 
       <div className="flex flex-wrap gap-2 sm:gap-3">

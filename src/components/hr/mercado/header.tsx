@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { PageHeader } from '@/components/shared/page-header';
 
 interface HeaderSectionProps {
   title: string;
@@ -22,10 +23,7 @@ export function HeaderSection({ title, description, onSearch, onSort }: HeaderSe
   return (
     <div className="space-y-6">
       {/* Title Section */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
-        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
-      </div>
+      <PageHeader title={title} subtitle={description} />
 
       {/* Search and Filter Bar */}
       <div className="flex items-center gap-4">

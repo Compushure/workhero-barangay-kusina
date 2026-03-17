@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { RewardRequestsContent } from '@/components/hr/reward-requests/reward-requests-content';
+import { RewardRequestsContent } from '@/components/hr/requests/reward-requests-content';
 import { MarketSuspense } from '@/components/shared/market-suspense';
 
 export const metadata: Metadata = {

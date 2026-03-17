@@ -13,7 +13,7 @@ import UserCardsGrid from './user-cards-grid';
 import QuickAssignmentPanel from './quick-assignment-panel';
 import AwardBadgeDialog from './dialogs/award-badge-dialog';
 import AllBadgesModal from './dialogs/all-badges-modal';
-import { Pagination } from '../task-verification/pagination';
+import { Pagination } from '@/components/shared/pagination';
 import { useDebounce } from '@/hooks/useDebounce';
 import { toast } from 'sonner';
 import {
@@ -32,7 +32,7 @@ import {
   useAssignManualBadgesToUsersBulk,
 } from '@/hooks/tanstack/mutations/managerBadgeAssignmentMutations';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
-import { PageHeader } from '../task-verification/page-header';
+import { PageHeader } from '@/components/shared/page-header';
 import { useManagerBadgeAssignmentStore } from '@/store/managerBadgeAssignmentStore';
 
 type UserSortOption = 'name-asc' | 'name-desc' | 'employee-asc' | 'employee-desc';
