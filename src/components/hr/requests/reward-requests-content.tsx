@@ -2,10 +2,10 @@
 
 import { useState, useMemo, useCallback, Suspense, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { HeaderSection } from '@/components/hr/dashboard/header';
-import { HeaderSkeleton } from '@/components/hr/dashboard/header-skeleton';
-import { RedemptionTable } from '@/components/hr/dashboard/redemption-table';
-import { RedemptionTableSkeleton } from '@/components/hr/dashboard/redemption-table-skeleton';
+import { HeaderSection } from './header';
+import { HeaderSkeleton } from './header-skeleton';
+import { RedemptionTable } from './redemption-table';
+import { RedemptionTableSkeleton } from './redemption-table-skeleton';
 import { useGetRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
 import { useDebounce } from '@/hooks/useDebounce';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
