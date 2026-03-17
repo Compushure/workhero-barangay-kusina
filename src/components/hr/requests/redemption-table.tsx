@@ -18,7 +18,7 @@ import {
   useAcceptRedemptionRequest,
   useDeclineRedemptionRequest,
 } from '@/hooks/tanstack/mutations/hrMutations';
-import { RemarksDialog } from '../requests/remarks';
+import { RemarksDialog } from './remarks';
 import type { RedemptionRequest } from '@/types';
 
 interface RedemptionTableProps {
