@@ -322,6 +322,7 @@ export function useMercadoPageState() {
   return {
     contentAreaStyle,
     isLoading,
+    totalItemsCount: rewards.length,
     totalPages,
     currentPage,
     paginatedRewards,

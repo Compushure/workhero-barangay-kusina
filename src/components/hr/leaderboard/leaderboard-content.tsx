@@ -44,13 +44,13 @@ export function LeaderboardContent({
       periodType === 'weekly' ? week : undefined
     );
     return (
-      <div className="flex min-h-[60vh] items-center justify-center py-6 sm:py-8">
-        <div className="flex flex-col items-center gap-4 rounded-2xl px-16 py-14 text-center max-w-md">
-          <div className="rounded-full bg-gray-100 p-4">
-            <Trophy className="w-16 h-16 text-gray-400" />
+      <div className="flex min-h-[52vh] items-center justify-center py-5 sm:py-7">
+        <div className="flex max-w-md flex-col items-center gap-4 rounded-2xl border border-accent/20 bg-card px-8 py-10 text-center shadow-sm/40">
+          <div className="rounded-full bg-primary/10 p-3.5 text-primary">
+            <Trophy className="h-14 w-14" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground">No Ranking Available</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="text-h3 text-foreground">No Ranking Available</h3>
+          <p className="text-meta text-muted-foreground">
             The ranking for{' '}
             <span className="font-semibold text-foreground">{emptyStatePeriodLabel}</span> has not
             been generated yet. Click the generate button above to create it.
@@ -62,7 +62,7 @@ export function LeaderboardContent({
 
   // Render table — kept visible while a background fetch is in progress (isFetching)
   return (
-    <div className="mb-2 w-full">
+    <div className="w-full">
       <LeaderboardTable
         players={data.players}
         periodLabel={data.periodLabel}

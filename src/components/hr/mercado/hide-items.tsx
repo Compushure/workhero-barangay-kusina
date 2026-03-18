@@ -25,7 +25,7 @@ export function HideRewardDialog({
 }: HideRewardDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-muted text-card-foreground border border-border max-w-md rounded-2xl p-6 [&>button]:hidden">
+      <DialogContent className="bg-card text-card-foreground border border-accent/25 max-w-md rounded-3xl p-6 shadow-xl">
         <button
           type="button"
           onClick={(event) => {
@@ -33,25 +33,25 @@ export function HideRewardDialog({
             event.stopPropagation();
             onOpenChange(false);
           }}
-          className="absolute right-4 top-4 rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="absolute right-4 top-4 rounded-full border border-transparent bg-white/20 p-1 text-muted-foreground shadow-sm/25 transition-all duration-200 hover:bg-accent-secondary/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           <X className="h-5 w-5 text-muted-foreground" />
           <span className="sr-only">Close</span>
         </button>
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-xl bg-background flex items-center justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent">
               {isHidden ? (
                 <Eye className="h-6 w-6 text-primary" />
               ) : (
                 <EyeOff className="h-6 w-6 text-primary" />
               )}
             </div>
-            <DialogTitle className="text-xl font-bold text-primary">
+            <DialogTitle className="text-h2 text-foreground">
               {isHidden ? 'Unhide Item' : 'Hide Item'}
             </DialogTitle>
           </div>
-          <DialogDescription className="text-base text-muted-foreground">
+          <DialogDescription className="text-meta text-muted-foreground">
             {isHidden
               ? 'This item will be visible to employees in the Mercado.'
               : 'This item will be hidden from employees in the Mercado.'}
@@ -62,7 +62,7 @@ export function HideRewardDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="h-11 rounded-xl border-border text-foreground hover:bg-background font-semibold text-base"
+            className="control-h rounded-xl border border-accent/25 bg-transparent text-button text-foreground transition-all duration-300 hover:bg-accent-secondary/10"
           >
             Cancel
           </Button>
@@ -71,7 +71,7 @@ export function HideRewardDialog({
               onConfirm();
               onOpenChange(false);
             }}
-            className="h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base"
+            className="control-h rounded-xl bg-primary-gradient text-button text-white shadow-sm/25 transition-all duration-300 hover:brightness-95"
           >
             {isHidden ? 'Unhide' : 'Hide'}
           </Button>

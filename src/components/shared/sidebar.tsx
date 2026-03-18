@@ -9,8 +9,11 @@ import {
   ChevronLeft,
   Clock3,
   FileText,
+  LayoutDashboard,
   Medal,
+  ShoppingCart,
   SquarePen,
+  Trophy,
   UserCircle2,
   type LucideIcon,
 } from 'lucide-react';
@@ -23,8 +26,8 @@ import { ProfilePic } from '@/components/sidebar/profile-pic';
 import { ProfileModal } from '@/components/sidebar/profile-modal';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useGetTodayAttendanceStatus } from '@/hooks/tanstack/queries/attendanceQueries';
-import { HrAttendanceModal } from '@/components/hr/attendance/hr-attendance-modal';
-import { HrAttendanceTrigger } from '@/components/hr/attendance/hr-attendance-trigger';
+import { HrManagerAttendanceModal } from './attendance/hr-manager-attendance-modal';
+import { HrManagerAttendanceTrigger } from './attendance/hr-manager-attendance-trigger';
 
 interface NavItem {
   key: string;
@@ -35,7 +38,7 @@ interface NavItem {
 }
 
 interface SidebarProps {
-  navItems?: NavItem[];
+  view: 'manager' | 'hr';
 }
 
 function SidebarUserProfile({
@@ -74,7 +77,7 @@ function SidebarUserProfile({
   );
 }
 
-const defaultNavItems: NavItem[] = [
+const managerNavItems: NavItem[] = [
   {
     key: 'assignment',
     label: 'Task Assignment',
@@ -112,7 +115,31 @@ const defaultNavItems: NavItem[] = [
   },
 ];
 
-export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
+const hrNavItems: NavItem[] = [
+  {
+    key: 'reward-requests',
+    label: 'Rewards Requests',
+    mobileLabel: 'Requests',
+    icon: LayoutDashboard,
+    href: '/hr/reward-requests',
+  },
+  {
+    key: 'mercado',
+    label: 'Mercado',
+    mobileLabel: 'Mercado',
+    icon: ShoppingCart,
+    href: '/hr/mercado',
+  },
+  {
+    key: 'leaderboard',
+    label: 'Leaderboard',
+    mobileLabel: 'Leaderboard',
+    icon: Trophy,
+    href: '/hr/leaderboard',
+  },
+];
+
+export function Sidebar({ view }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
@@ -120,6 +147,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
   const [showAttendanceModal, setShowAttendanceModal] = useState(false);
   const { startNavigation, stopNavigation, isNavigating, isLoggingOut } = useNavigationStore();
   const { data: user } = useGetSessionUser();
+  const navItems = view === 'manager' ? managerNavItems : hrNavItems;
   const { data: attendanceStatus } = useGetTodayAttendanceStatus();
 
   useEffect(() => {
@@ -154,7 +182,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
     <>
       <aside
         className={`hidden overflow-hidden bg-zinc-100 text-primary transition-all duration-500 ease-in-out md:flex md:flex-col md:justify-between z-50 shadow-sm/25 ${
-          isCollapsed ? 'w-17' : 'w-60 lg:w-64'
+          isCollapsed ? 'w-17' : 'w-52'
         }`}
       >
         <div className="mt-6 px-3 py-7">
@@ -215,12 +243,12 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
               const isDisabled = (!!pendingHref && !isNavigatingItem) || isLoggingOut;
               const Icon = item.icon;
 
-              const navLinkClassName = `group flex w-full cursor-pointer items-center gap-2.5 rounded-full py-3 font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
-                isCollapsed ? 'justify-center px-4' : 'justify-start px-4'
+              const navLinkClassName = `group flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium shadow-sm/15 transition-all duration-400 ease-in-out ${
+                isCollapsed ? 'justify-center' : 'justify-start'
               } ${
                 isActive
                   ? 'bg-primary-gradient text-zinc-50'
-                  : 'bg-zinc-50/75 text-[#131C2A] hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
+                  : 'bg-card text-primary hover:scale-103 transform-gpu hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm'
               } ${isDisabled ? 'pointer-events-none opacity-50' : ''}`;
 
               const navLink = (
@@ -236,34 +264,21 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                   aria-disabled={isDisabled}
                   className={navLinkClassName}
                 >
-                  {isCollapsed ? (
-                    isNavigatingItem ? (
-                      <NavigationDisplay
-                        isNavigating={isNavigatingItem}
-                        className="inline-flex items-center justify-center"
-                        iconClassName="size-5 animate-spin text-primary"
-                      />
-                    ) : (
-                      <Icon
-                        strokeWidth={1.75}
-                        className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-[#f47812]'}`}
-                      />
-                    )
+                  {isNavigatingItem ? (
+                    <NavigationDisplay
+                      isNavigating={isNavigatingItem}
+                      className="inline-flex items-center justify-center"
+                      iconClassName="size-5 animate-spin text-accent"
+                    />
                   ) : (
-                    <>
-                      <Icon
-                        strokeWidth={1.75}
-                        className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-[#f47812]'}`}
-                      />
-                      <span className="min-w-0 flex-1 truncate text-sm leading-tight">
-                        {item.label}
-                      </span>
-                      <NavigationDisplay
-                        isNavigating={isNavigatingItem}
-                        className="ml-auto inline-flex shrink-0 items-center justify-center"
-                        iconClassName="size-4 animate-spin text-primary"
-                      />
-                    </>
+                    <Icon
+                      strokeWidth={1.75}
+                      size={20}
+                      className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-accent'}`}
+                    />
+                  )}
+                  {!isCollapsed && (
+                    <span className="text-sidebar-label block whitespace-nowrap">{item.label}</span>
                   )}
                 </Link>
               );
@@ -291,11 +306,11 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
         <div
           className={
             isCollapsed
-              ? 'flex flex-col items-center justify-center gap-2 px-2 py-3'
+              ? 'flex flex-col items-center justify-center px-2 pt-3 pb-17'
               : 'flex flex-col px-3 py-4'
           }
         >
-          <HrAttendanceTrigger
+          <HrManagerAttendanceTrigger
             isCollapsed={isCollapsed}
             disabled={isUiDisabled}
             label={attendanceButtonLabel}
@@ -318,7 +333,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-background/95 backdrop-blur supports-backdrop-filter:bg-gray-50 md:hidden">
         <TooltipProvider>
           <div className="px-2 py-2">
-            <div className="grid grid-cols-6 gap-1">
+            <div className={`grid gap-1 ${view === 'manager' ? 'grid-cols-7' : 'grid-cols-5'}`}>
               {navItems.map((item) => {
                 const isActive = isNavLinkActive(item.href);
                 const isNavigatingItem = pendingHref === item.href;
@@ -389,7 +404,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                 <TooltipContent
                   side="top"
                   align="center"
-                  className="border border-accent/25 bg-card text-foreground shadow-sm/25"
+                  className="bg-card text-foreground shadow-sm/25"
                 >
                   {attendanceButtonLabel}
                 </TooltipContent>
@@ -403,7 +418,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
                     className={`flex flex-col items-center justify-center rounded-xl px-1 py-2 pb-2.5 text-primary transition-all duration-300 hover:bg-accent/20 hover:text-orange-500 ${isLoggingOut ? 'pointer-events-none opacity-50' : ''}`}
                   >
                     <UserCircle2 className="size-4" strokeWidth={1.9} />
-                    <span className="mt-1 text-[10px] leading-tight">Me</span>
+                    <span className="text-sidebar-label mt-1 w-full truncate text-center leading-tight">Profile</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent
@@ -426,7 +441,7 @@ export function Sidebar({ navItems = defaultNavItems }: SidebarProps) {
         user={user ?? null}
       />
 
-      <HrAttendanceModal open={showAttendanceModal} onOpenChange={setShowAttendanceModal} />
+      <HrManagerAttendanceModal view={view} open={showAttendanceModal} onOpenChange={setShowAttendanceModal} />
     </>
   );
 }

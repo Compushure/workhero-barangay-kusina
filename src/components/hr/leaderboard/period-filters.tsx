@@ -58,14 +58,14 @@ export function PeriodFilters({
   const hasSelection = selectedDate !== null;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white inline-flex items-stretch overflow-hidden self-start">
+    <div className="inline-flex w-full flex-col overflow-hidden rounded-2xl border border-accent/20 bg-card shadow-sm/30 sm:flex-row sm:items-stretch">
       {/* TYPE column */}
-      <div className="flex flex-col gap-0.5 px-4 py-3 min-w-[110px]">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+      <div className="flex min-w-33 flex-col gap-0.5 px-3.5 py-2.5">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           Select Period
         </span>
         <Select value={activeTab} onValueChange={onTypeChange}>
-          <SelectTrigger className="border-0 shadow-none p-0 h-auto gap-1.5 text-sm font-normal text-foreground focus:ring-0 bg-transparent [&>svg]:text-foreground [&>svg]:opacity-70">
+          <SelectTrigger className="h-auto gap-1.5 border-0 bg-transparent p-0 text-xs font-semibold text-foreground shadow-none focus-visible:ring-0 [&>svg]:text-muted-foreground sm:text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -81,20 +81,23 @@ export function PeriodFilters({
       {/* Divider + DATE column */}
       {hasAnyPeriods ? (
         <>
-          <div className="w-px bg-gray-200 self-stretch" />
+          <div className="h-px w-full bg-accent/20 sm:h-auto sm:w-px" />
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="flex flex-col gap-0.5 px-4 py-3 text-left hover:bg-gray-50 transition-colors group min-w-[160px]"
+                className="group flex min-w-42.5 flex-col gap-0.5 px-3.5 py-2.5 text-left transition-colors hover:bg-background/80"
               >
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   Filter by {TAB_LABELS[activeTab]}
                 </span>
                 <span className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 shrink-0 text-primary" />
+                  <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-primary sm:h-4 sm:w-4" />
                   <span
-                    className={cn('text-sm font-normal', !hasSelection && 'text-muted-foreground')}
+                    className={cn(
+                      'text-xs font-semibold sm:text-sm',
+                      !hasSelection && 'text-muted-foreground'
+                    )}
                   >
                     {triggerLabel}
                   </span>
@@ -108,7 +111,7 @@ export function PeriodFilters({
                         if (e.key === 'Enter' || e.key === ' ')
                           handleClear(e as unknown as React.MouseEvent);
                       }}
-                      className="ml-auto rounded-full p-0.5 text-muted-foreground hover:text-foreground hover:bg-muted"
+                      className="ml-auto rounded-full p-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                     >
                       <X className="h-3.5 w-3.5" />
                     </span>
