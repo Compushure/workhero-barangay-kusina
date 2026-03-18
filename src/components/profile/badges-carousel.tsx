@@ -1,16 +1,18 @@
 'use client';
 
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useGetUserBadges } from '@/hooks/tanstack/queries/employeeQueries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 
-const BADGES_PER_PAGE = 3;
+const MOBILE_BADGES_PER_PAGE = 1;
+const DESKTOP_BADGES_PER_PAGE = 3;
+const DESKTOP_MEDIA_QUERY = '(min-width: 1024px)';
 const NAV_BUTTON_CLASS =
-  'group h-10 w-10 rounded-xl border border-gray-300 bg-card p-0 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out hover:bg-accent-secondary hover:text-white disabled:pointer-events-none disabled:opacity-30';
+  'group h-10 w-10 rounded-xl bg-card p-0 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out hover:bg-accent-secondary hover:text-white disabled:pointer-events-none disabled:opacity-30';
 const BADGE_CARD_CLASS =
-  'h-full min-h-56 rounded-2xl border border-accent/25 bg-white p-5 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-[#F29F4A] hover:bg-[#FFF8EF] hover:shadow-sm';
+  'h-full min-h-56 rounded-2xl border border-accent/25 bg-white p-5 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-[#F29F4A] hover:shadow-sm';
 
 interface BadgesCarouselProps {
   userId: string;
@@ -19,18 +21,40 @@ interface BadgesCarouselProps {
 function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
   const { data: badges, isLoading } = useGetUserBadges(userId);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
+
+    const handleMediaQueryChange = (event: MediaQueryListEvent) => {
+      setIsDesktop(event.matches);
+    };
+
+    setIsDesktop(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleMediaQueryChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleMediaQueryChange);
+    };
+  }, []);
+
+  const badgesPerPage = isDesktop ? DESKTOP_BADGES_PER_PAGE : MOBILE_BADGES_PER_PAGE;
 
   const badgeList = badges || [];
-  const totalPages = Math.ceil(badgeList.length / BADGES_PER_PAGE);
-  const startIdx = currentPage * BADGES_PER_PAGE;
-  const endIdx = startIdx + BADGES_PER_PAGE;
+  const totalPages = Math.ceil(badgeList.length / badgesPerPage);
+  const startIdx = currentPage * badgesPerPage;
+  const endIdx = startIdx + badgesPerPage;
   const currentBadges = badgeList.slice(startIdx, endIdx);
+
+  useEffect(() => {
+    setCurrentPage((prevPage) => Math.min(prevPage, Math.max(totalPages - 1, 0)));
+  }, [totalPages]);
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-gray-300 bg-white p-5 sm:p-7 lg:p-8">
+      <div className="min-h-88 rounded-xl border border-gray-300 bg-white p-5 sm:min-h-96 sm:p-7 lg:h-full lg:min-h-0 lg:p-8">
         <div className="mx-auto flex max-w-4xl items-center justify-center gap-4 sm:gap-5">
-          {[...Array(BADGES_PER_PAGE)].map((_, i) => (
+          {[...Array(badgesPerPage)].map((_, i) => (
             <Skeleton key={i} className="h-44 w-30 rounded-2xl bg-white sm:h-50 sm:w-36" />
           ))}
         </div>
@@ -40,7 +64,7 @@ function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
 
   if (!badgeList.length) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-gray-300 bg-white py-12 text-center">
+      <div className="flex h-full flex-col items-center justify-center rounded-xl border border-gray-300 bg-white py-12 text-center">
         <Trophy className="mb-2 h-10 w-10 text-accent/70" />
         <p className="text-sm text-muted-foreground">No badges earned yet</p>
       </div>
@@ -51,12 +75,11 @@ function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
   const canGoForward = currentPage < totalPages - 1;
 
   return (
-    <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-xl border border-gray-300 bg-white px-12 py-7 sm:px-16 sm:py-9 lg:px-20">
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-linear-to-r from-white to-transparent sm:w-20" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-linear-to-l from-white to-transparent sm:w-20" />
+    <div className="flex h-full flex-col justify-center gap-2 sm:gap-3">
+      <div className="relative flex-1 overflow-hidden rounded-xl border border-gray-300 bg-white px-14 py-4 sm:px-16 sm:py-5 md:px-20 md:py-7 lg:px-24">
 
-        <div className="absolute left-3 top-1/2 z-10 -translate-y-1/2 sm:left-5 lg:left-6">
+
+        <div className="absolute left-2 top-1/2 z-10 -translate-y-1/2 sm:left-3 lg:left-4">
           <Button
             variant="ghost"
             size="sm"
@@ -69,7 +92,7 @@ function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
           </Button>
         </div>
 
-        <div className="absolute right-3 top-1/2 z-10 -translate-y-1/2 sm:right-5 lg:right-6">
+        <div className="absolute right-2 top-1/2 z-10 -translate-y-1/2 sm:right-3 lg:right-4">
           <Button
             variant="ghost"
             size="sm"
@@ -82,7 +105,7 @@ function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
           </Button>
         </div>
 
-        <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+        <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5 py-5">
           {currentBadges.map((badge) => (
             <article key={badge.userbadge_id} className={BADGE_CARD_CLASS}>
               <div className="flex h-full flex-col text-center">

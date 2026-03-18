@@ -10,7 +10,7 @@ interface BasicInformationProps {
 
 export function BasicInformation({ profile }: BasicInformationProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4 w-full max-w-full">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-1 sm:gap-3 md:gap-4 w-full max-w-full pb-0">
       <div className="space-y-1.5 sm:space-y-2 min-w-0 max-w-full">
         <Label htmlFor="name" className="text-xs sm:text-sm font-medium text-muted-foreground">
           Full Name

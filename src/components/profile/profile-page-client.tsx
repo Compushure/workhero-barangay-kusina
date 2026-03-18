@@ -33,11 +33,14 @@ import { useAntiSpam } from '@/hooks/useAntiSpam';
 const TAB_VALUES = ['personal', 'employment', 'badges'] as const;
 type TabValue = (typeof TAB_VALUES)[number];
 const DEFAULT_TAB: TabValue = 'personal';
-const TAB_TRIGGER_CLASS =
-  'z-10 min-w-0 flex-1 h-12 rounded-2xl border border-gray-300 bg-card px-4 sm:px-6 text-center text-sm font-semibold text-foreground shadow-sm transition-all duration-300 ease-in-out hover:bg-[#F29F4A] hover:text-white data-[state=active]:border-[#C96A1A] data-[state=active]:!bg-[#E07C24] data-[state=active]:text-white after:hidden';
-const SECTION_CARD_CLASS =
-  'space-y-3 rounded-lg border border-gray-200 bg-background-soft p-3 sm:p-4 pt';
+const CHROME_TAB_STRIP_CLASS =
+  '!flex !flex-row !flex-nowrap !items-end !justify-stretch !bg-transparent w-full !gap-[2px] !p-0 overflow-visible';
+const CHROME_TAB_TRIGGER_CLASS =
+  'chrome-tab z-0 flex-1 min-w-0 !h-[38px] !rounded-tl-[12px] !rounded-tr-[12px] !rounded-bl-none !rounded-br-none !bg-[#C1C5CC] !text-[#5F6368] !text-[0.72rem] sm:!text-[0.8rem] !font-medium hover:!bg-[#D0D4DA] hover:!text-[#3C4043] !overflow-hidden before:!hidden after:!hidden data-[state=active]:!bg-white data-[state=active]:!text-[#202124] data-[state=active]:!font-semibold data-[state=active]:!h-[42px] data-[state=active]:!z-[20] data-[state=active]:shadow-[0_-1px_0_0_rgba(255,255,255,1)] !border !border-gray-300 data-[state=active]:!border-b-0 !shadow-none !px-2 sm:!px-4 !py-0 whitespace-nowrap transition-colors pb-1.5 sm:pb-2.5 md:pb-3.5 lg:pb-4';
+const SECTION_CARD_CLASS = 'space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-3 sm:p-4';
 const SECTION_TITLE_CLASS = 'text-sm font-semibold text-[#E07C24]';
+const TAB_PANEL_HEIGHT_CLASS = 'min-h-[22rem] sm:min-h-[24rem] lg:h-[28rem]';
+const SKELETON_TAB_PANEL_HEIGHT_CLASS = 'min-h-[22rem] sm:min-h-[24rem] lg:h-[28rem]';
 
 interface ProfilePageClientProps {
   userId: string;
@@ -45,13 +48,23 @@ interface ProfilePageClientProps {
 
 function ProfileLoadingSkeleton() {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-9 w-24 bg-white/80" />
-      </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
-        <Skeleton className="h-80 w-full rounded-xl bg-white/80" />
-        <Skeleton className="h-96 w-full rounded-xl bg-white/80" />
+    <div className="w-full space-y-4 px-2 sm:px-0 md:mx-auto md:max-w-4xl lg:max-w-6xl">
+      <Skeleton className="h-9 w-24 bg-white/80" />
+      <div className="max-w-full overflow-hidden rounded-2xl border border-gray-300 bg-[#E5E7EB] p-0 shadow-md">
+        <div className="rounded-none bg-[linear-gradient(90deg,#F29F4A_0%,#E07C24_100%)] px-4 py-3 sm:px-5 sm:py-3.5">
+          <Skeleton className="h-8 w-44 bg-white/30" />
+        </div>
+        <div className="max-w-full space-y-3 px-3 py-3 sm:space-y-4 sm:px-4 sm:py-4 md:px-5 md:py-5">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-stretch xl:gap-5">
+            <Skeleton className="h-80 w-full rounded-xl bg-white/80 lg:h-full" />
+            <div className="min-w-0 lg:flex lg:h-full lg:flex-col">
+              <Skeleton className="mb-2 h-11 w-full rounded-t-xl bg-white/80" />
+              <Skeleton
+                className={`w-full rounded-b-xl bg-white/80 ${SKELETON_TAB_PANEL_HEIGHT_CLASS}`}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -79,7 +92,6 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   const uploadAntiSpam = useAntiSpam({ cooldown: 1500, maxAttempts: 3 });
   const deleteAntiSpam = useAntiSpam({ cooldown: 1500, maxAttempts: 3 });
 
-  // Route is already protected by protectSessionRoute(userId) on the server
   // So we can safely assume this is the user's own profile
   const isOwnProfile = true;
 
@@ -171,7 +183,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   };
 
   return (
-    <div className="w-full space-y-4 px-0 pb-4 md:mx-auto md:max-w-4xl lg:max-w-6xl">
+    <div className="w-full space-y-4 px-2 sm:px-0 md:mx-auto md:max-w-4xl lg:max-w-6xl">
       {/* Header */}
       <ProfileHeader isPending={isPending} onBack={handleBackClick} />
 
@@ -204,29 +216,35 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
               <RecentBadges userId={userId} showLabel={true} maxBadges={3} />
             </div>
           </div>
-          <div className="min-w-0 lg:flex lg:h-full lg:flex-col lg:gap-4">
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <div className="w-full">
-                <TabsList
-                  variant="line"
-                  className="grid h-auto w-full grid-cols-1 gap-2 rounded-3xl bg-transparent p-1 sm:grid-cols-3"
-                >
-                  <TabsTrigger value="personal" className={TAB_TRIGGER_CLASS}>
-                    Personal Information
+          <div className="min-w-0 lg:flex lg:flex-col">
+            <Tabs
+              value={activeTab}
+              onValueChange={handleTabChange}
+              className="w-full gap-0 overflow-visible"
+            >
+              <div className="relative z-10 w-full px-0">
+                <TabsList variant="line" className={CHROME_TAB_STRIP_CLASS}>
+                  <TabsTrigger value="personal" className={CHROME_TAB_TRIGGER_CLASS}>
+                    <span className="truncate sm:hidden">Personal</span>
+                    <span className="hidden truncate sm:inline">Personal Information</span>
                   </TabsTrigger>
-                  <TabsTrigger value="employment" className={TAB_TRIGGER_CLASS}>
-                    Employment Details
+                  <TabsTrigger value="employment" className={CHROME_TAB_TRIGGER_CLASS}>
+                    <span className="truncate sm:hidden">Employment</span>
+                    <span className="hidden truncate sm:inline">Employment Details</span>
                   </TabsTrigger>
-                  <TabsTrigger value="badges" className={TAB_TRIGGER_CLASS}>
-                    All Badges
+                  <TabsTrigger value="badges" className={CHROME_TAB_TRIGGER_CLASS}>
+                    <span className="truncate sm:hidden">Badges</span>
+                    <span className="hidden truncate sm:inline">All Badges</span>
                   </TabsTrigger>
                 </TabsList>
               </div>
             </Tabs>
 
-            <div className="w-full max-w-full rounded-xl border border-gray-300 bg-white p-3 sm:p-4 md:p-5 lg:flex-1">
+            <div
+              className={`flex w-full max-w-full ${TAB_PANEL_HEIGHT_CLASS} flex-col overflow-hidden rounded-b-xl border border-t-0 bg-white p-2 sm:p-3 md:p-4 lg:flex-1`}
+            >
               {activeTab === 'personal' && (
-                <div className="space-y-4">
+                <div className="h-full space-y-3 overflow-y-auto pr-2">
                   <section className={SECTION_CARD_CLASS}>
                     <h3 className={SECTION_TITLE_CLASS}>Basic Information</h3>
                     <BasicInformation profile={profile} />
@@ -238,19 +256,19 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
                 </div>
               )}
               {activeTab === 'employment' && (
-                <div className="space-y-4">
+                <div className="h-full space-y-3 pr-2">
                   <section className={SECTION_CARD_CLASS}>
                     <h3 className={SECTION_TITLE_CLASS}>Employment Details</h3>
                     <EmploymentDetails profile={profile} />
                   </section>
-                  <section className={SECTION_CARD_CLASS}>
+                  <section className={`${SECTION_CARD_CLASS} flex-1`}>
                     <h3 className={SECTION_TITLE_CLASS}>Government IDs</h3>
                     <GovernmentIDs profile={profile} />
                   </section>
                 </div>
               )}
               {activeTab === 'badges' && (
-                <div className="w-full max-w-full">
+                <div className="h-full w-full max-w-full pr-2">
                   <BadgesCarousel userId={userId} />
                 </div>
               )}
