@@ -393,6 +393,20 @@
 }
 
 @layer components {
+  /* Chrome browser-style tab – ear pseudo-element effect */
+  .chrome-tab {
+    isolation: isolate;
+  }
+
+  .chrome-tab[data-state='active'] {
+    overflow: visible !important;
+  }
+
+  .chrome-tab[data-state='active']::before,
+  .chrome-tab[data-state='active']::after {
+    content: none !important;
+    display: none !important;
+  }
 }
 
 @keyframes launcher-shadow-blink {
