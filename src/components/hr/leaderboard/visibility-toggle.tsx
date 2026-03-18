@@ -155,7 +155,7 @@ export default function VisibilityToggle({
               'inline-flex min-h-10 items-center justify-center cursor-pointer  rounded-md px-4 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-60',
               pendingVisibility
                 ? 'bg-accent hover:bg-accent/70'
-                : 'bg-accent-secondary hover:bg-accent-secondary/70'
+                : 'bg-accent hover:bg-accent/70'
             )}
           >
             {toggleVisibilityMutation.isPending ? 'Updating...' : confirmLabel}
