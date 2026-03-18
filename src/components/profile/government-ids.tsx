@@ -41,21 +41,38 @@ export function GovernmentIDs({ profile }: GovernmentIDsProps) {
               <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
                 {id.label}
               </Label>
-              {id.value && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleIdVisibility(id.type)}
-                  className="h-6 w-6 p-0 text-accent hover:bg-accent/10 transition-colors duration-200"
-                  title={visibleIds[id.type] ? 'Hide' : 'Show'}
-                >
-                  {visibleIds[id.type] ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  if (id.value) {
+                    toggleIdVisibility(id.type);
+                  }
+                }}
+                disabled={!id.value}
+                className="h-6 w-6 p-0 text-accent hover:bg-accent/10 transition-colors duration-200 disabled:text-muted-foreground disabled:hover:bg-transparent"
+                title={
+                  id.value
+                    ? visibleIds[id.type]
+                      ? `Hide ${id.label}`
+                      : `Show ${id.label}`
+                    : `${id.label} not available`
+                }
+                aria-label={
+                  id.value
+                    ? visibleIds[id.type]
+                      ? `Hide ${id.label}`
+                      : `Show ${id.label}`
+                    : `${id.label} not available`
+                }
+                aria-pressed={id.value ? Boolean(visibleIds[id.type]) : false}
+              >
+                {id.value && visibleIds[id.type] ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
             </div>
             <p className="text-xs sm:text-sm md:text-base font-semibold text-title font-mono p-2 bg-white rounded-md break-all">
               {id.value ? (
