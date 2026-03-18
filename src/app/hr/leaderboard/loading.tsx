@@ -37,9 +37,9 @@ function PeriodSelectorSkeleton() {
             </div>
             <div className="flex w-full flex-col items-start gap-1.5 xl:max-w-[172px]">
               <Skeleton className="h-3 w-28 rounded bg-gray-300" />
-              <div className="control-h flex w-full overflow-hidden rounded-md border border-accent/20 bg-card/75 shadow-sm/25">
-                <Skeleton className="control-h flex-1 rounded-none rounded-l-md bg-gray-300" />
-                <Skeleton className="control-h flex-1 rounded-none rounded-r-md bg-gray-300" />
+              <div className="control-h flex w-full overflow-hidden rounded-md border border-accent/25 bg-card/75 shadow-sm/25">
+                <Skeleton className="control-h flex-1 rounded-none rounded-l-md bg-gray-300/90" />
+                <Skeleton className="control-h flex-1 rounded-none rounded-r-md bg-gray-300/70" />
               </div>
             </div>
           </div>
