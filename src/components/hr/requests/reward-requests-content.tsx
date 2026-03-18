@@ -92,6 +92,7 @@ export function RewardRequestsContent() {
             sortBy={sortBy}
             statusFilter={statusFilter}
             onStatusChange={handleStatusChange}
+            requestsCount={filteredRequests.length}
           />
 
           <div className="flex-1 flex flex-col">
