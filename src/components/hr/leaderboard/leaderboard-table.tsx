@@ -116,7 +116,7 @@ export default function LeaderboardTable({
                         </TooltipTrigger>
                         <TooltipContent side="left" className="max-w-xs">
                           <p className="text-sm text-foreground">
-                            Performance Score = (Badge Points + Task Points) × Completed Tasks
+                            Performance Score = (Task Points × Completed Tasks) + Badge Points
                           </p>
                         </TooltipContent>
                       </Tooltip>
