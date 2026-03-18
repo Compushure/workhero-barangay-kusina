@@ -18,25 +18,61 @@ interface BadgesCarouselProps {
   userId: string;
 }
 
-function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
-  const { data: badges, isLoading } = useGetUserBadges(userId);
-  const [currentPage, setCurrentPage] = useState(0);
+function useIsDesktopBreakpoint() {
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
-
-    const handleMediaQueryChange = (event: MediaQueryListEvent) => {
+    const updateMatch = (event: MediaQueryListEvent) => {
       setIsDesktop(event.matches);
     };
 
     setIsDesktop(mediaQuery.matches);
-    mediaQuery.addEventListener('change', handleMediaQueryChange);
+    mediaQuery.addEventListener('change', updateMatch);
 
     return () => {
-      mediaQuery.removeEventListener('change', handleMediaQueryChange);
+      mediaQuery.removeEventListener('change', updateMatch);
     };
   }, []);
+
+  return isDesktop;
+}
+
+function CarouselNavButton({
+  direction,
+  onClick,
+  disabled,
+}: {
+  direction: 'previous' | 'next';
+  onClick: () => void;
+  disabled: boolean;
+}) {
+  const isPrevious = direction === 'previous';
+
+  return (
+    <div
+      className={`absolute top-1/2 z-10 -translate-y-1/2 ${
+        isPrevious ? 'left-2 sm:left-3 lg:left-4' : 'right-2 sm:right-3 lg:right-4'
+      }`}
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onClick}
+        disabled={disabled}
+        className={NAV_BUTTON_CLASS}
+        aria-label={isPrevious ? 'Previous badge page' : 'Next badge page'}
+      >
+        {isPrevious ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+      </Button>
+    </div>
+  );
+}
+
+function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
+  const { data: badges, isLoading } = useGetUserBadges(userId);
+  const [currentPage, setCurrentPage] = useState(0);
+  const isDesktop = useIsDesktopBreakpoint();
 
   const badgesPerPage = isDesktop ? DESKTOP_BADGES_PER_PAGE : MOBILE_BADGES_PER_PAGE;
 
@@ -77,33 +113,16 @@ function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
   return (
     <div className="flex h-full flex-col justify-center gap-2 sm:gap-3">
       <div className="relative flex-1 overflow-hidden rounded-xl border border-gray-300 bg-white px-14 py-4 sm:px-16 sm:py-5 md:px-20 md:py-7 lg:px-24">
-
-
-        <div className="absolute left-2 top-1/2 z-10 -translate-y-1/2 sm:left-3 lg:left-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-            disabled={!canGoBack}
-            className={NAV_BUTTON_CLASS}
-            aria-label="Previous badge page"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="absolute right-2 top-1/2 z-10 -translate-y-1/2 sm:right-3 lg:right-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
-            disabled={!canGoForward}
-            className={NAV_BUTTON_CLASS}
-            aria-label="Next badge page"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+        <CarouselNavButton
+          direction="previous"
+          onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+          disabled={!canGoBack}
+        />
+        <CarouselNavButton
+          direction="next"
+          onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+          disabled={!canGoForward}
+        />
 
         <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5 py-5">
           {currentBadges.map((badge) => (

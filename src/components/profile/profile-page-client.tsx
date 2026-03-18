@@ -33,6 +33,15 @@ import { useAntiSpam } from '@/hooks/useAntiSpam';
 const TAB_VALUES = ['personal', 'employment', 'badges'] as const;
 type TabValue = (typeof TAB_VALUES)[number];
 const DEFAULT_TAB: TabValue = 'personal';
+const TAB_OPTIONS: ReadonlyArray<{
+  value: TabValue;
+  mobileLabel: string;
+  desktopLabel: string;
+}> = [
+  { value: 'personal', mobileLabel: 'Personal', desktopLabel: 'Personal Information' },
+  { value: 'employment', mobileLabel: 'Employment', desktopLabel: 'Employment Details' },
+  { value: 'badges', mobileLabel: 'Badges', desktopLabel: 'All Badges' },
+] as const;
 const CHROME_TAB_STRIP_CLASS =
   '!flex !flex-row !flex-nowrap !items-end !justify-stretch !bg-transparent w-full !gap-[2px] !p-0 overflow-visible';
 const CHROME_TAB_TRIGGER_CLASS =
@@ -44,6 +53,23 @@ const SKELETON_TAB_PANEL_HEIGHT_CLASS = 'min-h-[22rem] sm:min-h-[24rem] lg:h-[28
 
 interface ProfilePageClientProps {
   userId: string;
+}
+
+function ProfileTabTrigger({
+  value,
+  mobileLabel,
+  desktopLabel,
+}: {
+  value: TabValue;
+  mobileLabel: string;
+  desktopLabel: string;
+}) {
+  return (
+    <TabsTrigger value={value} className={CHROME_TAB_TRIGGER_CLASS}>
+      <span className="truncate sm:hidden">{mobileLabel}</span>
+      <span className="hidden truncate sm:inline">{desktopLabel}</span>
+    </TabsTrigger>
+  );
 }
 
 function ProfileLoadingSkeleton() {
@@ -92,42 +118,41 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   const uploadAntiSpam = useAntiSpam({ cooldown: 1500, maxAttempts: 3 });
   const deleteAntiSpam = useAntiSpam({ cooldown: 1500, maxAttempts: 3 });
 
-  // So we can safely assume this is the user's own profile
-  const isOwnProfile = true;
+  const executeProtectedUpload = useCallback(
+    async (uploadFn: () => Promise<void>) => {
+      if (!uploadAntiSpam.canExecute) return;
+
+      await uploadAntiSpam.execute(async () => {
+        try {
+          await uploadFn();
+        } catch (error) {
+          console.error('Error uploading file:', error);
+        }
+      });
+    },
+    [uploadAntiSpam]
+  );
 
   const handleImageSelect = useCallback(
     (croppedImage: File) => {
       setShowCropDialog(false);
 
-      // Upload immediately after crop
-      if (uploadAntiSpam.canExecute) {
-        uploadAntiSpam.execute(async () => {
-          try {
-            startTransition(() => {
-              uploadPicture.mutate(croppedImage);
-            });
-          } catch (error) {
-            console.error('Error uploading cropped image:', error);
-          }
+      void executeProtectedUpload(async () => {
+        startTransition(() => {
+          uploadPicture.mutate(croppedImage);
         });
-      }
+      });
     },
-    [uploadPicture, uploadAntiSpam]
+    [executeProtectedUpload, startTransition, uploadPicture]
   );
 
   const handleFileChange = useCallback(
     async (file: File) => {
-      if (uploadAntiSpam.canExecute) {
-        await uploadAntiSpam.execute(async () => {
-          try {
-            await uploadPicture.mutateAsync(file);
-          } catch (error) {
-            console.error('Error uploading file:', error);
-          }
-        });
-      }
+      await executeProtectedUpload(async () => {
+        await uploadPicture.mutateAsync(file);
+      });
     },
-    [uploadPicture, uploadAntiSpam]
+    [executeProtectedUpload, uploadPicture]
   );
 
   const handleDeletePicture = useCallback(async () => {
@@ -135,12 +160,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
       await deleteAntiSpam.execute(async () => {
         try {
           await deletePicture.mutateAsync();
-          // Close modal after successful deletion
           setShowCropDialog(false);
-          // Optionally wait a moment to ensure cache is updated
-          setTimeout(() => {
-            // This ensures the dialog content re-renders with fresh data
-          }, 100);
         } catch (error) {
           console.error('Error deleting picture:', error);
         }
@@ -196,7 +216,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
                 profilePictureUrl={profile?.profilePictureUrl}
                 userName={profile?.name || 'User'}
                 userId={userId}
-                isOwnProfile={isOwnProfile}
+                isOwnProfile={true}
                 isLoading={uploadPicture.isPending || isPending}
                 isDeleting={deletePicture.isPending}
                 onFileChange={handleFileChange}
@@ -224,18 +244,14 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
             >
               <div className="relative z-10 w-full px-0">
                 <TabsList variant="line" className={CHROME_TAB_STRIP_CLASS}>
-                  <TabsTrigger value="personal" className={CHROME_TAB_TRIGGER_CLASS}>
-                    <span className="truncate sm:hidden">Personal</span>
-                    <span className="hidden truncate sm:inline">Personal Information</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="employment" className={CHROME_TAB_TRIGGER_CLASS}>
-                    <span className="truncate sm:hidden">Employment</span>
-                    <span className="hidden truncate sm:inline">Employment Details</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="badges" className={CHROME_TAB_TRIGGER_CLASS}>
-                    <span className="truncate sm:hidden">Badges</span>
-                    <span className="hidden truncate sm:inline">All Badges</span>
-                  </TabsTrigger>
+                  {TAB_OPTIONS.map((tab) => (
+                    <ProfileTabTrigger
+                      key={tab.value}
+                      value={tab.value}
+                      mobileLabel={tab.mobileLabel}
+                      desktopLabel={tab.desktopLabel}
+                    />
+                  ))}
                 </TabsList>
               </div>
             </Tabs>
