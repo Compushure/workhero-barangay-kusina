@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { CalendarIcon, X } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -11,9 +11,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MonthPicker, YearPicker, WeekCalendar } from '@/components/shared/period-date-pickers';
-import { getTriggerLabel } from '@/lib/utils/period-filter-utils';
+import {
+  buildAvailablePeriodKeys,
+  getTriggerLabel,
+  toPeriodSelectionKey,
+} from '@/lib/utils/period-filter-utils';
 import { cn } from '@/lib/utils';
-import type { RankingPeriodType } from '@/types';
+import type { RankingPeriodType, RankingPeriodWithTop } from '@/types';
 
 export const TAB_LABELS: Record<RankingPeriodType, string> = {
   weekly: 'Weekly',
@@ -29,6 +33,7 @@ interface PeriodFiltersProps {
   activeTab: RankingPeriodType;
   selectedDate: Date | null;
   hasAnyPeriods: boolean;
+  availablePeriods: RankingPeriodWithTop[];
   onTypeChange: (value: string) => void;
   onDateChange: (date: Date | null) => void;
 }
@@ -37,10 +42,15 @@ export function PeriodFilters({
   activeTab,
   selectedDate,
   hasAnyPeriods,
+  availablePeriods,
   onTypeChange,
   onDateChange,
 }: PeriodFiltersProps) {
   const [open, setOpen] = useState(false);
+  const availablePeriodKeys = useMemo(
+    () => buildAvailablePeriodKeys(availablePeriods, activeTab),
+    [availablePeriods, activeTab]
+  );
 
   const handleSelect = (date: Date) => {
     onDateChange(date);
@@ -56,6 +66,8 @@ export function PeriodFilters({
     emptyLabel: 'All periods',
   });
   const hasSelection = selectedDate !== null;
+  const isDateSelectable = (date: Date) =>
+    availablePeriodKeys.has(toPeriodSelectionKey(date, activeTab));
 
   return (
     <div className="inline-flex w-full flex-col overflow-hidden rounded-2xl border border-accent/20 bg-card shadow-sm/30 sm:flex-row sm:items-stretch">
@@ -121,13 +133,25 @@ export function PeriodFilters({
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               {activeTab === 'weekly' && (
-                <WeekCalendar selected={selectedDate} onSelect={handleSelect} />
+                <WeekCalendar
+                  selected={selectedDate}
+                  onSelect={handleSelect}
+                  isDateSelectable={isDateSelectable}
+                />
               )}
               {activeTab === 'monthly' && (
-                <MonthPicker selected={selectedDate} onSelect={handleSelect} />
+                <MonthPicker
+                  selected={selectedDate}
+                  onSelect={handleSelect}
+                  isDateSelectable={isDateSelectable}
+                />
               )}
               {activeTab === 'yearly' && (
-                <YearPicker selected={selectedDate} onSelect={handleSelect} />
+                <YearPicker
+                  selected={selectedDate}
+                  onSelect={handleSelect}
+                  isDateSelectable={isDateSelectable}
+                />
               )}
             </PopoverContent>
           </Popover>

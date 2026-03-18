@@ -19,9 +19,15 @@ interface MonthPickerProps {
   selected: Date | null;
   onSelect: (date: Date) => void;
   variant?: PeriodDatePickerVariant;
+  isDateSelectable?: (date: Date) => boolean;
 }
 
-export function MonthPicker({ selected, onSelect, variant = 'default' }: MonthPickerProps) {
+export function MonthPicker({
+  selected,
+  onSelect,
+  variant = 'default',
+  isDateSelectable,
+}: MonthPickerProps) {
   const [year, setYear] = useState(() => selected?.getFullYear() ?? new Date().getFullYear());
   const isEmployee = variant === 'employee';
 
@@ -71,6 +77,8 @@ export function MonthPicker({ selected, onSelect, variant = 'default' }: MonthPi
 
       <div className="grid grid-cols-3 gap-1">
         {MONTH_NAMES_SHORT.map((name, idx) => {
+          const monthDate = new Date(year, idx, 1);
+          const isDisabled = isDateSelectable ? !isDateSelectable(monthDate) : false;
           const isSelected =
             selected !== null &&
             selected.getFullYear() === year &&
@@ -79,9 +87,10 @@ export function MonthPicker({ selected, onSelect, variant = 'default' }: MonthPi
             <button
               key={name}
               type="button"
-              onClick={() => onSelect(new Date(year, idx, 1))}
+              onClick={() => onSelect(monthDate)}
+              disabled={isDisabled}
               className={cn(
-                'rounded-md py-2 text-sm transition-colors',
+                'rounded-md py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40',
                 isEmployee && 'font-jersey tracking-widest',
                 isEmployee
                   ? isSelected
@@ -107,9 +116,15 @@ interface YearPickerProps {
   selected: Date | null;
   onSelect: (date: Date) => void;
   variant?: PeriodDatePickerVariant;
+  isDateSelectable?: (date: Date) => boolean;
 }
 
-export function YearPicker({ selected, onSelect, variant = 'default' }: YearPickerProps) {
+export function YearPicker({
+  selected,
+  onSelect,
+  variant = 'default',
+  isDateSelectable,
+}: YearPickerProps) {
   const [rangeStart, setRangeStart] = useState(() =>
     getYearRangeStart(selected?.getFullYear() ?? new Date().getFullYear())
   );
@@ -166,14 +181,17 @@ export function YearPicker({ selected, onSelect, variant = 'default' }: YearPick
 
       <div className="grid grid-cols-3 gap-1">
         {years.map((yr) => {
+          const yearDate = new Date(yr, 0, 1);
+          const isDisabled = isDateSelectable ? !isDateSelectable(yearDate) : false;
           const isSelected = selected !== null && selected.getFullYear() === yr;
           return (
             <button
               key={yr}
               type="button"
-              onClick={() => onSelect(new Date(yr, 0, 1))}
+              onClick={() => onSelect(yearDate)}
+              disabled={isDisabled}
               className={cn(
-                'rounded-md py-2 text-sm transition-colors',
+                'rounded-md py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40',
                 isEmployee && 'font-jersey tracking-widest',
                 isEmployee
                   ? isSelected
@@ -273,9 +291,15 @@ interface WeekCalendarProps {
   selected: Date | null;
   onSelect: (date: Date) => void;
   variant?: PeriodDatePickerVariant;
+  isDateSelectable?: (date: Date) => boolean;
 }
 
-export function WeekCalendar({ selected, onSelect, variant = 'default' }: WeekCalendarProps) {
+export function WeekCalendar({
+  selected,
+  onSelect,
+  variant = 'default',
+  isDateSelectable,
+}: WeekCalendarProps) {
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
   const isEmployee = variant === 'employee';
 
@@ -293,6 +317,7 @@ export function WeekCalendar({ selected, onSelect, variant = 'default' }: WeekCa
           onDayMouseEnter={(day) => setHoveredDate(day)}
           onDayMouseLeave={() => setHoveredDate(null)}
           onDayClick={(day) => onSelect(day)}
+          disabled={isDateSelectable ? (date) => !isDateSelectable(date) : undefined}
           weekStartsOn={1}
           components={{ DayButton: WeekDayButton }}
         classNames={

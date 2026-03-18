@@ -154,6 +154,7 @@ export function PastRanksList({ initialData }: PastRanksListProps) {
               activeTab={activeTab}
               selectedDate={selectedDate}
               hasAnyPeriods={(periods?.length ?? 0) > 0}
+              availablePeriods={grouped[activeTab]}
               onTypeChange={handleTypeChange}
               onDateChange={handleDateChange}
             />
