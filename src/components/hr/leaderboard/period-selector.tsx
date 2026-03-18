@@ -19,6 +19,7 @@ import {
 } from '@/lib/utils/time-period-utils';
 import { useGenerateRankingByPeriod } from '@/hooks/tanstack/mutations/hrMutations';
 import { cn } from '@/lib/utils';
+import VisibilityToggle from '@/components/hr/leaderboard/visibility-toggle';
 import type { RankLogPeriodType } from '@/types';
 
 function getPreviousWeek(): { year: number; week: number } {
@@ -67,6 +68,8 @@ interface PeriodSelectorProps {
   currentMonth: number;
   /** Whether the period we're currently viewing has a ranking (drives badge and buttons) */
   currentPeriodRankingExists: boolean;
+  rankingPeriodId?: string;
+  isVisible?: boolean;
   className?: string;
 }
 
@@ -122,6 +125,8 @@ export function PeriodSelector({
   currentWeek,
   currentMonth,
   currentPeriodRankingExists,
+  rankingPeriodId,
+  isVisible,
   className,
 }: PeriodSelectorProps) {
   const router = useRouter();
@@ -198,14 +203,14 @@ export function PeriodSelector({
 
   return (
     <div className={cn('manager-sticky-controls w-full rounded-2xl p-3 sm:p-3.5', className)}>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[240px_minmax(0,1fr)_auto]">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[240px_minmax(0,1fr)_auto] xl:grid-cols-[130px_260px_auto]">
         {/* Period Type */}
-        <div className="flex w-full flex-col gap-1.5">
+        <div className="flex w-full flex-col gap-1.5 xl:max-w-[130px]">
           <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Period Type
           </span>
           <Select value={currentType} onValueChange={handlePeriodTypeChange}>
-            <SelectTrigger className="control-h w-full rounded-lg border border-border bg-card px-3.5 text-xs font-medium text-primary shadow-sm sm:text-sm">
+            <SelectTrigger className="control-h w-full rounded-lg border border-border bg-card px-3.5 text-xs font-semibold text-primary shadow-sm sm:text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -217,13 +222,13 @@ export function PeriodSelector({
         </div>
 
         {/* Period value */}
-        <div className="flex w-full flex-col gap-1.5">
+        <div className="flex w-full flex-col gap-1.5 xl:max-w-[260px]">
           <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             {periodFieldLabel}
           </span>
           {currentType === 'weekly' ? (
             <Select value={currentWeeklyKey} onValueChange={handleWeeklyPeriodChange}>
-              <SelectTrigger className="control-h w-full rounded-lg border border-border bg-card px-3.5 text-xs font-medium text-primary shadow-sm sm:text-sm">
+              <SelectTrigger className="control-h w-full rounded-lg border border-border bg-card px-3.5 text-xs font-semibold text-primary shadow-sm sm:text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -246,21 +251,37 @@ export function PeriodSelector({
         </div>
 
         {/* Status / Action */}
-        <div className="flex w-full items-center self-start">
-          {hasRanking ? (
-            <div className="control-h inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 text-xs font-semibold text-emerald-700 sm:text-sm lg:w-auto">
-              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
-              Ranking ready
+        <div className="flex w-full flex-col gap-1.5 self-start">
+          <div className="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[172px_172px]">
+            <div className="flex w-full flex-col items-start gap-1.5 xl:max-w-[172px]">
+              {hasRanking ? (
+                <div className="flex min-h-4 items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    Ranking ready
+                  </span>
+                </div>
+              ) : (
+                <div className="min-h-4" aria-hidden="true" />
+              )}
+              <Button
+                onClick={handleGenerateRank}
+                disabled={hasRanking || isPending || isGenerating}
+                className="control-h w-full rounded-full bg-primary-gradient px-4 text-xs font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:opacity-60 sm:text-sm"
+              >
+                {isGenerating ? 'Generating...' : 'Generate Rank'}
+              </Button>
             </div>
-          ) : (
-            <Button
-              onClick={handleGenerateRank}
-              disabled={isPending || isGenerating}
-              className="control-h w-full rounded-full bg-primary-gradient px-5 text-xs font-semibold text-white shadow-sm transition hover:opacity-95 sm:text-sm lg:w-auto"
-            >
-              {isGenerating ? 'Generating…' : 'Generate Rank'}
-            </Button>
-          )}
+
+            {hasRanking && rankingPeriodId && typeof isVisible === 'boolean' ? (
+              <VisibilityToggle
+                rankingPeriodId={rankingPeriodId}
+                isVisible={isVisible}
+                disabled={rankingPeriodId.startsWith('optimistic-')}
+                className="w-full xl:max-w-[172px]"
+              />
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

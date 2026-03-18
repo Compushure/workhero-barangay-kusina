@@ -13,7 +13,6 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import { Pagination } from '@/components/shared/pagination';
-import VisibilityToggle from '@/components/hr/leaderboard/visibility-toggle';
 import type { LeaderboardPlayer } from '@/types';
 
 const PAGE_SIZE = 10;
@@ -23,7 +22,6 @@ interface LeaderboardTableProps {
   periodLabel: string;
   dateRangeSubtitle: string | null;
   rankingPeriodId: string;
-  isVisible: boolean;
 }
 
 function RankCell({ rank }: { rank: number }) {
@@ -35,7 +33,6 @@ export default function LeaderboardTable({
   periodLabel,
   dateRangeSubtitle,
   rankingPeriodId,
-  isVisible,
 }: LeaderboardTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const isOptimisticRanking = rankingPeriodId.startsWith('optimistic-');
@@ -81,12 +78,6 @@ export default function LeaderboardTable({
               )}
             </div>
           </div>
-          <VisibilityToggle
-            rankingPeriodId={rankingPeriodId}
-            isVisible={isVisible}
-            disabled={isOptimisticRanking}
-            className="control-h rounded-full px-4"
-          />
         </div>
 
         <div className="w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">

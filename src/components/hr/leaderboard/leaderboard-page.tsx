@@ -1,7 +1,11 @@
 import { getISOWeek, getISOWeekYear } from 'date-fns';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
-import { checkRankingExists, getAllRankingPeriods } from '@/actions/hr/leaderboard';
+import {
+  checkRankingExists,
+  getAllRankingPeriods,
+  getEnrichedLeaderboardByPeriod,
+} from '@/actions/hr/leaderboard';
 import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-content';
 import { LeaderboardViewToggle } from '@/components/hr/leaderboard/leaderboard-view-toggle';
 import { PastRanksList } from '@/components/hr/leaderboard/past-ranks-list';
@@ -104,6 +108,20 @@ export async function LeaderboardPageContent({ searchParams }: LeaderboardPageCo
   const currentPeriodRankingExists =
     currentPeriodRankingExistsResult.success && !!currentPeriodRankingExistsResult.data;
 
+  const currentPeriodRankingDataResult = currentPeriodRankingExists
+    ? await getEnrichedLeaderboardByPeriod(
+        periodType,
+        year,
+        periodType === 'monthly' ? month : undefined,
+        periodType === 'weekly' ? week : undefined
+      )
+    : null;
+
+  const currentPeriodRankingData =
+    currentPeriodRankingDataResult?.success && currentPeriodRankingDataResult.data
+      ? currentPeriodRankingDataResult.data
+      : null;
+
   // Only fetch the list when actually showing the past-ranks list, not the detail view.
   const initialPastRanksData =
     currentView === 'past' && !isViewingSpecificPastRank ? await getAllRankingPeriods() : null;
@@ -139,6 +157,8 @@ export async function LeaderboardPageContent({ searchParams }: LeaderboardPageCo
             currentWeek={week}
             currentMonth={month}
             currentPeriodRankingExists={currentPeriodRankingExists}
+            rankingPeriodId={currentPeriodRankingData?.rankingPeriodId}
+            isVisible={currentPeriodRankingData?.isVisible}
             className="min-w-0 xl:max-w-4xl xl:mr-auto"
           />
         ) : null}

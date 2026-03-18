@@ -68,7 +68,6 @@ export function LeaderboardContent({
         periodLabel={data.periodLabel}
         dateRangeSubtitle={data.dateRangeSubtitle}
         rankingPeriodId={data.rankingPeriodId}
-        isVisible={data.isVisible}
       />
     </div>
   );
