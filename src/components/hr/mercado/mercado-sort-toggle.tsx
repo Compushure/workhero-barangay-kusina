@@ -9,12 +9,14 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
 export type SortOption = 'newest' | 'oldest';
 
 interface MercadoSortToggleProps {
   value: SortOption;
   onChange: (value: SortOption) => void;
+  className?: string;
 }
 
 const sortLabels: Record<SortOption, string> = {
@@ -22,7 +24,7 @@ const sortLabels: Record<SortOption, string> = {
   oldest: 'Oldest First',
 };
 
-export function MercadoSortToggle({ value, onChange }: MercadoSortToggleProps) {
+export function MercadoSortToggle({ value, onChange, className }: MercadoSortToggleProps) {
   const itemClassName = (isActive: boolean) =>
     `cursor-pointer transition-all duration-500 ease-in-out ${
       isActive
@@ -33,12 +35,19 @@ export function MercadoSortToggle({ value, onChange }: MercadoSortToggleProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="group h-10 w-44 justify-between rounded-xl border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white transition-all duration-400 ease-in-out">
-          <span className="truncate font-medium">{sortLabels[value]}</span>
-          <ArrowUpDown className="h-4 w-4 text-accent group-hover:text-white transition-all duration-400 ease-in-out" />
+        <Button
+          variant="default"
+          size="default"
+          className={cn(
+            'text-button control-h w-full justify-between rounded-md border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44',
+            className
+          )}
+        >
+          <span className="truncate">{sortLabels[value]}</span>
+          <ArrowUpDown size={14} className="text-accent" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="manager-dropdown-content w-48">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           Sort by Date
         </DropdownMenuLabel>

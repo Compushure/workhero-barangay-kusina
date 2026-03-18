@@ -6,8 +6,9 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import type { QueryKey } from '@tanstack/react-query';
 import { handleApproveTask, handleRejectTask } from '@/action-handlers/manager/verification';
-import type { VerificationRequest } from '@/types';
+import type { VerificationRequest, PaginatedResponse } from '@/types';
 import { managerTaskKeys } from '../queries/managerQueries';
 import { useTaskStore } from '@/store/taskStore';
 
@@ -37,10 +38,13 @@ export function useApproveTask(): UseMutationResult<
   VerificationRequest | null,
   Error,
   { id: string; remark: string },
-  { previousTasks: VerificationRequest[] | undefined }
+  {
+    previousTasks: VerificationRequest[] | undefined;
+    previousPendingPaginated: Array<[QueryKey, PaginatedResponse<VerificationRequest> | undefined]>;
+  }
 > {
   const queryClient = useQueryClient();
-  const { optimisticApprove, updateTask } = useTaskStore();
+  const { optimisticApprove, startOptimistic, commit, rollback } = useTaskStore();
 
   return useMutation({
     mutationFn: async ({
@@ -54,35 +58,61 @@ export function useApproveTask(): UseMutationResult<
     },
     onMutate: async ({ id }: { id: string; remark: string }) => {
       // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: managerTaskKeys.paginatedLists() });
       await queryClient.cancelQueries({ queryKey: managerTaskKeys.lists() });
 
       // Snapshot previous value
       const previousTasks = queryClient.getQueryData<VerificationRequest[]>(
         managerTaskKeys.list('in review')
       );
+      const previousPendingPaginated = queryClient
+        .getQueriesData<PaginatedResponse<VerificationRequest>>({
+          queryKey: managerTaskKeys.paginatedLists(),
+        })
+        .filter(([queryKey]) => queryKey[2] === 'in-review');
 
       // Optimistic update in Zustand store
+      startOptimistic();
       optimisticApprove(id);
 
-      // Optimistically update the cache
+      // Optimistically update legacy non-paginated cache
       queryClient.setQueryData<VerificationRequest[]>(managerTaskKeys.list('in review'), (old) => {
         if (!old) return old;
-        return old.map((task) => (task.kpitask_id === id ? { ...task, status: 'approved' } : task));
+        return old.filter((task) => task.kpitask_id !== id);
       });
 
-      return { previousTasks };
+      // Optimistically remove the task from every pending paginated page
+      previousPendingPaginated.forEach(([queryKey]) => {
+        queryClient.setQueryData<PaginatedResponse<VerificationRequest>>(queryKey, (old) => {
+          if (!old) return old;
+          const nextData = old.data.filter((task) => task.kpitask_id !== id);
+          const removedCount = old.data.length - nextData.length;
+          if (removedCount === 0) return old;
+
+          return {
+            ...old,
+            data: nextData,
+            count: Math.max(0, old.count - removedCount),
+          };
+        });
+      });
+
+      return { previousTasks, previousPendingPaginated };
     },
-    onError: (error, { id }, context) => {
+    onError: (_error, _variables, context) => {
       // Rollback on error
       if (context?.previousTasks) {
         queryClient.setQueryData(managerTaskKeys.list('in review'), context.previousTasks);
       }
+
+      context?.previousPendingPaginated.forEach(([queryKey, previousData]) => {
+        queryClient.setQueryData(queryKey, previousData);
+      });
+
+      rollback();
     },
-    onSuccess: (data, { id }) => {
-      // Update Zustand store with server response
-      if (data) {
-        updateTask(id, data);
-      }
+    onSuccess: () => {
+      commit();
     },
     onSettled: () => {
       // Invalidate all paginated queries to refetch updated data
@@ -120,10 +150,13 @@ export function useRejectTask(): UseMutationResult<
   VerificationRequest | null,
   Error,
   { id: string; remark: string },
-  { previousTasks: VerificationRequest[] | undefined }
+  {
+    previousTasks: VerificationRequest[] | undefined;
+    previousPendingPaginated: Array<[QueryKey, PaginatedResponse<VerificationRequest> | undefined]>;
+  }
 > {
   const queryClient = useQueryClient();
-  const { optimisticReject, updateTask } = useTaskStore();
+  const { optimisticReject, startOptimistic, commit, rollback } = useTaskStore();
 
   return useMutation({
     mutationFn: async ({
@@ -137,35 +170,61 @@ export function useRejectTask(): UseMutationResult<
     },
     onMutate: async ({ id }: { id: string; remark: string }) => {
       // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: managerTaskKeys.paginatedLists() });
       await queryClient.cancelQueries({ queryKey: managerTaskKeys.lists() });
 
       // Snapshot previous value
       const previousTasks = queryClient.getQueryData<VerificationRequest[]>(
         managerTaskKeys.list('in review')
       );
+      const previousPendingPaginated = queryClient
+        .getQueriesData<PaginatedResponse<VerificationRequest>>({
+          queryKey: managerTaskKeys.paginatedLists(),
+        })
+        .filter(([queryKey]) => queryKey[2] === 'in-review');
 
       // Optimistic update in Zustand store
+      startOptimistic();
       optimisticReject(id);
 
-      // Optimistically update the cache
+      // Optimistically update legacy non-paginated cache
       queryClient.setQueryData<VerificationRequest[]>(managerTaskKeys.list('in review'), (old) => {
         if (!old) return old;
-        return old.map((task) => (task.kpitask_id === id ? { ...task, status: 'rejected' } : task));
+        return old.filter((task) => task.kpitask_id !== id);
       });
 
-      return { previousTasks };
+      // Optimistically remove the task from every pending paginated page
+      previousPendingPaginated.forEach(([queryKey]) => {
+        queryClient.setQueryData<PaginatedResponse<VerificationRequest>>(queryKey, (old) => {
+          if (!old) return old;
+          const nextData = old.data.filter((task) => task.kpitask_id !== id);
+          const removedCount = old.data.length - nextData.length;
+          if (removedCount === 0) return old;
+
+          return {
+            ...old,
+            data: nextData,
+            count: Math.max(0, old.count - removedCount),
+          };
+        });
+      });
+
+      return { previousTasks, previousPendingPaginated };
     },
-    onError: (error, { id }, context) => {
+    onError: (_error, _variables, context) => {
       // Rollback on error
       if (context?.previousTasks) {
         queryClient.setQueryData(managerTaskKeys.list('in review'), context.previousTasks);
       }
+
+      context?.previousPendingPaginated.forEach(([queryKey, previousData]) => {
+        queryClient.setQueryData(queryKey, previousData);
+      });
+
+      rollback();
     },
-    onSuccess: (data, { id }) => {
-      // Update Zustand store with server response
-      if (data) {
-        updateTask(id, data);
-      }
+    onSuccess: () => {
+      commit();
     },
     onSettled: () => {
       // Invalidate all paginated queries to refetch updated data

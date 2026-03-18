@@ -2,8 +2,8 @@
 
 import React from 'react';
 
-import { useState } from 'react';
-import { Plus, Search, ArrowUpDown, Coins, Menu } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Plus, Search, ArrowUpDown, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,7 +15,7 @@ import AddEditBadgeDialog, { type BadgeFormData } from './dialogs/add-edit-badge
 import BadgeTable from './badge-table';
 import { BadgeFilterToggle, type BadgeFilterMode } from './badge-filter-toggle';
 import { useDebounce } from '../../../hooks/useDebounce';
-import { Pagination } from '../task-verification/pagination';
+import { Pagination } from '@/components/shared/pagination';
 import type { Badge } from '@/types/manager/badge-editor';
 import { BadgeEditorHeaderSkeleton } from './badge-editor-header-skeleton';
 import {
@@ -30,6 +30,8 @@ import {
   useUploadBadgeImage,
 } from '@/hooks/tanstack';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
+import { PageHeader } from '@/components/shared/page-header';
+import { useManagerBadgeEditorStore } from '@/store/managerBadgeEditorStore';
 
 type BadgeSortOption = 'name-asc' | 'points-desc' | 'created-desc' | 'created-asc';
 
@@ -41,7 +43,7 @@ const SORT_OPTIONS: { value: BadgeSortOption; label: string }[] = [
 ];
 
 export function BadgeEditorPage() {
-  const { data: badges = [], isLoading, isFetching, isError } = useGetBadges();
+  const { data: badgesData, isLoading, isFetching, isError } = useGetBadges();
   const { data: taskOptions = [] } = useGetBadgeTaskOptions();
   const { data: attributeOptions = [] } = useGetBadgeAttributeOptions();
   const { data: attendanceOptions = [] } = useGetBadgeAttendanceOptions();
@@ -50,6 +52,7 @@ export function BadgeEditorPage() {
   const deleteBadge = useDeleteBadge();
   const uploadBadgeImage = useUploadBadgeImage();
   const deleteBadgeImage = useDeleteBadgeImage();
+  const { badges, hydrateFromServer, isOptimistic } = useManagerBadgeEditorStore();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
   const [saveError, setSaveError] = useState('');
@@ -57,7 +60,27 @@ export function BadgeEditorPage() {
   const [sortOption, setSortOption] = useState<BadgeSortOption>('name-asc');
   const [filterMode, setFilterMode] = useState<BadgeFilterMode>('all');
   const [page, setPage] = useState(1);
-  const pageSize = 8;
+  const [hasLoadedHeaderOnce, setHasLoadedHeaderOnce] = useState(false);
+  const pageSize = 10;
+
+  useEffect(() => {
+    if (!isLoading) {
+      setHasLoadedHeaderOnce(true);
+    }
+  }, [isLoading]);
+
+  const showHeaderSkeleton = !hasLoadedHeaderOnce && isLoading;
+
+  useEffect(() => {
+    if (badgesData) {
+      hydrateFromServer(badgesData);
+      return;
+    }
+
+    if (!isLoading) {
+      hydrateFromServer([]);
+    }
+  }, [badgesData, hydrateFromServer, isLoading, isOptimistic]);
 
   // Debounce search term
   const debouncedSearchTerm = useDebounce(searchTerm, 900);
@@ -241,83 +264,93 @@ export function BadgeEditorPage() {
     SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Name (A-Z)';
 
   return (
-    <main className="w-full min-h-screen bg-zinc-100 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
-      <div className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl space-y-5 sm:space-y-6 lg:space-y-8">
-        {isLoading ? (
+    <main className="w-full min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl space-y-5 sm:space-y-4 lg:space-y-6">
+        {showHeaderSkeleton ? (
           <BadgeEditorHeaderSkeleton />
         ) : (
           <>
-            <div className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Badge Editor</h1>
-              <p className="text-sm sm:text-base lg:text-lg text-secondary">Create, edit, and manage badges with conditions.</p>
-            </div>
+            <PageHeader
+              title="Badge Editor"
+              subtitle="Create, edit, and manage badges with conditions."
+            />
 
-            <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+            <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
               {/* Badge Count Display */}
-              <div className="flex gap-3 sm:gap-4 text-base sm:text-lg font-bold text-foreground pl-1 sm:pl-2">
-            <h5 className="flex items-center gap-2">
-              <Coins size={20} className="text-accent" />
-              Badges{' '}
-              <span className="bg-accent/75 text-primary-foreground px-2.5 py-0.5 rounded-full text-sm ml-1 shadow-sm/25">
-                {totalCount ?? 0}
-              </span>
-            </h5>
-          </div>
+              <div className="flex shrink-0 self-start xl:self-center gap-2 whitespace-nowrap pl-0.5 text-h2 text-foreground sm:gap-3 sm:pl-1">
+                <h5 className="flex items-center gap-1.5">
+                  <Coins size={16} className="text-accent" />
+                  Badges
+                  <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-md text-[13px] ml-0.5 shadow-sm/25">
+                    {totalCount ?? 0}
+                  </span>
+                </h5>
+              </div>
 
-          {/* Search, Sort, and Add Button */}
-          <div className="flex flex-wrap gap-2 sm:gap-3 items-center justify-start lg:justify-end">
-            {/* Search Input */}
-            <div className="relative flex">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by badge name or description"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="pl-10 pr-4 py-2 rounded-full text-sm bg-card shadow-sm/25 focus:outline-none focus:border focus:border-accent transition-colors"
-              />
-            </div>
+              {/* Search, Sort, and Add Button */}
+              <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
+                {/* Search Input */}
+                <div className="relative min-w-0 flex-1 xl:max-w-md">
+                  <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search assignable task"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    className="text-meta control-h w-full min-w-0 rounded-md border border-zinc-200 bg-card pr-3 pl-9 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
+                  />
+                </div>
 
-            <BadgeFilterToggle filterMode={filterMode} onFilterChange={handleFilterChange} />
+                <div className="flex min-w-0 flex-wrap gap-2 sm:gap-3 xl:flex-nowrap xl:justify-end">
+                  <div className="shrink-0">
+                    <BadgeFilterToggle
+                      filterMode={filterMode}
+                      onFilterChange={handleFilterChange}
+                    />
+                  </div>
 
-            {/* Sort Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="default"
-                  size="default"
-                  className="bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-full sm:w-48 py-2 justify-between border border-gray-200"
-                >
-                  <span className="truncate">{currentSortLabel}</span>
-                  <ArrowUpDown size={18} className='text-accent'/>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background w-56">
-                {SORT_OPTIONS.map((option) => (
-                  <DropdownMenuItem
-                    key={option.value}
-                    onClick={() => handleSortChange(option.value)}
-                    className={`cursor-pointer transition-all duration-300 ease-in-out ${
-                      sortOption === option.value ? 'bg-accent/15' : ''
-                    }`}
-                  >
-                    {option.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {/* Sort and Add Button Row */}
+                  <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
+                    {/* Sort Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="default"
+                          size="default"
+                          className="text-button control-h w-full justify-between border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44"
+                        >
+                          <span className="truncate">{currentSortLabel}</span>
+                          <ArrowUpDown size={14} className="text-accent" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="manager-dropdown-content w-56">
+                        {SORT_OPTIONS.map((option) => (
+                          <DropdownMenuItem
+                            key={option.value}
+                            onClick={() => handleSortChange(option.value)}
+                            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                              sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                            }`}
+                          >
+                            {option.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
 
-            {/* Add New Badge Button */}
-            <Button
-              onClick={handleOpenAddDialog}
-              className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-3 sm:px-4 py-2 rounded-full shadow-sm/25 font-semibold text-sm w-full sm:w-48 justify-between"
-            >
-              <Coins size={18} />
-              <span className="inline">Add New Badge</span>
-              <Plus size={18} />
-            </Button>
-          </div>
-        </section>
+                    {/* Add New Badge Button */}
+                    <Button
+                      onClick={handleOpenAddDialog}
+                      className="text-button control-h w-full justify-center rounded-md bg-primary-gradient px-3 py-1.5 whitespace-nowrap text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 sm:w-auto sm:px-4"
+                    >
+                      <Coins size={14} />
+                      <span>Add New Badge</span>
+                      <Plus size={14} className="ml-1 sm:ml-3" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </section>
           </>
         )}
 

@@ -8,6 +8,12 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseHost = supabaseUrl ? new URL(supabaseUrl).hostname : null;
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      // Allow image payloads up to the app-level validation limit (5MB).
+      bodySizeLimit: '5mb',
+    },
+  },
   turbopack: {
     root: projectRoot,
   },

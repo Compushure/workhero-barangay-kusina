@@ -44,6 +44,7 @@ export const MercadoCard = memo(function MercadoCard({
   onUnhide,
 }: MercadoCardProps) {
   const [hideDialogOpen, setHideDialogOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
@@ -68,8 +69,11 @@ export const MercadoCard = memo(function MercadoCard({
   }, [isHidden, item.id, onHide, onUnhide]);
 
   const handleCardClick = useCallback(() => {
+    if (isMenuOpen || hideDialogOpen) {
+      return;
+    }
     onClick?.(item.id);
-  }, [onClick, item.id]);
+  }, [onClick, item.id, isMenuOpen, hideDialogOpen]);
 
   const availableDateText = useMemo(() => {
     if (!item.availableDate) return null;
@@ -78,7 +82,7 @@ export const MercadoCard = memo(function MercadoCard({
 
   return (
     <div
-      className="bg-background border border-border rounded-xl p-3.5 flex items-start gap-3.5 relative shadow-sm hover:shadow-md transition-all min-h-32 cursor-pointer hover:border-accent/50 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+      className="relative flex min-h-27 items-start gap-4 rounded-2xl border border-accent/15 bg-card px-3.5 py-3.5 shadow-sm/25 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/35 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -89,12 +93,12 @@ export const MercadoCard = memo(function MercadoCard({
         }
       }}
     >
-      <div className="h-20 w-20 bg-background border border-accent/20 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border border-accent/25 bg-background-soft/80 text-accent">
         {item.imageUrl && !imageError ? (
           <img
             src={item.imageUrl}
             alt={`${item.name} icon`}
-            className="h-full w-full object-cover"
+            className="h-full w-full rounded-xl object-cover"
             loading="lazy"
             decoding="async"
             onError={() => setImageError(true)}
@@ -109,14 +113,14 @@ export const MercadoCard = memo(function MercadoCard({
         )}
       </div>
 
-      <div className="flex-1 min-w-0 pr-10 flex flex-col gap-1">
-        <h3 className="text-base sm:text-lg font-semibold text-primary truncate leading-tight">{item.name}</h3>
+      <div className="flex-1 min-w-0 pr-10 flex flex-col gap-1.5">
+        <h3 className="text-task-title font-semibold text-foreground truncate">{item.name}</h3>
 
-        <div className="flex min-h-5 items-center gap-1.5 flex-wrap">
+        <div className="flex min-h-5 flex-wrap items-center gap-1.5">
           {availableDateText && (
             <Badge
               variant="secondary"
-              className="shrink-0 rounded-lg border border-accent/30 bg-accent-secondary/25 px-1.5 sm:px-2 text-primary hover:bg-accent-secondary/25 text-[10px] sm:text-[11px] leading-tight"
+              className="shrink-0 rounded-lg border border-accent/30 bg-accent-secondary/20 px-1.5 text-[10px] font-medium uppercase tracking-wide text-accent"
             >
               <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
               {availableDateText}
@@ -125,7 +129,7 @@ export const MercadoCard = memo(function MercadoCard({
           {isHidden && (
             <Badge
               variant="secondary"
-              className="shrink-0 rounded-lg border border-gray-300 bg-gray-200 px-1.5 sm:px-2 text-gray-700 hover:bg-gray-200 text-[10px] sm:text-[11px] leading-tight"
+              className="shrink-0 rounded-lg border border-border bg-background-soft px-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
             >
               <EyeOff className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
               Hidden
@@ -133,37 +137,40 @@ export const MercadoCard = memo(function MercadoCard({
           )}
         </div>
 
-        <div className="flex min-h-5 items-center gap-2 flex-wrap">
-          <p className="text-primary font-semibold text-sm">{formattedPrice} pts</p>
+        <div className="flex min-h-5 flex-wrap items-center gap-2">
+          <p className="text-button font-semibold text-primary">{formattedPrice} pts</p>
           {isOutOfStock ? (
             <Badge
               variant="destructive"
-              className="shrink-0 rounded-lg border border-destructive/80 bg-destructive px-1.5 sm:px-2 text-white hover:bg-destructive text-[10px] sm:text-[11px] leading-tight"
+              className="shrink-0 rounded-lg border border-destructive/40 bg-destructive/90 px-1.5 text-[10px] font-semibold uppercase tracking-wide text-white"
             >
               Out of stock
             </Badge>
           ) : (
             formattedQuantity !== undefined && (
-              <p className="text-muted-foreground text-xs sm:text-sm truncate">
-                | Available: {formattedQuantity}
-              </p>
+              <p className="text-meta text-muted-foreground">| Available: {formattedQuantity}</p>
             )
           )}
         </div>
 
         <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
+          <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 bg-accent text-card border border-accent/80 shadow-md hover:bg-primary-gradient hover:text-card hover:scale-105 transition-all duration-200"
+                className="control-h size-8 rounded-xl border border-accent/80 bg-primary-gradient text-card shadow-sm/25 transition-all duration-200 hover:scale-105"
               >
                 <Pencil className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32 rounded-xl">
-              <DropdownMenuItem onClick={() => setHideDialogOpen(true)}>
+            <DropdownMenuContent align="end" className="manager-dropdown-content w-36 rounded-xl">
+              <DropdownMenuItem
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setHideDialogOpen(true);
+                }}
+              >
                 {isHidden ? (
                   <Eye className="mr-2 h-4 w-4 text-primary" />
                 ) : (
@@ -171,12 +178,20 @@ export const MercadoCard = memo(function MercadoCard({
                 )}
                 {isHidden ? 'Unhide' : 'Hide'}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit?.(item.id)}>
+              <DropdownMenuItem
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onEdit?.(item.id);
+                }}
+              >
                 <Pencil className="mr-2 h-4 w-4 text-primary" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => onDelete?.(item.id)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onDelete?.(item.id);
+                }}
                 className="text-red-600 font-semibold"
               >
                 <Trash2 className="mr-2 h-4 w-4 text-red-600" />

@@ -13,12 +13,45 @@ interface ManagerAssignmentState {
   commit: () => void;
   rollback: () => void;
   optimisticDeleteTask: (taskId: string) => void;
+  optimisticDeleteAssignment: (assignmentId: string) => void;
+  optimisticDeleteTaskGroup: (criteria: {
+    categoryId: string;
+    deadlineDate: string;
+    maxOrders: number;
+    createdAt: string;
+  }) => void;
+  optimisticMergeAssignedTasks: (tasks: AssignedTask[]) => void;
   optimisticClearAll: () => void;
+  optimisticClearUnstartedAssigned: () => void;
   optimisticClearAllEmployeeTasks: (employeeId: string) => void;
   optimisticUpdateTask: (
     taskId: string,
     updates: { maxOrders?: number; newDueDate?: string; employeeIds?: string[] }
   ) => void;
+}
+
+function areAssignedTasksEquivalent(a: AssignedTask[], b: AssignedTask[]): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+
+  for (let i = 0; i < a.length; i += 1) {
+    const left = a[i];
+    const right = b[i];
+
+    if (
+      left.id !== right.id ||
+      left.taskId !== right.taskId ||
+      left.taskName !== right.taskName ||
+      left.maxOrders !== right.maxOrders ||
+      left.points !== right.points ||
+      left.xp !== right.xp ||
+      left.assignedEmployees.length !== right.assignedEmployees.length
+    ) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 const buildOptimisticEmployees = (
@@ -51,6 +84,7 @@ export const useManagerAssignmentStore = create<ManagerAssignmentState>((set, ge
     set((state) => ({ assignedTasks: [...state.assignedTasks, ...tasks] })),
   hydrateFromServer: (tasks) => {
     if (get().isOptimistic) return;
+    if (areAssignedTasksEquivalent(get().assignedTasks, tasks)) return;
     set({ assignedTasks: tasks });
   },
   startOptimistic: () => {
@@ -73,7 +107,81 @@ export const useManagerAssignmentStore = create<ManagerAssignmentState>((set, ge
     set((state) => ({
       assignedTasks: state.assignedTasks.filter((task) => task.id !== taskId),
     })),
+  optimisticDeleteAssignment: (assignmentId) =>
+    set((state) => ({
+      assignedTasks: state.assignedTasks
+        .map((task) => ({
+          ...task,
+          assignedEmployees: task.assignedEmployees.filter(
+            (employee) => employee.assignmentId !== assignmentId
+          ),
+        }))
+        .filter((task) => task.assignedEmployees.length > 0),
+    })),
+  optimisticDeleteTaskGroup: ({ categoryId, deadlineDate, maxOrders, createdAt }) =>
+    set((state) => ({
+      assignedTasks: state.assignedTasks.filter(
+        (task) =>
+          !(
+            task.taskId === categoryId &&
+            (task.dateRange.end ?? '') === deadlineDate &&
+            task.maxOrders === maxOrders &&
+            task.dateRange.start === createdAt
+          )
+      ),
+    })),
+  optimisticMergeAssignedTasks: (tasks) =>
+    set((state) => {
+      const existing = [...state.assignedTasks];
+
+      tasks.forEach((incomingTask) => {
+        const matchedIndex = existing.findIndex(
+          (currentTask) =>
+            currentTask.taskId === incomingTask.taskId &&
+            currentTask.dateRange.start === incomingTask.dateRange.start &&
+            currentTask.dateRange.end === incomingTask.dateRange.end &&
+            currentTask.maxOrders === incomingTask.maxOrders
+        );
+
+        if (matchedIndex < 0) {
+          existing.push(incomingTask);
+          return;
+        }
+
+        const matchedTask = existing[matchedIndex];
+        const currentEmployees = matchedTask.assignedEmployees ?? [];
+        const incomingEmployees = incomingTask.assignedEmployees ?? [];
+        const employeeById = new Map(currentEmployees.map((employee) => [employee.id, employee]));
+
+        incomingEmployees.forEach((employee) => {
+          employeeById.set(employee.id, employee);
+        });
+
+        existing[matchedIndex] = {
+          ...matchedTask,
+          assignedEmployees: Array.from(employeeById.values()),
+        };
+      });
+
+      return { assignedTasks: existing };
+    }),
   optimisticClearAll: () => set({ assignedTasks: [] }),
+  optimisticClearUnstartedAssigned: () =>
+    set((state) => ({
+      assignedTasks: state.assignedTasks
+        .map((task) => ({
+          ...task,
+          assignedEmployees: task.assignedEmployees.filter(
+            (emp) =>
+              !(
+                (emp.status?.toLowerCase() ?? 'assigned') === 'assigned' &&
+                (emp.completedOrders ?? 0) === 0 &&
+                (emp.pendingOrders ?? 0) === 0
+              )
+          ),
+        }))
+        .filter((task) => task.assignedEmployees.length > 0),
+    })),
   optimisticClearAllEmployeeTasks: (employeeId) =>
     set((state) => ({
       assignedTasks: state.assignedTasks

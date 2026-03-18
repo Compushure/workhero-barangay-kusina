@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Plus } from 'lucide-react';
+import { Package, Plus } from 'lucide-react';
 import { Suspense } from 'react';
 import { MercadoCard } from '@/components/hr/mercado/mercado-card';
 import { MercadoHeader } from '@/components/hr/mercado/mercado-header';
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { MercadoSortToggle } from '@/components/hr/mercado/mercado-sort-toggle';
 import { MercadoFilterToggle } from '@/components/hr/mercado/mercado-filter-toggle';
 import { MercadoSkeleton } from '@/components/hr/mercado/mercado-skeleton';
-import { Pagination } from '@/components/manager/task-verification/pagination';
+import { Pagination } from '@/components/shared/pagination';
 import { useMercadoPageState } from '@/actions/hr/use-mercado-page-state';
 
 const AddItemsModal = dynamic(() =>
@@ -29,6 +29,7 @@ const ViewItemModal = dynamic(() =>
 export function MercadoPageContent() {
   const {
     isLoading,
+    totalItemsCount,
     totalPages,
     currentPage,
     paginatedRewards,
@@ -68,57 +69,97 @@ export function MercadoPageContent() {
     handleSaveItem,
   } = useMercadoPageState();
 
+  const getEmptyStateMessage = () => {
+    if (search) {
+      return `No items found matching "${search}".`;
+    }
+
+    const filterLabels: string[] = [];
+
+    if (stockFilter === 'in-stock') filterLabels.push('In Stock');
+    if (stockFilter === 'out-of-stock') filterLabels.push('Out of Stock');
+    if (visibilityFilter === 'visible') filterLabels.push('Visible');
+    if (visibilityFilter === 'hidden') filterLabels.push('Hidden');
+    if (intervalFilter === 'weekly') filterLabels.push('Weekly');
+    if (intervalFilter === 'monthly') filterLabels.push('Monthly');
+    if (intervalFilter === 'yearly') filterLabels.push('Yearly');
+
+    if (filterLabels.length === 0) {
+      return 'No items yet. Click "Add Item" to create one.';
+    }
+
+    if (filterLabels.length === 1) {
+      return `No items found for the ${filterLabels[0]} filter.`;
+    }
+
+    return 'No items found. Please select other filters.';
+  };
+
   return (
-    // Page shell section.
-    <main className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
-      <div className="mx-auto w-full max-w-7xl 2xl:max-w-440 flex-1 flex flex-col gap-4 sm:gap-6">
+    <main className="w-full min-h-screen bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-5 sm:gap-6 2xl:max-w-screen-2xl">
         {isLoading ? (
           <MercadoHeaderSkeleton />
         ) : (
           <Suspense fallback={<MercadoHeaderSkeleton />}>
-            <div className="space-y-4 sm:space-y-6">
+            <div className="space-y-4 sm:space-y-5">
               <MercadoHeader
                 title="Mercado Manager"
                 description="Manage items visible in mercado"
                 showAddButton={false}
               />
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 sm:justify-end">
-                <div className="w-full sm:min-w-0 md:max-w-md lg:max-w-lg sm:flex-initial">
-                  <div className="w-full">
+              <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
+                <div className="flex shrink-0 self-start xl:self-center gap-2 whitespace-nowrap pl-0.5 text-h2 text-foreground sm:gap-3 sm:pl-1">
+                  <h5 className="flex items-center gap-1.5">
+                    <Package size={16} className="text-accent" />
+                    Items
+                    <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-md text-[13px] ml-1 shadow-sm/25">
+                      {totalItemsCount}
+                    </span>
+                  </h5>
+                </div>
+                <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
+                  <div className="min-w-0 flex-1 xl:max-w-xs">
                     <MercadoSearchBar
                       value={search}
                       onChange={setSearch}
                       placeholder="Search by item name"
+                      className="w-full"
                     />
                   </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <MercadoSortToggle value={sortOrder} onChange={setSortOrder} />
-                    <MercadoFilterToggle
-                      stockFilter={stockFilter}
-                      visibilityFilter={visibilityFilter}
-                      intervalFilter={intervalFilter}
-                      onStockFilterChange={setStockFilter}
-                      onVisibilityFilterChange={setVisibilityFilter}
-                      onIntervalFilterChange={setIntervalFilter}
-                    />
+                  <div className="w-full min-w-0 overflow-x-auto pb-1 xl:w-auto xl:overflow-visible xl:pb-0">
+                    <div className="flex min-w-max flex-nowrap items-center gap-2 sm:gap-3 xl:justify-end">
+                      <MercadoSortToggle
+                        value={sortOrder}
+                        onChange={setSortOrder}
+                        className="w-40 shrink-0 sm:w-44"
+                      />
+                      <MercadoFilterToggle
+                        stockFilter={stockFilter}
+                        visibilityFilter={visibilityFilter}
+                        intervalFilter={intervalFilter}
+                        onStockFilterChange={setStockFilter}
+                        onVisibilityFilterChange={setVisibilityFilter}
+                        onIntervalFilterChange={setIntervalFilter}
+                        className="shrink-0"
+                      />
+                      <Button
+                        onClick={openAddModal}
+                        className="text-button control-h w-32 shrink-0 justify-center rounded-md bg-primary-gradient px-3 py-1.5 whitespace-nowrap text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 sm:w-auto sm:px-4"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add Item
+                      </Button>
+                    </div>
                   </div>
-                  <Button
-                    onClick={openAddModal}
-                    className="w-full sm:w-auto h-10 px-4 rounded-lg bg-primary-gradient text-zinc-50 hover:opacity-95"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Item
-                  </Button>
                 </div>
-              </div>
+              </section>
             </div>
           </Suspense>
         )}
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex flex-1 flex-col">
           {/* Catalog grid section. */}
           {isLoading ? (
             <MercadoSkeleton />
@@ -146,14 +187,8 @@ export function MercadoPageContent() {
                   />
                 ))
               ) : (
-                <div className="col-span-full py-12 text-center">
-                  {search ? (
-                    <p className="text-muted-foreground">No items found matching your search.</p>
-                  ) : (
-                    <p className="text-muted-foreground">
-                      No items yet. Click "Add Item" to create one.
-                    </p>
-                  )}
+                <div className="col-span-full rounded-2xl border border-dashed border-accent/20 bg-card/40 py-14 text-center shadow-sm/25">
+                  <p className="text-button text-muted-foreground">{getEmptyStateMessage()}</p>
                 </div>
               )}
             </div>

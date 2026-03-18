@@ -33,15 +33,15 @@ export function DeleteModal({ open, onOpenChange, itemName, onConfirm }: DeleteM
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-muted text-card-foreground border border-border max-w-md rounded-2xl p-6">
+      <DialogContent className="bg-card text-card-foreground border border-accent/25 max-w-md rounded-3xl p-6 shadow-xl">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center">
-              <AlertTriangle className="h-6 w-6 text-primary" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+              <AlertTriangle className="h-6 w-6" />
             </div>
-            <DialogTitle className="text-xl font-bold text-primary">Delete Item</DialogTitle>
+            <DialogTitle className="text-h2 text-foreground">Delete Item</DialogTitle>
           </div>
-          <DialogDescription className="text-base text-muted-foreground">
+          <DialogDescription className="text-meta text-muted-foreground">
             Are you sure you want to delete{' '}
             <span className="font-semibold text-title">{itemName}</span>? This action cannot be
             undone.
@@ -53,14 +53,14 @@ export function DeleteModal({ open, onOpenChange, itemName, onConfirm }: DeleteM
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isDeleting}
-            className="h-11 rounded-xl border-border text-foreground hover:bg-muted font-semibold text-base"
+            className="control-h rounded-xl border border-accent/25 bg-transparent text-button text-foreground transition-all duration-300 hover:bg-accent-secondary/10"
           >
             Cancel
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={isDeleting}
-            className="h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base"
+            className="control-h rounded-xl bg-destructive text-button text-destructive-foreground shadow-sm/25 transition-all duration-300 hover:bg-destructive/90"
           >
             {isDeleting ? (
               <>

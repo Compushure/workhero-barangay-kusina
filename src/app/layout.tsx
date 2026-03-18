@@ -3,9 +3,10 @@ import './globals.css';
 import { AuthProvider } from '@/lib/auth-context';
 import { QueryProvider } from '@/lib/providers/query-provider';
 import { Toaster } from 'sonner';
-import { Roboto } from 'next/font/google';
+import { Inter, Roboto } from 'next/font/google';
 
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'] });
+const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '700'] });
 
 export const metadata: Metadata = {
   title: 'WorkHero',
@@ -23,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={roboto.className} suppressHydrationWarning>
+    <html lang="en" className={inter.className} suppressHydrationWarning>
       <body className="bg-background text-foreground" suppressHydrationWarning>
         <QueryProvider>
           <AuthProvider>{children}</AuthProvider>

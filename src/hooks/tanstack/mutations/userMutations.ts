@@ -15,6 +15,7 @@ import {
 } from '@/action-handlers/superadmin/users';
 import type { User, AddUserInput, EditUserInput } from '@/types';
 import { userKeys } from '../queries/userQueries';
+import { buildOptimisticUser, useAdminUserStore } from '@/store/adminUserStore';
 
 /**
  * Creates a new user with automatic cache invalidation
@@ -40,62 +41,33 @@ import { userKeys } from '../queries/userQueries';
  */
 export function useUploadProfilePicture() {
   const queryClient = useQueryClient();
+  const { startOptimistic, optimisticSetProfilePicture, rollback, commit } = useAdminUserStore();
   return useMutation<string | null, Error, { file: File; userid: string; username: string }>({
     mutationFn: async ({ file, userid, username }): Promise<string | null> => {
       // Use action-handler which returns the public URL
       return await handleUploadProfilePicture(username, userid, file);
     },
+    onMutate: ({ userid }) => {
+      startOptimistic();
+      optimisticSetProfilePicture(userid, '/assets/default-profile.png');
+    },
     onSuccess: (publicUrl, variables) => {
-      console.log('Upload successful:', variables.userid, publicUrl);
       if (publicUrl) {
-        // Update the cache with the new profilePictureUrl
-        const queryCache = queryClient.getQueryCache();
-        const userQueries = queryCache.findAll({ queryKey: userKeys.all });
-
-        userQueries.forEach((query) => {
-          if (Array.isArray(query.state.data)) {
-            // Regular list query
-            queryClient.setQueryData(query.queryKey, (oldData: User[] | undefined) => {
-              if (!oldData) return oldData;
-              return oldData.map((user) =>
-                user.id === variables.userid
-                  ? { ...user, profilePictureUrl: publicUrl }
-                  : user
-              );
-            });
-          } else if (query.state.data && typeof query.state.data === 'object' && 'data' in query.state.data) {
-            // Paginated query
-            type PaginatedUsers = { data: User[]; count?: number };
-            queryClient.setQueryData(query.queryKey, (oldData: PaginatedUsers | undefined) => {
-              if (!oldData?.data) return oldData;
-              return {
-                ...oldData,
-                data: oldData.data.map((user) =>
-                  user.id === variables.userid
-                    ? { ...user, profilePictureUrl: publicUrl }
-                    : user
-                ),
-              };
-            });
-          }
-        });
+        optimisticSetProfilePicture(variables.userid, publicUrl);
       }
-      // Invalidate paginated lists to refresh all sorted views when user data changes
+      commit();
       queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-      console.log('Cache invalidated for user:', variables.userid);
-      // Toast is handled by action-handler
     },
-    onError: (_error) => {
-      console.error('Upload mutation error:', _error);
-      // Rollback optimistic update on error
-      // Error toast is handled by action-handler
+    onError: () => {
+      rollback();
     },
   });
 }
 
 export function useDeleteProfilePicture() {
   const queryClient = useQueryClient();
+  const { startOptimistic, optimisticSetProfilePicture, rollback, commit } = useAdminUserStore();
   return useMutation<void, Error, { userId: string; userName: string }>({
     mutationFn: async ({ userId, userName }): Promise<void> => {
       const success = await handleDeleteProfilePicture(userId, userName);
@@ -103,21 +75,34 @@ export function useDeleteProfilePicture() {
         throw new Error('Failed to delete profile picture');
       }
     },
+    onMutate: ({ userId }) => {
+      startOptimistic();
+      optimisticSetProfilePicture(userId, null);
+    },
     onSuccess: (_, { userId }) => {
-      // Invalidate all user queries to refresh user lists
+      commit();
       queryClient.invalidateQueries({ queryKey: userKeys.all });
-      // Dispatch custom event to trigger storage re-check in user-card
       window.dispatchEvent(
         new CustomEvent('profile-image-deleted', {
           detail: { userId, timestamp: Date.now() },
         })
       );
     },
+    onError: () => {
+      rollback();
+    },
   });
 }
 
-export function useAddUser(): UseMutationResult<User, Error, AddUserInput, { previousQueries: Map<string, unknown> }> {
+export function useAddUser(): UseMutationResult<User, Error, AddUserInput, { tempId: string }> {
   const queryClient = useQueryClient();
+  const {
+    startOptimistic,
+    optimisticPrependUser,
+    optimisticReplaceUser,
+    rollback,
+    commit,
+  } = useAdminUserStore();
 
   return useMutation({
     mutationFn: async (input: AddUserInput): Promise<User> => {
@@ -131,76 +116,24 @@ export function useAddUser(): UseMutationResult<User, Error, AddUserInput, { pre
       return user;
     },
     onMutate: async (input: AddUserInput) => {
-      // Cancel any outgoing refetches to prevent overwriting our optimistic update
       await queryClient.cancelQueries({ queryKey: userKeys.all });
 
-      // Store previous queries for rollback
-      const previousQueries = new Map<string, unknown>();
-      
-      // Create temporary user object with expected structure
-      const tempUser: User = {
-        id: `temp-${Date.now()}`, // Temporary ID
-        name: input.name,
-        email: input.email,
-        employeeType: input.employeeType,
-        employmentStatus: input.employmentStatus || '',
-        date_added: new Date(),
-        createdAt: new Date(),
-        employeeId: input.employeeId || '',
-        contactNumber: input.contactNumber || '',
-        address: input.address,
-        tin: input.tin || '',
-        sss: input.sss || '',
-        pagibig: input.pagibig || '',
-        companyId: input.companyId || '',
-        profilePictureUrl: undefined, // Will be updated after actual server response
-      };
+      startOptimistic();
+      const tempUser = buildOptimisticUser(input);
+      optimisticPrependUser(tempUser);
 
-      // Update ALL cached user queries optimistically
-      const queryCache = queryClient.getQueryCache();
-      const userQueries = queryCache.findAll({ queryKey: userKeys.all });
-
-      userQueries.forEach((query) => {
-        const key = JSON.stringify(query.queryKey);
-        const oldData = query.state.data;
-        previousQueries.set(key, oldData);
-
-        // Check if this is a paginated query
-        if (query.queryKey.includes('paginated')) {
-          type PaginatedUsers = { data: User[]; count?: number };
-          const paginatedData = oldData as PaginatedUsers | undefined;
-          if (paginatedData?.data) {
-            // Add to beginning of paginated results
-            queryClient.setQueryData(query.queryKey, {
-              ...paginatedData,
-              data: [tempUser, ...paginatedData.data],
-              count: (paginatedData.count || 0) + 1,
-            });
-          }
-        } else if (Array.isArray(oldData)) {
-          // Regular list query
-          queryClient.setQueryData(query.queryKey, [tempUser, ...oldData]);
-        }
-      });
-
-      return { previousQueries };
+      return { tempId: tempUser.id };
     },
-    onSuccess: () => {
-      // Invalidate paginated lists to fetch real data from server and maintain correct sort order
-      // This ensures the new user appears in the correct position based on current sorting
+    onSuccess: (user, _input, context) => {
+      if (context?.tempId) {
+        optimisticReplaceUser(context.tempId, user);
+      }
+      commit();
       queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-      // Toast is handled by action-handler
     },
-    onError: (_error, _variables, context) => {
-      // Rollback all optimistic updates on error
-      if (context?.previousQueries) {
-        context.previousQueries.forEach((data, key) => {
-          const queryKey = JSON.parse(key);
-          queryClient.setQueryData(queryKey, data);
-        });
-      }
-      // Error toast is handled by action-handler
+    onError: () => {
+      rollback();
     },
   });
 }
@@ -237,6 +170,7 @@ export function useEditUser(): UseMutationResult<
   { previousUsers: User[] | undefined }
 > {
   const queryClient = useQueryClient();
+  const { startOptimistic, optimisticUpdateUser, rollback, commit } = useAdminUserStore();
 
   return useMutation({
     mutationFn: async ({
@@ -257,46 +191,20 @@ export function useEditUser(): UseMutationResult<
 
       return user;
     },
-    // Optimistic update: immediately update cache before server response
     onMutate: async ({ userId, data }) => {
-      // Cancel outgoing refetches to avoid overwriting optimistic update
       await queryClient.cancelQueries({ queryKey: userKeys.all });
+      startOptimistic();
+      optimisticUpdateUser(userId, data);
 
-      // Snapshot the previous value
-      const previousUsers = queryClient.getQueryData<User[]>(userKeys.lists());
-
-      // Optimistically update cache
-      queryClient.setQueryData<User[]>(userKeys.lists(), (old) => {
-        if (!old) return old;
-        return old.map((user) =>
-          user.id === userId
-            ? {
-                ...user,
-                ...(data.name && { name: data.name }),
-                ...(data.employeeType &&
-                  data.employeeType !== 'no-change' && {
-                    employeeType: data.employeeType,
-                  }),
-              }
-            : user
-        );
-      });
-
-      return { previousUsers };
+      return { previousUsers: undefined };
     },
     onSuccess: () => {
-      // Invalidate paginated lists to refresh all sorted views when user data changes
-      // This is critical for when a user's name changes - it affects sort order
+      commit();
       queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-      // Toast is handled by action-handler
     },
-    onError: (_error, _variables, context) => {
-      // Rollback optimistic update on error
-      if (context?.previousUsers) {
-        queryClient.setQueryData(userKeys.lists(), context.previousUsers);
-      }
-      // Error toast is handled by action-handler
+    onError: () => {
+      rollback();
     },
   });
 }
@@ -333,6 +241,7 @@ export function useDeleteUser(): UseMutationResult<
   { previousUsers: User[] | undefined }
 > {
   const queryClient = useQueryClient();
+  const { startOptimistic, optimisticDeleteUser, rollback, commit } = useAdminUserStore();
 
   return useMutation({
     mutationFn: async ({
@@ -349,34 +258,19 @@ export function useDeleteUser(): UseMutationResult<
         throw new Error('Failed to delete user');
       }
     },
-    // Optimistic update: immediately remove from cache
     onMutate: async ({ userId }) => {
-      // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: userKeys.all });
-
-      // Snapshot the previous value
-      const previousUsers = queryClient.getQueryData<User[]>(userKeys.lists());
-
-      // Optimistically remove user from cache
-      queryClient.setQueryData<User[]>(userKeys.lists(), (old) => {
-        if (!old) return old;
-        return old.filter((user) => user.id !== userId);
-      });
-
-      return { previousUsers };
+      startOptimistic();
+      optimisticDeleteUser(userId);
+      return { previousUsers: undefined };
     },
     onSuccess: () => {
-      // Invalidate paginated lists to remove deleted user from all sorted views
+      commit();
       queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-      // Toast is handled by action-handler
     },
-    onError: (_error, _variables, context) => {
-      // Rollback optimistic update on error
-      if (context?.previousUsers) {
-        queryClient.setQueryData(userKeys.lists(), context.previousUsers);
-      }
-      // Error toast is handled by action-handler
+    onError: () => {
+      rollback();
     },
   });
 }

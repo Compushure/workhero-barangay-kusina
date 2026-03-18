@@ -33,8 +33,8 @@ export function SortButton({
   const isMercadoStyle = styleVariant === 'mercado';
 
   const triggerClassName = isMercadoStyle
-    ? 'group border border-gray-300 bg-zinc-50/75 text-[#131C2A] hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-32 sm:flex-1 sm:min-w-[160px]'
-    : 'bg-card hover:bg-gray-200 rounded-full text-primary w-32 sm:flex-1 sm:min-w-[160px]';
+    ? 'group border border-gray-300 bg-zinc-50/75 text-primary hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-28 sm:flex-1 sm:min-w-[140px]'
+    : 'bg-card hover:bg-gray-200 rounded-md text-primary w-30 sm:flex-1 sm:min-w-[152px]';
 
   const itemClassName = (isActive: boolean) =>
     isMercadoStyle
@@ -51,23 +51,27 @@ export function SortButton({
         <Button
           variant="default"
           size="sm"
-          className={`${triggerClassName} cursor-pointer shadow-sm/50 flex justify-between items-center transition-all duration-500 ease-in-out h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 text-xs sm:text-sm`}
+          className={`${triggerClassName} control-h cursor-pointer shadow-sm/50 flex justify-between items-center transition-all duration-500 ease-in-out px-2.5 sm:px-3`}
         >
           {/* Label with fixed character width */}
-          <span className="max-w-20 sm:max-w-32 truncate">{currentLabel}</span>
+          <span className="max-w-18 sm:max-w-28 truncate">{currentLabel}</span>
           {/* Arrow icon */}
           <ArrowUpDown
-            size={14}
-            className={isMercadoStyle ? 'text-[#131C2A] group-hover:text-white ml-1 shrink-0' : 'text-accent ml-1 shrink-0'}
+            size={12}
+            className={
+              isMercadoStyle
+                ? 'text-primary group-hover:text-white ml-1 shrink-0'
+                : 'text-accent ml-1 shrink-0'
+            }
           />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-background">
+      <DropdownMenuContent align="end" className="manager-dropdown-content">
         {options.map((opt) => (
           <DropdownMenuItem
             key={opt.value}
             onClick={() => onSortChange(opt.value)}
-            className={`cursor-pointer transition-all duration-400 ease-in-out ${sortBy === opt.value ? 'bg-accent text-card' : 'hover:bg-accent/25!'}
+            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out ${sortBy === opt.value ? 'bg-accent/15 text-foreground' : ''}
             `}
           >
             {opt.label}

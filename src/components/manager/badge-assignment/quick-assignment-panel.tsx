@@ -1,8 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +19,8 @@ interface QuickAssignmentPanelProps {
   totalBadgePages: number;
   onBadgePageChange: (page: number) => void;
   users: BadgeAssignmentUser[];
-  onAwardBadge: (badgeId: string, user: BadgeAssignmentUser) => void;
+  onAwardBadgeToUsers: (badgeId: string, userIds: string[]) => void;
+  isAssigning?: boolean;
 }
 
 type UserSortOption = 'name-asc' | 'name-desc' | 'employee-asc' | 'employee-desc';
@@ -38,7 +38,8 @@ export default function QuickAssignmentPanel({
   totalBadgePages,
   onBadgePageChange,
   users,
-  onAwardBadge,
+  onAwardBadgeToUsers,
+  isAssigning = false,
 }: QuickAssignmentPanelProps) {
   const [selectedBadge, setSelectedBadge] = useState<BadgeSummary | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
@@ -50,18 +51,15 @@ export default function QuickAssignmentPanel({
   const debouncedBadgeSearch = useDebounce(badgeSearchTerm, 300);
 
   // Note: badges are already paginated from parent, just filter them locally
-  const filteredBadges = useMemo(
-    () => {
-      const normalizedSearch = normalizeSearchQuery(debouncedBadgeSearch);
-      return badges.filter(
-        (badge) =>
-          !normalizedSearch ||
-          badge.name.toLowerCase().includes(normalizedSearch) ||
-          badge.description?.toLowerCase().includes(normalizedSearch)
-      );
-    },
-    [badges, debouncedBadgeSearch]
-  );
+  const filteredBadges = useMemo(() => {
+    const normalizedSearch = normalizeSearchQuery(debouncedBadgeSearch);
+    return badges.filter(
+      (badge) =>
+        !normalizedSearch ||
+        badge.name.toLowerCase().includes(normalizedSearch) ||
+        badge.description?.toLowerCase().includes(normalizedSearch)
+    );
+  }, [badges, debouncedBadgeSearch]);
 
   // Filter users
   const filteredUsers = useMemo(() => {
@@ -90,6 +88,13 @@ export default function QuickAssignmentPanel({
   }, [users, debouncedUserSearch, userSortOption]);
 
   const toggleUserSelection = (userId: string) => {
+    if (selectedBadge) {
+      const matchedUser = users.find((user) => user.id === userId);
+      if (matchedUser?.badge_ids.includes(selectedBadge.id)) {
+        return;
+      }
+    }
+
     const newSelected = new Set(selectedUsers);
     if (newSelected.has(userId)) {
       newSelected.delete(userId);
@@ -99,34 +104,46 @@ export default function QuickAssignmentPanel({
     setSelectedUsers(newSelected);
   };
 
+  useEffect(() => {
+    if (!selectedBadge) {
+      return;
+    }
+
+    setSelectedUsers((previous) => {
+      const next = new Set(
+        Array.from(previous).filter((userId) => {
+          const matchedUser = users.find((user) => user.id === userId);
+          return matchedUser ? !matchedUser.badge_ids.includes(selectedBadge.id) : false;
+        })
+      );
+
+      return next;
+    });
+  }, [selectedBadge, users]);
+
   const handleAssignToSelected = () => {
     if (!selectedBadge || selectedUsers.size === 0) return;
 
-    const selectedBadgeId = selectedBadge.id;
-    selectedUsers.forEach((userId) => {
-      const user = users.find((u) => u.id === userId);
-      if (user) {
-        onAwardBadge(selectedBadgeId, user);
-      }
-    });
+    onAwardBadgeToUsers(selectedBadge.id, Array.from(selectedUsers));
 
     setSelectedBadge(null);
     setSelectedUsers(new Set());
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
       {/* Badges List - Left Side */}
       <div className="lg:col-span-1 space-y-4">
         <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-foreground">Select Badge</h2>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-            <Input
-              placeholder="Search by badge name or description"
+          <h2 className="text-base sm:text-lg font-semibold text-foreground">Select Badge</h2>
+          <div className="relative flex">
+            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search badges"
               value={badgeSearchTerm}
               onChange={(e) => setBadgeSearchTerm(sanitizeSearchInput(e.target.value))}
-              className="pl-10 bg-card border-accent/25 focus:border-accent h-9 text-sm shadow-sm/25"
+              className="text-meta control-h w-full pl-9 pr-3 rounded-md border border-zinc-200 bg-card shadow-sm/25 focus:outline-none focus:border-accent transition-colors"
             />
           </div>
         </div>
@@ -140,14 +157,14 @@ export default function QuickAssignmentPanel({
                   <button
                     key={badge.id}
                     onClick={() => setSelectedBadge(badge)}
-                    className={`w-full px-4 py-3 text-left transition-colors ${
+                    className={`w-full px-3 sm:px-4 py-3 text-left transition-colors ${
                       selectedBadge?.id === badge.id
                         ? 'bg-accent/15 border-l-4 border-accent'
-                        : 'bg-background-soft hover:bg-row-hover'
+                        : 'bg-card hover:bg-row-hover'
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 overflow-hidden border border-accent/25">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="shrink-0 size-8 sm:size-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-accent/25">
                         {badge.img_link ? (
                           <img
                             src={badge.img_link}
@@ -155,14 +172,16 @@ export default function QuickAssignmentPanel({
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <HelpCircle size={18} className="text-gray-400" />
+                          <HelpCircle size={16} className="sm:size-5 text-gray-400" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-foreground truncate">{badge.name}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Coins size={12} className="text-accent" />
-                          <span className="text-xs text-foreground font-medium">{badge.points}</span>
+                        <div className="font-semibold text-xs sm:text-sm text-foreground truncate">
+                          {badge.name}
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] sm:text-xs text-secondary mt-0.5">
+                          <Coins size={10} className="sm:size-3 shrink-0" />
+                          <span>{badge.points}</span>
                         </div>
                       </div>
                     </div>
@@ -170,9 +189,7 @@ export default function QuickAssignmentPanel({
                 ))}
               </div>
             ) : (
-              <div className="p-4 text-center text-secondary text-sm">
-                No badges found
-              </div>
+              <div className="p-4 text-center text-secondary text-sm">No badges found</div>
             )}
           </div>
 
@@ -222,9 +239,9 @@ export default function QuickAssignmentPanel({
         {selectedBadge ? (
           <>
             {/* Selected Badge Details */}
-            <div className="bg-card border border-accent/25 rounded-lg p-6 space-y-4 shadow-sm/25">
-              <div className="flex items-start gap-4">
-                <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-accent/25 shrink-0">
+            <div className="bg-card border border-accent/25 rounded-lg p-4 sm:p-6 space-y-4 shadow-sm/25">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="size-16 sm:w-20 sm:h-20 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-accent/25 shrink-0">
                   {selectedBadge.img_link ? (
                     <img
                       src={selectedBadge.img_link}
@@ -232,15 +249,21 @@ export default function QuickAssignmentPanel({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <HelpCircle size={40} className="text-gray-400" />
+                    <HelpCircle size={32} className="sm:size-10 text-gray-400" />
                   )}
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-foreground">{selectedBadge.name}</h3>
-                  <p className="text-sm text-secondary mt-1">{selectedBadge.description || 'No description'}</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <Coins size={16} className="text-accent" />
-                    <span className="font-medium text-foreground">{selectedBadge.points} points</span>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg sm:text-xl font-semibold text-foreground truncate">
+                    {selectedBadge.name}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-secondary mt-1 line-clamp-2">
+                    {selectedBadge.description || 'No description'}
+                  </p>
+                  <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3">
+                    <Coins size={14} className="sm:size-4 text-accent shrink-0" />
+                    <span className="font-medium text-sm sm:text-base text-foreground">
+                      {selectedBadge.points} points
+                    </span>
                   </div>
                 </div>
               </div>
@@ -249,26 +272,31 @@ export default function QuickAssignmentPanel({
             {/* User Selection */}
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-                <h2 className="text-lg font-semibold text-foreground">
+                <h2 className="text-base sm:text-lg font-semibold text-foreground">
                   Assign To Users ({selectedUsers.size} selected)
                 </h2>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex justify-between items-center py-4 w-full sm:w-64 md:w-40 border-accent/25 text-primary bg-card hover:bg-card hover:brightness-90 shadow-sm/25"
+                      variant="default"
+                      size="default"
+                      className="text-button control-h bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-44 py-1.5 justify-between border border-gray-200"
                     >
-                      {USER_SORT_OPTIONS.find((option) => option.value === userSortOption)?.label || 'Sort'}
-                      <ArrowUpDown className='text-accent'/>
+                      <span className="truncate">
+                        {USER_SORT_OPTIONS.find((option) => option.value === userSortOption)
+                          ?.label || 'Sort'}
+                      </span>
+                      <ArrowUpDown size={14} className="text-accent shrink-0" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background">
+                  <DropdownMenuContent align="end" className="manager-dropdown-content w-48">
                     {USER_SORT_OPTIONS.map((option) => (
                       <DropdownMenuItem
                         key={option.value}
                         onClick={() => setUserSortOption(option.value)}
-                        className={userSortOption === option.value ? 'bg-accent/15' : ''}
+                        className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                          userSortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                        }`}
                       >
                         {option.label}
                       </DropdownMenuItem>
@@ -276,13 +304,14 @@ export default function QuickAssignmentPanel({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <div className="relative w-full sm:w-64 md:w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-                <Input
-                  placeholder="Search by employee name, email, or ID"
+              <div className="relative flex">
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search employee"
                   value={userSearchTerm}
                   onChange={(e) => setUserSearchTerm(sanitizeSearchInput(e.target.value))}
-                  className="pl-10 bg-card border-accent/25 focus:border-accent h-9 text-sm shadow-sm/25 w-full sm:w-64 md:w-full"
+                  className="text-meta control-h w-full pl-9 pr-3 rounded-md border border-zinc-200 bg-card shadow-sm/25 focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
             </div>
@@ -296,32 +325,37 @@ export default function QuickAssignmentPanel({
                       <button
                         key={user.id}
                         onClick={() => toggleUserSelection(user.id)}
+                        disabled={selectedBadge ? user.badge_ids.includes(selectedBadge.id) : false}
                         className={`w-full px-4 py-3 flex items-center gap-3 transition-colors ${
-                          selectedUsers.has(user.id)
-                            ? 'bg-accent/15'
-                            : 'bg-card hover:bg-row-hover'
+                          selectedBadge && user.badge_ids.includes(selectedBadge.id)
+                            ? 'bg-zinc-100/80 opacity-65 cursor-not-allowed'
+                            : selectedUsers.has(user.id)
+                              ? 'bg-accent/15'
+                              : 'bg-card hover:bg-row-hover'
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={selectedUsers.has(user.id)}
                           onChange={() => {}}
-                          className="w-4 h-4 rounded border-accent/25 cursor-pointer"
+                          disabled={selectedBadge ? user.badge_ids.includes(selectedBadge.id) : false}
+                          className="w-4 h-4 rounded border-accent/25 cursor-pointer disabled:cursor-not-allowed"
                         />
                         <div className="flex-1 text-left min-w-0">
                           <p className="font-medium text-sm text-foreground">{user.name}</p>
                           <p className="text-xs text-secondary">{user.employee_id}</p>
+                          {selectedBadge && user.badge_ids.includes(selectedBadge.id) ? (
+                            <p className="text-[11px] text-muted-foreground">Already has selected badge</p>
+                          ) : null}
                         </div>
-                        <span className="text-xs text-secondary shrink-0">
+                        <span className="text-[10px] sm:text-xs text-secondary shrink-0">
                           {user.badge_ids.length} badge{user.badge_ids.length !== 1 ? 's' : ''}
                         </span>
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <div className="p-4 text-center text-secondary text-sm">
-                    No users found
-                  </div>
+                  <div className="p-4 text-center text-secondary text-sm">No users found</div>
                 )}
               </div>
             </div>
@@ -331,21 +365,23 @@ export default function QuickAssignmentPanel({
               <Button
                 onClick={() => setSelectedBadge(null)}
                 variant="outline"
-                className="flex-1 border-accent/25 text-primary bg-card hover:bg-accent/15 shadow-sm/25"
+                className="text-button control-h flex-1 border-accent/25 text-primary bg-card hover:bg-accent/15 shadow-sm/25"
               >
                 Clear Selection
               </Button>
               <Button
                 onClick={handleAssignToSelected}
-                disabled={selectedUsers.size === 0}
+                disabled={selectedUsers.size === 0 || isAssigning}
                 className="flex-1 bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card disabled:opacity-50 shadow-sm/25"
               >
-                Assign to {selectedUsers.size} User{selectedUsers.size !== 1 ? 's' : ''}
+                {isAssigning
+                  ? 'Assigning...'
+                  : `Assign to ${selectedUsers.size} User${selectedUsers.size !== 1 ? 's' : ''}`}
               </Button>
             </div>
           </>
         ) : (
-          <div className="bg-background-soft border border-dashed border-accent/25 rounded-lg p-12 text-center">
+          <div className="bg-card border border-dashed border-accent/25 rounded-lg p-12 text-center">
             <p className="text-secondary text-lg">Select a badge to assign to users</p>
           </div>
         )}

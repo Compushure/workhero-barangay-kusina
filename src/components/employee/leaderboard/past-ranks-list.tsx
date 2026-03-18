@@ -1,8 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Trophy, Users } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight, Trophy, CalendarIcon, X } from 'lucide-react';
 import { format, getISOWeek } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { MonthPicker, YearPicker, WeekCalendar } from '@/components/shared/period-date-pickers';
+import { getTriggerLabel, matchesDate, periodRangeLabel } from '@/lib/utils/period-filter-utils';
 import { useGetEmployeeVisiblePeriods } from '@/hooks/tanstack/queries/employeeQueries';
 import type { EmployeePeriodParams } from '@/action-handlers/employee/stats';
 import type { RankingPeriodWithTop, RankingPeriodType } from '@/types';
@@ -19,9 +23,9 @@ function periodLabel(row: RankingPeriodWithTop): string {
   const start = new Date(row.period_start + 'T00:00:00');
   switch (row.period_type) {
     case 'weekly':
-      return `Week ${getISOWeek(start)}, ${start.getFullYear()}`;
+      return `Week ${getISOWeek(start)}`;
     case 'monthly':
-      return format(start, 'MMMM yyyy');
+      return format(start, 'MMMM');
     case 'yearly':
       return `Year ${start.getFullYear()}`;
   }
@@ -38,6 +42,14 @@ function toPeriodParams(row: RankingPeriodWithTop): EmployeePeriodParams {
   return { periodType: 'yearly', year: start.getFullYear() };
 }
 
+// ─── PastRanksList ────────────────────────────────────────────────────────────
+
+const FILTER_PLACEHOLDER: Record<RankingPeriodType, string> = {
+  weekly: 'Filter by week…',
+  monthly: 'Filter by month…',
+  yearly: 'Filter by year…',
+};
+
 interface PastRanksListProps {
   onSelectPeriod: (params: EmployeePeriodParams) => void;
 }
@@ -45,7 +57,8 @@ interface PastRanksListProps {
 export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
   const [activeTab, setActiveTab] = useState<RankingPeriodType>('weekly');
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const { data: periods, isLoading, isError } = useGetEmployeeVisiblePeriods();
 
@@ -57,44 +70,53 @@ export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
     { weekly: [], monthly: [], yearly: [] }
   );
 
-  const list = periods !== null ? grouped[activeTab] : [];
-  const normalizedSearch = search.trim().toLowerCase();
-  const filteredList =
-    normalizedSearch.length === 0
-      ? list
-      : list.filter((row) => {
-          const label = periodLabel(row).toLowerCase();
-          const top = (row.top_performer_name ?? '').toLowerCase();
-          return label.includes(normalizedSearch) || top.includes(normalizedSearch);
-        });
+  const list =
+    periods !== null
+      ? grouped[activeTab].filter((row) => matchesDate(row, selectedDate, activeTab))
+      : [];
 
-  const totalPages = Math.max(1, Math.ceil((filteredList?.length ?? 0) / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const paginatedList =
-    filteredList?.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE) ?? [];
+  const paginatedList = list.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   const placeholderCount = Math.max(0, PAGE_SIZE - paginatedList.length);
+
+  const hasSelection = selectedDate !== null;
+  const triggerLabel = getTriggerLabel(activeTab, selectedDate);
+  const pickerVariant = 'employee' as const;
 
   function handleTabChange(tab: RankingPeriodType) {
     setActiveTab(tab);
     setPage(1);
-    setSearch('');
+    setSelectedDate(null);
+  }
+
+  function handleDateSelect(date: Date) {
+    setSelectedDate(date);
+    setPage(1);
+    setDatePickerOpen(false);
+  }
+
+  function handleClearDate(e: React.MouseEvent) {
+    e.stopPropagation();
+    setSelectedDate(null);
+    setPage(1);
   }
 
   return (
-    <div className="relative z-10 flex flex-col items-center w-full max-w-xl mx-auto px-4 py-4 gap-4">
+    <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center gap-4 px-3 py-4 sm:px-4">
       {/* Title */}
-      <h2 className="font-jersey tracking-widest text-[#F4B925] text-2xl md:text-3xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] text-center pt-0">
+      <h2 className="pt-0 text-center font-jersey text-xl tracking-widest text-[#F4B925] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:text-2xl md:text-3xl">
         Past Rankings
       </h2>
 
       {/* Period Tabs */}
-      <div className="flex items-center gap-2">
+      <div className="flex w-full flex-wrap items-center justify-center gap-2">
         {PERIOD_TABS.map((tab) => (
           <button
             key={tab.key}
             type="button"
             onClick={() => handleTabChange(tab.key)}
-            className={`px-3 py-1.5 rounded-lg font-jersey tracking-widest text-base shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors ${
+            className={`min-h-10 rounded-lg px-3 py-2 text-sm font-jersey tracking-widest shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors sm:px-4 sm:text-base ${
               activeTab === tab.key
                 ? 'bg-[#F4B925] text-[#3D2512]'
                 : 'bg-[#b07440] text-white hover:bg-[#8A6342]'
@@ -105,53 +127,81 @@ export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
         ))}
       </div>
 
-      {/* Search */}
+      {/* Date Picker */}
       <div className="w-full">
-        <input
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          placeholder={
-            activeTab === 'weekly'
-              ? 'Search week (e.g., "Week 1") or name…'
-              : activeTab === 'monthly'
-                ? 'Search month (e.g., "January 2026") or name…'
-                : 'Search year (e.g., "2026") or name…'
-          }
-          className="w-full rounded-lg border border-[#b07440]/70 bg-[#3D2512]/75 px-4 py-2 font-jersey tracking-widest text-base text-white placeholder:text-white/50 shadow-[2px_2px_0_rgba(0,0,0,0.35)] outline-none focus:border-[#F4B925]/80 focus:ring-2 focus:ring-[#F4B925]/20"
-        />
+        <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-lg border border-[#b07440]/70 bg-[#3D2512]/75 px-3 py-2.5 font-jersey text-sm tracking-widest text-white shadow-[2px_2px_0_rgba(0,0,0,0.35)] outline-none transition-colors hover:border-[#F4B925]/60 focus:border-[#F4B925]/80 focus:ring-2 focus:ring-[#F4B925]/20 sm:px-4 sm:text-base"
+            >
+              <CalendarIcon className="h-4 w-4 shrink-0 text-[#F4B925]" />
+              <span className={cn('flex-1 text-left', !hasSelection && 'text-white/50')}>
+                {hasSelection ? triggerLabel : FILTER_PLACEHOLDER[activeTab]}
+              </span>
+              {hasSelection && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Clear filter"
+                  onClick={handleClearDate}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ')
+                      handleClearDate(e as unknown as React.MouseEvent);
+                  }}
+                  className="ml-auto rounded-full p-0.5 text-white/50 transition-colors hover:text-white"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </span>
+              )}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-auto border-[#b07440]/70 bg-[#2a1a0e] p-0"
+            align="start"
+          >
+            {activeTab === 'weekly' && (
+              <WeekCalendar
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                variant={pickerVariant}
+              />
+            )}
+            {activeTab === 'monthly' && (
+              <MonthPicker
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                variant={pickerVariant}
+              />
+            )}
+            {activeTab === 'yearly' && (
+              <YearPicker
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                variant={pickerVariant}
+              />
+            )}
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Content */}
-      <div className="w-full flex flex-col gap-2">
+      <div className="relative flex w-full flex-col gap-2">
         {isLoading && (
           <>
-            {Array.from({ length: 4 }).map((_, i) => (
+            {Array.from({ length: PAGE_SIZE }).map((_, i) => (
               <div
                 key={i}
-                className="w-full h-14 rounded-lg bg-[#3D2512]/70 border border-[#b07440]/40 animate-pulse"
+                className="h-14 w-full animate-pulse rounded-lg border border-[#b07440]/40 bg-[#3D2512]/70"
               />
             ))}
           </>
         )}
 
         {isError && (
-          <p className="font-jersey tracking-widest text-red-400 text-base text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+          <p className="text-center font-jersey text-sm tracking-widest text-red-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:text-base">
             Failed to load rankings. Please try again.
           </p>
-        )}
-
-        {!isLoading && !isError && paginatedList.length === 0 && (
-          <div className="flex flex-col items-center gap-3 py-8">
-            <Trophy className="w-10 h-10 text-[#F4B925]/50" />
-            <p className="font-jersey tracking-widest text-[#F4B925]/70 text-base text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              {normalizedSearch.length > 0
-                ? 'No results found. Try a different search.'
-                : `No ${activeTab} rankings released yet.`}
-            </p>
-          </div>
         )}
 
         {!isLoading &&
@@ -161,65 +211,61 @@ export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
               key={row.id}
               type="button"
               onClick={() => onSelectPeriod(toPeriodParams(row))}
-              className="w-full flex items-center gap-3 rounded-lg border border-[#b07440]/60 bg-[#3D2512]/80 px-4 py-3 text-left transition-colors hover:border-[#F4B925]/70 hover:bg-[#4a2e18]/80 active:scale-[0.98]"
+              className="flex min-h-12 w-full items-center gap-2.5 rounded-lg border border-[#b07440]/60 bg-[#3D2512]/80 px-3 py-3 text-left transition-colors hover:border-[#F4B925]/70 hover:bg-[#4a2e18]/80 active:scale-[0.98] sm:gap-3 sm:px-4"
             >
-              {/* Icon */}
-              <div className="flex items-center justify-center w-8 h-8 rounded-md bg-[#F4B925]/20 shrink-0">
-                <Trophy className="w-4 h-4 text-[#F4B925]" />
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#F4B925]/20">
+                <Trophy className="h-4 w-4 text-[#F4B925]" />
               </div>
 
-              {/* Label + meta */}
-              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                <p className="font-jersey tracking-widest text-[#F4B925] text-base leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <p className="font-jersey text-sm leading-tight tracking-widest text-[#F4B925] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] sm:text-base">
                   {periodLabel(row)}
                 </p>
-                <div className="flex items-center gap-3 flex-wrap">
-                  {row.top_performer_name && (
-                    <span className="font-jersey tracking-widest text-white/70 text-xs">
-                      🥇 {row.top_performer_name}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1 font-jersey tracking-widest text-white/50 text-xs">
-                    <Users className="w-3 h-3" />
-                    {row.participant_count}
-                  </span>
-                </div>
+                <p className="font-jersey text-[11px] leading-tight tracking-widest text-white/70 sm:text-xs">
+                  {periodRangeLabel(row)}
+                </p>
               </div>
 
-              {/* View caret */}
-              <ChevronRight className="w-4 h-4 text-[#F4B925]/60 shrink-0" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-[#F4B925]/60" />
             </button>
           ))}
 
-        {/* Placeholders to keep list height fixed, similar to HR leaderboard table */}
+        {/* Always render placeholders to keep the list height stable regardless of data */}
         {!isLoading &&
           !isError &&
-          placeholderCount > 0 &&
           Array.from({ length: placeholderCount }).map((_, index) => (
             // eslint-disable-next-line react/no-array-index-key
             <button
               key={`placeholder-${index}`}
               type="button"
               disabled
-              className="w-full flex items-center gap-3 rounded-lg border border-transparent bg-transparent px-4 py-3 opacity-0 pointer-events-none select-none"
+              aria-hidden="true"
+              className="pointer-events-none flex w-full select-none items-center gap-2.5 rounded-lg border border-transparent bg-transparent px-3 py-3 opacity-0 sm:gap-3 sm:px-4"
             >
-              <div className="flex items-center justify-center w-8 h-8 rounded-md bg-[#F4B925]/20 shrink-0" />
-              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                <p className="font-jersey tracking-widest text-[#F4B925] text-base leading-tight">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#F4B925]/20" />
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <p className="font-jersey text-sm leading-tight tracking-widest text-[#F4B925] sm:text-base">
                   placeholder
                 </p>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="font-jersey tracking-widest text-white/70 text-xs">
-                    placeholder
-                  </span>
-                  <span className="flex items-center gap-1 font-jersey tracking-widest text-white/50 text-xs">
-                    placeholder
-                  </span>
-                </div>
+                <p className="font-jersey text-[11px] leading-tight tracking-widest text-white/70 sm:text-xs">
+                  placeholder
+                </p>
               </div>
-              <ChevronRight className="w-4 h-4 text-[#F4B925]/60 shrink-0" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-[#F4B925]/60" />
             </button>
           ))}
+
+        {/* Empty state overlaid on the placeholder rows so height never changes */}
+        {!isLoading && !isError && paginatedList.length === 0 && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+            <Trophy className="h-10 w-10 text-[#F4B925]/50" />
+            <p className="text-center font-jersey text-sm tracking-widest text-[#F4B925]/70 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:text-base">
+              {hasSelection
+                ? 'No rankings found for this period.'
+                : `No ${activeTab} rankings released yet.`}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Pagination */}
@@ -229,19 +275,19 @@ export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
             type="button"
             disabled={currentPage <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10"
             aria-label="Previous page"
           >
             <ChevronLeft className="h-4 w-4" strokeWidth={2.5} />
           </button>
-          <span className="font-jersey tracking-widest text-[#F4B925] text-base drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+          <span className="font-jersey text-base tracking-widest text-[#F4B925] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
             {currentPage} / {totalPages}
           </span>
           <button
             type="button"
             disabled={currentPage >= totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[-2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[-2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10"
             aria-label="Next page"
           >
             <ChevronRight className="h-4 w-4" strokeWidth={2.5} />

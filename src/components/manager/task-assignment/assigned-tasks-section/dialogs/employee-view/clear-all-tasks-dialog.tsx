@@ -35,14 +35,14 @@ function ClearAllTasksDialog({
       onOpenChange={(open) => !open && setShowClearConfirm(null)}
     >
       <DialogTitle></DialogTitle>
-      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white">
-        <div className="space-y-4">
-          <h3 className="text-lg font-bold text-foreground">Clear All Tasks?</h3>
-          <p className="text-gray-600">
+      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white p-4 sm:p-5">
+        <div className="space-y-3">
+          <h3 className="text-base font-bold text-foreground">Clear All Tasks?</h3>
+          <p className="text-gray-600 text-sm">
             Are you sure you want to unassign all tasks from {employee.name}? This action cannot be
             undone.
           </p>
-          <div className="flex gap-4 justify-end">
+          <div className="flex gap-3 justify-end">
             <Button
               onClick={handleClearAllTasks}
               disabled={clearAllEmployeeTasksMutation.isPending}

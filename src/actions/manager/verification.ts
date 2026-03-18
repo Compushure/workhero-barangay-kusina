@@ -48,7 +48,7 @@ function applySearchAndSort(query: any, searchTerm: string, sort: VerificationSo
 
 export async function fetchTasksToReviewPaginated(
   page: number = 1,
-  pageSize: number = 8,
+  pageSize: number = 10,
   searchTerm: string = '',
   sort: VerificationSort = 'date-desc'
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
@@ -93,7 +93,7 @@ export async function fetchApprovedTasks(): Promise<ServerActionResponse<Verific
 
 export async function fetchApprovedTasksPaginated(
   page: number = 1,
-  pageSize: number = 8,
+  pageSize: number = 10,
   searchTerm: string = '',
   sort: VerificationSort = 'date-desc'
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {
@@ -138,7 +138,7 @@ export async function fetchDeniedTasks(): Promise<ServerActionResponse<Verificat
 
 export async function fetchDeniedTasksPaginated(
   page: number = 1,
-  pageSize: number = 8,
+  pageSize: number = 10,
   searchTerm: string = '',
   sort: VerificationSort = 'date-desc'
 ): Promise<ServerActionResponse<PaginatedResponse<VerificationRequest>>> {

@@ -43,26 +43,24 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-background text-card-foreground border border-border max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto [&>button]:hidden">
+      <DialogContent className="bg-card text-card-foreground border border-accent/25 max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl rounded-3xl p-4 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         {/* Custom Close Button */}
         <button
           onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-4 rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 z-50"
+          className="absolute right-4 top-4 rounded-full border border-transparent bg-white/30 p-1 text-muted-foreground shadow-sm/25 transition-all duration-200 hover:bg-accent-secondary/20 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           <X className="h-5 w-5 text-muted-foreground" />
           <span className="sr-only">Close</span>
         </button>
 
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl font-bold text-primary">
-            Mercado Item
-          </DialogTitle>
+          <DialogTitle className="text-h2 text-foreground">Mercado Item</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-2">
           {/* Image Preview */}
           <div className="flex justify-center">
-            <div className="h-28 w-28 sm:h-32 sm:w-32 bg-muted rounded-xl flex items-center justify-center overflow-hidden">
+            <div className="flex h-28 w-28 items-center justify-center rounded-2xl border border-accent/25 bg-background-soft sm:h-32 sm:w-32">
               {item.imageUrl && !imageError ? (
                 <img
                   src={item.imageUrl}
@@ -84,20 +82,26 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
 
           {/* Item Name */}
           <div className="text-center">
-            <p className="text-sm font-medium text-muted-foreground mb-1">Item Name</p>
+            <p className="text-meta font-medium text-muted-foreground mb-1">Item Name</p>
             <div className="flex flex-col items-center gap-1.5">
-              <p className="text-xl font-bold text-black break-all px-4 leading-tight">
+              <p className="text-task-title font-semibold text-foreground break-all px-4 leading-tight">
                 {item.name}
               </p>
               <div className="flex items-center gap-2 flex-wrap justify-center">
                 {isScheduled && (
-                  <Badge variant="secondary" className="bg-primary/15 text-primary text-xs">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-lg border border-accent/25 bg-accent/10 text-[11px] font-semibold uppercase tracking-wide text-accent"
+                  >
                     <Calendar className="h-3 w-3 mr-1" />
                     Available {formatDateShort(item.availableDate)}
                   </Badge>
                 )}
                 {!item.isActive && (
-                  <Badge variant="secondary" className="bg-gray-200 text-gray-700 text-xs">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-lg border border-border bg-muted/70 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+                  >
                     Hidden
                   </Badge>
                 )}
@@ -109,41 +113,45 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 py-2">
             {item.quantity !== undefined && (
               <div className="text-center">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Available Quantity</p>
-                <p className="text-base font-semibold text-title">{formatNumber(item.quantity)}</p>
+                <p className="text-meta font-medium text-muted-foreground mb-1">
+                  Available Quantity
+                </p>
+                <p className="text-button font-semibold text-foreground">
+                  {formatNumber(item.quantity)}
+                </p>
               </div>
             )}
 
             <div className="text-center">
-              <p className="text-xs font-medium text-muted-foreground mb-1">Cost</p>
-              <p className="text-base font-semibold text-title">
+              <p className="text-meta font-medium text-muted-foreground mb-1">Cost</p>
+              <p className="text-button font-semibold text-foreground">
                 {formatNumber(item.cost)} {item.cost === 1 ? 'pt' : 'pts'}
               </p>
             </div>
 
             {item.redeemingLimit !== undefined && (
               <div className="text-center">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Redeeming Limit</p>
-                <p className="text-base font-semibold text-title">
+                <p className="text-meta font-medium text-muted-foreground mb-1">Redeeming Limit</p>
+                <p className="text-button font-semibold text-foreground">
                   {formatNumber(item.redeemingLimit)}
                 </p>
               </div>
             )}
 
             <div className="text-center">
-              <p className="text-xs font-medium text-muted-foreground mb-1">Availability</p>
-              <p className="text-base font-semibold text-title">
+              <p className="text-meta font-medium text-muted-foreground mb-1">Availability</p>
+              <p className="text-button font-semibold text-foreground">
                 {formatAvailabilityLabel(item.availableMonth)}
               </p>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-border mt-2">
+          <div className="grid grid-cols-1 gap-3 border-t border-accent/20 pt-4 sm:grid-cols-2">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="h-10 sm:h-11 rounded-xl border-border text-foreground hover:bg-accent-secondary/25 font-semibold text-sm sm:text-base order-2 sm:order-1"
+              className="control-h order-2 rounded-xl border border-accent/25 text-button text-foreground transition-all duration-300 hover:bg-accent-secondary/10 sm:order-1"
             >
               Cancel
             </Button>
@@ -153,7 +161,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
                   onEdit();
                   onOpenChange(false);
                 }}
-                className="h-10 sm:h-11 rounded-xl bg-primary-gradient hover:opacity-95 text-zinc-50 font-semibold text-sm sm:text-base order-1 sm:order-2"
+                className="control-h order-1 rounded-xl bg-primary-gradient text-button text-white shadow-sm/25 transition-all duration-300 hover:opacity-95 sm:order-2"
               >
                 Edit
               </Button>

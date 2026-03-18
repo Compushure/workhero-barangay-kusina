@@ -43,20 +43,20 @@ export function PeriodNav({ periodType, onPeriodTypeChange }: PeriodNavProps) {
   const label = periodType.charAt(0).toUpperCase() + periodType.slice(1);
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className="flex items-center justify-center gap-1.5 sm:gap-2">
       {/* Left: previous (wraps to Yearly when on Weekly) */}
       <button
         type="button"
         onClick={() => onPeriodTypeChange(prevType)}
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#b07440] text-white opacity-100 shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] [&_svg]:opacity-100"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#b07440] text-white opacity-100 shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] [&_svg]:opacity-100 sm:h-11 sm:w-11 md:h-12 md:w-12"
         aria-label="Previous period"
       >
-        <ChevronLeft className="h-6 w-6 shrink-0 stroke-white" strokeWidth={2.5} />
+        <ChevronLeft className="h-5 w-5 shrink-0 stroke-white sm:h-6 sm:w-6" strokeWidth={2.5} />
       </button>
 
       {/* Center: same style as "Top Kusineros of the Week" — #F4B925, no glow, no border */}
       <span
-        className="min-w-[120px] px-4 py-2 text-center font-jersey text-2xl tracking-widest text-[#F4B925] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+        className="min-w-[96px] px-2 py-1.5 text-center font-jersey text-xl tracking-widest text-[#F4B925] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:min-w-[120px] sm:px-4 sm:py-2 sm:text-2xl"
         aria-live="polite"
       >
         {label}
@@ -66,10 +66,10 @@ export function PeriodNav({ periodType, onPeriodTypeChange }: PeriodNavProps) {
       <button
         type="button"
         onClick={() => onPeriodTypeChange(nextType)}
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#b07440] text-white opacity-100 shadow-[-2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] [&_svg]:opacity-100"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#b07440] text-white opacity-100 shadow-[-2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] [&_svg]:opacity-100 sm:h-11 sm:w-11 md:h-12 md:w-12"
         aria-label="Next period"
       >
-        <ChevronRight className="h-6 w-6 shrink-0 stroke-white" strokeWidth={2.5} />
+        <ChevronRight className="h-5 w-5 shrink-0 stroke-white sm:h-6 sm:w-6" strokeWidth={2.5} />
       </button>
     </div>
   );

@@ -2,28 +2,34 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function BadgeAssignmentHeaderSkeleton() {
   return (
-    <div className="space-y-6">
-      {/* Title Section */}
-      <div className="space-y-2">
-        <Skeleton className="h-9 w-56 bg-muted" />
-        <Skeleton className="h-5 w-80 bg-muted" />
-      </div>
+    <div className="space-y-4 sm:space-y-5 md:space-y-8 lg:space-y-6">
+      <section className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-3 sm:gap-4">
+        {/* Title Section */}
+        <div className="space-y-2">
+          <Skeleton className="h-8 sm:h-9 w-48 sm:w-56 bg-gray-300" />
+          <Skeleton className="h-4 sm:h-5 w-11/12 max-w-64 sm:max-w-80 bg-gray-300" />
+        </div>
 
-      {/* Tabs */}
-      <div className="flex rounded-xl overflow-hidden shadow-md border border-accent/25">
-        <Skeleton className="h-12 flex-1 bg-muted rounded-l-xl" />
-        <Skeleton className="h-12 flex-1 bg-muted rounded-r-xl" />
-      </div>
+        {/* Tabs */}
+        <div className="flex rounded-md overflow-hidden shadow-md border border-accent/25 w-full sm:w-fit">
+          <Skeleton className="control-skeleton-h flex-1 sm:w-32 md:w-36 bg-gray-300 rounded-l-md" />
+          <Skeleton className="control-skeleton-h flex-1 sm:w-36 md:w-40 bg-gray-300 rounded-r-md" />
+        </div>
+      </section>
 
       {/* Search and Sort Controls */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+      <div className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         {/* Badge/User Count */}
-        <Skeleton className="h-7 w-40 bg-muted rounded-full" />
+        <Skeleton className="h-7 sm:h-8 w-36 sm:w-40 bg-gray-300 rounded-md shrink-0 self-start" />
 
         {/* Search and Sort */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center w-full sm:w-auto">
-          <Skeleton className="h-10 w-full sm:w-64 bg-muted rounded-full" />
-          <Skeleton className="h-10 w-full sm:w-40 bg-muted rounded-lg" />
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
+          <div className="min-w-0 flex-1 xl:w-54 xl:min-w-54 xl:max-w-64">
+            <Skeleton className="control-skeleton-h w-full bg-gray-300 rounded-md" />
+          </div>
+          <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap sm:gap-3 xl:justify-end">
+            <Skeleton className="control-skeleton-h w-full sm:w-44 bg-gray-300 rounded-md" />
+          </div>
         </div>
       </div>
     </div>

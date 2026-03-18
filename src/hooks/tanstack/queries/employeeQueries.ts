@@ -15,8 +15,9 @@ import {
 } from '@/action-handlers/employee/stats';
 import type { EmployeePeriodParams } from '@/action-handlers/employee/stats';
 import { fetchUserBadgesHandler } from '@/action-handlers/employee/badges';
-import { getVisibleRankingPeriods } from '@/actions/hr/leaderboard';
+import { getLatestLeaderboardPeriods, getVisibleRankingPeriods } from '@/actions/hr/leaderboard';
 import type { EmployeeRank, EmployeeTopRankEntry, RankingPeriodWithTop } from '@/types';
+import type { LatestPeriods } from '@/components/employee/leaderboard/period-nav';
 import type { EmployeePointsData } from '@/types/employee/points';
 import type { EmployeeXP } from '@/types/employee/xp';
 import type { UserBadge } from '@/actions/employee/badges';
@@ -49,6 +50,7 @@ export const employeeKeys = {
   badges: () => [...employeeKeys.all, 'badges'] as const,
   userBadges: (userId: string) => [...employeeKeys.badges(), userId] as const,
   visiblePeriods: () => [...employeeKeys.all, 'visible-periods'] as const,
+  latestPeriods: () => [...employeeKeys.all, 'latest-periods'] as const,
 };
 
 export function useGetEmployeePoints(
@@ -112,10 +114,13 @@ export function useGetEmployeeRank(
       return result;
     },
     enabled: queryOptions.enabled !== false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes (formerly cacheTime)
-    retry: 1, // Retry once on failure
-    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    staleTime: 0,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchInterval: 10 * 1000,
+    refetchIntervalInBackground: false,
   }) as UseQueryResult<EmployeeRank | null, Error>;
 }
 
@@ -159,6 +164,10 @@ export function useGetEmployeeTopRanksByPeriod(
 /**
  * Fetches all HR-generated ranking periods that are visible to employees.
  * Used by the employee leaderboard "Past Rankings" history list.
+ *
+ * - staleTime: 0 so data is always considered stale and refetches on mount.
+ * - refetchInterval: polls every 30 s while the tab is focused so HR visibility
+ *   toggles (possibly in another tab) are reflected without a full page refresh.
  */
 export function useGetEmployeeVisiblePeriods(): UseQueryResult<RankingPeriodWithTop[] | null, Error> {
   return useQuery({
@@ -168,11 +177,46 @@ export function useGetEmployeeVisiblePeriods(): UseQueryResult<RankingPeriodWith
       if (!result.success) return null;
       return result.data ?? null;
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
     gcTime: 30 * 60 * 1000,
     retry: 1,
+    refetchOnMount: true,
     refetchOnWindowFocus: true,
+    refetchInterval: 30 * 1000,
+    refetchIntervalInBackground: false,
   }) as UseQueryResult<RankingPeriodWithTop[] | null, Error>;
+}
+
+/**
+ * Fetches the latest generated periods (weekly, monthly, yearly) with their visibility state.
+ *
+ * - initialData: SSR-fetched snapshot for instant first render (no loading flash)
+ * - initialDataUpdatedAt: 0: marks SSR data as immediately stale so a fresh fetch fires on
+ *   every mount (stale-while-revalidate pattern). This ensures same-tab navigation always
+ *   reflects the latest visibility state.
+ * - refetchInterval: polls every 30 s while the tab is focused so cross-tab visibility
+ *   changes (HR toggling in another tab) are picked up without a full page refresh.
+ */
+export function useGetLatestLeaderboardPeriods(
+  initialData?: LatestPeriods
+): UseQueryResult<LatestPeriods, Error> {
+  return useQuery({
+    queryKey: employeeKeys.latestPeriods(),
+    queryFn: async () => {
+      const result = await getLatestLeaderboardPeriods();
+      if (!result.success) throw new Error(result.error ?? 'Failed to fetch latest periods');
+      return result.data ?? { weekly: null, monthly: null, yearly: null };
+    },
+    initialData,
+    initialDataUpdatedAt: 0,
+    staleTime: 0,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30 * 1000,
+    refetchIntervalInBackground: false,
+  }) as UseQueryResult<LatestPeriods, Error>;
 }
 
 /**
@@ -212,6 +256,7 @@ export function useGetUserBadges(
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
     retry: 1,
+    refetchOnMount: true,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<UserBadge[] | null, Error>;
 }
