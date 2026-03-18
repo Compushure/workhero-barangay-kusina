@@ -11,7 +11,7 @@ import {
 import { PageHeader } from '@/components/shared/page-header';
 
 interface HeaderSectionProps {
-  title: string;
+  title?: string;
   description?: string;
   searchTerm?: string;
   onSearch?: (value: string) => void;
@@ -21,9 +21,15 @@ interface HeaderSectionProps {
   onStatusChange?: (value: string) => void;
 }
 
-export function HeaderSection({
-  title,
-  description,
+export function HeaderSection({ title, description }: HeaderSectionProps) {
+  return (
+    <div className="space-y-4 sm:space-y-5">
+      <PageHeader title={title ?? ''} subtitle={description} />
+    </div>
+  );
+}
+
+export function RewardRequestsControls({
   searchTerm = '',
   onSearch,
   onSort,
@@ -50,9 +56,7 @@ export function HeaderSection({
     sortOptions.find((option) => option.value === sortBy)?.label || 'Date (Newest)';
 
   return (
-    <div className="space-y-4 sm:space-y-5">
-      <PageHeader title={title} subtitle={description} />
-
+    <div className="sticky top-(--sticky-top-gap) z-30">
       <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5">
         <div className="flex min-w-0 flex-col items-stretch gap-2 xl:flex-row xl:items-center xl:justify-end">
           <div className="min-w-0 flex-1 xl:max-w-xs">

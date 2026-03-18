@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, Suspense, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { HeaderSection } from './header';
+import { HeaderSection, RewardRequestsControls } from './header';
 import { HeaderSkeleton } from './header-skeleton';
 import { RedemptionTable } from './redemption-table';
 import { RedemptionTableSkeleton } from './redemption-table-skeleton';
@@ -82,14 +82,18 @@ export function RewardRequestsContent() {
             <HeaderSection
               title="Redemption Requests"
               description="Manage employee's request of redemption"
-              searchTerm={searchTerm}
-              onSearch={handleSearch}
-              onSort={handleSort}
-              sortBy={sortBy}
-              statusFilter={statusFilter}
-              onStatusChange={handleStatusChange}
             />
           </Suspense>
+
+          <RewardRequestsControls
+            searchTerm={searchTerm}
+            onSearch={handleSearch}
+            onSort={handleSort}
+            sortBy={sortBy}
+            statusFilter={statusFilter}
+            onStatusChange={handleStatusChange}
+          />
+
           <div className="flex-1 flex flex-col">
             {isTableLoading ? (
               <RedemptionTableSkeleton rows={8} />

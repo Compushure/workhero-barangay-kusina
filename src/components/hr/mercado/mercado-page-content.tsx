@@ -101,6 +101,7 @@ export function MercadoPageContent() {
         {isLoading ? (
           <MercadoHeaderSkeleton />
         ) : (
+          <>
           <Suspense fallback={<MercadoHeaderSkeleton />}>
             <div className="space-y-4 sm:space-y-5">
               <MercadoHeader
@@ -108,56 +109,63 @@ export function MercadoPageContent() {
                 description="Manage items visible in mercado"
                 showAddButton={false}
               />
-
-              <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
-                <div className="flex shrink-0 self-start xl:self-center gap-2 whitespace-nowrap pl-0.5 text-h2 text-foreground sm:gap-3 sm:pl-1">
-                  <h5 className="flex items-center gap-1.5">
-                    <Package size={16} className="text-accent" />
-                    Items
-                    <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-md text-[13px] ml-1 shadow-sm/25">
-                      {totalItemsCount}
-                    </span>
-                  </h5>
-                </div>
-                <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
-                  <div className="min-w-0 flex-1 xl:max-w-xs">
-                    <MercadoSearchBar
-                      value={search}
-                      onChange={setSearch}
-                      placeholder="Search by item name"
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="w-full min-w-0 overflow-x-auto pb-1 xl:w-auto xl:overflow-visible xl:pb-0">
-                    <div className="flex min-w-max flex-nowrap items-center gap-2 sm:gap-3 xl:justify-end">
-                      <MercadoSortToggle
-                        value={sortOrder}
-                        onChange={setSortOrder}
-                        className="w-40 shrink-0 sm:w-44"
-                      />
-                      <MercadoFilterToggle
-                        stockFilter={stockFilter}
-                        visibilityFilter={visibilityFilter}
-                        intervalFilter={intervalFilter}
-                        onStockFilterChange={setStockFilter}
-                        onVisibilityFilterChange={setVisibilityFilter}
-                        onIntervalFilterChange={setIntervalFilter}
-                        className="shrink-0"
-                      />
-                      <Button
-                        onClick={openAddModal}
-                        className="text-button control-h w-32 shrink-0 justify-center rounded-md bg-primary-gradient px-3 py-1.5 whitespace-nowrap text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 sm:w-auto sm:px-4"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Add Item
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </section>
             </div>
           </Suspense>
+
+          <div className="sticky top-(--sticky-top-gap) z-30">
+            <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div className="flex shrink-0 self-start xl:self-center gap-2 whitespace-nowrap pl-0.5 text-h2 text-foreground sm:gap-3 sm:pl-1">
+                <h5 className="flex items-center gap-1.5">
+                  <Package size={16} className="text-accent" />
+                  Items
+                  <span className="bg-accent/75 text-primary-foreground px-2 py-0.5 rounded-md text-[13px] ml-1 shadow-sm/25">
+                    {totalItemsCount}
+                  </span>
+                </h5>
+              </div>
+              <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
+                <div className="min-w-0 flex-1 xl:max-w-xs">
+                  <MercadoSearchBar
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="Search by item name"
+                    className="w-full"
+                  />
+                </div>
+                <div className="w-full min-w-0 overflow-x-auto pb-1 xl:w-auto xl:overflow-visible xl:pb-0">
+                  <div className="flex min-w-max flex-nowrap items-center gap-2 sm:gap-3 xl:justify-end">
+                    <MercadoSortToggle
+                      value={sortOrder}
+                      onChange={setSortOrder}
+                      className="w-40 shrink-0 sm:w-44"
+                    />
+                    <MercadoFilterToggle
+                      stockFilter={stockFilter}
+                      visibilityFilter={visibilityFilter}
+                      intervalFilter={intervalFilter}
+                      onStockFilterChange={setStockFilter}
+                      onVisibilityFilterChange={setVisibilityFilter}
+                      onIntervalFilterChange={setIntervalFilter}
+                      className="shrink-0"
+                    />
+                    <Button
+                      onClick={openAddModal}
+                      className="text-button control-h w-32 shrink-0 justify-center rounded-md bg-primary-gradient px-3 py-1.5 whitespace-nowrap text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 sm:w-auto sm:px-4"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Item
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+          </>
         )}
+
+        {/* {!isLoading && (
+          
+        )} */}
 
         <div className="flex flex-1 flex-col">
           {/* Catalog grid section. */}
