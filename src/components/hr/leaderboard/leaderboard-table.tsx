@@ -84,26 +84,26 @@ export default function LeaderboardTable({
           <Table className="min-w-248">
             <TableHeader>
               <TableRow className="bg-primary-gradient border-0 text-card hover:opacity-95">
-                <TableHead className="w-10 whitespace-nowrap pl-1 pr-1 text-[10px] font-bold uppercase tracking-wide text-current sm:w-16 sm:pl-3 sm:pr-3 sm:text-xs">
+                <TableHead className="w-10 whitespace-nowrap px-2 text-center text-[10px] font-bold uppercase tracking-wide text-current sm:w-16 sm:px-4 sm:text-xs">
                   Rank
                 </TableHead>
-                <TableHead className="min-w-32 whitespace-nowrap pl-1 text-[10px] font-bold uppercase tracking-wide text-current sm:min-w-56 sm:pl-0 sm:text-xs">
+                <TableHead className="min-w-32 whitespace-nowrap px-2 text-left text-[10px] font-bold uppercase tracking-wide text-current sm:min-w-56 sm:px-4 sm:text-xs">
                   Name
                 </TableHead>
-                <TableHead className="whitespace-nowrap pr-1.5 text-right text-[10px] font-bold uppercase tracking-wide text-current sm:pr-4 sm:text-xs">
+                <TableHead className="whitespace-nowrap px-2 text-center text-[10px] font-bold uppercase tracking-wide text-current sm:px-4 sm:text-xs">
                   <span className="sm:hidden">Tasks Completed</span>
                   <span className="hidden sm:inline">Total Completed Tasks</span>
                 </TableHead>
-                <TableHead className="whitespace-nowrap pr-1.5 text-right text-[10px] font-bold uppercase tracking-wide text-current sm:pr-4 sm:text-xs">
+                <TableHead className="whitespace-nowrap px-2 text-center text-[10px] font-bold uppercase tracking-wide text-current sm:px-4 sm:text-xs">
                   <span className="sm:hidden">Task Pts</span>
                   <span className="hidden sm:inline">Task Points</span>
                 </TableHead>
-                <TableHead className="whitespace-nowrap pr-1.5 text-right text-[10px] font-bold uppercase tracking-wide text-current sm:pr-4 sm:text-xs">
+                <TableHead className="whitespace-nowrap px-2 text-center text-[10px] font-bold uppercase tracking-wide text-current sm:px-4 sm:text-xs">
                   <span className="sm:hidden">Badge Pts</span>
                   <span className="hidden sm:inline">Badge Points</span>
                 </TableHead>
-                <TableHead className="whitespace-nowrap pr-3 text-right text-[10px] font-bold uppercase tracking-wide text-current sm:pr-5 sm:text-xs">
-                  <div className="flex items-center justify-end gap-1 sm:gap-1.5">
+                <TableHead className="whitespace-nowrap px-2 text-center text-[10px] font-bold uppercase tracking-wide text-current sm:px-4 sm:text-xs">
+                  <div className="flex items-center justify-center gap-1 sm:gap-1.5">
                     <span className="sm:hidden">Score</span>
                     <span className="hidden sm:inline">Performance Score</span>
                     <TooltipProvider>
@@ -132,26 +132,26 @@ export default function LeaderboardTable({
                       key={`optimistic-skeleton-${index}`}
                       className="border-0 bg-background-soft hover:bg-background-soft"
                     >
-                      <TableCell className="py-2.5 pl-2 pr-2 sm:py-3.5 sm:pl-5 sm:pr-4">
-                        <div className="h-6 w-8 animate-pulse rounded bg-gray-300" />
+                      <TableCell className="px-2 py-2.5 text-center sm:px-4 sm:py-3.5">
+                        <div className="mx-auto h-6 w-8 animate-pulse rounded bg-gray-300" />
                       </TableCell>
-                      <TableCell className="py-2.5 sm:py-3.5">
-                        <div className="flex items-center gap-2 sm:gap-2.5">
+                      <TableCell className="px-2 py-2.5 sm:px-4 sm:py-3.5">
+                        <div className="flex items-center justify-start gap-2 sm:gap-2.5">
                           <div className="h-8 w-8 animate-pulse rounded-full bg-gray-300 sm:h-10 sm:w-10" />
                           <div className="h-4 w-32 animate-pulse rounded bg-gray-300 sm:h-4.5 sm:w-44" />
                         </div>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
-                        <div className="ml-auto h-4 w-14 animate-pulse rounded bg-gray-300" />
+                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-center sm:py-3.5 sm:pr-4">
+                        <div className="mx-auto h-4 w-14 animate-pulse rounded bg-gray-300" />
                       </TableCell>
-                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
-                        <div className="ml-auto h-4 w-14 animate-pulse rounded bg-gray-300" />
+                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-center sm:py-3.5 sm:pr-4">
+                        <div className="mx-auto h-4 w-14 animate-pulse rounded bg-gray-300" />
                       </TableCell>
-                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
-                        <div className="ml-auto h-4 w-14 animate-pulse rounded bg-gray-300" />
+                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-center sm:py-3.5 sm:pr-4">
+                        <div className="mx-auto h-4 w-14 animate-pulse rounded bg-gray-300" />
                       </TableCell>
-                      <TableCell className="whitespace-nowrap py-2.5 pr-3 text-right sm:py-3.5 sm:pr-5">
-                        <div className="ml-auto h-5 w-20 animate-pulse rounded bg-gray-300" />
+                      <TableCell className="whitespace-nowrap py-2.5 pr-3 text-center sm:py-3.5 sm:pr-5">
+                        <div className="mx-auto h-5 w-20 animate-pulse rounded bg-gray-300" />
                       </TableCell>
                     </TableRow>
                   ))
@@ -160,11 +160,11 @@ export default function LeaderboardTable({
                       key={player.id}
                       className="bg-card transition-colors hover:bg-accent-secondary/25"
                     >
-                      <TableCell className="py-2.5 pl-2 pr-2 sm:py-3.5 sm:pl-5 sm:pr-4">
+                      <TableCell className="px-2 py-2.5 text-center sm:px-4 sm:py-3.5">
                         <RankCell rank={player.rank} />
                       </TableCell>
-                      <TableCell className="py-2.5 sm:py-3.5">
-                        <div className="flex items-center gap-2 sm:gap-2.5">
+                      <TableCell className="px-2 py-2.5 sm:px-4 sm:py-3.5">
+                        <div className="flex items-center justify-start gap-2 sm:gap-2.5">
                           <Avatar className="h-8 w-8 border-2 border-background sm:h-10 sm:w-10">
                             <AvatarImage src={player.image ?? undefined} alt={player.name} />
                             <AvatarFallback className="bg-primary-gradient text-xs font-semibold text-card sm:text-sm">
@@ -181,22 +181,22 @@ export default function LeaderboardTable({
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
+                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-center sm:py-3.5 sm:pr-4">
                         <span className="text-xs font-semibold text-foreground sm:text-sm">
                           {player.totalCompletedTasks.toLocaleString()}
                         </span>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
+                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-center sm:py-3.5 sm:pr-4">
                         <span className="text-xs font-semibold text-foreground sm:text-sm">
                           {player.taskPoints.toLocaleString()}
                         </span>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
+                      <TableCell className="whitespace-nowrap py-2.5 pr-2 text-center sm:py-3.5 sm:pr-4">
                         <span className="text-xs font-semibold text-foreground sm:text-sm">
                           {player.badgePoints.toLocaleString()}
                         </span>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap py-2.5 pr-3 text-right sm:py-3.5 sm:pr-5">
+                      <TableCell className="whitespace-nowrap py-2.5 pr-3 text-center sm:py-3.5 sm:pr-5">
                         <span className="text-xs font-semibold text-primary sm:text-sm">
                           {player.performanceScore.toLocaleString()}
                         </span>
@@ -209,24 +209,24 @@ export default function LeaderboardTable({
                   className="pointer-events-none border-0 select-none"
                   aria-hidden="true"
                 >
-                  <TableCell className="py-2.5 pl-2 pr-2 sm:py-3.5 sm:pl-5 sm:pr-4">
+                  <TableCell className="px-2 py-2.5 text-center sm:px-4 sm:py-3.5">
                     <span className="invisible text-xl font-semibold sm:text-2xl">0</span>
                   </TableCell>
-                  <TableCell className="py-2.5 sm:py-3.5">
-                    <div className="flex items-center gap-2 sm:gap-2.5">
+                  <TableCell className="px-2 py-2.5 sm:px-4 sm:py-3.5">
+                    <div className="flex items-center justify-start gap-2 sm:gap-2.5">
                       <div className="invisible h-8 w-8 sm:h-10 sm:w-10" />
                     </div>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
+                  <TableCell className="whitespace-nowrap py-2.5 pr-2 text-center sm:py-3.5 sm:pr-4">
                     <span className="invisible text-xs font-semibold sm:text-sm">0</span>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
+                  <TableCell className="whitespace-nowrap py-2.5 pr-2 text-center sm:py-3.5 sm:pr-4">
                     <span className="invisible text-xs font-semibold sm:text-sm">0</span>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
+                  <TableCell className="whitespace-nowrap py-2.5 pr-2 text-center sm:py-3.5 sm:pr-4">
                     <span className="invisible text-xs font-semibold sm:text-sm">0</span>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap py-2.5 pr-3 text-right sm:py-3.5 sm:pr-5">
+                  <TableCell className="whitespace-nowrap py-2.5 pr-3 text-center sm:py-3.5 sm:pr-5">
                     <span className="invisible text-xs font-semibold sm:text-sm">0</span>
                   </TableCell>
                 </TableRow>
