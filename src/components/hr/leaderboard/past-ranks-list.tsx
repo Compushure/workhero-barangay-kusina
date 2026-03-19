@@ -152,7 +152,7 @@ export function PastRanksList({
 
       {!isPending && periods !== null ? (
         <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <div className="manager-sticky-controls w-full rounded-2xl p-3 sm:p-3.5 xl:max-w-[380px]">
+          <div className="manager-sticky-controls !mx-0 w-full rounded-2xl p-3 sm:p-3.5 xl:max-w-[380px]">
             <PeriodFilters
               activeTab={activeTab}
               selectedDate={selectedDate}

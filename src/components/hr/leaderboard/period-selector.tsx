@@ -171,15 +171,15 @@ export function PeriodSelector({
     : isLatestSelected
       ? {
           icon: AlertCircle,
-          text: `Latest ${currentType} ranking is not generated yet. Generate now!`,
+          text: 'Generation available',
           tone: 'text-amber-600',
-          textClassName: 'text-[11px] font-medium leading-tight text-muted-foreground',
+          textClassName: 'text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground',
         }
       : {
           icon: AlertCircle,
-          text: `Generation is only available for ${latestPeriodLabel}.`,
+          text: 'Generation unavailable',
           tone: 'text-muted-foreground',
-          textClassName: 'text-[11px] font-medium leading-tight text-muted-foreground',
+          textClassName: 'text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground',
         };
 
   const handleWeeklyPeriodChange = (value: string) => {
@@ -228,7 +228,7 @@ export function PeriodSelector({
   const GenerateStatusIcon = generateStatus.icon;
 
   return (
-    <div className={cn('manager-sticky-controls w-full rounded-2xl p-3 sm:p-3.5', className)}>
+    <div className={cn('manager-sticky-controls !mx-0 w-full rounded-2xl p-3 sm:p-3.5', className)}>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[240px_minmax(0,1fr)_auto] xl:grid-cols-[130px_260px_auto]">
         {/* Period Type */}
         <div className="flex w-full flex-col gap-1.5 xl:max-w-[130px]">

@@ -16,7 +16,7 @@ function ViewToggleSkeleton() {
 
 function PeriodSelectorSkeleton() {
   return (
-    <div className="sticky top-(--sticky-top-gap) z-20 mx-2 rounded-2xl border border-accent/20 bg-card p-3 shadow-sm/40 backdrop-blur-sm sm:p-3.5">
+    <div className="sticky top-(--sticky-top-gap) z-20 !mx-0 rounded-2xl border border-accent/20 bg-card p-3 shadow-sm/40 backdrop-blur-sm sm:p-3.5">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[240px_minmax(0,1fr)_auto] xl:grid-cols-[130px_260px_auto]">
         <div className="flex w-full flex-col gap-1.5 xl:max-w-[130px]">
           <Skeleton className="h-3 w-20 rounded bg-gray-300" />
