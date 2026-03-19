@@ -71,9 +71,9 @@
   --text-h1: clamp(1.65rem, 2vw, 1.95rem);
   --text-h2: clamp(1.125rem, 1.05vw, 1.25rem);
   --text-task-title: clamp(1.03rem, 1vw, 1.15rem);
-  --text-meta: clamp(0.84rem, 0.75vw, 0.9rem);
+  --text-meta: clamp(0.8rem, 0.72vw, 0.86rem);
   --text-sidebar-label: 0.84rem;
-  --text-button: 0.86rem;
+  --text-button: 0.76rem;
 
   --weight-h1: 700;
   --weight-h2: 700;
@@ -81,9 +81,9 @@
   --weight-meta: 400;
   --weight-sidebar-label: 500;
   --weight-button: 700;
-  --control-height: 2.125rem;
-  --manager-action-gap: 0.4rem;
-  --manager-action-padding: 0.2rem;
+  --control-height: 1.875rem;
+  --manager-action-gap: 0.32rem;
+  --manager-action-padding: 0.14rem;
   --sticky-top-gap: 0.625rem;
 }
 
@@ -91,12 +91,12 @@
   :root {
     --text-h2: clamp(1.04rem, 0.95vw, 1.12rem);
     --text-task-title: clamp(0.97rem, 0.92vw, 1.06rem);
-    --text-meta: clamp(0.79rem, 0.68vw, 0.84rem);
+    --text-meta: clamp(1rem, 0.65vw, 0.8rem);
     --text-sidebar-label: 0.79rem;
-    --text-button: 0.81rem;
-    --control-height: 2rem;
-    --manager-action-gap: 0.35rem;
-    --manager-action-padding: 0.18rem;
+    --text-button: 0.77rem;
+    --control-height: 1.75rem;
+    --manager-action-gap: 0.3rem;
+    --manager-action-padding: 0.12rem;
   }
 }
 
@@ -349,6 +349,7 @@
     /* background: color-mix(in oklab, var(--background) 25%, white 15%); */
     backdrop-filter: blur(8px);
     box-shadow: 0 1px 4px rgba(7, 24, 39, 0.15);
+    margin-inline: 0.5rem;
   }
 
   .manager-action-cluster {
@@ -378,9 +379,10 @@
 
   .manager-dropdown-item {
     color: var(--foreground);
-    min-height: var(--control-height);
-    padding-top: 0.375rem;
-    padding-bottom: 0.375rem;
+    font-size: calc(var(--text-meta) - 0.02rem);
+    min-height: calc(var(--control-height) - 0.125rem);
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
   }
 
   .manager-dropdown-item:hover,
@@ -391,6 +393,20 @@
 }
 
 @layer components {
+  /* Chrome browser-style tab – ear pseudo-element effect */
+  .chrome-tab {
+    isolation: isolate;
+  }
+
+  .chrome-tab[data-state='active'] {
+    overflow: visible !important;
+  }
+
+  .chrome-tab[data-state='active']::before,
+  .chrome-tab[data-state='active']::after {
+    content: none !important;
+    display: none !important;
+  }
 }
 
 @keyframes launcher-shadow-blink {

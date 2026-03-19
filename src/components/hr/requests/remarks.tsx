@@ -94,10 +94,10 @@ export function RemarksDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="bg-card text-card-foreground border border-border sm:max-w-md">
+      <DialogContent className="bg-card text-card-foreground border border-accent/25 sm:max-w-md rounded-3xl shadow-xl">
         <DialogHeader className="space-y-3">
-          <DialogTitle className="text-xl font-semibold text-primary">{title}</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
+          <DialogTitle className="text-h2 text-foreground">{title}</DialogTitle>
+          <DialogDescription className="text-meta text-muted-foreground">
             {description}
           </DialogDescription>
         </DialogHeader>
@@ -143,7 +143,7 @@ export function RemarksDialog({
             variant="outline"
             onClick={handleCancel}
             disabled={isDisabled}
-            className="flex-1 rounded-3xl border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white transition-all duration-400 ease-in-out"
+            className="control-h flex-1 rounded-full border border-accent/25 bg-transparent text-button text-foreground shadow-sm/25 transition-all duration-300 hover:bg-accent-secondary/10"
           >
             {cancelLabel}
           </Button>
@@ -153,9 +153,9 @@ export function RemarksDialog({
             variant={confirmVariant}
             className={`flex-1 rounded-3xl ${
               confirmVariant === 'default'
-                ? 'bg-primary-gradient text-zinc-50 hover:opacity-95'
+                ? 'bg-primary-gradient text-white shadow-sm/25 transition-all duration-300 hover:opacity-95'
                 : confirmVariant === 'destructive'
-                  ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                  ? 'bg-destructive text-destructive-foreground transition-all duration-300 hover:bg-destructive/90'
                   : ''
             }`}
           >

@@ -7,30 +7,29 @@ import { PastRanksListSkeleton } from '@/components/hr/leaderboard/past-ranks-li
 
 function ViewToggleSkeleton() {
   return (
-    <div className="flex w-full items-center rounded-full border border-gray-200 bg-gray-100 p-1 gap-1 sm:w-auto sm:gap-0.5">
-      <Skeleton className="min-h-10 flex-1 rounded-full sm:flex-none sm:w-36" />
-      <Skeleton className="min-h-10 flex-1 rounded-full sm:flex-none sm:w-36" />
+    <div className="flex h-fit w-full overflow-hidden rounded-md border border-accent/25 bg-card/75 shadow-sm/25 sm:w-fit">
+      <Skeleton className="control-h flex-1 rounded-l-md bg-gray-300 sm:w-40 sm:flex-none" />
+      <Skeleton className="control-h flex-1 rounded-r-md bg-gray-300 sm:w-40 sm:flex-none" />
     </div>
   );
 }
 
 function PeriodSelectorSkeleton() {
   return (
-    <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-      {/* Period Type */}
-      <div className="flex w-full flex-col gap-1.5 sm:w-auto">
-        <Skeleton className="h-3.5 w-20 rounded" />
-        <Skeleton className="h-10 w-full rounded-md sm:w-28" />
+    <div className="sticky top-(--sticky-top-gap) z-20 mx-2 rounded-2xl border border-accent/20 bg-card p-3 shadow-sm/40 backdrop-blur-sm sm:p-3.5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[240px_minmax(0,1fr)_auto]">
+        <div className="flex w-full flex-col gap-1.5">
+          <Skeleton className="h-3 w-20 rounded bg-gray-300" />
+          <Skeleton className="control-h w-full rounded-full bg-gray-300" />
+        </div>
+        <div className="flex w-full flex-col gap-1.5">
+          <Skeleton className="h-3 w-14 rounded bg-gray-300" />
+          <Skeleton className="control-h w-full rounded-full bg-gray-300" />
+        </div>
+        <div className="flex w-full items-center">
+          <Skeleton className="control-h w-full rounded-full bg-gray-300 lg:w-36" />
+        </div>
       </div>
-
-      {/* Period value */}
-      <div className="flex w-full flex-col gap-1.5 sm:w-auto sm:min-w-56">
-        <Skeleton className="h-3.5 w-12 rounded" />
-        <Skeleton className="h-10 w-full rounded-md sm:min-w-56" />
-      </div>
-
-      {/* Generate button */}
-      <Skeleton className="h-10 w-full rounded-md sm:w-32 sm:self-end" />
     </div>
   );
 }
@@ -41,26 +40,25 @@ export default function LeaderboardLoading() {
   const isPastView = view === 'past';
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-white px-3 py-3 sm:px-4 sm:py-4">
-      <div className="mx-auto mt-2 w-full max-w-7xl sm:mt-4">
-        <div className="mb-2 sm:mb-3">
-          {/* Header row */}
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-8 w-40 rounded sm:h-9 sm:w-48" />
-              <Skeleton className="h-3.5 w-64 rounded sm:h-4 sm:w-80" />
+    <main className="w-full min-h-screen bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-4 sm:gap-6 2xl:max-w-screen-2xl">
+        <div className="space-y-4 sm:space-y-5">
+          <section className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-44 rounded bg-gray-300" />
+              <Skeleton className="h-4 w-80 rounded bg-gray-300" />
             </div>
             <ViewToggleSkeleton />
-          </div>
+          </section>
 
-          {/* When navigating to "View Past Rankings", show the Past Ranks list skeleton instead
-              of the generate-period selector skeleton. */}
-          {isPastView ? <></> : <PeriodSelectorSkeleton />}
+          {isPastView ? null : <PeriodSelectorSkeleton />}
+
+          {isPastView ? <Skeleton className="h-4 w-40 rounded bg-gray-300" /> : null}
         </div>
 
         {/* Main content area */}
         {isPastView ? <PastRanksListSkeleton /> : <LeaderboardTableSkeleton />}
       </div>
-    </div>
+    </main>
   );
 }

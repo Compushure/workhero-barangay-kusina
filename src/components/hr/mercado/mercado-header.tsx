@@ -2,6 +2,7 @@
 
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/shared/page-header';
 
 interface MercadoHeaderProps {
   title: string;
@@ -17,20 +18,17 @@ export function MercadoHeader({
   showAddButton = true,
 }: MercadoHeaderProps) {
   return (
-    <div className="p-4 flex items-center justify-between mb-4">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
-        <p className="text-base text-muted-foreground mt-1">{description}</p>
-      </div>
+    <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <PageHeader title={title} subtitle={description} />
       {showAddButton && onAddClick && (
         <Button
           onClick={onAddClick}
-          className="h-11 px-6 rounded-xl bg-primary-gradient text-zinc-50 hover:opacity-95 font-semibold text-base"
+          className="control-h text-button inline-flex items-center gap-2 rounded-xl bg-primary-gradient px-4 text-zinc-50 shadow-sm/25 transition-all duration-300 hover:opacity-95 sm:px-6"
         >
-          <Plus className="h-5 w-5 mr-2" />
+          <Plus className="h-4 w-4" />
           Add Item
         </Button>
       )}
-    </div>
+    </section>
   );
 }

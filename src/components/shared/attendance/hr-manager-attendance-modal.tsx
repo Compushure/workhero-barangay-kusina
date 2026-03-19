@@ -30,13 +30,13 @@ function formatLogLabel(action: AttendanceLogRow['action']): string {
   return 'Back to Work';
 }
 
-export function HrAttendanceModal({
-  open,
-  onOpenChange,
-}: {
+interface HrManagerAttendanceModalProps {
+  view: 'manager' | 'hr';
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}) {
+}
+
+export function HrManagerAttendanceModal({ view, open, onOpenChange }: HrManagerAttendanceModalProps) {
   const { data: status, isLoading, isFetching } = useGetTodayAttendanceStatus();
   const timeInMutation = useTimeInAttendance();
   const timeOutMutation = useTimeOutAttendance();
@@ -119,11 +119,11 @@ export function HrAttendanceModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md rounded-xl">
         <DialogHeader>
-          <DialogTitle>HR Attendance</DialogTitle>
+          <DialogTitle>{view === 'manager' ? "Manager" : "HR"} Attendance</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3 pt-2">
-          <div className="rounded-md bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          <div className="rounded-md bg-muted/40 border border-accent-secondary/50 px-3 py-2 text-sm text-muted-foreground">
             {status?.message ?? 'Checking attendance status...'}
           </div>
 
@@ -198,7 +198,7 @@ export function HrAttendanceModal({
             >
               {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : breakLabel}
             </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isBusy}>
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isBusy} className='bg-card text-primary hover:bg-gray-200 hover:text-primary px-6'>
               Close
             </Button>
           </div>

@@ -10,63 +10,64 @@ import {
 
 export default function LeaderboardTableSkeleton() {
   return (
-    <div className="mb-2 w-full">
-      <div className="mb-4 flex w-full flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="w-full space-y-4">
+      <div className="flex w-full flex-col gap-2.5 rounded-2xl border border-accent/20 bg-card px-4 py-3 shadow-sm/40 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div className="space-y-1.5">
-          <Skeleton className="h-6 w-44 rounded sm:h-7 sm:w-48" />
-          <Skeleton className="h-3.5 w-28 rounded sm:h-4 sm:w-36" />
+          <Skeleton className="h-4 w-32 rounded-full bg-gray-300 sm:w-36" />
+          <Skeleton className="h-6 w-44 rounded-full bg-gray-300 sm:w-56" />
+          <Skeleton className="h-4 w-32 rounded-full bg-gray-300" />
         </div>
-        <Skeleton className="h-10 w-36 rounded sm:h-9 sm:w-28" />
+        <Skeleton className="control-h w-44 rounded-full bg-gray-300 sm:w-52" />
       </div>
 
-      <div className="w-full overflow-hidden rounded-xl border border-gray-300 bg-white shadow-md">
-        <div className="w-full overflow-x-auto">
-          <Table className="min-w-150 sm:min-w-190">
+      <div className="w-full overflow-hidden rounded-2xl border border-accent/20 bg-card shadow-sm/40">
+        <div className="w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <Table className="min-w-248">
             <TableHeader>
-              <TableRow className="bg-primary-gradient border-0 hover:opacity-95">
-                <TableHead className="w-10 pl-1 pr-1 sm:w-20 sm:pl-5 sm:pr-4">
-                  <Skeleton className="h-3.5 w-9 rounded bg-white/20 sm:h-4 sm:w-10" />
+              <TableRow className="bg-background border-0">
+                <TableHead className="w-10 pl-2 pr-2 sm:w-16 sm:pl-5 sm:pr-3">
+                  <Skeleton className="h-3.5 w-10 rounded bg-gray-300" />
                 </TableHead>
                 <TableHead className="pl-1 sm:pl-0">
-                  <Skeleton className="h-3.5 w-12 rounded bg-white/20 sm:h-4 sm:w-14" />
+                  <Skeleton className="h-3.5 w-24 rounded bg-gray-300" />
                 </TableHead>
-                <TableHead className="pr-1.5 text-right sm:pr-4">
-                  <Skeleton className="ml-auto h-3.5 w-14 rounded bg-white/20 sm:h-4 sm:w-36" />
+                <TableHead className="pr-2 text-right sm:pr-4">
+                  <Skeleton className="ml-auto h-3.5 w-24 rounded bg-gray-300" />
                 </TableHead>
-                <TableHead className="pr-1.5 text-right sm:pr-4">
-                  <Skeleton className="ml-auto h-3.5 w-16 rounded bg-white/20 sm:h-4 sm:w-20" />
+                <TableHead className="pr-2 text-right sm:pr-4">
+                  <Skeleton className="ml-auto h-3.5 w-24 rounded bg-gray-300" />
                 </TableHead>
-                <TableHead className="pr-1.5 text-right sm:pr-4">
-                  <Skeleton className="ml-auto h-3.5 w-16 rounded bg-white/20 sm:h-4 sm:w-20" />
+                <TableHead className="pr-2 text-right sm:pr-4">
+                  <Skeleton className="ml-auto h-3.5 w-24 rounded bg-gray-300" />
                 </TableHead>
                 <TableHead className="pr-2 text-right sm:pr-5">
-                  <Skeleton className="ml-auto h-3.5 w-20 rounded bg-white/20 sm:h-4 sm:w-24" />
+                  <Skeleton className="ml-auto h-3.5 w-28 rounded bg-gray-300" />
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {[1, 2, 3, 4, 5].map((i) => (
-                <TableRow key={i} className="bg-accent/5 border-0">
-                  <TableCell className="pl-1 pr-1 sm:pl-5 sm:pr-4">
-                    <Skeleton className="h-5 w-8 rounded sm:h-6 sm:w-10" />
+                <TableRow key={i} className="border-0 bg-background-soft hover:bg-background-soft">
+                  <TableCell className="py-2.5 pl-2 pr-2 sm:py-3.5 sm:pl-5 sm:pr-4">
+                    <Skeleton className="h-6 w-12 rounded bg-gray-300" />
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 sm:gap-3">
-                      <Skeleton className="h-8 w-8 shrink-0 rounded-full sm:h-10 sm:w-10" />
-                      <Skeleton className="h-3.5 w-24 rounded sm:h-5 sm:w-40" />
+                  <TableCell className="py-2.5 sm:py-3.5">
+                    <div className="flex items-center gap-2 sm:gap-2.5">
+                      <Skeleton className="h-8 w-8 shrink-0 rounded-full bg-gray-300 sm:h-10 sm:w-10" />
+                      <Skeleton className="h-4 w-36 rounded bg-gray-300 sm:w-48" />
                     </div>
                   </TableCell>
-                  <TableCell className="pr-1.5 text-right sm:pr-4">
-                    <Skeleton className="ml-auto h-5 w-14 rounded sm:h-6 sm:w-16" />
+                  <TableCell className="py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
+                    <Skeleton className="ml-auto h-4 w-16 rounded bg-gray-300" />
                   </TableCell>
-                  <TableCell className="pr-1.5 text-right sm:pr-4">
-                    <Skeleton className="ml-auto h-5 w-14 rounded sm:h-6 sm:w-16" />
+                  <TableCell className="py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
+                    <Skeleton className="ml-auto h-4 w-16 rounded bg-gray-300" />
                   </TableCell>
-                  <TableCell className="pr-1.5 text-right sm:pr-4">
-                    <Skeleton className="ml-auto h-5 w-14 rounded sm:h-6 sm:w-16" />
+                  <TableCell className="py-2.5 pr-2 text-right sm:py-3.5 sm:pr-4">
+                    <Skeleton className="ml-auto h-4 w-16 rounded bg-gray-300" />
                   </TableCell>
-                  <TableCell className="pr-2 text-right sm:pr-5">
-                    <Skeleton className="ml-auto h-6 w-16 rounded sm:h-7 sm:w-20" />
+                  <TableCell className="py-2.5 pr-3 text-right sm:py-3.5 sm:pr-5">
+                    <Skeleton className="ml-auto h-4 w-20 rounded bg-gray-300" />
                   </TableCell>
                 </TableRow>
               ))}

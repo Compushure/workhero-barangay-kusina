@@ -1,34 +1,97 @@
 'use client';
 
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useGetUserBadges } from '@/hooks/tanstack/queries/employeeQueries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 
-const BADGES_PER_PAGE = 5;
+const MOBILE_BADGES_PER_PAGE = 1;
+const DESKTOP_BADGES_PER_PAGE = 3;
+const DESKTOP_MEDIA_QUERY = '(min-width: 1024px)';
+const NAV_BUTTON_CLASS =
+  'group h-10 w-10 rounded-xl bg-card p-0 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out hover:bg-accent-secondary hover:text-white disabled:pointer-events-none disabled:opacity-30';
+const BADGE_CARD_CLASS =
+  'h-full min-h-56 rounded-2xl border border-accent/25 bg-white p-5 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-[#F29F4A] hover:shadow-sm';
 
 interface BadgesCarouselProps {
   userId: string;
 }
 
+function useIsDesktopBreakpoint() {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
+    const updateMatch = (event: MediaQueryListEvent) => {
+      setIsDesktop(event.matches);
+    };
+
+    setIsDesktop(mediaQuery.matches);
+    mediaQuery.addEventListener('change', updateMatch);
+
+    return () => {
+      mediaQuery.removeEventListener('change', updateMatch);
+    };
+  }, []);
+
+  return isDesktop;
+}
+
+function CarouselNavButton({
+  direction,
+  onClick,
+  disabled,
+}: {
+  direction: 'previous' | 'next';
+  onClick: () => void;
+  disabled: boolean;
+}) {
+  const isPrevious = direction === 'previous';
+
+  return (
+    <div
+      className={`absolute top-1/2 z-10 -translate-y-1/2 ${
+        isPrevious ? 'left-2 sm:left-3 lg:left-4' : 'right-2 sm:right-3 lg:right-4'
+      }`}
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onClick}
+        disabled={disabled}
+        className={NAV_BUTTON_CLASS}
+        aria-label={isPrevious ? 'Previous badge page' : 'Next badge page'}
+      >
+        {isPrevious ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+      </Button>
+    </div>
+  );
+}
+
 function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
   const { data: badges, isLoading } = useGetUserBadges(userId);
   const [currentPage, setCurrentPage] = useState(0);
+  const isDesktop = useIsDesktopBreakpoint();
+
+  const badgesPerPage = isDesktop ? DESKTOP_BADGES_PER_PAGE : MOBILE_BADGES_PER_PAGE;
 
   const badgeList = badges || [];
-  const totalPages = Math.ceil(badgeList.length / BADGES_PER_PAGE);
-  const startIdx = currentPage * BADGES_PER_PAGE;
-  const endIdx = startIdx + BADGES_PER_PAGE;
+  const totalPages = Math.ceil(badgeList.length / badgesPerPage);
+  const startIdx = currentPage * badgesPerPage;
+  const endIdx = startIdx + badgesPerPage;
   const currentBadges = badgeList.slice(startIdx, endIdx);
+
+  useEffect(() => {
+    setCurrentPage((prevPage) => Math.min(prevPage, Math.max(totalPages - 1, 0)));
+  }, [totalPages]);
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="flex gap-3">
-          {[...Array(BADGES_PER_PAGE)].map((_, i) => (
-            <Skeleton key={i} className="h-32 w-28 rounded-lg shrink-0" />
+      <div className="min-h-88 rounded-xl border border-gray-300 bg-white p-5 sm:min-h-96 sm:p-7 lg:h-full lg:min-h-0 lg:p-8">
+        <div className="mx-auto flex max-w-4xl items-center justify-center gap-4 sm:gap-5">
+          {[...Array(badgesPerPage)].map((_, i) => (
+            <Skeleton key={i} className="h-44 w-30 rounded-2xl bg-white sm:h-50 sm:w-36" />
           ))}
         </div>
       </div>
@@ -37,8 +100,8 @@ function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
 
   if (!badgeList.length) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-center">
-        <Trophy className="h-12 w-12 text-muted-foreground/40 mb-2" />
+      <div className="flex h-full flex-col items-center justify-center rounded-xl border border-gray-300 bg-white py-12 text-center">
+        <Trophy className="mb-2 h-10 w-10 text-accent/70" />
         <p className="text-sm text-muted-foreground">No badges earned yet</p>
       </div>
     );
@@ -48,197 +111,73 @@ function BadgesCarouselComponent({ userId }: BadgesCarouselProps) {
   const canGoForward = currentPage < totalPages - 1;
 
   return (
-    <div className="space-y-4">
-      {/* xs-sm: Scrollable container with all badges */}
-      <div className="md:hidden">
-        <div 
-          className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] -webkit-overflow-scrolling-touch overscroll-x-contain touch-pan-x"
-          style={{
-            msOverflowStyle: 'none',
-            scrollbarWidth: 'none',
-            WebkitOverflowScrolling: 'touch'
-          }}
-        >
-          <div className="flex gap-2 sm:gap-3 pb-2">
-            {badgeList.map((badge) => (
-              <Tooltip key={badge.userbadge_id}>
-                <TooltipTrigger asChild>
-                  <div className="shrink-0 w-18 h-26 sm:w-20 sm:h-28 flex flex-col items-center justify-start p-1 sm:p-1.5 rounded-lg border-2 border-accent/20 hover:border-accent/40 transition-colors bg-accent/5 hover:bg-accent/10 cursor-pointer min-w-0 max-w-full">
-                    {/* Badge Image */}
-                    {badge.img_link ? (
-                      <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-lg overflow-hidden mb-1.5 sm:mb-2 shrink-0">
-                        <img
-                          src={badge.img_link}
-                          alt={badge.badge_name}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-accent/15 flex items-center justify-center mb-1.5 sm:mb-2 shrink-0">
-                        <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
-                      </div>
-                    )}
+    <div className="flex h-full flex-col justify-center gap-2 sm:gap-3">
+      <div className="relative flex-1 overflow-hidden rounded-xl border border-gray-300 bg-white px-14 py-4 sm:px-16 sm:py-5 md:px-20 md:py-7 lg:px-24">
+        <CarouselNavButton
+          direction="previous"
+          onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+          disabled={!canGoBack}
+        />
+        <CarouselNavButton
+          direction="next"
+          onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+          disabled={!canGoForward}
+        />
 
-                    {/* Badge Info */}
-                    <div className="w-full text-center flex-1 flex flex-col justify-between min-h-12 sm:min-h-14 min-w-0 max-w-full overflow-hidden">
-                      <div className="w-full min-w-0 max-w-full overflow-hidden">
-                        <h4 className="text-[9px] sm:text-[10px] font-bold text-title line-clamp-2 mb-0.5 sm:mb-1 wrap-break-word overflow-hidden">
-                          {badge.badge_name}
-                        </h4>
-                        {badge.badge_description && (
-                          <p className="text-[8px] sm:text-[9px] text-muted-foreground/80 line-clamp-2 wrap-break-word overflow-hidden">
-                            {badge.badge_description}
-                          </p>
-                        )}
-                      </div>
-                      <p className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground mt-0.5 sm:mt-1 truncate">
-                        {new Date(badge.date_acquired).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: '2-digit',
-                        })}
-                      </p>
-                    </div>
+        <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5 py-5">
+          {currentBadges.map((badge) => (
+            <article key={badge.userbadge_id} className={BADGE_CARD_CLASS}>
+              <div className="flex h-full flex-col text-center">
+                {badge.img_link ? (
+                  <div className="mx-auto mb-4 h-14 w-14 overflow-hidden rounded-xl sm:h-16 sm:w-16">
+                    <img
+                      src={badge.img_link}
+                      alt={badge.badge_name}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
-                </TooltipTrigger>
-                <TooltipContent className="bg-black text-white max-w-56">
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold text-white">
-                      {badge.badge_name || 'Badge'}
-                    </p>
-                    {badge.badge_description && (
-                      <p className="text-[11px] text-white/80">{badge.badge_description}</p>
-                    )}
-                    <p className="text-[11px] text-white/80">
-                      Acquired:{' '}
-                      {new Date(badge.date_acquired).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </p>
+                ) : (
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent/12 sm:h-16 sm:w-16">
+                    <Trophy className="h-7 w-7 text-accent" />
                   </div>
-                </TooltipContent>
-              </Tooltip>
-            ))}
-          </div>
+                )}
+
+                <h4 className="line-clamp-2 min-h-12 text-base font-semibold leading-tight text-title wrap-break-word">
+                  {badge.badge_name}
+                </h4>
+
+                <p className="mt-2 line-clamp-2 min-h-11 text-sm leading-snug text-muted-foreground">
+                  {badge.badge_description || 'No description provided.'}
+                </p>
+
+                <p className="mt-auto pt-3 text-xs text-muted-foreground">
+                  Acquired:{' '}
+                  {new Date(badge.date_acquired).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </p>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
 
-      {/* md+: Carousel with pagination buttons */}
-      <div className="hidden md:block">
-        <div className="flex items-center gap-3">
-          {/* Previous Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-            disabled={!canGoBack}
-            className="shrink-0 h-10 w-10 p-0"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-
-          {/* Badges Grid (5 per page) */}
-          <div className="flex-1 overflow-hidden">
-            <div className="flex gap-3 transition-transform duration-300">
-              {currentBadges.map((badge) => (
-                <Tooltip key={badge.userbadge_id}>
-                  <TooltipTrigger asChild>
-                    <div className="shrink-0 w-24 h-30 lg:w-28 lg:h-32 flex flex-col items-center justify-start p-2 rounded-lg border-2 border-accent/20 hover:border-accent/40 transition-colors bg-accent/5 hover:bg-accent/10 cursor-pointer min-w-0 max-w-full">
-                      {/* Badge Image */}
-                      {badge.img_link ? (
-                        <div className="relative h-14 w-14 lg:h-16 lg:w-16 rounded-lg overflow-hidden mb-2 shrink-0">
-                          <img
-                            src={badge.img_link}
-                            alt={badge.badge_name}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="h-14 w-14 lg:h-16 lg:w-16 rounded-lg bg-accent/15 flex items-center justify-center mb-2 shrink-0">
-                          <Trophy className="h-7 w-7 lg:h-8 lg:w-8 text-accent" />
-                        </div>
-                      )}
-
-                      {/* Badge Info */}
-                      <div className="w-full text-center flex-1 flex flex-col justify-between min-h-16 min-w-0 max-w-full overflow-hidden">
-                        <div className="w-full min-w-0 max-w-full overflow-hidden">
-                          <h4 className="text-xs font-bold text-title line-clamp-2 mb-1 wrap-break-word overflow-hidden">
-                            {badge.badge_name}
-                          </h4>
-                          {badge.badge_description && (
-                            <p className="text-[10px] text-muted-foreground/80 line-clamp-2 wrap-break-word overflow-hidden">
-                              {badge.badge_description}
-                            </p>
-                          )}
-                        </div>
-                        <p className="text-[10px] font-semibold text-muted-foreground mt-1 truncate">
-                          {new Date(badge.date_acquired).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: '2-digit',
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-black text-white max-w-56">
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold text-white">
-                        {badge.badge_name || 'Badge'}
-                      </p>
-                      {badge.badge_description && (
-                        <p className="text-[11px] text-white/80">{badge.badge_description}</p>
-                      )}
-                      <p className="text-[11px] text-white/80">
-                        Acquired:{' '}
-                        {new Date(badge.date_acquired).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </p>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              ))}
-            </div>
-          </div>
-
-          {/* Next Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
-            disabled={!canGoForward}
-            className="shrink-0 h-10 w-10 p-0"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1.5">
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentPage(i)}
+              className={`h-1.5 rounded-full transition-colors ${
+                i === currentPage ? 'w-4 bg-accent' : 'w-2 bg-accent/40'
+              }`}
+              aria-label={`Go to badge page ${i + 1}`}
+            />
+          ))}
         </div>
-
-        {/* Page Indicator */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 text-xs text-muted-foreground mt-4">
-            <span>
-              Page {currentPage + 1} of {totalPages}
-            </span>
-            <div className="flex gap-1">
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i)}
-                  className={`h-2 rounded-full transition-colors ${
-                    i === currentPage ? 'bg-accent w-3' : 'bg-accent/40 w-2'
-                  }`}
-                  aria-label={`Go to page ${i + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
