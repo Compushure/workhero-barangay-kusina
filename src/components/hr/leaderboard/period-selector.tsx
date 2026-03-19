@@ -10,8 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CheckCircle2 } from 'lucide-react';
-import { getISOWeek, getISOWeekYear, subWeeks } from 'date-fns';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { getISOWeek, getISOWeekYear } from 'date-fns';
 import {
   getISOWeeksInYear,
   buildPeriodLabel,
@@ -32,19 +32,8 @@ function getPreviousWeek(): { year: number; week: number } {
   return { year: nowYear, week: nowWeek - 1 };
 }
 
-/** Returns the ISO year and week for the week that was two weeks ago from today. */
-function getTwoWeeksAgo(): { year: number; week: number } {
-  const now = new Date();
-  const twoWeeksAgoDate = subWeeks(now, 2);
-  return {
-    year: getISOWeekYear(twoWeeksAgoDate),
-    week: getISOWeek(twoWeeksAgoDate),
-  };
-}
-
-/** Previous week and two-weeks-ago for the weekly period dropdown. */
 function getWeeklyPeriodOptions(): { year: number; week: number }[] {
-  return [getPreviousWeek(), getTwoWeeksAgo()];
+  return [getPreviousWeek()];
 }
 
 function getPreviousMonth(): { year: number; month: number } {
@@ -133,6 +122,9 @@ export function PeriodSelector({
   const [isPending, startTransition] = useTransition();
   const [optimisticallyGenerated, setOptimisticallyGenerated] = useState(false);
   const generateRankingMutation = useGenerateRankingByPeriod();
+  const latestWeek = getPreviousWeek();
+  const latestMonth = getPreviousMonth();
+  const latestYear = getPreviousYear();
 
   useEffect(() => {
     setOptimisticallyGenerated(false);
@@ -154,6 +146,41 @@ export function PeriodSelector({
   const weeklySelectOptions = weeklyOptionKeys.has(currentWeeklyKey)
     ? weeklyOptions
     : [...weeklyOptions, { year: currentYear, week: currentWeek }];
+  const isLatestSelected =
+    currentType === 'weekly'
+      ? currentYear === latestWeek.year && currentWeek === latestWeek.week
+      : currentType === 'monthly'
+        ? currentYear === latestMonth.year && currentMonth === latestMonth.month
+        : currentYear === latestYear;
+  const latestPeriodLabel =
+    currentType === 'weekly'
+      ? `${buildPeriodLabel('weekly', latestWeek.year, undefined, latestWeek.week)} (${getISOWeekDateRangeLabelShort(latestWeek.year, latestWeek.week)})`
+      : currentType === 'monthly'
+        ? buildPeriodLabel('monthly', latestMonth.year, latestMonth.month)
+        : buildPeriodLabel('yearly', latestYear);
+  const hasRanking = currentPeriodRankingExists || optimisticallyGenerated;
+  const isGenerating = generateRankingMutation.isPending;
+  const isGenerateDisabled = hasRanking || isPending || isGenerating || !isLatestSelected;
+  const generateStatus = hasRanking
+    ? {
+        icon: CheckCircle2,
+        text: 'Ranking ready',
+        tone: 'text-emerald-600',
+        textClassName: 'text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground',
+      }
+    : isLatestSelected
+      ? {
+          icon: AlertCircle,
+          text: `Latest ${currentType} ranking is not generated yet. Generate now!`,
+          tone: 'text-amber-600',
+          textClassName: 'text-[11px] font-medium leading-tight text-muted-foreground',
+        }
+      : {
+          icon: AlertCircle,
+          text: `Generation is only available for ${latestPeriodLabel}.`,
+          tone: 'text-muted-foreground',
+          textClassName: 'text-[11px] font-medium leading-tight text-muted-foreground',
+        };
 
   const handleWeeklyPeriodChange = (value: string) => {
     const [y, w] = value.split('-').map(Number);
@@ -198,8 +225,7 @@ export function PeriodSelector({
     );
   };
 
-  const hasRanking = currentPeriodRankingExists || optimisticallyGenerated;
-  const isGenerating = generateRankingMutation.isPending;
+  const GenerateStatusIcon = generateStatus.icon;
 
   return (
     <div className={cn('manager-sticky-controls w-full rounded-2xl p-3 sm:p-3.5', className)}>
@@ -254,19 +280,15 @@ export function PeriodSelector({
         <div className="flex w-full flex-col gap-1.5 self-start">
           <div className="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[172px_172px]">
             <div className="flex w-full flex-col items-start gap-1.5 xl:max-w-[172px]">
-              {hasRanking ? (
-                <div className="flex min-h-4 items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                    Ranking ready
-                  </span>
-                </div>
-              ) : (
-                <div className="min-h-4" aria-hidden="true" />
-              )}
+              <div className="flex min-h-4 items-center gap-1.5">
+                <GenerateStatusIcon className={cn('h-3.5 w-3.5 shrink-0', generateStatus.tone)} />
+                <span className={generateStatus.textClassName}>
+                  {generateStatus.text}
+                </span>
+              </div>
               <Button
                 onClick={handleGenerateRank}
-                disabled={hasRanking || isPending || isGenerating}
+                disabled={isGenerateDisabled}
                 className="control-h w-full rounded-full bg-primary-gradient px-4 text-xs font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:opacity-60 sm:text-sm"
               >
                 {isGenerating ? 'Generating...' : 'Generate Rank'}
