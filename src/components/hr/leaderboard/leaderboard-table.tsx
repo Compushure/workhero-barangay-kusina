@@ -22,6 +22,7 @@ interface LeaderboardTableProps {
   periodLabel: string;
   dateRangeSubtitle: string | null;
   rankingPeriodId: string;
+  periodHeaderLabel?: string | null;
 }
 
 function RankCell({ rank }: { rank: number }) {
@@ -33,6 +34,7 @@ export default function LeaderboardTable({
   periodLabel,
   dateRangeSubtitle,
   rankingPeriodId,
+  periodHeaderLabel = 'Active Period',
 }: LeaderboardTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const isOptimisticRanking = rankingPeriodId.startsWith('optimistic-');
@@ -68,9 +70,11 @@ export default function LeaderboardTable({
         {/* Period header */}
         <div className="flex flex-col gap-3 border-b border-border bg-background-soft px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground mb-1">
-              Active Period
-            </p>
+            {periodHeaderLabel ? (
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                {periodHeaderLabel}
+              </p>
+            ) : null}
             <div className='flex gap-2 items-end'>
               <h2 className="text-h2 text-foreground">{periodLabel}</h2>
               {dateRangeSubtitle && (

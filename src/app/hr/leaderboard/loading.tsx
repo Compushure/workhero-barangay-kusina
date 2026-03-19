@@ -67,8 +67,6 @@ export default function LeaderboardLoading() {
           </section>
 
           {isPastView ? null : <PeriodSelectorSkeleton />}
-
-          {isPastView ? <Skeleton className="h-4 w-40 rounded bg-gray-300" /> : null}
         </div>
 
         {/* Main content area */}

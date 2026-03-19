@@ -39,7 +39,7 @@ export function MonthPicker({
             <button
               type="button"
               onClick={() => setYear((y) => y - 1)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -47,7 +47,7 @@ export function MonthPicker({
             <button
               type="button"
               onClick={() => setYear((y) => y + 1)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -90,7 +90,7 @@ export function MonthPicker({
               onClick={() => onSelect(monthDate)}
               disabled={isDisabled}
               className={cn(
-                'rounded-md py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+                'cursor-pointer rounded-md py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40',
                 isEmployee && 'font-jersey tracking-widest',
                 isEmployee
                   ? isSelected
@@ -139,7 +139,7 @@ export function YearPicker({
             <button
               type="button"
               onClick={() => setRangeStart((s) => s - YEAR_RANGE_SIZE)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -149,7 +149,7 @@ export function YearPicker({
             <button
               type="button"
               onClick={() => setRangeStart((s) => s + YEAR_RANGE_SIZE)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -191,7 +191,7 @@ export function YearPicker({
               onClick={() => onSelect(yearDate)}
               disabled={isDisabled}
               className={cn(
-                'rounded-md py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+                'cursor-pointer rounded-md py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40',
                 isEmployee && 'font-jersey tracking-widest',
                 isEmployee
                   ? isSelected
@@ -253,7 +253,7 @@ function WeekDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        'flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal',
+        'flex aspect-square size-auto w-full min-w-(--cell-size) cursor-pointer flex-col gap-1 leading-none font-normal disabled:cursor-not-allowed',
         '[&>span]:text-xs [&>span]:opacity-70',
         isEmployee && 'font-jersey text-white/80',
         isEmployee
@@ -331,9 +331,9 @@ export function WeekCalendar({
                 outside: 'text-white/20 aria-selected:text-white/20',
                 disabled: 'text-white/20 opacity-50',
                 button_previous:
-                  'inline-flex items-center justify-center rounded-md size-(--cell-size) aria-disabled:opacity-50 p-0 select-none text-[#F4B925] hover:bg-[#3D2512]/80 hover:text-[#F4B925] [&_svg]:text-[#F4B925] [&_svg]:size-4',
+                  'inline-flex cursor-pointer items-center justify-center rounded-md size-(--cell-size) aria-disabled:opacity-50 p-0 select-none text-[#F4B925] hover:bg-[#3D2512]/80 hover:text-[#F4B925] [&_svg]:text-[#F4B925] [&_svg]:size-4',
                 button_next:
-                  'inline-flex items-center justify-center rounded-md size-(--cell-size) aria-disabled:opacity-50 p-0 select-none text-[#F4B925] hover:bg-[#3D2512]/80 hover:text-[#F4B925] [&_svg]:text-[#F4B925] [&_svg]:size-4',
+                  'inline-flex cursor-pointer items-center justify-center rounded-md size-(--cell-size) aria-disabled:opacity-50 p-0 select-none text-[#F4B925] hover:bg-[#3D2512]/80 hover:text-[#F4B925] [&_svg]:text-[#F4B925] [&_svg]:size-4',
               }
             : { today: '' }
         }

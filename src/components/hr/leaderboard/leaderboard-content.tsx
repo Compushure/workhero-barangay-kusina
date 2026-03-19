@@ -13,6 +13,7 @@ interface LeaderboardContentProps {
   week: number;
   month: number;
   show: boolean;
+  periodHeaderLabel?: string | null;
 }
 
 export function LeaderboardContent({
@@ -21,6 +22,7 @@ export function LeaderboardContent({
   week,
   month,
   show,
+  periodHeaderLabel = 'Active Period',
 }: LeaderboardContentProps) {
   const { data, isPending, isFetching } = useLeaderboardRankingQuery({
     periodType,
@@ -68,6 +70,7 @@ export function LeaderboardContent({
         periodLabel={data.periodLabel}
         dateRangeSubtitle={data.dateRangeSubtitle}
         rankingPeriodId={data.rankingPeriodId}
+        periodHeaderLabel={periodHeaderLabel}
       />
     </div>
   );

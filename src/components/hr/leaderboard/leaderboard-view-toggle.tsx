@@ -18,13 +18,11 @@ export function LeaderboardViewToggle({ currentView }: LeaderboardViewToggleProp
     const params = new URLSearchParams(searchParams.toString());
     if (view === 'generate') {
       params.delete('view');
+      params.delete('pastDefault');
     } else {
       params.set('view', 'past');
-      // Clear period params so the past-ranks list is shown, not a specific rank
-      params.delete('show');
-      params.delete('year');
-      params.delete('week');
-      params.delete('month');
+      params.set('pastDefault', '1');
+      params.set('show', '1');
     }
     const qs = params.toString();
     startTransition(() => {

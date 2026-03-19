@@ -164,7 +164,7 @@ export function PeriodSelector({
   const generateStatus = hasRanking
     ? {
         icon: CheckCircle2,
-        text: 'Ranking ready',
+        text: 'Already generated',
         tone: 'text-emerald-600',
         textClassName: 'text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground',
       }
@@ -236,7 +236,7 @@ export function PeriodSelector({
             Period Type
           </span>
           <Select value={currentType} onValueChange={handlePeriodTypeChange}>
-            <SelectTrigger className="control-h w-full rounded-lg border border-border bg-card px-3.5 text-xs font-semibold text-primary shadow-sm sm:text-sm">
+            <SelectTrigger className="control-h w-full cursor-pointer rounded-lg border border-border bg-card px-3.5 text-xs font-semibold text-primary shadow-sm sm:text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -254,7 +254,7 @@ export function PeriodSelector({
           </span>
           {currentType === 'weekly' ? (
             <Select value={currentWeeklyKey} onValueChange={handleWeeklyPeriodChange}>
-              <SelectTrigger className="control-h w-full rounded-lg border border-border bg-card px-3.5 text-xs font-semibold text-primary shadow-sm sm:text-sm">
+              <SelectTrigger className="control-h w-full cursor-pointer rounded-lg border border-border bg-card px-3.5 text-xs font-semibold text-primary shadow-sm sm:text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -289,7 +289,7 @@ export function PeriodSelector({
               <Button
                 onClick={handleGenerateRank}
                 disabled={isGenerateDisabled}
-                className="control-h w-full rounded-full bg-primary-gradient px-4 text-xs font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:opacity-60 sm:text-sm"
+                className="control-h w-full rounded-full bg-primary-gradient px-4 text-xs font-semibold text-white shadow-sm transition hover:cursor-pointer hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:opacity-60 sm:text-sm"
               >
                 {isGenerating ? 'Generating...' : 'Generate Rank'}
               </Button>

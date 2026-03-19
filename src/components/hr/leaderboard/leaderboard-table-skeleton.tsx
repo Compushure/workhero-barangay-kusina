@@ -8,13 +8,21 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-export default function LeaderboardTableSkeleton() {
+interface LeaderboardTableSkeletonProps {
+  periodHeaderLabel?: string | null;
+}
+
+export default function LeaderboardTableSkeleton({
+  periodHeaderLabel = 'Active Period',
+}: LeaderboardTableSkeletonProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="w-full overflow-hidden rounded-2xl border border-accent/20 bg-card shadow-sm/40">
         <div className="flex flex-col gap-3 border-b border-border bg-background-soft px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-          <div className="space-y-1.5">
-            <Skeleton className="h-3 w-24 rounded bg-gray-300" />
+          <div>
+            {periodHeaderLabel ? (
+              <Skeleton className="mb-1 h-3 w-24 rounded bg-gray-300" />
+            ) : null}
             <div className="flex items-end gap-2">
               <Skeleton className="h-8 w-36 rounded bg-gray-300 sm:w-44" />
               <Skeleton className="h-4 w-28 rounded bg-gray-300" />
