@@ -218,7 +218,7 @@ export async function submitTaskVerification(
   await insertNotification({
     userId: user.id,
     type: 'task',
-    message: `You have submitted ${pendingOrders} order${pendingOrders !== 1 ? 's' : ''} for "${taskName}" for review!${remainingAfterSubmission > 0 ? ` You have ${remainingAfterSubmission} order${remainingAfterSubmission !== 1 ? 's' : ''} remaining in this task.` : ' This task is now complete!'}`,
+    message: `You have submitted ${pendingOrders} order${pendingOrders !== 1 ? 's' : ''} for "${taskName}" for review! ${remainingAfterSubmission > 0 ? ` You have ${remainingAfterSubmission} order${remainingAfterSubmission !== 1 ? 's' : ''} remaining in this task.` : `You have submitted the last remaining order ${remainingAfterSubmission !== 1 ? 's' : ''} for this task`}`,
     metadata: {
       taskId: kpitaskId,
       taskName,

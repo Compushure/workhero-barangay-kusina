@@ -28,6 +28,7 @@
   --accent: #f47812; /* Deep citrus orange */
   --accent-secondary: #faa938; /* Light citrus orange */
   --primary-gradient: linear-gradient(180deg, #faa938 0%, #f47812 100%);
+  --wood-gradient: linear-gradient(180deg, #faa938 0%, #f47812 100%);
 
   --row-hover: #fce4bf;
 
@@ -297,6 +298,10 @@
   .wood-panel {
     background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 100%);
     border: 3px solid var(--pixel-border);
+  }
+
+  .bg-wood-card {
+    background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 100%);
   }
 
   .animate-launcher-shadow {
