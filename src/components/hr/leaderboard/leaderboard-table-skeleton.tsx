@@ -33,26 +33,26 @@ export default function LeaderboardTableSkeleton({
         <div className="w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <Table className="min-w-248">
             <TableHeader>
-              <TableRow className="bg-primary-gradient border-0">
+              <TableRow className="border-0 bg-gray-100">
                 <TableHead className="w-10 px-2 text-center sm:w-16 sm:px-4">
-                  <Skeleton className="mx-auto h-3.5 w-10 rounded bg-gray-300/80" />
+                  <Skeleton className="mx-auto h-3.5 w-10 rounded bg-gray-200" />
                 </TableHead>
                 <TableHead className="px-2 sm:px-4">
-                  <Skeleton className="h-3.5 w-20 rounded bg-gray-300/80" />
+                  <Skeleton className="h-3.5 w-20 rounded bg-gray-200" />
                 </TableHead>
                 <TableHead className="px-2 text-center sm:px-4">
-                  <Skeleton className="mx-auto h-3.5 w-24 rounded bg-gray-300/80" />
+                  <Skeleton className="mx-auto h-3.5 w-24 rounded bg-gray-200" />
                 </TableHead>
                 <TableHead className="px-2 text-center sm:px-4">
-                  <Skeleton className="mx-auto h-3.5 w-20 rounded bg-gray-300/80" />
+                  <Skeleton className="mx-auto h-3.5 w-20 rounded bg-gray-200" />
                 </TableHead>
                 <TableHead className="px-2 text-center sm:px-4">
-                  <Skeleton className="mx-auto h-3.5 w-20 rounded bg-gray-300/80" />
+                  <Skeleton className="mx-auto h-3.5 w-20 rounded bg-gray-200" />
                 </TableHead>
                 <TableHead className="px-2 text-center sm:px-4">
                   <div className="flex items-center justify-center gap-1.5">
-                    <Skeleton className="h-3.5 w-28 rounded bg-gray-300/80" />
-                    <Skeleton className="h-4 w-4 rounded-full bg-gray-300/80" />
+                    <Skeleton className="h-3.5 w-28 rounded bg-gray-200" />
+                    <Skeleton className="h-4 w-4 rounded-full bg-gray-200" />
                   </div>
                 </TableHead>
               </TableRow>

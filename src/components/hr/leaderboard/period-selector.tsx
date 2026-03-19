@@ -135,7 +135,7 @@ export function PeriodSelector({
       ? buildPeriodLabel(currentType, currentYear, currentMonth)
       : currentType === 'yearly'
         ? buildPeriodLabel(currentType, currentYear)
-        : `${buildPeriodLabel(currentType, currentYear, undefined, currentWeek)} (${getISOWeekDateRangeLabelShort(currentYear, currentWeek)})`;
+        : getISOWeekDateRangeLabelShort(currentYear, currentWeek);
 
   const periodFieldLabel =
     currentType === 'weekly' ? 'Week' : currentType === 'monthly' ? 'Month' : 'Year';
@@ -154,7 +154,7 @@ export function PeriodSelector({
         : currentYear === latestYear;
   const latestPeriodLabel =
     currentType === 'weekly'
-      ? `${buildPeriodLabel('weekly', latestWeek.year, undefined, latestWeek.week)} (${getISOWeekDateRangeLabelShort(latestWeek.year, latestWeek.week)})`
+      ? getISOWeekDateRangeLabelShort(latestWeek.year, latestWeek.week)
       : currentType === 'monthly'
         ? buildPeriodLabel('monthly', latestMonth.year, latestMonth.month)
         : buildPeriodLabel('yearly', latestYear);
@@ -229,7 +229,7 @@ export function PeriodSelector({
 
   return (
     <div className={cn('manager-sticky-controls !mx-0 w-full rounded-2xl p-3 sm:p-3.5', className)}>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[240px_minmax(0,1fr)_auto] xl:grid-cols-[130px_260px_auto]">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[240px_minmax(0,1fr)_auto] xl:grid-cols-[130px_210px_auto]">
         {/* Period Type */}
         <div className="flex w-full flex-col gap-1.5 xl:max-w-[130px]">
           <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -248,7 +248,7 @@ export function PeriodSelector({
         </div>
 
         {/* Period value */}
-        <div className="flex w-full flex-col gap-1.5 xl:max-w-[260px]">
+        <div className="flex w-full flex-col gap-1.5 xl:max-w-[210px]">
           <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             {periodFieldLabel}
           </span>
@@ -260,7 +260,7 @@ export function PeriodSelector({
               <SelectContent>
                 {weeklySelectOptions.map(({ year: y, week: w }) => {
                   const key = `${y}-${w}`;
-                  const label = `${buildPeriodLabel('weekly', y, undefined, w)} (${getISOWeekDateRangeLabelShort(y, w)})`;
+                  const label = getISOWeekDateRangeLabelShort(y, w);
                   return (
                     <SelectItem key={key} value={key}>
                       {label}

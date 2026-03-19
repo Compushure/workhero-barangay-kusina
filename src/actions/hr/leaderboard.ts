@@ -83,7 +83,7 @@ export async function getEnrichedLeaderboardByPeriod(
 
     const periodLabel =
       periodType === 'weekly'
-        ? periodInfo.period_label.replace(/,\s*\d{4}$/, '')
+        ? 'Week'
         : periodInfo.period_label;
 
     return {
