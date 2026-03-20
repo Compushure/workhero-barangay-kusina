@@ -317,6 +317,7 @@ export function Sidebar({ view }: SidebarProps) {
             disabled={isUiDisabled}
             label={attendanceButtonLabel}
             shouldRemind={shouldShowAttendanceReminder}
+            status={attendanceStatus}
             onClick={() => setShowAttendanceModal(true)}
           />
 
@@ -393,6 +394,7 @@ export function Sidebar({ view }: SidebarProps) {
                 shouldRemind={shouldShowAttendanceReminder}
                 label={mobileAttendanceLabel}
                 tooltipLabel={attendanceButtonLabel}
+                status={attendanceStatus}
                 onClick={() => setShowAttendanceModal(true)}
               />
 

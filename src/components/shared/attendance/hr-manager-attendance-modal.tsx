@@ -279,6 +279,18 @@ export function HrManagerAttendanceModal({ view, open, onOpenChange }: HrManager
               </Button>
             ) : null}
 
+            {hasTimedOut && status?.isAbsent ? (
+              <div className="flex-1 flex items-center justify-center rounded-md border border-red-500 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+                Absent
+              </div>
+            ) : null}
+
+            {hasTimedOut && !status?.isAbsent ? (
+              <div className="flex-1 flex items-center justify-center rounded-md border border-green-500 bg-green-50 px-3 py-2 text-sm font-semibold text-green-700">
+                Already Timed Out
+              </div>
+            ) : null}
+
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isBusy} className='bg-card text-primary hover:bg-gray-200 hover:text-primary sm:px-6'>
               Close
             </Button>
