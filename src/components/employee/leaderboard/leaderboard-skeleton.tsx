@@ -29,6 +29,22 @@ function PeriodNavSkeleton() {
   );
 }
 
+function HistoryDatePickerSkeleton() {
+  return (
+    <div className="flex w-full justify-center" aria-hidden>
+      <div className="w-full max-w-[282px] sm:w-[44%] sm:min-w-[240px] sm:max-w-[264px]">
+        <div className="flex min-h-11 w-full items-center gap-2 rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B] px-3 py-2.5 shadow-[4px_4px_0px_#000] shadow-[#3017008e] sm:min-h-12 sm:px-4">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border-2 border-[#47331F] bg-[#5B3E29] shadow-[inset_0_1px_0_rgba(255,225,181,0.12)] sm:h-9 sm:w-9">
+            <div className="h-4 w-4 animate-pulse rounded-sm bg-[#F4B925]/45 sm:h-[18px] sm:w-[18px]" />
+          </div>
+          <div className="h-4 flex-1 animate-pulse rounded bg-white/30 sm:h-5" />
+          <div className="h-3.5 w-3.5 animate-pulse rounded-full bg-[#CF8B22]/75" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SkeletonCard({ size }: { size: 'large' | 'small' }) {
   const isLarge = size === 'large';
   return (
@@ -80,8 +96,14 @@ function SkeletonCard({ size }: { size: 'large' | 'small' }) {
 
 export function LeaderboardSkeleton({ variant = 'current' }: LeaderboardSkeletonProps) {
   return (
-    <div className="flex w-full max-w-7xl flex-1 flex-col items-center">
-      <header className="flex w-full max-w-4xl shrink-0 flex-col items-center min-h-40 sm:min-h-44 md:min-h-56">
+    <div className={`flex w-full ${variant === 'history' ? 'max-w-5xl' : 'max-w-7xl'} flex-1 flex-col items-center`}>
+      <header
+        className={`flex w-full shrink-0 flex-col items-center ${
+          variant === 'history'
+            ? 'max-w-3xl'
+            : 'max-w-4xl min-h-40 sm:min-h-44 md:min-h-56'
+        }`}
+      >
         {variant === 'current' && (
           <div className="mb-7 flex w-full flex-col items-center gap-6 sm:mb-8 sm:gap-7">
             <ToggleSkeleton />
@@ -93,14 +115,23 @@ export function LeaderboardSkeleton({ variant = 'current' }: LeaderboardSkeleton
         )}
 
         {variant === 'history' && (
-          <div className="flex min-h-18 w-full flex-col items-center justify-start sm:min-h-20 md:min-h-22">
-            <div className="h-8 w-56 animate-pulse rounded-lg bg-[#F4B925]/30 sm:h-10 sm:w-64 md:h-12 md:w-96" aria-hidden />
-            <div className="mt-2 h-5 w-40 animate-pulse rounded bg-white/25 sm:w-48 md:h-7 md:w-60" aria-hidden />
-          </div>
+          <>
+            <div className="mb-5 w-full max-w-[420px] self-center sm:mb-6">
+              <ToggleSkeleton />
+            </div>
+            <div className="relative z-10 mb-5 flex w-full max-w-3xl shrink-0 flex-col items-center gap-5 px-1 sm:mb-6 sm:gap-6">
+              <div className="mt-6 flex w-full justify-center sm:mt-7">
+                <div className="flex w-full max-w-2xl justify-center">
+                  <PeriodNavSkeleton />
+                </div>
+              </div>
+              <HistoryDatePickerSkeleton />
+            </div>
+          </>
         )}
       </header>
 
-      <div className="flex w-full max-w-7xl flex-1 flex-col items-center pt-3 sm:pt-4">
+      <div className={`flex w-full ${variant === 'history' ? 'max-w-5xl' : 'max-w-7xl'} flex-1 flex-col items-center pt-3 sm:pt-4`}>
         <section className="w-full md:hidden" aria-hidden>
           <div className="rounded-2xl border-2 border-[#47331F] bg-[#3D2512]/75 px-2 py-3 shadow-xl sm:px-3">
             <div className="grid grid-cols-2 gap-2 pt-4 sm:gap-2.5">
@@ -116,7 +147,7 @@ export function LeaderboardSkeleton({ variant = 'current' }: LeaderboardSkeleton
           </div>
         </section>
 
-        <div className="hidden w-full flex-col items-center gap-6 md:flex md:gap-8" aria-hidden>
+        <div className={`hidden w-full flex-col items-center ${variant === 'history' ? 'gap-6 md:gap-8' : 'gap-6 md:gap-8'} md:flex`} aria-hidden>
           <div className="relative flex w-full justify-center pt-2">
             <div className="relative mt-[1.7rem] flex w-full flex-col items-center gap-2.5 sm:mt-[2.15rem] sm:flex-row sm:items-end sm:justify-center sm:gap-3 md:-translate-y-7 md:gap-4">
               <div className="relative flex justify-center sm:translate-y-11">
