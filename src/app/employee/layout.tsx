@@ -4,6 +4,7 @@ import { ConditionalLogout } from '@/components/employee/conditional-logout';
 import { ConditionalNotifications } from '@/components/employee/conditional-notifications';
 import { ConditionalMapLauncher } from '@/components/employee/conditional-map-launcher';
 import { NavLoadingState } from '@/components/employee/nav-loading-state';
+import LevelDebugLayoutMount from '@/components/employee/widgets/test/level/level-debug-layout-mount';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   await protectEmployeeRoute();
@@ -18,6 +19,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="fixed bottom-4 left-4 z-50">
         <ConditionalLogout hideOnMercado />
       </div>
+      <LevelDebugLayoutMount />
       <RealtimeNotificationToastClientWrapper />
     </div>
   );

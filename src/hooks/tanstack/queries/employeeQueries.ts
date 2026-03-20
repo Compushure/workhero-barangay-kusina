@@ -12,6 +12,9 @@ import {
   handleFetchEmployeeTopRanksByPeriod,
   handleFetchEmployeeTopWeeklyRanks,
   handleFetchEmployeeXP,
+  handleFetchXPRequiredForNextLevel,
+  handleFetchAllLevelMetadata,
+  type LevelMetadata,
 } from '@/action-handlers/employee/stats';
 import type { EmployeePeriodParams } from '@/action-handlers/employee/stats';
 import { fetchUserBadgesHandler } from '@/action-handlers/employee/badges';
@@ -47,6 +50,8 @@ export const employeeKeys = {
     ] as const,
   points: () => [...employeeKeys.all, 'points'] as const,
   xp: () => [...employeeKeys.all, 'xp'] as const,
+  xpRequiredForNext: (currentLevel: number) => [...employeeKeys.all, 'xp-required-next', currentLevel] as const,
+  levelMetadata: () => [...employeeKeys.all, 'level-metadata'] as const,
   badges: () => [...employeeKeys.all, 'badges'] as const,
   userBadges: (userId: string) => [...employeeKeys.badges(), userId] as const,
   visiblePeriods: () => [...employeeKeys.all, 'visible-periods'] as const,
@@ -259,4 +264,51 @@ export function useGetUserBadges(
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<UserBadge[] | null, Error>;
+}
+
+/**
+ * Fetches the XP required to reach the next level
+ * Caches level metadata for efficient progress calculation
+ *
+ * @param currentLevel - The user's current level
+ * @param options - Query options
+ * @returns Query result with required XP (or 100 as default)
+ */
+export function useGetXPRequiredForNextLevel(
+  currentLevel: number,
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<number | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.xpRequiredForNext(currentLevel),
+    queryFn: async () => {
+      return await handleFetchXPRequiredForNextLevel(currentLevel);
+    },
+    enabled: queryOptions.enabled !== false && currentLevel < 10,
+    staleTime: 60 * 60 * 1000, // 1 hour - level metadata changes rarely
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours
+    retry: 1,
+  }) as UseQueryResult<number | null, Error>;
+}
+
+/**
+ * Fetches all level metadata with XP requirements
+ * Essential for correct XP progress and level unlocks
+ *
+ * @param options - Query options
+ * @returns Query result with LevelMetadata array
+ */
+export function useGetAllLevelMetadata(
+  queryOptions: { enabled?: boolean } = {}
+): UseQueryResult<LevelMetadata[] | null, Error> {
+  return useQuery({
+    queryKey: employeeKeys.levelMetadata(),
+    queryFn: async () => {
+      return await handleFetchAllLevelMetadata();
+    },
+    enabled: queryOptions.enabled !== false,
+    staleTime: 60 * 60 * 1000, // 1 hour - level metadata changes rarely
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours
+    retry: 1,
+    refetchOnWindowFocus: false,
+  }) as UseQueryResult<LevelMetadata[] | null, Error>;
 }
