@@ -19,9 +19,15 @@ interface MonthPickerProps {
   selected: Date | null;
   onSelect: (date: Date) => void;
   variant?: PeriodDatePickerVariant;
+  isDateSelectable?: (date: Date) => boolean;
 }
 
-export function MonthPicker({ selected, onSelect, variant = 'default' }: MonthPickerProps) {
+export function MonthPicker({
+  selected,
+  onSelect,
+  variant = 'default',
+  isDateSelectable,
+}: MonthPickerProps) {
   const [year, setYear] = useState(() => selected?.getFullYear() ?? new Date().getFullYear());
   const isEmployee = variant === 'employee';
 
@@ -33,7 +39,7 @@ export function MonthPicker({ selected, onSelect, variant = 'default' }: MonthPi
             <button
               type="button"
               onClick={() => setYear((y) => y - 1)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -41,7 +47,7 @@ export function MonthPicker({ selected, onSelect, variant = 'default' }: MonthPi
             <button
               type="button"
               onClick={() => setYear((y) => y + 1)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -71,6 +77,8 @@ export function MonthPicker({ selected, onSelect, variant = 'default' }: MonthPi
 
       <div className="grid grid-cols-3 gap-1">
         {MONTH_NAMES_SHORT.map((name, idx) => {
+          const monthDate = new Date(year, idx, 1);
+          const isDisabled = isDateSelectable ? !isDateSelectable(monthDate) : false;
           const isSelected =
             selected !== null &&
             selected.getFullYear() === year &&
@@ -79,9 +87,10 @@ export function MonthPicker({ selected, onSelect, variant = 'default' }: MonthPi
             <button
               key={name}
               type="button"
-              onClick={() => onSelect(new Date(year, idx, 1))}
+              onClick={() => onSelect(monthDate)}
+              disabled={isDisabled}
               className={cn(
-                'rounded-md py-2 text-sm transition-colors',
+                'cursor-pointer rounded-md py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40',
                 isEmployee && 'font-jersey tracking-widest',
                 isEmployee
                   ? isSelected
@@ -107,9 +116,15 @@ interface YearPickerProps {
   selected: Date | null;
   onSelect: (date: Date) => void;
   variant?: PeriodDatePickerVariant;
+  isDateSelectable?: (date: Date) => boolean;
 }
 
-export function YearPicker({ selected, onSelect, variant = 'default' }: YearPickerProps) {
+export function YearPicker({
+  selected,
+  onSelect,
+  variant = 'default',
+  isDateSelectable,
+}: YearPickerProps) {
   const [rangeStart, setRangeStart] = useState(() =>
     getYearRangeStart(selected?.getFullYear() ?? new Date().getFullYear())
   );
@@ -124,7 +139,7 @@ export function YearPicker({ selected, onSelect, variant = 'default' }: YearPick
             <button
               type="button"
               onClick={() => setRangeStart((s) => s - YEAR_RANGE_SIZE)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -134,7 +149,7 @@ export function YearPicker({ selected, onSelect, variant = 'default' }: YearPick
             <button
               type="button"
               onClick={() => setRangeStart((s) => s + YEAR_RANGE_SIZE)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -166,14 +181,17 @@ export function YearPicker({ selected, onSelect, variant = 'default' }: YearPick
 
       <div className="grid grid-cols-3 gap-1">
         {years.map((yr) => {
+          const yearDate = new Date(yr, 0, 1);
+          const isDisabled = isDateSelectable ? !isDateSelectable(yearDate) : false;
           const isSelected = selected !== null && selected.getFullYear() === yr;
           return (
             <button
               key={yr}
               type="button"
-              onClick={() => onSelect(new Date(yr, 0, 1))}
+              onClick={() => onSelect(yearDate)}
+              disabled={isDisabled}
               className={cn(
-                'rounded-md py-2 text-sm transition-colors',
+                'cursor-pointer rounded-md py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40',
                 isEmployee && 'font-jersey tracking-widest',
                 isEmployee
                   ? isSelected
@@ -235,7 +253,7 @@ function WeekDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        'flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal',
+        'flex aspect-square size-auto w-full min-w-(--cell-size) cursor-pointer flex-col gap-1 leading-none font-normal disabled:cursor-not-allowed',
         '[&>span]:text-xs [&>span]:opacity-70',
         isEmployee && 'font-jersey text-white/80',
         isEmployee
@@ -273,9 +291,15 @@ interface WeekCalendarProps {
   selected: Date | null;
   onSelect: (date: Date) => void;
   variant?: PeriodDatePickerVariant;
+  isDateSelectable?: (date: Date) => boolean;
 }
 
-export function WeekCalendar({ selected, onSelect, variant = 'default' }: WeekCalendarProps) {
+export function WeekCalendar({
+  selected,
+  onSelect,
+  variant = 'default',
+  isDateSelectable,
+}: WeekCalendarProps) {
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
   const isEmployee = variant === 'employee';
 
@@ -293,6 +317,7 @@ export function WeekCalendar({ selected, onSelect, variant = 'default' }: WeekCa
           onDayMouseEnter={(day) => setHoveredDate(day)}
           onDayMouseLeave={() => setHoveredDate(null)}
           onDayClick={(day) => onSelect(day)}
+          disabled={isDateSelectable ? (date) => !isDateSelectable(date) : undefined}
           weekStartsOn={1}
           components={{ DayButton: WeekDayButton }}
         classNames={
@@ -306,9 +331,9 @@ export function WeekCalendar({ selected, onSelect, variant = 'default' }: WeekCa
                 outside: 'text-white/20 aria-selected:text-white/20',
                 disabled: 'text-white/20 opacity-50',
                 button_previous:
-                  'inline-flex items-center justify-center rounded-md size-(--cell-size) aria-disabled:opacity-50 p-0 select-none text-[#F4B925] hover:bg-[#3D2512]/80 hover:text-[#F4B925] [&_svg]:text-[#F4B925] [&_svg]:size-4',
+                  'inline-flex cursor-pointer items-center justify-center rounded-md size-(--cell-size) aria-disabled:opacity-50 p-0 select-none text-[#F4B925] hover:bg-[#3D2512]/80 hover:text-[#F4B925] [&_svg]:text-[#F4B925] [&_svg]:size-4',
                 button_next:
-                  'inline-flex items-center justify-center rounded-md size-(--cell-size) aria-disabled:opacity-50 p-0 select-none text-[#F4B925] hover:bg-[#3D2512]/80 hover:text-[#F4B925] [&_svg]:text-[#F4B925] [&_svg]:size-4',
+                  'inline-flex cursor-pointer items-center justify-center rounded-md size-(--cell-size) aria-disabled:opacity-50 p-0 select-none text-[#F4B925] hover:bg-[#3D2512]/80 hover:text-[#F4B925] [&_svg]:text-[#F4B925] [&_svg]:size-4',
               }
             : { today: '' }
         }

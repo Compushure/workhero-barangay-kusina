@@ -1,7 +1,9 @@
 import { getISOWeek, getISOWeekYear } from 'date-fns';
-import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
-import { checkRankingExists, getAllRankingPeriods } from '@/actions/hr/leaderboard';
+import {
+  checkRankingExists,
+  getAllRankingPeriods,
+  getEnrichedLeaderboardByPeriod,
+} from '@/actions/hr/leaderboard';
 import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-content';
 import { LeaderboardViewToggle } from '@/components/hr/leaderboard/leaderboard-view-toggle';
 import { PastRanksList } from '@/components/hr/leaderboard/past-ranks-list';
@@ -17,6 +19,7 @@ type SearchParams = {
   month?: string;
   show?: string;
   view?: string;
+  pastDefault?: string;
 };
 
 interface LeaderboardPageContentProps {
@@ -90,9 +93,7 @@ export async function LeaderboardPageContent({ searchParams }: LeaderboardPageCo
   // This ensures navigating back to the page (without params) still renders the table.
   const show = resolvedParams.show !== '0' && resolvedParams.show !== 'false';
 
-  // When view=past AND a specific year is in the URL, the user clicked "View Ranking"
-  // from the past-ranks list — show the table, not the list.
-  const isViewingSpecificPastRank = currentView === 'past' && selectedYear !== null;
+  const shouldResolveDefaultPastSelection = resolvedParams.pastDefault === '1';
 
   const currentPeriodRankingExistsResult = await checkRankingExists(
     periodType,
@@ -104,9 +105,23 @@ export async function LeaderboardPageContent({ searchParams }: LeaderboardPageCo
   const currentPeriodRankingExists =
     currentPeriodRankingExistsResult.success && !!currentPeriodRankingExistsResult.data;
 
+  const currentPeriodRankingDataResult = currentPeriodRankingExists
+    ? await getEnrichedLeaderboardByPeriod(
+        periodType,
+        year,
+        periodType === 'monthly' ? month : undefined,
+        periodType === 'weekly' ? week : undefined
+      )
+    : null;
+
+  const currentPeriodRankingData =
+    currentPeriodRankingDataResult?.success && currentPeriodRankingDataResult.data
+      ? currentPeriodRankingDataResult.data
+      : null;
+
   // Only fetch the list when actually showing the past-ranks list, not the detail view.
   const initialPastRanksData =
-    currentView === 'past' && !isViewingSpecificPastRank ? await getAllRankingPeriods() : null;
+    currentView === 'past' ? await getAllRankingPeriods() : null;
 
   return (
     <main className="w-full min-h-screen bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
@@ -115,21 +130,12 @@ export async function LeaderboardPageContent({ searchParams }: LeaderboardPageCo
           <section className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-end lg:justify-between">
             <PageHeader
               title="Leaderboard"
-              subtitle="Generate rankings by period and control employee visibility."
+              subtitle="Generate new rankings, review past ranks, and control employee visibility."
             />
 
             <LeaderboardViewToggle currentView={currentView} />
           </section>
 
-          {isViewingSpecificPastRank ? (
-            <Link
-              href="/hr/leaderboard?view=past"
-              className="inline-flex items-center gap-1 text-meta font-semibold text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Back to Past Rankings
-            </Link>
-          ) : null}
         </div>
 
         {currentView === 'generate' ? (
@@ -139,12 +145,28 @@ export async function LeaderboardPageContent({ searchParams }: LeaderboardPageCo
             currentWeek={week}
             currentMonth={month}
             currentPeriodRankingExists={currentPeriodRankingExists}
+            rankingPeriodId={currentPeriodRankingData?.rankingPeriodId}
+            isVisible={currentPeriodRankingData?.isVisible}
             className="min-w-0 xl:max-w-4xl xl:mr-auto"
           />
         ) : null}
 
-        {currentView === 'past' && !isViewingSpecificPastRank ? (
-          <PastRanksList initialData={initialPastRanksData} />
+        {currentView === 'past' ? (
+          <PastRanksList
+            initialData={initialPastRanksData}
+            initialType={periodType}
+            initialRequestedPeriod={
+              !shouldResolveDefaultPastSelection && selectedYear !== null
+                ? {
+                    type: periodType,
+                    year,
+                    month: periodType === 'monthly' ? month : undefined,
+                    week: periodType === 'weekly' ? week : undefined,
+                  }
+                : null
+            }
+            shouldResolveDefaultSelection={shouldResolveDefaultPastSelection}
+          />
         ) : (
           <LeaderboardContent
             periodType={periodType}
