@@ -50,6 +50,8 @@ export const LogOutBtn = memo(function LogOutBtn() {
     startLogout();
     startTransition(async () => {
       try {
+        await queryClient.cancelQueries();
+
         const { error } = await handleSignOut();
 
         if (error) {
@@ -59,7 +61,7 @@ export const LogOutBtn = memo(function LogOutBtn() {
           return;
         }
 
-        // Clear all cached queries to prevent data leakage between users
+        // Clear all cached queries to prevent data leakage and stop stale protected-page refetches.
         queryClient.clear();
 
         toast.success('Logged out', {
@@ -67,7 +69,6 @@ export const LogOutBtn = memo(function LogOutBtn() {
         });
 
         router.replace('/auth/login');
-        router.refresh();
       } finally {
         stopLogout();
       }
