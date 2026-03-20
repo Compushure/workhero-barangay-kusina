@@ -6,21 +6,21 @@ export function MercadoSkeleton() {
       {Array.from({ length: 9 }).map((_, i) => (
         <div
           key={i}
-          className="bg-background border border-border rounded-xl p-3.5 min-h-32 flex items-start gap-3.5 relative"
+          className="relative flex min-h-32 items-start gap-4 rounded-2xl border border-accent/15 bg-card px-3.5 py-3 shadow-sm/25"
         >
-          <Skeleton className="h-23 w-23 rounded-lg bg-muted" />
+          <Skeleton className="h-20 w-20 shrink-0 rounded-xl bg-gray-300" />
 
-          <div className="flex-1 min-w-0 pr-10 space-y-2">
-            <Skeleton className="h-6 w-2/3 bg-muted" />
-            <Skeleton className="h-4 w-1/3 rounded-lg bg-muted" />
+          <div className="min-w-0 flex-1 space-y-3 pr-8">
+            <Skeleton className="h-5 w-2/3 rounded-lg bg-gray-300" />
+            <Skeleton className="h-4 w-1/2 rounded-lg bg-gray-300" />
             <div className="flex items-center gap-2">
-              <Skeleton className="h-4 w-16 bg-muted" />
-              <Skeleton className="h-4 w-24 bg-muted" />
+              <Skeleton className="h-4 w-16 rounded-full bg-gray-300" />
+              <Skeleton className="h-4 w-20 rounded-full bg-gray-300" />
             </div>
-            <Skeleton className="h-4 w-28 bg-muted" />
+            <Skeleton className="h-4 w-28 rounded-full bg-gray-300" />
           </div>
 
-          <Skeleton className="absolute top-3 right-3 h-7 w-7 rounded-md bg-muted" />
+          <Skeleton className="absolute top-3 right-3 h-8 w-8 rounded-xl bg-gray-300" />
         </div>
       ))}
     </div>

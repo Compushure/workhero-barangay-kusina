@@ -4,7 +4,7 @@ import { Trophy } from 'lucide-react';
 import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
-const PERFORMANCE_SCORE_TOOLTIP = 'Performance Score = Total Points Earned × Completed Tasks';
+const PERFORMANCE_SCORE_TOOLTIP = 'Performance Score = (Task Points × Completed Tasks) + Badge Points';
 
 export function RankWidget() {
   const { data: rankData, isLoading: isRankLoading } = useGetEmployeeRank();

@@ -1,8 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, Suspense, useEffect, useState, useTransition } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useCallback, Suspense, useState, useTransition } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,6 @@ import { BasicInformation } from './basic-information';
 import { EmploymentDetails } from './employment-details';
 import { ContactInformation } from './contact-information';
 import { GovernmentIDs } from './government-ids';
-import { GamifiedStats } from './gamified-stats';
 import { ImageCropUpload } from '@/components/admin/image-crop-upload';
 import { useGetUserProfile } from '@/hooks/tanstack/queries/profileQueries';
 import {
@@ -32,23 +30,67 @@ import {
 } from '@/hooks/tanstack/mutations/profileMutations';
 import { useAntiSpam } from '@/hooks/useAntiSpam';
 
-const TAB_VALUES = ['basic', 'contact', 'employment', 'ids', 'stats', 'badges'] as const;
+const TAB_VALUES = ['personal', 'employment', 'badges'] as const;
 type TabValue = (typeof TAB_VALUES)[number];
-const DEFAULT_TAB: TabValue = 'basic';
+const DEFAULT_TAB: TabValue = 'personal';
+const TAB_OPTIONS: ReadonlyArray<{
+  value: TabValue;
+  mobileLabel: string;
+  desktopLabel: string;
+}> = [
+  { value: 'personal', mobileLabel: 'Personal', desktopLabel: 'Personal Information' },
+  { value: 'employment', mobileLabel: 'Employment', desktopLabel: 'Employment Details' },
+  { value: 'badges', mobileLabel: 'Badges', desktopLabel: 'All Badges' },
+] as const;
+const CHROME_TAB_STRIP_CLASS =
+  '!flex !flex-row !flex-nowrap !items-end !justify-stretch !bg-transparent w-full !gap-[2px] !p-0 overflow-visible';
+const CHROME_TAB_TRIGGER_CLASS =
+  'chrome-tab z-0 flex-1 min-w-0 !h-[38px] !rounded-tl-[12px] !rounded-tr-[12px] !rounded-bl-none !rounded-br-none !bg-[#C1C5CC] !text-[#5F6368] !text-[0.72rem] sm:!text-[0.8rem] !font-medium hover:!bg-[#D0D4DA] hover:!text-[#3C4043] !overflow-hidden before:!hidden after:!hidden data-[state=active]:!bg-white data-[state=active]:!text-[#202124] data-[state=active]:!font-semibold data-[state=active]:!h-[42px] data-[state=active]:!z-[20] data-[state=active]:shadow-[0_-1px_0_0_rgba(255,255,255,1)] !border !border-gray-300 data-[state=active]:!border-b-0 !shadow-none !px-2 sm:!px-4 !py-0 whitespace-nowrap transition-colors pb-1.5 sm:pb-2.5 md:pb-3.5 lg:pb-4';
+const SECTION_CARD_CLASS = 'space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-3 sm:p-4';
+const SECTION_TITLE_CLASS = 'text-sm font-semibold text-[#E07C24]';
+const TAB_PANEL_HEIGHT_CLASS = 'min-h-[22rem] sm:min-h-[24rem] lg:h-[28rem]';
+const SKELETON_TAB_PANEL_HEIGHT_CLASS = 'min-h-[22rem] sm:min-h-[24rem] lg:h-[28rem]';
 
 interface ProfilePageClientProps {
   userId: string;
 }
 
+function ProfileTabTrigger({
+  value,
+  mobileLabel,
+  desktopLabel,
+}: {
+  value: TabValue;
+  mobileLabel: string;
+  desktopLabel: string;
+}) {
+  return (
+    <TabsTrigger value={value} className={CHROME_TAB_TRIGGER_CLASS}>
+      <span className="truncate sm:hidden">{mobileLabel}</span>
+      <span className="hidden truncate sm:inline">{desktopLabel}</span>
+    </TabsTrigger>
+  );
+}
+
 function ProfileLoadingSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-10 w-32 bg-background" />
-      </div>
-      <div className="space-y-4">
-        <Skeleton className="h-40 w-full bg-background" />
-        <Skeleton className="h-96 w-full bg-background" />
+    <div className="w-full space-y-4 px-2 sm:px-0 md:mx-auto md:max-w-4xl lg:max-w-6xl">
+      <Skeleton className="h-9 w-24 bg-white/80" />
+      <div className="max-w-full overflow-hidden rounded-2xl border border-gray-300 bg-[#E5E7EB] p-0 shadow-md">
+        <div className="rounded-none bg-[linear-gradient(90deg,#F29F4A_0%,#E07C24_100%)] px-4 py-3 sm:px-5 sm:py-3.5">
+          <Skeleton className="h-8 w-44 bg-white/30" />
+        </div>
+        <div className="max-w-full space-y-3 px-3 py-3 sm:space-y-4 sm:px-4 sm:py-4 md:px-5 md:py-5">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-stretch xl:gap-5">
+            <Skeleton className="h-80 w-full rounded-xl bg-white/80 lg:h-full" />
+            <div className="min-w-0 lg:flex lg:h-full lg:flex-col">
+              <Skeleton className="mb-2 h-11 w-full rounded-t-xl bg-white/80" />
+              <Skeleton
+                className={`w-full rounded-b-xl bg-white/80 ${SKELETON_TAB_PANEL_HEIGHT_CLASS}`}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -67,8 +109,6 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   const [isPending, startTransition] = useTransition();
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [activeTab, setActiveTab] = useState<TabValue>(DEFAULT_TAB);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [roleLoading, setRoleLoading] = useState(true);
 
   const { data: profile, isLoading } = useGetUserProfile(userId);
   const uploadPicture = useUploadOwnProfilePicture(userId);
@@ -78,98 +118,41 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   const uploadAntiSpam = useAntiSpam({ cooldown: 1500, maxAttempts: 3 });
   const deleteAntiSpam = useAntiSpam({ cooldown: 1500, maxAttempts: 3 });
 
-  // Route is already protected by protectSessionRoute(userId) on the server
-  // So we can safely assume this is the user's own profile
-  const isOwnProfile = true;
+  const executeProtectedUpload = useCallback(
+    async (uploadFn: () => Promise<void>) => {
+      if (!uploadAntiSpam.canExecute) return;
 
-  // Fetch user's role from Supabase claims
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const supabase = createClient();
-        const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
-
-        if (claimsError || !claimsData?.claims) {
-          console.log('Failed to get user claims');
-          setRoleLoading(false);
-          return;
+      await uploadAntiSpam.execute(async () => {
+        try {
+          await uploadFn();
+        } catch (error) {
+          console.error('Error uploading file:', error);
         }
-
-        const role = claimsData.claims.app_metadata?.user_role;
-        const normalizedRole = role?.trim().toLowerCase() || null;
-        setUserRole(normalizedRole);
-      } catch (error) {
-        console.error('Error fetching user role:', error);
-      } finally {
-        setRoleLoading(false);
-      }
-    };
-
-    fetchUserRole();
-  }, []);
-
-  // Check if user can access stats tab (only regular/employee)
-  const canAccessStats = userRole === 'regular' || userRole === 'employee';
-
-  useEffect(() => {
-    const applyHash = () => {
-      const hash = window.location.hash.replace('#', '') as TabValue;
-
-      // Check if the requested tab is 'stats' and user doesn't have access
-      if (hash === 'stats' && !canAccessStats) {
-        setActiveTab(DEFAULT_TAB);
-        window.history.replaceState(null, '', `#${DEFAULT_TAB}`);
-        return;
-      }
-
-      if (TAB_VALUES.includes(hash)) {
-        setActiveTab(hash);
-      } else {
-        setActiveTab(DEFAULT_TAB);
-      }
-    };
-
-    // Only apply hash once role has been loaded
-    if (!roleLoading) {
-      applyHash();
-      window.addEventListener('hashchange', applyHash);
-      return () => window.removeEventListener('hashchange', applyHash);
-    }
-  }, [roleLoading, canAccessStats]);
+      });
+    },
+    [uploadAntiSpam]
+  );
 
   const handleImageSelect = useCallback(
     (croppedImage: File) => {
       setShowCropDialog(false);
 
-      // Upload immediately after crop
-      if (uploadAntiSpam.canExecute) {
-        uploadAntiSpam.execute(async () => {
-          try {
-            startTransition(() => {
-              uploadPicture.mutate(croppedImage);
-            });
-          } catch (error) {
-            console.error('Error uploading cropped image:', error);
-          }
+      void executeProtectedUpload(async () => {
+        startTransition(() => {
+          uploadPicture.mutate(croppedImage);
         });
-      }
+      });
     },
-    [uploadPicture, uploadAntiSpam]
+    [executeProtectedUpload, startTransition, uploadPicture]
   );
 
   const handleFileChange = useCallback(
     async (file: File) => {
-      if (uploadAntiSpam.canExecute) {
-        await uploadAntiSpam.execute(async () => {
-          try {
-            await uploadPicture.mutateAsync(file);
-          } catch (error) {
-            console.error('Error uploading file:', error);
-          }
-        });
-      }
+      await executeProtectedUpload(async () => {
+        await uploadPicture.mutateAsync(file);
+      });
     },
-    [uploadPicture, uploadAntiSpam]
+    [executeProtectedUpload, uploadPicture]
   );
 
   const handleDeletePicture = useCallback(async () => {
@@ -177,12 +160,7 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
       await deleteAntiSpam.execute(async () => {
         try {
           await deletePicture.mutateAsync();
-          // Close modal after successful deletion
           setShowCropDialog(false);
-          // Optionally wait a moment to ensure cache is updated
-          setTimeout(() => {
-            // This ensures the dialog content re-renders with fresh data
-          }, 100);
         } catch (error) {
           console.error('Error deleting picture:', error);
         }
@@ -225,97 +203,93 @@ function ProfilePageClientContent({ userId }: ProfilePageClientProps) {
   };
 
   return (
-    <div className="space-y-3 w-full px-0 pb-4 md:max-w-3xl lg:max-w-4xl 2xl:max-w-5xl md:mx-auto">
+    <div className="w-full space-y-4 px-2 sm:px-0 md:mx-auto md:max-w-4xl lg:max-w-6xl">
       {/* Header */}
       <ProfileHeader isPending={isPending} onBack={handleBackClick} />
 
       {/* Profile Card */}
       <ProfileCard profile={profile}>
-        <div className="flex flex-col items-center text-center gap-2 sm:gap-2.5 w-full bg-[linear-gradient(to_bottom,rgba(244,120,18,0.58)_0%,rgba(250,169,56,0.36)_38%,rgba(250,169,56,0)_100%)] rounded-xl px-2.5 py-3 sm:px-3 sm:py-4 md:px-5 md:py-6 shadow-inner">
-          <ProfilePicture
-            profilePictureUrl={profile?.profilePictureUrl}
-            userName={profile?.name || 'User'}
-            userId={userId}
-            isOwnProfile={isOwnProfile}
-            isLoading={uploadPicture.isPending || isPending}
-            isDeleting={deletePicture.isPending}
-            onFileChange={handleFileChange}
-            onDelete={handleDeletePicture}
-            onOpenCropDialog={() => setShowCropDialog(true)}
-          />
-          <div className="space-y-1 w-full min-w-0">
-            <p className="text-base sm:text-lg md:text-xl font-semibold text-title wrap-break-word">
-              {profile.name}
-            </p>
-            {profile.employeeId && (
-              <p className="text-xs text-muted-foreground break-all">{profile.employeeId}</p>
-            )}
-          </div>
-          <RecentBadges userId={userId} showLabel={true} maxBadges={3} />
-        </div>
-
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mt-5">
-          <div
-            className="w-full overflow-x-auto overflow-y-visible -mx-3 px-3 sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            <TabsList
-              variant="line"
-              className="w-max min-w-max flex! flex-row bg-transparent p-0 gap-2 h-auto"
-            >
-              <TabsTrigger
-                value="basic"
-                className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
-              >
-                Basic Information
-              </TabsTrigger>
-              <TabsTrigger
-                value="contact"
-                className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
-              >
-                Contact Information
-              </TabsTrigger>
-              <TabsTrigger
-                value="employment"
-                className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
-              >
-                Employment Details
-              </TabsTrigger>
-              <TabsTrigger
-                value="ids"
-                className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
-              >
-                Government IDs
-              </TabsTrigger>
-              {canAccessStats && (
-                <TabsTrigger
-                  value="stats"
-                  className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
-                >
-                  Gamified Stats
-                </TabsTrigger>
-              )}
-              <TabsTrigger
-                value="badges"
-                className="shrink-0 min-w-35 md:min-w-40 min-h-10 px-2.5 py-1.5 whitespace-normal text-center text-[11px] sm:text-sm leading-tight data-[state=active]:bg-background-soft"
-              >
-                All Badges
-              </TabsTrigger>
-            </TabsList>
-          </div>
-        </Tabs>
-
-        <div className="mt-4 space-y-4 pb-4 w-full max-w-full h-[50svh] sm:h-[52svh] md:h-auto min-h-64 sm:min-h-72 overflow-y-auto md:overflow-y-visible overscroll-y-contain min-w-0 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
-          {activeTab === 'basic' && <BasicInformation profile={profile} />}
-          {activeTab === 'contact' && <ContactInformation profile={profile} />}
-          {activeTab === 'employment' && <EmploymentDetails profile={profile} />}
-          {activeTab === 'ids' && <GovernmentIDs profile={profile} />}
-          {activeTab === 'stats' && canAccessStats && <GamifiedStats profile={profile} />}
-          {activeTab === 'badges' && (
-            <div className="space-y-2 w-full max-w-full overflow-hidden">
-              <BadgesCarousel userId={userId} />
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-stretch xl:gap-5">
+          <div className="h-full w-full rounded-xl border border-[#E8D8C1] bg-[linear-gradient(180deg,#F2B178_0%,#F8E4CA_52%,#FBF4E8_100%)] px-3 py-4 text-center shadow-sm sm:px-4 sm:py-5">
+            <div className="flex flex-col items-center gap-2.5">
+              <ProfilePicture
+                profilePictureUrl={profile?.profilePictureUrl}
+                userName={profile?.name || 'User'}
+                userId={userId}
+                isOwnProfile={true}
+                isLoading={uploadPicture.isPending || isPending}
+                isDeleting={deletePicture.isPending}
+                onFileChange={handleFileChange}
+                onDelete={handleDeletePicture}
+                onOpenCropDialog={() => setShowCropDialog(true)}
+              />
+              <div className="w-full min-w-0 space-y-0.5">
+                <p className="text-base font-semibold text-title wrap-break-word sm:text-lg md:text-xl">
+                  {profile.name}
+                </p>
+                {profile.employeeId && (
+                  <p className="text-xs font-medium text-muted-foreground break-all">
+                    {profile.employeeId}
+                  </p>
+                )}
+              </div>
+              <RecentBadges userId={userId} showLabel={true} maxBadges={3} />
             </div>
-          )}
+          </div>
+          <div className="min-w-0 lg:flex lg:flex-col">
+            <Tabs
+              value={activeTab}
+              onValueChange={handleTabChange}
+              className="w-full gap-0 overflow-visible"
+            >
+              <div className="relative z-10 w-full px-0">
+                <TabsList variant="line" className={CHROME_TAB_STRIP_CLASS}>
+                  {TAB_OPTIONS.map((tab) => (
+                    <ProfileTabTrigger
+                      key={tab.value}
+                      value={tab.value}
+                      mobileLabel={tab.mobileLabel}
+                      desktopLabel={tab.desktopLabel}
+                    />
+                  ))}
+                </TabsList>
+              </div>
+            </Tabs>
+
+            <div
+              className={`flex w-full max-w-full ${TAB_PANEL_HEIGHT_CLASS} flex-col overflow-hidden rounded-b-xl border border-t-0 bg-white p-2 sm:p-3 md:p-4 lg:flex-1`}
+            >
+              {activeTab === 'personal' && (
+                <div className="h-full space-y-3 overflow-y-auto pr-2">
+                  <section className={SECTION_CARD_CLASS}>
+                    <h3 className={SECTION_TITLE_CLASS}>Basic Information</h3>
+                    <BasicInformation profile={profile} />
+                  </section>
+                  <section className={SECTION_CARD_CLASS}>
+                    <h3 className={SECTION_TITLE_CLASS}>Contact Information</h3>
+                    <ContactInformation profile={profile} />
+                  </section>
+                </div>
+              )}
+              {activeTab === 'employment' && (
+                <div className="h-full space-y-3 pr-2">
+                  <section className={SECTION_CARD_CLASS}>
+                    <h3 className={SECTION_TITLE_CLASS}>Employment Details</h3>
+                    <EmploymentDetails profile={profile} />
+                  </section>
+                  <section className={`${SECTION_CARD_CLASS} flex-1`}>
+                    <h3 className={SECTION_TITLE_CLASS}>Government IDs</h3>
+                    <GovernmentIDs profile={profile} />
+                  </section>
+                </div>
+              )}
+              {activeTab === 'badges' && (
+                <div className="h-full w-full max-w-full pr-2">
+                  <BadgesCarousel userId={userId} />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </ProfileCard>
 

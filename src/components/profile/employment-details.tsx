@@ -23,7 +23,7 @@ interface EmploymentDetailsProps {
 
 export function EmploymentDetails({ profile }: EmploymentDetailsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4 w-full max-w-full">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-4 md:gap-4 w-full max-w-full">
       {profile.employmentStatus && (
         <div className="space-y-1.5 sm:space-y-2 min-w-0 max-w-full">
           <Label className="text-xs sm:text-sm font-medium text-muted-foreground">

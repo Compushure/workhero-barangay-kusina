@@ -2,10 +2,10 @@
 
 import { useState, useMemo, useCallback, Suspense, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { HeaderSection } from '@/components/hr/dashboard/header';
-import { HeaderSkeleton } from '@/components/hr/dashboard/header-skeleton';
-import { RedemptionTable } from '@/components/hr/dashboard/redemption-table';
-import { RedemptionTableSkeleton } from '@/components/hr/dashboard/redemption-table-skeleton';
+import { HeaderSection } from './header';
+import { HeaderSkeleton } from './header-skeleton';
+import { RedemptionTable } from './redemption-table';
+import { RedemptionTableSkeleton } from './redemption-table-skeleton';
 import { useGetRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
 import { useDebounce } from '@/hooks/useDebounce';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
@@ -75,9 +75,9 @@ export function RewardRequestsContent() {
   if (error) return null;
 
   return (
-    <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 bg-zinc-100 min-h-screen flex flex-col">
-      <div className="mx-auto max-w-7xl 2xl:max-w-440 w-full flex-1 flex flex-col">
-        <div className="flex-1 flex flex-col gap-4 sm:gap-6">
+    <main className="w-full min-h-screen bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-4 sm:gap-6 2xl:max-w-screen-2xl">
+        <div className="flex flex-1 flex-col gap-4 sm:gap-6">
           <Suspense fallback={<HeaderSkeleton />}>
             <HeaderSection
               title="Redemption Requests"
@@ -99,6 +99,6 @@ export function RewardRequestsContent() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

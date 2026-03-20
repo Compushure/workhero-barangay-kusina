@@ -15,7 +15,7 @@ import AddEditBadgeDialog, { type BadgeFormData } from './dialogs/add-edit-badge
 import BadgeTable from './badge-table';
 import { BadgeFilterToggle, type BadgeFilterMode } from './badge-filter-toggle';
 import { useDebounce } from '../../../hooks/useDebounce';
-import { Pagination } from '../task-verification/pagination';
+import { Pagination } from '@/components/shared/pagination';
 import type { Badge } from '@/types/manager/badge-editor';
 import { BadgeEditorHeaderSkeleton } from './badge-editor-header-skeleton';
 import {
@@ -30,7 +30,7 @@ import {
   useUploadBadgeImage,
 } from '@/hooks/tanstack';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
-import { PageHeader } from '../task-verification/page-header';
+import { PageHeader } from '@/components/shared/page-header';
 import { useManagerBadgeEditorStore } from '@/store/managerBadgeEditorStore';
 
 type BadgeSortOption = 'name-asc' | 'points-desc' | 'created-desc' | 'created-asc';

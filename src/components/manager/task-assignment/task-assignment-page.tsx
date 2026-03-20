@@ -3,7 +3,7 @@
 import { TaskAssignmentProvider } from './task-assignment-page-context';
 import { TaskAssignmentCard } from './task-assignment-card/task-assignment-card';
 import { CurrentAssignedTasks } from './assigned-tasks-section/current-assigned-tasks';
-import { PageHeader } from '../task-verification/page-header';
+import { PageHeader } from '@/components/shared/page-header';
 
 export function TaskAssignmentPage() {
   // ✅ Removed parent-child loading coordination - each component manages its own loading state
