@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import { protectHRRoute } from '@/actions/shared/auth';
 import LeaderboardLoading from './loading';
 import { LeaderboardPageContent } from '@/components/hr/leaderboard/leaderboard-page';
 
@@ -25,7 +26,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function LeaderboardPage({ searchParams }: LeaderboardPageProps) {
+export default async function LeaderboardPage({ searchParams }: LeaderboardPageProps) {
+  await protectHRRoute();
+
   return (
     <Suspense fallback={<LeaderboardLoading />}>
       <LeaderboardPageContent searchParams={searchParams} />
