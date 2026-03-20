@@ -141,7 +141,7 @@ export function LeaderboardPageClient({
       />
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center px-3 pb-5 pt-4 sm:px-4 sm:pb-7 sm:pt-6 md:pt-7">
-        {!showingPastDetail && (
+        {!showingPastDetail && !(view === 'current' && isLoading) && (
           <div className="mb-5 w-full max-w-[388px] self-center rounded-[12px] border-[3px] border-[#47331F] bg-[linear-gradient(180deg,#6E4A2C_0%,#55361E_100%)] p-1.5 shadow-[0_10px_18px_rgba(0,0,0,0.28),4px_4px_0px_#000] shadow-[#3017008e] sm:mb-6 sm:max-w-[412px]">
             <div className="inline-flex w-full overflow-hidden rounded-[8px] border-2 border-[#7F5733] bg-[#5B3E29] shadow-[inset_0_1px_0_rgba(255,225,181,0.14)]">
               <button
