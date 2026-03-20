@@ -592,6 +592,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { AttendanceConfig } from '@/types';
 import {
   useGetTodayAttendanceStatus,
+  useGetTodayAttendanceTimeline,
   useTimeInAttendance,
   useTimeOutAttendance,
   useStartBreak,
@@ -600,16 +601,13 @@ import {
 import { attendanceConfig } from '@/lib/attendance-config';
 
 import {
-  parseTimeOnDate,
-  getNextResetTime,
   formatTimeRemaining,
   parseDurationToMs,
   calculateBreakElapsed,
 } from './attendance-utils';
 
-import StatusIndicator from './status-indicator';
 import AttendanceButtons from './attendance-buttons';
-import AttendanceLogs, { AttendanceLog } from './attendance-logs';
+import AttendanceLogs from './attendance-logs';
 
 export default function AttendanceIcon({ config }: { config?: Partial<AttendanceConfig> }) {
   const mergedConfig: AttendanceConfig = useMemo(
@@ -625,27 +623,18 @@ export default function AttendanceIcon({ config }: { config?: Partial<Attendance
   );
 
   const { data: status } = useGetTodayAttendanceStatus(mergedConfig);
+  const { data: timelineLogs } = useGetTodayAttendanceTimeline();
   const timeInMutation = useTimeInAttendance(mergedConfig);
   const timeOutMutation = useTimeOutAttendance(mergedConfig);
   const startBreakMutation = useStartBreak(mergedConfig);
   const endBreakMutation = useEndBreak(mergedConfig);
 
-  const [timeRemaining, setTimeRemaining] = useState<string>('');
   const [breakTimer, setBreakTimer] = useState<string>('');
   const [isCurrentlyOverBreak, setIsCurrentlyOverBreak] = useState<boolean>(false);
-  const [lateTimer, setLateTimer] = useState<string>('');
-  const [absentTimer, setAbsentTimer] = useState<string>('');
-  const [nowTime, setNowTime] = useState<Date>(new Date());
 
   useEffect(() => {
     const updateTimer = () => {
       const now = new Date();
-      setNowTime(now);
-
-      // Reset timer
-      const nextReset = getNextResetTime(mergedConfig.timeInAt);
-      const diff = nextReset.getTime() - now.getTime();
-      setTimeRemaining(formatTimeRemaining(diff));
 
       // Break timer + overbreak check
       if (status?.isOnBreak && status?.breakStartTime) {
@@ -658,20 +647,6 @@ export default function AttendanceIcon({ config }: { config?: Partial<Attendance
       } else {
         setBreakTimer('');
         setIsCurrentlyOverBreak(false);
-      }
-
-      // Late timer
-      if (!status?.hasTimedIn && !status?.isAbsent && status?.canTimeIn) {
-        const lateAfterTime = parseTimeOnDate(now, mergedConfig.lateAfter);
-        const timeDiff = lateAfterTime.getTime() - now.getTime();
-        setLateTimer(timeDiff > 0 ? formatTimeRemaining(timeDiff) : '00:00:00');
-      }
-
-      // Absent timer
-      if (!status?.hasTimedIn && !status?.isAbsent) {
-        const autoTimeoutTime = parseTimeOnDate(now, mergedConfig.autoTimeoutAt);
-        const timeDiff = autoTimeoutTime.getTime() - now.getTime();
-        setAbsentTimer(timeDiff > 0 ? formatTimeRemaining(timeDiff) : '00:00:00');
       }
     };
 
@@ -704,68 +679,29 @@ export default function AttendanceIcon({ config }: { config?: Partial<Attendance
     }
   };
 
-  // ✅ Do not show logs if employee is absent
-  const logs = useMemo(() => {
-    if (status?.isAbsent) {
-      return []; // 🚫 No logs when absent
-    }
-
-    const arr: AttendanceLog[] = [];
-
-    if (status?.timeInTime) {
-      arr.push({
-        action: 'timein',
-        time: status.timeInTime,
-        note: status?.isLate ? '⚠️ Late timing in' : undefined,
-      });
-    }
-
-    if (status?.breakStartTime) {
-      arr.push({
-        action: 'startbreak',
-        time: status.breakStartTime,
-      });
-    }
-
-    if (status?.breakEndTime) {
-      arr.push({
-        action: 'endbreak',
-        time: status.breakEndTime,
-        note: status?.isOverBreaktime ? '⚠️ Over break' : undefined,
-      });
-    }
-
-    if (status?.timeOutTime) {
-      arr.push({
-        action: 'timeout',
-        time: status.timeOutTime,
-        note: status?.isUndertime
-          ? '⚠️ Working undertime'
-          : status?.isOvertime
-          ? '✅ Overtime logged'
-          : undefined,
-      });
-    }
-
-    return arr;
-  }, [status]);
-
   return (
     <div className="flex flex-col gap-4">
-      <StatusIndicator
-        status={status}
-        nowTime={nowTime}
-        lateTimer={lateTimer}
-        absentTimer={absentTimer}
-        timeRemaining={timeRemaining}
-        breakTimer={breakTimer}
-        isCurrentlyLate={status?.isLate ?? false}
-        isApproachingAbsent={false}
-        isCurrentlyOverBreak={isCurrentlyOverBreak}
-        lateAfter={parseTimeOnDate(nowTime, mergedConfig.lateAfter)}
-        hasTimedOut={status?.hasTimedOut ?? false}
-        isOnBreak={status?.isOnBreak ?? false}
-      />
+      <div className="rounded-md bg-muted/40 border border-accent-secondary/50 px-4 py-3 text-center text-xl text-foreground">
+        {status?.message ?? 'Checking attendance status...'}
+      </div>
+
+      {status?.hasTimedIn && !status?.hasTimedOut && status?.isLate ? (
+        <div className="rounded-md border border-orange-400 bg-orange-50 px-4 py-2 text-center text-xl text-orange-700">
+          Note: You were marked late for today.
+        </div>
+      ) : null}
+
+      {status?.hasTimedIn && !status?.hasTimedOut && status?.isOvertime ? (
+        <div className="rounded-md border border-red-500 bg-red-50 px-4 py-2 text-center text-xl text-red-700 font-semibold">
+          ⚠️ You are currently working overtime.
+        </div>
+      ) : null}
+
+      {status?.isOnBreak && breakTimer ? (
+        <div className={`rounded-md border px-4 py-2 text-center text-xl ${isCurrentlyOverBreak ? 'border-red-500 bg-red-50 text-red-700' : 'border-orange-400 bg-orange-50 text-orange-700'}`}>
+          {isCurrentlyOverBreak ? `Break exceeded by ${breakTimer}.` : `Break time remaining: ${breakTimer}`}
+        </div>
+      ) : null}
 
       <AttendanceButtons
         status={status}
@@ -775,7 +711,7 @@ export default function AttendanceIcon({ config }: { config?: Partial<Attendance
         handleBreakClick={handleBreakClick}
       />
 
-      <AttendanceLogs logs={logs} />
+      <AttendanceLogs logs={timelineLogs ?? []} />
     </div>
   );
 }

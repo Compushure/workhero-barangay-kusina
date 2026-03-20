@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse } from '@/lib/utils/safe-action';
-import type { AttendanceConfig, AttendanceLog, AttendanceStatus } from '@/types';
+import type { AttendanceConfig, AttendanceLog, AttendanceStatus, AttendanceTimelineEntry } from '@/types';
 import { attendanceConfig } from '@/lib/attendance-config';
 
 function normalizeConfig(config?: Partial<AttendanceConfig>): AttendanceConfig {
@@ -21,6 +21,14 @@ function parseTimeOnDate(base: Date, time: string): Date {
   const result = new Date(base);
   result.setHours(hours, minutes, 0, 0);
   return result;
+}
+
+function formatTo12Hour(time24: string): string {
+  const [hoursRaw, minutesRaw] = time24.split(':').map((v) => Number(v));
+  const period = hoursRaw >= 12 ? 'PM' : 'AM';
+  const hours12 = hoursRaw % 12 || 12;
+  const minutes = String(minutesRaw).padStart(2, '0');
+  return `${hours12}:${minutes} ${period}`;
 }
 
 function getDayRange(base: Date): { start: Date; end: Date } {
@@ -52,6 +60,57 @@ function parseDurationToMs(duration: string): number {
   return (hours * 60 + minutes) * 60 * 1000; // milliseconds
 }
 
+function toIsoString(value?: string | Date | null): string | null {
+  if (!value) return null;
+  return typeof value === 'string' ? value : value.toISOString();
+}
+
+function buildTimelineFromLog(log: AttendanceLog | null): AttendanceTimelineEntry[] {
+  if (!log || (log.is_absent ?? false)) {
+    return [];
+  }
+
+  const entries: AttendanceTimelineEntry[] = [];
+  const timeIn = toIsoString(log.timein_time);
+  const breakStart = toIsoString(log.breaktime_start);
+  const breakEnd = toIsoString(log.breaktime_end);
+  const timeOut = toIsoString(log.timeout_time);
+
+  if (timeIn) {
+    entries.push({
+      action: 'timein',
+      time: timeIn,
+      note: log.is_ontime === false ? 'Late timing in' : undefined,
+    });
+  }
+
+  if (breakStart) {
+    entries.push({ action: 'startbreak', time: breakStart });
+  }
+
+  if (breakEnd) {
+    entries.push({
+      action: 'endbreak',
+      time: breakEnd,
+      note: log.over_breaktime ? 'Over break time' : undefined,
+    });
+  }
+
+  if (timeOut && timeIn && new Date(timeOut).getTime() !== new Date(timeIn).getTime()) {
+    entries.push({
+      action: 'timeout',
+      time: timeOut,
+      note: log.is_undertime
+        ? 'Working undertime'
+        : log.is_overtime
+          ? 'Overtime logged'
+          : undefined,
+    });
+  }
+
+  return entries.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+}
+
 async function getTodayLog(employeeId: string): Promise<AttendanceLog | null> {
   const supabase = await createClient();
   const now = new Date();
@@ -79,6 +138,23 @@ export async function getAttendanceConfigAction(): Promise<ServerActionResponse<
   return { error: null, data: attendanceConfig };
 }
 
+export async function getTodayAttendanceTimelineAction(): Promise<ServerActionResponse<AttendanceTimelineEntry[]>> {
+  try {
+    const supabase = await createClient();
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session?.user) {
+      return { error: 'No active session found' };
+    }
+
+    const employeeId = sessionData.session.user.id;
+    const log = await getTodayLog(employeeId);
+    return { error: null, data: buildTimelineFromLog(log) };
+  } catch (error) {
+    console.error('Error in getTodayAttendanceTimelineAction:', error);
+    return { error: 'Failed to fetch attendance logs' };
+  }
+}
+
 export async function getTodayAttendanceStatusAction(
   config?: Partial<AttendanceConfig>
 ): Promise<ServerActionResponse<AttendanceStatus>> {
@@ -101,18 +177,18 @@ export async function getTodayAttendanceStatusAction(
 
     let log = await getTodayLog(employeeId);
 
-    // Auto-mark absent if past overtimeAfter with no time-in
-    if (!log && now >= overtimeAfter) {
+    // Auto-mark absent if no time-in by timeoutAt.
+    if (!log && now >= timeOutAt) {
       const { data: absent, error: absentError } = await supabase
         .from('AttendanceLog')
         .insert({
-          timein_time: overtimeAfter.toISOString(),
-          timeout_time: overtimeAfter.toISOString(),
+          timein_time: timeOutAt.toISOString(),
+          timeout_time: timeOutAt.toISOString(),
           is_ontime: false,
           employee_id: employeeId,
           is_overtime: false,
           is_absent: true,
-          no_timeout: false,
+          no_timeout: true,
           is_undertime: false,
         })
         .select('*')
@@ -123,13 +199,41 @@ export async function getTodayAttendanceStatusAction(
       }
     }
 
-    // Auto-mark absent if on break past timeOutAt
-    if (log && isOnBreak(log) && now >= timeOutAt) {
+    // Mark over-breaktime while currently on break.
+    if (log && isOnBreak(log) && log.breaktime_start) {
+      const breakStartIso =
+        typeof log.breaktime_start === 'string'
+          ? log.breaktime_start
+          : log.breaktime_start.toISOString();
+      const breakDurationMs = calculateBreakDuration(breakStartIso, now.toISOString());
+      const allowedBreakMs = parseDurationToMs(normalized.breaktime_duration);
+      const isOverBreaktime = breakDurationMs > allowedBreakMs;
+
+      if (isOverBreaktime && !(log.over_breaktime ?? false)) {
+        const { data: updated, error: updateError } = await supabase
+          .from('AttendanceLog')
+          .update({
+            over_breaktime: true,
+          })
+          .eq('id', log.id)
+          .select('*')
+          .single();
+
+        if (!updateError && updated) {
+          log = updated as AttendanceLog;
+        }
+      }
+    }
+
+    // Auto-mark absent only if still on break at/after autoTimeoutAt.
+    if (log && isOnBreak(log) && now >= autoTimeoutAt) {
       const { data: updated, error: updateError } = await supabase
         .from('AttendanceLog')
         .update({
           is_absent: true,
           over_breaktime: true,
+          no_timeout: true,
+          timeout_time: autoTimeoutAt.toISOString(),
         })
         .eq('id', log.id)
         .select('*')
@@ -140,17 +244,16 @@ export async function getTodayAttendanceStatusAction(
       }
     }
 
-    // Auto-timeout if open log past autoTimeoutAt
+    // Auto-mark absent if not timed out by autoTimeoutAt.
     if (log && isOpenLog(log) && !isOnBreak(log) && now >= autoTimeoutAt) {
-      const isOvertime = autoTimeoutAt > overtimeAfter;
-      const isUndertime = autoTimeoutAt < timeOutAt;
       const { data: updated, error: updateError } = await supabase
         .from('AttendanceLog')
         .update({
           timeout_time: autoTimeoutAt.toISOString(),
+          is_absent: true,
           no_timeout: true,
-          is_overtime: isOvertime,
-          is_undertime: isUndertime,
+          is_overtime: false,
+          is_undertime: false,
         })
         .eq('id', log.id)
         .select('*')
@@ -167,10 +270,51 @@ export async function getTodayAttendanceStatusAction(
     const hasTimedOut = hasTimedIn && !open;
     const onBreak = log ? isOnBreak(log) : false;
 
-    const canTimeIn = !hasTimedIn && !isAbsent && now >= timeInAt && now <= autoTimeoutAt;
+    const canTimeIn = !hasTimedIn && !isAbsent && now >= timeInAt && now <= timeOutAt;
     const canTimeOut = hasTimedIn && open && !onBreak;
     const canStartBreak = hasTimedIn && !hasTimedOut && !onBreak && !log?.breaktime_end;
     const canEndBreak = hasTimedIn && onBreak;
+
+    let message: string;
+    const timeInLabel = formatTo12Hour(normalized.timeInAt);
+    const timeOutLabel = formatTo12Hour(normalized.timeOutAt);
+    const autoTimeoutLabel = formatTo12Hour(normalized.autoTimeoutAt);
+
+    if (isAbsent) {
+      message = `You are marked absent for today. Next time in is ${timeInLabel} tomorrow.`;
+    } else if (!hasTimedIn) {
+      if (now < timeInAt) {
+        message = `Time in starts at ${timeInLabel}`;
+      } else if (now > autoTimeoutAt) {
+        message = 'Time in closed for today';
+      } else {
+        // Check if currently in the late window
+        if (now >= lateAfter) {
+          message = 'Ready to time in - Late';
+        } else {
+          message = 'Ready to time in';
+        }
+      }
+    } else if (onBreak) {
+      message = 'On break - end break to continue';
+    } else if (hasTimedOut) {
+      message = `You have already timed out for today. Next time in is ${timeInLabel} tomorrow.`;
+    } else {
+      const oneHourBeforeAutoTimeout = new Date(autoTimeoutAt.getTime() - 60 * 60 * 1000);
+      const isNearAutoTimeout = now >= oneHourBeforeAutoTimeout && now < autoTimeoutAt;
+
+      if (now >= overtimeAfter) {
+        message = `You are currently working overtime. Please time out before ${autoTimeoutLabel} to avoid being marked absent.`;
+      } else if (now >= timeOutAt) {
+        message = 'Ready to time out';
+      } else {
+        message = `Regular timeout time should be at ${timeOutLabel}. Any time out before this is considered undertime.`;
+      }
+
+      if (isNearAutoTimeout) {
+        message += ` Reminder: If you do not time out before ${autoTimeoutLabel}, you will be marked absent.`;
+      }
+    }
 
     const status: AttendanceStatus = {
       logId: log?.id,
@@ -191,17 +335,7 @@ export async function getTodayAttendanceStatusAction(
       canStartBreak,
       canEndBreak,
       isOverBreaktime: log?.over_breaktime ?? undefined,
-      message: !hasTimedIn
-        ? now < timeInAt
-          ? `Time in starts at ${normalized.timeInAt}`
-          : now > autoTimeoutAt
-            ? 'Time in closed for today'
-            : 'Ready to time in'
-        : onBreak
-          ? 'On break - end break to continue'
-          : hasTimedOut
-            ? 'Already timed out'
-            : 'Ready to time out',
+      message,
     };
 
     return { error: null, data: status };
@@ -227,13 +361,13 @@ export async function timeInAttendanceAction(
 
     const timeInAt = parseTimeOnDate(now, normalized.timeInAt);
     const lateAfter = parseTimeOnDate(now, normalized.lateAfter);
-    const autoTimeoutAt = parseTimeOnDate(now, normalized.autoTimeoutAt);
+    const timeOutAt = parseTimeOnDate(now, normalized.timeOutAt);
 
     if (now < timeInAt) {
       return { error: `Time in starts at ${normalized.timeInAt}` };
     }
 
-    if (now > autoTimeoutAt) {
+    if (now > timeOutAt) {
       return { error: 'Time in is closed for today' };
     }
 

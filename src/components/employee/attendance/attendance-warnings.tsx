@@ -6,6 +6,8 @@ interface Props {
   status: any;
   warningText?: string;
   breakWarningText?: string;
+  timeInAvailabilityText?: string;
+  canTimeIn?: boolean;
   isCurrentlyLate?: boolean;
   isApproachingAbsent?: boolean;
   lateTimer: string;
@@ -20,6 +22,8 @@ export default function AttendanceWarnings({
   status,
   warningText,
   breakWarningText,
+  timeInAvailabilityText,
+  canTimeIn,
   isCurrentlyLate,
   isApproachingAbsent,
   lateTimer,
@@ -43,9 +47,9 @@ export default function AttendanceWarnings({
               ⚠️ Late arrival detected. Time in immediately to minimize impact on your record.
             </PixelBadge>
           )}
-          {status?.canTimeIn && lateAfter && nowTime < lateAfter && !isCurrentlyLate && (
-            <PixelBadge color="blue">
-              ℹ️ Time in within {lateTimer} to be marked on-time.
+          {!isCurrentlyLate && !isApproachingAbsent && timeInAvailabilityText && (
+            <PixelBadge color={canTimeIn ? 'green' : 'blue'}>
+              {timeInAvailabilityText}
             </PixelBadge>
           )}
         </>
@@ -61,11 +65,6 @@ export default function AttendanceWarnings({
         </PixelBadge>
       )}
 
-      {status?.hasTimedIn && status?.isLate && !hasTimedOut && (
-        <PixelBadge color="orange">
-          📋 Note: You were marked late for today.
-        </PixelBadge>
-      )}
     </div>
   );
 }

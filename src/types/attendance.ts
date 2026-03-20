@@ -84,3 +84,9 @@ export interface AttendanceStatus {
   canEndBreak?: boolean;
   isOverBreaktime?: boolean;
 }
+
+export interface AttendanceTimelineEntry {
+  action: 'timein' | 'timeout' | 'startbreak' | 'endbreak';
+  time: string;
+  note?: string;
+}

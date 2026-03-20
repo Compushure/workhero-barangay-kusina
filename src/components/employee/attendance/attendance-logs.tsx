@@ -26,29 +26,21 @@ function getLogDisplay(action: AttendanceLog['action']) {
 }
 
 export default function AttendanceLogs({ logs = [] }: AttendanceLogsProps) {
-  // Keep only logs from today; avoid hard-coded hour so early shifts still show
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const filteredLogs = logs.filter((log) => {
-    const logTime = new Date(log.time);
-    return !Number.isNaN(logTime.getTime()) && logTime.toDateString() === today.toDateString();
-  });
-
   return (
-    <div className="mt-2 w-full max-h-none md:max-h-54 overflow-visible md:overflow-y-auto space-y-2 bg-[#E8DBBF] rounded">
-      {filteredLogs.length === 0 ? (
-        <p className="text-md text-gray-700 text-center">🚫 No logs yet</p>
+    <div className="mt-2 w-full h-44 sm:h-48 md:h-54 overflow-y-auto space-y-2 bg-[#E8DBBF] rounded pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      {logs.length === 0 ? (
+        <p className="text-sm text-gray-700 text-center">🚫 No logs yet</p>
       ) : (
-        filteredLogs.map((log, idx) => {
+        logs.map((log, idx) => {
           const { icon, label } = getLogDisplay(log.action);
           return (
             <div
               key={idx}
-              className="flex flex-col text-black/70 bg-[#DECFB4] rounded px-3 py-2 border border-black/10"
+              className="flex flex-col text-black/70 bg-[#DECFB4] rounded px-3 py-1.5 border border-black/10"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col gap-1">
-                  <span className="text-lg flex items-center gap-2">
+                  <span className="text-base flex items-center gap-2">
                     {icon} {label}
                   </span>
                   {log.note && <span className="text-sm text-red-500">{log.note}</span>}
