@@ -1,102 +1,60 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Calendar, Eye, EyeOff, History } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Pagination as PastRanksPagination } from '@/components/shared/pagination';
+import { useEffect, useMemo, useState } from 'react';
+import { getISOWeek } from 'date-fns';
+import { History } from 'lucide-react';
 import { PastRanksListSkeleton } from '@/components/hr/leaderboard/past-ranks-list-skeleton';
 import { PeriodFilters, TAB_LABELS } from '@/components/hr/leaderboard/period-filters';
-import {
-  usePastRanksFilter,
-  periodLabel,
-  periodRangeLabel,
-  buildUrl,
-  PAST_RANKS_PAGE_SIZE,
-} from '@/hooks/hr/usePastRanksFilter';
+import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-content';
+import { usePastRanksFilter } from '@/hooks/hr/usePastRanksFilter';
+import { matchesDate } from '@/lib/utils/period-filter-utils';
 import type { ActionResult } from '@/lib/utils/safe-action';
 import type { RankingPeriodWithTop, RankingPeriodType } from '@/types';
 
-interface PeriodRowProps {
-  row: RankingPeriodWithTop;
-  onSelect: (url: string) => void;
+interface PeriodReference {
+  type: RankingPeriodType;
+  year: number;
+  month?: number;
+  week?: number;
 }
 
-function PeriodRow({ row, onSelect }: PeriodRowProps) {
+function findMatchingPeriod(
+  rows: RankingPeriodWithTop[],
+  reference: PeriodReference | null | undefined
+): RankingPeriodWithTop | null {
+  if (!reference) return null;
+
   return (
-    <div className="flex w-full flex-col gap-2.5 rounded-2xl border border-accent/20 bg-card px-3.5 py-3.5 shadow-sm/30 transition-colors hover:border-primary/40 hover:bg-background sm:flex-row sm:items-center sm:gap-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-        <Calendar className="h-4.5 w-4.5" />
-      </div>
+    rows.find((row) => {
+      if (row.period_type !== reference.type) return false;
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-semibold text-foreground sm:text-base">{periodLabel(row)}</p>
-          {row.is_visible ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700">
-              <Eye className="h-3 w-3" />
-              Visible
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <EyeOff className="h-3 w-3" />
-              Hidden
-            </span>
-          )}
-        </div>
-        <p className="text-meta text-muted-foreground">{periodRangeLabel(row)}</p>
-      </div>
+      const start = new Date(row.period_start + 'T00:00:00');
+      if (reference.type === 'weekly') {
+        return start.getFullYear() === reference.year && getISOWeek(start) === reference.week;
+      }
 
-      <div className="flex w-full shrink-0 items-center gap-4 sm:w-auto">
-        <Button
-          size="sm"
-          onClick={() => onSelect(buildUrl(row))}
-          className="control-h w-full shrink-0 rounded-full bg-primary-gradient px-5 text-xs font-semibold text-white shadow-sm hover:opacity-95 sm:w-auto sm:text-sm"
-        >
-          View Rankings
-        </Button>
-      </div>
-    </div>
+      if (reference.type === 'monthly') {
+        return start.getFullYear() === reference.year && start.getMonth() + 1 === reference.month;
+      }
+
+      return start.getFullYear() === reference.year;
+    }) ?? null
   );
 }
 
-function PeriodRowPlaceholder() {
-  return (
-    <div
-      className="pointer-events-none flex w-full select-none flex-col gap-2.5 rounded-2xl border border-transparent bg-transparent px-3.5 py-3.5 opacity-0 sm:flex-row sm:items-center sm:gap-4"
-      aria-hidden="true"
-    >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10" />
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-semibold text-foreground sm:text-base">Placeholder</p>
-        </div>
-        <p className="text-meta text-muted-foreground">Placeholder</p>
-      </div>
-      <div className="flex w-full shrink-0 items-center gap-4 sm:w-auto">
-        <Button size="sm" className="control-h w-full shrink-0 rounded-full sm:w-auto">
-          View Rankings
-        </Button>
-      </div>
-    </div>
-  );
+function findOldestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
+  return rows.length > 0 ? rows[rows.length - 1] : null;
 }
 
 function PeriodEmptyState({
-  activeTab,
-  isNoData,
+  message,
 }: {
-  activeTab: RankingPeriodType;
-  isNoData: boolean;
+  message: string;
 }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-accent/30 bg-background/40 px-6 py-10 text-center">
       <History className="h-10 w-10 text-muted-foreground/40" />
-      <p className="text-meta text-muted-foreground">
-        {isNoData
-          ? `No ${TAB_LABELS[activeTab].toLowerCase()} rankings yet.`
-          : 'No matching periods.'}
-      </p>
+      <p className="text-meta text-muted-foreground">{message}</p>
     </div>
   );
 }
@@ -104,31 +62,83 @@ function PeriodEmptyState({
 interface PastRanksListProps {
   /** When provided (e.g. from server), list renders immediately without client fetch */
   initialData?: ActionResult<RankingPeriodWithTop[]> | null;
+  initialType: RankingPeriodType;
+  initialRequestedPeriod?: PeriodReference | null;
+  shouldResolveDefaultSelection?: boolean;
 }
 
-export function PastRanksList({ initialData }: PastRanksListProps) {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState<RankingPeriodType>('weekly');
-  const [currentPage, setCurrentPage] = useState(1);
+export function PastRanksList({
+  initialData,
+  initialType,
+  initialRequestedPeriod = null,
+  shouldResolveDefaultSelection = false,
+}: PastRanksListProps) {
+  const [activeTab, setActiveTab] = useState<RankingPeriodType>(initialType);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<RankingPeriodWithTop | null>(null);
+  const [hasInitializedSelection, setHasInitializedSelection] = useState(false);
 
-  const { periods, error, isPending, grouped, list, paginatedList, totalPages, page } =
-    usePastRanksFilter({ initialData, activeTab, currentPage, selectedDate });
+  const { periods, error, isPending, grouped } = usePastRanksFilter({
+    initialData,
+    activeTab,
+    currentPage: 1,
+    selectedDate: null,
+  });
 
-  const placeholderCount = Math.max(0, PAST_RANKS_PAGE_SIZE - paginatedList.length);
+  const resolvePeriodForTab = useMemo(
+    () => (tab: RankingPeriodType, options?: { useRequestedPeriod?: boolean }) => {
+      const rows = grouped[tab];
+      if (rows.length === 0) return null;
+
+      if (options?.useRequestedPeriod && initialRequestedPeriod?.type === tab) {
+        return findMatchingPeriod(rows, initialRequestedPeriod) ?? rows[0];
+      }
+
+      if (shouldResolveDefaultSelection) {
+        return findOldestPeriod(rows);
+      }
+
+      return findOldestPeriod(rows);
+    },
+    [grouped, initialRequestedPeriod, shouldResolveDefaultSelection]
+  );
+
+  useEffect(() => {
+    if (hasInitializedSelection || periods === null) return;
+
+    const initialPeriod = resolvePeriodForTab(activeTab, { useRequestedPeriod: true });
+    setSelectedPeriod(initialPeriod);
+    setSelectedDate(initialPeriod ? new Date(initialPeriod.period_start + 'T00:00:00') : null);
+    setHasInitializedSelection(true);
+  }, [activeTab, hasInitializedSelection, periods, resolvePeriodForTab]);
 
   const handleTypeChange = (value: string) => {
-    setActiveTab(value as RankingPeriodType);
-    setCurrentPage(1);
-    setSelectedDate(null);
+    const nextTab = value as RankingPeriodType;
+    setActiveTab(nextTab);
+    const nextPeriod = resolvePeriodForTab(nextTab);
+    setSelectedPeriod(nextPeriod);
+    setSelectedDate(nextPeriod ? new Date(nextPeriod.period_start + 'T00:00:00') : null);
   };
 
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
-    setCurrentPage(1);
+
+    if (date === null) {
+      const fallbackPeriod = resolvePeriodForTab(activeTab);
+      setSelectedPeriod(fallbackPeriod);
+      return;
+    }
+
+    const matchingPeriod = grouped[activeTab].find((row) => matchesDate(row, date, activeTab));
+    if (matchingPeriod) {
+      setSelectedPeriod(matchingPeriod);
+    }
   };
 
-  const showContent = !isPending && periods !== null;
+  const emptyMessage =
+    grouped[activeTab].length === 0
+      ? `No ${TAB_LABELS[activeTab].toLowerCase()} rankings yet.`
+      : `No older ${TAB_LABELS[activeTab].toLowerCase()} ranking is available from this view yet.`;
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -140,52 +150,34 @@ export function PastRanksList({ initialData }: PastRanksListProps) {
         </div>
       ) : null}
 
-      {showContent ? (
+      {!isPending && periods !== null ? (
         <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <div className="flex h-full flex-col gap-4 rounded-2xl border border-accent/20 bg-card p-3.5 shadow-sm/40 sm:p-5">
-            <div>
-              <h2 className="text-h2 text-foreground">Past Generated Ranks</h2>
-              <p className="text-meta text-muted-foreground">
-                Browse previously generated rankings.
-              </p>
-            </div>
-
+          <div className="manager-sticky-controls !mx-0 w-full rounded-2xl p-3 sm:p-3.5 xl:max-w-[380px]">
             <PeriodFilters
               activeTab={activeTab}
               selectedDate={selectedDate}
-              hasAnyPeriods={(periods?.length ?? 0) > 0}
+              hasAnyPeriods={grouped[activeTab].length > 0}
+              availablePeriods={grouped[activeTab]}
               onTypeChange={handleTypeChange}
               onDateChange={handleDateChange}
             />
 
-            <div className="flex flex-1 flex-col gap-3 overflow-hidden">
-              {list.length === 0 ? (
-                <PeriodEmptyState
-                  activeTab={activeTab}
-                  isNoData={grouped[activeTab].length === 0}
-                />
-              ) : (
-                <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
-                  {paginatedList.map((row) => (
-                    <PeriodRow key={row.id} row={row} onSelect={(url) => router.push(url)} />
-                  ))}
-                  {Array.from({ length: placeholderCount }).map((_, index) => (
-                    <PeriodRowPlaceholder key={`placeholder-${index}`} />
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
 
-          {list.length > 0 ? (
-            <div className={totalPages <= 1 ? 'invisible' : ''}>
-              <PastRanksPagination
-                totalPages={totalPages}
-                currentPage={page}
-                onPageChange={setCurrentPage}
-              />
-            </div>
-          ) : null}
+          <div className="flex flex-1 flex-col gap-3">
+            {selectedPeriod ? (
+                <LeaderboardContent
+                  periodType={selectedPeriod.period_type}
+                  year={new Date(selectedPeriod.period_start + 'T00:00:00').getFullYear()}
+                  week={getISOWeek(new Date(selectedPeriod.period_start + 'T00:00:00'))}
+                  month={new Date(selectedPeriod.period_start + 'T00:00:00').getMonth() + 1}
+                  show
+                  periodHeaderLabel="Past Period"
+                />
+            ) : (
+              <PeriodEmptyState message={emptyMessage} />
+            )}
+          </div>
         </div>
       ) : null}
     </div>

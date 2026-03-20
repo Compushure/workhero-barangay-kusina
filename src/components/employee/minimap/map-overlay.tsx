@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { create } from 'zustand';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNavigationStore } from '../nav-loading-state';
 
 interface MapState {
@@ -24,15 +26,51 @@ export const useMapStore = create<MapState>((set, get) => ({
 const locations: Array<{
   id: string;
   label: string;
+  name: string;
   x: number;
   y: number;
   path?: string;
 }> = [
-  { id: 'attendance', label: '⏰ Attendance Station', path: '/employee/attendance', x: 18, y: 32 },
-  { id: 'kitchen', label: '🍲 Kitchen', path: '/employee/dashboard', x: 50, y: 25 },
-  { id: 'mercado', label: '🏪 Mercado', path: '/employee/mercado', x: 78, y: 36 },
-  { id: 'tasks', label: '📋 Task Board', path: '/employee/tasks', x: 35, y: 64 },
-  { id: 'leaderboard', label: '🏆 Leaderboard', path: '/employee/leaderboard', x: 79, y: 67 },
+  {
+    id: 'attendance',
+    label: '⏰ Attendance Station',
+    name: 'This is where you time in, take breaks, and time out.',
+    path: '/employee/attendance',
+    x: 18,
+    y: 32,
+  },
+  {
+    id: 'kitchen',
+    label: '🍲 Kitchen',
+    name: 'This is where you do your tasks.',
+    path: '/employee/dashboard',
+    x: 50,
+    y: 25,
+  },
+  {
+    id: 'mercado',
+    label: '🏪 Mercado',
+    name: 'This is where you can find various items for redemption.',
+    path: '/employee/mercado',
+    x: 78,
+    y: 36,
+  },
+  {
+    id: 'tasks',
+    label: '📋 Task Board',
+    name: 'This is where you can view and manage your tasks.',
+    path: '/employee/tasks',
+    x: 35,
+    y: 64,
+  },
+  {
+    id: 'leaderboard',
+    label: '🏆 Leaderboard',
+    name: 'This is where you can see the weekly top 10 ranking.',
+    path: '/employee/leaderboard',
+    x: 79,
+    y: 67,
+  },
 ];
 
 export function MapOverlay() {
@@ -40,6 +78,7 @@ export function MapOverlay() {
   const pathname = usePathname();
   const { isMapOpen, toggleMap, closeMap } = useMapStore();
   const { isNavigating, startNavigation } = useNavigationStore();
+  const [activeTooltipId, setActiveTooltipId] = useState<string | null>(null);
 
   const travelTo = (path: string) => {
     if (!path || isNavigating) return;
@@ -95,22 +134,38 @@ export function MapOverlay() {
                 className="absolute"
                 style={{ left: `${loc.x}%`, top: `${loc.y}%`, transform: 'translate(-50%, -50%)' }}
               >
-                <motion.button
-                  type="button"
-                  disabled={isNavigating || !loc.path}
-                  className={`cursor-pointer ${isNavigating || !loc.path ? 'opacity-60 cursor-not-allowed' : ''}`}
-                  style={{ transformOrigin: 'center center' }}
-                  whileHover={{ scale: 1.12 }}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => loc.path && travelTo(loc.path)}
-                  aria-disabled={isNavigating || !loc.path}
-                >
-                  <div className="inline-flex items-center bg-[#E8DBBF] border-2 border-[#47331F] rounded-lg shadow-[5px_5px_0px_#000] shadow-[#47331F]/50 px-4 py-2.5">
-                    <span className="text-[12px] font-semibold text-[#47331F] whitespace-nowrap">
-                      {loc.label}
-                    </span>
-                  </div>
-                </motion.button>
+                <Tooltip open={activeTooltipId === loc.id}>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      disabled={isNavigating || !loc.path}
+                      className={`cursor-pointer ${isNavigating || !loc.path ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      onClick={() => loc.path && travelTo(loc.path)}
+                      onMouseEnter={() => setActiveTooltipId(loc.id)}
+                      onMouseLeave={() => setActiveTooltipId((current) => (current === loc.id ? null : current))}
+                      onFocus={() => setActiveTooltipId(loc.id)}
+                      onBlur={() => setActiveTooltipId((current) => (current === loc.id ? null : current))}
+                      onPointerDown={() =>
+                        setActiveTooltipId((current) => (current === loc.id ? null : current))
+                      }
+                      aria-disabled={isNavigating || !loc.path}
+                    >
+                      <motion.div
+                        style={{ transformOrigin: 'center center' }}
+                        whileHover={{ scale: 1.12 }}
+                        whileTap={{ scale: 0.96 }}
+                        className="inline-flex items-center bg-[#E8DBBF] border-2 border-[#47331F] rounded-lg shadow-[5px_5px_0px_#000] shadow-[#47331F]/50 px-4 py-2.5"
+                      >
+                        <span className="text-[12px] font-semibold text-[#47331F] whitespace-nowrap">
+                          {loc.label}
+                        </span>
+                      </motion.div>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={8} className="z-[70]">
+                    {loc.name}
+                  </TooltipContent>
+                </Tooltip>
               </div>
             ))}
 

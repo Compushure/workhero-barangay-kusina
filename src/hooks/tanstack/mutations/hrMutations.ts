@@ -156,7 +156,7 @@ function toOptimisticPlayers(): (LeaderboardPlayer & { rank: number })[] {
 function toOptimisticLeaderboardResult(params: GenerateRankingParams): EnrichedLeaderboardResult {
   const periodLabel =
     params.periodType === 'weekly'
-      ? `Week ${params.week ?? '-'}`
+      ? 'Week'
       : buildPeriodLabel(params.periodType, params.year, params.month, params.week);
 
   const dateRangeSubtitle =

@@ -56,6 +56,17 @@ export function getTriggerLabel(
   }
 }
 
+export function toPeriodSelectionKey(date: Date, type: RankingPeriodType): string {
+  switch (type) {
+    case 'weekly':
+      return format(startOfISOWeek(date), 'yyyy-MM-dd');
+    case 'monthly':
+      return format(date, 'yyyy-MM');
+    case 'yearly':
+      return format(date, 'yyyy');
+  }
+}
+
 /** Human-readable date range for a period (e.g. "Mar 2 – 8, 2026" for weekly). */
 export function periodRangeLabel(row: RankingPeriodWithTop): string {
   const start = new Date(row.period_start + 'T00:00:00');
@@ -88,4 +99,13 @@ export function matchesDate(
     case 'yearly':
       return start.getFullYear() === selectedDate.getFullYear();
   }
+}
+
+export function buildAvailablePeriodKeys(
+  periods: RankingPeriodWithTop[],
+  activeTab: RankingPeriodType
+): Set<string> {
+  return new Set(
+    periods.map((row) => toPeriodSelectionKey(new Date(row.period_start + 'T00:00:00'), activeTab))
+  );
 }

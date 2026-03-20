@@ -15,6 +15,7 @@ import {
   getCutoffForSpecificPeriod,
   getPeriodDateRangeSubtitle,
   getPeriodStartEnd,
+  getISOWeeksInYear,
 } from '@/lib/utils/time-period-utils';
 import { enrichRankingPlayers } from '@/lib/utils/enrich-ranking';
 import { format, getISOWeek, getISOWeekYear } from 'date-fns';
@@ -82,7 +83,7 @@ export async function getEnrichedLeaderboardByPeriod(
 
     const periodLabel =
       periodType === 'weekly'
-        ? periodInfo.period_label.replace(/,\s*\d{4}$/, '')
+        ? 'Week'
         : periodInfo.period_label;
 
     return {
@@ -122,6 +123,56 @@ function buildPeriodLabelLikeView(periodType: RankLogPeriodType, periodStartDate
   }
 }
 
+function getLatestCompletedPeriod(periodType: RankLogPeriodType): {
+  year: number;
+  month?: number;
+  week?: number;
+} {
+  const now = new Date();
+
+  if (periodType === 'weekly') {
+    const currentIsoWeek = getISOWeek(now);
+    const currentIsoYear = getISOWeekYear(now);
+
+    if (currentIsoWeek <= 1) {
+      const previousYear = currentIsoYear - 1;
+      return { year: previousYear, week: getISOWeeksInYear(previousYear) };
+    }
+
+    return { year: currentIsoYear, week: currentIsoWeek - 1 };
+  }
+
+  if (periodType === 'monthly') {
+    const currentMonth = now.getMonth() + 1;
+    if (currentMonth <= 1) {
+      return { year: now.getFullYear() - 1, month: 12 };
+    }
+
+    return { year: now.getFullYear(), month: currentMonth - 1 };
+  }
+
+  return { year: now.getFullYear() - 1 };
+}
+
+function isLatestCompletedPeriod(
+  periodType: RankLogPeriodType,
+  year: number,
+  month?: number,
+  week?: number
+): boolean {
+  const latest = getLatestCompletedPeriod(periodType);
+
+  if (periodType === 'weekly') {
+    return latest.year === year && latest.week === week;
+  }
+
+  if (periodType === 'monthly') {
+    return latest.year === year && latest.month === month;
+  }
+
+  return latest.year === year;
+}
+
 
 /**
  * Generate ranking for a specific period.
@@ -145,6 +196,10 @@ export async function generateRankingByPeriod(
     } = await supabase.auth.getUser();
     if (authError || !user) {
       throw new Error('Not authenticated');
+    }
+
+    if (!isLatestCompletedPeriod(periodType, year, month, week)) {
+      throw new Error('Only the latest completed period can be generated from this screen');
     }
 
     const { start, end } = getPeriodStartEnd(
