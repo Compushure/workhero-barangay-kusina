@@ -32,12 +32,10 @@ export function LeaderboardContent({
     show,
   });
 
-  // Show skeleton during initial load OR background refetch when there's no data yet
   if ((isPending || isFetching) && !data) {
     return <LeaderboardTableSkeleton />;
   }
 
-  // No ranking data for this period
   if (!data) {
     const emptyStatePeriodLabel = buildPeriodLabel(
       periodType,
@@ -45,6 +43,7 @@ export function LeaderboardContent({
       periodType === 'monthly' ? month : undefined,
       periodType === 'weekly' ? week : undefined
     );
+
     return (
       <div className="flex min-h-[52vh] items-center justify-center py-5 sm:py-7">
         <div className="flex max-w-md flex-col items-center gap-4 rounded-2xl border border-accent/20 bg-card px-8 py-10 text-center shadow-sm/40">
@@ -62,7 +61,6 @@ export function LeaderboardContent({
     );
   }
 
-  // Render table — kept visible while a background fetch is in progress (isFetching)
   return (
     <div className="w-full">
       <LeaderboardTable
