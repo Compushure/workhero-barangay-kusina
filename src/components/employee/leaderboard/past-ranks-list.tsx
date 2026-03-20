@@ -116,7 +116,7 @@ export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
             key={tab.key}
             type="button"
             onClick={() => handleTabChange(tab.key)}
-            className={`min-h-10 rounded-lg px-3 py-2 text-sm font-jersey tracking-widest shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors sm:px-4 sm:text-base ${
+            className={`min-h-10 cursor-pointer rounded-lg px-3 py-2 text-sm font-jersey tracking-widest shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors sm:px-4 sm:text-base ${
               activeTab === tab.key
                 ? 'bg-[#F4B925] text-[#3D2512]'
                 : 'bg-[#b07440] text-white hover:bg-[#8A6342]'
@@ -133,7 +133,7 @@ export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
           <PopoverTrigger asChild>
             <button
               type="button"
-              className="flex w-full items-center gap-2 rounded-lg border border-[#b07440]/70 bg-[#3D2512]/75 px-3 py-2.5 font-jersey text-sm tracking-widest text-white shadow-[2px_2px_0_rgba(0,0,0,0.35)] outline-none transition-colors hover:border-[#F4B925]/60 focus:border-[#F4B925]/80 focus:ring-2 focus:ring-[#F4B925]/20 sm:px-4 sm:text-base"
+              className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-[#b07440]/70 bg-[#3D2512]/75 px-3 py-2.5 font-jersey text-sm tracking-widest text-white shadow-[2px_2px_0_rgba(0,0,0,0.35)] outline-none transition-colors hover:border-[#F4B925]/60 focus:border-[#F4B925]/80 focus:ring-2 focus:ring-[#F4B925]/20 sm:px-4 sm:text-base"
             >
               <CalendarIcon className="h-4 w-4 shrink-0 text-[#F4B925]" />
               <span className={cn('flex-1 text-left', !hasSelection && 'text-white/50')}>
@@ -211,7 +211,7 @@ export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
               key={row.id}
               type="button"
               onClick={() => onSelectPeriod(toPeriodParams(row))}
-              className="flex min-h-12 w-full items-center gap-2.5 rounded-lg border border-[#b07440]/60 bg-[#3D2512]/80 px-3 py-3 text-left transition-colors hover:border-[#F4B925]/70 hover:bg-[#4a2e18]/80 active:scale-[0.98] sm:gap-3 sm:px-4"
+              className="flex min-h-12 w-full cursor-pointer items-center gap-2.5 rounded-lg border border-[#b07440]/60 bg-[#3D2512]/80 px-3 py-3 text-left transition-colors hover:border-[#F4B925]/70 hover:bg-[#4a2e18]/80 active:scale-[0.98] sm:gap-3 sm:px-4"
             >
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#F4B925]/20">
                 <Trophy className="h-4 w-4 text-[#F4B925]" />
@@ -275,7 +275,7 @@ export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
             type="button"
             disabled={currentPage <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10"
             aria-label="Previous page"
           >
             <ChevronLeft className="h-4 w-4" strokeWidth={2.5} />
@@ -287,7 +287,7 @@ export function PastRanksList({ onSelectPeriod }: PastRanksListProps) {
             type="button"
             disabled={currentPage >= totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[-2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[-2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10"
             aria-label="Next page"
           >
             <ChevronRight className="h-4 w-4" strokeWidth={2.5} />

@@ -4,10 +4,13 @@ type LeaderboardSkeletonProps = {
 
 function PeriodNavSkeleton() {
   return (
-    <div className="flex items-center justify-center gap-1.5 sm:gap-2" aria-hidden>
-      <div className="h-10 w-10 shrink-0 animate-pulse rounded-xl bg-[#b07440]/70 shadow-[2px_2px_0_rgba(0,0,0,0.4)] sm:h-11 sm:w-11 md:h-12 md:w-12" />
-      <div className="h-10 min-w-24 animate-pulse rounded bg-[#F4B925]/30 px-2 sm:min-w-30 sm:px-4" />
-      <div className="h-10 w-10 shrink-0 animate-pulse rounded-xl bg-[#b07440]/70 shadow-[-2px_2px_0_rgba(0,0,0,0.4)] sm:h-11 sm:w-11 md:h-12 md:w-12" />
+    <div className="flex w-full max-w-[320px] items-center justify-center gap-2 rounded-2xl border border-[#8A6342] bg-[#5A412C]/95 px-2.5 py-2 shadow-[2px_2px_0_rgba(0,0,0,0.35)] sm:max-w-none sm:gap-3 sm:px-4" aria-hidden>
+      <div className="h-9 w-9 shrink-0 animate-pulse rounded-xl bg-[#b07440]/70 shadow-[2px_2px_0_rgba(0,0,0,0.4)] sm:h-10 sm:w-10" />
+      <div className="flex min-w-0 flex-1 flex-col items-center rounded-xl border border-[#6C4B30] bg-[#3D2512]/75 px-3 py-2 sm:min-w-[150px] sm:px-4">
+        <div className="h-2 w-14 animate-pulse rounded bg-[#F4B925]/20 sm:w-16" />
+        <div className="mt-1 h-5 w-20 animate-pulse rounded bg-[#F4B925]/35 sm:h-6 sm:w-28" />
+      </div>
+      <div className="h-9 w-9 shrink-0 animate-pulse rounded-xl bg-[#b07440]/70 shadow-[-2px_2px_0_rgba(0,0,0,0.4)] sm:h-10 sm:w-10" />
     </div>
   );
 }
