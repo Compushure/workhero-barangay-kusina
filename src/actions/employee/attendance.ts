@@ -66,7 +66,7 @@ function toIsoString(value?: string | Date | null): string | null {
 }
 
 function buildTimelineFromLog(log: AttendanceLog | null): AttendanceTimelineEntry[] {
-  if (!log || (log.is_absent ?? false)) {
+  if (!log) {
     return [];
   }
 
@@ -96,15 +96,28 @@ function buildTimelineFromLog(log: AttendanceLog | null): AttendanceTimelineEntr
     });
   }
 
-  if (timeOut && timeIn && new Date(timeOut).getTime() !== new Date(timeIn).getTime()) {
+  const shouldShowTimeout =
+    !!timeOut &&
+    (!!(log.is_absent ?? false) ||
+      !timeIn ||
+      new Date(timeOut).getTime() !== new Date(timeIn).getTime());
+
+  if (shouldShowTimeout && timeOut) {
+    const timedOutFromBreakWithoutReturn =
+      !!(log.is_absent ?? false) && !!breakStart && !breakEnd && !!(log.no_timeout ?? false);
+
     entries.push({
       action: 'timeout',
       time: timeOut,
-      note: log.is_undertime
-        ? 'Working undertime'
-        : log.is_overtime
-          ? 'Overtime logged'
-          : undefined,
+      note: timedOutFromBreakWithoutReturn
+        ? 'Did not return from break; system marked absent.'
+        : log.is_absent
+          ? 'System marked absent.'
+          : log.is_undertime
+            ? 'Working undertime'
+            : log.is_overtime
+              ? 'Overtime logged'
+              : undefined,
     });
   }
 
@@ -265,10 +278,10 @@ export async function getTodayAttendanceStatusAction(
     }
 
     const isAbsent = log?.is_absent ?? false;
-    const hasTimedIn = !!log && !isAbsent;
+    const hasTimedIn = !!log;
     const open = log ? isOpenLog(log) : false;
-    const hasTimedOut = hasTimedIn && !open;
-    const onBreak = log ? isOnBreak(log) : false;
+    const hasTimedOut = !!log && !open;
+    const onBreak = log ? !isAbsent && isOnBreak(log) : false;
 
     const canTimeIn = !hasTimedIn && !isAbsent && now >= timeInAt && now <= timeOutAt;
     const canTimeOut = hasTimedIn && open && !onBreak;
@@ -281,7 +294,11 @@ export async function getTodayAttendanceStatusAction(
     const autoTimeoutLabel = formatTo12Hour(normalized.autoTimeoutAt);
 
     if (isAbsent) {
-      message = `You are marked absent for today. Next time in is ${timeInLabel} tomorrow.`;
+      if (log?.breaktime_start && !log?.breaktime_end) {
+        message = `You did not return from break. The system marked you absent for today. Next time in is ${timeInLabel} tomorrow.`;
+      } else {
+        message = `You are marked absent for today. Next time in is ${timeInLabel} tomorrow.`;
+      }
     } else if (!hasTimedIn) {
       if (now < timeInAt) {
         message = `Time in starts at ${timeInLabel}`;

@@ -9,7 +9,7 @@ interface StatItem {
 }
 
 const formatValue = (value: unknown): string => {
-  if (value === null || value === undefined || value === '') return 'N/A';
+  if (value === null || value === undefined || value === '') return '0';
   if (typeof value === 'number' && Number.isFinite(value)) return value.toLocaleString();
   return String(value);
 };

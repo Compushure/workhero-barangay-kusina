@@ -640,10 +640,11 @@ export default function AttendanceIcon({ config }: { config?: Partial<Attendance
       if (status?.isOnBreak && status?.breakStartTime) {
         const elapsedMs = calculateBreakElapsed(status.breakStartTime, now);
         const allowedMs = parseDurationToMs(mergedConfig.breaktime_duration);
-        const remainingMs = allowedMs - elapsedMs;
+        const isOverBreak = elapsedMs > allowedMs;
+        const timerMs = isOverBreak ? elapsedMs - allowedMs : allowedMs - elapsedMs;
 
-        setBreakTimer(formatTimeRemaining(Math.max(0, remainingMs)));
-        setIsCurrentlyOverBreak(elapsedMs >= allowedMs);
+        setBreakTimer(formatTimeRemaining(timerMs));
+        setIsCurrentlyOverBreak(isOverBreak);
       } else {
         setBreakTimer('');
         setIsCurrentlyOverBreak(false);
