@@ -13,7 +13,8 @@ import {
   useClaimTaskPointsandXP,
   useRedoTask,
 } from '@/hooks/tanstack/mutations/employeeTasksMutations';
-import { formatDate, isTaskOverdue } from '@/utils/date-utils';
+import { formatDate } from '@/utils/date-utils';
+import { isTaskStatusItemOverdue } from './task-status-utils';
 
 interface TaskCardDialogProps {
   task: TaskStatusItem;
@@ -23,6 +24,7 @@ interface TaskCardDialogProps {
 
 export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCardDialogProps) {
   const remainingOrders = task.maxOrders - task.completedOrders;
+  const isOverdue = isTaskStatusItemOverdue(task);
 
   const [remarkOpen, setRemarkOpen] = useState(true);
   const [pendingOrders, setPendingOrders] = useState(task.pendingOrders || 1);
@@ -168,7 +170,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                 <span className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
                   DUE DATE
                 </span>
-                <p className={`flex items-center gap-1.5 text-base font-medium ${isTaskOverdue(task.dueDate) ? 'text-red-700' : 'text-muted-foreground'}`}>
+                <p className={`flex items-center gap-1.5 text-base font-medium ${isOverdue ? 'text-red-700' : 'text-muted-foreground'}`}>
                   <Calendar strokeWidth={2.5} className='size-4'/>
                   {formatDate(task.dueDate)}
                 </p>

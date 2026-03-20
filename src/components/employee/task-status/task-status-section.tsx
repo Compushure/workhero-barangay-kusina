@@ -4,18 +4,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type { TaskStatusItem, TaskStatusKind } from './types';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
-import { useGetEmployeeTasks } from '@/hooks/tanstack/employee';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface TaskStatusSectionProps {
   status: TaskStatusKind;
   task: TaskStatusItem[];
+  isLoading: boolean;
   children: React.ReactNode;
 }
 
-export function TaskStatusSection({ status, task, children }: TaskStatusSectionProps) {
-  const { error, isLoading } = useGetEmployeeTasks();
-
+export function TaskStatusSection({ status, task, isLoading, children }: TaskStatusSectionProps) {
   return (
     <div className="flex flex-col gap-3 min-w-0 w-full">
       <header className="flex w-full justify-between px-2">
