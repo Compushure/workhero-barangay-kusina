@@ -4,7 +4,7 @@
  * This file contains all employee stat getter functions:
  * - getEmployeeLevel: Fetches the current employee's level
  * - getEmployeePoints: Fetches points and deducted points
- * - getEmployeePerformanceScore: Fetches performance_score (approved task count × total_points_earned)
+ * - getEmployeePerformanceScore: Fetches performance_score ((task points × completed tasks) + badge points)
  * - getEmployeeRank: Fetches rank among all employees
  * - getEmployeeXP: Fetches current and total XP
  */
@@ -95,7 +95,7 @@ export async function getEmployeePoints(): Promise<ActionResult<EmployeePointsDa
 
 /**
  * Fetches the current employee's performance score from user_attributes.
- * performance_score = (count of approved KPITask) × total_points_earned (used for leaderboard ranking).
+ * performance_score = (total KPI task points × completed tasks) + badge points (used for leaderboard ranking).
  */
 export async function getEmployeePerformanceScore(): Promise<ActionResult<number>> {
   return safeAction(async () => {

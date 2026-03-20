@@ -50,7 +50,7 @@ function PaginationComponent({
 
   return (
     <div
-      className={`flex items-center justify-center gap-1 sm:gap-1.5 scale-90 sm:scale-100 lg:scale-105 xl:scale-110 2xl:scale-125 ${
+      className={`flex min-h-10 items-center justify-center gap-1 py-1 sm:min-h-12 sm:gap-1.5 sm:py-1.5 scale-90 sm:scale-100 lg:min-h-14 lg:scale-105 xl:min-h-16 xl:scale-110 2xl:min-h-20 2xl:scale-125 ${
         isFixed ? 'sm:fixed bottom-6 lg:bottom-8 left-1/2 z-40 sm:-translate-x-1/2' : ''
       }`}
     >
