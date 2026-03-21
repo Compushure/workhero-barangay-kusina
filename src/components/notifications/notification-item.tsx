@@ -2,6 +2,7 @@ import { Check, Clock3, Dot } from 'lucide-react';
 
 import type { NotificationItem } from '@/types';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 interface NotificationItemCardProps {
@@ -57,35 +58,46 @@ export function NotificationItemCard({ notification, onMarkRead }: NotificationI
   return (
     <div
       className={cn(
-        'group flex items-start gap-3 rounded-lg border border-border/70 bg-white px-3 py-2.5 shadow-sm transition hover:border-primary/50',
-        isUnread ? 'bg-primary/5' : 'bg-muted'
+        'group flex items-start gap-3 rounded-lg border px-3 py-2.5 shadow-sm transition',
+        isUnread
+          ? 'border-accent-secondary/50 bg-card/12 hover:border-accent-secondary/75'
+          : 'border-card/20 bg-card/5 hover:border-accent/45'
       )}
     >
-      <Dot className={cn('mt-1 h-5 w-5 text-muted-foreground', isUnread && 'text-primary')} />
+      <Dot className={cn('mt-1 h-5 w-5 text-card/40', isUnread && 'text-accent-secondary')} />
       <div className="flex-1 space-y-1">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-          <span className="font-semibold text-foreground">{notification.type}</span>
+        <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-card/70">
+          <span className="font-semibold text-accent-secondary">{notification.type}</span>
           {status ? (
-            <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-foreground">
+            <span className="rounded-full border border-accent/45 bg-black/10 px-2 py-0.5 text-[11px] font-semibold text-card">
               {formatStatus(status)}
             </span>
           ) : null}
         </div>
-        <p className="text-sm text-foreground">{notification.message}</p>
-        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+        <p className="text-xs text-card">{notification.message}</p>
+        <div className="flex items-center gap-2 text-[11px] text-card/65">
           <Clock3 className="h-3.5 w-3.5" />
           <span>{formatTimestamp(notification.createdAt)}</span>
         </div>
       </div>
       {isUnread ? (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-muted-foreground hover:text-primary"
-          onClick={onMarkRead}
-        >
-          <Check className="h-4 w-4" />
-        </Button>
+        <TooltipProvider delayDuration={120}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-6 text-card bg-wood-light border border-wood shadow-sm/25 hover:bg-accent/80 duration-300 transition-all ease-in-out"
+                onClick={onMarkRead}
+              >
+                <Check className="size-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs">
+              mark as read
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       ) : null}
     </div>
   );

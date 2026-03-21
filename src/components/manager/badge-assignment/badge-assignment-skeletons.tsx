@@ -1,6 +1,6 @@
 export function BadgeAssignmentUsersSkeleton() {
   return (
-    <><div className="space-y-4">
+    <div className="space-y-4">
       {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="bg-card rounded-lg border-b border-gray-300 p-3 shadow-sm/25">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -31,33 +31,7 @@ export function BadgeAssignmentUsersSkeleton() {
             </div>
           </div>
         </div>))}
-    </div><div className="space-y-4">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className="bg-background-soft rounded-xl border border-accent/25 p-4 shadow-sm/25"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <div className="shrink-0 flex items-center gap-3 min-w-0 sm:min-w-48">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted" />
-                <div className="min-w-0 flex-1 sm:w-48 space-y-2">
-                  <div className="h-4 w-30 rounded bg-muted" />
-                  <div className="h-3 w-22 rounded bg-muted" />
-                </div>
-              </div>
-
-              <div className="flex-1 flex items-center gap-2 flex-wrap px-0 sm:px-4 min-w-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-muted" />
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-muted" />
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-muted" />
-                <div className="h-10 sm:h-12 w-10 rounded-md bg-muted" />
-              </div>
-
-              <div className="h-10 w-full sm:w-30 rounded-md bg-muted" />
-            </div>
-          </div>
-        ))}
-      </div></>
+    </div>
   );
 }
 

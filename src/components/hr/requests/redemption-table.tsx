@@ -41,7 +41,7 @@ export function RedemptionTable({
   const [selectedRequest, setSelectedRequest] = useState<RedemptionRequest | null>(null);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [requestImageError, setRequestImageError] = useState(false);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   // Pagination logic
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -170,7 +170,7 @@ export function RedemptionTable({
 
                   return (
                     <TableRow key={request.id} className="bg-card hover:bg-accent-secondary/25">
-                      <TableCell className="hidden px-2 py-2.5 lg:table-cell sm:px-4">
+                      <TableCell className="hidden px-2 py-3 lg:table-cell sm:px-4">
                         <p className="text-xs font-medium text-foreground sm:text-sm">{dateStr}</p>
                         <p className="text-[10px] text-muted-foreground sm:text-xs">{timeStr}</p>
                       </TableCell>

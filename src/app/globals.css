@@ -30,6 +30,7 @@
   --accent-secondary: #faa938; /* Light citrus orange */
   --accent-foreground: #fafafa;
   --primary-gradient: linear-gradient(180deg, #faa938 0%, #f47812 100%);
+  --wood-gradient: linear-gradient(180deg, #faa938 0%, #f47812 100%);
 
   --row-hover: #fce4bf;
 
@@ -448,7 +449,11 @@
 
   .wood-panel {
     background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 100%);
-    border: 3px solid var(--pixel-border);
+    border: 2.5px solid var(--pixel-border);
+  }
+
+  .bg-wood-card {
+    background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 100%);
   }
 
   .kitchen-parchment-card {
