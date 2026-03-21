@@ -11,6 +11,11 @@ export interface AttendanceConfig {
   overtimeAfter: string; // HH:mm
   autoTimeoutAt: string; // HH:mm
   breaktime_duration: string; // HH:mm - Duration allowed for break
+  /**
+   * IANA timezone identifier (e.g., 'Asia/Manila') that defines the business day.
+   * All attendance windows are interpreted in this timezone to avoid server-region drift.
+   */
+  timezone: string;
 }
 
 /**

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { formatInTimeZone, zonedTimeToUtc } from 'date-fns-tz';
 import {
   Dialog,
   DialogContent,
@@ -35,11 +36,12 @@ function formatLogLabel(action: AttendanceLogRow['action']): string {
   return 'Back to Work';
 }
 
-function parseTimeOnDate(base: Date, time: string): Date {
+function parseTimeOnDate(baseUtc: Date, time: string, timeZone: string): Date {
   const [hours, minutes] = time.split(':').map((value) => Number(value));
-  const result = new Date(base);
-  result.setHours(hours, minutes, 0, 0);
-  return result;
+  const datePart = formatInTimeZone(baseUtc, timeZone, 'yyyy-MM-dd');
+  const hour = String(hours).padStart(2, '0');
+  const minute = String(minutes).padStart(2, '0');
+  return zonedTimeToUtc(`${datePart} ${hour}:${minute}:00`, timeZone);
 }
 
 function parseDurationToMs(duration: string): number {
@@ -77,6 +79,7 @@ export function HrManagerAttendanceModal({ view, open, onOpenChange }: HrManager
   const timeOutMutation = useTimeOutAttendance(attendanceConfig);
   const startBreakMutation = useStartBreak(attendanceConfig);
   const endBreakMutation = useEndBreak(attendanceConfig);
+  const timeZone = attendanceConfig?.timezone ?? 'Asia/Manila';
 
   const isBusy =
     isLoading ||
@@ -101,8 +104,8 @@ export function HrManagerAttendanceModal({ view, open, onOpenChange }: HrManager
 
     if (!hasTimedIn) {
       if (attendanceConfig?.lateAfter && attendanceConfig?.timeOutAt) {
-        const lateAfterTime = parseTimeOnDate(now, attendanceConfig.lateAfter);
-        const timeOutAt = parseTimeOnDate(now, attendanceConfig.timeOutAt);
+        const lateAfterTime = parseTimeOnDate(now, attendanceConfig.lateAfter, timeZone);
+        const timeOutAt = parseTimeOnDate(now, attendanceConfig.timeOutAt, timeZone);
 
         if (now > lateAfterTime && now <= timeOutAt) {
           return { label: 'Late (Not Timed In)', className: 'text-orange-600' };
@@ -202,6 +205,7 @@ export function HrManagerAttendanceModal({ view, open, onOpenChange }: HrManager
                   hour: 'numeric',
                   minute: '2-digit',
                   hour12: true,
+                  timeZone,
                 })}
               </p>
             </div>
@@ -232,6 +236,7 @@ export function HrManagerAttendanceModal({ view, open, onOpenChange }: HrManager
                         hour: 'numeric',
                         minute: '2-digit',
                         hour12: true,
+                        timeZone,
                       })}
                     </span>
                   </div>

@@ -1,9 +1,12 @@
 'use server';
 
+import { formatInTimeZone, zonedTimeToUtc } from 'date-fns-tz';
 import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse } from '@/lib/utils/safe-action';
 import type { AttendanceConfig, AttendanceLog, AttendanceStatus, AttendanceTimelineEntry } from '@/types';
 import { attendanceConfig } from '@/lib/attendance-config';
+
+const DEFAULT_TIMEZONE = attendanceConfig.timezone || 'Asia/Manila';
 
 function normalizeConfig(config?: Partial<AttendanceConfig>): AttendanceConfig {
   return {
@@ -13,14 +16,17 @@ function normalizeConfig(config?: Partial<AttendanceConfig>): AttendanceConfig {
     overtimeAfter: config?.overtimeAfter ?? config?.timeOutAt ?? attendanceConfig.overtimeAfter,
     autoTimeoutAt: config?.autoTimeoutAt ?? attendanceConfig.autoTimeoutAt,
     breaktime_duration: config?.breaktime_duration ?? attendanceConfig.breaktime_duration,
+    timezone: config?.timezone ?? attendanceConfig.timezone ?? DEFAULT_TIMEZONE,
   };
 }
 
-function parseTimeOnDate(base: Date, time: string): Date {
+function parseTimeOnDate(baseUtc: Date, time: string, timeZone: string): Date {
   const [hours, minutes] = time.split(':').map((v) => Number(v));
-  const result = new Date(base);
-  result.setHours(hours, minutes, 0, 0);
-  return result;
+  const datePart = formatInTimeZone(baseUtc, timeZone, 'yyyy-MM-dd');
+  const hour = String(hours).padStart(2, '0');
+  const minute = String(minutes).padStart(2, '0');
+  // Interpret HH:mm in the configured timezone, return as UTC Date for consistent comparisons
+  return zonedTimeToUtc(`${datePart} ${hour}:${minute}:00`, timeZone);
 }
 
 function formatTo12Hour(time24: string): string {
@@ -31,11 +37,10 @@ function formatTo12Hour(time24: string): string {
   return `${hours12}:${minutes} ${period}`;
 }
 
-function getDayRange(base: Date): { start: Date; end: Date } {
-  const start = new Date(base);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(base);
-  end.setHours(23, 59, 59, 999);
+function getDayRange(base: Date, timeZone: string): { start: Date; end: Date } {
+  const datePart = formatInTimeZone(base, timeZone, 'yyyy-MM-dd');
+  const start = zonedTimeToUtc(`${datePart} 00:00:00.000`, timeZone);
+  const end = zonedTimeToUtc(`${datePart} 23:59:59.999`, timeZone);
   return { start, end };
 }
 
@@ -124,10 +129,10 @@ function buildTimelineFromLog(log: AttendanceLog | null): AttendanceTimelineEntr
   return entries.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 }
 
-async function getTodayLog(employeeId: string): Promise<AttendanceLog | null> {
+async function getTodayLog(employeeId: string, timeZone: string): Promise<AttendanceLog | null> {
   const supabase = await createClient();
   const now = new Date();
-  const { start, end } = getDayRange(now);
+  const { start, end } = getDayRange(now, timeZone);
 
   const { data, error } = await supabase
     .from('AttendanceLog')
@@ -160,7 +165,8 @@ export async function getTodayAttendanceTimelineAction(): Promise<ServerActionRe
     }
 
     const employeeId = sessionData.session.user.id;
-    const log = await getTodayLog(employeeId);
+    const timeZone = attendanceConfig.timezone ?? DEFAULT_TIMEZONE;
+    const log = await getTodayLog(employeeId, timeZone);
     return { error: null, data: buildTimelineFromLog(log) };
   } catch (error) {
     console.error('Error in getTodayAttendanceTimelineAction:', error);
@@ -182,13 +188,13 @@ export async function getTodayAttendanceStatusAction(
     const now = new Date();
     const normalized = normalizeConfig(config);
 
-    const timeInAt = parseTimeOnDate(now, normalized.timeInAt);
-    const timeOutAt = parseTimeOnDate(now, normalized.timeOutAt);
-    const lateAfter = parseTimeOnDate(now, normalized.lateAfter);
-    const overtimeAfter = parseTimeOnDate(now, normalized.overtimeAfter);
-    const autoTimeoutAt = parseTimeOnDate(now, normalized.autoTimeoutAt);
+    const timeInAt = parseTimeOnDate(now, normalized.timeInAt, normalized.timezone);
+    const timeOutAt = parseTimeOnDate(now, normalized.timeOutAt, normalized.timezone);
+    const lateAfter = parseTimeOnDate(now, normalized.lateAfter, normalized.timezone);
+    const overtimeAfter = parseTimeOnDate(now, normalized.overtimeAfter, normalized.timezone);
+    const autoTimeoutAt = parseTimeOnDate(now, normalized.autoTimeoutAt, normalized.timezone);
 
-    let log = await getTodayLog(employeeId);
+    let log = await getTodayLog(employeeId, normalized.timezone);
 
     // Auto-mark absent if no time-in by timeoutAt.
     if (!log && now >= timeOutAt) {
@@ -376,9 +382,9 @@ export async function timeInAttendanceAction(
     const now = new Date();
     const normalized = normalizeConfig(config);
 
-    const timeInAt = parseTimeOnDate(now, normalized.timeInAt);
-    const lateAfter = parseTimeOnDate(now, normalized.lateAfter);
-    const timeOutAt = parseTimeOnDate(now, normalized.timeOutAt);
+    const timeInAt = parseTimeOnDate(now, normalized.timeInAt, normalized.timezone);
+    const lateAfter = parseTimeOnDate(now, normalized.lateAfter, normalized.timezone);
+    const timeOutAt = parseTimeOnDate(now, normalized.timeOutAt, normalized.timezone);
 
     if (now < timeInAt) {
       return { error: `Time in starts at ${normalized.timeInAt}` };
@@ -388,7 +394,7 @@ export async function timeInAttendanceAction(
       return { error: 'Time in is closed for today' };
     }
 
-    const existing = await getTodayLog(employeeId);
+    const existing = await getTodayLog(employeeId, normalized.timezone);
     if (existing) {
       if (existing.is_absent) {
         return { error: 'Attendance already marked absent for today' };
@@ -451,10 +457,10 @@ export async function timeOutAttendanceAction(
     const now = new Date();
     const normalized = normalizeConfig(config);
 
-    const timeOutAt = parseTimeOnDate(now, normalized.timeOutAt);
-    const overtimeAfter = parseTimeOnDate(now, normalized.overtimeAfter);
+    const timeOutAt = parseTimeOnDate(now, normalized.timeOutAt, normalized.timezone);
+    const overtimeAfter = parseTimeOnDate(now, normalized.overtimeAfter, normalized.timezone);
 
-    let log = logId ? null : await getTodayLog(employeeId);
+    let log = logId ? null : await getTodayLog(employeeId, normalized.timezone);
 
     if (logId) {
       const { data, error } = await supabase
@@ -538,8 +544,9 @@ export async function startBreakAction(
 
     const employeeId = sessionData.session.user.id;
     const now = new Date();
+    const normalized = normalizeConfig(config);
 
-    const log = await getTodayLog(employeeId);
+    const log = await getTodayLog(employeeId, normalized.timezone);
 
     if (!log) {
       return { error: 'No active time in found for today' };
@@ -611,7 +618,7 @@ export async function endBreakAction(
     const now = new Date();
     const normalized = normalizeConfig(config);
 
-    let log = logId ? null : await getTodayLog(employeeId);
+    let log = logId ? null : await getTodayLog(employeeId, normalized.timezone);
 
     if (logId) {
       const { data, error } = await supabase
