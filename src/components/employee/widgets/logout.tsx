@@ -44,6 +44,8 @@ export const LogOutBtn = memo(function LogOutBtn({ iconOnly = false, className }
     startLogout();
     startTransition(async () => {
       try {
+        await queryClient.cancelQueries();
+
         const { error } = await handleSignOut();
 
         if (error) {
@@ -58,7 +60,6 @@ export const LogOutBtn = memo(function LogOutBtn({ iconOnly = false, className }
         });
 
         router.replace('/auth/login');
-        router.refresh();
       } finally {
         stopLogout();
       }

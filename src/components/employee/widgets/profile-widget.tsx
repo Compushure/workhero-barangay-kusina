@@ -1,14 +1,18 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import { ProfileLevelSkeleton } from './widget-skeletons';
+import { useMemo } from 'react';
+import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
+import { useGetEmployeeXP } from '@/hooks/tanstack/queries/employeeQueries';
+import type { EmployeeXP } from '@/types';
 import { ProfileModal } from '@/components/sidebar/profile-modal';
+import { useState } from 'react';
 
 export default function ProfileLevelCard() {
-  const { data: user, isLoading: userLoading } = useGetSessionUser();
-  const [hasImage, setHasImage] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const { data: user, isLoading: userLoading } = useGetSessionUser();
+  const { data: xpData, isLoading: xpLoading } = useGetEmployeeXP();
+  const [hasImage, setHasImage] = useState(true);
 
   const imageUrlWithCacheBust = useMemo(() => {
     if (!user?.profilePictureUrl) return undefined;
@@ -29,7 +33,7 @@ export default function ProfileLevelCard() {
   const name = user?.name ?? 'Employee';
   const email = user?.email ?? 'No email address';
 
-  const isLoading = userLoading;
+  const isLoading = userLoading || xpLoading;
 
   if (isLoading) {
     return <ProfileLevelSkeleton />;

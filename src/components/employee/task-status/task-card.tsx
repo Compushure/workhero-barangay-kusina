@@ -5,7 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Coins, Soup, Calendar } from 'lucide-react';
 import type { TaskStatusItem } from './types';
 import TaskCardDialog from './task-card-dialog';
-import { formatDate, isTaskOverdue } from '@/utils/date-utils';
+import { formatDate } from '@/utils/date-utils';
+import { isTaskStatusItemOverdue } from './task-status-utils';
 
 
 interface TaskCardProps {
@@ -14,6 +15,7 @@ interface TaskCardProps {
 
 export function TaskCard({ task }: TaskCardProps) {
   const [modalOpen, setModalOpen] = useState(false);
+  const isOverdue = isTaskStatusItemOverdue(task);
 
   return (
     <>
@@ -35,7 +37,7 @@ export function TaskCard({ task }: TaskCardProps) {
             <p className={`min-w-0 w-full max-w-xs truncate text-lg font-medium leading-snug ${task.status === 'approved' && task.completedOrders === task.maxOrders && task.pendingOrders === 0 ? 'text-card/50 line-through' : 'text-card'}`} title={task.name}>
               {task.name}
             </p>
-            <span className={`flex gap-2 items-center text-sm font-medium ${isTaskOverdue(task.dueDate) ? 'text-red-700' : ''}`}>
+            <span className={`flex gap-2 items-center text-sm font-medium ${isOverdue ? 'text-red-700' : ''}`}>
               <Calendar strokeWidth={2.75} className='size-4'/>
               {formatDate(task.dueDate)}
             </span>

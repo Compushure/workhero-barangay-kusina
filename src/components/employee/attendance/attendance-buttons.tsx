@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import DutyLabel from './duty-label';
 
 interface Props {
   status: any;
@@ -20,9 +19,6 @@ export default function AttendanceButtons({
 }: Props) {
   return (
     <div className="flex flex-col items-center gap-4 w-full">
-      {/* Duty status label */}
-      <DutyLabel status={status} />
-
       {/* Already Timed Out */}
       {status?.hasTimedOut && (
         <div className="text-center">

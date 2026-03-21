@@ -1,9 +1,9 @@
 'use client';
 
 import { TaskStatusBoard } from './task-status-board';
-import NavSection from '../nav-section';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
 import HeaderHUD from '../widgets/header-hud';
+import { RankWidget } from '../dashboard/rank-panel';
 
 export function TasksPage() {
   const { data, error, isLoading } = useGetEmployeeTasks();
@@ -17,20 +17,25 @@ export function TasksPage() {
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-[radial-gradient(circle,#FFFCF5_0%,#EFC18F_40%,#D68B5C_75%,#60203D_100%)]">
-
-      <header className='fixed z-50 w-screen'>
-        <HeaderHUD />
+      <header className="sticky top-0 left-0 right-0 w-full px-2 sm:px-4 pt-2 z-20 pointer-events-none">
+        <div className="pointer-events-auto flex w-full flex-col gap-2 p-1">
+          <HeaderHUD className="rounded-lg" />
+          <div className="flex w-full justify-end pr-1 sm:pr-2 lg:pr-4">
+            <RankWidget />
+          </div>
+        </div>
       </header>
-      
+
       <div className="flex flex-row w-full mx-auto p-4">
         <TaskStatusBoard
           currentTasks={currentTasks}
           inReviewTasks={onReviewTasks}
           verifiedTasks={verifiedTasks}
           rejectedTasks={deniedTasks}
+          isLoading={isLoading}
+          error={error}
         />
       </div>
-
     </div>
   );
 }
