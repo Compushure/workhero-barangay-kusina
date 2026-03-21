@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, type ReactNode } from 'react';
+import React, { useMemo, useState } from 'react';
 import { CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -36,7 +36,6 @@ interface PeriodFiltersProps {
   availablePeriods: RankingPeriodWithTop[];
   onTypeChange: (value: string) => void;
   onDateChange: (date: Date | null) => void;
-  extraContent?: ReactNode;
 }
 
 export function PeriodFilters({
@@ -46,7 +45,6 @@ export function PeriodFilters({
   availablePeriods,
   onTypeChange,
   onDateChange,
-  extraContent,
 }: PeriodFiltersProps) {
   const [open, setOpen] = useState(false);
   const availablePeriodKeys = useMemo(
@@ -67,14 +65,7 @@ export function PeriodFilters({
     availablePeriodKeys.has(toPeriodSelectionKey(date, activeTab));
 
   return (
-    <div
-      className={cn(
-        'grid gap-3',
-        extraContent
-          ? 'sm:grid-cols-2 lg:grid-cols-[240px_minmax(0,1fr)_196px] xl:grid-cols-[130px_210px_196px]'
-          : 'sm:grid-cols-2 xl:grid-cols-[130px_210px]'
-      )}
-    >
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[130px_210px]">
       <div className="flex w-full flex-col gap-1.5 xl:max-w-[130px]">
         <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           Select Period
@@ -144,10 +135,6 @@ export function PeriodFilters({
           </PopoverContent>
         </Popover>
       </div>
-
-      {extraContent ? (
-        <div className="flex w-full flex-col gap-1.5 lg:justify-end">{extraContent}</div>
-      ) : null}
     </div>
   );
 }

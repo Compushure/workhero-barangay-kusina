@@ -84,7 +84,7 @@ export async function editUserPoints({
 /**
  * Edit (add) XP for a specific user
  * Only accessible by managers
- * Level is automatically calculated by the database (every 100 XP = 1 level)
+ * Level/XP are calculated manually from Level thresholds (no DB trigger dependency)
  * @param userId - The user ID to update XP for
  * @param xpToAdd - Number of XP to add (must be non-negative)
  * @returns Updated XP and level values
@@ -114,12 +114,79 @@ export async function editUserXP({
       throw new Error('User ID is required');
     }
 
-    // Use admin client for manager operations
-    // Update User table - database trigger handles increment and level calculation
+    const { data: userData, error: userFetchError } = await supabaseAdmin
+      .from('User')
+      .select('xp, level, total_xp')
+      .eq('id', userId)
+      .single();
+
+    if (userFetchError || !userData) {
+      throw new Error('User not found');
+    }
+
+    const { data: levelRows, error: levelRowsError } = await supabaseAdmin
+      .from('Level')
+      .select('level, xp')
+      .order('level', { ascending: true });
+
+    if (levelRowsError) {
+      throw new Error(`Failed to fetch level thresholds: ${levelRowsError.message}`);
+    }
+
+    const levelThresholds = new Map<number, number>();
+    for (const row of levelRows ?? []) {
+      levelThresholds.set(row.level, row.xp ?? 100);
+    }
+
+    const getLevelThreshold = (level: number): number => {
+      if (level <= 1) {
+        return Math.max(0, levelThresholds.get(1) ?? 0);
+      }
+
+      return Math.max(0, levelThresholds.get(level) ?? level * 100);
+    };
+
+    const getRequiredXpForLevel = (level: number): number => {
+      if (level <= 1) {
+        return Math.max(1, getLevelThreshold(2));
+      }
+
+      return Math.max(1, getLevelThreshold(level));
+    };
+
+    let newLevel = Math.min(Math.max(userData.level ?? 1, 1), 10);
+    let newXp = Math.max(0, userData.xp ?? 0) + xpToAdd;
+
+    // Keep awarding XP at cap, but never level past 10.
+    if (newLevel < 10) {
+      while (newLevel < 10) {
+        const requiredXp = getRequiredXpForLevel(newLevel);
+        if (newXp < requiredXp) {
+          break;
+        }
+
+        newXp -= requiredXp;
+        newLevel += 1;
+      }
+    }
+
+    const computeTotalXP = (level: number, xp: number): number => {
+      let sum = 0;
+      for (let lvl = 1; lvl < level; lvl += 1) {
+        sum += getRequiredXpForLevel(lvl);
+      }
+      return sum + Math.max(0, xp);
+    };
+
+    const fallbackTotalXp = computeTotalXP(Math.min(Math.max(userData.level ?? 1, 1), 10), Math.max(0, userData.xp ?? 0));
+    const totalXpAfterUpdate = Math.max(0, (userData.total_xp ?? fallbackTotalXp) + xpToAdd);
+
     const { error: updateError } = await supabaseAdmin
       .from('User')
       .update({
-        xp: xpToAdd,
+        xp: newXp,
+        level: newLevel,
+        total_xp: totalXpAfterUpdate,
       })
       .eq('id', userId);
 
@@ -127,24 +194,9 @@ export async function editUserXP({
       throw new Error(`Failed to update XP: ${updateError.message}`);
     }
 
-    // Query user_attributes view to get final values
-    const { data, error: fetchError } = await supabaseAdmin
-      .from('user_attributes')
-      .select('xp, user_level')
-      .eq('user_id', userId)
-      .single();
-
-    if (fetchError) {
-      throw new Error(`Failed to fetch updated user data: ${fetchError.message}`);
-    }
-
-    if (!data) {
-      throw new Error('User not found after update');
-    }
-
     return {
-      newXP: data.xp,
-      newLevel: data.user_level,
+      newXP: newXp,
+      newLevel,
     };
   });
 }

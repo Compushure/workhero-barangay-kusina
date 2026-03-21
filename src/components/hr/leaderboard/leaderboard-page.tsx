@@ -147,7 +147,7 @@ export async function LeaderboardPageContent({ searchParams }: LeaderboardPageCo
             currentPeriodRankingExists={currentPeriodRankingExists}
             rankingPeriodId={currentPeriodRankingData?.rankingPeriodId}
             isVisible={currentPeriodRankingData?.isVisible}
-            className="min-w-0 xl:mr-auto xl:w-fit"
+            className="min-w-0 xl:max-w-4xl xl:mr-auto"
           />
         ) : null}
 

@@ -1,27 +1,56 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
-import HeaderHUD from '../widgets/header-hud';
+import { useMemo, useState } from 'react';
+import ProfileAndLevel from '../attendance/profile-level';
+import XPProgressAndPoints from '../attendance/xp-points';
 import NavSection from '../nav-section';
 import CookingSection from './cooking-section';
 import { RankWidget } from './rank-panel';
 import { RewardRequestsFeedbackModal } from './reward-requests-feedback-modal';
 import TaskIcon from './quick-task';
+import RewardIcon from './reward-icon';
 import { Card, CardContent } from '@/components/ui/card';
+import { useGetAllLevelMetadata, useGetEmployeeXP } from '@/hooks/tanstack/queries/employeeQueries';
+
+const DEFAULT_KITCHEN_BG_URL =
+  'https://ewvpbwxqkomybbhmqygm.supabase.co/storage/v1/object/public/kitchen/level_1_bg.png';
 
 export default function EmployeeDashboardClient() {
   const [isRewardFeedbackModalOpen, setIsRewardFeedbackModalOpen] = useState(false);
+  const { data: xpData } = useGetEmployeeXP();
+  const { data: levelMetadata } = useGetAllLevelMetadata();
+
+  const kitchenBackgroundUrl = useMemo(() => {
+    const currentLevel = xpData?.level ?? 1;
+    const levelRow = levelMetadata?.find((row) => row.level === currentLevel);
+    const dbLink = levelRow?.bg_img_link?.trim();
+
+    // Fallback only when DB link is empty/null.
+    return dbLink && dbLink.length > 0 ? dbLink : DEFAULT_KITCHEN_BG_URL;
+  }, [levelMetadata, xpData?.level]);
 
   return (
     <div
-      // className="flex flex-col min-h-screen bg-bottom bg-repeat bg-contain"
-      // style={{ backgroundImage: "url('/w.png')" }}
-      className="flex flex-col min-h-screen bg-[radial-gradient(circle,#FFFCF5_0%,#EFC18F_40%,#D68B5C_60%,#60203D_100%)]"
+      className="flex flex-col min-h-screen bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url('${kitchenBackgroundUrl}')` }}
     >
       {/* Row 1: Header HUD */}
-      <header>
-        <HeaderHUD />
+      <header className="sticky top-0 left-0 right-0 w-full px-2 sm:px-4 pt-2 z-20 pointer-events-none">
+        <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-4 p-1">
+          <div className="pointer-events-auto flex items-center gap-3 sm:gap-4 flex-nowrap overflow-x-auto">
+            <ProfileAndLevel />
+            <XPProgressAndPoints />
+          </div>
+
+          <div className="pointer-events-auto w-full sm:w-auto flex justify-end">
+            <Card className="bg-transparent shadow-none border-none w-full sm:w-auto p-0 gap-0 mr-15">
+              <CardContent className="p-0">
+                <RankWidget />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </header>
 
       {/* Row 2: Nav (20%) + Cooking (60%) + Rank (20%) */}
@@ -38,7 +67,7 @@ export default function EmployeeDashboardClient() {
           <div className="w-[20%]">
             <Card className="bg-transparent shadow-none border-none h-full">
               <CardContent className="h-full">
-                <NavSection />
+                
               </CardContent>
             </Card>
           </div>
@@ -48,35 +77,16 @@ export default function EmployeeDashboardClient() {
             <CookingSection className="w-full h-full" />
           </div>
 
-          <div className="w-[20%] min-w-70 flex items-start justify-start">
-            <Card className="bg-transparent shadow-none border-none">
-              <CardContent className="p-0">
-                <RankWidget />
-
-                <button
-                  type="button"
-                  onClick={() => setIsRewardFeedbackModalOpen(true)}
-                  className=" mt-2 w-70 cursor-pointer transition-transform hover:scale-[1.02]"
-                  aria-label="Open reward request feedbacks"
-                >
-                  <Image
-                    src="/mercado/bellbasket.png"
-                    alt="Open reward request feedbacks"
-                    width={280}
-                    height={78}
-                    className="h-auto w-full"
-                    priority
-                  />
-                </button>
-              </CardContent>
-            </Card>
-          </div>
+          <div className="w-[20%] min-w-70 flex items-start justify-start" />
         </div>
       </section>
 
-      {/* Row 3: Tasks modal trigger only */}
-      <section className="flex p-4 justify-center">
+      {/* Row 3: Tasks and reward feedback triggers */}
+      <section className="flex px-4 pb-4 pt-10 justify-center">
+        <div className="flex items-center gap-6">
         <TaskIcon />
+          <RewardIcon onOpen={() => setIsRewardFeedbackModalOpen(true)} />
+        </div>
       </section>
 
       <RewardRequestsFeedbackModal
