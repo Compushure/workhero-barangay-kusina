@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Welcome to Work Hero KusinHero</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f7e7d5;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    "
+  >
+    <div
+      style="
+        display: none;
+        overflow: hidden;
+        line-height: 1px;
+        opacity: 0;
+        max-height: 0;
+        max-width: 0;
+      "
+    >
+      {{PREVIEW_TEXT}}
+    </div>
+
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      style="border-collapse: collapse"
+    >
+      <tr>
+        <td align="center" style="padding: 32px 16px">
+          <table
+            role="presentation"
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            style="border-collapse: collapse; max-width: 640px"
+          >
+            <tr>
+              <td style="padding-bottom: 20px">
+                <div
+                  style="
+                    border: 2px solid #e4c9a2;
+                    background-color: #fff8ed;
+                    box-shadow:
+                      0 8px 28px rgba(92, 62, 34, 0.16),
+                      0 2px 8px rgba(92, 62, 34, 0.1);
+                    padding: 22px 24px 24px;
+                    border-radius: 12px;
+                  "
+                >
+                  <p
+                    style="
+                      margin: 0;
+                      color: #f07818;
+                      font-size: 11px;
+                      font-weight: 700;
+                      letter-spacing: 0.28em;
+                      text-transform: uppercase;
+                    "
+                  >
+                    WORK HERO
+                  </p>
+                  <p
+                    style="
+                      margin: 12px 0 0;
+                      color: #1f140c;
+                      font-size: 28px;
+                      font-weight: 800;
+                      line-height: 1.25;
+                    "
+                  >
+                    Barangay Kusina
+                  </p>
+                  <p
+                    style="
+                      margin: 10px 0 0;
+                      color: #c15f0f;
+                      font-size: 22px;
+                      font-weight: 700;
+                      letter-spacing: 0.01em;
+                      line-height: 1.35;
+                    "
+                  >
+                    Welcome, {{USER_NAME}}
+                  </p>
+                  <p
+                    style="
+                      margin: 10px 0 0;
+                      color: #3a2b1b;
+                      font-size: 16px;
+                      line-height: 1.6;
+                    "
+                  >
+                    You’ve been added as a <strong>{{ROLE_LABEL}}</strong> and your first
+                    sign-in link is ready.
+                  </p>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div
+                  style="
+                    border: 2px solid #e4c9a2;
+                    background-color: #fffaf2;
+                    box-shadow: 0 8px 24px rgba(92, 62, 34, 0.12);
+                    padding: 28px 26px;
+                    border-radius: 12px;
+                  "
+                >
+                  <p
+                    style="
+                      margin: 0 0 14px;
+                      color: #2f2417;
+                      font-size: 17px;
+                      line-height: 1.7;
+                    "
+                  >
+                    Thanks for signing up. We are glad to welcome you to the Work Hero Barangay
+                    Kusina team.
+                  </p>
+
+                  <p
+                    style="
+                      margin: 16px 0 0;
+                      color: #3b2a1a;
+                      font-family: Verdana, Geneva, sans-serif;
+                      font-size: 16px;
+                      line-height: 1.7;
+                    "
+                  >
+                    To log in for the very first time, use your personal magic link below. Your
+                    password will be handed out to you by the Admin User.
+                  </p>
+
+                  <div style="padding: 26px 0 12px; text-align: center">
+                    <a
+                      href="{{MAGIC_LINK}}"
+                      style="
+                        display: inline-block;
+                        border: 2px solid #c15f0f;
+                        background-color: #f48d32;
+                        color: #1f140c;
+                        font-family: 'Courier New', monospace;
+                        font-size: 13px;
+                        font-weight: 700;
+                        letter-spacing: 0.08em;
+                        padding: 14px 22px;
+                        text-decoration: none;
+                        text-transform: uppercase;
+                        border-radius: 6px;
+                        box-shadow:
+                          0 10px 20px rgba(193, 95, 15, 0.3),
+                          inset 0 1px 0 rgba(255, 255, 255, 0.4);
+                      "
+                    >
+                      Start Cooking
+                    </a>
+                  </div>
+
+                  <p
+                    style="
+                      margin: 8px 0 0;
+                      color: #6b5038;
+                      font-family: Verdana, Geneva, sans-serif;
+                      font-size: 13px;
+                      line-height: 1.6;
+                      text-align: center;
+                    "
+                  >
+                    This link will sign you in and send you to {{NEXT_DESTINATION}}.
+                  </p>
+
+                  <div
+                    style="
+                      margin-top: 24px;
+                      border: 1px dashed #caa474;
+                      background: #fff4e3;
+                      padding: 16px;
+                      border-radius: 8px;
+                    "
+                  >
+                    <p
+                      style="
+                        margin: 0;
+                        color: #4b3522;
+                        font-family: Verdana, Geneva, sans-serif;
+                        font-size: 14px;
+                        font-weight: 700;
+                        line-height: 1.5;
+                      "
+                    >
+                      Button not working?
+                    </p>
+                    <p
+                      style="
+                        margin: 10px 0 0;
+                        color: #4b3522;
+                        font-family: Verdana, Geneva, sans-serif;
+                        font-size: 14px;
+                        line-height: 1.6;
+                      "
+                    >
+                      Copy and paste this link into your browser:
+                    </p>
+                    <p style="margin: 12px 0 0">
+                      <a
+                        href="{{MAGIC_LINK}}"
+                        style="
+                          color: #b85c38;
+                          font-family: 'Courier New', monospace;
+                          font-size: 13px;
+                          line-height: 1.7;
+                          word-break: break-all;
+                        "
+                      >
+                        {{MAGIC_LINK}}
+                      </a>
+                    </p>
+                  </div>
+
+                    <p
+                      style="
+                        margin: 24px 0 0;
+                        color: #3b2a1a;
+                        font-family: Verdana, Geneva, sans-serif;
+                      font-size: 16px;
+                      line-height: 1.7;
+                    "
+                  >
+                    Should you have any concerns, feel free to contact
+                    <a
+                      href="mailto:{{SUPPORT_EMAIL}}"
+                      style="color: #b85c38; font-weight: 700; text-decoration: none"
+                    >
+                      {{SUPPORT_EMAIL}}
+                    </a>
+                    .
+                  </p>
+
+                  <p
+                    style="
+                      margin: 18px 0 0;
+                      color: #3b2a1a;
+                      font-family: 'Courier New', monospace;
+                      font-size: 20px;
+                      line-height: 1.4;
+                    "
+                    >
+                    Let's get cooking, KusinHero!
+                  </p>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 18px 8px 0; text-align: center">
+                <p
+                  style="
+                    margin: 0;
+                    color: #d5b998;
+                    font-family: Verdana, Geneva, sans-serif;
+                    font-size: 12px;
+                    line-height: 1.6;
+                  "
+                >
+                  This login link is intended for {{USER_NAME}}. If you were not expecting this
+                  email, you can safely ignore it.
+                </p>
+                <p
+                  style="
+                    margin: 10px 0 0;
+                    color: #a88c6c;
+                    font-family: Verdana, Geneva, sans-serif;
+                    font-size: 12px;
+                    line-height: 1.6;
+                  "
+                >
+                  (c) {{YEAR}} Work Hero Barangay Kusina
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

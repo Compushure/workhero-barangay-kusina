@@ -11,6 +11,7 @@
 export type ServerActionResponse<T = unknown> = {
   error: string | null;
   data?: T;
+  warning?: string | null;
 };
 
 /**
