@@ -4,10 +4,24 @@ import { ConditionalNotifications } from '../conditional-notifications';
 import XPProgress from '../attendance/xp-points';
 import ProfileLevelCard from '../attendance/profile-level';
 import PointsCardWidget from './points-card-widget';
+import { cn } from '@/lib/utils';
 
-export default function HeaderHUD() {
+interface HeaderHUDProps {
+  className?: string;
+  hideNotificationsOnMercado?: boolean;
+}
+
+export default function HeaderHUD({
+  className,
+  hideNotificationsOnMercado = true,
+}: HeaderHUDProps) {
   return (
-    <div className="flex min-h-24 min-w-300 items-center gap-3 bg-linear-to-b from-muted-foreground/50 to-amber-900/0 px-5 font-jersey">
+    <div
+      className={cn(
+        'flex min-h-24 w-full items-center gap-3 overflow-x-auto px-5 font-jersey sticky',
+        className
+      )}
+    >
       <div className="shrink-0">
         <XPProgress />
       </div>
@@ -17,7 +31,7 @@ export default function HeaderHUD() {
       </div>
 
       <div className="shrink-0">
-        <ConditionalNotifications hideOnMercado />
+        <ConditionalNotifications hideOnMercado={hideNotificationsOnMercado} />
       </div>
 
       <div className="shrink-0">

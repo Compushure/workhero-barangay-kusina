@@ -3,12 +3,9 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { MercadoProvider, useMercadoContext } from './mercado-context';
-import { useMercadoPageData } from '@/hooks/useMercadoPageData';
-import { LogOutBtn } from '@/components/employee/attendance/logout';
-import { NotificationsPopover } from '@/components/notifications/notifications';
 import { MapLauncher } from '@/components/employee/minimap/map-launcher';
-import { Coins } from 'lucide-react';
 import { NavLoadingState } from '@/components/employee/nav-loading-state';
+import HeaderHUD from '../widgets/header-hud';
 
 interface MercadoLayoutClientProps {
   children: React.ReactNode;
@@ -28,19 +25,6 @@ const INTERVAL_STALLS: IntervalStall[] = [
 
 function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
   const { setSelectedInterval } = useMercadoContext();
-  const { userPoints, isLoading } = useMercadoPageData();
-
-  const marketControlStyles = {
-    shell: 'bg-[#765332] border-3 border-[#47331F] rounded-lg',
-    label: 'text-sm text-[#F5E8D6]/90 font-medium',
-    value: 'text-2xl font-bold text-[#F5E8D6] pixelated-text',
-    iconWrap:
-      'flex items-center justify-center w-12 h-12 rounded-full bg-[#E89C30] border-2 border-[#47331F] shrink-0',
-    bellTrigger:
-      'h-16 w-16 rounded-full bg-[#765332] border-3 border-[#47331F] text-[#F5E8D6] hover:scale-105 hover:bg-[#765332] hover:text-[#F5E8D6] transition-all shadow-none',
-    bellIcon: 'h-8 w-8',
-    bellBadge: 'bg-[#E89C30] text-[#690003] border border-[#47331F] font-bold',
-  };
 
   const handleStallClick = (interval: 'weekly' | 'monthly' | 'yearly') => {
     setSelectedInterval(interval);
@@ -58,32 +42,8 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
         quality={100}
       />
 
-      <div className="absolute top-4 left-4 z-40 flex items-start gap-3 md:top-6 md:left-6">
-        <div className={cn('w-40 px-4 py-3 md:w-50', marketControlStyles.shell)}>
-          <div className="flex items-center gap-3">
-            <div className={marketControlStyles.iconWrap}>
-              <Coins className="h-7 w-7 text-[#690003]" />
-            </div>
-            <div>
-              <p className={marketControlStyles.label}>Fiesta Points</p>
-              <p className={marketControlStyles.value}>
-                {isLoading ? '...' : userPoints.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-0.5">
-          <NotificationsPopover
-            triggerClassName={marketControlStyles.bellTrigger}
-            iconClassName={marketControlStyles.bellIcon}
-            badgeClassName={marketControlStyles.bellBadge}
-          />
-        </div>
-      </div>
-
-      <div className="absolute top-4 right-4 z-40 flex flex-col items-end gap-3 md:top-6 md:right-6">
-        <LogOutBtn />
+      <div className="absolute top-0 left-0 right-0 z-40">
+        <HeaderHUD hideNotificationsOnMercado={false} />
       </div>
 
       <MapLauncher className="right-4 top-27 translate-y-0 md:right-6 md:top-31" />
