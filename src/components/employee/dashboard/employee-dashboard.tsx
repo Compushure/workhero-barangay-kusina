@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useMemo, useState } from 'react';
 // import ProfileAndLevel from '../attendance/profile-level';
 // import XPProgressAndPoints from '../attendance/xp-points';
@@ -33,11 +32,21 @@ export default function EmployeeDashboardClient() {
 
   return (
     <div
-      className="flex flex-col min-h-screen bg-cover bg-center bg-no-repeat"
+      className="relative flex flex-col min-h-screen bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url('${kitchenBackgroundUrl}')` }}
     >
-      {/* Row 1: Header HUD */}
-      <HeaderHUD/>
+      {/* Overlay top widgets (do not affect layout flow) */}
+      <div className="pointer-events-none absolute top-0 left-0 right-0 z-20 w-full px-2 pt-2 sm:px-4">
+        <div className="pointer-events-auto flex w-full flex-col gap-2">
+          <HeaderHUD className="rounded-lg" />
+          <div className="flex w-full justify-end pr-1 sm:pr-2 lg:pr-4">
+            <RankWidget />
+          </div>
+        </div>
+      </div>
+
+      {/* Preserve original vertical placement after moving HUD to overlay */}
+      <div className="h-26 sm:h-28" aria-hidden="true" />
 
       {/* Row 2: Nav (20%) + Cooking (60%) + Rank (20%) */}
       <section className="relative flex gap-4 p-4 flex-none h-87">
@@ -52,9 +61,7 @@ export default function EmployeeDashboardClient() {
           {/* Left column: 20% */}
           <div className="w-[20%]">
             <Card className="bg-transparent shadow-none border-none h-full">
-              <CardContent className="h-full">
-                
-              </CardContent>
+              <CardContent className="h-full"></CardContent>
             </Card>
           </div>
 
@@ -70,7 +77,7 @@ export default function EmployeeDashboardClient() {
       {/* Row 3: Tasks and reward feedback triggers */}
       <section className="flex px-4 pb-4 pt-10 justify-center">
         <div className="flex items-center gap-6">
-        <TaskIcon />
+          <TaskIcon />
           <RewardIcon onOpen={() => setIsRewardFeedbackModalOpen(true)} />
         </div>
       </section>
