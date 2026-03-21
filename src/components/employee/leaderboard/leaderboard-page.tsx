@@ -192,7 +192,7 @@ export function LeaderboardPageClient({
             ) : (
               <>
                 <header className="mb-5 flex w-full max-w-3xl shrink-0 flex-col items-center gap-5 px-1 sm:mb-6 sm:gap-6">
-                  <div className="mt-6 flex w-full justify-center sm:mt-7">
+                  <div className="mt-6 flex w-full max-w-[388px] justify-center sm:mt-7 sm:max-w-[412px]">
                     <PeriodNav
                       periodType={periodType}
                       onPeriodTypeChange={handlePeriodTypeChange}
