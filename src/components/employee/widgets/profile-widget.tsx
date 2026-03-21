@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
-import { ProfileLevelSkeleton } from './skeletons';
+import { ProfileLevelSkeleton } from './widget-skeletons';
 import { ProfileModal } from '@/components/sidebar/profile-modal';
 
 export default function ProfileLevelCard() {

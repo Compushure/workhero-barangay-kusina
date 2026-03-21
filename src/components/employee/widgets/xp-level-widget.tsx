@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { handleFetchEmployeeXP } from '@/action-handlers/employee/stats';
 import type { EmployeeXP } from '@/types';
-import { XPProgressSkeleton } from './skeletons';
+import { XPProgressSkeleton } from './widget-skeletons';
 
 export default function XPProgress() {
   const [xpData, setXpData] = useState<EmployeeXP | null>(null);

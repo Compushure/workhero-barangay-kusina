@@ -1,8 +1,8 @@
 'use client';
 
 import { ConditionalNotifications } from '../conditional-notifications';
-import XPProgress from '../attendance/xp-points';
-import ProfileLevelCard from '../attendance/profile-level';
+import XPProgress from './xp-level-widget';
+import ProfileLevelCard from './profile-widget';
 import PointsCardWidget from './points-card-widget';
 import { cn } from '@/lib/utils';
 
