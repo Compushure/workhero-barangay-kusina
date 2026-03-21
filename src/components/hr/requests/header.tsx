@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUpDown, Search } from 'lucide-react';
+import { ArrowUpDown, ListTodo, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,7 +11,7 @@ import {
 import { PageHeader } from '@/components/shared/page-header';
 
 interface HeaderSectionProps {
-  title: string;
+  title?: string;
   description?: string;
   searchTerm?: string;
   onSearch?: (value: string) => void;
@@ -19,17 +19,25 @@ interface HeaderSectionProps {
   sortBy?: string;
   statusFilter?: string;
   onStatusChange?: (value: string) => void;
+  requestsCount?: number;
 }
 
-export function HeaderSection({
-  title,
-  description,
+export function HeaderSection({ title, description }: HeaderSectionProps) {
+  return (
+    <div className="space-y-4 sm:space-y-5">
+      <PageHeader title={title ?? ''} subtitle={description} />
+    </div>
+  );
+}
+
+export function RewardRequestsControls({
   searchTerm = '',
   onSearch,
   onSort,
   sortBy = 'date-desc',
   statusFilter,
   onStatusChange,
+  requestsCount = 0,
 }: HeaderSectionProps) {
   const statusOptions = [
     { value: 'pending', label: 'Pending' },
@@ -50,12 +58,20 @@ export function HeaderSection({
     sortOptions.find((option) => option.value === sortBy)?.label || 'Date (Newest)';
 
   return (
-    <div className="space-y-4 sm:space-y-5">
-      <PageHeader title={title} subtitle={description} />
+    <div className="sticky top-(--sticky-top-gap) z-30">
+      <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex shrink-0 self-start gap-2 whitespace-nowrap text-h5 text-foreground sm:gap-3 xl:self-center">
+          <h5 className="flex items-center gap-1.5 text-h2">
+            <ListTodo size={16} className="text-accent" />
+            Requests{' '}
+            <span className="ml-1 rounded-md bg-accent/75 px-2 py-0.5 text-[13px] text-primary-foreground shadow-sm/25">
+              {requestsCount}
+            </span>
+          </h5>
+        </div>
 
-      <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5">
-        <div className="flex min-w-0 flex-col items-stretch gap-2 xl:flex-row xl:items-center xl:justify-end">
-          <div className="min-w-0 flex-1 xl:max-w-xs">
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
+          <div className="min-w-0 flex-1 xl:max-w-md">
             <div className="relative min-w-0 flex-1">
               <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-400" />
               <input

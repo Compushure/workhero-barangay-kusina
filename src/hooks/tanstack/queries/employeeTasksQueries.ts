@@ -29,10 +29,10 @@ export function useGetEmployeeTasks(
       return await handleFetchEmployeeTasks();
     },
     enabled: queryOptions.enabled !== false,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 10 * 1000, // 10 seconds
+    gcTime: 2 * 60 * 1000, // 2 minutes
     retry: 2,
     refetchOnWindowFocus: true,
-    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes for real-time updates
+    refetchInterval: 15 * 1000, // Auto-refresh every 15 seconds for near real-time updates
   }) as UseQueryResult<EmployeeTasksData, Error>;
 }

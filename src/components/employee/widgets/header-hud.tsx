@@ -1,33 +1,106 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
-import PointsIcon from './points-widget';
-import LevelIcon from './level-widget';
-import { ProfilePic } from './user-profile';
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { ConditionalNotifications } from '../conditional-notifications';
+import XPProgress from './xp-level-widget';
+import PointsCardWidget from './points-card-widget';
+import { cn } from '@/lib/utils';
+import { LogOutBtn } from './logout';
+import { MapLauncher } from '../minimap/map-launcher';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-export default function HeaderHUD() {
+interface HeaderHUDProps {
+  className?: string;
+  hideNotificationsOnMercado?: boolean;
+}
+
+export default function HeaderHUD({
+  className,
+  hideNotificationsOnMercado = true,
+}: HeaderHUDProps) {
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+
   return (
-    <div className="flex h-24 min-w-300 bg-linear-to-b from-muted-foreground/50 to-amber-900/0">
-      {/* Left column: 20%, justify-start */}
-      <Card className="w-[20%] flex items-center justify-start bg-transparent shadow-none border-none">
-        <CardContent className="flex items-center justify-start p-0">
-          <PointsIcon />
-        </CardContent>
-      </Card>
+    <div
+      className={cn(
+        'flex min-h-24 w-full items-center justify-start gap-3 overflow-x-hidden px-3 sm:pl-12 sm:pr-24 sticky',
+        className
+      )}
+    >
+      <div className="shrink-0 font-jersey">
+        <XPProgress />
+      </div>
 
-      {/* Middle column: 60%, centered */}
-      <Card className="w-[60%] flex items-center justify-center p-4 bg-transparent shadow-none border-none">
-        <CardContent className="flex items-center justify-center">
-          <LevelIcon />
-        </CardContent>
-      </Card>
+      <div className="shrink-0 font-jersey">
+        <PointsCardWidget />
+      </div>
 
-      {/* Right column: 20%, justify-end */}
-      <Card className="w-[20%] flex items-center justify-end p-4 bg-transparent shadow-none border-none">
-        <CardContent className="flex items-center justify-end">
-          <ProfilePic />
-        </CardContent>
-      </Card>
+      <div className="shrink-0 ml-auto">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="inline-flex">
+              <ConditionalNotifications
+                hideOnMercado={hideNotificationsOnMercado}
+              />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" sideOffset={8}>
+            Notifications
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div className="shrink-0">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="inline-flex">
+              <MapLauncher inline />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" sideOffset={8}>
+            Navigation Map
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div className="shrink-0">
+        <DropdownMenu open={isAccountMenuOpen} onOpenChange={setIsAccountMenuOpen}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Open account actions"
+                  className="inline-flex size-12 items-center justify-center rounded-full wood-panel text-card shadow-sm transition-all duration-300 hover:scale-103 hover:cursor-pointer"
+                >
+                  <ChevronDown
+                    className={cn(
+                      'size-6 transition-transform duration-200',
+                      isAccountMenuOpen && 'rotate-180'
+                    )}
+                  />
+                </button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" sideOffset={8}>
+              More
+            </TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent
+            align="end"
+            sideOffset={8}
+            className="wood-panel border-0 p-2 pl-3 min-w-40"
+          >
+            <LogOutBtn className="w-full" />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }
