@@ -340,62 +340,6 @@ export async function getEmployeeTopRanksByPeriod(
   });
 }
 
-/**
- * Get level data from the Level table
- * @param levelNumber The level to fetch (1-10)
- * @returns Level data with xp requirement and other details
- */
-async function getLevelData(levelNumber: number): Promise<{
-  xp: number;
-  level: number;
-  description?: string;
-  bg_img_link?: string;
-} | null> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('Level')
-    .select('level, xp, description, bg_img_link')
-    .eq('level', levelNumber)
-    .single();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return {
-    level: data.level,
-    xp: data.xp ?? 100, // Default fallback to 100 XP if not set
-    description: data.description,
-    bg_img_link: data.bg_img_link,
-  };
-}
-
-/**
- * Calculate total XP based on Level table data
- * @param level User's current level (capped at 10)
- * @param currentXP User's current XP within the level (0-99)
- * @returns Total cumulative XP (Level threshold + currentXP within level)
- */
-async function calculateTotalXP(level: number, currentXP: number): Promise<number> {
-  const cappedLevel = Math.min(Math.max(level, 1), 10);
-
-  const getRequiredXpForLevel = async (targetLevel: number): Promise<number> => {
-    // Level 1 progression uses level 2 requirement since level 1 entry is usually 0.
-    const requirementLevel = targetLevel <= 1 ? 2 : targetLevel;
-    const levelData = await getLevelData(requirementLevel);
-    const fallback = requirementLevel * 100;
-    return Math.max(1, levelData?.xp ?? fallback);
-  };
-
-  let total = 0;
-  for (let lvl = 1; lvl < cappedLevel; lvl += 1) {
-    total += await getRequiredXpForLevel(lvl);
-  }
-
-  return total + Math.max(0, currentXP);
-}
-
 export async function getEmployeeXP(): Promise<ActionResult<EmployeeXP>> {
   return safeAction(async () => {
     const supabase = await createClient();
@@ -409,10 +353,10 @@ export async function getEmployeeXP(): Promise<ActionResult<EmployeeXP>> {
       throw new Error('User not authenticated');
     }
 
-    const { data, error } = await supabaseAdmin
-      .from('User')
-      .select('xp, level, total_xp')
-      .eq('id', user.id)
+    const { data, error } = await supabase
+      .from('user_attributes')
+      .select('xp, user_level')
+      .eq('user_id', user.id)
       .single();
 
     if (error) {
@@ -423,231 +367,17 @@ export async function getEmployeeXP(): Promise<ActionResult<EmployeeXP>> {
       throw new Error('User XP data not found');
     }
 
-    // Default level to 1 if null or 0, cap at 10
-    let level = data.level && data.level > 0 ? data.level : 1;
-    level = Math.min(level, 10); // Enforce level cap
-
+    // Default level to 1 if null or 0
+    const level = data.user_level && data.user_level > 0 ? data.user_level : 1;
     const currentXP = data.xp ?? 0;
-    const storedTotalXP = data.total_xp;
-    const totalXP =
-      typeof storedTotalXP === 'number' && Number.isFinite(storedTotalXP)
-        ? Math.max(0, storedTotalXP)
-        : await calculateTotalXP(level, currentXP);
+
+    // totalXP counts cumulative XP including previous levels
+    const totalXP = (level - 1) * 100 + currentXP;
 
     return {
       currentXP,
       totalXP,
       level,
-    };
-  });
-}
-
-/**
- * Get XP required to reach the next level
- * @param currentLevel Current user level (1-10)
- * @returns XP required to reach nextLevel (or 100 as default fallback)
- */
-export async function getXPRequiredForNextLevel(currentLevel: number): Promise<ActionResult<number>> {
-  return safeAction(async () => {
-    const cappedLevel = Math.min(currentLevel, 10);
-
-    // If already at max level, return 0
-    if (cappedLevel >= 10) {
-      return 0;
-    }
-
-    // Per-level threshold from DB. For level 1, use level 2 threshold since level 1 is usually 0.
-    const thresholdLevel = cappedLevel <= 1 ? 2 : cappedLevel;
-    const levelData = await getLevelData(thresholdLevel);
-    const fallback = thresholdLevel * 100;
-
-    return Math.max(0, levelData?.xp ?? fallback);
-  });
-}
-
-/**
- * Get all level metadata (for caching/initialization)
- * @returns Array of all level data with XP requirements
- */
-export interface LevelMetadata {
-  level: number;
-  xp: number;
-  description?: string;
-  bg_img_link?: string;
-}
-
-export interface XPDebugUpdateResult {
-  level: number;
-  xp: number;
-  totalXP: number;
-}
-
-export async function getAllLevelMetadata(): Promise<ActionResult<LevelMetadata[]>> {
-  return safeAction(async () => {
-    const supabase = await createClient();
-
-    const { data, error } = await supabase
-      .from('Level')
-      .select('level, xp, description, bg_img_link')
-      .order('level', { ascending: true });
-
-    if (error) {
-      throw new Error(`Failed to fetch level metadata: ${error.message}`);
-    }
-
-    if (!data || data.length === 0) {
-      // Return default levels if table is empty
-      return [
-        { level: 1, xp: 0, description: 'Level 1 - Trainee' },
-        { level: 2, xp: 100, description: 'Level 2 - Apprentice' },
-        { level: 3, xp: 250, description: 'Level 3 - Skilled' },
-        { level: 4, xp: 450, description: 'Level 4 - Experienced' },
-        { level: 5, xp: 700, description: 'Level 5 - Expert' },
-        { level: 6, xp: 1000, description: 'Level 6 - Master' },
-        { level: 7, xp: 1350, description: 'Level 7 - Grand Master' },
-        { level: 8, xp: 1750, description: 'Level 8 - Legendary' },
-        { level: 9, xp: 2200, description: 'Level 9 - Mythic' },
-        { level: 10, xp: 2700, description: 'Level 10 - Ultimate Chef' },
-      ];
-    }
-
-    return data.map((row) => ({
-      level: row.level,
-      xp: row.xp ?? 100,
-      description: row.description,
-      bg_img_link: row.bg_img_link,
-    }));
-  });
-}
-
-function deriveLevelAndCurrentXPFromTotalXP(totalXP: number, levelRows: LevelMetadata[]): {
-  level: number;
-  xp: number;
-} {
-  const safeTotalXP = Math.max(0, Math.trunc(totalXP));
-
-  const thresholds = new Map<number, number>();
-  for (const row of levelRows) {
-    thresholds.set(row.level, row.xp ?? 100);
-  }
-
-  const getRequiredXpForLevel = (level: number): number => {
-    const requirementLevel = level <= 1 ? 2 : level;
-    return Math.max(1, thresholds.get(requirementLevel) ?? requirementLevel * 100);
-  };
-
-  let remaining = safeTotalXP;
-  let level = 1;
-
-  // Consume per-level requirements until max level is reached.
-  while (level < 10) {
-    const required = getRequiredXpForLevel(level);
-    if (remaining < required) {
-      break;
-    }
-
-    remaining -= required;
-    level += 1;
-  }
-
-  return { level, xp: remaining };
-}
-
-/**
- * Debug-only action to increase/decrease XP of the authenticated active employee.
- * Disabled in production.
- */
-export async function adjustActiveUserXPByDelta(
-  delta: number
-): Promise<ActionResult<XPDebugUpdateResult>> {
-  return safeAction(async () => {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('XP debug action is disabled in production');
-    }
-
-    const normalizedDelta = Math.trunc(delta);
-    if (!Number.isFinite(normalizedDelta) || normalizedDelta === 0) {
-      throw new Error('Delta must be a non-zero number');
-    }
-
-    const supabase = await createClient();
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      throw new Error('User not authenticated');
-    }
-
-    const { data: currentData, error: currentError } = await supabaseAdmin
-      .from('User')
-      .select('xp, level, total_xp')
-      .eq('id', user.id)
-      .single();
-
-    if (currentError || !currentData) {
-      throw new Error(`Failed to fetch current XP data: ${currentError?.message ?? 'No data found'}`);
-    }
-
-    const currentLevel = Math.min(Math.max(currentData.level ?? 1, 1), 10);
-    const currentXP = Math.max(0, currentData.xp ?? 0);
-    const currentTotalXP =
-      typeof currentData.total_xp === 'number' && Number.isFinite(currentData.total_xp)
-        ? Math.max(0, currentData.total_xp)
-        : await calculateTotalXP(currentLevel, currentXP);
-    const nextTotalXP = Math.max(0, currentTotalXP + normalizedDelta);
-
-    const { data: levelRows, error: levelError } = await supabase
-      .from('Level')
-      .select('level, xp, description, bg_img_link')
-      .order('level', { ascending: true });
-
-    if (levelError) {
-      throw new Error(`Failed to fetch level metadata: ${levelError.message}`);
-    }
-
-    const normalizedRows: LevelMetadata[] =
-      levelRows && levelRows.length > 0
-        ? levelRows.map((row) => ({
-            level: row.level,
-            xp: row.xp ?? 100,
-            description: row.description,
-            bg_img_link: row.bg_img_link,
-          }))
-        : [
-            { level: 1, xp: 0 },
-            { level: 2, xp: 100 },
-            { level: 3, xp: 250 },
-            { level: 4, xp: 450 },
-            { level: 5, xp: 700 },
-            { level: 6, xp: 1000 },
-            { level: 7, xp: 1350 },
-            { level: 8, xp: 1750 },
-            { level: 9, xp: 2200 },
-            { level: 10, xp: 2700 },
-          ];
-
-    const derived = deriveLevelAndCurrentXPFromTotalXP(nextTotalXP, normalizedRows);
-
-    const { error: updateError } = await supabaseAdmin
-      .from('User')
-      .update({
-        xp: derived.xp,
-        level: derived.level,
-        total_xp: nextTotalXP,
-      })
-      .eq('id', user.id);
-
-    if (updateError) {
-      throw new Error(`Failed to update XP data: ${updateError.message}`);
-    }
-
-    return {
-      level: derived.level,
-      xp: derived.xp,
-      totalXP: nextTotalXP,
     };
   });
 }

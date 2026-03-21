@@ -142,32 +142,33 @@ export async function assignManualBadgeToUser(
     return { error: `Failed to award badge: ${insertError.message}` };
   }
 
-  // Award points to the user if badge has points; keep points and total_points_earned in sync.
+  // Award points to the user if badge has points
   if (badgeRow.points && badgeRow.points > 0) {
-    const { data: userRow, error: userFetchError } = await supabaseAdmin
-      .from('User')
-      .select('points, total_points_earned')
-      .eq('id', userId)
-      .single();
+    const { error: pointsError } = await supabaseAdmin.rpc('increment_points_for_user', {
+      target_user_id: userId,
+      amount: badgeRow.points,
+    });
 
-    if (userFetchError || !userRow) {
-      return { error: 'Failed to add points after awarding badge' };
-    }
+    if (pointsError) {
+      const { data: userRow, error: userFetchError } = await supabaseAdmin
+        .from('User')
+        .select('points')
+        .eq('id', userId)
+        .single();
 
-    const currentPoints = (userRow as { points: number | null }).points ?? 0;
-    const currentTotalPointsEarned =
-      (userRow as { total_points_earned: number | null }).total_points_earned ?? 0;
+      if (userFetchError || !userRow) {
+        return { error: 'Failed to add points after awarding badge' };
+      }
 
-    const { error: manualUpdateError } = await supabaseAdmin
-      .from('User')
-      .update({
-        points: currentPoints + badgeRow.points,
-        total_points_earned: currentTotalPointsEarned + badgeRow.points,
-      })
-      .eq('id', userId);
+      const currentPoints = (userRow as { points: number | null }).points ?? 0;
+      const { error: manualUpdateError } = await supabaseAdmin
+        .from('User')
+        .update({ points: currentPoints + badgeRow.points })
+        .eq('id', userId);
 
-    if (manualUpdateError) {
-      return { error: 'Failed to add points after awarding badge' };
+      if (manualUpdateError) {
+        return { error: 'Failed to add points after awarding badge' };
+      }
     }
   }
 

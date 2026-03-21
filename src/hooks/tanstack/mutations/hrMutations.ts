@@ -287,8 +287,6 @@ export function useCreateRedemptionRequest() {
       // Invalidate rewards to update quantities after redemption request
       queryClient.invalidateQueries({ queryKey: rewardKeys.all });
       queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
-      // Refresh employee points shown in Mercado/header widgets after deduction
-      queryClient.invalidateQueries({ queryKey: employeeKeys.points() });
     },
   });
 }

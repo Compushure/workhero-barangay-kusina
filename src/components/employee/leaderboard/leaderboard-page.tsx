@@ -13,8 +13,6 @@ import type { LatestPeriods } from './period-nav';
 import { PeriodNav, getLatestPeriodParams } from './period-nav';
 import ProfileAndLevel from '../attendance/profile-level';
 import XPProgressAndPoints from '../attendance/xp-points';
-import { RankWidget } from '../dashboard/rank-panel';
-import { Card, CardContent } from '@/components/ui/card';
 import { LeaderboardEmptyState } from './leaderboard-empty-state';
 import { LeaderboardPodium } from './leaderboard-podium';
 import { LeaderboardShelf } from './leaderboard-shelf';
@@ -132,11 +130,6 @@ export function LeaderboardPageClient({
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-4 md:gap-6">
             <ProfileAndLevel />
             <XPProgressAndPoints />
-            <Card className="bg-transparent shadow-none border-none">
-              <CardContent className="p-0">
-                <RankWidget />
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

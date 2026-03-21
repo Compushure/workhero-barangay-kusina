@@ -13,11 +13,6 @@ import {
   getEmployeeTopRanksByPeriod,
   getEmployeeTopWeeklyRanks,
   getEmployeeXP,
-  getXPRequiredForNextLevel,
-  getAllLevelMetadata,
-  adjustActiveUserXPByDelta,
-  type LevelMetadata,
-  type XPDebugUpdateResult,
 } from '@/actions/employee/stats';
 import { toast } from 'sonner';
 import type {
@@ -27,8 +22,6 @@ import type {
   EmployeeXP,
   RankLogPeriodType,
 } from '@/types';
-
-export type { LevelMetadata, XPDebugUpdateResult };
 // import type { TimePeriod } from '@/lib/utils/time-period-utils';
 
 export interface EmployeePeriodParams {
@@ -167,53 +160,4 @@ export async function handleFetchEmployeeXP(): Promise<EmployeeXP | null> {
   }
 
   return result.data;
-}
-
-/**
- * Fetches the XP required to reach the next level
- * @param currentLevel Current user level
- * @returns XP required for next level, or null on error
- */
-export async function handleFetchXPRequiredForNextLevel(currentLevel: number): Promise<number | null> {
-  const result = await getXPRequiredForNextLevel(currentLevel);
-
-  if (!result.success) {
-    // Silent fail for this one since it's not critical UI feedback
-    return null;
-  }
-
-  return result.data ?? 100; // Default to 100 if not found
-}
-
-/**
- * Fetches all level metadata
- * @returns Array of level metadata, or null on error
- */
-export async function handleFetchAllLevelMetadata(): Promise<LevelMetadata[] | null> {
-  const result = await getAllLevelMetadata();
-
-  if (!result.success) {
-    // Silent fail - will use defaults
-    return null;
-  }
-
-  return result.data ?? null;
-}
-
-/**
- * Debug-only handler to adjust active user's XP by delta.
- */
-export async function handleAdjustActiveUserXPByDelta(
-  delta: number
-): Promise<XPDebugUpdateResult | null> {
-  const result = await adjustActiveUserXPByDelta(delta);
-
-  if (!result.success) {
-    toast.error('Failed to update XP', {
-      description: result.error ?? 'Unknown error',
-    });
-    return null;
-  }
-
-  return result.data ?? null;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { MessageSquareMore } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -13,13 +13,11 @@ import {
 } from '@/components/ui/select';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGetMyRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
 import type { RedemptionRequest } from '@/types';
 
@@ -30,15 +28,14 @@ interface RewardRequestsFeedbackModalProps {
 
 type RequestStatusFilter = 'approved' | 'declined';
 type SortOrder = 'newest' | 'oldest';
-const REQUESTS_PAGE_SIZE = 3;
 
 const CONTROL_TRIGGER_CLASS =
-  'h-8 rounded-lg font-pixel text-[9px] bg-[#f7efdf] border-[#9b7a56] text-[#4b3522] focus-visible:ring-[#8a6844]/40 focus-visible:border-[#8a6844] data-[state=open]:border-[#8a6844] data-[state=open]:ring-1 data-[state=open]:ring-[#8a6844]/40';
+  'h-8 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] focus-visible:ring-[#8a6844]/40 focus-visible:border-[#8a6844] data-[state=open]:border-[#8a6844] data-[state=open]:ring-1 data-[state=open]:ring-[#8a6844]/40';
 
 const CONTROL_CONTENT_CLASS = 'bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]';
 
 const CONTROL_ITEM_CLASS =
-  'font-pixel text-[10px] text-[#4b3522] data-[state=checked]:bg-[#d8c29f] data-[state=checked]:text-[#4b3522] data-highlighted:bg-[#ccb389] data-highlighted:text-[#4b3522]';
+  'text-[#4b3522] data-[state=checked]:bg-[#d8c29f] data-[state=checked]:text-[#4b3522] data-highlighted:bg-[#ccb389] data-highlighted:text-[#4b3522]';
 
 const EMPLOYEE_CANCELLED_REMARKS = ['cancelled by employee', 'canceled by employee'] as const;
 
@@ -94,70 +91,57 @@ function RequestSection({
   };
 
   return (
-    <section className="space-y-2.5">
+    <section className="space-y-2">
       {requests.length === 0 ? (
-        <div className="kitchen-chip mx-auto max-w-105 px-3 py-2 text-center font-pixel text-[9px]">
+        <div className="rounded-md border border-[#9b7a56]/35 bg-[#f7efdf] px-3 py-2 text-xs text-[#7a5b3f]">
           {emptyText}
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {requests.map((request) => {
             const isExpanded = expandedRequestIds.has(request.id);
-            const isApproved = request.status === 'approved';
-            const hasFeedback = Boolean(request.remarks?.trim());
-            const statusLabel = isApproved ? 'Approved' : 'Declined';
-            const statusClasses = isApproved
-              ? 'border-[#2f7b4a]/35 bg-[#e3f2e6] text-[#1f5a36]'
-              : 'border-[#9b3a3a]/35 bg-[#f8e2e2] text-[#7b2727]';
 
             return (
               <article
                 key={request.id}
-                className="rounded-xl border-2 border-[#8ea17f] bg-[#efe8cf] px-3 py-2.5 transition-all duration-200 hover:-translate-y-0.5"
+                className="rounded-md border border-[#9b7a56]/35 bg-[#f7efdf] px-3 py-2"
               >
-                <div className="mb-2 flex items-start justify-between gap-2">
-                  <p className="min-w-0 flex-1 wrap-break-word pr-2 font-pixel text-[10px] leading-relaxed text-[#3f2a1a]">
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <p className="min-w-0 flex-1 wrap-break-word pr-2 text-sm font-semibold leading-tight text-[#3f2a1a]">
                     {request.requestedItem || request.rewardName}
                   </p>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <span
-                      className={`rounded-md border px-2 py-0.5 font-pixel text-[10px] uppercase tracking-wide ${statusClasses}`}
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleFeedback(request.id)}
+                      aria-label={isExpanded ? 'Hide feedback' : 'Show feedback'}
+                      className={`inline-flex h-8 w-8 items-center justify-center rounded-sm border transition-colors ${
+                        isExpanded
+                          ? 'border-[#47331F] bg-[#765332] text-[#f5e8d6]'
+                          : 'border-[#9b7a56]/60 bg-[#f3e5cc] text-[#6b5038] hover:bg-[#ecdcbf]'
+                      }`}
                     >
-                      {statusLabel}
-                    </span>
-                    {hasFeedback ? (
-                      <button
-                        type="button"
-                        onClick={() => toggleFeedback(request.id)}
-                        aria-label={isExpanded ? 'Hide feedback' : 'Show feedback'}
-                        className={`inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors ${
-                          isExpanded
-                            ? 'border-[#47331F] bg-[#765332] text-[#f5e8d6]'
-                            : 'border-[#9b7a56]/60 bg-[#f3e5cc] text-[#6b5038] hover:bg-[#ecdcbf]'
-                        }`}
-                      >
-                        <MessageSquareMore className="h-4.5 w-4.5" />
-                      </button>
-                    ) : null}
+                      <MessageSquareMore className="h-4.5 w-4.5" />
+                    </button>
                   </div>
                 </div>
 
-                <p className="font-pixel text-[10px] text-[#6b5038]">
+                <p className="text-xs text-[#6b5038]">
                   Qty {request.quantity} • {request.pointsCost * request.quantity} pts
                 </p>
 
-                {hasFeedback && isExpanded && (
-                  <div className="mt-1.5 h-20 overflow-y-auto scrollbar-hide rounded-lg border border-[#9b7a56]/30 bg-[#f3e5cc] px-2 py-1.5 animate-in fade-in-0 zoom-in-95 duration-200">
-                    <p className="font-pixel text-[10px] text-[#4b3522]">
-                      Feedback:
-                      <span className="mt-1 block font-medium whitespace-pre-wrap wrap-break-word">
+                {isExpanded && (
+                  <div className="mt-1 rounded-sm border border-[#9b7a56]/30 bg-[#f3e5cc] px-2 py-1">
+                    <p className="text-xs text-[#4b3522]">
+                      Feedback:{' '}
+                      <span className="font-medium break-all">
                         {request.remarks?.trim() || 'No feedback provided'}
                       </span>
                     </p>
                   </div>
                 )}
 
-                <p className="mt-1 font-pixel text-[9px] text-[#7a5b3f]">
+                <p className="mt-1 text-[11px] text-[#7a5b3f]">
                   {getRequestTimestampPrefix(request.status)}
                   {format(new Date(request.requestedAt), 'MMM dd, yyyy h:mm a')}
                 </p>
@@ -177,7 +161,6 @@ export function RewardRequestsFeedbackModal({
   const [statusFilter, setStatusFilter] = useState<RequestStatusFilter>('approved');
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const { data: requests = [], isLoading } = useGetMyRedemptionRequests('all');
 
   const { approvedRequests, declinedRequests } = useMemo(() => {
@@ -217,24 +200,7 @@ export function RewardRequestsFeedbackModal({
     return sortRequestsByDate(filteredActiveRequests, sortOrder);
   }, [filteredActiveRequests, sortOrder]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedActiveRequests.length / REQUESTS_PAGE_SIZE));
-
-  const paginatedRequests = useMemo(() => {
-    const startIndex = (currentPage - 1) * REQUESTS_PAGE_SIZE;
-    return sortedActiveRequests.slice(startIndex, startIndex + REQUESTS_PAGE_SIZE);
-  }, [sortedActiveRequests, currentPage]);
-
   const hasReviewedRequests = approvedRequests.length > 0 || declinedRequests.length > 0;
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [statusFilter, sortOrder, searchTerm, open]);
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
 
   const handleSortOrderChange = (value: string) => {
     if (value === 'newest' || value === 'oldest') {
@@ -250,53 +216,25 @@ export function RewardRequestsFeedbackModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={false}
-        className="kitchen-parchment-card w-[94vw] max-w-205 max-h-[82vh] rounded-3xl p-0 gap-0 overflow-hidden"
-      >
-        <DialogClose
-          aria-label="Close"
-          className="absolute right-4 top-4 z-10 h-8 w-8 rounded-full bg-[#e4d3b3] text-[#3f2a1a] border-2 border-[#a88961] transition hover:scale-105 hover:bg-[#dcc7a2]"
-        >
-          ✕
-        </DialogClose>
-
-        <DialogHeader className="border-b-2 border-[#8a6844]/30 bg-[#e1d2b7] px-5 py-4 gap-2">
-          <DialogTitle className="font-pixel text-[10px] text-[#3f2a1a] leading-relaxed pr-18">
+      <DialogContent className="w-[40vw] max-w-[40vw] sm:max-w-[40vw] md:max-w-[40vw] lg:max-w-[40vw] rounded-2xl border-[#8a6844] bg-[#eadbc1] p-0 overflow-hidden">
+        <DialogHeader className="border-b border-[#8a6844]/30 bg-[#e1d2b7] px-5 py-4">
+          <DialogTitle className="text-lg font-bold text-[#3f2a1a]">
             Reward Request Feedbacks
           </DialogTitle>
-          <DialogDescription className="font-pixel text-[9px] leading-relaxed text-[#6b5038] pr-18">
+          <DialogDescription className="text-xs text-[#6b5038]">
             View your approved and declined reward requests with HR feedback.
           </DialogDescription>
-
-          <Tabs value={statusFilter} onValueChange={handleStatusFilterChange} className="mt-2">
-            <TabsList className="mx-auto grid w-full max-w-145 grid-cols-2 rounded-xl border border-[#9b7a56]/45 bg-[#efdec1] p-1">
-              <TabsTrigger
-                value="approved"
-                className="font-pixel text-[10px] data-[state=active]:bg-[#d8efdb] data-[state=active]:text-[#1f5a36] data-[state=active]:border data-[state=active]:border-[#7eb07f]/45"
-              >
-                Approved ({approvedRequests.length})
-              </TabsTrigger>
-              <TabsTrigger
-                value="declined"
-                className="font-pixel text-[10px] data-[state=active]:bg-[#f8e2e2] data-[state=active]:text-[#7b2727] data-[state=active]:border data-[state=active]:border-[#9b3a3a]/35"
-              >
-                Declined ({declinedRequests.length})
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          <div className="mt-2 grid w-full max-w-145 gap-2 sm:grid-cols-[1fr_auto] sm:mx-auto">
-            <div className="flex items-center gap-2 w-full">
+          <div className="mt-3 flex w-full items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
               <Input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="Search items..."
-                className="h-8 w-full rounded-lg border border-[#9b7a56] bg-[#f7efdf] px-3 font-pixel text-[9px]! md:text-[9px]! text-[#4b3522] placeholder:text-[9px] placeholder:text-[#8d7255]"
+                className="h-8 w-44 sm:w-52 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
               />
 
               <Select value={sortOrder} onValueChange={handleSortOrderChange}>
-                <SelectTrigger className={`${CONTROL_TRIGGER_CLASS} w-26`}>
+                <SelectTrigger className={`${CONTROL_TRIGGER_CLASS} w-28`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className={CONTROL_CONTENT_CLASS}>
@@ -309,51 +247,39 @@ export function RewardRequestsFeedbackModal({
                 </SelectContent>
               </Select>
             </div>
+
+            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+              <SelectTrigger className={`${CONTROL_TRIGGER_CLASS} w-52`}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className={CONTROL_CONTENT_CLASS}>
+                <SelectItem value="approved" className={CONTROL_ITEM_CLASS}>
+                  Approved ({approvedRequests.length})
+                </SelectItem>
+                <SelectItem value="declined" className={CONTROL_ITEM_CLASS}>
+                  Declined ({declinedRequests.length})
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </DialogHeader>
 
-        <div className="max-h-[58vh] space-y-3 overflow-y-auto px-5 py-3 bg-[#eadbc1]">
+        <div className="max-h-[65vh] space-y-4 overflow-y-auto px-5 py-4">
           {isLoading ? (
-            <p className="font-pixel text-[10px] text-[#6b5038] animate-pulse">Loading request updates...</p>
+            <p className="text-sm text-[#6b5038]">Loading request updates...</p>
           ) : !hasReviewedRequests ? (
-            <div className="kitchen-chip mx-auto max-w-105 px-3 py-2 text-center font-pixel text-[9px]">
+            <div className="rounded-md border border-[#9b7a56]/35 bg-[#f7efdf] px-3 py-2 text-sm text-[#6b5038]">
               No approved or declined reward requests yet.
             </div>
           ) : (
-            <>
-              <RequestSection
-                requests={paginatedRequests}
-                emptyText={
-                  statusFilter === 'approved'
-                    ? 'No approved requests yet.'
-                    : 'No declined requests yet.'
-                }
-              />
-
-              {sortedActiveRequests.length > 0 && totalPages > 1 ? (
-                <div className="mt-2 flex items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))}
-                    disabled={currentPage === 1}
-                    className="h-7 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-2 font-pixel text-[8px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Prev
-                  </button>
-                  <span className="font-pixel text-[8px] text-[#6b5038]">
-                    {currentPage}/{totalPages}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((previous) => Math.min(totalPages, previous + 1))}
-                    disabled={currentPage === totalPages}
-                    className="h-7 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-2 font-pixel text-[8px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </div>
-              ) : null}
-            </>
+            <RequestSection
+              requests={sortedActiveRequests}
+              emptyText={
+                statusFilter === 'approved'
+                  ? 'No approved requests yet.'
+                  : 'No declined requests yet.'
+              }
+            />
           )}
         </div>
       </DialogContent>

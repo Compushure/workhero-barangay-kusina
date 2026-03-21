@@ -122,6 +122,21 @@ export function useClaimTaskPointsandXP(): UseMutationResult<
             points: old.points + data.pointsAdded,
           };
         });
+
+        // Optimistically update the XP cache
+        queryClient.setQueryData(employeeKeys.xp(), (old: any) => {
+          if (!old) return old;
+          const newTotalXP = old.totalXP + data.xpAdded;
+          const newLevel = Math.floor(newTotalXP / 100);
+          const newCurrentXP = newTotalXP % 100;
+
+          return {
+            ...old,
+            totalXP: newTotalXP,
+            level: newLevel,
+            currentXP: newCurrentXP,
+          };
+        });
       }
 
       // Remove claimed task from approved list in the shared cache after success

@@ -16,38 +16,6 @@ function getRewardImageUrl(supabase: any, rewardId: string): string {
   return supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`).data.publicUrl;
 }
 
-async function adjustUserPointsByDelta(userId: string, delta: number): Promise<ServerActionResponse<number>> {
-  const supabaseAdmin = await getSupabaseAdminClient();
-
-  const { data: userData, error: userDataError } = await supabaseAdmin
-    .from('User')
-    .select('points')
-    .eq('id', userId)
-    .single();
-
-  if (userDataError || !userData) {
-    return { error: 'Failed to fetch user points balance' };
-  }
-
-  const currentPoints = Number(userData.points || 0);
-  const nextPoints = currentPoints + delta;
-
-  if (nextPoints < 0) {
-    return { error: `Insufficient points balance for adjustment (${delta})` };
-  }
-
-  const { error: updateError } = await supabaseAdmin
-    .from('User')
-    .update({ points: nextPoints })
-    .eq('id', userId);
-
-  if (updateError) {
-    return { error: `Failed to adjust points: ${updateError.message}` };
-  }
-
-  return { error: null, data: nextPoints };
-}
-
 /**
  * Helper function to auto-decline pending requests when stock is insufficient
  * @param rewardId - The reward ID to check pending requests for
@@ -90,6 +58,7 @@ async function autoDeclinePendingRequestsForReward(
     for (const req of pendingRequests) {
       const requestQuantity = req.quantity || 1;
       const reward = Array.isArray(req.Reward) ? req.Reward[0] : req.Reward;
+      const user = Array.isArray(req.User) ? req.User[0] : req.User;
       const pointsCostPerItem = reward?.points_cost || 0;
       const totalPointsCost = pointsCostPerItem * requestQuantity;
 
@@ -118,8 +87,15 @@ async function autoDeclinePendingRequestsForReward(
           })
           .eq('id', req.id);
 
-        // Return points to user (spendable balance only).
-        await adjustUserPointsByDelta(req.user_id, totalPointsCost);
+        // Return points to user
+        if (user) {
+          await supabaseAdmin
+            .from('User')
+            .update({
+              points: (user.points || 0) + totalPointsCost,
+            })
+            .eq('id', req.user_id);
+        }
 
         console.log(`Auto-declined request ${req.id}: ${declineRemark}`);
       }
@@ -300,7 +276,12 @@ export async function acceptRedemptionRequestAction(
           .eq('id', requestId);
 
         // Return points to user if declined
-        await adjustUserPointsByDelta(request.user_id, totalPointsCost);
+        await supabaseAdmin
+          .from('User')
+          .update({
+            points: (user?.points || 0) + totalPointsCost,
+          })
+          .eq('id', request.user_id);
 
         return { error: 'Item is out of stock. Request has been automatically declined.' };
       }
@@ -317,7 +298,12 @@ export async function acceptRedemptionRequestAction(
           .eq('id', requestId);
 
         // Return points to user
-        await adjustUserPointsByDelta(request.user_id, totalPointsCost);
+        await supabaseAdmin
+          .from('User')
+          .update({
+            points: (user?.points || 0) + totalPointsCost,
+          })
+          .eq('id', request.user_id);
 
         return { error: `Only ${currentReward.quantity} item(s) available. Request has been automatically declined.` };
       }
@@ -456,6 +442,7 @@ export async function declineRedemptionRequestAction(
     const user = Array.isArray(request.User) ? request.User[0] : request.User;
     const pointsCostPerItem = reward?.points_cost || 0;
     const totalPointsCost = pointsCostPerItem * quantity;
+    const currentPoints = user?.points || 0;
 
     // Update request status to rejected with optional remarks
     const { error: updateError } = await supabase
@@ -472,11 +459,16 @@ export async function declineRedemptionRequestAction(
       return { error: `Failed to decline request: ${updateError.message}` };
     }
 
-    // Return points to user (spendable balance only).
-    const returnPointsResult = await adjustUserPointsByDelta(request.user_id, totalPointsCost);
+    // Return points to user (admin client: User table not writable by authenticated)
+    const { error: returnPointsError } = await supabaseAdmin
+      .from('User')
+      .update({
+        points: currentPoints + totalPointsCost,
+      })
+      .eq('id', request.user_id);
 
-    if (returnPointsResult.error) {
-      console.error('Error returning points:', returnPointsResult.error);
+    if (returnPointsError) {
+      console.error('Error returning points:', returnPointsError);
       // Try to revert the rejection
       await supabaseAdmin
         .from('RewardRequest')
@@ -498,7 +490,12 @@ export async function declineRedemptionRequestAction(
         .from('RewardRequest')
         .update({ status: 'pending', approved_by: null })
         .eq('id', requestId);
-      await adjustUserPointsByDelta(request.user_id, -totalPointsCost);
+      await supabaseAdmin
+        .from('User')
+        .update({
+          points: currentPoints,
+        })
+        .eq('id', request.user_id);
       return { error: 'Failed to restore stock. Request rejection reverted.' };
     }
 
@@ -523,7 +520,12 @@ export async function declineRedemptionRequestAction(
           .from('RewardRequest')
           .update({ status: 'pending', approved_by: null })
           .eq('id', requestId);
-        await adjustUserPointsByDelta(request.user_id, -totalPointsCost);
+        await supabaseAdmin
+          .from('User')
+          .update({
+            points: currentPoints,
+          })
+          .eq('id', request.user_id);
         return { error: 'Failed to restore stock. Request rejection reverted.' };
       }
     }
@@ -660,8 +662,15 @@ export async function autoDeclineInsufficientStockRequestsAction(): Promise<Serv
           continue;
         }
 
-        // Return points to user (spendable balance only).
-        await adjustUserPointsByDelta(req.user_id, totalPointsCost);
+        // Return points to user
+        if (user) {
+          await supabaseAdmin
+            .from('User')
+            .update({
+              points: (user.points || 0) + totalPointsCost,
+            })
+            .eq('id', req.user_id);
+        }
 
         declinedCount++;
         console.log(`Auto-declined request ${req.id}: ${declineRemark}`);

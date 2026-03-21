@@ -9,38 +9,6 @@ import {
 } from '@/types';
 import { insertNotification } from '@/lib/notifications';
 
-async function adjustUserPointsByDelta(userId: string, delta: number): Promise<ServerActionResponse<number>> {
-  const { data: userData, error: userDataError } = await supabaseAdmin
-    .from('User')
-    .select('points')
-    .eq('id', userId)
-    .single();
-
-  if (userDataError || !userData) {
-    return { error: 'Failed to fetch user data' };
-  }
-
-  const currentPoints = Number(userData.points || 0);
-  const nextPoints = currentPoints + delta;
-
-  if (nextPoints < 0) {
-    return { error: `Insufficient points. You need ${Math.abs(delta)} points but have ${currentPoints}` };
-  }
-
-  const { error: updatePointsError } = await supabaseAdmin
-    .from('User')
-    .update({
-      points: nextPoints,
-    })
-    .eq('id', userId);
-
-  if (updatePointsError) {
-    return { error: `Failed to update points: ${updatePointsError.message}` };
-  }
-
-  return { error: null, data: nextPoints };
-}
-
 function getRewardImageUrl(supabase: any, rewardId: string): string {
   const baseUrl = supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`)
     .data.publicUrl;
@@ -236,11 +204,17 @@ export async function createRedemptionRequestAction(
       return { error: `Insufficient points. You need ${totalCost} points but have ${userPoints}` };
     }
 
-    // Deduct total cost from current balance only (does not affect total_points_earned).
-    const deductionResult = await adjustUserPointsByDelta(user.id, -totalCost);
-    if (deductionResult.error) {
-      console.error('Error deducting points:', deductionResult.error);
-      return { error: deductionResult.error };
+    //logic for order item points: deduct total cost on request
+    const { error: updatePointsError } = await supabaseAdmin
+      .from('User')
+      .update({
+        points: userPoints - totalCost,
+      })
+      .eq('id', user.id);
+
+    if (updatePointsError) {
+      console.error('Error deducting points:', updatePointsError);
+      return { error: `Failed to deduct points: ${updatePointsError.message}` };
     }
 
     const { error: insertError } = await supabase.from('RewardRequest').insert({
@@ -253,8 +227,12 @@ export async function createRedemptionRequestAction(
 
     if (insertError) {
       console.error('Error creating redemption request:', insertError);
-      // Best-effort refund using delta to avoid clobbering concurrent updates.
-      await adjustUserPointsByDelta(user.id, totalCost);
+      await supabaseAdmin
+        .from('User')
+        .update({
+          points: userPoints,
+        })
+        .eq('id', user.id);
       return { error: `Failed to create redemption request: ${insertError.message}` };
     }
 
@@ -352,16 +330,24 @@ export async function cancelMyRedemptionRequestAction(
       return { error: `Failed to cancel request: ${cancelRequestError.message}` };
     }
 
-    // Refund full item cost to spendable points only.
-    const restoreResult = await adjustUserPointsByDelta(user.id, pointsToRestore);
-    if (restoreResult.error) {
+    const currentPoints = userData.points || 0;
+
+    //logic for cancel item points: refund full item cost
+    const { error: restorePointsError } = await supabaseAdmin
+      .from('User')
+      .update({
+        points: currentPoints + pointsToRestore,
+      })
+      .eq('id', user.id);
+
+    if (restorePointsError) {
       await supabase
         .from('RewardRequest')
         .update({ status: 'pending', remarks: null })
         .eq('id', requestId)
         .eq('user_id', user.id);
 
-      return { error: 'Failed to restore points. Cancellation reverted.' };
+      return { error: `Failed to restore points. Cancellation reverted.` };
     }
 
     await insertNotification({

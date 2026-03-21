@@ -361,36 +361,18 @@ export async function claimTaskPointsAndXP(
     return { error: 'No completed orders available to claim', data: undefined };
   }
 
-  const pointsToAdd = categoryPoints * pendingOrders;
+  const { error: pointsError } = await supabase.rpc('increment_points_for_user', {
+    target_user_id: user.id,
+    amount: categoryPoints * pendingOrders,
+  });
 
-  const { data: currentPointsData, error: currentPointsError } = await supabaseAdmin
-    .from('User')
-    .select('points, total_points_earned')
-    .eq('id', user.id)
-    .single();
-
-  if (currentPointsError || !currentPointsData) {
-    return { error: 'Failed to fetch user points: ' + (currentPointsError?.message ?? 'No data'), data: undefined };
-  }
-
-  const nextPoints = Number(currentPointsData.points ?? 0) + pointsToAdd;
-  const nextTotalPointsEarned = Number(currentPointsData.total_points_earned ?? 0) + pointsToAdd;
-
-  const { error: pointsUpdateError } = await supabaseAdmin
-    .from('User')
-    .update({
-      points: nextPoints,
-      total_points_earned: nextTotalPointsEarned,
-    })
-    .eq('id', user.id);
-
-  if (pointsUpdateError) {
-    return { error: 'Failed to add points: ' + pointsUpdateError.message, data: undefined };
+  if (pointsError) {
+    return { error: 'Failed to add points: ' + pointsError.message, data: undefined };
   }
 
   const { data: userRow, error: userFetchError } = await supabase
     .from('User')
-    .select('xp, level, total_xp')
+    .select('xp, level')
     .eq('id', user.id)
     .single();
 
@@ -400,71 +382,14 @@ export async function claimTaskPointsAndXP(
 
   const currentLevel = (userRow as { level: number | null }).level ?? 0;
   const currentXp = (userRow as { xp: number | null }).xp ?? 0;
-  const currentTotalXp = (userRow as { total_xp: number | null }).total_xp;
-  const xpToAdd = categoryXp * pendingOrders;
-
-  const { data: levelRows, error: levelRowsError } = await supabase
-    .from('Level')
-    .select('level, xp')
-    .order('level', { ascending: true });
-
-  if (levelRowsError) {
-    return { error: 'Failed to fetch level thresholds: ' + levelRowsError.message, data: undefined };
-  }
-
-  const levelThresholds = new Map<number, number>();
-  for (const row of levelRows ?? []) {
-    levelThresholds.set(row.level, row.xp ?? 100);
-  }
-
-  const getLevelThreshold = (level: number): number => {
-    if (level <= 1) {
-      return Math.max(0, levelThresholds.get(1) ?? 0);
-    }
-
-    return Math.max(0, levelThresholds.get(level) ?? level * 100);
-  };
-
-  // Level 1 commonly stores 0 in DB; use level 2 requirement for progression from level 1.
-  const getRequiredXpForLevel = (level: number): number => {
-    if (level <= 1) {
-      return Math.max(1, getLevelThreshold(2));
-    }
-
-    return Math.max(1, getLevelThreshold(level));
-  };
-
-  let newLevel = Math.min(Math.max(currentLevel, 1), 10);
-  let newXp = Math.max(0, currentXp) + xpToAdd;
-
-  // Once a user is at level 10, keep accumulating XP but do not level past the cap.
-  if (newLevel < 10) {
-    while (newLevel < 10) {
-      const requiredXp = getRequiredXpForLevel(newLevel);
-
-      if (newXp < requiredXp) {
-        break;
-      }
-
-      newXp -= requiredXp;
-      newLevel += 1;
-    }
-  }
-
-  const computeTotalXP = (level: number, xp: number): number => {
-    let sum = 0;
-    for (let lvl = 1; lvl < level; lvl += 1) {
-      sum += getRequiredXpForLevel(lvl);
-    }
-    return sum + Math.max(0, xp);
-  };
-
-  const fallbackTotalXp = computeTotalXP(Math.min(Math.max(currentLevel, 1), 10), Math.max(0, currentXp));
-  const totalXpAfterUpdate = Math.max(0, (currentTotalXp ?? fallbackTotalXp) + xpToAdd);
+  const totalXp = currentLevel * 100 + currentXp;
+  const newTotalXp = totalXp + categoryXp * pendingOrders;
+  const newLevel = Math.floor(newTotalXp / 100);
+  const newXp = newTotalXp % 100;
 
   const { error: xpUpdateError } = await supabaseAdmin
     .from('User')
-    .update({ level: newLevel, xp: newXp, total_xp: totalXpAfterUpdate })
+    .update({ level: newLevel, xp: newXp })
     .eq('id', user.id);
 
   if (xpUpdateError) {
@@ -486,7 +411,7 @@ export async function claimTaskPointsAndXP(
   }
 
   // Build notification message
-  const pointsEarned = pointsToAdd;
+  const pointsEarned = categoryPoints * pendingOrders;
   let notificationMessage = `You have claimed ${pointsEarned} points for completing the task "${categoryName}."`;
   
   // Check if user leveled up
@@ -513,6 +438,6 @@ export async function claimTaskPointsAndXP(
 
   return {
     error: null,
-    data: { pointsAdded: pointsToAdd, xpAdded: categoryXp * pendingOrders },
+    data: { pointsAdded: categoryPoints * pendingOrders, xpAdded: categoryXp * pendingOrders },
   };
 }

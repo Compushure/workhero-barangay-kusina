@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function CookingSection({ className = '' }: { className?: string }) {
   return (
@@ -9,32 +9,33 @@ export default function CookingSection({ className = '' }: { className?: string 
       className={`bg-transparent shadow-none border-none flex flex-col items-center gap-6 p-6 relative ${className}`}
     >
       <CardContent className="flex flex-col items-center gap-6 flex-1 justify-center w-full">
-        {/* Placeholder dishes for future cooking implementation */}
-        <div className="flex items-center justify-center gap-3 sm:gap-5">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <div
-              key={`sinigang-placeholder-${index}`}
-              className="relative h-14 w-14 sm:h-16 sm:w-16 rounded-lg border-2 border-[#47331F]/60 bg-[#F5E7CF]/75 p-1 shadow-md"
-            >
-              <Image
-                src="/assets/dish/food-sinigang.png"
-                alt="Sinigang placeholder"
-                fill
-                className="object-contain p-1"
-              />
-            </div>
-          ))}
+        {/* Main pot */}
+        <div className="w-24 h-24 sm:w-32 sm:h-32 bg-red-100 rounded-full flex items-center justify-center text-3xl sm:text-4xl shadow-md">
+          🍲
         </div>
 
-        {/* Main kitchen pot visual */}
-        <div className="relative w-52 h-52 sm:w-64 sm:h-64 drop-shadow-[0_8px_16px_rgba(0,0,0,0.45)]">
-          <Image
-            src="/assets/kitchen-bg/kitchen-pot.png"
-            alt="Kitchen pot"
-            fill
-            className="object-contain"
-            priority
-          />
+        {/* Bowls container */}
+        <div className="relative flex gap-2 sm:gap-4 flex-wrap justify-center w-full">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="w-12 h-12 sm:w-16 sm:h-16 bg-yellow-200 rounded-full flex items-center justify-center text-xl sm:text-2xl shadow-md"
+            >
+              🍜
+            </div>
+          ))}
+
+          {/* Donate button */}
+          <Button
+            variant="secondary"
+            size="sm"
+            // Mobile: pinned bottom-right of card
+            // Desktop: beside bowls (top-right of bowls container)
+            className="absolute bottom-4 right-4 sm:static sm:ml-4 sm:self-center"
+            onClick={() => console.log('Donate triggered')}
+          >
+            Donate
+          </Button>
         </div>
       </CardContent>
     </Card>

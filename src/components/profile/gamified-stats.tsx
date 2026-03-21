@@ -17,20 +17,12 @@ const formatValue = (value: unknown): string => {
 export function GamifiedStats({ profile }: { profile: UserWithExtras }) {
   const stats: StatItem[] = [
     {
-      label: 'XP',
-      value: formatValue(profile.xp),
-    },
-    {
       label: 'Total XP',
       value: formatValue(profile.total_xp),
     },
     {
       label: 'Points',
       value: formatValue(profile.points),
-    },
-    {
-      label: 'Total Points',
-      value: formatValue(profile.total_points_earned),
     },
     {
       label: 'Level',
