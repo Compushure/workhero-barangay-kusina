@@ -87,7 +87,7 @@ export function NotificationItemCard({ notification, onMarkRead }: NotificationI
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-6 text-card bg-wood-light shadow-sm/25 hover:bg-accent/80 duration-300 transition-all ease-in-out"
+                className="size-6 text-card bg-wood-light border border-wood shadow-sm/25 hover:bg-accent/80 duration-300 transition-all ease-in-out"
                 onClick={onMarkRead}
               >
                 <Check className="size-3.5" />

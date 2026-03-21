@@ -1,21 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { handleFetchEmployeeXP, handleFetchEmployeePoints } from '@/action-handlers/employee/stats';
-import type { EmployeeXP, EmployeePointsData } from '@/types';
+import { handleFetchEmployeeXP } from '@/action-handlers/employee/stats';
+import type { EmployeeXP } from '@/types';
 import { XPProgressSkeleton } from './skeletons';
 
 export default function XPProgress() {
   const [xpData, setXpData] = useState<EmployeeXP | null>(null);
-  const [pointsData, setPointsData] = useState<EmployeePointsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      const [xp, pts] = await Promise.all([handleFetchEmployeeXP(), handleFetchEmployeePoints()]);
+      const xp = await handleFetchEmployeeXP();
       setXpData(xp);
-      setPointsData(pts);
       setLoading(false);
     }
     fetchData();
@@ -27,14 +25,15 @@ export default function XPProgress() {
   }
 
   const currentXP = xpData?.currentXP ?? 0;
+  const currentLevel = xpData?.level ?? 1;
   const maxXp = 100; // matches screenshot
-  const totalPts = pointsData?.points ?? 0;
 
   return (
-    <div className="w-full sm:w-100 max-w-[200px] sm:max-w-[200px] bg-[#765332] rounded-lg shadow-md border-3 border-[#47331F] p-2 py-0 flex flex-col items-center">
-      {/* XP text above progress bar */}
-      <div className="w-full text-lg sm:text-xl text-yellow-500 text-left">
-        XP: {currentXP} / {maxXp}
+    <div className="w-full sm:w-100 max-w-50 sm:max-w-50 wood-panel rounded-lg shadow-md p-2 py-0 flex flex-col items-center">
+      {/* Level in place of points row */}
+      <div className="w-full flex items-center gap-2 text-lg sm:text-xl text-yellow-500">
+        <span className="text-sm">⭐</span>
+        <span>Lvl {currentLevel}</span>
       </div>
 
       {/* Progress bar */}
@@ -47,10 +46,10 @@ export default function XPProgress() {
         </div>
       </div>
 
-      {/* Points with star icon */}
-      <div className="w-full flex items-center gap-2 text-lg sm:text-xl text-yellow-500">
-        <span className="text-sm">⭐</span>
-        <span>{totalPts} pts</span>
+      
+      {/* XP text above progress bar */}
+      <div className="w-full text-base sm:text-lg text-yellow-500 text-left pl-2">
+        XP : {currentXP} / {maxXp}
       </div>
     </div>
   );

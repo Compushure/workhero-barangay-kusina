@@ -105,7 +105,7 @@ export function MapLauncher({ className }: MapLauncherProps) {
         onPointerUp={handlePointerUp}
         disabled={isNavigating}
         className={cn(
-          'fixed z-[55] flex h-17 w-17 items-center justify-center rounded-full bg-[#6F4C2E] border-3 border-[#47331F] text-[#F4B925] transition-transform',
+          'fixed z-[55] flex h-17 w-17 items-center justify-center rounded-full wood-panel text-[#F4B925] transition-transform',
           position ? '' : 'right-4 top-1/2 -translate-y-1/2',
           dragging
             ? 'cursor-grabbing'

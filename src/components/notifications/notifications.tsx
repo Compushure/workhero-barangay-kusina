@@ -55,11 +55,11 @@ export function NotificationsPopover({
           size="icon"
           className={cn(
             'relative size-12 rounded-full wood-panel shadow-sm hover:border-primary/40 hover:text-accent-secondary hover:scale-103 transition-all duration-300 ease-in-out',
-            unreadCount > 0 ? 'text-card' : 'text-card/75',
+            unreadCount > 0 ? 'text-card' : 'text-muted',
             triggerClassName
           )}
         >
-          <Bell className={cn('size-4.5 text-muted', iconClassName)} />
+          <Bell className={cn('size-4.5', iconClassName)} />
           {unreadCount > 0 && (
             <span
               className={cn(
@@ -88,7 +88,7 @@ export function NotificationsPopover({
             <Button
               size="sm"
               variant="ghost"
-              className="h-7 px-2 text-xs text-card/70 hover:bg-card/10 hover:text-accent-secondary"
+              className="h-7 px-2 text-xs text-card/70 bg-wood-light shadow-sm border border-wood hover:bg-card/10 hover:text-accent-secondary"
               onClick={() => markAllNotificationsRead.mutate()}
               disabled={markAllNotificationsRead.isPending || unreadCount === 0}
             >
@@ -121,7 +121,7 @@ export function NotificationsPopover({
             </TabsList>
           </Tabs>
         </div>
-        <div className="h-90 scrollbar-hide bg-black/5">
+        <div className="h-90 scrollbar-hide bg-black/10">
           <ScrollArea className="h-full pl-2 pr-3">
             {isLoading ? (
               <div className="flex items-center justify-center py-12 text-sm text-card/75">
