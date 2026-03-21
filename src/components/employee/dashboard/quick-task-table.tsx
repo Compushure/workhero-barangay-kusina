@@ -1,37 +1,72 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
 import { useClaimTaskPointsandXP } from '@/hooks/tanstack/mutations/employeeTasksMutations';
 import type { TaskStatusItem } from '@/components/employee/task-status/types';
 
-type TasksTableProps = {
-  /** Optional fallback data for testing; live data is fetched */
-  tasks?: TaskStatusItem[];
-};
-
 const formatDate = (iso?: string | null) => {
   if (!iso) return '—';
   const date = new Date(iso);
-  return Number.isNaN(date.getTime())
-    ? '—'
-    : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 };
 
-export default function TasksTable({ tasks: fallbackTasks = [] }: TasksTableProps) {
+type TasksTableProps = {
+  tasks?: TaskStatusItem[];
+  sortOrder?: 'newest' | 'oldest';
+};
+
+const TASKS_PAGE_SIZE = 3;
+
+export default function TasksTable({
+  tasks: fallbackTasks = [],
+  sortOrder = 'newest',
+}: TasksTableProps) {
   const { data, isLoading, isError } = useGetEmployeeTasks();
   const claimMutation = useClaimTaskPointsandXP();
   const [activeClaimId, setActiveClaimId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const approvedTasks = useMemo(() => {
     const source = data?.verifiedTasks ?? fallbackTasks;
-    // Show approved tasks that still have pending instances to claim
-    return (source || []).filter((task) => task.status === 'approved' && task.pendingOrders > 0);
+    return source.filter((task) => task.status === 'approved' && task.pendingOrders > 0);
   }, [data?.verifiedTasks, fallbackTasks]);
+
+  const sortedApprovedTasks = useMemo(() => {
+    return [...approvedTasks].sort((first, second) => {
+      const firstTime = first.approvedAt ? new Date(first.approvedAt).getTime() : 0;
+      const secondTime = second.approvedAt ? new Date(second.approvedAt).getTime() : 0;
+
+      return sortOrder === 'newest' ? secondTime - firstTime : firstTime - secondTime;
+    });
+  }, [approvedTasks, sortOrder]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedApprovedTasks.length / TASKS_PAGE_SIZE));
+
+  const paginatedTasks = useMemo(() => {
+    const startIndex = (currentPage - 1) * TASKS_PAGE_SIZE;
+    return sortedApprovedTasks.slice(startIndex, startIndex + TASKS_PAGE_SIZE);
+  }, [sortedApprovedTasks, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortOrder, data?.verifiedTasks, fallbackTasks]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const handleClaim = (task: TaskStatusItem) => {
     if (claimMutation.isPending) return;
+
     setActiveClaimId(task.id);
     claimMutation.mutate(
       {
@@ -42,70 +77,107 @@ export default function TasksTable({ tasks: fallbackTasks = [] }: TasksTableProp
         maxOrders: task.maxOrders,
       },
       {
-        onSettled: () => setActiveClaimId(null),
+        onSettled: () => {
+          setActiveClaimId(null);
+        },
       }
     );
   };
 
+  if (isLoading) {
+    return <div className="p-5 text-center font-pixel text-[10px] text-[#f5e8d6] animate-pulse">Loading tasks...</div>;
+  }
+
+  if (isError) {
+    return <p className="p-5 text-center font-pixel text-[10px] text-red-300">Failed to load approved tasks.</p>;
+  }
+
   return (
-    <div className="flex flex-col max-h-[70vh] gap-4 font-pixel">
-      {isLoading ? (
-        <p className="text-sm text-center text-gray-600">Loading approved tasks…</p>
-      ) : isError ? (
-        <p className="text-sm text-center text-red-600">Failed to load approved tasks.</p>
-      ) : approvedTasks.length === 0 ? (
-        <p className="text-sm text-center text-gray-600">No approved tasks waiting to claim.</p>
+    <div className="space-y-2.5 rounded-xl bg-[#eadbc1] p-1 sm:p-2 max-h-[48vh] overflow-y-auto">
+      {sortedApprovedTasks.length === 0 ? (
+        <div className="rounded-xl border-2 border-[#d5c7ac] bg-[#f0e6d1] p-3 text-center font-pixel text-[9px] text-[#6d553d]">
+          No approved tasks available.
+        </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {approvedTasks.map((task) => {
-            const totalPoints = task.points * task.pendingOrders;
-            const totalXp = task.xp * task.pendingOrders;
+        paginatedTasks.map((task) => {
+          const totalPoints = task.points * task.pendingOrders;
+          const totalXp = task.xp * task.pendingOrders;
+          const isClaimingTask = claimMutation.isPending && activeClaimId === task.id;
 
-            return (
-              <div
-                key={task.id}
-                className="bg-[#6D4A2C] rounded-xl shadow-sm p-4 border-3 border-[#47331F] grid grid-cols-3 gap-10 items-center min-w-0"
-              >
-                {/* Column 1: Category name & description */}
-                <div className="flex flex-col font-jersey min-w-0">
-                  <p className="text-xl text-[#F5E8D6] uppercase tracking-wide truncate">
+          return (
+            <div
+              key={task.id}
+              className="rounded-xl border-2 border-[#d4c5a8] bg-[#f7efdf] p-3 transition-all duration-200 hover:-translate-y-0.5"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="font-pixel text-[10px] leading-relaxed text-[#3f2a1a] wrap-break-word">
                     {task.name}
-                  </p>
-                  <p className="text-md text-[#948E85] truncate">{task.description}</p>
-                </div>
-
-                {/* Column 2: Instances and approval date */}
-                <div className="flex flex-col font-jersey text-[#F5E8D6] min-w-0">
-                  <span className="text-xl uppercase tracking-wide truncate">
-                    Instances: {task.completedOrders} / {task.maxOrders}
-                  </span>
-                  <span className="text-[#948E85] text-md truncate">
-                    Approved on {formatDate(task.approvedAt)}
-                  </span>
-                </div>
-
-                {/* Column 3: Totals + Claim */}
-                <div className="flex items-center justify-between min-w-0">
-                  <div className="text-left font-jersey text-lg text-yellow-500 min-w-0">
-                    <p className="truncate">
-                      🪙 {totalPoints} <span className="ml-1 text-green-500">🟢 {totalXp}</span>
-                    </p>
                   </div>
+                  <div className="mt-0.5 font-pixel text-[9px] text-[#6b5038]">
+                    Approved on {formatDate(task.approvedAt)}
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span className="kitchen-chip px-2 py-0.5 font-pixel text-[8px]">
+                      {task.points} pts each
+                    </span>
+                    <span className="kitchen-chip px-2 py-0.5 font-pixel text-[8px]">
+                      Qty {task.pendingOrders}
+                    </span>
+                    <span className="rounded-md border-2 border-[#7eb07f]/30 bg-[#e3f2e6] px-2 py-0.5 font-pixel text-[8px] text-[#1f5a36]">
+                      Total {totalPoints} pts
+                    </span>
+                    <span className="rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-2 py-0.5 font-pixel text-[8px] text-[#204b61]">
+                      XP {totalXp}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant="outline"
+                    className="rounded-md border-2 border-[#7eb07f]/45 bg-[#d8efdb] font-pixel text-[8px] text-[#1f5a36]"
+                  >
+                    Approved
+                  </Badge>
                   <Button
+                    size="sm"
                     onClick={() => handleClaim(task)}
                     disabled={claimMutation.isPending}
-                    title="Claim to cook dish"
-                    className="bg-[#D08C23] border-3 text-xs font-pixel border-[#47331F] shadow-[4px_4px_0px_#000] shadow-[#543A23] text-[#211A12] hover:opacity-90 cursor-pointer hover:translate-y-1 hover:shadow-[2px_2px_0px_#000]
-                    transition-all duration-150 hover:bg-[#D08C23] disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0px_#000] disabled:hover:bg-[#D08C23]"
+                    className="kitchen-btn h-8 px-3 font-pixel text-[8px] hover:bg-inherit"
                   >
-                    {claimMutation.isPending && activeClaimId === task.id ? 'Claiming…' : 'Claim'}
+                    {isClaimingTask ? 'Claiming...' : 'Claim'}
                   </Button>
                 </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })
       )}
+
+      {sortedApprovedTasks.length > 0 && totalPages > 1 ? (
+        <div className="mt-2 flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))}
+            disabled={currentPage === 1}
+            className="h-7 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-2 font-pixel text-[8px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <span className="font-pixel text-[8px] text-[#6b5038]">
+            {currentPage}/{totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => setCurrentPage((previous) => Math.min(totalPages, previous + 1))}
+            disabled={currentPage === totalPages}
+            className="h-7 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-2 font-pixel text-[8px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
