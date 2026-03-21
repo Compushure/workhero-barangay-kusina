@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { formatInTimeZone, zonedTimeToUtc } from 'date-fns-tz';
+import { formatInTimeZone, fromZonedTime } from 'date-fns-tz';
 import {
   Dialog,
   DialogContent,
@@ -41,7 +41,7 @@ function parseTimeOnDate(baseUtc: Date, time: string, timeZone: string): Date {
   const datePart = formatInTimeZone(baseUtc, timeZone, 'yyyy-MM-dd');
   const hour = String(hours).padStart(2, '0');
   const minute = String(minutes).padStart(2, '0');
-  return zonedTimeToUtc(`${datePart} ${hour}:${minute}:00`, timeZone);
+  return fromZonedTime(`${datePart} ${hour}:${minute}:00`, timeZone);
 }
 
 function parseDurationToMs(duration: string): number {

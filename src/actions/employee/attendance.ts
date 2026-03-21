@@ -1,6 +1,6 @@
 'use server';
 
-import { formatInTimeZone, zonedTimeToUtc } from 'date-fns-tz';
+import { formatInTimeZone, fromZonedTime } from 'date-fns-tz';
 import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse } from '@/lib/utils/safe-action';
 import type { AttendanceConfig, AttendanceLog, AttendanceStatus, AttendanceTimelineEntry } from '@/types';
@@ -25,8 +25,8 @@ function parseTimeOnDate(baseUtc: Date, time: string, timeZone: string): Date {
   const datePart = formatInTimeZone(baseUtc, timeZone, 'yyyy-MM-dd');
   const hour = String(hours).padStart(2, '0');
   const minute = String(minutes).padStart(2, '0');
-  // Interpret HH:mm in the configured timezone, return as UTC Date for consistent comparisons
-  return zonedTimeToUtc(`${datePart} ${hour}:${minute}:00`, timeZone);
+  // Interpret HH:mm as local time in the configured timezone, then convert to UTC for comparison.
+  return fromZonedTime(`${datePart} ${hour}:${minute}:00`, timeZone);
 }
 
 function formatTo12Hour(time24: string): string {
@@ -39,8 +39,8 @@ function formatTo12Hour(time24: string): string {
 
 function getDayRange(base: Date, timeZone: string): { start: Date; end: Date } {
   const datePart = formatInTimeZone(base, timeZone, 'yyyy-MM-dd');
-  const start = zonedTimeToUtc(`${datePart} 00:00:00.000`, timeZone);
-  const end = zonedTimeToUtc(`${datePart} 23:59:59.999`, timeZone);
+  const start = fromZonedTime(`${datePart} 00:00:00.000`, timeZone);
+  const end = fromZonedTime(`${datePart} 23:59:59.999`, timeZone);
   return { start, end };
 }
 
