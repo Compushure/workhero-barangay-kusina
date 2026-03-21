@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AuthHomeLink } from '@/components/auth/auth-home-link';
 
 interface LoginFormFooterProps {
   disabled: boolean;
@@ -23,6 +24,13 @@ export function LoginFormFooter({ disabled }: LoginFormFooterProps) {
         >
           Admin Login
         </Link>
+      </div>
+
+      <div className="mt-3 flex justify-center">
+        <AuthHomeLink
+          className="inline-flex items-center gap-2 rounded-lg border-3 border-orange-900 bg-orange-100 px-3 py-2 font-pixel text-[8px] text-orange-900 shadow-[3px_3px_0px_rgba(71,51,31,0.4)] transition-all hover:-translate-y-0.5 hover:bg-orange-200 sm:text-[9px]"
+          iconClassName="h-3.5 w-3.5 sm:h-4 sm:w-4"
+        />
       </div>
     </div>
   );

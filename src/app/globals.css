@@ -1,5 +1,6 @@
 @import 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
 @import 'https://fonts.googleapis.com/css2?family=Jersey+10&display=swap';
+@import 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=VT323&display=swap';
 
 @import 'tailwindcss';
 @import 'tw-animate-css';
@@ -27,6 +28,7 @@
   /* this is the main accent color to be used */
   --accent: #f47812; /* Deep citrus orange */
   --accent-secondary: #faa938; /* Light citrus orange */
+  --accent-foreground: #fafafa;
   --primary-gradient: linear-gradient(180deg, #faa938 0%, #f47812 100%);
 
   --row-hover: #fce4bf;
@@ -130,7 +132,9 @@
 
 @theme inline {
   --font-pixel: 'Press Start 2P', monospace;
+  --font-pixel-body: 'VT323', monospace;
   --font-jersey: 'Jersey 10', monospace;
+  --font-body-home: 'Nunito', sans-serif;
   --font-sans: 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
@@ -262,6 +266,51 @@
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
+
+.homepage-theme {
+  --background: #30261f;
+  --background-soft: #3b3028;
+  --foreground: #f3e5d1;
+  --card: #433528;
+  --card-foreground: #f3e5d1;
+  --popover: #3a2d23;
+  --popover-foreground: #f3e5d1;
+  --title: #fff3df;
+  --primary: #e3a537;
+  --primary-foreground: #24180f;
+  --secondary: #694632;
+  --secondary-foreground: #f3e5d1;
+  --accent: #d96b30;
+  --accent-secondary: #f2b04a;
+  --accent-foreground: #fff7ed;
+  --muted: #564538;
+  --muted-foreground: #d5b998;
+  --destructive: #b74141;
+  --destructive-foreground: #fff7f7;
+  --border: #6a503f;
+  --input: #5d4737;
+  --ring: #e3a537;
+  --sidebar: #3a2d23;
+  --sidebar-foreground: #f3e5d1;
+  --sidebar-primary: #e3a537;
+  --sidebar-primary-foreground: #24180f;
+  --sidebar-accent: #694632;
+  --sidebar-accent-foreground: #f3e5d1;
+  --sidebar-border: #6a503f;
+  --sidebar-ring: #e3a537;
+  --wood: #5c3b23;
+  --wood-light: #7d5936;
+  --pixel-border: #47331f;
+  --parchment: #efe1c7;
+  --parchment-foreground: #3b2a1a;
+  --gold: #f4b925;
+  --gold-dark: #b57f1f;
+  --xp-bar: #43a047;
+  --xp-bar-bg: #1e3d22;
+  --cooking-orange: #f47812;
+  --cooking-glow: #ffd36b;
+}
+
 .pixel-button:hover {
   transform: translate(-2px, -2px);
   box-shadow: 6px 6px 0px #000;
@@ -306,6 +355,93 @@
 }
 
 @layer utilities {
+  .parchment-card {
+    background: linear-gradient(135deg, var(--parchment) 0%, #e8d7b7 50%, var(--parchment) 100%);
+    border: 3px solid var(--wood);
+    box-shadow:
+      inset 0 0 22px rgba(98, 72, 43, 0.22),
+      4px 4px 0 rgba(71, 51, 31, 0.5);
+    color: var(--parchment-foreground);
+  }
+
+  .game-btn {
+    font-family: 'Press Start 2P', monospace;
+    border-radius: 0.125rem;
+    cursor: pointer;
+    background: linear-gradient(180deg, #e89852 0%, #df8540 100%);
+    border: 3px solid var(--pixel-border);
+    color: var(--primary-foreground);
+    box-shadow:
+      inset 1px 1px 0 var(--cooking-glow),
+      3px 3px 0 rgba(71, 51, 31, 0.6);
+    text-shadow: 1px 1px 0 rgba(71, 51, 31, 0.5);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .game-btn:hover {
+    background: linear-gradient(180deg, #de8b45 0%, #d77b35 100%);
+    transform: translateY(-2px);
+    box-shadow:
+      inset 1px 1px 0 var(--cooking-glow),
+      3px 5px 0 rgba(71, 51, 31, 0.6);
+  }
+
+  .game-btn:active {
+    background: linear-gradient(180deg, #d77b35 0%, #c66c27 100%);
+    transform: translateY(2px);
+    box-shadow:
+      inset 1px 1px 0 #c66c27,
+      1px 1px 0 rgba(71, 51, 31, 0.6);
+  }
+
+  .game-btn-secondary {
+    background: linear-gradient(180deg, var(--secondary) 0%, #4a3427 100%);
+    color: var(--foreground);
+    text-shadow: none;
+  }
+
+  .game-btn-danger {
+    background: linear-gradient(180deg, var(--destructive) 0%, #8f2f2f 100%);
+    color: var(--destructive-foreground);
+  }
+
+  .xp-bar-container {
+    background: var(--xp-bar-bg);
+    border: 2px solid var(--pixel-border);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  .xp-bar-fill {
+    background: linear-gradient(90deg, var(--xp-bar) 0%, #58be5c 100%);
+    box-shadow:
+      inset 0 -2px 0 rgba(24, 91, 42, 0.8),
+      0 0 8px rgba(67, 160, 71, 0.4);
+  }
+
+  .font-pixel-body {
+    font-family: 'VT323', monospace;
+  }
+
+  .font-body-home {
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .steam-animation {
+    animation: steam 3s ease-in-out infinite;
+  }
+
+  .bubble-animation {
+    animation: bubble 1.5s ease-in-out infinite;
+  }
+
+  .glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
   .bg-primary-gradient {
     background-image: var(--primary-gradient);
   }
@@ -476,5 +612,49 @@
   }
   100% {
     box-shadow: 0 0 8px 2px rgba(244, 185, 37, 0.35);
+  }
+}
+
+@keyframes steam {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-20px) scale(1.2);
+  }
+}
+
+@keyframes bubble {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.05);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(244, 185, 37, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(244, 185, 37, 0.6),
+      0 0 40px rgba(244, 120, 18, 0.3);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
   }
 }
