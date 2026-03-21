@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { X, ArrowRight, Loader2 } from 'lucide-react';
 import {
   Dialog,
@@ -25,6 +25,7 @@ interface ProfileModalProps {
 
 export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
   if (!user) return null;
@@ -36,9 +37,11 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
     });
   };
 
+  const shouldShowMobileLogout = !pathname.startsWith('/employee');
+
   return (
     <Dialog open={open} onOpenChange={!isPending ? onOpenChange : undefined}>
-      <DialogContent className="w-[min(90vw,360px)] sm:w-[min(88vw,420px)] md:w-[min(80vw,540px)] xl:w-[min(60vw,620px)] 2xl:w-[min(48vw,700px)] rounded-2xl p-3 sm:p-4 md:p-5 bg-background text-foreground [&>button]:hidden">
+      <DialogContent className="w-[min(90vw,360px)] sm:w-[min(88vw,420px)] md:w-[min(80vw,540px)] xl:w-[min(60vw,620px)] 2xl:w-[min(48vw,700px)] max-h-[88vh] overflow-y-auto rounded-2xl p-3 sm:p-4 md:p-4 bg-background text-foreground [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:[scrollbar-width:none] sm:[-ms-overflow-style:none] sm:[&::-webkit-scrollbar]:hidden [&>button]:hidden">
         {/* Custom Close Button */}
         <button
           onClick={() => onOpenChange(false)}
@@ -58,9 +61,8 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 md:gap-5 py-1 md:py-2">
-          {/* Profile Picture */}
-          <div className="flex justify-center">
+        <div className="grid grid-cols-1 gap-3 py-1 md:grid-cols-[11rem_minmax(0,1fr)] md:gap-4 md:py-1.5">
+          <div className="flex flex-col items-center gap-2 md:gap-2.5">
             <ProfileAvatar
               userId={user.id}
               userName={user.name}
@@ -68,31 +70,29 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
               size="lg"
               className="bg-(--color-background-soft) transition-transform duration-300 hover:scale-105 border-accent/15"
             />
+
+            <div className="flex justify-center w-full">
+              <RecentBadges userId={user.id} showLabel={false} maxBadges={3} />
+            </div>
           </div>
 
-          {/* Recent Badges (3 badges) */}
-          <div className="flex justify-center">
-            <RecentBadges userId={user.id} showLabel={false} maxBadges={3} />
-          </div>
-
-          {/* Basic Information */}
-          <div className="space-y-3 animate-in fade-in duration-300">
-            <div className="space-y-2.5">
-              <div className="flex flex-col gap-1">
+          <div className="space-y-2.5 animate-in fade-in duration-300">
+            <div className="space-y-2">
+              <div className="flex flex-col gap-0.5">
                 <label className="text-xs font-medium text-muted-foreground">Full Name</label>
                 <p className="text-sm sm:text-base font-semibold text-title">{user.name}</p>
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-0.5">
                 <label className="text-xs font-medium text-muted-foreground">Email Address</label>
                 <p className="text-xs sm:text-sm font-semibold text-title break-all">{user.email}</p>
               </div>
               {user.employeeId && (
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-0.5">
                   <label className="text-xs font-medium text-muted-foreground">Employee ID</label>
                   <p className="text-sm sm:text-base font-semibold text-title">{user.employeeId}</p>
                 </div>
               )}
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-0.5">
                 <label className="text-xs font-medium text-muted-foreground">Role</label>
                 <div>
                   <Badge variant="default" className="font-semibold capitalize">
@@ -104,7 +104,7 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-3 md:pt-4 border-t border-border space-y-2.5">
+          <div className="pt-2.5 border-t border-border space-y-2 md:col-span-2">
             <Button
               onClick={handleViewFullProfile}
               disabled={isPending}
@@ -124,8 +124,12 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
               )}
             </Button>
             
-            {/* Logout Button */}
-            <LogOutBtn />
+            {/* Logout button: mobile only, not shown on /employee routes */}
+            {shouldShowMobileLogout ? (
+              <div className="md:hidden">
+                <LogOutBtn />
+              </div>
+            ) : null}
           </div>
         </div>
       </DialogContent>

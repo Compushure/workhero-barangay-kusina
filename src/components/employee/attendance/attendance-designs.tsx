@@ -27,11 +27,13 @@ export default function AttendanceDesign() {
           day: 'numeric',
           hour: 'numeric',
           minute: '2-digit',
+          second: '2-digit',
+          hour12: true,
         })
       );
 
     formatNow();
-    const intervalId = setInterval(formatNow, 60000);
+    const intervalId = setInterval(formatNow, 1000);
 
     return () => clearInterval(intervalId);
   }, []);

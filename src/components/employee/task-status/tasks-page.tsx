@@ -1,7 +1,6 @@
 'use client';
 
 import { TaskStatusBoard } from './task-status-board';
-import NavSection from '../nav-section';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
 import HeaderHUD from '../widgets/header-hud';
 
@@ -28,6 +27,8 @@ export function TasksPage() {
           inReviewTasks={onReviewTasks}
           verifiedTasks={verifiedTasks}
           rejectedTasks={deniedTasks}
+          isLoading={isLoading}
+          error={error}
         />
       </div>
 

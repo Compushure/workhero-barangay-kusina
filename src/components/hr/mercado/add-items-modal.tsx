@@ -378,20 +378,17 @@ export function AddItemsModal({
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
-      <DialogContent className="bg-card text-card-foreground border border-accent/25 max-w-[95vw] sm:max-w-137.5 md:max-w-162.5 lg:max-w-175 rounded-3xl p-4 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-background text-card-foreground border border-border max-w-[95vw] sm:max-w-137.5 md:max-w-162.5 lg:max-w-175 rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2 text-h2 text-foreground">
-              <Pencil className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
+            <DialogTitle className="flex items-center gap-2 text-primary text-base sm:text-lg font-semibold">
+              <Pencil className="h-4 w-4 sm:h-5 sm:w-5" />
               {editingItem ? 'Edit Item Reward' : 'Add Item Reward'}
             </DialogTitle>
             <button
               onClick={handleClose}
-              aria-label="Close"
-              className="rounded-full border border-transparent bg-white/30 p-1 text-muted-foreground shadow-sm/25 transition-all duration-200 hover:bg-accent-secondary/20 hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
+              className="text-muted-foreground hover:text-title transition-colors h-5 w-5"
+            ></button>
           </div>
         </DialogHeader>
 
@@ -661,19 +658,19 @@ export function AddItemsModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 flex flex-col-reverse justify-end gap-3 sm:flex-row">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
           <Button
             variant="outline"
             onClick={handleClose}
             disabled={isLoading}
-            className="control-h text-button w-full rounded-xl border border-accent/25 bg-transparent text-foreground shadow-sm/25 transition-all duration-300 hover:bg-accent-secondary/10 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            className="h-10 rounded-lg border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white transition-all duration-400 ease-in-out px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="control-h text-button w-full rounded-xl bg-primary-gradient text-white shadow-sm/25 transition-all duration-300 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            className="h-10 rounded-lg bg-primary-gradient text-zinc-50 hover:opacity-95 px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isLoading ? (
               <>

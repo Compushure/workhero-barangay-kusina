@@ -24,3 +24,13 @@ export interface TaskStatusItem {
 }
 
 export type TaskStatusKind = 'Current' | 'In Review' | 'Approved' | 'Rejected';
+
+export type TaskSortOption =
+  | 'due-date-asc'
+  | 'due-date-desc'
+  | 'points-asc'
+  | 'points-desc'
+  | 'title-asc'
+  | 'title-desc';
+
+export type TaskOverdueFilter = 'all' | 'overdue' | 'not-overdue';

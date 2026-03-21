@@ -7,7 +7,6 @@ import {
   Award,
   CheckCircle,
   ChevronLeft,
-  Clock3,
   FileText,
   LayoutDashboard,
   Medal,
@@ -28,6 +27,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useGetTodayAttendanceStatus } from '@/hooks/tanstack/queries/attendanceQueries';
 import { HrManagerAttendanceModal } from './attendance/hr-manager-attendance-modal';
 import { HrManagerAttendanceTrigger } from './attendance/hr-manager-attendance-trigger';
+import { HrManagerMobileAttendanceTrigger } from './attendance/hr-manager-mobile-attendance-trigger';
 
 interface NavItem {
   key: string;
@@ -164,12 +164,14 @@ export function Sidebar({ view }: SidebarProps) {
 
   const isUiDisabled = isNavigating || isLoggingOut;
   const isNavLinkActive = (href: string) => pathname === href;
-  const attendanceButtonLabel = attendanceStatus?.canTimeOut
-    ? 'Time Out'
-    : attendanceStatus?.canTimeIn
-      ? 'Time In'
-      : 'Attendance';
-  const mobileAttendanceLabel = 'Attendance';
+  const attendanceButtonLabel = attendanceStatus?.isOnBreak
+    ? 'On Break'
+    : attendanceStatus?.canTimeOut
+      ? 'Time Out'
+      : attendanceStatus?.canTimeIn
+        ? 'Time In'
+        : 'Attendance';
+  const mobileAttendanceLabel = attendanceStatus?.isOnBreak ? 'On Break' : 'Attendance';
   const shouldShowAttendanceReminder = !!(
     attendanceStatus?.canTimeIn || attendanceStatus?.canTimeOut
   );
@@ -315,6 +317,7 @@ export function Sidebar({ view }: SidebarProps) {
             disabled={isUiDisabled}
             label={attendanceButtonLabel}
             shouldRemind={shouldShowAttendanceReminder}
+            status={attendanceStatus}
             onClick={() => setShowAttendanceModal(true)}
           />
 
@@ -386,29 +389,14 @@ export function Sidebar({ view }: SidebarProps) {
                 );
               })}
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setShowAttendanceModal(true)}
-                    disabled={isUiDisabled}
-                    className={`flex flex-col items-center justify-center rounded-xl px-1 py-2 pb-2.5 text-primary transition-all duration-300 hover:bg-accent/20 hover:text-orange-500 ${
-                      isUiDisabled ? 'pointer-events-none opacity-50' : ''
-                    } ${shouldShowAttendanceReminder ? 'animate-pulse' : ''}`}
-                  >
-                    <Clock3 className="size-4" strokeWidth={1.9} />
-                    <span className="text-sidebar-label mt-1 w-full truncate text-center leading-tight">
-                      {mobileAttendanceLabel}
-                    </span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  align="center"
-                  className="bg-card text-foreground shadow-sm/25"
-                >
-                  {attendanceButtonLabel}
-                </TooltipContent>
-              </Tooltip>
+              <HrManagerMobileAttendanceTrigger
+                disabled={isUiDisabled}
+                shouldRemind={shouldShowAttendanceReminder}
+                label={mobileAttendanceLabel}
+                tooltipLabel={attendanceButtonLabel}
+                status={attendanceStatus}
+                onClick={() => setShowAttendanceModal(true)}
+              />
 
               <Tooltip>
                 <TooltipTrigger asChild>

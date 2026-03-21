@@ -2,6 +2,7 @@
 
 import { Clock3 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import type { AttendanceStatus } from '@/types/attendance';
 
 interface HrManagerAttendanceTriggerProps {
   isCollapsed: boolean;
@@ -9,6 +10,7 @@ interface HrManagerAttendanceTriggerProps {
   label: string;
   onClick: () => void;
   shouldRemind?: boolean;
+  status?: AttendanceStatus;
 }
 
 export function HrManagerAttendanceTrigger({
@@ -17,20 +19,49 @@ export function HrManagerAttendanceTrigger({
   label,
   onClick,
   shouldRemind = false,
+  status,
 }: HrManagerAttendanceTriggerProps) {
+  // Determine status badge display
+  let statusBadge: string | null = null;
+  let statusColor = '';
+  
+  if (status?.isAbsent) {
+    statusBadge = 'Absent';
+    statusColor = 'bg-red-100 text-red-700';
+  } else if (status?.hasTimedOut) {
+    statusBadge = 'Timed Out';
+    statusColor = 'bg-green-100 text-green-700';
+  } else if (status?.isOnBreak) {
+    statusBadge = 'On Break';
+    statusColor = 'bg-amber-100 text-amber-700';
+  } else if (status?.hasTimedIn) {
+    statusBadge = 'Active';
+    statusColor = 'bg-blue-100 text-blue-700';
+  } else if (status?.canTimeIn) {
+    statusBadge = 'Ready';
+    statusColor = 'bg-emerald-100 text-emerald-700';
+  }
+
   const triggerButton = (
     <button
       onClick={onClick}
       disabled={disabled}
       aria-label={isCollapsed ? 'Open attendance' : undefined}
-      className={`inline-flex items-center justify-center shadow-sm/25 hover:scale-103 transform-gpu duration-300 ease-in-out hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 ${
+      className={`inline-flex items-center justify-between shadow-sm/25 hover:scale-103 transform-gpu duration-300 ease-in-out hover:bg-[#FAA938]/20 hover:text-[#f47812] hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 ${
         isCollapsed
           ? 'h-9 w-9 rounded-full'
           : 'mb-3 w-full gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium'
       } ${shouldRemind ? 'ring-2 ring-accent-secondary/50 ring-offset-2 ring-offset-muted animate-pulse' : ''}`}
     >
-      <Clock3 className={`${isCollapsed ? 'size-4' : 'size-3.5'} text-accent`} />
-      {!isCollapsed ? label : null}
+      <div className="flex items-center gap-1.5">
+        <Clock3 className={`${isCollapsed ? 'size-4' : 'size-3.5'} text-accent`} />
+        {!isCollapsed ? label : null}
+      </div>
+      {!isCollapsed && statusBadge && (
+        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${statusColor}`}>
+          {statusBadge}
+        </span>
+      )}
     </button>
   );
 
@@ -42,7 +73,10 @@ export function HrManagerAttendanceTrigger({
         align="center"
         className="border border-accent/25 bg-card text-foreground shadow-sm/25"
       >
-        {label}
+        <div className="flex flex-col gap-1">
+          <span>{label}</span>
+          {statusBadge && <span className="text-xs">{statusBadge}</span>}
+        </div>
       </TooltipContent>
     </Tooltip>
   ) : (

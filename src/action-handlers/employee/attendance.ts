@@ -2,13 +2,14 @@ import { safeAction } from '@/lib/utils/safe-action';
 import { toast } from 'sonner';
 import {
   getAttendanceConfigAction,
+  getTodayAttendanceTimelineAction,
   getTodayAttendanceStatusAction,
   timeInAttendanceAction,
   timeOutAttendanceAction,
   startBreakAction,
   endBreakAction,
 } from '@/actions/employee/attendance';
-import type { AttendanceConfig, AttendanceStatus } from '@/types';
+import type { AttendanceConfig, AttendanceStatus, AttendanceTimelineEntry } from '@/types';
 
 export async function handleGetAttendanceConfig(): Promise<{
   error: string | null;
@@ -31,6 +32,19 @@ export async function handleGetTodayAttendanceStatus(
 
   if (!result.success || result.data?.error) {
     return { error: result.error || result.data?.error || 'Failed to load attendance status' };
+  }
+
+  return { error: null, data: result.data?.data };
+}
+
+export async function handleGetTodayAttendanceTimeline(): Promise<{
+  error: string | null;
+  data?: AttendanceTimelineEntry[];
+}> {
+  const result = await safeAction(() => getTodayAttendanceTimelineAction());
+
+  if (!result.success || result.data?.error) {
+    return { error: result.error || result.data?.error || 'Failed to load attendance logs' };
   }
 
   return { error: null, data: result.data?.data };
