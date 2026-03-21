@@ -144,7 +144,7 @@ export default function TasksTable({
                     size="sm"
                     onClick={() => handleClaim(task)}
                     disabled={claimMutation.isPending}
-                    className="kitchen-btn h-8 px-3 font-pixel text-[8px] hover:bg-inherit"
+                    className="kitchen-btn h-8 px-3 font-pixel text-[8px] hover:brightness-105"
                   >
                     {isClaimingTask ? 'Claiming...' : 'Claim'}
                   </Button>
