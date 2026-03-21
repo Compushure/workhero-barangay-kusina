@@ -9,9 +9,10 @@ import { useNavigationStore } from '../nav-loading-state';
 
 interface MapLauncherProps {
   className?: string;
+  inline?: boolean;
 }
 
-export function MapLauncher({ className }: MapLauncherProps) {
+export function MapLauncher({ className, inline = false }: MapLauncherProps) {
   const { toggleMap, closeMap } = useMapStore();
   const { isNavigating, finishNavigation } = useNavigationStore();
   const pathname = usePathname();
@@ -100,30 +101,38 @@ export function MapLauncher({ className }: MapLauncherProps) {
         type="button"
         onClick={handleClick}
         title="Click to travel"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
+        onPointerDown={inline ? undefined : handlePointerDown}
+        onPointerMove={inline ? undefined : handlePointerMove}
+        onPointerUp={inline ? undefined : handlePointerUp}
         disabled={isNavigating}
         className={cn(
-          'fixed z-[55] flex h-17 w-17 items-center justify-center rounded-full wood-panel text-[#F4B925] transition-transform',
-          position ? '' : 'right-4 top-1/2 -translate-y-1/2',
-          dragging
-            ? 'cursor-grabbing'
-            : isNavigating
+          inline
+            ? 'relative z-0 inline-flex size-12 items-center justify-center rounded-full wood-panel text-[#F4B925] transition-all duration-300 shadow-sm'
+            : 'fixed z-55 flex h-17 w-17 items-center justify-center rounded-full wood-panel text-[#F4B925] transition-transform',
+          !inline && (position ? '' : 'right-4 top-1/2 -translate-y-1/2'),
+          inline
+            ? isNavigating
               ? 'cursor-not-allowed opacity-70'
-              : 'cursor-pointer hover:scale-105',
+              : 'cursor-pointer hover:scale-103 hover:border-primary/40'
+            : dragging
+              ? 'cursor-grabbing'
+              : isNavigating
+                ? 'cursor-not-allowed opacity-70'
+                : 'cursor-pointer hover:scale-105',
           className
         )}
-        style={position ? { left: position.x, top: position.y } : undefined}
+        style={!inline && position ? { left: position.x, top: position.y } : undefined}
         aria-label="Open travel map"
         aria-disabled={isNavigating}
       >
         <div className="relative flex items-center justify-center h-full w-full rounded-full">
-          <span
-            className="pointer-events-none absolute inset-0 rounded-full border-2 border-[#47331F] blur-[2px] opacity-75 animate-ping"
-            aria-hidden
-          />
-          <Map className="h-8 w-8" aria-hidden />
+          {!inline && (
+            <span
+              className="pointer-events-none absolute inset-0 rounded-full border-2 border-[#47331F] blur-[2px] opacity-75 animate-ping"
+              aria-hidden
+            />
+          )}
+          <Map className={inline ? 'size-6' : 'size-8'} aria-hidden />
         </div>
       </button>
     </>

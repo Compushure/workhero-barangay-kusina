@@ -62,7 +62,7 @@ export function NotificationsPopover({
           variant="ghost"
           size="icon"
           className={cn(
-            'relative size-12 rounded-full wood-panel shadow-sm hover:border-primary/40 hover:text-accent-secondary hover:scale-103 transition-all duration-300 ease-in-out',
+            'relative size-12 rounded-full wood-panel shadow-sm hover:border-primary/40 hover:text-accent-secondary hover:scale-103 hover:cursor-pointer transition-all duration-300 ease-in-out',
             unreadCount > 0 ? 'text-card' : 'text-muted',
             triggerClassName
           )}
@@ -71,7 +71,7 @@ export function NotificationsPopover({
           {unreadCount > 0 && (
             <span
               className={cn(
-                'absolute -right-2 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[11px] font-semibold leading-none text-white',
+                'absolute -right-2 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-sm font-semibold leading-none text-white',
                 badgeClassName
               )}
             >

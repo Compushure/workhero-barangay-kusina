@@ -17,7 +17,7 @@ import {
 } from '@/components/hr/mercado/mercado-filter-toggle';
 import { SortOption } from '@/components/hr/mercado/mercado-sort-toggle';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 9;
 
 export interface EditableMercadoItem {
   id: string;

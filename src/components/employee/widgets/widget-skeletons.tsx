@@ -1,21 +1,23 @@
-"use client";
+'use client';
 
 export function XPProgressSkeleton() {
   return (
-    <div className="w-full sm:w-100 max-w-50 sm:max-w-50 wood-panel rounded-lg shadow-md p-2 py-0 flex flex-col items-center">
-      <div className="w-full flex items-center gap-2 py-1">
-        <div className="h-4 w-4 rounded-full bg-wood-light/70 animate-pulse" />
-        <div className="h-5 w-14 rounded bg-wood-light/70 animate-pulse" />
+    <div className="w-full sm:w-100 max-w-75 sm:max-w-75 wood-panel rounded-lg shadow-md px-2 pt-1 pb-2 flex items-center gap-2">
+      <div className="h-12 w-12 rounded-full wood-panel shrink-0 overflow-hidden shadow-[2px_2px_2px_#000] shadow-[#47331F]/50">
+        <div className="h-full w-full rounded-full bg-wood-light/70 animate-pulse" />
       </div>
 
-      <div className="w-full">
-        <div className="h-5 bg-[#273A27] border-2 border-[#47331F] rounded-sm overflow-hidden">
-          <div className="h-full w-3/4 bg-wood-light/70 animate-pulse" />
+      <div className="min-w-0 flex-1">
+        <div className="w-full flex items-center justify-between py-1">
+          <div className="h-5 w-16 rounded bg-wood-light/70 animate-pulse" />
+          <div className="h-5 w-24 rounded bg-wood-light/70 animate-pulse" />
         </div>
-      </div>
 
-      <div className="w-full py-1 pl-2">
-        <div className="h-5 w-24 rounded bg-wood-light/70 animate-pulse" />
+        <div className="w-full pt-0.5">
+          <div className="h-5 bg-[#273A27] border-2 border-[#47331F] rounded-sm overflow-hidden">
+            <div className="h-full w-3/4 bg-wood-light/70 animate-pulse" />
+          </div>
+        </div>
       </div>
     </div>
   );

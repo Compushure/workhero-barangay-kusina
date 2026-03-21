@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { MercadoProvider, useMercadoContext } from './mercado-context';
-import { MapLauncher } from '@/components/employee/minimap/map-launcher';
 import { NavLoadingState } from '@/components/employee/nav-loading-state';
 import HeaderHUD from '../widgets/header-hud';
 
@@ -45,8 +44,6 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
       <div className="absolute top-0 left-0 right-0 z-40">
         <HeaderHUD hideNotificationsOnMercado={false} />
       </div>
-
-      <MapLauncher className="right-4 top-27 translate-y-0 md:right-6 md:top-31" />
 
       <div className="relative z-10 flex h-full w-full items-end justify-center overflow-hidden pt-20 pb-0 md:pt-24 md:pb-0">
         <div className="flex h-full w-full max-w-7xl items-end justify-center px-10 translate-y-0 pb-0 md:px-16 md:translate-y-0 md:pb-0 lg:px-20 lg:translate-y-0">

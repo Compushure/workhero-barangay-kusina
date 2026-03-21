@@ -13,9 +13,9 @@ export default function PointsCardWidget() {
   }
 
   return (
-    <div className="flex h-14 w-40 max-w-44 items-center justify-start gap-3 rounded-lg wood-panel px-3 shadow-md font-jersey tracking-wider">
+    <div className="flex h-17 w-36 max-w-40 items-center justify-start gap-3 rounded-lg wood-panel px-2 shadow-md font-jersey tracking-wider">
       <div className="rounded-full bg-white/20 p-1.5">
-        <Coins className="h-4 w-4 text-yellow-500" />
+        <Coins className="size-5 text-yellow-500" />
       </div>
       <div className="flex flex-col pt-2">
         <span className="text-sm text-yellow-500 leading-2">Fiesta Points</span>

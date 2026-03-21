@@ -97,7 +97,7 @@ export function MercadoPageContent() {
 
   return (
     <main className="w-full min-h-screen bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
-      <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-5 sm:gap-6 2xl:max-w-screen-2xl">
+      <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-5 2xl:max-w-screen-2xl">
         {isLoading ? (
           <MercadoHeaderSkeleton />
         ) : (
@@ -163,16 +163,12 @@ export function MercadoPageContent() {
           </>
         )}
 
-        {/* {!isLoading && (
-          
-        )} */}
-
         <div className="flex flex-1 flex-col">
           {/* Catalog grid section. */}
           {isLoading ? (
             <MercadoSkeleton />
           ) : (
-            <div className="grid auto-rows-fr grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid auto-rows-fr grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {paginatedRewards.length > 0 ? (
                 paginatedRewards.map((item) => (
                   <MercadoCard
