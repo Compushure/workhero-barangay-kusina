@@ -68,7 +68,7 @@ export default function AttendanceDesign() {
       </div>
 
       {/* Center column: main card + dashboard button */}
-      <div className="relative z-10 flex min-h-screen w-full items-center justify-center px-4 py-8">
+      <div className="relative z-10 flex min-h-screen w-full items-center justify-center px-4 py-8 mt-5">
         <div className="flex w-full max-w-4xl flex-col items-center text-center pb-12">
           {/* Main card */}
           {isAttendanceLoading ? (
@@ -79,7 +79,7 @@ export default function AttendanceDesign() {
               <h1 className="font-jersey text-3xl text-[#252525d8] text-center mb-1">
                 ⏰ Attendance Station
               </h1>
-              <p className="font-jersey text-xl text-[#474747d8] text-center text-parchment-foreground/70">
+              <p className="font-jersey text-xl text-center text-parchment-foreground/70">
                 {dateLabel || 'Loading time…'}
               </p>
 

@@ -60,8 +60,8 @@ export function NotificationItemCard({ notification, onMarkRead }: NotificationI
       className={cn(
         'group flex items-start gap-3 rounded-lg border px-3 py-2.5 shadow-sm transition',
         isUnread
-          ? 'border-accent-secondary/50 bg-card/14 hover:border-accent-secondary/75'
-          : 'border-card/20 bg-card/8 hover:border-accent/45'
+          ? 'border-accent-secondary/50 bg-card/12 hover:border-accent-secondary/75'
+          : 'border-card/20 bg-card/5 hover:border-accent/45'
       )}
     >
       <Dot className={cn('mt-1 h-5 w-5 text-card/40', isUnread && 'text-accent-secondary')} />

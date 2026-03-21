@@ -49,7 +49,13 @@ export function NotificationsPopover({
 
   if (isLoading && notifications.length === 0) {
     return (
-      <div className="relative size-12 rounded-full wood-panel shadow-sm" aria-hidden="true">
+      <div
+        className={cn(
+          'relative inline-flex size-12 items-center justify-center rounded-full wood-panel shadow-sm',
+          triggerClassName
+        )}
+        aria-hidden="true"
+      >
         <div className="absolute inset-2 rounded-full bg-wood-light/70 animate-pulse" />
       </div>
     );
@@ -62,7 +68,7 @@ export function NotificationsPopover({
           variant="ghost"
           size="icon"
           className={cn(
-            'relative size-12 rounded-full wood-panel shadow-sm hover:border-primary/40 hover:text-accent-secondary hover:scale-103 hover:cursor-pointer transition-all duration-300 ease-in-out',
+            'relative size-12 mr-0.5 rounded-full wood-panel shadow-sm hover:border-primary/40 hover:text-accent-secondary hover:scale-103 hover:cursor-pointer transition-all duration-300 ease-in-out',
             unreadCount > 0 ? 'text-card' : 'text-muted',
             triggerClassName
           )}
