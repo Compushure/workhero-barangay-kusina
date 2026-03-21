@@ -297,7 +297,7 @@
 
   .wood-panel {
     background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 100%);
-    border: 3px solid var(--pixel-border);
+    border: 2.5px solid var(--pixel-border);
   }
 
   .bg-wood-card {

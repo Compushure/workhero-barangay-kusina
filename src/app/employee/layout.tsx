@@ -12,9 +12,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="flex min-h-screen">
       <ToastViewSync view="employee" />
       <NavLoadingState />
-      <div className="fixed right-4 top-4 z-50">
+      {/* <div className="fixed right-4 top-4 z-50">
         <ConditionalNotifications hideOnMercado />
-      </div>
+      </div> */}
       <ConditionalMapLauncher hideOnMercado />
       <main className="flex-1">{children}</main>
       <div className="fixed bottom-4 left-4 z-50">

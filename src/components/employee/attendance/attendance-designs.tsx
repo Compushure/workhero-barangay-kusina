@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import AttendanceIcon from './attendance';
 import { RankWidget } from '../dashboard/rank-panel';
-import XPProgressAndPoints from './xp-points';
-import ProfileAndLevel from './profile-level';
+import XPProgress from './xp-points';
+import ProfileAndLevelCard from './profile-level';
 import DashboardRedirectButton from './kitchen-redirection';
 import { Card, CardContent } from '@/components/ui/card';
 import { useGetTodayAttendanceStatus } from '@/hooks/tanstack';
@@ -61,8 +61,8 @@ export default function AttendanceDesign() {
       <div className="sticky top-0 left-0 right-0 w-full px-2 sm:px-4 pt-2 z-20 pointer-events-none">
         <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-4 p-1">
           <div className="pointer-events-auto flex items-center gap-3 sm:gap-4 flex-nowrap overflow-x-auto">
-            <ProfileAndLevel />
-            <XPProgressAndPoints />
+            <ProfileAndLevelCard />
+            <XPProgress />
           </div>
 
           <div className="pointer-events-auto w-full sm:w-auto flex justify-end">
