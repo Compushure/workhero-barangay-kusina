@@ -128,8 +128,8 @@ export const RewardCard = memo(function RewardCard({
         </div>
 
         <div className="px-4 py-2 flex-1 flex flex-col gap-3 min-w-0 text-[#4f3a26]">
-          <div className="min-h-22 flex items-center justify-center">
-            <h3 className="text-2xl sm:text-2xl leading-tight font-bold text-[#3b2615] whitespace-normal wrap-break-word pixelated-text min-w-0 text-center">
+          <div className="min-h-22 flex flex-col items-center justify-center">
+            <h3 className="text-xl sm:text-2xl leading-tight font-bold text-[#3b2615] whitespace-normal break-words pixelated-text min-w-0 text-center line-clamp-2">
               {reward.name}
             </h3>
           </div>
