@@ -14,22 +14,31 @@ interface TaskStatusSectionProps {
 }
 
 export function TaskStatusSection({ status, task, isLoading, children }: TaskStatusSectionProps) {
+  const statusAccentClassName =
+    status === 'Current'
+      ? 'bg-[#e7c27f] text-[#4b3522] border-[#c79a54]'
+      : status === 'In Review'
+        ? 'bg-[#d7e3f4] text-[#204b61] border-[#87a9bc]'
+        : status === 'Approved'
+          ? 'bg-[#d8efdb] text-[#1f5a36] border-[#7eb07f]'
+          : 'bg-[#f4d6ce] text-[#8b2e22] border-[#d18d7e]';
+
   return (
-    <div className="flex flex-col gap-3 min-w-0 w-full">
-      <header className="flex w-full justify-between px-2">
-        <h5 className="text-base font-semibold flex items-center gap-2">
-          <span className="inline-flex w-fit rounded-full bg-background text-muted-foreground px-4 py-0.5 shadow-sm/15">
+    <div className="flex min-w-0 w-full flex-col gap-2.5">
+      <header className="flex w-full items-center justify-between gap-2 px-1">
+        <h5 className="flex min-w-0 items-center gap-1.5 font-pixel text-[10px] text-[#3f2a1a] sm:gap-2 sm:text-[11px]">
+          <span className={`inline-flex w-fit rounded-full border-2 px-3 py-1 ${statusAccentClassName}`}>
             {status}{' '}
           </span>
-          <span className="bg-gray-50 px-2.5 py-0.5 rounded-full ml-1 shadow-sm/15">
+          <span className="rounded-full border-2 border-[#d4c5a8] bg-[#f7efdf] px-2 py-1 text-[8px] text-[#6b5038] sm:px-2.5 sm:text-[9px]">
             {task.length ?? 0}
           </span>
         </h5>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Info className="size-8 p-1 rounded-full bg-background text-foreground hover:bg-foreground hover:text-muted shadow-sm/15 cursor-pointer transition-all ease-in-out duration-200" />
+            <Info className="size-7 rounded-full border-2 border-[#d4c5a8] bg-[#f7efdf] p-1.5 text-[#8a6039] shadow-none cursor-pointer transition-all duration-200 hover:bg-[#efe2ca]" />
           </TooltipTrigger>
-          <TooltipContent className="text-sm w-xs max-w-md text-wrap">
+          <TooltipContent className="max-w-xs border-[#9b7a56] bg-[#FFF2CC] font-pixel text-[9px] leading-relaxed text-[#3B2A1A]">
             {status === 'Current'
               ? 'Tasks in this section have orders you have not fully completed.'
               : status === 'In Review'
@@ -42,17 +51,16 @@ export function TaskStatusSection({ status, task, isLoading, children }: TaskSta
           </TooltipContent>
         </Tooltip>
       </header>
-      {/* Exactly 3 task cards visible; 4+ tasks scroll vertically */}
-      <div className="bg-[#2D061D]/35 border rounded-xl shadow-sm h-80 flex flex-col min-h-0 overflow-hidden w-full inset-shadow-sm/25">
+      <div className="flex h-72 min-h-0 w-full flex-col overflow-hidden rounded-2xl border-2 border-[#d4c5a8] bg-[#f7efdf] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
         <ScrollArea className="flex-1 min-h-0 w-full">
-          <div className="flex flex-col gap-4 items-stretch p-4 w-full min-w-0">
+          <div className="flex min-w-0 w-full flex-col items-stretch gap-2.5 p-2.5">
             {isLoading ? (
               <>
-                <Skeleton className="w-full h-20 rounded-[1.1875rem] bg-background" />
-                <Skeleton className="w-full h-20 rounded-[1.1875rem] bg-background" />
+                <Skeleton className="h-20 w-full rounded-[1.1875rem] bg-[#eadbc1]" />
+                <Skeleton className="h-20 w-full rounded-[1.1875rem] bg-[#eadbc1]" />
               </>
             ) : (
-              <>{children}</>
+              children
             )}
           </div>
         </ScrollArea>
