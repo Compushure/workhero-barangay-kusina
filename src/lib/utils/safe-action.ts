@@ -31,5 +31,5 @@ export async function safeAction<T>(action: () => Promise<T>): Promise<ActionRes
  * Type for server action responses with optional error
  */
 export type ServerActionResponse<T = void> =
-  | { error: null; data?: T }
-  | { error: string; data?: never };
+  | { error: null; data?: T; warning?: string | null }
+  | { error: string; data?: never; warning?: never };
