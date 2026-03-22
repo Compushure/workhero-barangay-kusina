@@ -90,10 +90,10 @@ export function TaskStatusBoard({
   const activeFilterCount = overdueFilter !== 'all' ? 1 : 0;
 
   const checkboxItemClassName = (isActive: boolean) =>
-    `group cursor-pointer rounded-md py-1.5 font-pixel text-[10px] transition-all duration-200 ${
+    `group cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] transition-all duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] ${
       isActive
-        ? 'bg-[#8a6039] text-[#fff6e5]'
-        : 'text-[#4b3522] hover:bg-[#dcc8aa] data-[highlighted]:bg-[#dcc8aa] data-[highlighted]:text-[#4b3522]'
+        ? 'text-[#4b3522]'
+        : 'text-[#4b3522] hover:bg-[#8a6039] hover:text-[#fff6e5] data-[highlighted]:bg-[#8a6039] data-[highlighted]:text-[#fff6e5]'
     }`;
 
   const [current, onReview, verified, denied] = useMemo(
@@ -107,33 +107,34 @@ export function TaskStatusBoard({
   );
 
   return (
-    <div className="w-full overflow-hidden rounded-[28px] border-3 border-[#47331F] bg-[#eadbc1] p-3 font-pixel shadow-[0_10px_28px_rgba(71,51,31,0.24)] sm:p-4">
-      <div className="flex flex-col gap-3 border-b-2 border-[#d4c5a8] pb-4">
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border-3 border-[#47331F] bg-[#eadbc1] p-2.5 font-jersey shadow-[0_10px_28px_rgba(71,51,31,0.24)] sm:p-3">
+      <div className="flex flex-col gap-2 border-b-2 border-[#d4c5a8] pb-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
-            <span className="inline-flex w-fit rounded-full border-2 border-[#d4c5a8] bg-[#f7efdf] px-3 py-1 text-[9px] tracking-[0.25em] text-[#8a6039]">
-              TASK BOARD
-            </span>
             <div>
-              <h2 className="text-[15px] leading-tight text-[#3f2a1a] sm:text-[18px]">
-                Track every kitchen task by status
+              <h2 className="text-[28px] leading-none text-[#3f2a1a] sm:text-[32px]">
+                Task Board
               </h2>
-              <p className="mt-1 max-w-xl text-[9px] leading-relaxed text-[#6b5038] sm:text-[10px]">
-                Keep an eye on what is active, waiting for review, approved by the manager, or sent back for redo.
+              <p className="mt-1 max-w-xl text-[14px] leading-snug tracking-[0.04em] text-[#6b5038] sm:text-[16px]">
+                View your assigned tasks and track each one by status.
               </p>
             </div>
           </div>
 
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
             <div className="w-full space-y-1 sm:w-auto">
-              <span className="block text-[9px] tracking-[0.2em] text-[#8a6039]">SORT BY</span>
+              <span className="block text-[14px] tracking-[0.18em] text-[#8a6039] sm:text-[16px]">SORT BY</span>
               <Select value={sortBy} onValueChange={(value) => setSortBy(value as TaskSortOption)}>
-                <SelectTrigger className="h-8 w-full rounded-lg border-[#9b7a56] bg-[#f7efdf] font-pixel text-[9px] text-[#4b3522] shadow-none sm:w-52">
+                <SelectTrigger className="h-9 w-full rounded-lg border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] sm:w-52">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
-                <SelectContent className="border-[#9b7a56] bg-[#f6eddd] text-[#4b3522]">
+                <SelectContent className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 text-[#4b3522] sm:w-64">
                   {sortOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value} className="font-pixel text-[9px]">
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] transition-colors duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] focus:bg-[#8a6039] focus:text-[#fff6e5] data-[highlighted]:bg-[#8a6039] data-[highlighted]:text-[#fff6e5]"
+                    >
                       {option.label}
                     </SelectItem>
                   ))}
@@ -147,12 +148,12 @@ export function TaskStatusBoard({
                   <Button
                     size="default"
                     variant="outline"
-                    className="h-8 w-full justify-between rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-pixel text-[9px] text-[#4b3522] shadow-none transition-all duration-200 cursor-pointer hover:bg-[#efe2ca] sm:w-auto"
+                    className="h-9 w-full justify-between rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] sm:w-auto"
                   >
-                    <Filter className="h-4 w-4 text-[#8a6039]" />
-                    <span>Filter</span>
+                    <Filter strokeWidth={2.5} className="h-4 w-4 text-[#6b5038]" />
+                    <span className="inline-flex items-center text-[16px] leading-none">Filter</span>
                     {activeFilterCount > 0 && (
-                      <Badge className="ml-1 h-5 min-w-5 rounded-full border border-[#47331F] bg-[#F4B925] px-1.5 py-0 font-pixel text-[8px] leading-none text-[#2f2115]">
+                      <Badge className="ml-1 h-5 min-w-5 rounded-full border border-[#47331F] bg-[#F4B925] px-1.5 py-0 font-jersey text-[10px] leading-none text-[#2f2115]">
                         {activeFilterCount}
                       </Badge>
                     )}
@@ -164,7 +165,7 @@ export function TaskStatusBoard({
                   collisionPadding={12}
                   className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 sm:w-64"
                 >
-                  <DropdownMenuLabel className="px-2 py-1 font-pixel text-[8px] tracking-[0.2em] text-[#8a6039]">
+                  <DropdownMenuLabel className="px-2 py-1 font-jersey text-[14px] tracking-[0.04em] text-[#8a6039]">
                     Due Date State
                   </DropdownMenuLabel>
                   <DropdownMenuCheckboxItem
@@ -203,13 +204,13 @@ export function TaskStatusBoard({
         </div>
       </div>
 
-      <div className="pt-4">
+      <div className="min-h-0 flex-1 pt-3">
         {error ? (
           <div className="flex h-48 w-full flex-col items-center justify-center rounded-2xl border-2 border-[#c9b08d] bg-[#f7efdf] px-4 text-center">
-            <span className="font-pixel text-[11px] text-[#8b2e22]">Error loading tasks. Please try again.</span>
+            <span className="font-jersey text-[14px] tracking-[0.06em] text-[#8b2e22]">Error loading tasks. Please try again.</span>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:gap-4">
+          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 md:grid-cols-2 md:grid-rows-2 xl:gap-3">
             <TaskStatusSection status="Current" task={current} isLoading={isLoading}>
               {current.map((task) => (
                 <TaskCard key={task.id} task={task} />
