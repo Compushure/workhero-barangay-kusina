@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, Suspense, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { HeaderSection, RewardRequestsControls } from './header';
 import { HeaderSkeleton } from './header-skeleton';
@@ -24,6 +24,7 @@ export function RewardRequestsContent() {
   const { data: requests = [], isLoading, error } = useGetRedemptionRequests(statusFilter);
   // Show skeleton only on first load to avoid flicker during background refetch.
   const isTableLoading = isLoading && requests.length === 0;
+  const isInitialLoading = isLoading && requests.length === 0;
 
   useEffect(() => {
     if (error) {
@@ -89,16 +90,29 @@ export function RewardRequestsContent() {
 
   if (error) return null;
 
+  if (isInitialLoading) {
+    return (
+      <main className="flex min-h-screen w-full flex-col bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+        <div className="mx-auto flex h-full w-full max-w-7xl flex-1 flex-col 2xl:max-w-screen-2xl">
+          <div className="flex min-h-0 flex-1 flex-col gap-4 sm:gap-6">
+            <HeaderSkeleton />
+            <div className="flex flex-1 flex-col md:min-h-[18rem] lg:min-h-[23rem] xl:min-h-[27rem]">
+              <RedemptionTableSkeleton rows={8} />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-screen w-full flex-col bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
       <div className="mx-auto flex h-full w-full max-w-7xl flex-1 flex-col 2xl:max-w-screen-2xl">
         <div className="flex min-h-0 flex-1 flex-col gap-4 sm:gap-6">
-          <Suspense fallback={<HeaderSkeleton />}>
-            <HeaderSection
-              title="Redemption Requests"
-              description="Manage employee's request of redemption"
-            />
-          </Suspense>
+          <HeaderSection
+            title="Redemption Requests"
+            description="Manage employee's request of redemption"
+          />
           <RewardRequestsControls
             searchTerm={searchTerm}
             onSearch={handleSearch}
