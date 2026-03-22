@@ -25,7 +25,10 @@ export function HideRewardDialog({
 }: HideRewardDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card text-card-foreground border border-accent/25 max-w-md rounded-3xl p-6 shadow-xl">
+      <DialogContent
+        showCloseButton={false}
+        className="bg-card text-card-foreground border border-accent/25 max-w-md rounded-3xl p-6 shadow-xl"
+      >
         <button
           type="button"
           onClick={(event) => {
