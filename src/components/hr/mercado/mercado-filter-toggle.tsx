@@ -57,8 +57,8 @@ export function MercadoFilterToggle({
   const checkboxItemClassName = (isActive: boolean) =>
     `group cursor-pointer py-1.5 transition-all duration-500 ease-in-out ${
       isActive
-        ? 'bg-accent-secondary text-white'
-        : 'hover:bg-accent-secondary/80 hover:text-white data-[highlighted]:bg-accent-secondary/80 data-[highlighted]:text-white'
+        ? 'bg-accent/15 text-foreground hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground'
+        : 'hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground'
     }`;
 
   return (
@@ -93,7 +93,7 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onStockFilterChange(checked ? 'in-stock' : 'all')}
             className={checkboxItemClassName(stockFilter === 'in-stock')}
           >
-            <Package className="mr-2 h-4 w-4 text-green-500 transition-colors group-hover:text-white group-data-highlighted:text-white" />
+            <Package className="mr-2 h-4 w-4 text-green-500 transition-colors group-hover:text-foreground group-data-highlighted:text-foreground" />
             In Stock
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
@@ -101,7 +101,7 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onStockFilterChange(checked ? 'out-of-stock' : 'all')}
             className={checkboxItemClassName(stockFilter === 'out-of-stock')}
           >
-            <PackageX className="mr-2 h-4 w-4 text-red-500 transition-colors group-hover:text-white group-data-highlighted:text-white" />
+            <PackageX className="mr-2 h-4 w-4 text-red-500 transition-colors group-hover:text-foreground group-data-highlighted:text-foreground" />
             Out of Stock
           </DropdownMenuCheckboxItem>
 
@@ -115,7 +115,7 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onVisibilityFilterChange(checked ? 'visible' : 'all')}
             className={checkboxItemClassName(visibilityFilter === 'visible')}
           >
-            <Eye className="mr-2 h-4 w-4 text-blue-500 transition-colors group-hover:text-white group-data-highlighted:text-white" />
+            <Eye className="mr-2 h-4 w-4 text-blue-500 transition-colors group-hover:text-foreground group-data-highlighted:text-foreground" />
             Visible
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
@@ -123,7 +123,7 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onVisibilityFilterChange(checked ? 'hidden' : 'all')}
             className={checkboxItemClassName(visibilityFilter === 'hidden')}
           >
-            <EyeOff className="mr-2 h-4 w-4 text-gray-500 transition-colors group-hover:text-white group-data-highlighted:text-white" />
+            <EyeOff className="mr-2 h-4 w-4 text-gray-500 transition-colors group-hover:text-foreground group-data-highlighted:text-foreground" />
             Hidden
           </DropdownMenuCheckboxItem>
 

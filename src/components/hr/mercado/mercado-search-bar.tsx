@@ -26,7 +26,7 @@ export function MercadoSearchBar({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(sanitizeSearchInput(e.target.value))}
-        className="text-meta control-h w-full min-w-0 rounded-md border border-zinc-200 bg-card pr-3 pl-9 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
+        className="text-meta control-h w-full min-w-0 rounded-md border border-zinc-200 bg-card pr-3 pl-9 shadow-sm/25 transition-colors placeholder:text-gray-400 focus:border-accent focus:outline-none"
       />
     </div>
   );

@@ -28,8 +28,8 @@ export function MercadoSortToggle({ value, onChange, className }: MercadoSortTog
   const itemClassName = (isActive: boolean) =>
     `cursor-pointer transition-all duration-500 ease-in-out ${
       isActive
-        ? 'bg-accent-secondary text-white'
-        : 'hover:bg-accent-secondary/80 hover:text-white data-[highlighted]:bg-accent-secondary/80 data-[highlighted]:text-white'
+        ? 'bg-accent/15 text-foreground hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground'
+        : 'hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground'
     }`;
 
   return (
