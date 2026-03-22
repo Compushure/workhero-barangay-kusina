@@ -1,6 +1,15 @@
 'use client';
 
-import { ArrowDown, ArrowUp, ArrowUpDown, Check, Clock3, ListTodo, Search, X } from 'lucide-react';
+import {
+  ArrowUpDown,
+  BadgeCheck,
+  Clock3,
+  ClockArrowDown,
+  ClockArrowUp,
+  ListTodo,
+  Search,
+  XCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -41,14 +50,14 @@ export function RewardRequestsControls({
   requestsCount = 0,
 }: HeaderSectionProps) {
   const statusOptions = [
-    { value: 'pending', label: 'Pending', icon: Clock3, iconClassName: 'text-yellow-500' },
-    { value: 'approved', label: 'Approved', icon: Check, iconClassName: 'text-emerald-600' },
-    { value: 'rejected', label: 'Rejected', icon: X, iconClassName: 'text-red-600' },
+    { value: 'pending', label: 'Pending', icon: Clock3, iconClassName: 'text-accent' },
+    { value: 'approved', label: 'Approved', icon: BadgeCheck, iconClassName: 'text-accent' },
+    { value: 'rejected', label: 'Rejected', icon: XCircle, iconClassName: 'text-accent' },
   ];
 
   const sortOptions = [
-    { value: 'date-desc', label: 'Newest First', icon: ArrowDown },
-    { value: 'date-asc', label: 'Oldest First', icon: ArrowUp },
+    { value: 'date-desc', label: 'Newest First', icon: ClockArrowDown },
+    { value: 'date-asc', label: 'Oldest First', icon: ClockArrowUp },
   ];
 
   const currentStatusLabel =
@@ -90,14 +99,17 @@ export function RewardRequestsControls({
                   <Button
                     variant="default"
                     size="default"
-                    className="text-button control-h w-full justify-between border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44"
+                    className="text-button control-h w-full justify-between bg-card px-2 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer hover:bg-card hover:text-foreground hover:brightness-90 focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 sm:w-44 sm:px-3"
                   >
                     <span className="truncate">{currentStatusLabel}</span>
                     <ArrowUpDown size={14} className="text-accent" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="manager-dropdown-content w-44 p-2">
-                  <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
+                <DropdownMenuContent
+                  align="end"
+                  className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
+                >
+                  <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
                     Filter by Status
                   </DropdownMenuLabel>
                   {statusOptions.map((option) => (
@@ -108,8 +120,8 @@ export function RewardRequestsControls({
                         statusFilter === option.value ? 'bg-accent/15 text-foreground' : ''
                       }`}
                     >
-                      <option.icon className={`mr-2 h-4 w-4 ${option.iconClassName}`} />
-                      <span className="text-[14px]">{option.label}</span>
+                      <option.icon className={`mr-2.5 size-3.5 shrink-0 ${option.iconClassName}`} />
+                      <span>{option.label}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -121,7 +133,7 @@ export function RewardRequestsControls({
                 <Button
                   variant="default"
                   size="default"
-                  className="text-button control-h w-full justify-between border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44"
+                  className="text-button control-h w-full justify-between bg-card px-2 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer hover:bg-card hover:text-foreground hover:brightness-90 focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 sm:w-44 sm:px-3"
                 >
                   <span className="truncate">{currentSortLabel}</span>
                   <ArrowUpDown size={14} className="text-accent" />
@@ -129,9 +141,9 @@ export function RewardRequestsControls({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[11rem] p-2"
+                className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
               >
-                <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
+                <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
                   Sort by Date
                 </DropdownMenuLabel>
                 {sortOptions.map((option) => (
@@ -142,8 +154,8 @@ export function RewardRequestsControls({
                       sortBy === option.value ? 'bg-accent/15 text-foreground' : ''
                     }`}
                   >
-                    <option.icon className="mr-2 h-4 w-4" />
-                    <span className="text-[14px]">{option.label}</span>
+                    <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                    <span>{option.label}</span>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
