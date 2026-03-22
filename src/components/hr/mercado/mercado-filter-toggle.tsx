@@ -68,7 +68,7 @@ export function MercadoFilterToggle({
           <Button
             size="default"
             variant="outline"
-            className="text-button control-h w-full justify-between rounded-md border border-gray-200 bg-card px-3 py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-auto"
+            className="text-button control-h w-full justify-between rounded-md border border-gray-200 bg-card px-3 py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 hover:text-primary sm:w-auto"
           >
             <Filter className="h-4 w-4 text-accent" />
             <span className="hidden sm:inline">Filter</span>
@@ -162,7 +162,7 @@ export function MercadoFilterToggle({
           </DropdownMenuLabel>
           <DropdownMenuItem
             onClick={clearFilters}
-            className="cursor-pointer py-1.5 pl-8 text-secondary hover:text-foreground"
+            className="group cursor-pointer py-1.5 transition-all duration-500 ease-in-out hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground"
           >
             Clear Filters
           </DropdownMenuItem>

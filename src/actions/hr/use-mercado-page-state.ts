@@ -106,7 +106,7 @@ export function useMercadoPageState() {
 
   // Data sources.
   const { contentAreaStyle } = useSidebarContentArea();
-  const debouncedSearch = useDebounce(search, 300);
+  const debouncedSearch = useDebounce(search, 500);
   const { data: allRewards = [], isLoading } = useGetRewards();
 
   // Filtered and sorted list.
