@@ -1,6 +1,15 @@
 'use client';
 
-import { Filter } from 'lucide-react';
+import {
+  BadgeCheck,
+  CircleAlert,
+  CircleDashed,
+  Clock3,
+  EyeOff,
+  Filter,
+  SearchCheck,
+  XCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -21,16 +30,16 @@ interface AssignedTasksFilterBarProps {
 }
 
 const overdueOptions = [
-  { value: 'all', label: 'All tasks' },
-  { value: 'hide-overdue', label: 'Hide overdue' },
-  { value: 'only-overdue', label: 'Only overdue' },
+  { value: 'all', label: 'All tasks', icon: SearchCheck },
+  { value: 'hide-overdue', label: 'Hide overdue', icon: EyeOff },
+  { value: 'only-overdue', label: 'Only overdue', icon: CircleAlert },
 ];
 
 const statusOptions = [
-  { value: 'assigned', label: 'Assigned' },
-  { value: 'in review', label: 'In Review' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'rejected', label: 'Rejected' },
+  { value: 'assigned', label: 'Assigned', icon: CircleDashed },
+  { value: 'in review', label: 'In Review', icon: Clock3 },
+  { value: 'approved', label: 'Approved', icon: BadgeCheck },
+  { value: 'rejected', label: 'Rejected', icon: XCircle },
 ];
 
 export function AssignedTasksFilterBar({
@@ -70,11 +79,12 @@ export function AssignedTasksFilterBar({
             <DropdownMenuRadioItem
               key={opt.value}
               value={opt.value}
-              className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out ${
+            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out ${
                 overdueFilter === opt.value ? 'bg-accent/15 text-foreground font-medium' : ''
               }`}
             >
-              {opt.label}
+              <opt.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+              <span className="truncate">{opt.label}</span>
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
@@ -91,7 +101,8 @@ export function AssignedTasksFilterBar({
               statusFilters.includes(opt.value) ? 'bg-accent/15 text-foreground font-medium' : ''
             }`}
           >
-            {opt.label}
+            <opt.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+            <span className="truncate">{opt.label}</span>
           </DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>

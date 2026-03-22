@@ -29,7 +29,7 @@ export default function TaskViewCardMenu({
           <Button
             onClick={handleOpenEditDialog}
             variant="ghost"
-            className="justify-start text-foreground hover:bg-accent-secondary/25 cursor-pointer transition-all duration-400 ease-in-out"
+            className="justify-start text-foreground hover:bg-accent-secondary/25 hover:text-foreground cursor-pointer transition-all duration-400 ease-in-out"
           >
             Edit Task
           </Button>

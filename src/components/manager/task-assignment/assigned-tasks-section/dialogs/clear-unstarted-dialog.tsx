@@ -47,13 +47,13 @@ function ClearUnstartedAssignedDialog({ setShowClearConfirm }: ClearUnstartedDia
             disabled={clearUnstartedMutation.isPending}
             className="bg-red-700 hover:bg-red-500 text-white cursor-pointer transition-all duration-400 ease-in-out"
           >
-            {clearUnstartedMutation.isPending ? 'Clearing...' : 'Clear Unstarted'}
+            {clearUnstartedMutation.isPending ? 'Clearing...' : 'Confirm'}
           </Button>
           <Button
             variant="outline"
             onClick={() => setShowClearConfirm(false)}
             disabled={clearUnstartedMutation.isPending}
-            className="border-zinc-400 bg-white hover:bg-gray-300 cursor-pointer transition-all duration-400 ease-in-out"
+            className="border-zinc-400 bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground cursor-pointer transition-all duration-400 ease-in-out"
           >
             Cancel
           </Button>

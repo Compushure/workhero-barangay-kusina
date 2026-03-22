@@ -197,54 +197,73 @@ export default function EditTaskDialog({
                 {editAssignedEmployees.length}
               </span>
             </h4>
-            <div className="bg-card rounded-xl border border-accent/50 min-h-[10vh] max-h-[30vh] overflow-y-auto">
-              <div className="">
-                {filteredEmployees.map((emp) => {
-                  const isDisabled = disabledEmployeeIds.has(emp.id);
-                  const isSelected = editAssignedEmployees.includes(emp.id);
+            <div className="rounded-2xl border-2 border-accent-secondary/50 flex-1 flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden min-h-[10vh] max-h-[30vh]">
+              <table className="w-full table-fixed">
+                <thead className="bg-primary-gradient text-card border-b border-accent-secondary/50 sticky top-0 z-10">
+                  <tr className="text-xs font-semibold">
+                    <th className="w-[10%] py-1.5"></th>
+                    <th className="w-[60%] text-left px-1.5 py-1.5">NAME</th>
+                    <th className="w-[30%] text-left px-1.5 py-1.5">ID NO.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredEmployees.map((emp) => {
+                    const isDisabled = disabledEmployeeIds.has(emp.id);
+                    const isSelected = editAssignedEmployees.includes(emp.id);
 
-                  return (
-                    <div
-                      key={emp.id}
-                      className={`flex items-center gap-3 pl-4 py-2 ${
-                        isDisabled
-                          ? 'brightness-75 opacity-50 cursor-not-allowed'
-                          : isSelected
-                            ? 'bg-accent-secondary/25  border-b border-accent/50'
-                            : 'bg-card hover:brightness-96 hover:bg-accent-secondary/25 cursor-pointer transition-all duration-300 ease-in-out border-b border-accent/25'
-                      }`}
-                      onClick={() => !isDisabled && toggleEmployee(emp.id)}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        disabled={isDisabled}
-                        onChange={() => {}}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!isDisabled) toggleEmployee(emp.id);
-                        }}
-                        className="size-4 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
-                        style={{
-                          backgroundImage: !!isSelected
-                            ? "url(\"data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e\")"
-                            : 'none',
-                          backgroundRepeat: 'no-repeat',
-                          backgroundPosition: 'center',
-                          backgroundSize: '0.875rem',
-                        }}
-                      />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-800">{emp.name}</p>
-                        <p className="text-xs text-gray-500">{emp.empId}</p>
-                      </div>
-                      {isDisabled && (
-                        <span className="text-xs text-gray-500 ml-1.5">Already assigned</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                    return (
+                      <tr
+                        key={emp.id}
+                        className={`border-b border-accent/25 transition-all duration-300 ease-in-out text-primary ${
+                          isDisabled
+                            ? 'brightness-75 opacity-50 cursor-not-allowed'
+                            : isSelected
+                              ? 'bg-accent-secondary/25'
+                              : 'bg-card hover:bg-row-hover cursor-pointer'
+                        }`}
+                        onClick={() => !isDisabled && toggleEmployee(emp.id)}
+                      >
+                        <td className="w-[10%] p-3 text-center align-middle">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            disabled={isDisabled}
+                            onChange={() => {}}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isDisabled) toggleEmployee(emp.id);
+                            }}
+                            className="size-4 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
+                            style={{
+                              backgroundImage: !!isSelected
+                                ? "url(\"data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e\")"
+                                : 'none',
+                              backgroundRepeat: 'no-repeat',
+                              backgroundPosition: 'center',
+                              backgroundSize: '1rem',
+                            }}
+                          />
+                        </td>
+                        <td className="w-[60%] min-w-0 px-1.5 py-1.5 align-middle">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="truncate text-sm font-medium text-gray-800">
+                              {emp.name}
+                            </span>
+                            {isDisabled && (
+                              <span className="truncate text-2xs font-light text-gray-500">
+                                Already assigned
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="w-[30%] px-1.5 py-1.5 text-xs text-gray-600 align-middle">
+                          {emp.empId}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -253,7 +272,7 @@ export default function EditTaskDialog({
           <Button
             onClick={handleEditTask}
             disabled={editAssignedEmployees.length === 0 || isProcessing}
-            className="bg-foreground hover:bg-accent text-white cursor-pointer transition-all duration-400 ease-in-out"
+            className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-400 ease-in-out"
           >
             {isProcessing ? 'Saving...' : 'Confirm'}
           </Button>
@@ -261,7 +280,7 @@ export default function EditTaskDialog({
             variant="outline"
             onClick={handleCancelEdit}
             disabled={isProcessing}
-            className="border-zinc-400 bg-white hover:bg-gray-200 cursor-pointer transition-all duration-400 ease-in-out"
+            className="border-zinc-400 bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground cursor-pointer transition-all duration-400 ease-in-out"
           >
             Cancel
           </Button>
