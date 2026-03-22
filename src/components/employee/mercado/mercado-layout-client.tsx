@@ -161,8 +161,11 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
                     className="object-contain pixelated"
                     sizes="(max-width: 768px) 256px, (max-width: 1024px) 304px, 352px"
                   />
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2">
-                    <div className="bg-[#E8DBBF] border-2 border-[#47331F] text-[#47331F] px-5 py-2.5 rounded-lg shadow-[4px_4px_0px_rgba(71,51,31,0.5)] font-bold text-base md:text-lg pixelated-text whitespace-nowrap transition-transform group-hover:scale-110">
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2">
+                    <div
+                      className="bg-[#E8DBBF] border-2 border-[#47331F] text-[#47331F] px-5 py-2.5 rounded-lg shadow-[4px_4px_0px_rgba(71,51,31,0.5)] font-bold text-base md:text-lg whitespace-nowrap transition-transform group-hover:scale-110"
+                      style={{ fontFamily: '"Jersey 10", sans-serif' }}
+                    >
                       {intervalLabel}
                     </div>
                   </div>
@@ -198,8 +201,11 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
                 className="object-contain pixelated"
                 sizes="(max-width: 768px) 256px, 320px"
               />
-              <div className="absolute -top-5 left-1/2 -translate-x-1/2">
-                <div className="bg-[#E8DBBF] border-2 border-[#47331F] text-[#47331F] px-5 py-2.5 rounded-lg shadow-[4px_4px_0px_rgba(71,51,31,0.5)] text-base font-bold pixelated-text whitespace-nowrap transition-transform group-hover:scale-110">
+              <div className="absolute -top-1 left-1/2 -translate-x-1/2">
+                <div
+                  className="bg-[#E8DBBF] border-2 border-[#47331F] text-[#47331F] px-5 py-2.5 rounded-lg shadow-[4px_4px_0px_rgba(71,51,31,0.5)] text-base font-bold whitespace-nowrap transition-transform group-hover:scale-110"
+                  style={{ fontFamily: '"Jersey 10", sans-serif' }}
+                >
                   {mobileStall.label}
                 </div>
               </div>

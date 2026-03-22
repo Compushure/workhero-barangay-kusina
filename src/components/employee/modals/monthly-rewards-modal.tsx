@@ -23,17 +23,7 @@ import {
 import { RewardCard } from '@/components/employee/mercado/reward-card';
 import { useCancelMyRedemptionRequest } from '@/hooks/tanstack/mutations/redemptionMutations';
 import { format } from 'date-fns';
-import {
-  Package,
-  Sparkles,
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Coins,
-  Clock,
-  XCircle,
-} from 'lucide-react';
+import { Package, Sparkles, AlertCircle, Loader2, Coins, Clock, XCircle } from 'lucide-react';
 import type { RedemptionRequest, Reward } from '@/types';
 
 type RewardInterval = 'weekly' | 'monthly' | 'yearly';
@@ -50,10 +40,10 @@ interface MonthlyRewardsModalProps {
   pendingRequests: RedemptionRequest[];
 }
 
-const ITEMS_PER_PAGE = 8;
 const MODAL_CONTENT_CLASS =
-  'bg-[#e8d9c0] border border-[#8a6844] w-[95vw] sm:w-[90vw] md:w-[75vw] lg:w-[60vw] max-w-[95vw] max-h-[90vh] sm:max-h-[86vh] rounded-2xl p-0 flex flex-col overflow-hidden shadow-xl';
-const MODAL_GRID_CLASS = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6';
+  'bg-[#e8d9c0] border border-[#8a6844] !w-[88vw] sm:!w-[82vw] lg:!w-[68vw] xl:!w-[60vw] !max-w-[88vw] sm:!max-w-[82vw] lg:!max-w-[68vw] xl:!max-w-[980px] h-[75vh] sm:h-[72vh] lg:h-[68vh] rounded-2xl p-0 flex flex-col overflow-hidden shadow-xl';
+const MODAL_GRID_CLASS =
+  'grid auto-rows-fr grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4';
 const INTERVAL_LABELS: Record<RewardInterval, string> = {
   weekly: 'Weekly',
   monthly: 'Monthly',
@@ -97,7 +87,6 @@ export function MonthlyRewardsModal({
   pendingRewardIds,
   pendingRequests,
 }: MonthlyRewardsModalProps) {
-  const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [pendingSearchTerm, setPendingSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
@@ -125,13 +114,6 @@ export function MonthlyRewardsModal({
     );
   }, [rewards, pendingRewardIds, searchTerm, sortOrder, userPoints]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredAndSortedRewards.length / ITEMS_PER_PAGE));
-
-  const paginatedRewards = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredAndSortedRewards.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredAndSortedRewards, currentPage]);
-
   const pendingRequestsForInterval = useMemo(() => {
     const intervalRewardIds = new Set(rewards.map((reward) => reward.id));
     return pendingRequests.filter((request) => intervalRewardIds.has(request.rewardId));
@@ -148,7 +130,6 @@ export function MonthlyRewardsModal({
   }, [pendingRequestsForInterval, pendingSearchTerm]);
 
   useEffect(() => {
-    setCurrentPage(1);
     setSearchTerm('');
     setPendingSearchTerm('');
     setSortOrder('newest');
@@ -156,13 +137,9 @@ export function MonthlyRewardsModal({
   }, [interval, open]);
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, sortOrder]);
-
-  useEffect(() => {
     if (!open) return;
     scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'auto' });
-  }, [open, interval, activeView, currentPage, searchTerm, pendingSearchTerm, sortOrder]);
+  }, [open, interval, activeView, searchTerm, pendingSearchTerm, sortOrder]);
 
   if (!interval) return null;
 
@@ -264,7 +241,7 @@ export function MonthlyRewardsModal({
           </div>
         )}
 
-        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#e6d7bf]">
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-3 sm:p-4 bg-[#e6d7bf]">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Loader2 className="h-10 w-10 text-[#6a4a2d] animate-spin mx-auto mb-3" />
@@ -283,7 +260,7 @@ export function MonthlyRewardsModal({
             <EmptyState intervalName={intervalName} />
           ) : (
             <div className={MODAL_GRID_CLASS}>
-              {paginatedRewards.map((reward) => (
+              {filteredAndSortedRewards.map((reward) => (
                 <RewardCard
                   key={reward.id}
                   reward={reward}
@@ -295,34 +272,6 @@ export function MonthlyRewardsModal({
             </div>
           )}
         </div>
-
-        {activeView === 'items' && totalPages > 1 && (
-          <footer className="p-3 sm:p-4 bg-[#ded0b8] border-t border-[#8a6844]/25 flex items-center justify-center gap-4 sm:gap-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="text-[#4b3522] hover:bg-[#8a6844]/10"
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" /> Previous
-            </Button>
-
-            <span className="text-sm font-bold text-[#4b3522]">
-              {currentPage} / {totalPages}
-            </span>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="text-[#4b3522] hover:bg-[#8a6844]/10"
-            >
-              Next <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
-          </footer>
-        )}
       </DialogContent>
     </Dialog>
   );
@@ -362,10 +311,10 @@ function PendingRequestsView({
       {requests.map((request) => (
         <Card
           key={request.id}
-          className="group relative overflow-hidden bg-[#eadbc1] border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-80 min-w-0 flex flex-col rounded-lg"
+          className="group relative overflow-hidden bg-[#eadbc1] border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-72 min-w-0 flex flex-col rounded-lg"
         >
           <CardContent className="p-0 flex-1 flex flex-col">
-            <div className="relative h-28 w-full overflow-hidden bg-[#dfcfb3] border-b border-[#8a6844]/20">
+            <div className="relative h-24 w-full overflow-hidden bg-[#dfcfb3] border-b border-[#8a6844]/20">
               {rewardImageById.get(request.rewardId) ? (
                 <Image
                   src={rewardImageById.get(request.rewardId)!}
