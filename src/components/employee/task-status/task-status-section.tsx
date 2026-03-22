@@ -16,6 +16,33 @@ interface TaskStatusSectionProps {
   children: React.ReactNode;
 }
 
+function TaskCardSkeleton() {
+  return (
+    <div className="w-full rounded-lg border-2 border-[#d4c5a8] bg-[#fdf5e8] px-3.5 py-3">
+      <div className="flex flex-col gap-2.5">
+        <div className="flex items-start justify-between gap-2.5">
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-6 w-40 bg-[#eadbc1]" />
+            <div className="flex items-center gap-1.5">
+              <Skeleton className="h-5 w-5 rounded-sm bg-[#eadbc1]" />
+              <Skeleton className="h-4 w-32 bg-[#eadbc1]" />
+            </div>
+          </div>
+          <div className="rounded-xl border-2 border-[#d4c5a8] bg-[#f3e4c9] px-2 py-1.5">
+            <Skeleton className="h-12 w-12 bg-[#eadbc1]" />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Skeleton className="h-7 w-22 rounded-md bg-[#eadbc1]" />
+          <Skeleton className="h-7 w-16 rounded-md bg-[#d7e3f4]" />
+          <Skeleton className="h-7 w-22 rounded-md bg-[#eadbc1]" />
+          <Skeleton className="h-7 w-22 rounded-md bg-[#eadbc1]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function TaskStatusSection({
   status,
   task,
@@ -84,8 +111,8 @@ export function TaskStatusSection({
             <div className="flex min-w-0 w-full flex-col items-stretch gap-2 p-2">
               {isLoading ? (
                 <>
-                  <Skeleton className="h-16 w-full rounded-[1rem] bg-[#eadbc1]" />
-                  <Skeleton className="h-16 w-full rounded-[1rem] bg-[#eadbc1]" />
+                  <TaskCardSkeleton />
+                  <TaskCardSkeleton />
                 </>
               ) : (
                 children

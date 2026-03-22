@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { TaskStatusSection } from './task-status-section';
 import { TaskCard } from './task-card';
 import type { TaskStatusItem, TaskOverdueFilter, TaskSortOption } from './types';
@@ -158,97 +159,117 @@ export function TaskStatusBoard({
     <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border-3 border-[#47331F] bg-[#eadbc1] p-2.5 font-jersey shadow-[0_10px_28px_rgba(71,51,31,0.24)] sm:p-3">
       <div className="flex flex-col gap-2 border-b-2 border-[#d4c5a8] pb-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-2">
-            <div>
-              <h2 className="text-[28px] leading-none text-[#3f2a1a] sm:text-[32px]">
-                Task Board
-              </h2>
-              <p className="mt-1 max-w-xl text-[14px] leading-snug tracking-[0.04em] text-[#6b5038] sm:text-[16px]">
-                View your assigned tasks and track each one by status.
-              </p>
-            </div>
-          </div>
+          {isLoading ? (
+            <>
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-52 bg-[#dcc8aa]" />
+                <Skeleton className="h-5 w-80 max-w-full bg-[#e3d3b7]" />
+              </div>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
+                <div className="w-full space-y-1 sm:w-auto">
+                  <Skeleton className="h-5 w-20 bg-[#dcc8aa]" />
+                  <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-52" />
+                </div>
+                <div className="flex w-full items-center gap-2 self-start sm:w-auto sm:self-end">
+                  <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-32" />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <div>
+                  <h2 className="text-[28px] leading-none text-[#3f2a1a] sm:text-[32px]">
+                    Task Board
+                  </h2>
+                  <p className="mt-1 max-w-xl text-[14px] leading-snug tracking-[0.04em] text-[#6b5038] sm:text-[16px]">
+                    View your assigned tasks and track each one by status.
+                  </p>
+                </div>
+              </div>
 
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
-            <div className="w-full space-y-1 sm:w-auto">
-              <span className="block text-[14px] tracking-[0.18em] text-[#8a6039] sm:text-[16px]">SORT BY</span>
-              <Select value={sortBy} onValueChange={(value) => setSortBy(value as TaskSortOption)}>
-                <SelectTrigger className="h-9 w-full rounded-lg border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] sm:w-52">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 text-[#4b3522] sm:w-64">
-                  {sortOptions.map((option) => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value}
-                      className="cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] transition-colors duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] focus:bg-[#8a6039] focus:text-[#fff6e5] data-[highlighted]:bg-[#8a6039] data-[highlighted]:text-[#fff6e5]"
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
+                <div className="w-full space-y-1 sm:w-auto">
+                  <span className="block text-[14px] tracking-[0.18em] text-[#8a6039] sm:text-[16px]">SORT BY</span>
+                  <Select value={sortBy} onValueChange={(value) => setSortBy(value as TaskSortOption)}>
+                    <SelectTrigger className="h-9 w-full rounded-lg border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] sm:w-52">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 text-[#4b3522] sm:w-64">
+                      {sortOptions.map((option) => (
+                        <SelectItem
+                          key={option.value}
+                          value={option.value}
+                          className="cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] transition-colors duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] focus:bg-[#8a6039] focus:text-[#fff6e5] data-[highlighted]:bg-[#8a6039] data-[highlighted]:text-[#fff6e5]"
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className={cn('flex w-full items-center gap-2 self-start sm:w-auto sm:self-end')}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="default"
+                        variant="outline"
+                        className="h-9 w-full justify-between rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] sm:w-auto"
+                      >
+                        <Filter strokeWidth={2.5} className="h-4 w-4 text-[#6b5038]" />
+                        <span className="inline-flex items-center text-[16px] leading-none">Filter</span>
+                        {activeFilterCount > 0 && (
+                          <Badge className="ml-1 h-5 min-w-5 rounded-full border border-[#47331F] bg-[#F4B925] px-1.5 py-0 font-jersey text-[10px] leading-none text-[#2f2115]">
+                            {activeFilterCount}
+                          </Badge>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      sideOffset={8}
+                      collisionPadding={12}
+                      className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 sm:w-64"
                     >
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className={cn('flex w-full items-center gap-2 self-start sm:w-auto sm:self-end')}>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="default"
-                    variant="outline"
-                    className="h-9 w-full justify-between rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] sm:w-auto"
-                  >
-                    <Filter strokeWidth={2.5} className="h-4 w-4 text-[#6b5038]" />
-                    <span className="inline-flex items-center text-[16px] leading-none">Filter</span>
-                    {activeFilterCount > 0 && (
-                      <Badge className="ml-1 h-5 min-w-5 rounded-full border border-[#47331F] bg-[#F4B925] px-1.5 py-0 font-jersey text-[10px] leading-none text-[#2f2115]">
-                        {activeFilterCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  sideOffset={8}
-                  collisionPadding={12}
-                  className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 sm:w-64"
-                >
-                  <DropdownMenuLabel className="px-2 py-1 font-jersey text-[14px] tracking-[0.04em] text-[#8a6039]">
-                    Due Date State
-                  </DropdownMenuLabel>
-                  <DropdownMenuCheckboxItem
-                    checked={overdueFilter === 'all'}
-                    onCheckedChange={(checked) => {
-                      if (checked) setOverdueFilter('all');
-                    }}
-                    className={checkboxItemClassName(overdueFilter === 'all')}
-                  >
-                    All Tasks
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={overdueFilter === 'overdue'}
-                    onCheckedChange={(checked) => {
-                      if (checked) setOverdueFilter('overdue');
-                      else setOverdueFilter('all');
-                    }}
-                    className={checkboxItemClassName(overdueFilter === 'overdue')}
-                  >
-                    Overdue Only
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={overdueFilter === 'not-overdue'}
-                    onCheckedChange={(checked) => {
-                      if (checked) setOverdueFilter('not-overdue');
-                      else setOverdueFilter('all');
-                    }}
-                    className={checkboxItemClassName(overdueFilter === 'not-overdue')}
-                  >
-                    Not Overdue Only
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
+                      <DropdownMenuLabel className="px-2 py-1 font-jersey text-[14px] tracking-[0.04em] text-[#8a6039]">
+                        Due Date State
+                      </DropdownMenuLabel>
+                      <DropdownMenuCheckboxItem
+                        checked={overdueFilter === 'all'}
+                        onCheckedChange={(checked) => {
+                          if (checked) setOverdueFilter('all');
+                        }}
+                        className={checkboxItemClassName(overdueFilter === 'all')}
+                      >
+                        All Tasks
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        checked={overdueFilter === 'overdue'}
+                        onCheckedChange={(checked) => {
+                          if (checked) setOverdueFilter('overdue');
+                          else setOverdueFilter('all');
+                        }}
+                        className={checkboxItemClassName(overdueFilter === 'overdue')}
+                      >
+                        Overdue Only
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        checked={overdueFilter === 'not-overdue'}
+                        onCheckedChange={(checked) => {
+                          if (checked) setOverdueFilter('not-overdue');
+                          else setOverdueFilter('all');
+                        }}
+                        className={checkboxItemClassName(overdueFilter === 'not-overdue')}
+                      >
+                        Not Overdue Only
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
