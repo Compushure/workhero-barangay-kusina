@@ -7,7 +7,7 @@ import {
   Clock3,
   EyeOff,
   Filter,
-  SearchCheck,
+  Layers3,
   XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,7 +30,7 @@ interface AssignedTasksFilterBarProps {
 }
 
 const overdueOptions = [
-  { value: 'all', label: 'All tasks', icon: SearchCheck },
+  { value: 'all', label: 'All tasks', icon: Layers3 },
   { value: 'hide-overdue', label: 'Hide overdue', icon: EyeOff },
   { value: 'only-overdue', label: 'Only overdue', icon: CircleAlert },
 ];
@@ -67,7 +67,7 @@ export function AssignedTasksFilterBar({
             size={12}
             className={`shrink-0 ${isActive ? 'text-primary-foreground' : 'text-accent'}`}
           />
-          <span className="truncate hidden sm:inline">Filters{isActive ? ' •' : ''}</span>
+          <span className="truncate hidden sm:inline">Filters</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="manager-dropdown-content min-w-44">
@@ -79,7 +79,7 @@ export function AssignedTasksFilterBar({
             <DropdownMenuRadioItem
               key={opt.value}
               value={opt.value}
-            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out ${
+              className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out pl-2 [&_span.absolute]:hidden ${
                 overdueFilter === opt.value ? 'bg-accent/15 text-foreground font-medium' : ''
               }`}
             >

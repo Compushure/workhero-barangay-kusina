@@ -164,7 +164,7 @@ export default function TaskCategoryTable({
                         variant="ghost"
                         size="icon"
                         onClick={() => onEdit(task)}
-                        className="size-7 sm:size-9 hover:bg-card hover:text-foreground border hover:border-accent/50 transition-colors"
+                        className="size-7 sm:size-9 cursor-pointer hover:bg-card hover:text-foreground border hover:border-accent/50 transition-colors"
                         title="Edit task"
                       >
                         <Pencil className="size-3 sm:size-4" />
@@ -173,7 +173,7 @@ export default function TaskCategoryTable({
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDeleteClick(task)}
-                        className="size-7 sm:size-9 hover:bg-card hover:text-red-600 border hover:border-accent/50 transition-colors"
+                        className="size-7 sm:size-9 cursor-pointer hover:bg-card hover:text-red-600 border hover:border-accent/50 transition-colors"
                         title="Delete task"
                       >
                         <Trash2 className="size-3 sm:size-4" />
@@ -209,10 +209,10 @@ export default function TaskCategoryTable({
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-card">
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-card p-4 sm:p-5">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-base">Delete Task Category?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
+            <AlertDialogTitle className="text-foreground text-base">Delete Task Category?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
               Are you sure you want to delete "{taskToDelete?.name}"? This action cannot be undone
               and will remove this task category from the system.
             </AlertDialogDescription>
@@ -220,13 +220,13 @@ export default function TaskCategoryTable({
           <AlertDialogFooter>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-foreground hover:bg-red-700 text-card h-8 text-xs px-3"
+              className="bg-red-700 hover:bg-red-500 text-white cursor-pointer transition-all duration-400 ease-in-out"
             >
-              Delete
+              Confirm
             </AlertDialogAction>
             <AlertDialogCancel
               onClick={() => setTaskToDelete(null)}
-              className="bg-card hover:bg-card hover:brightness-90 h-8 text-xs px-3"
+              className="border-zinc-400 !bg-card !text-foreground hover:!bg-[#fafafa] hover:!text-foreground hover:brightness-90 cursor-pointer transition-all duration-400 ease-in-out"
             >
               Cancel
             </AlertDialogCancel>

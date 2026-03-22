@@ -19,7 +19,7 @@ interface TaskSortingBarProps {
 export function TaskSortingBar({ sortBy, onSortChange }: TaskSortingBarProps) {
   const options = [
     { value: 'recently added', label: 'Recently Added', icon: ClockArrowDown },
-    { value: 'oldest', label: 'Oldest', icon: ClockArrowUp },
+    { value: 'oldest', label: 'Oldest Added', icon: ClockArrowUp },
     { value: 'closest', label: 'Closest Due', icon: CalendarArrowUp },
     { value: 'farthest', label: 'Farthest Due', icon: CalendarArrowDown },
   ];

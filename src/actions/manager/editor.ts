@@ -53,9 +53,21 @@ export async function fetchTaskCategoriesPaginated(
       orderByColumn = 'created_at';
       ascending = false;
       break;
+    case 'oldest-created':
+      orderByColumn = 'created_at';
+      ascending = true;
+      break;
+    case 'points-asc':
+      orderByColumn = 'points';
+      ascending = true;
+      break;
     case 'points-desc':
       orderByColumn = 'points';
       ascending = false;
+      break;
+    case 'xp-asc':
+      orderByColumn = 'xp';
+      ascending = true;
       break;
     case 'xp-desc':
       orderByColumn = 'xp';

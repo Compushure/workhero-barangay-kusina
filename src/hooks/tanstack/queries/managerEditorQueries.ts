@@ -17,7 +17,10 @@ export type TaskCategorySortOption =
   | 'name-desc'
   | 'type-name'
   | 'recently-created'
+  | 'oldest-created'
+  | 'points-asc'
   | 'points-desc'
+  | 'xp-asc'
   | 'xp-desc';
 
 export type TaskRepeatabilityFilter = 'all' | 'repeatable' | 'non-repeatable';
