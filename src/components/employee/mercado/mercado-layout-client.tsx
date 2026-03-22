@@ -1,15 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Coins } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import { MercadoProvider, useMercadoContext } from './mercado-context';
-import { useMercadoPageData } from '@/hooks/useMercadoPageData';
+import {
+  useGetAvailableRewardsByInterval,
+  useGetRewards,
+} from '@/hooks/tanstack/queries/rewardQueries';
 import { NavLoadingState } from '@/components/employee/nav-loading-state';
-import { LogOutBtn } from '@/components/employee/widgets/logout';
-import { NotificationsPopover } from '@/components/notifications/notifications';
-import { MapLauncher } from '@/components/employee/minimap/map-launcher';
+
+const HeaderHUD = dynamic(() => import('@/components/employee/widgets/header-hud'), {
+  ssr: false,
+});
 
 interface MercadoLayoutClientProps {
   children: React.ReactNode;
@@ -53,23 +57,49 @@ function CarouselArrowButton({ direction, onClick }: CarouselArrowButtonProps) {
 
 function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
   const { setSelectedInterval } = useMercadoContext();
-  const { userPoints, isLoading } = useMercadoPageData();
+  const { data: allRewards = [] } = useGetRewards();
+  const { data: weeklyRewards = [] } = useGetAvailableRewardsByInterval('weekly');
+  const { data: monthlyRewards = [] } = useGetAvailableRewardsByInterval('monthly');
+  const { data: yearlyRewards = [] } = useGetAvailableRewardsByInterval('yearly');
   const [mobileStallIndex, setMobileStallIndex] = useState(0);
 
-  const marketControlStyles = {
-    shell: 'bg-[#765332] border-3 border-[#47331F] rounded-lg',
-    label: 'text-xs sm:text-sm text-[#F5E8D6]/90 font-medium whitespace-nowrap',
-    value: 'text-xl sm:text-2xl font-bold text-[#F5E8D6] pixelated-text leading-tight',
-    iconWrap:
-      'flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#E89C30] border-2 border-[#47331F] shrink-0',
-    bellTrigger:
-      'h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-[#765332] border-3 border-[#47331F] text-[#F5E8D6] hover:scale-105 hover:bg-[#765332] hover:text-[#F5E8D6] transition-all shadow-none',
-    bellIcon: 'h-6 w-6 sm:h-8 sm:w-8',
-    bellBadge:
-      'bg-[#E89C30] text-[#690003] border border-[#47331F] font-bold text-[10px] sm:text-xs',
-  };
+  const rewardsCountByInterval = useMemo(
+    () => ({
+      weekly: weeklyRewards.length,
+      monthly: monthlyRewards.length,
+      yearly: yearlyRewards.length,
+    }),
+    [weeklyRewards.length, monthlyRewards.length, yearlyRewards.length]
+  );
+
+  const hiddenOnlyByInterval = useMemo(
+    () => ({
+      weekly:
+        allRewards.some((reward) => reward.availableMonth === 'weekly') &&
+        !allRewards.some((reward) => reward.availableMonth === 'weekly' && reward.isActive),
+      monthly:
+        allRewards.some((reward) => reward.availableMonth === 'monthly') &&
+        !allRewards.some((reward) => reward.availableMonth === 'monthly' && reward.isActive),
+      yearly:
+        allRewards.some((reward) => reward.availableMonth === 'yearly') &&
+        !allRewards.some((reward) => reward.availableMonth === 'yearly' && reward.isActive),
+    }),
+    [allRewards]
+  );
+
+  const closedByInterval = useMemo(
+    () => ({
+      weekly: (rewardsCountByInterval.weekly ?? 0) === 0 || hiddenOnlyByInterval.weekly,
+      monthly: (rewardsCountByInterval.monthly ?? 0) === 0 || hiddenOnlyByInterval.monthly,
+      yearly: (rewardsCountByInterval.yearly ?? 0) === 0 || hiddenOnlyByInterval.yearly,
+    }),
+    [rewardsCountByInterval, hiddenOnlyByInterval]
+  );
 
   const handleStallClick = (interval: 'weekly' | 'monthly' | 'yearly') => {
+    if (closedByInterval[interval]) {
+      return;
+    }
     setSelectedInterval(interval);
   };
 
@@ -95,57 +125,37 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
         quality={100}
       />
 
-      <div className="absolute top-4 left-4 z-40 flex items-start gap-2 sm:gap-3 md:top-6 md:left-6">
-        <div
-          className={cn(
-            'w-auto min-w-[130px] px-3 sm:px-4 py-2 sm:py-3 md:w-50',
-            marketControlStyles.shell
-          )}
-        >
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className={marketControlStyles.iconWrap}>
-              <Coins className="h-6 w-6 sm:h-7 sm:w-7 text-[#690003]" />
-            </div>
-            <div>
-              <p className={marketControlStyles.label}>Fiesta Points</p>
-              <p className={marketControlStyles.value}>
-                {isLoading ? '...' : userPoints.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-0.5">
-          <NotificationsPopover
-            triggerClassName={marketControlStyles.bellTrigger}
-            iconClassName={marketControlStyles.bellIcon}
-            badgeClassName={marketControlStyles.bellBadge}
-          />
+      <div className="pointer-events-none absolute top-0 left-0 right-0 z-40 w-full px-2 pt-2 sm:px-4">
+        <div className="pointer-events-auto">
+          <HeaderHUD className="rounded-lg" hideNotificationsOnMercado={false} />
         </div>
       </div>
-
-      <div className="absolute top-4 right-4 z-40 flex flex-col items-end gap-3 md:top-6 md:right-6">
-        <LogOutBtn />
-      </div>
-
-      <MapLauncher className="right-4 top-27 translate-y-0 md:right-6 md:top-31" />
 
       <div className="relative z-10 flex h-full w-full items-end justify-center overflow-hidden pb-10 md:pb-12 lg:pb-16">
         <div className="flex h-full w-full max-w-7xl items-end justify-center px-4 translate-y-0 pb-0 md:px-8">
           <div className="hidden items-end justify-center gap-4 md:flex md:gap-6 lg:gap-10">
             {INTERVAL_STALLS.map((stall) => {
               const intervalLabel = stall.label;
+              const isDisabled = closedByInterval[stall.interval];
 
               return (
                 <button
                   key={stall.interval}
                   onClick={() => handleStallClick(stall.interval)}
+                  disabled={isDisabled}
                   className={cn(
                     'relative shrink-0 transition-all duration-300',
                     'h-80 w-64 md:h-96 md:w-[19rem] lg:h-[28rem] lg:w-[22rem]',
-                    'hover:scale-105 active:scale-95 cursor-pointer group'
+                    isDisabled
+                      ? 'cursor-not-allowed'
+                      : 'hover:scale-105 active:scale-95 cursor-pointer group'
                   )}
-                  aria-label={`View ${intervalLabel} market`}
+                  aria-label={
+                    isDisabled
+                      ? `${intervalLabel} market is closed`
+                      : `View ${intervalLabel} market`
+                  }
+                  aria-disabled={isDisabled}
                 >
                   <div
                     aria-hidden="true"
@@ -161,6 +171,16 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
                     className="object-contain pixelated"
                     sizes="(max-width: 768px) 256px, (max-width: 1024px) 304px, 352px"
                   />
+                  {isDisabled ? (
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <div
+                        className="rounded-md border-2 border-[#47331F] bg-[#B8473E] px-5 py-2 text-lg font-bold text-[#FFF7E8] shadow-[4px_4px_0px_rgba(71,51,31,0.6)] rotate-[-8deg]"
+                        style={{ fontFamily: '"Jersey 10", sans-serif' }}
+                      >
+                        CLOSED
+                      </div>
+                    </div>
+                  ) : null}
                   <div className="absolute -top-1 left-1/2 -translate-x-1/2">
                     <div
                       className="bg-[#E8DBBF] border-2 border-[#47331F] text-[#47331F] px-5 py-2.5 rounded-lg shadow-[4px_4px_0px_rgba(71,51,31,0.5)] font-bold text-base md:text-lg whitespace-nowrap transition-transform group-hover:scale-110"
@@ -180,12 +200,20 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
             <button
               type="button"
               onClick={() => handleStallClick(mobileStall.interval)}
+              disabled={closedByInterval[mobileStall.interval]}
               className={cn(
                 'relative shrink-0 transition-all duration-300',
                 'h-64 w-64 sm:h-80 sm:w-80',
-                'hover:scale-105 active:scale-95 cursor-pointer group'
+                closedByInterval[mobileStall.interval]
+                  ? 'cursor-not-allowed'
+                  : 'hover:scale-105 active:scale-95 cursor-pointer group'
               )}
-              aria-label={`View ${mobileStall.label} market`}
+              aria-label={
+                closedByInterval[mobileStall.interval]
+                  ? `${mobileStall.label} market is closed`
+                  : `View ${mobileStall.label} market`
+              }
+              aria-disabled={closedByInterval[mobileStall.interval]}
             >
               <div
                 aria-hidden="true"
@@ -201,6 +229,16 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
                 className="object-contain pixelated"
                 sizes="(max-width: 768px) 256px, 320px"
               />
+              {closedByInterval[mobileStall.interval] ? (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div
+                    className="rounded-md border-2 border-[#47331F] bg-[#B8473E] px-4 py-2 text-base font-bold text-[#FFF7E8] shadow-[4px_4px_0px_rgba(71,51,31,0.6)] rotate-[-8deg]"
+                    style={{ fontFamily: '"Jersey 10", sans-serif' }}
+                  >
+                    CLOSED
+                  </div>
+                </div>
+              ) : null}
               <div className="absolute -top-1 left-1/2 -translate-x-1/2">
                 <div
                   className="bg-[#E8DBBF] border-2 border-[#47331F] text-[#47331F] px-5 py-2.5 rounded-lg shadow-[4px_4px_0px_rgba(71,51,31,0.5)] text-base font-bold whitespace-nowrap transition-transform group-hover:scale-110"
