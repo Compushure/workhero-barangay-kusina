@@ -618,6 +618,7 @@ export default function AttendanceIcon({ config }: { config?: Partial<Attendance
       overtimeAfter: config?.overtimeAfter ?? attendanceConfig.overtimeAfter,
       autoTimeoutAt: config?.autoTimeoutAt ?? attendanceConfig.autoTimeoutAt,
       breaktime_duration: config?.breaktime_duration ?? attendanceConfig.breaktime_duration,
+      timezone: config?.timezone ?? attendanceConfig.timezone,
     }),
     [config]
   );
