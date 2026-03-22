@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, Suspense, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { HeaderSection } from './header';
+import { HeaderSection, RewardRequestsControls } from './header';
 import { HeaderSkeleton } from './header-skeleton';
 import { RedemptionTable } from './redemption-table';
 import { RedemptionTableSkeleton } from './redemption-table-skeleton';
@@ -101,12 +101,6 @@ export function RewardRequestsContent() {
             <HeaderSection
               title="Redemption Requests"
               description="Manage employee's request of redemption"
-              searchTerm={searchTerm}
-              onSearch={handleSearch}
-              onSort={handleSort}
-              sortBy={sortBy}
-              statusFilter={statusFilter}
-              onStatusChange={handleStatusChange}
             />
           </Suspense>
           <div className="flex flex-1 flex-col md:min-h-[18rem] lg:min-h-[23rem] xl:min-h-[27rem]">

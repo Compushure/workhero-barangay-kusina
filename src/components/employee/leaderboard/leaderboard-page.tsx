@@ -10,9 +10,8 @@ import {
 import { getISOWeekDateRangeLabel } from '@/lib/utils/time-period-utils';
 import type { RankLogPeriodType } from '@/types';
 import type { LatestPeriods } from './period-nav';
-import { PeriodNav, getLatestPeriodParams } from './period-nav';
-import ProfileAndLevel from '../attendance/profile-level';
-import XPProgressAndPoints from '../attendance/xp-points';
+import { PeriodNav, getLeaderboardTitle, getLatestPeriodParams } from './period-nav';
+import HeaderHUD from '../widgets/header-hud';
 import { LeaderboardEmptyState } from './leaderboard-empty-state';
 import { LeaderboardPodium } from './leaderboard-podium';
 import { LeaderboardShelf } from './leaderboard-shelf';
@@ -126,12 +125,7 @@ export function LeaderboardPageClient({
           paddingBottom: '0.75rem',
         }}
       >
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-4 md:gap-6">
-            <ProfileAndLevel />
-            <XPProgressAndPoints />
-          </div>
-        </div>
+        <HeaderHUD className="rounded-lg" />
       </div>
 
       <div

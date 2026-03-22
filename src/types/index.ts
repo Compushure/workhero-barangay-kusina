@@ -2,7 +2,7 @@
  * Type Definitions
  * =================
  * Centralized location for all application types and interfaces.
- * 
+ *
  * Types are organized by domain:
  * - shared: Common types used across the application
  * - manager: Manager-specific types
@@ -142,6 +142,7 @@ export type EditBadgeInput = z.infer<typeof import('@/zod/schemas').editBadgeSch
 export type ServerActionResponse<T = unknown> = {
   error: string | null;
   data?: T;
+  warning?: string | null;
 };
 
 // ============================================

@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { LogOutBtn } from '@/components/employee/attendance/logout';
+import { LogOutBtn } from './widgets/logout';
 
 interface ConditionalLogoutProps {
   hideOnMercado?: boolean;

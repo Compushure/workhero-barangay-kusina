@@ -11,12 +11,19 @@ import {
   fetchUsersAction,
   fetchUsersPaginatedAction,
   addUserAction,
+  checkUserEmailAvailabilityAction,
   editUserAction,
   deleteUserAction,
   uploadProfilePicture,
   deleteProfilePicture,
 } from '@/actions/superadmin/users';
-import { type User, type AddUserInput, type EditUserInput, type UserQueryParams, type PaginatedResponse } from '@/types';
+import {
+  type User,
+  type AddUserInput,
+  type EditUserInput,
+  type UserQueryParams,
+  type PaginatedResponse,
+} from '@/types';
 import { toast } from 'sonner';
 
 /**
@@ -63,12 +70,16 @@ export async function handleFetchUsersPaginated(
  * @param input - New user data
  * @returns Created user or null on error
  */
-export async function handleUploadProfilePicture(username: string, userId: string, file: File): Promise<string | null> {
+export async function handleUploadProfilePicture(
+  username: string,
+  userId: string,
+  file: File
+): Promise<string | null> {
   try {
     // Import Supabase client for direct upload
     const { createClient } = await import('@/lib/supabase/client');
     const supabase = createClient();
-    
+
     // Upload directly to Supabase storage from client (avoids Next.js body size limit)
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('employees')
@@ -136,7 +147,46 @@ export async function handleAddUser(input: AddUserInput): Promise<User | null> {
   }
 
   toast.success(`Successfully added ${input.name}`);
+  if (result.data?.warning) {
+    toast.warning(result.data.warning, {
+      duration: 8000,
+    });
+  }
   return result.data?.data ?? null;
+}
+
+export async function checkUserEmailAvailability(email: string): Promise<{
+  available: boolean;
+  normalizedEmail: string;
+  message?: string;
+  error?: string;
+}> {
+  const normalizedEmail = email.trim().toLowerCase();
+  const result = await safeAction(() => checkUserEmailAvailabilityAction(email));
+
+  if (!result.success) {
+    return {
+      available: false,
+      normalizedEmail,
+      error: result.error,
+    };
+  }
+
+  if (result.data?.error) {
+    return {
+      available: false,
+      normalizedEmail,
+      error: result.data.error,
+    };
+  }
+
+  return (
+    result.data?.data ?? {
+      available: false,
+      normalizedEmail,
+      error: 'Unexpected email availability response',
+    }
+  );
 }
 
 /**
