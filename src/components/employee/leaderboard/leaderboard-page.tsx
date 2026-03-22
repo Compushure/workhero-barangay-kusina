@@ -140,28 +140,11 @@ export function LeaderboardPageClient({
               <button
                 type="button"
                 onClick={() => {
-                  if (view !== 'history') {
-                    handleToggleHistory();
-                  }
-                }}
-                className={`${toggleButtonClass} ${
-                  view === 'history'
-                    ? 'cursor-not-allowed rounded-none translate-y-[3px] bg-[#CF8B22] text-white shadow-[inset_0_4px_0_rgba(77,44,16,0.26),inset_0_-2px_0_rgba(255,231,189,0.16)]'
-                    : 'cursor-pointer rounded-none bg-[#CF8B22]/28 text-white/70 shadow-[0_5px_0_rgba(77,44,16,0.82)] hover:translate-y-[4px] hover:bg-[#CF8B22]/48 hover:text-white hover:shadow-[0_1px_0_rgba(77,44,16,0.78)]'
-                }`}
-                aria-pressed={view === 'history'}
-              >
-                <History className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-                Past Rankings
-              </button>
-              <button
-                type="button"
-                onClick={() => {
                   if (view !== 'current') {
                     handleToggleHistory();
                   }
                 }}
-                className={`${toggleButtonClass} border-l-[3px] border-[#47331F] ${
+                className={`${toggleButtonClass} ${
                   view === 'current'
                     ? 'cursor-not-allowed rounded-none translate-y-[3px] bg-[#CF8B22] text-white shadow-[inset_0_4px_0_rgba(77,44,16,0.26),inset_0_-2px_0_rgba(255,231,189,0.16)]'
                     : 'cursor-pointer rounded-none bg-[#CF8B22]/28 text-white/70 shadow-[0_5px_0_rgba(77,44,16,0.82)] hover:translate-y-[4px] hover:bg-[#CF8B22]/48 hover:text-white hover:shadow-[0_1px_0_rgba(77,44,16,0.78)]'
@@ -170,6 +153,23 @@ export function LeaderboardPageClient({
               >
                 <RefreshCcw className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                 Latest Rankings
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (view !== 'history') {
+                    handleToggleHistory();
+                  }
+                }}
+                className={`${toggleButtonClass} border-l-[3px] border-[#47331F] ${
+                  view === 'history'
+                    ? 'cursor-not-allowed rounded-none translate-y-[3px] bg-[#CF8B22] text-white shadow-[inset_0_4px_0_rgba(77,44,16,0.26),inset_0_-2px_0_rgba(255,231,189,0.16)]'
+                    : 'cursor-pointer rounded-none bg-[#CF8B22]/28 text-white/70 shadow-[0_5px_0_rgba(77,44,16,0.82)] hover:translate-y-[4px] hover:bg-[#CF8B22]/48 hover:text-white hover:shadow-[0_1px_0_rgba(77,44,16,0.78)]'
+                }`}
+                aria-pressed={view === 'history'}
+              >
+                <History className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+                Past Rankings
               </button>
             </div>
           </div>
