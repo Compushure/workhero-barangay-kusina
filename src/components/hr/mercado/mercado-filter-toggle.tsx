@@ -1,6 +1,6 @@
 'use client';
 
-import { Filter, PackageX, Package, EyeOff, Eye } from 'lucide-react';
+import { Clock3, Eye, EyeOff, Filter, Layers3, Package, PackageX, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -68,7 +68,7 @@ export function MercadoFilterToggle({
           <Button
             size="default"
             variant="outline"
-            className="text-button control-h w-full justify-between rounded-md border border-gray-200 bg-card px-3 py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 hover:text-primary sm:w-auto"
+            className="text-button control-h w-full justify-between bg-card px-3 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer hover:bg-card hover:text-foreground hover:brightness-90 focus-visible:ring-[0.5px] focus-visible:ring-accent focus-visible:ring-offset-0 sm:w-auto"
           >
             <Filter className="h-4 w-4 text-accent" />
             <span className="hidden sm:inline">Filter</span>
@@ -85,7 +85,7 @@ export function MercadoFilterToggle({
           collisionPadding={12}
           className="manager-dropdown-content w-72 max-h-136 overflow-visible p-1"
         >
-          <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
+          <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
             Stock Status
           </DropdownMenuLabel>
           <DropdownMenuCheckboxItem
@@ -93,7 +93,7 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onStockFilterChange(checked ? 'in-stock' : 'all')}
             className={checkboxItemClassName(stockFilter === 'in-stock')}
           >
-            <Package className="mr-2 h-4 w-4 !text-green-500" />
+            <Package className="mr-2.5 size-3.5 shrink-0 !text-accent" />
             In Stock
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
@@ -101,13 +101,13 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onStockFilterChange(checked ? 'out-of-stock' : 'all')}
             className={checkboxItemClassName(stockFilter === 'out-of-stock')}
           >
-            <PackageX className="mr-2 h-4 w-4 !text-red-500" />
+            <PackageX className="mr-2.5 size-3.5 shrink-0 !text-accent" />
             Out of Stock
           </DropdownMenuCheckboxItem>
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
+          <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
             Visibility
           </DropdownMenuLabel>
           <DropdownMenuCheckboxItem
@@ -115,7 +115,7 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onVisibilityFilterChange(checked ? 'visible' : 'all')}
             className={checkboxItemClassName(visibilityFilter === 'visible')}
           >
-            <Eye className="mr-2 h-4 w-4 !text-blue-500" />
+            <Eye className="mr-2.5 size-3.5 shrink-0 !text-accent" />
             Visible
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
@@ -123,13 +123,13 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onVisibilityFilterChange(checked ? 'hidden' : 'all')}
             className={checkboxItemClassName(visibilityFilter === 'hidden')}
           >
-            <EyeOff className="mr-2 h-4 w-4 !text-gray-500" />
+            <EyeOff className="mr-2.5 size-3.5 shrink-0 !text-accent" />
             Hidden
           </DropdownMenuCheckboxItem>
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
+          <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
             Availability Interval
           </DropdownMenuLabel>
           <DropdownMenuCheckboxItem
@@ -139,6 +139,7 @@ export function MercadoFilterToggle({
             }}
             className={checkboxItemClassName(intervalFilter === 'all')}
           >
+            <Layers3 className="mr-2.5 size-3.5 shrink-0 !text-accent" />
             All Intervals
           </DropdownMenuCheckboxItem>
           {intervalOptions.map((interval) => (
@@ -151,19 +152,21 @@ export function MercadoFilterToggle({
               }}
               className={checkboxItemClassName(intervalFilter === interval.value)}
             >
+              <Clock3 className="mr-2.5 size-3.5 shrink-0 !text-accent" />
               {interval.label}
             </DropdownMenuCheckboxItem>
           ))}
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
+          <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
             Quick Actions
           </DropdownMenuLabel>
           <DropdownMenuItem
             onClick={clearFilters}
             className="group cursor-pointer py-1.5 transition-all duration-500 ease-in-out hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground"
           >
+            <RotateCcw className="mr-2.5 size-3.5 shrink-0 text-accent" />
             Clear Filters
           </DropdownMenuItem>
         </DropdownMenuContent>
