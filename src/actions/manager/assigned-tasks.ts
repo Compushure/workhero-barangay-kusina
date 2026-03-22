@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse } from '@/types';
 import type { AssignedTask, AssignedEmployee } from '@/types';
 import { insertNotification } from '@/lib/notifications';
+import { getCurrentManilaDateString } from '@/utils/date-utils';
 
 /**
  * Fetch paginated current assigned tasks
@@ -79,7 +80,7 @@ export async function fetchCurrentAssignedTasksPaginated(
   }
 
   // Apply overdue filter
-  const today = new Date().toISOString().split('T')[0];
+  const today = getCurrentManilaDateString();
   if (overdueFilter === 'hide-overdue') {
     query = query.gte('k_deadline_date', today);
   } else if (overdueFilter === 'only-overdue') {
@@ -271,7 +272,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   }
 
   // Apply overdue filter
-  const today = new Date().toISOString().split('T')[0];
+  const today = getCurrentManilaDateString();
   if (overdueFilter === 'hide-overdue') {
     query = query.gte('k_deadline_date', today);
   } else if (overdueFilter === 'only-overdue') {
