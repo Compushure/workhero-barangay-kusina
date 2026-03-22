@@ -96,8 +96,8 @@ export function MercadoPageContent() {
   };
 
   return (
-    <main className="flex h-full min-h-0 w-full flex-col bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
-      <div className="mx-auto flex h-full min-h-0 w-full max-w-7xl flex-col 2xl:max-w-screen-2xl">
+    <main className="flex min-h-screen w-full flex-col bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto flex h-full w-full max-w-7xl flex-col 2xl:max-w-screen-2xl flex-1">
         <div className="flex min-h-0 flex-1 flex-col gap-5 sm:gap-6">
           {isLoading ? (
             <MercadoHeaderSkeleton />
@@ -160,58 +160,56 @@ export function MercadoPageContent() {
             </Suspense>
           )}
 
-          <div className="flex min-h-0 flex-1 flex-col">
-            {/* Catalog grid section. */}
+          {/* Catalog grid section */}
+          <div className="flex-1 md:min-h-[18rem] lg:min-h-[23rem] xl:min-h-[27rem]">
             {isLoading ? (
               <MercadoSkeleton />
             ) : (
-              <div className="flex-1 md:min-h-[18rem] lg:min-h-[23rem] xl:min-h-[27rem]">
-                <div className="grid auto-rows-fr grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                  {paginatedRewards.length > 0 ? (
-                    <>
-                      {paginatedRewards.map((item) => (
-                        <MercadoCard
-                          key={item.id}
-                          item={{
-                            id: item.id,
-                            name: item.name,
-                            price: item.pointsCost,
-                            quantity: item.quantity,
-                            isActive: item.isActive,
-                            imageUrl: item.imageUrl,
-                            availableMonth: item.availableMonth,
-                            availableDate: item.availableDate,
-                          }}
-                          onClick={openViewModal}
-                          onEdit={openEditModal}
-                          onDelete={openDeleteModal}
-                          onHide={handleHide}
-                          onUnhide={handleUnhide}
-                        />
-                      ))}
-                    </>
-                  ) : (
-                    <div className="col-span-full rounded-2xl border border-dashed border-accent/20 bg-card/40 py-14 text-center shadow-sm/25">
-                      <p className="text-button text-muted-foreground">{getEmptyStateMessage()}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Pagination - pushed to bottom with mt-auto */}
-            {totalPages > 1 && (
-              <div className="mt-auto pt-3 sm:pt-4">
-                <Pagination
-                  totalPages={totalPages}
-                  currentPage={currentPage}
-                  onPageChange={setCurrentPage}
-                  isFixed={false}
-                />
+              <div className="grid auto-rows-fr grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                {paginatedRewards.length > 0 ? (
+                  <>
+                    {paginatedRewards.map((item) => (
+                      <MercadoCard
+                        key={item.id}
+                        item={{
+                          id: item.id,
+                          name: item.name,
+                          price: item.pointsCost,
+                          quantity: item.quantity,
+                          isActive: item.isActive,
+                          imageUrl: item.imageUrl,
+                          availableMonth: item.availableMonth,
+                          availableDate: item.availableDate,
+                        }}
+                        onClick={openViewModal}
+                        onEdit={openEditModal}
+                        onDelete={openDeleteModal}
+                        onHide={handleHide}
+                        onUnhide={handleUnhide}
+                      />
+                    ))}
+                  </>
+                ) : (
+                  <div className="col-span-full rounded-2xl border border-dashed border-accent/20 bg-card/40 py-14 text-center shadow-sm/25">
+                    <p className="text-button text-muted-foreground">{getEmptyStateMessage()}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
+
+        {/* Pagination as footer */}
+        {totalPages > 1 && (
+          <div className="mt-auto pt-4 sm:pt-6 flex justify-center">
+            <Pagination
+              totalPages={totalPages}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              isFixed={false}
+            />
+          </div>
+        )}
       </div>
 
       <AddItemsModal
