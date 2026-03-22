@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Filter } from 'lucide-react';
 import {
   Select,
@@ -86,8 +86,26 @@ export function TaskStatusBoard({
 }: TaskStatusBoardProps) {
   const [sortBy, setSortBy] = useState<TaskSortOption>('due-date-asc');
   const [overdueFilter, setOverdueFilter] = useState<TaskOverdueFilter>('all');
+  const [openSections, setOpenSections] = useState<Record<'Current' | 'In Review' | 'Approved' | 'Rejected', boolean>>({
+    Current: true,
+    'In Review': true,
+    Approved: true,
+    Rejected: true,
+  });
+  const [isMobileLayout, setIsMobileLayout] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const updateLayoutMode = () => setIsMobileLayout(mediaQuery.matches);
+
+    updateLayoutMode();
+    mediaQuery.addEventListener('change', updateLayoutMode);
+
+    return () => mediaQuery.removeEventListener('change', updateLayoutMode);
+  }, []);
 
   const activeFilterCount = overdueFilter !== 'all' ? 1 : 0;
+  const openCount = Object.values(openSections).filter(Boolean).length;
 
   const checkboxItemClassName = (isActive: boolean) =>
     `group cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] transition-all duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] ${
@@ -105,6 +123,36 @@ export function TaskStatusBoard({
     ],
     [currentTasks, inReviewTasks, verifiedTasks, rejectedTasks, overdueFilter, sortBy]
   );
+
+  const sectionClassName = (status: 'Current' | 'In Review' | 'Approved' | 'Rejected') =>
+    cn(
+      'min-h-0',
+      openSections[status] && openCount === 1 && 'md:col-span-2'
+    );
+
+  function handleSectionOpenChange(
+    status: 'Current' | 'In Review' | 'Approved' | 'Rejected',
+    open: boolean
+  ) {
+    setOpenSections((prev) => {
+      if (isMobileLayout && open) {
+        return {
+          Current: status === 'Current',
+          'In Review': status === 'In Review',
+          Approved: status === 'Approved',
+          Rejected: status === 'Rejected',
+        };
+      }
+
+      const next = { ...prev, [status]: open };
+
+      if (!Object.values(next).some(Boolean)) {
+        return prev;
+      }
+
+      return next;
+    });
+  }
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border-3 border-[#47331F] bg-[#eadbc1] p-2.5 font-jersey shadow-[0_10px_28px_rgba(71,51,31,0.24)] sm:p-3">
@@ -210,27 +258,59 @@ export function TaskStatusBoard({
             <span className="font-jersey text-[14px] tracking-[0.06em] text-[#8b2e22]">Error loading tasks. Please try again.</span>
           </div>
         ) : (
-          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 md:grid-cols-2 md:grid-rows-2 xl:gap-3">
-            <TaskStatusSection status="Current" task={current} isLoading={isLoading}>
-              {current.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </TaskStatusSection>
-            <TaskStatusSection status="In Review" task={onReview} isLoading={isLoading}>
-              {onReview.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </TaskStatusSection>
-            <TaskStatusSection status="Approved" task={verified} isLoading={isLoading}>
-              {verified.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </TaskStatusSection>
-            <TaskStatusSection status="Rejected" task={denied} isLoading={isLoading}>
-              {denied.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </TaskStatusSection>
+          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 md:grid-cols-2 xl:gap-3">
+            <div className={sectionClassName('Current')}>
+              <TaskStatusSection
+                status="Current"
+                task={current}
+                isLoading={isLoading}
+                open={openSections.Current}
+                onOpenChange={(open) => handleSectionOpenChange('Current', open)}
+              >
+                {current.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
+              </TaskStatusSection>
+            </div>
+            <div className={sectionClassName('In Review')}>
+              <TaskStatusSection
+                status="In Review"
+                task={onReview}
+                isLoading={isLoading}
+                open={openSections['In Review']}
+                onOpenChange={(open) => handleSectionOpenChange('In Review', open)}
+              >
+                {onReview.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
+              </TaskStatusSection>
+            </div>
+            <div className={sectionClassName('Approved')}>
+              <TaskStatusSection
+                status="Approved"
+                task={verified}
+                isLoading={isLoading}
+                open={openSections.Approved}
+                onOpenChange={(open) => handleSectionOpenChange('Approved', open)}
+              >
+                {verified.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
+              </TaskStatusSection>
+            </div>
+            <div className={sectionClassName('Rejected')}>
+              <TaskStatusSection
+                status="Rejected"
+                task={denied}
+                isLoading={isLoading}
+                open={openSections.Rejected}
+                onOpenChange={(open) => handleSectionOpenChange('Rejected', open)}
+              >
+                {denied.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
+              </TaskStatusSection>
+            </div>
           </div>
         )}
       </div>
