@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { create } from 'zustand';
+import { createPortal } from 'react-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNavigationStore } from '../nav-loading-state';
 
@@ -79,6 +80,11 @@ export function MapOverlay() {
   const { isMapOpen, toggleMap, closeMap } = useMapStore();
   const { isNavigating, startNavigation } = useNavigationStore();
   const [activeTooltipId, setActiveTooltipId] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const travelTo = (path: string) => {
     if (!path || isNavigating) return;
@@ -91,11 +97,15 @@ export function MapOverlay() {
     router.push(path);
   };
 
-  return (
+  if (!isMounted) {
+    return null;
+  }
+
+  return createPortal(
     <AnimatePresence>
       {isMapOpen ? (
         <motion.div
-          className="fixed inset-0 z-[60] flex items-center justify-center"
+          className="fixed inset-0 z-120 flex items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -103,7 +113,7 @@ export function MapOverlay() {
           <div className="absolute inset-0 bg-black/60" onClick={closeMap} />
 
           <motion.div
-            className="relative w-[92vw] max-w-[700px] max-h-[90vh] aspect-square"
+            className="relative w-[92vw] max-w-175 max-h-[90vh] aspect-square"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -142,9 +152,13 @@ export function MapOverlay() {
                       className={`cursor-pointer ${isNavigating || !loc.path ? 'opacity-60 cursor-not-allowed' : ''}`}
                       onClick={() => loc.path && travelTo(loc.path)}
                       onMouseEnter={() => setActiveTooltipId(loc.id)}
-                      onMouseLeave={() => setActiveTooltipId((current) => (current === loc.id ? null : current))}
+                      onMouseLeave={() =>
+                        setActiveTooltipId((current) => (current === loc.id ? null : current))
+                      }
                       onFocus={() => setActiveTooltipId(loc.id)}
-                      onBlur={() => setActiveTooltipId((current) => (current === loc.id ? null : current))}
+                      onBlur={() =>
+                        setActiveTooltipId((current) => (current === loc.id ? null : current))
+                      }
                       onPointerDown={() =>
                         setActiveTooltipId((current) => (current === loc.id ? null : current))
                       }
@@ -162,7 +176,7 @@ export function MapOverlay() {
                       </motion.div>
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="top" sideOffset={8} className="z-[70]">
+                  <TooltipContent side="top" sideOffset={8} className="z-130">
                     {loc.name}
                   </TooltipContent>
                 </Tooltip>
@@ -175,6 +189,7 @@ export function MapOverlay() {
           </motion.div>
         </motion.div>
       ) : null}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

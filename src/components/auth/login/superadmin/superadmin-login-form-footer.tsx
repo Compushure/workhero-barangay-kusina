@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AuthHomeLink } from '@/components/auth/auth-home-link';
 
 export function SuperadminLoginFormFooter() {
   return (
@@ -11,6 +12,12 @@ export function SuperadminLoginFormFooter() {
           Employee Login
         </button>
       </Link>
+      <div className="mt-3 flex justify-center">
+        <AuthHomeLink
+          className="inline-flex items-center gap-2 rounded-lg border border-[#f47812]/20 bg-[#fff8ef] px-3 py-2 text-sm font-medium text-[#8b4513] transition-colors hover:bg-[#fcf1df]"
+          iconClassName="h-4 w-4 text-[#f47812]"
+        />
+      </div>
     </div>
   );
 }

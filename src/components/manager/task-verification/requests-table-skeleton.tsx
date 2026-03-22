@@ -42,7 +42,7 @@ export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
         </TableHeader>
         <TableBody>
           {Array.from({ length: rows }).map((_, index) => (
-            <TableRow key={index} className="bg-background-soft hover:bg-background-soft">
+            <TableRow key={index} className="bg-background-soft hover:bg-background-soft py-2">
               <TableCell className="hidden sm:table-cell px-2 sm:px-4">
                 <div className="h-4 w-20 sm:w-28 bg-gray-300 rounded animate-pulse" />
               </TableCell>

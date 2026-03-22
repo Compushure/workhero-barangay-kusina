@@ -1,5 +1,12 @@
 'use server';
 
+import { supabaseAdmin } from '@/lib/supabase/admin';
+import { getPostLoginPath, sendWelcomeEmail } from '@/lib/smtp/welcome-email';
+import {
+  buildExistingEmailMessage,
+  findExistingUserEmail,
+  normalizeUserEmail,
+} from '@/lib/users/email-availability';
 import { createClient } from '@/lib/supabase/server';
 import type {
   ServerActionResponse,
@@ -108,6 +115,83 @@ function buildQueryParams(params: UserQueryParams): string {
   return searchParams.toString();
 }
 
+type EmailAvailabilityCheck = {
+  available: boolean;
+  normalizedEmail: string;
+  message?: string;
+};
+
+async function createFirstLoginMagicLink(
+  email: string,
+  employeeType: AddUserInput['employeeType']
+) {
+  const nextPath = getPostLoginPath(employeeType);
+  const redirectTo = new URL(nextPath, baseUrl).toString();
+  const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+    type: 'magiclink',
+    email,
+    options: {
+      redirectTo,
+    },
+  });
+
+  if (error || !data?.properties?.hashed_token) {
+    throw new Error(error?.message || 'Failed to generate the first login magic link');
+  }
+
+  const confirmUrl = new URL('/auth/confirm', baseUrl);
+  confirmUrl.searchParams.set('token_hash', data.properties.hashed_token);
+  confirmUrl.searchParams.set('type', data.properties.verification_type);
+  confirmUrl.searchParams.set('next', nextPath);
+
+  return confirmUrl.toString();
+}
+
+export async function checkUserEmailAvailabilityAction(
+  email: string
+): Promise<ServerActionResponse<EmailAvailabilityCheck>> {
+  const normalizedEmail = normalizeUserEmail(email);
+  const parsedEmail = addUserSchema.shape.email.safeParse(normalizedEmail);
+
+  if (!parsedEmail.success) {
+    return {
+      error: null,
+      data: {
+        available: false,
+        normalizedEmail,
+        message: parsedEmail.error.issues[0]?.message || 'Invalid email address',
+      },
+    };
+  }
+
+  try {
+    const existingEmail = await findExistingUserEmail(parsedEmail.data);
+
+    if (existingEmail.exists) {
+      return {
+        error: null,
+        data: {
+          available: false,
+          normalizedEmail: existingEmail.normalizedEmail,
+          message: buildExistingEmailMessage(existingEmail.normalizedEmail),
+        },
+      };
+    }
+
+    return {
+      error: null,
+      data: {
+        available: true,
+        normalizedEmail: parsedEmail.data,
+      },
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'Failed to verify email availability',
+    };
+  }
+}
+
 // ============================================
 // User Management Actions
 // ============================================
@@ -140,8 +224,7 @@ export async function fetchUsersPaginatedAction(
     const data = await res.json();
     const users = (data.users ?? []) as User[];
     const fallbackPageSize = params.pageSize ?? 25;
-    const totalCount =
-      typeof data.count === 'number' ? data.count : users.length;
+    const totalCount = typeof data.count === 'number' ? data.count : users.length;
     const totalPages =
       typeof data.totalPages === 'number'
         ? data.totalPages
@@ -184,7 +267,15 @@ export async function addUserAction(input: AddUserInput): Promise<ServerActionRe
     pagibig,
     employeeId,
   } = parsed.data;
-  console.log('Adding user:', name, email, employeeType, employmentStatus);
+  const normalizedEmail = normalizeUserEmail(email);
+  console.log('Adding user:', name, normalizedEmail, employeeType, employmentStatus);
+
+  const existingEmail = await findExistingUserEmail(normalizedEmail);
+  if (existingEmail.exists) {
+    return {
+      error: buildExistingEmailMessage(existingEmail.normalizedEmail),
+    };
+  }
 
   const res = await fetch(`${baseUrl}/admin/tools/adduser`, {
     method: 'POST',
@@ -192,7 +283,7 @@ export async function addUserAction(input: AddUserInput): Promise<ServerActionRe
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      email: email,
+      email: normalizedEmail,
       password: password,
       name: name,
       requested_role: employeeType,
@@ -230,8 +321,8 @@ export async function addUserAction(input: AddUserInput): Promise<ServerActionRe
   const completeUser: User = {
     id: user?.id || userRow?.id,
     name: userRow?.name || user?.user_metadata?.name || user?.email || '',
-    email: user?.email || '',
-    employeeType: userRow?.role_id ? 'regular' : 'regular', // role_id would need to be looked up
+    email: user?.email || normalizedEmail,
+    employeeType,
     date_added: new Date(userRow?.date_added || new Date()),
     createdAt: new Date(userRow?.date_added || new Date()),
     employmentStatus: userRow?.employment_status || '',
@@ -243,7 +334,29 @@ export async function addUserAction(input: AddUserInput): Promise<ServerActionRe
     pagibig: userRow?.pagibig_id || '',
   };
 
-  return { error: null, data: completeUser };
+  try {
+    const magicLink = await createFirstLoginMagicLink(normalizedEmail, employeeType);
+
+    await sendWelcomeEmail({
+      to: normalizedEmail,
+      name,
+      role: employeeType,
+      magicLink,
+    });
+
+    return { error: null, data: completeUser };
+  } catch (mailError) {
+    const mailErrorMessage =
+      mailError instanceof Error ? mailError.message : 'Unknown email delivery error';
+
+    console.error('[addUserAction] Failed to send welcome email:', mailError);
+
+    return {
+      error: null,
+      data: completeUser,
+      warning: `User was added, but the welcome email could not be sent: ${mailErrorMessage}`,
+    };
+  }
 }
 
 export async function editUserAction(
@@ -332,9 +445,9 @@ export async function deleteUserAction(userId: string): Promise<ServerActionResp
     .from('employees')
     .remove([`${userId}/profile.png`]);
 
-    if (profileError) {
-      return { error: 'Failed to delete profile picture: ' + profileError.message };
-    }
+  if (profileError) {
+    return { error: 'Failed to delete profile picture: ' + profileError.message };
+  }
   return { error: null };
 }
 
@@ -349,27 +462,23 @@ export async function uploadProfilePicture(
   // This action validates the upload and returns the public URL
   // The actual upload happens client-side to avoid Next.js body size limits
   const supabase = await createClient();
-  
+
   // Verify the file exists in storage
-  const { data, error } = await supabase.storage
-    .from('employees')
-    .list(userId, {
-      limit: 1,
-      search: 'profile.png'
-    });
+  const { data, error } = await supabase.storage.from('employees').list(userId, {
+    limit: 1,
+    search: 'profile.png',
+  });
 
   if (error || !data || data.length === 0) {
     return { error: 'Profile picture verification failed' };
   }
-  
+
   // Return the public URL with cache busting
   const publicUrl = getProfileImageUrl(supabase, userId);
   return { error: null, data: { publicUrl } };
 }
 
-export async function deleteProfilePicture(
-  userId: string
-): Promise<ServerActionResponse> {
+export async function deleteProfilePicture(userId: string): Promise<ServerActionResponse> {
   const supabase = await createClient();
   const { data, error } = await supabase.storage
     .from('employees')

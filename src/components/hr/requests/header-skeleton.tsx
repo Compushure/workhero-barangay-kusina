@@ -8,9 +8,15 @@ export function HeaderSkeleton() {
         <Skeleton className="h-4 w-80 rounded-lg bg-gray-300" />
       </div>
 
-      <div className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5">
-        <div className="flex min-w-0 flex-col items-stretch gap-2 xl:flex-row xl:items-center xl:justify-end">
-          <div className="min-w-0 flex-1 xl:max-w-xs">
+      <div className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex shrink-0 self-start items-center gap-2 sm:gap-3 xl:self-center">
+          <Skeleton className="h-5 w-5 rounded bg-gray-300" />
+          <Skeleton className="h-5 w-24 rounded bg-gray-300" />
+          <Skeleton className="h-6 w-10 rounded-md bg-gray-300" />
+        </div>
+
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
+          <div className="min-w-0 flex-1 xl:max-w-md">
             <Skeleton className="control-skeleton-h w-full rounded-lg bg-gray-300" />
           </div>
           <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap xl:shrink-0">

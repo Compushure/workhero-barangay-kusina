@@ -2,20 +2,20 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function TaskAssignmentCardSkeleton() {
   return (
-    <div className="rounded-2xl bg-background-soft p-4 sm:p-6 shadow-sm/25">
+    <div className="rounded-2xl bg-background-soft p-3 sm:p-4 md:px-7 py-5 shadow-sm/25 max-w-230">
       {/* Title skeleton */}
-      <Skeleton className="h-5 sm:h-6 w-44 sm:w-48 md:w-60 mb-4 sm:mb-5 bg-gray-300" />
+      <Skeleton className="h-5 w-44 sm:w-48 md:w-60 mb-4 bg-gray-300" />
 
       {/* Button group skeleton */}
       <div className="flex flex-wrap gap-2 sm:gap-3">
         <div className="w-full sm:w-auto sm:min-w-44">
-          <Skeleton className="control-skeleton-h w-full sm:w-44 md:w-50 bg-gray-300 rounded-md" />
+          <Skeleton className="h-7 w-full sm:w-44 md:w-50 bg-gray-300 rounded-md" />
         </div>
         <div className="w-full sm:w-auto">
-          <Skeleton className="control-skeleton-h w-full sm:w-44 md:w-50 bg-gray-300 rounded-md" />
+          <Skeleton className="h-7 w-full sm:w-44 md:w-50 bg-gray-300 rounded-md" />
         </div>
         <div className="w-full sm:w-auto">
-          <Skeleton className="control-skeleton-h w-full sm:w-44 md:w-50 bg-gray-300 rounded-md" />
+          <Skeleton className="h-7 w-full sm:w-44 md:w-50 bg-gray-300 rounded-md" />
         </div>
       </div>
 

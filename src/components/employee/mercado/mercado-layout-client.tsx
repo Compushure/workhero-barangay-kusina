@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { Coins } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MercadoProvider, useMercadoContext } from './mercado-context';
 import { useMercadoPageData } from '@/hooks/useMercadoPageData';
-import { LogOutBtn } from '@/components/employee/attendance/logout';
+import { NavLoadingState } from '@/components/employee/nav-loading-state';
+import { LogOutBtn } from '@/components/employee/widgets/logout';
 import { NotificationsPopover } from '@/components/notifications/notifications';
 import { MapLauncher } from '@/components/employee/minimap/map-launcher';
-import { Coins } from 'lucide-react';
-import { NavLoadingState } from '@/components/employee/nav-loading-state';
 
 interface MercadoLayoutClientProps {
   children: React.ReactNode;

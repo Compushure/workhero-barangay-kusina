@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth-context';
 import { QueryProvider } from '@/lib/providers/query-provider';
-import { Toaster } from 'sonner';
+import { Toaster, ToastViewRootProvider } from '@/components/ui/sonner';
 import { Inter, Roboto } from 'next/font/google';
 
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'] });
@@ -26,10 +26,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body className="bg-background text-foreground" suppressHydrationWarning>
-        <QueryProvider>
-          <AuthProvider>{children}</AuthProvider>
-          <Toaster position="bottom-right" richColors />
-        </QueryProvider>
+        <ToastViewRootProvider>
+          <QueryProvider>
+            <AuthProvider>{children}</AuthProvider>
+            <Toaster position="bottom-right" richColors />
+          </QueryProvider>
+        </ToastViewRootProvider>
       </body>
     </html>
   );
