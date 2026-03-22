@@ -82,7 +82,7 @@ export const MercadoCard = memo(function MercadoCard({
 
   return (
     <div
-      className="bg-background border border-border rounded-xl p-3.5 flex items-start gap-3.5 relative shadow-sm hover:shadow-md transition-all min-h-32 cursor-pointer hover:border-accent/50 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+      className="bg-card border border-border rounded-xl p-3.5 flex items-start gap-3.5 relative shadow-sm hover:shadow-md transition-all min-h-32 cursor-pointer hover:border-accent/50 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
