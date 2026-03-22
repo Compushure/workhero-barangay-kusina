@@ -10,11 +10,8 @@ import {
 import { getISOWeekDateRangeLabel } from '@/lib/utils/time-period-utils';
 import type { RankLogPeriodType } from '@/types';
 import type { LatestPeriods } from './period-nav';
-import { PeriodNav, getLatestPeriodParams } from './period-nav';
-import ProfileAndLevel from '../attendance/profile-level';
-import XPProgressAndPoints from '../attendance/xp-points';
-import { RankWidget } from '../dashboard/rank-panel';
-import { Card, CardContent } from '@/components/ui/card';
+import { PeriodNav, getLeaderboardTitle, getLatestPeriodParams } from './period-nav';
+import HeaderHUD from '../widgets/header-hud';
 import { LeaderboardEmptyState } from './leaderboard-empty-state';
 import { LeaderboardPodium } from './leaderboard-podium';
 import { LeaderboardShelf } from './leaderboard-shelf';
@@ -128,21 +125,28 @@ export function LeaderboardPageClient({
           paddingBottom: '0.75rem',
         }}
       >
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-4 md:gap-6">
-            <ProfileAndLevel />
-            <XPProgressAndPoints />
-            <Card className="bg-transparent shadow-none border-none">
-              <CardContent className="p-0">
-                <RankWidget />
-              </CardContent>
-            </Card>
+        <div className="flex w-full flex-col gap-2">
+          <HeaderHUD className="rounded-lg" />
+          <div className="flex w-full justify-end pr-1 sm:pr-2 lg:pr-4">
+            <button
+              type="button"
+              onClick={handleToggleHistory}
+              className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-jersey tracking-widest shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors sm:px-4 sm:text-base ${
+                view === 'history'
+                  ? 'bg-[#F4B925] text-[#3D2512]'
+                  : 'bg-[#694c33] text-white hover:bg-[#8A6342]'
+              }`}
+            >
+              <History className="h-4 w-4" />
+              Past Rankings
+            </button>
           </div>
         </div>
       </div>
 
+      {/* Spacer so content doesn't hide under the fixed HUD on sm+ */}
       <div
-        className="hidden sm:block sm:h-[calc(max(0.75rem,env(safe-area-inset-top))+6.5rem)]"
+        className="hidden sm:block sm:h-[calc(max(0.75rem,env(safe-area-inset-top))+10rem)]"
         aria-hidden="true"
       />
 

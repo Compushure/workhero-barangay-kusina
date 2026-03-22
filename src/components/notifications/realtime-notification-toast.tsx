@@ -22,17 +22,17 @@ const ICON_BY_TYPE = {
 } as const;
 
 const CARD_BY_TYPE = {
-  badge: 'border-amber-300 bg-amber-50 text-amber-950',
-  task: 'border-sky-300 bg-sky-50 text-sky-950',
-  reward: 'border-emerald-300 bg-emerald-50 text-emerald-950',
-  user: 'border-violet-300 bg-violet-50 text-violet-950',
+  badge: 'border-amber-400',
+  task: 'border-cyan-400',
+  reward: 'border-lime-400',
+  user: 'border-violet-400',
 } as const;
 
 const ICON_BY_COLOR = {
-  badge: 'text-amber-600',
-  task: 'text-sky-600',
-  reward: 'text-emerald-600',
-  user: 'text-violet-600',
+  badge: 'text-amber-300',
+  task: 'text-cyan-300',
+  reward: 'text-lime-300',
+  user: 'text-fuchsia-300',
 } as const;
 
 export function RealtimeNotificationToastClient({ userId }: RealtimeNotificationToastClientProps) {
@@ -56,7 +56,7 @@ export function RealtimeNotificationToastClient({ userId }: RealtimeNotification
         clearNotification();
         setCurrent(null);
       }, 250);
-    }, 5500);
+    }, 7000);
 
     return () => clearTimeout(timer);
   }, [clearNotification, newNotification, queryClient]);
@@ -83,15 +83,15 @@ export function RealtimeNotificationToastClient({ userId }: RealtimeNotification
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 18, scale: 0.98 }}
           transition={{ duration: 0.22, ease: 'easeOut' }}
-          className="fixed bottom-6 right-6 z-90 w-90 max-w-[calc(100vw-2rem)]"
+          className="fixed bottom-6 right-6 z-90 w-100 max-w-[calc(100vw-2rem)]"
         >
-          <div className={cn('rounded-xl border p-4 shadow-xl backdrop-blur-sm', cardClass)}>
+          <div className={cn('rounded-xl border-2 p-4 shadow-xl backdrop-blur-sm bg-wood-card text-card', cardClass)}>
             <div className="flex items-start gap-3">
-              <div className={cn('mt-0.5', iconClass)}>
-                <Icon className="h-5 w-5" />
+              <div className={cn('mt-0.5 p-1.5 rounded-md bg-yellow-500/15 shadow-sm/25', iconClass)}>
+                <Icon className="size-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-wide opacity-80">{current.type}</p>
+                <p className="text-[0.75rem] font-bold uppercase tracking-wide opacity-80">{current.type}</p>
                 <p className="mt-0.5 text-sm leading-snug">{current.message}</p>
               </div>
               <button

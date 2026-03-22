@@ -13,7 +13,7 @@ export function RankWidget() {
   const rank = rankData?.rank ?? 1;
 
   const cardClassName =
-    'mb-4 w-full max-w-[320px] shrink-0 rounded-lg border-3 border-[#47331F] bg-[#765332] p-2 font-jersey tracking-widest shadow-md sm:-ml-2 sm:w-[320px]';
+    'rounded-lg shadow-md wood-panel p-2 mb-4 -ml-2 w-[320px] min-h-[90px] shrink-0 font-jersey tracking-widest';
 
   if (isRankLoading) {
     return (

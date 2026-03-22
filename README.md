@@ -146,6 +146,14 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
 # Application Configuration
 NEXT_PUBLIC_SITE_URL=http://localhost:3008
+
+# Email (Brevo SMTP)
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=587
+SMTP_USER=your_brevo_smtp_login
+SMTP_KEY=your_brevo_smtp_key
+SMTP_ALLOW_SELF_SIGNED=true
+SMTP_FROM="Compushure <tonilegayada@gmail.com>"
 ```
 
 > **⚠️ Important**: The `SUPABASE_SERVICE_ROLE_KEY` should NEVER be exposed to the client. It's only used in server-side code.
@@ -159,6 +167,12 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3008
 | `SUPABASE_URL` | Supabase URL for admin operations (server-side only) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key for elevated permissions (server-side only) |
 | `NEXT_PUBLIC_SITE_URL` | Application URL for callbacks and redirects |
+| `SMTP_HOST` | Brevo SMTP host (`smtp-relay.brevo.com`) |
+| `SMTP_PORT` | Brevo SMTP port (`587` recommended) |
+| `SMTP_USER` | Brevo SMTP login email (e.g., `a593f3001@smtp-brevo.com`) |
+| `SMTP_KEY` | Brevo SMTP key (not API key) |
+| `SMTP_ALLOW_SELF_SIGNED` | Set `true` only if TLS interception/self-signed certs block mail |
+| `SMTP_FROM` | From header, e.g., `"Compushure <tonilegayada@gmail.com>"` |
 
 </details>
 
@@ -213,7 +227,8 @@ npm run format:check  # Check formatting without changes
   "lint": "eslint .",                           // Run ESLint
   "format": "prettier --write .",               // Format code
   "format:check": "prettier --check .",         // Check formatting
-  "typecheck": "tsc --noEmit"                   // TypeScript validation
+  "typecheck": "tsc --noEmit",                  // TypeScript validation
+  "smtp:verify": "node scripts/smtp-verify.js"  // Verify Brevo SMTP transport with .env.local
 }
 ```
 
@@ -670,7 +685,14 @@ queryClient.invalidateQueries({
 });
 ```
 
-#### 5. Type Safety with Zod
+#### 5. Zustand Workflow
+
+- Global/optimistic UI state lives in `src/store/*` (navigation, tasks, assignments, attendance, etc.).
+- Mutation flow: **Server Action → Action Handler (toasts/shape) → TanStack Mutation (cache) → Zustand optimistic helpers**.
+- Stores provide prepend/replace/delete helpers used in mutations before invalidating React Query caches.
+- Keep secrets/admin logic in server actions; Zustand is for client experience only.
+
+#### 6. Type Safety with Zod
 
 ```typescript
 // Define schema in zod/schemas/user.ts
@@ -693,6 +715,12 @@ const form = useForm<AddUserInput>({
 
 <details>
 <summary><strong>🔧 Quirks & Special Configurations</strong></summary>
+
+### Email (Brevo SMTP)
+
+- Set SMTP vars in `.env.local`: `SMTP_HOST`, `SMTP_PORT=587`, `SMTP_USER`, `SMTP_KEY`, `SMTP_FROM="Compushure <tonilegayada@gmail.com>"`.
+- If your network uses TLS inspection/self-signed certs, set `SMTP_ALLOW_SELF_SIGNED=true` or provide the proxy CA via `NODE_EXTRA_CA_CERTS=/path/to/ca.crt`.
+- Verify connectivity without sending a real message: `npm run smtp:verify` (runs Nodemailer `transporter.verify()` with `.env.local`).
 
 ### Database Migrations
 

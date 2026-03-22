@@ -8,12 +8,14 @@
 
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { AddUserInput, EmployeeTypeValue } from '@/types';
+import { checkUserEmailAvailability } from '@/action-handlers/superadmin/users';
 import { addUserSchema } from '@/zod/schemas';
 import { RequiredLabel } from '@/components/admin/required-label';
+import { useDebounce } from '@/hooks/useDebounce';
 import {
   Dialog,
   DialogContent,
@@ -54,6 +56,7 @@ import {
 } from 'lucide-react';
 
 type AddUserFormValues = AddUserInput;
+type EmailAvailabilityState = 'idle' | 'checking' | 'available' | 'taken' | 'error';
 
 interface AddUserModalProps {
   open: boolean;
@@ -75,12 +78,17 @@ const EMPLOYMENT_STATUS_OPTIONS = [
 export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProps) {
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
+  const [emailAvailabilityState, setEmailAvailabilityState] =
+    useState<EmailAvailabilityState>('idle');
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    setError,
+    clearErrors,
+    getFieldState,
     reset,
     formState: { errors, isValid },
   } = useForm<AddUserFormValues>({
@@ -101,18 +109,138 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
       pagibig: '',
     },
   });
+  const emailValue = watch('email') ?? '';
+  const debouncedEmail = useDebounce(emailValue, 450);
+  const normalizedEmailValue = emailValue.trim().toLowerCase();
+  const normalizedDebouncedEmail = debouncedEmail.trim().toLowerCase();
+  const isEmailFormatValid = addUserSchema.shape.email.safeParse(normalizedEmailValue).success;
+  const isEmailAwaitingFreshCheck =
+    !!normalizedEmailValue &&
+    isEmailFormatValid &&
+    normalizedEmailValue !== normalizedDebouncedEmail;
+  const isEmailGuardBlocking =
+    !!normalizedEmailValue &&
+    (isEmailAwaitingFreshCheck ||
+      emailAvailabilityState === 'checking' ||
+      emailAvailabilityState === 'taken' ||
+      emailAvailabilityState === 'error');
+
+  const emailRegistration = register('email', {
+    setValueAs: (value) => (typeof value === 'string' ? value.trim().toLowerCase() : value),
+    onChange: () => {
+      if (getFieldState('email').error?.type === 'manual') {
+        clearErrors('email');
+      }
+      setEmailAvailabilityState('idle');
+    },
+  });
+
+  useEffect(() => {
+    if (!normalizedDebouncedEmail) {
+      setEmailAvailabilityState('idle');
+      if (getFieldState('email').error?.type === 'manual') {
+        clearErrors('email');
+      }
+      return;
+    }
+
+    if (!addUserSchema.shape.email.safeParse(normalizedDebouncedEmail).success) {
+      setEmailAvailabilityState('idle');
+      if (getFieldState('email').error?.type === 'manual') {
+        clearErrors('email');
+      }
+      return;
+    }
+
+    let cancelled = false;
+    setEmailAvailabilityState('checking');
+
+    void (async () => {
+      const result = await checkUserEmailAvailability(normalizedDebouncedEmail);
+
+      if (cancelled || normalizedDebouncedEmail !== normalizedEmailValue) {
+        return;
+      }
+
+      if (result.error) {
+        setEmailAvailabilityState('error');
+        setError('email', {
+          type: 'manual',
+          message: 'Unable to verify email availability right now. Please try again.',
+        });
+        return;
+      }
+
+      if (!result.available) {
+        setEmailAvailabilityState('taken');
+        setError('email', {
+          type: 'manual',
+          message: result.message || `A user with email "${result.normalizedEmail}" already exists`,
+        });
+        return;
+      }
+
+      setEmailAvailabilityState('available');
+      if (getFieldState('email').error?.type === 'manual') {
+        clearErrors('email');
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    clearErrors,
+    debouncedEmail,
+    getFieldState,
+    normalizedDebouncedEmail,
+    normalizedEmailValue,
+    setError,
+  ]);
 
   const onSubmit = (data: AddUserFormValues) => {
     startTransition(async () => {
-      await onAddUser(data);
-      reset();
-      onOpenChange(false);
+      const normalizedEmail = data.email.trim().toLowerCase();
+      const emailCheck = await checkUserEmailAvailability(normalizedEmail);
+
+      if (emailCheck.error) {
+        setEmailAvailabilityState('error');
+        setError('email', {
+          type: 'manual',
+          message: 'Unable to verify email availability right now. Please try again.',
+        });
+        return;
+      }
+
+      if (!emailCheck.available) {
+        setEmailAvailabilityState('taken');
+        setError('email', {
+          type: 'manual',
+          message:
+            emailCheck.message ||
+            `A user with email "${emailCheck.normalizedEmail}" already exists`,
+        });
+        return;
+      }
+
+      try {
+        await onAddUser({
+          ...data,
+          email: normalizedEmail,
+        });
+        reset();
+        setEmailAvailabilityState('idle');
+        onOpenChange(false);
+      } catch {
+        // Upstream action handlers already surface the failure toast.
+      }
     });
   };
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       reset();
+      setEmailAvailabilityState('idle');
     }
     onOpenChange(newOpen);
   };
@@ -200,12 +328,29 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                                 : ''
                             }`}
                             disabled={isPending}
-                            {...register('email')}
+                            {...emailRegistration}
                           />
                         </div>
                         {errors.email && (
                           <p className="text-xs sm:text-sm lg:text-base text-destructive">
                             {errors.email.message}
+                          </p>
+                        )}
+                        {!errors.email && normalizedEmailValue && (
+                          <p
+                            className={`text-xs sm:text-sm lg:text-base ${
+                              isEmailGuardBlocking
+                                ? 'text-amber-600'
+                                : emailAvailabilityState === 'available'
+                                  ? 'text-emerald-600'
+                                  : 'text-gray-500'
+                            }`}
+                          >
+                            {isEmailGuardBlocking
+                              ? 'Checking whether this email already exists...'
+                              : emailAvailabilityState === 'available'
+                                ? 'This email is available.'
+                                : null}
                           </p>
                         )}
                       </div>
@@ -526,7 +671,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
             <Button
               type="submit"
               form="add-user-form"
-              disabled={isPending || !isValid}
+              disabled={isPending || !isValid || isEmailGuardBlocking}
               className="flex-1 bg-foreground cursor-pointer text-white hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 ease-in-out shadow-sm/25"
             >
               {isPending ? 'Adding...' : 'Add User'}

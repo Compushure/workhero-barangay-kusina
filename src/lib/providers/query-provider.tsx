@@ -10,6 +10,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState, type ReactNode } from 'react';
+import { DraggableTanstackToggle } from './draggable-tanstack-toggle';
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   // Create a client instance per component mount to avoid sharing state between requests
@@ -36,7 +37,12 @@ export function QueryProvider({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       {children}
       {/* Enable React Query Devtools in development */}
-      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+      {process.env.NODE_ENV === 'development' && (
+        <>
+          <ReactQueryDevtools initialIsOpen={false} />
+          <DraggableTanstackToggle />
+        </>
+      )}
     </QueryClientProvider>
   );
 }
