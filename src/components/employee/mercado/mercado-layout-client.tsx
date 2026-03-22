@@ -22,10 +22,13 @@ interface IntervalStall {
 }
 
 const INTERVAL_STALLS: IntervalStall[] = [
-  { interval: 'weekly', label: 'Weekly', image: '/mercado/market_02.8.png' },
-  { interval: 'monthly', label: 'Monthly', image: '/mercado/bakery_01.png' },
-  { interval: 'yearly', label: 'Yearly', image: '/mercado/market_02.5.png' },
+  { interval: 'weekly', label: 'Weekly', image: '/mercado/stall-weekly.png' },
+  { interval: 'monthly', label: 'Monthly', image: '/mercado/stall-monthly.png' },
+  { interval: 'yearly', label: 'Yearly', image: '/mercado/stall-yearly.png' },
 ];
+
+const STALL_HOVER_GLOW_CLASS =
+  'h-44 w-44 sm:h-56 sm:w-56 md:h-64 md:w-64 rounded-full bg-[#F4B925]/45 blur-3xl opacity-0 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:scale-110 group-active:opacity-100';
 
 interface CarouselArrowButtonProps {
   direction: 'left' | 'right';
@@ -144,6 +147,13 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
                   )}
                   aria-label={`View ${intervalLabel} market`}
                 >
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                  >
+                    <div className={STALL_HOVER_GLOW_CLASS} />
+                  </div>
+
                   <Image
                     src={stall.image}
                     alt={`${intervalLabel} market stall`}
@@ -174,6 +184,13 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
               )}
               aria-label={`View ${mobileStall.label} market`}
             >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 flex items-center justify-center"
+              >
+                <div className={STALL_HOVER_GLOW_CLASS} />
+              </div>
+
               <Image
                 src={mobileStall.image}
                 alt={`${mobileStall.label} market stall`}
