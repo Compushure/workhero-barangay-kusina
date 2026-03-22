@@ -78,8 +78,8 @@ export default function TaskEditorPage() {
   const [hasLoadedHeaderOnce, setHasLoadedHeaderOnce] = useState(false);
   const pageSize = 10;
 
-  // Debounce search term like current-assigned-tasks (900ms)
-  const debouncedSearchTerm = useDebounce(searchTerm, 900);
+  // Debounce search term
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // Fetch tasks with debounced search and sort
   const {

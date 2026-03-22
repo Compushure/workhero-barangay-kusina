@@ -213,7 +213,7 @@ export default function BadgeTable({
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleExpand(badge.id)}
-                        className="text-foreground hover:bg-foreground/10 p-1 sm:p-2"
+                        className="text-foreground hover:bg-foreground/10 p-1 sm:p-2 cursor-pointer"
                       >
                         <span className="mr-1">{badge.conditions.length}</span>
                         {expandedBadgeId === badge.id ? (
@@ -229,7 +229,7 @@ export default function BadgeTable({
                         variant="ghost"
                         size="icon"
                         onClick={() => onEdit(badge)}
-                        className="size-7 sm:size-9 hover:bg-card hover:text-foreground border hover:border-accent/50 transition-colors"
+                        className="size-7 sm:size-9 hover:bg-card hover:text-foreground border hover:border-accent/50 transition-colors cursor-pointer"
                         title="Edit task"
                       >
                         <Pencil className="size-3 sm:size-4" />
@@ -238,7 +238,7 @@ export default function BadgeTable({
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDeleteClick(badge)}
-                        className="size-7 sm:size-9 hover:bg-card hover:text-red-600 border hover:border-accent/50 transition-colors"
+                        className="size-7 sm:size-9 hover:bg-card hover:text-red-600 border hover:border-accent/50 transition-colors cursor-pointer"
                         title="Delete task"
                       >
                         <Trash2 className="size-3 sm:size-4" />
@@ -407,10 +407,15 @@ export default function BadgeTable({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setBadgeToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel
+              onClick={() => setBadgeToDelete(null)}
+              className="cursor-pointer"
+            >
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-foreground hover:bg-red-700 text-card"
+              className="bg-foreground hover:bg-red-700 text-card cursor-pointer"
             >
               Delete
             </AlertDialogAction>

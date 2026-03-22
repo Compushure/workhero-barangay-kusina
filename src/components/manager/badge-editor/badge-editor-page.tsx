@@ -3,12 +3,22 @@
 import React from 'react';
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, ArrowUpDown, Coins } from 'lucide-react';
+import {
+  ArrowDownAZ,
+  ArrowUpAZ,
+  ArrowUpDown,
+  ClockArrowDown,
+  ClockArrowUp,
+  Coins,
+  Plus,
+  Search,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AddEditBadgeDialog, { type BadgeFormData } from './dialogs/add-edit-badge-dialog';
@@ -33,13 +43,39 @@ import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-no
 import { PageHeader } from '@/components/shared/page-header';
 import { useManagerBadgeEditorStore } from '@/store/managerBadgeEditorStore';
 
-type BadgeSortOption = 'name-asc' | 'points-desc' | 'created-desc' | 'created-asc';
+type BadgeSortOption =
+  | 'name-asc'
+  | 'name-desc'
+  | 'points-desc'
+  | 'points-asc'
+  | 'created-desc'
+  | 'created-asc';
 
-const SORT_OPTIONS: { value: BadgeSortOption; label: string }[] = [
-  { value: 'name-asc', label: 'Name (A-Z)' },
-  { value: 'points-desc', label: 'Points (High to Low)' },
-  { value: 'created-desc', label: 'Recently Created' },
-  { value: 'created-asc', label: 'Oldest Created' },
+const SORT_NAME_OPTIONS: Array<{
+  value: Extract<BadgeSortOption, 'name-asc' | 'name-desc'>;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}> = [
+  { value: 'name-asc', label: 'Name (A-Z)', icon: ArrowDownAZ },
+  { value: 'name-desc', label: 'Name (Z-A)', icon: ArrowUpAZ },
+];
+
+const SORT_POINTS_OPTIONS: Array<{
+  value: Extract<BadgeSortOption, 'points-desc' | 'points-asc'>;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}> = [
+  { value: 'points-desc', label: 'Points (High to Low)', icon: Coins },
+  { value: 'points-asc', label: 'Points (Low to High)', icon: Coins },
+];
+
+const SORT_DATE_OPTIONS: Array<{
+  value: Extract<BadgeSortOption, 'created-desc' | 'created-asc'>;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}> = [
+  { value: 'created-desc', label: 'Recently Created', icon: ClockArrowDown },
+  { value: 'created-asc', label: 'Oldest Created', icon: ClockArrowUp },
 ];
 
 export function BadgeEditorPage() {
@@ -83,7 +119,7 @@ export function BadgeEditorPage() {
   }, [badgesData, hydrateFromServer, isLoading, isOptimistic]);
 
   // Debounce search term
-  const debouncedSearchTerm = useDebounce(searchTerm, 900);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // Mock data filtering and sorting
   let filteredBadges = badges.filter((badge) => {
@@ -108,8 +144,12 @@ export function BadgeEditorPage() {
     switch (sortOption) {
       case 'name-asc':
         return a.name.localeCompare(b.name);
+      case 'name-desc':
+        return b.name.localeCompare(a.name);
       case 'points-desc':
         return b.points - a.points;
+      case 'points-asc':
+        return a.points - b.points;
       case 'created-desc': {
         const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
         const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
@@ -260,8 +300,9 @@ export function BadgeEditorPage() {
     setPage(newPage);
   };
 
+  const sortOptions = [...SORT_DATE_OPTIONS, ...SORT_NAME_OPTIONS, ...SORT_POINTS_OPTIONS];
   const currentSortLabel =
-    SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Name (A-Z)';
+    sortOptions.find((opt) => opt.value === sortOption)?.label || 'Name (A-Z)';
 
   return (
     <main className="w-full min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
@@ -323,18 +364,69 @@ export function BadgeEditorPage() {
                           <ArrowUpDown size={14} className="text-accent" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="manager-dropdown-content w-56">
-                        {SORT_OPTIONS.map((option) => (
-                          <DropdownMenuItem
-                            key={option.value}
-                            onClick={() => handleSortChange(option.value)}
-                            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
-                              sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
-                            }`}
-                          >
-                            {option.label}
-                          </DropdownMenuItem>
-                        ))}
+                      <DropdownMenuContent
+                        align="end"
+                        className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
+                      >
+                        <DropdownMenuLabel className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-secondary">
+                          Sort By Date
+                        </DropdownMenuLabel>
+                        {SORT_DATE_OPTIONS.map((option) => {
+                          const OptionIcon = option.icon;
+
+                          return (
+                            <DropdownMenuItem
+                              key={option.value}
+                              onClick={() => handleSortChange(option.value)}
+                              className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                                sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                              }`}
+                            >
+                              <OptionIcon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                              {option.label}
+                            </DropdownMenuItem>
+                          );
+                        })}
+
+                        <DropdownMenuLabel className="mt-1 border-t border-border px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-secondary">
+                          Sort By Name
+                        </DropdownMenuLabel>
+                        {SORT_NAME_OPTIONS.map((option) => {
+                          const OptionIcon = option.icon;
+
+                          return (
+                            <DropdownMenuItem
+                              key={option.value}
+                              onClick={() => handleSortChange(option.value)}
+                              className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                                sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                              }`}
+                            >
+                              <OptionIcon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                              {option.label}
+                            </DropdownMenuItem>
+                          );
+                        })}
+
+                        <DropdownMenuLabel className="mt-1 border-t border-border px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-secondary">
+                          Sort By Points
+                        </DropdownMenuLabel>
+                        {SORT_POINTS_OPTIONS.map((option) => {
+                          const OptionIcon = option.icon;
+
+                          return (
+                            <DropdownMenuItem
+                              key={option.value}
+                              onClick={() => handleSortChange(option.value)}
+                              className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                                sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                              }`}
+                            >
+                              <OptionIcon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                              {option.label}
+                            </DropdownMenuItem>
+                          );
+                        })}
                       </DropdownMenuContent>
                     </DropdownMenu>
 

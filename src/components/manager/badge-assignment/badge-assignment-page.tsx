@@ -114,7 +114,7 @@ export default function BadgeAssignmentPage() {
 
   const showHeaderSkeleton = !hasLoadedHeaderOnce && isHeaderLoading;
 
-  const debouncedSearchTerm = useDebounce(searchTerm, 900);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   useEffect(() => {
     const handleHashChange = () => {
