@@ -12,7 +12,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { HideRewardDialog } from './hide-items';
 import { isItemAvailableNow } from '@/utils/date-utils';
-import { AvailabilityInterval, formatDateShort, formatNumber } from './formatters';
+import {
+  AvailabilityInterval,
+  formatDateShort,
+  formatDateTimeShort,
+  formatNumber,
+} from './formatters';
 
 interface MercadoItem {
   id: string;
@@ -79,6 +84,7 @@ export const MercadoCard = memo(function MercadoCard({
     if (!item.availableDate) return null;
     return formatDateShort(item.availableDate, '');
   }, [item.availableDate]);
+  const createdAtText = useMemo(() => formatDateTimeShort(item.createdAt, ''), [item.createdAt]);
 
   return (
     <div
@@ -93,7 +99,7 @@ export const MercadoCard = memo(function MercadoCard({
         }
       }}
     >
-      <div className="h-20 w-20 bg-background border border-accent/20 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+      <div className="flex h-24 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-accent/20 bg-background">
         {item.imageUrl && !imageError ? (
           <img
             src={item.imageUrl}
@@ -159,6 +165,12 @@ export const MercadoCard = memo(function MercadoCard({
             )
           )}
         </div>
+
+        {createdAtText && (
+          <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
+            Created at: {createdAtText}
+          </p>
+        )}
 
         <div className="absolute right-3.5 top-3.5 z-10" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>

@@ -178,6 +178,7 @@ export function MercadoPageContent() {
                           quantity: item.quantity,
                           isActive: item.isActive,
                           imageUrl: item.imageUrl,
+                          createdAt: item.createdAt,
                           availableMonth: item.availableMonth,
                           availableDate: item.availableDate,
                         }}
