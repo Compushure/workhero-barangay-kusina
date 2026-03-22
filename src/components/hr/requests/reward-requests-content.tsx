@@ -18,7 +18,7 @@ export function RewardRequestsContent() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
-  const debouncedSearchTerm = useDebounce(searchTerm, 250);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // Fetch redemption requests from database with status filter
   const { data: requests = [], isLoading, error } = useGetRedemptionRequests(statusFilter);
