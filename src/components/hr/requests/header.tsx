@@ -41,9 +41,9 @@ export function RewardRequestsControls({
   requestsCount = 0,
 }: HeaderSectionProps) {
   const statusOptions = [
-    { value: 'pending', label: 'Pending', icon: Clock3 },
-    { value: 'approved', label: 'Approved', icon: Check },
-    { value: 'rejected', label: 'Rejected', icon: X },
+    { value: 'pending', label: 'Pending', icon: Clock3, iconClassName: 'text-yellow-500' },
+    { value: 'approved', label: 'Approved', icon: Check, iconClassName: 'text-emerald-600' },
+    { value: 'rejected', label: 'Rejected', icon: X, iconClassName: 'text-red-600' },
   ];
 
   const sortOptions = [
@@ -108,7 +108,7 @@ export function RewardRequestsControls({
                         statusFilter === option.value ? 'bg-accent/15 text-foreground' : ''
                       }`}
                     >
-                      <option.icon className="mr-2 h-4 w-4" />
+                      <option.icon className={`mr-2 h-4 w-4 ${option.iconClassName}`} />
                       <span className="text-[14px]">{option.label}</span>
                     </DropdownMenuItem>
                   ))}
