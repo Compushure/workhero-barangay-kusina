@@ -74,7 +74,7 @@ export function HideRewardDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="control-h rounded-xl border border-accent/25 bg-transparent text-button text-foreground transition-all duration-300 hover:bg-gray-200 hover:text-foreground"
+            className="control-h rounded-xl border border-gray-300 text-button text-foreground transition-all duration-300 hover:bg-gray-200 hover:text-foreground"
           >
             Cancel
           </Button>

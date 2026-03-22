@@ -165,7 +165,7 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="control-h order-2 rounded-xl border border-accent/25 text-button text-foreground transition-all duration-300 hover:bg-gray-200 hover:text-foreground sm:order-2"
+              className="control-h order-2 rounded-xl border border-gray-300 text-button text-foreground transition-all duration-300 hover:bg-gray-200 hover:text-foreground sm:order-2"
             >
               Cancel
             </Button>
