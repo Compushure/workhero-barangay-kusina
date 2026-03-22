@@ -8,6 +8,7 @@ import {
   useGetAvailableRewardsByInterval,
   useGetRewards,
 } from '@/hooks/tanstack/queries/rewardQueries';
+import { isIntervalClosed } from './mercado-stall-state';
 
 export function MercadoPageClient() {
   const { selectedInterval, setSelectedInterval } = useMercadoContext();
@@ -21,17 +22,7 @@ export function MercadoPageClient() {
   const isSelectedIntervalClosed = useMemo(() => {
     if (!selectedInterval) return false;
 
-    const hasAnyIntervalItem = allRewards.some(
-      (reward) => reward.availableMonth === selectedInterval
-    );
-    const hasVisibleIntervalItem = allRewards.some(
-      (reward) => reward.availableMonth === selectedInterval && reward.isActive
-    );
-
-    const hiddenOnly = hasAnyIntervalItem && !hasVisibleIntervalItem;
-    const noAvailableItems = intervalRewards.length === 0;
-
-    return hiddenOnly || noAvailableItems;
+    return isIntervalClosed(selectedInterval, allRewards, intervalRewards.length);
   }, [allRewards, intervalRewards.length, selectedInterval]);
 
   useEffect(() => {
