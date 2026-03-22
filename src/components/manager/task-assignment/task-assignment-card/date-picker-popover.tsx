@@ -7,15 +7,20 @@ import { ChevronDown, CalendarIcon } from 'lucide-react';
 interface DatePickerPopoverProps {
   deadline: Date | null;
   onDeadlineChange: (date: Date | null) => void;
+  disabled?: boolean;
 }
 
-export function DatePickerPopover({ deadline, onDeadlineChange }: DatePickerPopoverProps) {
+export function DatePickerPopover({
+  deadline,
+  onDeadlineChange,
+  disabled = false,
+}: DatePickerPopoverProps) {
   const deadlineDisplay = deadline
     ? deadline.toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
     : 'Set Deadline';
 
   const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
+    if (date && !disabled) {
       // Adjust for Manila timezone (UTC+8) to prevent showing previous day
       const manilaOffset = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
       const adjustedDate = new Date(date.getTime() + manilaOffset);
@@ -26,7 +31,10 @@ export function DatePickerPopover({ deadline, onDeadlineChange }: DatePickerPopo
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="bg-zinc-50 text-primary flex items-center gap-4 cursor-pointer transition-all duration-400 ease-in-out shadow-sm/25 hover:bg-accent/15 text-xs h-7">
+        <Button
+          disabled={disabled}
+          className="bg-zinc-50 text-primary flex items-center gap-4 cursor-pointer transition-all duration-400 ease-in-out shadow-sm/25 hover:bg-accent/15 text-xs h-7 disabled:cursor-not-allowed disabled:opacity-60"
+        >
           <CalendarIcon className="size-3.5 text-accent" />
           <span className={`${deadline ? 'text-accent' : 'text-secondary'}`}>
             {deadlineDisplay}
@@ -40,7 +48,9 @@ export function DatePickerPopover({ deadline, onDeadlineChange }: DatePickerPopo
             mode="single"
             selected={deadline || undefined}
             onSelect={handleDateSelect}
-            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+            disabled={(date) =>
+              disabled || date < new Date(new Date().setHours(0, 0, 0, 0))
+            }
           />
         </div>
       </PopoverContent>

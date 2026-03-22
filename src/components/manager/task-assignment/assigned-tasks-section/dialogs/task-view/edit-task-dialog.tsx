@@ -15,6 +15,7 @@ import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import { useGetCurrentAssignedTasksPaginated } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { Coins, Search } from 'lucide-react';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
+import { isTaskOverdue } from '@/utils/date-utils';
 
 interface EditTaskDialogProps {
   showEditDialog: boolean;
@@ -43,6 +44,7 @@ export default function EditTaskDialog({
   editAssignedEmployees,
   toggleEmployee,
 }: EditTaskDialogProps) {
+  const isOverdue = isTaskOverdue(task.dateRange?.end ?? null);
   const assignedTasksQuery = useGetCurrentAssignedTasksPaginated(
     1,
     1000,
@@ -165,7 +167,13 @@ export default function EditTaskDialog({
               <DatePickerPopover
                 deadline={editDueDate}
                 onDeadlineChange={(date) => date && setEditDueDate(date)}
+                disabled={isOverdue}
               />
+              {isOverdue && (
+                <p className="text-[11px] text-red-600 text-center max-w-40">
+                  Due date can no longer be edited after the task is overdue.
+                </p>
+              )}
             </div>
           </div>
 

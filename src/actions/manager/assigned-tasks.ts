@@ -456,15 +456,40 @@ export async function fetchCurrentAssignedEmployeesPaginated(
 
 export async function clearUnstartedTaskAssignments(): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
-  // Delete only KPITask entries that are 'assigned' AND have no progress
-  const { error } = await supabase
+
+  // We resolve eligible rows first so "unstarted" also covers records whose
+  // progress counters are still null instead of literal zero.
+  const { data: existingAssignments, error: fetchError } = await supabase
+    .from('KPITask')
+    .select('id, status, completed_orders, pending_orders');
+
+  if (fetchError) return { error: fetchError.message, data: undefined };
+
+  const assignmentIdsToDelete =
+    existingAssignments
+      ?.filter((assignment) => {
+        const normalizedStatus = assignment.status?.trim().toLowerCase();
+        const completedOrders = assignment.completed_orders ?? 0;
+        const pendingOrders = assignment.pending_orders ?? 0;
+
+        return (
+          normalizedStatus === 'assigned' &&
+          completedOrders === 0 &&
+          pendingOrders === 0
+        );
+      })
+      .map((assignment) => assignment.id) ?? [];
+
+  if (assignmentIdsToDelete.length === 0) {
+    return { error: null, data: true };
+  }
+
+  const { error: deleteError } = await supabase
     .from('KPITask')
     .delete()
-    .eq('status', 'assigned')
-    .eq('completed_orders', 0)
-    .eq('pending_orders', 0);
+    .in('id', assignmentIdsToDelete);
 
-  if (error) return { error: error.message, data: undefined };
+  if (deleteError) return { error: deleteError.message, data: undefined };
   return { error: null, data: true };
 }
 

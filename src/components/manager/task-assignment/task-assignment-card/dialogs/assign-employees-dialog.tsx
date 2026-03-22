@@ -43,10 +43,10 @@ export function AssignEmployeesDialog({
     selectedTaskIds.forEach((taskId) => {
       assignedTasks.forEach((assignedTask) => {
         if (assignedTask.taskId === taskId) {
-          const taskStatus = (assignedTask.status ?? '').toLowerCase();
+          const taskStatus = (assignedTask.status ?? '').trim().toLowerCase();
 
           assignedTask.assignedEmployees.forEach((emp) => {
-            const employeeStatus = (emp.status ?? taskStatus ?? '').toLowerCase();
+            const employeeStatus = (emp.status ?? taskStatus ?? '').trim().toLowerCase();
             if (activeStatuses.has(employeeStatus)) {
               disabledIds.add(emp.id);
             }
