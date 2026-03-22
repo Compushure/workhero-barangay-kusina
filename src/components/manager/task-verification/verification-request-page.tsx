@@ -131,11 +131,6 @@ export function VerificationRequestsPage({
 
   // Use memoized values directly instead of calling functions
   const currentTasks = getCurrentTasks;
-
-  useEffect(() => {
-    hydrateFromServer(currentTasks);
-  }, [currentTasks, hydrateFromServer]);
-
   const totalPages = getTotalPages;
   const currentPage = getCurrentPage;
   const totalCount = useMemo(() => {
@@ -154,6 +149,17 @@ export function VerificationRequestsPage({
     (sortBy === 'pending' && isLoadingPending) ||
     (sortBy === 'approved' && isLoadingApproved) ||
     (sortBy === 'denied' && isLoadingDenied);
+
+  useEffect(() => {
+    if (currentTasks.length > 0) {
+      hydrateFromServer(currentTasks);
+      return;
+    }
+
+    if (!isCurrentCategoryLoading) {
+      hydrateFromServer([]);
+    }
+  }, [currentTasks, hydrateFromServer, isCurrentCategoryLoading]);
 
   // Filter and sort requests based on search term and date/employee sorting
   const filteredRequests = useMemo(() => {
@@ -245,7 +251,7 @@ export function VerificationRequestsPage({
     }
   };
 
-  const showInitialSkeleton = isCurrentCategoryLoading && currentTasks.length === 0;
+  const showInitialSkeleton = isCurrentCategoryLoading && tasks.length === 0;
 
   return (
     <div className="px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6 min-h-screen flex flex-col">
