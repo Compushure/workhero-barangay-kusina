@@ -93,7 +93,7 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onStockFilterChange(checked ? 'in-stock' : 'all')}
             className={checkboxItemClassName(stockFilter === 'in-stock')}
           >
-            <Package className="mr-2 h-4 w-4 text-green-500 transition-colors group-hover:text-foreground group-data-highlighted:text-foreground" />
+            <Package className="mr-2 h-4 w-4 !text-green-500" />
             In Stock
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
@@ -101,7 +101,7 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onStockFilterChange(checked ? 'out-of-stock' : 'all')}
             className={checkboxItemClassName(stockFilter === 'out-of-stock')}
           >
-            <PackageX className="mr-2 h-4 w-4 text-red-500 transition-colors group-hover:text-foreground group-data-highlighted:text-foreground" />
+            <PackageX className="mr-2 h-4 w-4 !text-red-500" />
             Out of Stock
           </DropdownMenuCheckboxItem>
 
@@ -115,7 +115,7 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onVisibilityFilterChange(checked ? 'visible' : 'all')}
             className={checkboxItemClassName(visibilityFilter === 'visible')}
           >
-            <Eye className="mr-2 h-4 w-4 text-blue-500 transition-colors group-hover:text-foreground group-data-highlighted:text-foreground" />
+            <Eye className="mr-2 h-4 w-4 !text-blue-500" />
             Visible
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
@@ -123,7 +123,7 @@ export function MercadoFilterToggle({
             onCheckedChange={(checked) => onVisibilityFilterChange(checked ? 'hidden' : 'all')}
             className={checkboxItemClassName(visibilityFilter === 'hidden')}
           >
-            <EyeOff className="mr-2 h-4 w-4 text-gray-500 transition-colors group-hover:text-foreground group-data-highlighted:text-foreground" />
+            <EyeOff className="mr-2 h-4 w-4 !text-gray-500" />
             Hidden
           </DropdownMenuCheckboxItem>
 
