@@ -106,7 +106,7 @@ export function TaskStatusSection({
         </div>
       </header>
       <CollapsibleContent className="min-h-0 flex-1 overflow-hidden data-[state=closed]:hidden">
-        <div className="flex min-h-0 h-full w-full flex-col overflow-hidden rounded-lg border-2 border-[#c5ac84] bg-[#f7efdf] shadow-[0_0_0_1px_rgba(155,122,86,0.2),inset_0_1px_0_rgba(255,255,255,0.35)]">
+        <div className="flex min-h-0 h-full w-full flex-col overflow-hidden rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] shadow-[0_0_0_1px_rgba(155,122,86,0.2),inset_0_1px_0_rgba(255,255,255,0.35)]">
           <ScrollArea className="flex-1 min-h-0 w-full">
             <div className="flex min-w-0 w-full flex-col items-stretch gap-2 p-2">
               {isLoading ? (
@@ -122,7 +122,7 @@ export function TaskStatusSection({
         </div>
       </CollapsibleContent>
       {!open ? (
-        <div className="rounded-lg border-2 border-[#c5ac84] bg-[#f7efdf]/92 px-3 py-2 text-center font-jersey text-[14px] tracking-[0.04em] text-[#8a6039] shadow-[0_0_0_1px_rgba(155,122,86,0.14)]">
+        <div className="rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf]/92 px-3 py-2 text-center font-jersey text-[14px] tracking-[0.04em] text-[#8a6039] shadow-[0_0_0_1px_rgba(155,122,86,0.14)]">
           Section collapsed. Expand to view tasks.
         </div>
       ) : null}

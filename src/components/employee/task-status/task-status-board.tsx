@@ -17,7 +17,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TaskStatusSection } from './task-status-section';
 import { TaskCard } from './task-card';
@@ -105,8 +104,13 @@ export function TaskStatusBoard({
     return () => mediaQuery.removeEventListener('change', updateLayoutMode);
   }, []);
 
-  const activeFilterCount = overdueFilter !== 'all' ? 1 : 0;
   const openCount = Object.values(openSections).filter(Boolean).length;
+  const filterLabel =
+    overdueFilter === 'overdue'
+      ? 'Overdue Only'
+      : overdueFilter === 'not-overdue'
+        ? 'Not Overdue'
+        : 'Filter';
 
   const checkboxItemClassName = (isActive: boolean) =>
     `group cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] transition-all duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] ${
@@ -192,7 +196,7 @@ export function TaskStatusBoard({
                 <div className="w-full space-y-1 sm:w-auto">
                   <span className="block text-[14px] tracking-[0.18em] text-[#8a6039] sm:text-[16px]">SORT BY</span>
                   <Select value={sortBy} onValueChange={(value) => setSortBy(value as TaskSortOption)}>
-                    <SelectTrigger className="h-9 w-full rounded-lg border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] sm:w-52">
+                    <SelectTrigger className="h-9 w-full rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-52">
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
                     <SelectContent className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 text-[#4b3522] sm:w-64">
@@ -215,15 +219,10 @@ export function TaskStatusBoard({
                       <Button
                         size="default"
                         variant="outline"
-                        className="h-9 w-full justify-between rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] sm:w-auto"
+                        className="h-9 w-full justify-between rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-auto"
                       >
                         <Filter strokeWidth={2.5} className="h-4 w-4 text-[#6b5038]" />
-                        <span className="inline-flex items-center text-[16px] leading-none">Filter</span>
-                        {activeFilterCount > 0 && (
-                          <Badge className="ml-1 h-5 min-w-5 rounded-full border border-[#47331F] bg-[#F4B925] px-1.5 py-0 font-jersey text-[10px] leading-none text-[#2f2115]">
-                            {activeFilterCount}
-                          </Badge>
-                        )}
+                        <span className="inline-flex items-center text-[16px] leading-none">{filterLabel}</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
