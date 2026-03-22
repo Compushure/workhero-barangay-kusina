@@ -262,25 +262,25 @@ export function ManagerPage() {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-accent/20 bg-card backdrop-blur-sm shadow-sm/25">
-        <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2.5 sm:py-3 md:py-4 lg:py-5">
+      <header className="sticky top-0 z-30 border-b border-accent/20 bg-card/95 backdrop-blur-sm shadow-sm/25">
+        <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2 sm:py-2.5 md:py-3">
           {isLoading ? (
             <div className="animate-pulse flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
-              <div className="space-y-2">
-                <div className="h-6 sm:h-7 lg:h-8 bg-background rounded w-40 sm:w-52" />
-                <div className="h-4 sm:h-5 bg-background rounded w-32 sm:w-44" />
+              <div className="space-y-1.5">
+                <div className="h-5 sm:h-6 bg-background rounded w-36 sm:w-44" />
+                <div className="h-3.5 sm:h-4 bg-background rounded w-28 sm:w-36" />
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-wrap">
-                <div className="h-9 sm:h-10 bg-background rounded-xl w-24 sm:w-28 md:w-32" />
-                <div className="h-9 sm:h-10 bg-background rounded-xl w-24 sm:w-28 md:w-32" />
+                <div className="h-8 sm:h-8.5 bg-background rounded-md w-20 sm:w-24 md:w-28" />
+                <div className="h-8 sm:h-8.5 bg-background rounded-md w-20 sm:w-24 md:w-28" />
               </div>
             </div>
           ) : (
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
               <div className="flex items-center gap-3 sm:gap-4">
                 <div>
-                  <h1 className="text-h1 font-bold text-foreground">User Management</h1>
-                  <p className="text-meta text-muted-foreground">
+                  <h1 className="text-lg sm:text-xl font-bold text-foreground">User Management</h1>
+                  <p className="text-xs sm:text-[13px] text-muted-foreground">
                     Manage employee accounts and access details
                   </p>
                 </div>
@@ -289,20 +289,20 @@ export function ManagerPage() {
                 <Button
                   variant="default"
                   onClick={() => setAddModalOpen(true)}
-                  className="text-button control-h gap-1.5 md:gap-2 rounded-md bg-primary-gradient px-3 text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85"
+                  className="text-[11px] h-8 sm:h-8.5 gap-1.5 md:gap-2 rounded-md bg-primary-gradient px-2.5 sm:px-3 text-card shadow-sm/25 transition-all duration-300 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85"
                   aria-label="Add User"
                 >
-                  <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <UserPlus className="h-3.5 w-3.5" />
                   <span className="hidden md:inline">Add User</span>
                 </Button>
                 <Button
                   variant="default"
                   onClick={handleLogout}
                   disabled={isPending}
-                  className="text-button control-h gap-1.5 md:gap-2 rounded-md bg-primary-gradient px-3 text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 disabled:opacity-60"
+                  className="text-[11px] h-8 sm:h-8.5 gap-1.5 md:gap-2 rounded-md bg-primary-gradient px-2.5 sm:px-3 text-card shadow-sm/25 transition-all duration-300 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 disabled:opacity-60"
                   aria-label="Logout"
                 >
-                  <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <LogOut className="h-3.5 w-3.5" />
                   <span className="hidden md:inline">Logout</span>
                 </Button>
               </div>
@@ -311,8 +311,8 @@ export function ManagerPage() {
         </div>
       </header>
 
-      <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2.5 sm:py-3 md:py-4 lg:py-5 overflow-x-hidden">
-        <div className="sticky top-(--sticky-top-gap) z-30">
+      <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2 sm:py-2.5 md:py-3 overflow-x-hidden">
+        <div className="sticky top-13 sm:top-14 z-20">
           {isLoading ? (
             <SearchFilterSkeleton />
           ) : (
@@ -334,7 +334,7 @@ export function ManagerPage() {
       </div>
 
       {/* Content */}
-      <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 pb-6 lg:pb-8 flex flex-col min-h-[calc(100vh-300px)] overflow-x-hidden">
+      <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 pb-5 lg:pb-6 flex flex-col min-h-[calc(100vh-260px)] overflow-x-hidden">
         {isLoading ? (
           <div className="grid gap-3 sm:gap-4 lg:gap-5">
             {[...Array(3)].map((_, i) => (
@@ -343,15 +343,15 @@ export function ManagerPage() {
                 className="rounded-2xl bg-card p-3 sm:p-4 lg:p-5 border border-accent/20 shadow-sm/25 animate-pulse"
               >
                 <div className="flex items-start justify-between gap-2 sm:gap-3 lg:gap-4">
-                  <div className="flex-1 min-w-0 space-y-2 sm:space-y-3 lg:space-y-4">
-                    <div className="h-3.5 sm:h-4 lg:h-5 bg-background rounded w-1/2 sm:w-2/5" />
-                    <div className="h-3.5 sm:h-4 lg:h-5 bg-background rounded w-4/5 sm:w-3/5" />
-                    <div className="flex gap-1.5 sm:gap-2 lg:gap-3 pt-1 sm:pt-2">
-                      <div className="h-5 sm:h-6 lg:h-7 bg-background rounded-full w-16 sm:w-20 lg:w-24" />
-                      <div className="h-5 sm:h-6 lg:h-7 bg-background rounded-full w-20 sm:w-24 lg:w-28" />
+                  <div className="flex-1 min-w-0 space-y-2 sm:space-y-2.5 lg:space-y-3">
+                    <div className="h-3.5 sm:h-4 bg-background rounded w-1/2 sm:w-2/5" />
+                    <div className="h-3.5 sm:h-4 bg-background rounded w-4/5 sm:w-3/5" />
+                    <div className="flex gap-1.5 sm:gap-2 pt-0.5 sm:pt-1">
+                      <div className="h-4.5 sm:h-5 bg-background rounded-full w-14 sm:w-16 lg:w-20" />
+                      <div className="h-4.5 sm:h-5 bg-background rounded-full w-16 sm:w-20 lg:w-24" />
                     </div>
                   </div>
-                  <div className="h-7 sm:h-8 lg:h-10 bg-background rounded-full w-7 sm:w-8 lg:w-10 shrink-0" />
+                  <div className="h-6 sm:h-7 bg-background rounded-full w-6 sm:w-7 shrink-0" />
                 </div>
               </div>
             ))}

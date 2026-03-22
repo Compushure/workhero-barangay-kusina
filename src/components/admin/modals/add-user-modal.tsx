@@ -252,33 +252,33 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="bg-card w-[95vw] max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col border-2 border-[#f47812]/20">
-        <DialogHeader className="px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 lg:pt-7 pb-2 lg:pb-3 border-b border-[#f47812]/15 shrink-0">
-          <DialogTitle className="text-base sm:text-xl lg:text-2xl font-bold text-foreground">
+      <DialogContent className="bg-card w-[95vw] max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto max-h-[94vh] p-0 rounded-xl shadow-xl flex flex-col border border-accent/20">
+        <DialogHeader className="px-3 sm:px-5 lg:px-6 pt-3 sm:pt-4 lg:pt-5 pb-2 border-b border-accent/20 shrink-0">
+          <DialogTitle className="text-sm sm:text-lg lg:text-xl font-bold text-foreground">
             Add New User
           </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm lg:text-base text-gray-600 hidden sm:block">
+          <DialogDescription className="text-xs sm:text-[13px] text-muted-foreground hidden sm:block">
             Create a new employee account with complete details and Philippine government IDs
           </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden md:[&::-webkit-scrollbar]:block">
-          <div className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
+          <div className="px-3 sm:px-5 lg:px-6 py-2.5 sm:py-3.5 lg:py-4">
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className="space-y-3 sm:space-y-6 lg:space-y-8"
+              className="space-y-3 sm:space-y-4 lg:space-y-5"
               id="add-user-form"
             >
               <Accordion
                 type="multiple"
                 defaultValue={['basic', 'employment', 'address', 'ids']}
-                className="space-y-3 sm:space-y-4 lg:space-y-5"
+                className="space-y-2.5 sm:space-y-3"
               >
                 <AccordionItem
                   value="basic"
-                  className="border border-[#f47812]/15 rounded-lg px-3 sm:px-4 bg-background"
+                  className="border border-accent/20 rounded-lg px-2.5 sm:px-3.5 bg-background"
                 >
-                  <AccordionTrigger className="text-xs sm:text-sm lg:text-base font-semibold text-foreground hover:no-underline py-3">
+                  <AccordionTrigger className="text-xs sm:text-[13px] font-semibold text-foreground hover:no-underline py-2.5">
                     Basic Information
                   </AccordionTrigger>
                   <AccordionContent>
@@ -443,9 +443,9 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 <AccordionItem
                   value="employment"
-                  className="border border-[#f47812]/15 rounded-lg px-3 sm:px-4 lg:px-5 bg-background"
+                  className="border border-accent/20 rounded-lg px-2.5 sm:px-3.5 bg-background"
                 >
-                  <AccordionTrigger className="text-xs sm:text-sm lg:text-base font-semibold text-foreground hover:no-underline">
+                  <AccordionTrigger className="text-xs sm:text-[13px] font-semibold text-foreground hover:no-underline">
                     Employment Details
                   </AccordionTrigger>
                   <AccordionContent>
@@ -550,9 +550,9 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 <AccordionItem
                   value="address"
-                  className="border border-[#f47812]/15 rounded-lg px-3 sm:px-4 lg:px-5 bg-background"
+                  className="border border-accent/20 rounded-lg px-2.5 sm:px-3.5 bg-background"
                 >
-                  <AccordionTrigger className="text-xs sm:text-sm lg:text-base font-semibold text-foreground hover:no-underline">
+                  <AccordionTrigger className="text-xs sm:text-[13px] font-semibold text-foreground hover:no-underline">
                     Address Information
                   </AccordionTrigger>
                   <AccordionContent>
@@ -583,9 +583,9 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
                 <AccordionItem
                   value="ids"
-                  className="border border-[#f47812]/15 rounded-lg px-3 sm:px-4 lg:px-5 bg-background"
+                  className="border border-accent/20 rounded-lg px-2.5 sm:px-3.5 bg-background"
                 >
-                  <AccordionTrigger className="text-xs sm:text-sm lg:text-base font-semibold text-foreground hover:no-underline">
+                  <AccordionTrigger className="text-xs sm:text-[13px] font-semibold text-foreground hover:no-underline">
                     Government IDs
                   </AccordionTrigger>
                   <AccordionContent>
@@ -666,13 +666,13 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
           </div>
         </ScrollArea>
 
-        <div className="px-6 py-4 border-t border-[#f47812]/15 shrink-0 bg-card">
+        <div className="px-3 sm:px-5 lg:px-6 py-3 border-t border-accent/20 shrink-0 bg-card">
           <div className="flex flex-col-reverse sm:flex-row gap-3">
             <Button
               type="submit"
               form="add-user-form"
               disabled={isPending || !isValid || isEmailGuardBlocking}
-              className="flex-1 bg-foreground cursor-pointer text-white hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 ease-in-out shadow-sm/25"
+              className="text-button control-h flex-1 rounded-md bg-primary-gradient text-card shadow-sm/25 cursor-pointer transition-all duration-300 ease-in-out hover:bg-primary-gradient hover:brightness-85 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending ? 'Adding...' : 'Add User'}
             </Button>
@@ -681,7 +681,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
               variant="outline"
               onClick={() => handleOpenChange(false)}
               disabled={isPending}
-              className="flex-1 cursor-pointer border-zinc-300 bg-white text-foreground hover:bg-gray-100 hover:text-foreground transition-all duration-500 ease-in-out"
+              className="text-button control-h flex-1 rounded-md cursor-pointer border-zinc-300 bg-card text-foreground hover:bg-gray-100 hover:text-foreground transition-all duration-300 ease-in-out"
             >
               Cancel
             </Button>
