@@ -84,7 +84,7 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
     <div className="relative h-screen w-full overflow-hidden">
       <NavLoadingState />
       <Image
-        src="/mercado/mercado-bg.svg"
+        src="/mercado/mercado-bg.png"
         alt="Mercado Background"
         fill
         className="object-cover object-bottom"
@@ -127,9 +127,9 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
 
       <MapLauncher className="right-4 top-27 translate-y-0 md:right-6 md:top-31" />
 
-      <div className="relative z-10 flex h-full w-full items-end justify-center overflow-hidden pt-20 pb-0 md:pt-24 md:pb-0">
-        <div className="flex h-full w-full max-w-7xl items-end justify-center px-10 translate-y-0 pb-0 md:px-16 md:translate-y-0 md:pb-0 lg:px-20 lg:translate-y-0">
-          <div className="hidden items-end justify-center gap-0 md:flex md:gap-2 lg:gap-3">
+      <div className="relative z-10 flex h-full w-full items-end justify-center overflow-hidden pb-10 md:pb-12 lg:pb-16">
+        <div className="flex h-full w-full max-w-7xl items-end justify-center px-4 translate-y-0 pb-0 md:px-8">
+          <div className="hidden items-end justify-center gap-4 md:flex md:gap-6 lg:gap-10">
             {INTERVAL_STALLS.map((stall) => {
               const intervalLabel = stall.label;
 
@@ -139,7 +139,7 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
                   onClick={() => handleStallClick(stall.interval)}
                   className={cn(
                     'relative shrink-0 transition-all duration-300',
-                    'h-80 w-80 md:h-100 md:w-100 lg:h-120 lg:w-120',
+                    'h-80 w-64 md:h-96 md:w-[19rem] lg:h-[28rem] lg:w-[22rem]',
                     'hover:scale-105 active:scale-95 cursor-pointer group'
                   )}
                   aria-label={`View ${intervalLabel} market`}
@@ -149,10 +149,10 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
                     alt={`${intervalLabel} market stall`}
                     fill
                     className="object-contain pixelated"
-                    sizes="(max-width: 768px) 280px, (max-width: 1024px) 350px, 420px"
+                    sizes="(max-width: 768px) 256px, (max-width: 1024px) 304px, 352px"
                   />
-                  <div className="absolute -top-5 left-1/2 -translate-x-1/2">
-                    <div className="bg-[#690003]/90 text-white px-5 py-2.5 rounded-lg text-base font-bold pixelated-text whitespace-nowrap">
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2">
+                    <div className="bg-[#E8DBBF] border-2 border-[#47331F] text-[#47331F] px-5 py-2.5 rounded-lg shadow-[4px_4px_0px_rgba(71,51,31,0.5)] font-bold text-base md:text-lg pixelated-text whitespace-nowrap transition-transform group-hover:scale-110">
                       {intervalLabel}
                     </div>
                   </div>
@@ -169,7 +169,7 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
               onClick={() => handleStallClick(mobileStall.interval)}
               className={cn(
                 'relative shrink-0 transition-all duration-300',
-                'h-56 w-56 sm:h-72 sm:w-72',
+                'h-64 w-64 sm:h-80 sm:w-80',
                 'hover:scale-105 active:scale-95 cursor-pointer group'
               )}
               aria-label={`View ${mobileStall.label} market`}
@@ -179,10 +179,10 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
                 alt={`${mobileStall.label} market stall`}
                 fill
                 className="object-contain pixelated"
-                sizes="(max-width: 768px) 260px, 280px"
+                sizes="(max-width: 768px) 256px, 320px"
               />
               <div className="absolute -top-5 left-1/2 -translate-x-1/2">
-                <div className="bg-[#690003]/90 text-white px-5 py-2.5 rounded-lg text-base font-bold pixelated-text whitespace-nowrap">
+                <div className="bg-[#E8DBBF] border-2 border-[#47331F] text-[#47331F] px-5 py-2.5 rounded-lg shadow-[4px_4px_0px_rgba(71,51,31,0.5)] text-base font-bold pixelated-text whitespace-nowrap transition-transform group-hover:scale-110">
                   {mobileStall.label}
                 </div>
               </div>
