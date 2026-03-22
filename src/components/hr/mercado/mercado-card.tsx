@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, memo, useCallback, useEffect } from 'react';
-import { Pencil, ImageIcon, EyeOff, Eye, Calendar, Trash2 } from 'lucide-react';
+import { Pencil, ImageIcon, EyeOff, Eye, Calendar, Trash2, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -82,7 +82,7 @@ export const MercadoCard = memo(function MercadoCard({
 
   return (
     <div
-      className="bg-card border border-border rounded-xl p-3.5 flex items-start gap-3.5 relative shadow-sm hover:shadow-md transition-all min-h-32 cursor-pointer hover:border-accent/50 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+      className="relative flex min-h-[7.5rem] cursor-pointer items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 shadow-sm transition-all hover:scale-[1.01] hover:border-accent/50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -113,7 +113,7 @@ export const MercadoCard = memo(function MercadoCard({
         )}
       </div>
 
-      <div className="flex-1 min-w-0 pr-10 flex flex-col gap-1">
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 pr-10">
         <h3 className="text-base sm:text-lg font-semibold text-primary truncate leading-tight">
           {item.name}
         </h3>
@@ -140,7 +140,10 @@ export const MercadoCard = memo(function MercadoCard({
         </div>
 
         <div className="flex min-h-5 items-center gap-2 flex-wrap">
-          <p className="text-primary font-semibold text-sm">{formattedPrice} pts</p>
+          <p className="flex items-center gap-1 text-primary font-semibold text-sm">
+            <Coins className="h-3.5 w-3.5" />
+            {formattedPrice} pts
+          </p>
           {isOutOfStock ? (
             <Badge
               variant="destructive"
@@ -157,23 +160,27 @@ export const MercadoCard = memo(function MercadoCard({
           )}
         </div>
 
-        <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
+        <div className="absolute right-3.5 top-3.5 z-10" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 bg-accent text-card border border-accent/80 shadow-md hover:bg-primary-gradient hover:text-card hover:scale-105 transition-all duration-200"
+                className="h-7 w-7 cursor-pointer border border-accent/80 bg-accent text-card shadow-md transition-all duration-200 hover:scale-105 hover:bg-primary-gradient hover:text-card"
               >
                 <Pencil className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32 rounded-xl">
+            <DropdownMenuContent
+              align="end"
+              className="manager-dropdown-content w-32 rounded-xl p-1"
+            >
               <DropdownMenuItem
                 onClick={(event) => {
                   event.stopPropagation();
                   setHideDialogOpen(true);
                 }}
+                className="cursor-pointer transition-all duration-500 ease-in-out hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground"
               >
                 {isHidden ? (
                   <Eye className="mr-2 h-4 w-4 text-primary" />
@@ -187,6 +194,7 @@ export const MercadoCard = memo(function MercadoCard({
                   event.stopPropagation();
                   onEdit?.(item.id);
                 }}
+                className="cursor-pointer transition-all duration-500 ease-in-out hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground"
               >
                 <Pencil className="mr-2 h-4 w-4 text-primary" />
                 Edit
@@ -196,7 +204,7 @@ export const MercadoCard = memo(function MercadoCard({
                   event.stopPropagation();
                   onDelete?.(item.id);
                 }}
-                className="text-red-600 font-semibold"
+                className="cursor-pointer font-semibold text-red-600 transition-all duration-500 ease-in-out hover:bg-accent/15 hover:text-red-600 data-[highlighted]:bg-accent/15 data-[highlighted]:text-red-600"
               >
                 <Trash2 className="mr-2 h-4 w-4 text-red-600" />
                 Delete
