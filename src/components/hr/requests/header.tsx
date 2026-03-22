@@ -1,11 +1,12 @@
 'use client';
 
-import { ArrowUpDown, ListTodo, Search } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Check, Clock3, ListTodo, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PageHeader } from '@/components/shared/page-header';
@@ -40,22 +41,20 @@ export function RewardRequestsControls({
   requestsCount = 0,
 }: HeaderSectionProps) {
   const statusOptions = [
-    { value: 'pending', label: 'Pending' },
-    { value: 'approved', label: 'Approved' },
-    { value: 'rejected', label: 'Rejected' },
+    { value: 'pending', label: 'Pending', icon: Clock3 },
+    { value: 'approved', label: 'Approved', icon: Check },
+    { value: 'rejected', label: 'Rejected', icon: X },
   ];
 
   const sortOptions = [
-    { value: 'date-desc', label: 'Date (Newest)' },
-    { value: 'date-asc', label: 'Date (Oldest)' },
-    { value: 'employee-asc', label: 'Employee (A-Z)' },
-    { value: 'employee-desc', label: 'Employee (Z-A)' },
+    { value: 'date-desc', label: 'Newest First', icon: ArrowDown },
+    { value: 'date-asc', label: 'Oldest First', icon: ArrowUp },
   ];
 
   const currentStatusLabel =
     statusOptions.find((option) => option.value === statusFilter)?.label || 'Pending';
   const currentSortLabel =
-    sortOptions.find((option) => option.value === sortBy)?.label || 'Date (Newest)';
+    sortOptions.find((option) => option.value === sortBy)?.label || 'Newest First';
 
   return (
     <div className="sticky top-(--sticky-top-gap) z-30">
@@ -97,16 +96,20 @@ export function RewardRequestsControls({
                     <ArrowUpDown size={14} className="text-accent" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="manager-dropdown-content w-44">
+                <DropdownMenuContent align="end" className="manager-dropdown-content w-44 p-2">
+                  <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
+                    Filter by Status
+                  </DropdownMenuLabel>
                   {statusOptions.map((option) => (
                     <DropdownMenuItem
                       key={option.value}
                       onClick={() => onStatusChange(option.value)}
-                      className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                      className={`manager-dropdown-item cursor-pointer transition-all duration-300 ease-in-out ${
                         statusFilter === option.value ? 'bg-accent/15 text-foreground' : ''
                       }`}
                     >
-                      {option.label}
+                      <option.icon className="mr-2 h-4 w-4" />
+                      <span className="text-[14px]">{option.label}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -124,16 +127,23 @@ export function RewardRequestsControls({
                   <ArrowUpDown size={14} className="text-accent" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="manager-dropdown-content w-56">
+              <DropdownMenuContent
+                align="end"
+                className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[11rem] p-2"
+              >
+                <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
+                  Sort by Date
+                </DropdownMenuLabel>
                 {sortOptions.map((option) => (
                   <DropdownMenuItem
                     key={option.value}
                     onClick={() => onSort?.(option.value)}
-                    className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                    className={`manager-dropdown-item cursor-pointer transition-all duration-300 ease-in-out ${
                       sortBy === option.value ? 'bg-accent/15 text-foreground' : ''
                     }`}
                   >
-                    {option.label}
+                    <option.icon className="mr-2 h-4 w-4" />
+                    <span className="text-[14px]">{option.label}</span>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>

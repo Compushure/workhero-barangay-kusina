@@ -53,10 +53,6 @@ export function RewardRequestsContent() {
             return b.pointsCost - a.pointsCost;
           case 'cost-asc':
             return a.pointsCost - b.pointsCost;
-          case 'employee-asc':
-            return a.userName.localeCompare(b.userName);
-          case 'employee-desc':
-            return b.userName.localeCompare(a.userName);
           default:
             return 0;
         }
@@ -103,6 +99,15 @@ export function RewardRequestsContent() {
               description="Manage employee's request of redemption"
             />
           </Suspense>
+          <RewardRequestsControls
+            searchTerm={searchTerm}
+            onSearch={handleSearch}
+            onSort={handleSort}
+            sortBy={sortBy}
+            statusFilter={statusFilter}
+            onStatusChange={handleStatusChange}
+            requestsCount={filteredRequests.length}
+          />
           <div className="flex flex-1 flex-col md:min-h-[18rem] lg:min-h-[23rem] xl:min-h-[27rem]">
             {isTableLoading ? (
               <RedemptionTableSkeleton rows={8} />
