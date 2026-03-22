@@ -4,7 +4,11 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ListTodo, Search } from 'lucide-react';
 import { PageHeader } from '@/components/shared/page-header';
-import { SortButton } from '@/components/manager/task-verification/sort-button';
+import {
+  SortButton,
+  defaultDateOptions,
+  defaultStatusOptions,
+} from '@/components/manager/task-verification/sort-button';
 import { RequestsTable } from '@/components/manager/task-verification/requests-table';
 import { RequestsTableSkeleton } from '@/components/manager/task-verification/requests-table-skeleton';
 import type { VerificationRequest, SortOption } from '@/types';
@@ -20,6 +24,7 @@ import {
 } from '@/hooks/tanstack';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 import { useTaskStore } from '@/store/taskStore';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface VerificationRequestsPageProps {
   initialRequests: VerificationRequest[];
@@ -32,31 +37,30 @@ export function VerificationRequestsPage({
   const { tasks, hydrateFromServer } = useTaskStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('pending');
-  const [dateSortBy, setDateSortBy] = useState<
-    'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
-  >('date-desc');
+  const [dateSortBy, setDateSortBy] = useState<'date-desc' | 'date-asc'>('date-desc');
   const [pendingPage, setPendingPage] = useState(1);
   const [remark, setRemark] = useState('');
   const [approvedPage, setApprovedPage] = useState(1);
   const [deniedPage, setDeniedPage] = useState(1);
   const isSubmittingRef = useRef(false);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // Use paginated Tanstack Query hooks with separate pagination for each category
   const {
     data: pendingData,
     isLoading: isLoadingPending,
     isError: isPendingError,
-  } = useGetTasksToReviewPaginated(pendingPage, searchTerm, dateSortBy);
+  } = useGetTasksToReviewPaginated(pendingPage, debouncedSearchTerm, dateSortBy);
   const {
     data: approvedData,
     isLoading: isLoadingApproved,
     isError: isApprovedError,
-  } = useGetApprovedTasksPaginated(approvedPage, searchTerm, dateSortBy);
+  } = useGetApprovedTasksPaginated(approvedPage, debouncedSearchTerm, dateSortBy);
   const {
     data: deniedData,
     isLoading: isLoadingDenied,
     isError: isDeniedError,
-  } = useGetDeniedTasksPaginated(deniedPage, searchTerm, dateSortBy);
+  } = useGetDeniedTasksPaginated(deniedPage, debouncedSearchTerm, dateSortBy);
 
   const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
@@ -154,7 +158,7 @@ export function VerificationRequestsPage({
   // Filter and sort requests based on search term and date/employee sorting
   const filteredRequests = useMemo(() => {
     let filtered = tasks;
-    const normalizedSearch = normalizeSearchQuery(searchTerm);
+    const normalizedSearch = normalizeSearchQuery(debouncedSearchTerm);
 
     // Apply search filter
     if (normalizedSearch) {
@@ -179,21 +183,11 @@ export function VerificationRequestsPage({
           const dateB = new Date(b.kpitask_completed_at || b.kpitask_created_at || 0).getTime();
           return dateA - dateB; // Oldest first
         }
-        case 'employee-asc': {
-          const nameA = a.assigned_to_name || '';
-          const nameB = b.assigned_to_name || '';
-          return nameA.localeCompare(nameB); // Alphabetical by employee name
-        }
-        case 'employee-desc': {
-          const nameA = a.assigned_to_name || '';
-          const nameB = b.assigned_to_name || '';
-          return nameB.localeCompare(nameA);
-        }
         default:
           return 0;
       }
     });
-  }, [tasks, searchTerm, dateSortBy]);
+  }, [tasks, debouncedSearchTerm, dateSortBy]);
 
   const resetConfirmState = () => setConfirmAction({ type: null, id: null });
 
@@ -304,28 +298,27 @@ export function VerificationRequestsPage({
                   <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Search by employee name or ID"
+                    placeholder="Search for employee and task name"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
-                    className="text-meta control-h w-full min-w-0 rounded-md border border-zinc-200 bg-card pr-3 pl-9 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
+                    className="text-meta control-h w-full min-w-0 truncate rounded-md border border-zinc-200 bg-card pr-3 pl-9 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
                   />
                 </div>
                 <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap lg:shrink-0">
-                  <SortButton sortBy={sortBy} onSortChange={setSortBy} styleVariant="default" />
                   <SortButton
-                    sortBy={dateSortBy as any}
-                    onSortChange={(value) =>
-                      setDateSortBy(
-                        value as 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc'
-                      )
-                    }
-                    options={[
-                      { value: 'date-desc' as any, label: 'Date (Newest) - Default' },
-                      { value: 'date-asc' as any, label: 'Date (Oldest)' },
-                      { value: 'employee-asc' as any, label: 'Employee Name (A-Z)' },
-                      { value: 'employee-desc' as any, label: 'Employee Name (Z-A)' },
-                    ]}
+                    sortBy={sortBy}
+                    onSortChange={(value) => setSortBy(value as SortOption)}
+                    options={defaultStatusOptions}
                     styleVariant="default"
+                    menuLabel="Filter by Status"
+                    widthClassName="w-33 sm:flex-1 sm:min-w-[168px]"
+                  />
+                  <SortButton
+                    sortBy={dateSortBy}
+                    onSortChange={(value) => setDateSortBy(value as 'date-desc' | 'date-asc')}
+                    options={defaultDateOptions}
+                    styleVariant="default"
+                    menuLabel="Sort by Date"
                   />
                 </div>
               </div>
