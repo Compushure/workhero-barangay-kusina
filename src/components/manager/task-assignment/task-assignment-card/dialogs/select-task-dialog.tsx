@@ -179,7 +179,7 @@ export function SelectTasksDialog({
     <>
       <Button
         onClick={() => setOpen(true)}
-        className={`w-full sm:w-auto bg-zinc-50 shadow-sm/25 flex items-center justify-between cursor-pointer transition-all duration-400 ease-in-out hover:bg-accent/15 h-7 text-xs`}
+        className={`w-full sm:w-auto bg-zinc-50 shadow-sm/25 flex items-center justify-between cursor-pointer transition-all duration-400 ease-in-out hover:bg-[#fafafa] hover:brightness-90 h-7 text-xs`}
       >
         <div className="flex items-center gap-2 min-w-0 sm:min-w-40 max-w-full sm:max-w-70 pr-1">
           <ListTodo size={14} className="text-accent" />
@@ -219,7 +219,7 @@ export function SelectTasksDialog({
                 <Button
                   variant="default"
                   size="default"
-                  className="bg-card shadow-sm/25 hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-full sm:w-36 md:w-44 py-1.5 text-xs justify-between border border-gray-200 h-7"
+                  className="bg-card shadow-sm/25 hover:bg-[#fafafa] hover:brightness-90 transition-all duration-200 ease-in-out cursor-pointer text-gray-700 shadow-md w-full sm:w-36 md:w-44 py-1.5 text-xs justify-between border border-gray-200 h-7"
                 >
                   <span className="truncate">{currentFilterLabel}</span>
                   <ChevronDown size={14} />
@@ -259,7 +259,7 @@ export function SelectTasksDialog({
             <Button
               variant="outline"
               onClick={handleClose}
-              className="w-full sm:w-auto px-4 sm:px-8 bg-card text-foreground hover:bg-accent hover:text-card cursor-pointer transition-all duration-400 ease-in-out h-8 text-xs"
+              className="w-full sm:w-auto px-4 sm:px-8 bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground cursor-pointer transition-all duration-400 ease-in-out h-8 text-xs"
             >
               Close
             </Button>

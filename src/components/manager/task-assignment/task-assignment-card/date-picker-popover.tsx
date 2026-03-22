@@ -33,7 +33,7 @@ export function DatePickerPopover({
       <PopoverTrigger asChild>
         <Button
           disabled={disabled}
-          className="bg-zinc-50 text-primary flex items-center gap-4 cursor-pointer transition-all duration-400 ease-in-out shadow-sm/25 hover:bg-accent/15 text-xs h-7 disabled:cursor-not-allowed disabled:opacity-60"
+          className="bg-zinc-50 text-primary flex items-center gap-4 cursor-pointer transition-all duration-400 ease-in-out shadow-sm/25 hover:bg-[#fafafa] hover:brightness-90 text-xs h-7 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <CalendarIcon className="size-3.5 text-accent" />
           <span className={`${deadline ? 'text-accent' : 'text-secondary'}`}>
