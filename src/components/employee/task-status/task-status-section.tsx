@@ -44,7 +44,7 @@ export function TaskStatusSection({ status, task, isLoading, children }: TaskSta
               : status === 'In Review'
                 ? 'Tasks in this section pending requests for verification to the manager.'
                 : status === 'Approved'
-                  ? 'Tasks approved by manager. Tasks return back to current section once you claim your points but have not completed all the orders.'
+                  ? 'Tasks approved by manager. Claim their rewards from the dashboard quick task.'
                   : status === 'Rejected'
                     ? 'Tasks rejected by manager. They can still be resubmitted. Press redo task; it will transfer to current where you can submit it again.'
                     : null}

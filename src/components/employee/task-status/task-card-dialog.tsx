@@ -12,7 +12,6 @@ import { type SetStateAction, useEffect, useState } from 'react';
 import type { TaskStatusItem } from './types';
 import {
   useSubmitTaskVerification,
-  useClaimTaskPointsandXP,
   useRedoTask,
 } from '@/hooks/tanstack/mutations/employeeTasksMutations';
 import { formatDate } from '@/utils/date-utils';
@@ -39,34 +38,19 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
   }, [modalOpen, task.pendingOrders]);
 
   const submitMutation = useSubmitTaskVerification();
-  const claimMutation = useClaimTaskPointsandXP();
   const redoMutation = useRedoTask();
 
-  const canClaim =
-    task.status?.toLowerCase() === 'approved' &&
-    task.pendingOrders !== 0 &&
-    !claimMutation.isSuccess;
+  const isApprovedTask = task.status?.toLowerCase() === 'approved';
   const isFullyCompletedAndClaimed = task.completedOrders === task.maxOrders && task.claimedAt;
   const canSubmit = task.status?.toLowerCase() === 'assigned' && !submitMutation.isSuccess;
   const canRedo = task.status?.toLowerCase() === 'rejected' && !redoMutation.isSuccess;
 
   const actionButtonClassName =
-    'inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-[#47331F] bg-[#8A6039] px-4 py-2 font-jersey text-[13px] tracking-[0.05em] text-[#fff6e5] shadow-[3px_3px_0px_#47331F] transition-all duration-150 hover:bg-[#9A6E45] disabled:pointer-events-none disabled:opacity-50 sm:w-auto sm:text-[14px]';
+    'inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-[#47331F] bg-[#8A6039] px-4 py-2 font-jersey text-[13px] tracking-[0.05em] text-[#fff6e5] shadow-[3px_3px_0px_#47331F] transition-all duration-150 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#9A6E45] hover:shadow-[2px_2px_0px_#47331F] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto sm:text-[14px]';
 
   function handleRedo() {
     if (!canRedo || redoMutation.isPending) return;
     redoMutation.mutate(task.id);
-  }
-
-  function handleClaim() {
-    if (!canClaim || claimMutation.isPending) return;
-    claimMutation.mutate({
-      kpitaskId: task.id,
-      taskName: task.name,
-      pendingOrders: task.pendingOrders,
-      completedOrders: task.completedOrders,
-      maxOrders: task.maxOrders,
-    });
   }
 
   function handleSubmit() {
@@ -161,7 +145,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                   </button>
                 </div>
 
-                <p className={`mt-1.5 text-[12px] text-[#6b5038] ${task.status === 'assigned' ? '' : 'opacity-0'}`}>
+                <p className={`mt-1.5 text-[14px] text-[#6b5038] ${task.status === 'assigned' ? '' : 'opacity-0'}`}>
                   Remaining: {task.maxOrders - task.completedOrders} orders
                 </p>
               </div>
@@ -207,7 +191,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                 aria-expanded={remarkOpen}
               >
                 <ChefHat className="size-4.5" />
-                {remarkOpen ? 'close remark' : 'view remark'}
+                <span className="text-[14px] leading-none">{remarkOpen ? 'close remark' : 'view remark'}</span>
                 <ChevronDown
                   className={`size-4.5 shrink-0 transition-transform duration-150 ${remarkOpen ? 'rotate-180' : ''}`}
                   aria-hidden
@@ -215,7 +199,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
               </button>
               {remarkOpen ? (
                 <div className="max-h-32 w-full min-w-0 overflow-auto rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2.5">
-                  <p className="wrap-break-word text-[13px] leading-relaxed text-[#4b3522]">
+                  <p className="wrap-break-word text-[14px] leading-relaxed text-[#4b3522]">
                     {task.remark}
                   </p>
                 </div>
@@ -243,27 +227,10 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
             </div>
           ) : null}
 
-          {canClaim ? (
-            <div className="flex flex-col items-end pt-2">
-              <button
-                type="button"
-                onClick={handleClaim}
-                disabled={claimMutation.isPending}
-                className={actionButtonClassName}
-              >
-                {claimMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-                    Claiming...
-                  </>
-                ) : (
-                  'Claim Points & XP'
-                )}
-              </button>
-              <p className="w-full pt-2 text-center text-[14px] text-[#6b5038]">
-                Verification request for {pendingOrders} order/s has been approved!
-              </p>
-            </div>
+          {isApprovedTask && !isFullyCompletedAndClaimed ? (
+            <p className="pt-2 text-center text-[14px] text-[#6b5038]">
+              Claim approved task rewards from the kitchen quick task.
+            </p>
           ) : isFullyCompletedAndClaimed ? (
             <p className="flex flex-col pt-2 text-center text-[14px] text-[#6b5038]">
               <span>All orders are complete!</span>
