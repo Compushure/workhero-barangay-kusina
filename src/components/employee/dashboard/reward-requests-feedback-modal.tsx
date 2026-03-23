@@ -256,7 +256,7 @@ export function RewardRequestsFeedbackModal({
       >
         <DialogClose
           aria-label="Close"
-          className="absolute right-4 top-4 z-10 h-10 w-10 rounded-full bg-[#e4d3b3] text-[#3f2a1a] border-2 border-[#a88961] transition hover:scale-105 hover:bg-[#dcc7a2]"
+          className="absolute right-4 top-4 z-10 h-10 w-10 rounded-full bg-[#e4d3b3] text-[#3f2a1a] border-2 border-[#a88961] transition hover:scale-105 hover:bg-[#dcc7a2] flex items-center justify-center"
         >
           ✕
         </DialogClose>

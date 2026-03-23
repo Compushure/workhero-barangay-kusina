@@ -109,7 +109,7 @@ export default function TasksTable({
               key={task.id}
               className="rounded-xl border-2 border-[#d4c5a8] bg-[#f7efdf] p-3 transition-all duration-200 hover:-translate-y-0.5"
             >
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="font-pixel text-[15px] leading-relaxed text-[#3f2a1a] wrap-break-word">
                     {task.name}

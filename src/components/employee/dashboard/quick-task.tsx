@@ -29,7 +29,7 @@ function WideDialogContent({ children, className, ...props }: DialogContentProps
     >
       <DialogClose
         aria-label="Close"
-        className="absolute right-4 top-3 z-10 text-[#5f4330] opacity-90 transition hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eadbc1] hover:scale-110 duration-150 cursor-pointer"
+        className="absolute right-4 top-3 z-10 h-10 w-10 rounded-full bg-[#e4d3b3] text-[#3f2a1a] border-2 border-[#a88961] transition hover:scale-105 hover:bg-[#dcc7a2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8a6844]/60 focus-visible:ring-offset-[#eadbc1] cursor-pointer flex items-center justify-center"
       >
         <XIcon className="h-5 w-5" />
       </DialogClose>
