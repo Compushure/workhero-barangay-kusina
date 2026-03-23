@@ -41,7 +41,7 @@ interface MonthlyRewardsModalProps {
 }
 
 const MODAL_CONTENT_CLASS =
-  'bg-[#e8d9c0] border border-[#8a6844] !w-[88vw] sm:!w-[82vw] lg:!w-[68vw] xl:!w-[60vw] !max-w-[88vw] sm:!max-w-[82vw] lg:!max-w-[68vw] xl:!max-w-[980px] h-[75vh] sm:h-[72vh] lg:h-[68vh] rounded-2xl p-0 flex flex-col overflow-hidden shadow-xl';
+  'bg-[#e8d9c0] border border-[#8a6844] !w-[88vw] sm:!w-[82vw] lg:!w-[68vw] xl:!w-[60vw] !max-w-[88vw] sm:!max-w-[82vw] lg:!max-w-[68vw] xl:!max-w-[980px] h-[90vh] rounded-2xl p-0 flex flex-col overflow-hidden shadow-xl';
 const MODAL_GRID_CLASS =
   'grid auto-rows-fr [grid-template-columns:repeat(auto-fit,minmax(260px,300px))] justify-center items-start gap-3 sm:gap-4';
 const INTERVAL_LABELS: Record<RewardInterval, string> = {
