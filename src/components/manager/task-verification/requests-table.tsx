@@ -229,7 +229,7 @@ export function RequestsTable({
         <DialogContent className="w-[min(92vw,350px)] sm:w-[min(85vw,450px)] md:w-[min(75vw,550px)] lg:w-[min(65vw,650px)] rounded-2xl p-3 sm:p-4 md:p-5 bg-card">
           <DialogHeader>
             <DialogTitle className="text-sm sm:text-base font-bold text-foreground">
-              Task Remark
+              Previous Task Remark
             </DialogTitle>
           </DialogHeader>
           <div className="py-2 sm:py-3">
