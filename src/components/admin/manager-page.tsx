@@ -56,8 +56,8 @@ export function ManagerPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(8);
 
-  // Debounce search query to prevent excessive API calls (1500ms delay)
-  const debouncedSearchQuery = useDebounce(searchQuery, 1500);
+  // Debounce search query to prevent excessive API calls (500ms delay)
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const isDebouncing = searchQuery !== debouncedSearchQuery;
 
   // TanStack Query hook with debounced parameters and pagination
@@ -85,6 +85,7 @@ export function ManagerPage() {
   }, [paginatedData, hydrateFromServer]);
 
   const users = localUsers;
+  const filteredTotalCount = resolvedPaginatedData.count ?? 0;
   const totalPages = resolvedPaginatedData.totalPages;
 
   // TanStack Query mutation hooks
@@ -259,30 +260,28 @@ export function ManagerPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-zinc-100 overflow-x-hidden">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-background border-b-3 border-[#f47812]/15 shadow-sm/25">
-        <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2.5 sm:py-3 md:py-4 lg:py-5">
+      <header className="top-0 z-30 border-b border-accent/20 bg-card/95 backdrop-blur-sm shadow-sm/25">
+        <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 md:px-4 lg:px-6 xl:px-8 py-2 sm:py-2.5 md:py-3">
           {isLoading ? (
             <div className="animate-pulse flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
-              <div className="space-y-2">
-                <div className="h-6 sm:h-7 lg:h-8 bg-background rounded w-40 sm:w-52" />
-                <div className="h-4 sm:h-5 bg-background rounded w-32 sm:w-44" />
+              <div className="space-y-1.5">
+                <div className="h-5 sm:h-6 bg-background rounded w-36 sm:w-44" />
+                <div className="h-3.5 sm:h-4 bg-background rounded w-28 sm:w-36" />
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-wrap">
-                <div className="h-9 sm:h-10 bg-background rounded-xl w-24 sm:w-28 md:w-32" />
-                <div className="h-9 sm:h-10 bg-background rounded-xl w-24 sm:w-28 md:w-32" />
+                <div className="h-8 sm:h-8.5 bg-background rounded-md w-20 sm:w-24 md:w-28" />
+                <div className="h-8 sm:h-8.5 bg-background rounded-md w-20 sm:w-24 md:w-28" />
               </div>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
+            <div className="flex sm:items-center justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
               <div className="flex items-center gap-3 sm:gap-4">
                 <div>
-                  <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-foreground">
-                    User Management
-                  </h1>
-                  <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-gray-600">
-                    {users.length} total users on page {page}
+                  <h1 className="text-lg sm:text-xl font-bold text-foreground">User Management</h1>
+                  <p className="text-xs sm:text-[13px] text-muted-foreground">
+                    Manage employee accounts and access details
                   </p>
                 </div>
               </div>
@@ -290,20 +289,20 @@ export function ManagerPage() {
                 <Button
                   variant="default"
                   onClick={() => setAddModalOpen(true)}
-                  className="gap-0 md:gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-3 md:px-4 h-9 sm:h-10"
+                  className="text-button h-8 sm:h-8.5 gap-1.5 md:gap-2 rounded-md bg-primary-gradient px-2.5 sm:px-3 text-card shadow-sm/25 transition-all duration-300 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85"
                   aria-label="Add User"
                 >
-                  <UserPlus className="h-4 w-4" />
+                  <UserPlus className="h-3.5 w-3.5" />
                   <span className="hidden md:inline">Add User</span>
                 </Button>
                 <Button
                   variant="default"
                   onClick={handleLogout}
                   disabled={isPending}
-                  className="gap-0 md:gap-2 bg-accent text-white border-accent cursor-pointer hover:bg-accent/90 transition-all duration-500 ease-in-out shadow-sm/25 px-2 sm:px-3 md:px-4 h-9 sm:h-10"
+                  className="text-button h-8 sm:h-8.5 gap-1.5 md:gap-2 rounded-md bg-primary-gradient px-2.5 sm:px-3 text-card shadow-sm/25 transition-all duration-300 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 disabled:opacity-60"
                   aria-label="Logout"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-3.5 w-3.5" />
                   <span className="hidden md:inline">Logout</span>
                 </Button>
               </div>
@@ -312,60 +311,59 @@ export function ManagerPage() {
         </div>
       </header>
 
-      <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2.5 sm:py-3 md:py-4 lg:py-5 space-y-2.5 sm:space-y-3 md:space-y-4 lg:space-y-5 overflow-x-hidden">
-        {isLoading ? (
-          <SearchFilterSkeleton />
-        ) : (
-          <SearchFilter
-            searchQuery={searchQuery}
-            onSearchChange={handleSearchChange}
-            employeeTypeFilter={employeeTypeFilter}
-            onEmployeeTypeChange={handleEmployeeTypeFilterChange}
-            employmentStatusFilter={employmentStatusFilter}
-            onEmploymentStatusChange={handleEmploymentStatusFilterChange}
-            sortBy={sortBy}
-            onSortChange={handleSortChange}
-            isDebouncing={isDebouncing}
-            isLoading={isLoading}
-          />
-        )}
-      </div>
+      {isLoading ? (
+        <SearchFilterSkeleton />
+      ) : (
+        <SearchFilter
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          employeeTypeFilter={employeeTypeFilter}
+          onEmployeeTypeChange={handleEmployeeTypeFilterChange}
+          employmentStatusFilter={employmentStatusFilter}
+          onEmploymentStatusChange={handleEmploymentStatusFilterChange}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+          isDebouncing={isDebouncing}
+          isLoading={isLoading}
+          totalCount={filteredTotalCount}
+        />
+      )}
 
       {/* Content */}
-      <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 pb-6 lg:pb-8 flex flex-col min-h-[calc(100vh-300px)] overflow-x-hidden">
+      <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-5 lg:py-6 flex flex-col min-h-[calc(100dvh-260px)]">
         {isLoading ? (
           <div className="grid gap-3 sm:gap-4 lg:gap-5">
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className="rounded-3xl bg-background p-3 sm:p-4 lg:p-6 xl:p-7 border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25 animate-pulse"
+                className="rounded-2xl bg-card p-3 sm:p-4 lg:p-5 border border-accent/20 shadow-sm/25 animate-pulse"
               >
                 <div className="flex items-start justify-between gap-2 sm:gap-3 lg:gap-4">
-                  <div className="flex-1 min-w-0 space-y-2 sm:space-y-3 lg:space-y-4">
-                    <div className="h-3.5 sm:h-4 lg:h-5 bg-background rounded w-1/2 sm:w-2/5" />
-                    <div className="h-3.5 sm:h-4 lg:h-5 bg-background rounded w-4/5 sm:w-3/5" />
-                    <div className="flex gap-1.5 sm:gap-2 lg:gap-3 pt-1 sm:pt-2">
-                      <div className="h-5 sm:h-6 lg:h-7 bg-background rounded-full w-16 sm:w-20 lg:w-24" />
-                      <div className="h-5 sm:h-6 lg:h-7 bg-background rounded-full w-20 sm:w-24 lg:w-28" />
+                  <div className="flex-1 min-w-0 space-y-2 sm:space-y-2.5 lg:space-y-3">
+                    <div className="h-3.5 sm:h-4 bg-background rounded w-1/2 sm:w-2/5" />
+                    <div className="h-3.5 sm:h-4 bg-background rounded w-4/5 sm:w-3/5" />
+                    <div className="flex gap-1.5 sm:gap-2 pt-0.5 sm:pt-1">
+                      <div className="h-4.5 sm:h-5 bg-background rounded-full w-14 sm:w-16 lg:w-20" />
+                      <div className="h-4.5 sm:h-5 bg-background rounded-full w-16 sm:w-20 lg:w-24" />
                     </div>
                   </div>
-                  <div className="h-7 sm:h-8 lg:h-10 bg-background rounded-full w-7 sm:w-8 lg:w-10 shrink-0" />
+                  <div className="h-6 sm:h-7 bg-background rounded-full w-6 sm:w-7 shrink-0" />
                 </div>
               </div>
             ))}
           </div>
         ) : error ? (
-          <div className="rounded-3xl bg-background p-6 sm:p-8 lg:p-12 text-center border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
+          <div className="rounded-2xl bg-card p-6 sm:p-8 lg:p-10 text-center border border-accent/20 shadow-sm/25">
             <p className="text-destructive mb-4 font-semibold">Failed to load users</p>
-            <p className="text-sm text-gray-600">{error.message}</p>
+            <p className="text-meta text-muted-foreground">{error.message}</p>
           </div>
         ) : users.length === 0 ? (
-          <div className="rounded-3xl bg-background p-6 sm:p-8 lg:p-12 text-center border-b-3 border-x-2 border-[#f47812]/15 shadow-sm/25">
+          <div className="rounded-2xl bg-card p-6 sm:p-8 lg:p-10 text-center border border-accent/20 shadow-sm/25">
             <div className="mx-auto w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mb-4">
               <UserPlus className="h-6 w-6 text-foreground" />
             </div>
             <p className="text-foreground mb-2 font-semibold">No users found</p>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-meta text-muted-foreground mb-4">
               {searchQuery || employeeTypeFilter !== 'all' || employmentStatusFilter !== 'all'
                 ? 'Try adjusting your filters'
                 : 'Add your first user to get started'}
@@ -373,7 +371,7 @@ export function ManagerPage() {
             {!searchQuery && employeeTypeFilter === 'all' && employmentStatusFilter === 'all' && (
               <Button
                 onClick={() => setAddModalOpen(true)}
-                className="bg-foreground hover:bg-foreground/90 text-white transition-all duration-500 ease-in-out shadow-sm/25"
+                className="text-button control-h rounded-md bg-primary-gradient px-4 text-card shadow-sm/25 transition-all duration-500 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85"
               >
                 Add User
               </Button>

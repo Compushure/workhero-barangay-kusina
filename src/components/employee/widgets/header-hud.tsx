@@ -29,7 +29,7 @@ export default function HeaderHUD({
   return (
     <div
       className={cn(
-        'flex min-h-24 w-full items-center justify-start gap-3 overflow-x-hidden px-3 sm:pl-12 sm:pr-24 sticky',
+        'flex min-h-24 w-full items-center justify-start gap-2 sm:gap-3 overflow-x-hidden px-2 sm:pl-12 sm:pr-24 sticky',
         className
       )}
     >
@@ -45,9 +45,7 @@ export default function HeaderHUD({
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="inline-flex">
-              <ConditionalNotifications
-                hideOnMercado={hideNotificationsOnMercado}
-              />
+              <ConditionalNotifications hideOnMercado={hideNotificationsOnMercado} />
             </div>
           </TooltipTrigger>
           <TooltipContent side="bottom" sideOffset={8}>
@@ -77,11 +75,11 @@ export default function HeaderHUD({
                 <button
                   type="button"
                   aria-label="Open account actions"
-                  className="inline-flex size-12 items-center justify-center rounded-full wood-panel text-card shadow-sm transition-all duration-300 hover:scale-103 hover:cursor-pointer"
+                  className="inline-flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full wood-panel text-card shadow-sm transition-all duration-300 hover:scale-103 hover:cursor-pointer"
                 >
                   <ChevronDown
                     className={cn(
-                      'size-6 transition-transform duration-200',
+                      'size-5 sm:size-6 transition-transform duration-200',
                       isAccountMenuOpen && 'rotate-180'
                     )}
                   />
