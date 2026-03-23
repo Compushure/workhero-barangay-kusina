@@ -2,6 +2,7 @@
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MoreVertical } from 'lucide-react';
 
 interface TaskViewCardMenuProps {
@@ -9,6 +10,7 @@ interface TaskViewCardMenuProps {
   setOpenPopover: (open: boolean) => void;
   handleOpenEditDialog: () => void;
   setShowDeleteConfirm: (show: boolean) => void;
+  isOverdue: boolean;
 }
 
 export default function TaskViewCardMenu({
@@ -16,6 +18,7 @@ export default function TaskViewCardMenu({
   setOpenPopover,
   handleOpenEditDialog,
   setShowDeleteConfirm,
+  isOverdue,
 }: TaskViewCardMenuProps) {
   return (
     <Popover open={openPopover} onOpenChange={setOpenPopover}>
@@ -26,13 +29,37 @@ export default function TaskViewCardMenu({
       </PopoverTrigger>
       <PopoverContent className="w-32 p-1.5 bg-card" align="end">
         <div className="flex flex-col gap-0.5">
-          <Button
-            onClick={handleOpenEditDialog}
-            variant="ghost"
-            className="justify-start text-foreground hover:bg-accent-secondary/25 hover:text-foreground cursor-pointer transition-all duration-400 ease-in-out"
-          >
-            Edit Task
-          </Button>
+          {isOverdue ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="cursor-not-allowed">
+                  <Button
+                    onClick={handleOpenEditDialog}
+                    variant="ghost"
+                    disabled
+                    className="w-full justify-start text-foreground opacity-50 transition-all duration-400 ease-in-out"
+                  >
+                    Edit Task
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="left"
+                sideOffset={8}
+                className="max-w-48 border border-zinc-200 bg-white px-3 py-2 text-[11px] leading-relaxed text-zinc-600 shadow-md"
+              >
+                Cannot edit anymore because this task is overdue.
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button
+              onClick={handleOpenEditDialog}
+              variant="ghost"
+              className="w-full justify-start text-foreground hover:bg-accent-secondary/25 hover:text-foreground transition-all duration-400 ease-in-out"
+            >
+              Edit Task
+            </Button>
+          )}
           <Button
             onClick={() => {
               setShowDeleteConfirm(true);

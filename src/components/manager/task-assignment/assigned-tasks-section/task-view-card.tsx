@@ -21,6 +21,7 @@ interface TaskViewCardProps {
 export function TaskViewCard({ task }: TaskViewCardProps) {
   const { editTask } = useTaskAssignment();
   const updateTaskMutation = useUpdateTaskAssignmentMutation();
+  const isOverdue = isTaskOverdue(task.dateRange.end);
 
   const [expanded, setExpanded] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<{
@@ -164,7 +165,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
               <span className="bg-accent-secondary/20 w-fit rounded-md px-2 py-0.5">
                 {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
               </span>
-              {isTaskOverdue(task.dateRange.end) && (
+              {isOverdue && (
                 <span className="bg-red-100 text-red-500 text-[13px] px-1.5 sm:px-2 py-0.5 rounded-md">
                   Task is Overdue
                 </span>
@@ -230,6 +231,7 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           setOpenPopover={setOpenPopover}
           handleOpenEditDialog={handleOpenEditDialog}
           setShowDeleteConfirm={setShowDeleteConfirm}
+          isOverdue={isOverdue}
         />
       </div>
 

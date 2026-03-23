@@ -58,6 +58,20 @@ export default function TaskCategoryTable({
     setTaskToDelete(null);
   };
 
+  const formatCreatedDate = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Unknown date';
+
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="bg-card rounded-2xl overflow-x-auto overflow-y-hidden shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -126,6 +140,10 @@ export default function TaskCategoryTable({
                       </div>
                       <div className="text-[10px] sm:text-xs text-primary font-medium px-1 sm:px-1.5 rounded-full bg-accent/15 w-fit mt-2.5 truncate">
                         {task.type}
+                      </div>
+                      <div className="text-[10px] sm:text-xs text-secondary mt-2 truncate">
+                        <span className="font-semibold">Created:</span>{' '}
+                        {formatCreatedDate(task.createdAt)}
                       </div>
                     </div>
                   </TableCell>
