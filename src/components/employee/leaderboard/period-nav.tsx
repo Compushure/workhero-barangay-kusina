@@ -32,9 +32,6 @@ interface PeriodNavProps {
   onPeriodTypeChange: (periodType: RankLogPeriodType) => void;
 }
 
-/**
- * [<] Weekly | Monthly | Yearly [>] — retro style: dark brown buttons with golden borders, center label.
- */
 export function PeriodNav({ periodType, onPeriodTypeChange }: PeriodNavProps) {
   const idx = PERIOD_ORDER.indexOf(periodType);
   const len = PERIOD_ORDER.length;
@@ -43,41 +40,37 @@ export function PeriodNav({ periodType, onPeriodTypeChange }: PeriodNavProps) {
   const label = periodType.charAt(0).toUpperCase() + periodType.slice(1);
 
   return (
-    <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-      {/* Left: previous (wraps to Yearly when on Weekly) */}
+    <div className="inline-flex w-full items-center justify-center gap-3 sm:gap-4">
       <button
         type="button"
         onClick={() => onPeriodTypeChange(prevType)}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#b07440] text-white opacity-100 shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] [&_svg]:opacity-100 sm:h-11 sm:w-11 md:h-12 md:w-12"
+        className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B] text-white shadow-[4px_4px_0px_#000] shadow-[#3017008e] transition-all duration-150 hover:translate-y-1 hover:bg-[#7C5432] hover:shadow-[2px_2px_0px_#000] sm:h-[3.2rem] sm:w-[3.2rem]"
         aria-label="Previous period"
       >
-        <ChevronLeft className="h-5 w-5 shrink-0 stroke-white sm:h-6 sm:w-6" strokeWidth={2.5} />
+        <ChevronLeft className="h-4 w-4 shrink-0 stroke-white sm:h-[18px] sm:w-[18px]" strokeWidth={2.25} />
       </button>
 
-      {/* Center: same style as "Top Kusineros of the Week" — #F4B925, no glow, no border */}
-      <span
-        className="min-w-[96px] px-2 py-1.5 text-center font-jersey text-xl tracking-widest text-[#F4B925] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:min-w-[120px] sm:px-4 sm:py-2 sm:text-2xl"
-        aria-live="polite"
-      >
-        {label}
-      </span>
+      <div className="flex min-h-12 min-w-0 flex-1 items-center justify-center text-center sm:min-h-[3.2rem]">
+        <span
+          className="block font-jersey text-xl leading-none tracking-[0.08em] text-[#F4B925] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:text-2xl"
+          aria-live="polite"
+        >
+          {label}
+        </span>
+      </div>
 
-      {/* Right: next (wraps to Weekly when on Yearly) */}
       <button
         type="button"
         onClick={() => onPeriodTypeChange(nextType)}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#b07440] text-white opacity-100 shadow-[-2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] [&_svg]:opacity-100 sm:h-11 sm:w-11 md:h-12 md:w-12"
+        className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B] text-white shadow-[4px_4px_0px_#000] shadow-[#3017008e] transition-all duration-150 hover:translate-y-1 hover:bg-[#7C5432] hover:shadow-[2px_2px_0px_#000] sm:h-[3.2rem] sm:w-[3.2rem]"
         aria-label="Next period"
       >
-        <ChevronRight className="h-5 w-5 shrink-0 stroke-white sm:h-6 sm:w-6" strokeWidth={2.5} />
+        <ChevronRight className="h-4 w-4 shrink-0 stroke-white sm:h-[18px] sm:w-[18px]" strokeWidth={2.25} />
       </button>
     </div>
   );
 }
 
-/** Get the period params for the latest period of the given type (for fetching data).
- * Returns null when no period has been generated yet, or when the latest period is not visible.
- */
 export function getLatestPeriodParams(
   periodType: RankLogPeriodType,
   latest: LatestPeriods
@@ -98,9 +91,6 @@ export function getLatestPeriodParams(
   }
 }
 
-/**
- * Build the page title: "Top Kusineros of the Week" | "Top Kusineros of the Month of January" | "Top Kusineros of the Year 2026"
- */
 export function getLeaderboardTitle(periodType: RankLogPeriodType, latest: LatestPeriods): string {
   switch (periodType) {
     case 'weekly':

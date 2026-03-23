@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Pencil, Plus, X, Loader2, Camera } from 'lucide-react';
+import { Pencil, Plus, X, Loader2, Camera, Calendar as CalendarIcon, ChevronDown } from 'lucide-react';
 import {
   format,
   startOfWeek,
@@ -32,7 +32,7 @@ type AvailabilityInterval = 'weekly' | 'monthly' | 'yearly';
 const MAX_REWARD_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_REWARD_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const mercadoSelectItemClassName =
-  'cursor-pointer transition-all duration-500 ease-in-out hover:bg-accent-secondary/80 hover:text-white data-[highlighted]:bg-accent-secondary/80 data-[highlighted]:text-white data-[state=checked]:bg-accent-secondary data-[state=checked]:text-white';
+  'cursor-pointer transition-all duration-500 ease-in-out hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground data-[state=checked]:bg-accent/15 data-[state=checked]:text-foreground';
 
 interface AddItemsModalProps {
   open: boolean;
@@ -564,11 +564,11 @@ export function AddItemsModal({
                 >
                   <SelectTrigger
                     id="available-month"
-                    className="h-10 w-full rounded-lg bg-background border-border hover:bg-muted text-foreground"
+                    className="h-10 w-full cursor-pointer rounded-lg bg-background border-border text-foreground"
                   >
                     <SelectValue placeholder="Select interval" />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover text-popover-foreground rounded-lg">
+                  <SelectContent className="manager-dropdown-content rounded-lg bg-popover text-popover-foreground">
                     <SelectItem
                       value="none"
                       className={cn(mercadoSelectItemClassName, 'text-muted-foreground italic')}
@@ -596,31 +596,35 @@ export function AddItemsModal({
                       variant="outline"
                       disabled={availabilityInterval === 'none'}
                       className={cn(
-                        'h-10 w-full rounded-lg justify-start text-left font-normal bg-background border-border hover:bg-muted',
+                        'h-10 w-full rounded-lg justify-between text-left font-normal bg-background border-border hover:bg-background hover:text-foreground',
                         !availableDate && 'text-muted-foreground'
                       )}
                     >
-                      {availableDate ? format(availableDate, 'PPP') : 'Select date'}
+                      <span className="flex items-center gap-2">
+                        <CalendarIcon className="h-4 w-4 text-accent" />
+                        <span>{availableDate ? format(availableDate, 'PPP') : 'Set Deadline'}</span>
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-foreground" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 rounded-lg" align="start">
+                  <PopoverContent className="w-auto rounded-xl border border-border bg-background p-0 shadow-sm/25" align="start">
                     <Calendar
                       mode="single"
                       selected={availableDate}
                       onSelect={setAvailableDate}
                       disabled={disabledDateMatcher}
-                      className="rounded-lg bg-background"
+                      className="rounded-xl bg-background p-3"
                       classNames={{
                         weekday:
-                          'text-accent-secondary rounded-md flex-1 font-normal text-[0.8rem] select-none',
+                          'text-[#f97316] rounded-md flex-1 font-normal text-[0.8rem] select-none',
                         month_caption:
                           'flex items-center justify-center h-(--cell-size) w-full px-(--cell-size) text-sm font-semibold text-foreground',
                         button_previous:
-                          'inline-flex items-center justify-center size-(--cell-size) rounded-md p-0 select-none text-foreground hover:bg-accent-secondary/80 hover:text-white aria-disabled:opacity-50',
+                          'inline-flex items-center justify-center size-(--cell-size) rounded-md p-0 select-none text-foreground hover:bg-[#fed7aa] hover:text-foreground aria-disabled:opacity-50',
                         button_next:
-                          'inline-flex items-center justify-center size-(--cell-size) rounded-md p-0 select-none text-foreground hover:bg-accent-secondary/80 hover:text-white aria-disabled:opacity-50',
+                          'inline-flex items-center justify-center size-(--cell-size) rounded-md p-0 select-none text-foreground hover:bg-[#fed7aa] hover:text-foreground aria-disabled:opacity-50',
                         today:
-                          'bg-accent-secondary/15 text-accent-secondary rounded-md data-[selected=true]:bg-accent-secondary data-[selected=true]:text-white',
+                          'rounded-md border-0 text-foreground data-[selected=true]:border-0 data-[selected=true]:bg-[#f97316] data-[selected=true]:text-white',
                         outside: 'text-muted-foreground/60 aria-selected:text-muted-foreground/60',
                         disabled: 'text-muted-foreground/45 opacity-100',
                       }}
@@ -629,7 +633,7 @@ export function AddItemsModal({
                           <CalendarDayButton
                             {...props}
                             className={cn(
-                              'hover:bg-accent-secondary/80 hover:text-white data-[selected-single=true]:bg-accent-secondary data-[selected-single=true]:text-white data-[range-middle=true]:bg-accent-secondary/20 data-[range-middle=true]:text-foreground data-[range-start=true]:bg-accent-secondary data-[range-start=true]:text-white data-[range-end=true]:bg-accent-secondary data-[range-end=true]:text-white'
+                              'cursor-pointer border-0 text-foreground hover:bg-[#fed7aa] hover:text-foreground group-data-[focused=true]/day:border-transparent group-data-[focused=true]/day:ring-0 data-[selected-single=true]:border-0 data-[selected-single=true]:bg-[#f97316] data-[selected-single=true]:text-white data-[range-middle=true]:bg-transparent data-[range-middle=true]:text-foreground data-[range-start=true]:border-0 data-[range-start=true]:bg-[#f97316] data-[range-start=true]:text-white data-[range-end=true]:border-0 data-[range-end=true]:bg-[#f97316] data-[range-end=true]:text-white'
                             )}
                           />
                         ),
@@ -658,15 +662,7 @@ export function AddItemsModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isLoading}
-            className="h-10 rounded-lg border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-accent-secondary hover:text-white transition-all duration-400 ease-in-out px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
+        <div className="mt-6 flex flex-col-reverse justify-end gap-3 sm:flex-row">
           <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
@@ -680,6 +676,14 @@ export function AddItemsModal({
             ) : (
               'Save'
             )}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isLoading}
+            className="h-10 rounded-lg border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-gray-200 hover:text-foreground transition-all duration-400 ease-in-out px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+          >
+            Cancel
           </Button>
         </div>
 

@@ -23,17 +23,7 @@ import {
 import { RewardCard } from '@/components/employee/mercado/reward-card';
 import { useCancelMyRedemptionRequest } from '@/hooks/tanstack/mutations/redemptionMutations';
 import { format } from 'date-fns';
-import {
-  Package,
-  Sparkles,
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Coins,
-  Clock,
-  XCircle,
-} from 'lucide-react';
+import { Package, Sparkles, AlertCircle, Loader2, Coins, Clock, XCircle } from 'lucide-react';
 import type { RedemptionRequest, Reward } from '@/types';
 
 type RewardInterval = 'weekly' | 'monthly' | 'yearly';
@@ -50,10 +40,10 @@ interface MonthlyRewardsModalProps {
   pendingRequests: RedemptionRequest[];
 }
 
-const ITEMS_PER_PAGE = 8;
 const MODAL_CONTENT_CLASS =
-  'bg-[#e8d9c0] border border-[#8a6844] w-[60vw] max-w-[60vw] sm:max-w-[60vw] md:max-w-[60vw] lg:max-w-[60vw] max-h-[86vh] rounded-2xl p-0 flex flex-col overflow-hidden shadow-xl';
-const MODAL_GRID_CLASS = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
+  'bg-[#e8d9c0] border border-[#8a6844] !w-[88vw] sm:!w-[82vw] lg:!w-[68vw] xl:!w-[60vw] !max-w-[88vw] sm:!max-w-[82vw] lg:!max-w-[68vw] xl:!max-w-[980px] h-[75vh] sm:h-[72vh] lg:h-[68vh] rounded-2xl p-0 flex flex-col overflow-hidden shadow-xl';
+const MODAL_GRID_CLASS =
+  'grid auto-rows-fr [grid-template-columns:repeat(auto-fit,minmax(260px,300px))] justify-center items-start gap-3 sm:gap-4';
 const INTERVAL_LABELS: Record<RewardInterval, string> = {
   weekly: 'Weekly',
   monthly: 'Monthly',
@@ -97,7 +87,6 @@ export function MonthlyRewardsModal({
   pendingRewardIds,
   pendingRequests,
 }: MonthlyRewardsModalProps) {
-  const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [pendingSearchTerm, setPendingSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
@@ -125,13 +114,6 @@ export function MonthlyRewardsModal({
     );
   }, [rewards, pendingRewardIds, searchTerm, sortOrder, userPoints]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredAndSortedRewards.length / ITEMS_PER_PAGE));
-
-  const paginatedRewards = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredAndSortedRewards.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredAndSortedRewards, currentPage]);
-
   const pendingRequestsForInterval = useMemo(() => {
     const intervalRewardIds = new Set(rewards.map((reward) => reward.id));
     return pendingRequests.filter((request) => intervalRewardIds.has(request.rewardId));
@@ -148,7 +130,6 @@ export function MonthlyRewardsModal({
   }, [pendingRequestsForInterval, pendingSearchTerm]);
 
   useEffect(() => {
-    setCurrentPage(1);
     setSearchTerm('');
     setPendingSearchTerm('');
     setSortOrder('newest');
@@ -156,20 +137,16 @@ export function MonthlyRewardsModal({
   }, [interval, open]);
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, sortOrder]);
-
-  useEffect(() => {
     if (!open) return;
     scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'auto' });
-  }, [open, interval, activeView, currentPage, searchTerm, pendingSearchTerm, sortOrder]);
+  }, [open, interval, activeView, searchTerm, pendingSearchTerm, sortOrder]);
 
   if (!interval) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={MODAL_CONTENT_CLASS}>
-        <DialogHeader className="p-6 pb-4 border-b border-[#8a6844]/30 bg-[#ded0b8] space-y-1 items-center text-center">
+        <DialogHeader className="p-4 sm:p-6 pb-4 border-b border-[#8a6844]/30 bg-[#ded0b8] space-y-1 items-center text-center">
           <DialogTitle className="text-xl sm:text-2xl font-bold text-[#3f2a1a] flex items-center justify-center gap-3">
             <div className="relative p-2 bg-[#8a6844]/10 rounded-lg">
               <Package className="h-6 w-6 text-[#6a4a2d]" />
@@ -184,14 +161,14 @@ export function MonthlyRewardsModal({
         </DialogHeader>
 
         {!isLoading && (
-          <div className="px-6 pt-3 pb-2 bg-[#e3d4bb] border-b border-[#8a6844]/20 flex items-center justify-between gap-3">
+          <div className="px-4 sm:px-6 pt-3 pb-3 bg-[#e3d4bb] border-b border-[#8a6844]/20 flex flex-col sm:flex-row items-center justify-between gap-3">
             {activeView === 'items' && rewards.length > 0 ? (
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center sm:justify-start">
                 <Select
                   value={interval || 'weekly'}
                   onValueChange={(value: RewardInterval) => onIntervalChange(value)}
                 >
-                  <SelectTrigger className="h-8 w-32 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
+                  <SelectTrigger className="h-8 w-[100px] sm:w-32 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
@@ -205,14 +182,14 @@ export function MonthlyRewardsModal({
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search items..."
-                  className="h-8 w-44 sm:w-52 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
+                  className="h-8 w-[140px] sm:w-52 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
                 />
 
                 <Select
                   value={sortOrder}
                   onValueChange={(value: 'newest' | 'oldest') => setSortOrder(value)}
                 >
-                  <SelectTrigger className="h-8 w-28 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
+                  <SelectTrigger className="h-8 w-[100px] sm:w-28 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
@@ -222,12 +199,12 @@ export function MonthlyRewardsModal({
                 </Select>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center sm:justify-start">
                 <Select
                   value={interval || 'weekly'}
                   onValueChange={(value: RewardInterval) => onIntervalChange(value)}
                 >
-                  <SelectTrigger className="h-8 w-32 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
+                  <SelectTrigger className="h-8 w-[100px] sm:w-32 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
@@ -240,10 +217,10 @@ export function MonthlyRewardsModal({
                 <Input
                   value={pendingSearchTerm}
                   onChange={(event) => setPendingSearchTerm(event.target.value)}
-                  placeholder="Search pending items..."
-                  className="h-8 w-44 sm:w-56 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
+                  placeholder="Search pending..."
+                  className="h-8 w-[140px] sm:w-56 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
                 />
-                <p className="text-xs text-[#6b5038] font-medium">
+                <p className="text-xs text-[#6b5038] font-medium w-full text-center sm:w-auto sm:text-left mt-1 sm:mt-0">
                   Pending requests for {intervalName}: {filteredPendingRequests.length}
                 </p>
               </div>
@@ -255,7 +232,7 @@ export function MonthlyRewardsModal({
               onClick={() =>
                 setActiveView((current) => (current === 'items' ? 'pending' : 'items'))
               }
-              className="h-8 border-[#9b7a56] bg-[#f6eddd] text-[#4b3522] hover:bg-[#ecdcbf]"
+              className="h-8 w-full sm:w-auto border-[#9b7a56] bg-[#f6eddd] text-[#4b3522] hover:bg-[#ecdcbf]"
             >
               {activeView === 'items'
                 ? `See My Pending Requests (${pendingRequestsForInterval.length})`
@@ -264,7 +241,7 @@ export function MonthlyRewardsModal({
           </div>
         )}
 
-        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-6 bg-[#e6d7bf]">
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-3 sm:p-4 bg-[#e6d7bf]">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Loader2 className="h-10 w-10 text-[#6a4a2d] animate-spin mx-auto mb-3" />
@@ -283,7 +260,7 @@ export function MonthlyRewardsModal({
             <EmptyState intervalName={intervalName} />
           ) : (
             <div className={MODAL_GRID_CLASS}>
-              {paginatedRewards.map((reward) => (
+              {filteredAndSortedRewards.map((reward) => (
                 <RewardCard
                   key={reward.id}
                   reward={reward}
@@ -295,34 +272,6 @@ export function MonthlyRewardsModal({
             </div>
           )}
         </div>
-
-        {activeView === 'items' && totalPages > 1 && (
-          <footer className="p-4 bg-[#ded0b8] border-t border-[#8a6844]/25 flex items-center justify-center gap-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="text-[#4b3522] hover:bg-[#8a6844]/10"
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" /> Previous
-            </Button>
-
-            <span className="text-sm font-bold text-[#4b3522]">
-              {currentPage} / {totalPages}
-            </span>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="text-[#4b3522] hover:bg-[#8a6844]/10"
-            >
-              Next <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
-          </footer>
-        )}
       </DialogContent>
     </Dialog>
   );
@@ -362,10 +311,10 @@ function PendingRequestsView({
       {requests.map((request) => (
         <Card
           key={request.id}
-          className="group relative overflow-hidden bg-[#eadbc1] border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-80 min-w-0 flex flex-col rounded-lg"
+          className="group relative overflow-hidden bg-[#eadbc1] border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-72 min-w-0 flex flex-col rounded-lg"
         >
           <CardContent className="p-0 flex-1 flex flex-col">
-            <div className="relative h-28 w-full overflow-hidden bg-[#dfcfb3] border-b border-[#8a6844]/20">
+            <div className="relative h-24 w-full overflow-hidden bg-[#dfcfb3] border-b border-[#8a6844]/20">
               {rewardImageById.get(request.rewardId) ? (
                 <Image
                   src={rewardImageById.get(request.rewardId)!}

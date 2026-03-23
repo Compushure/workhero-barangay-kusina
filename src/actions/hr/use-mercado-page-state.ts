@@ -106,7 +106,7 @@ export function useMercadoPageState() {
 
   // Data sources.
   const { contentAreaStyle } = useSidebarContentArea();
-  const debouncedSearch = useDebounce(search, 300);
+  const debouncedSearch = useDebounce(search, 500);
   const { data: allRewards = [], isLoading } = useGetRewards();
 
   // Filtered and sorted list.
@@ -137,7 +137,22 @@ export function useMercadoPageState() {
     filteredRewards.sort((a, b) => {
       const dateA = getRewardTimestamp(a);
       const dateB = getRewardTimestamp(b);
-      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+      switch (sortOrder) {
+        case 'newest':
+          return dateB - dateA;
+        case 'oldest':
+          return dateA - dateB;
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'points-desc':
+          return b.pointsCost - a.pointsCost;
+        case 'points-asc':
+          return a.pointsCost - b.pointsCost;
+        default:
+          return 0;
+      }
     });
 
     return filteredRewards;
