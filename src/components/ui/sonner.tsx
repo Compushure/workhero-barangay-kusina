@@ -127,7 +127,7 @@ const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
       ...toastOptions,
       className: cn(
         DEFAULT_TOAST_CLASS,
-        view === 'employee' ? 'font-jersey text-sm tracking-[0.018em]' : null,
+        view === 'employee' ? 'font-jersey text-base tracking-[0.02em]' : null,
         toastOptions?.className
       ),
       style: {
