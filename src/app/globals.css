@@ -225,6 +225,35 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .employee-font-scope,
+  .employee-font-scope * {
+    font-family: var(--font-jersey), 'Nunito', sans-serif !important;
+    letter-spacing: 0.0225em;
+  }
+
+  .employee-font-scope :is(h1, h2, h3, h4, h5, h6) {
+    letter-spacing: 0.0225em;
+  }
+
+  .employee-font-scope :is(button, [role='button'], label, input, textarea, select) {
+    letter-spacing: 0.03em;
+  }
+
+  .employee-font-scope :is(.text-xs, .text-2xs) {
+    font-size: 1.05rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .employee-font-scope .text-sm {
+    font-size: 1.1rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .employee-font-scope .text-base {
+    font-size: 1.15rem !important;
+    line-height: 1.4 !important;
+  }
 }
 
 .hr-theme {

@@ -125,7 +125,11 @@ const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
   const mergedToastOptions = useMemo<ToasterProps['toastOptions']>(() => {
     return {
       ...toastOptions,
-      className: cn(DEFAULT_TOAST_CLASS, toastOptions?.className),
+      className: cn(
+        DEFAULT_TOAST_CLASS,
+        view === 'employee' ? 'font-jersey text-sm tracking-[0.018em]' : null,
+        toastOptions?.className
+      ),
       style: {
         borderWidth: BORDER_WIDTH,
         ...toastOptions?.style,
