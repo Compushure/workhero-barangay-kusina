@@ -91,7 +91,7 @@ export default function TaskIcon() {
 
       <WideDialogContent>
         <DialogHeader className="border-b border-[#8a6844]/30 bg-[#e1d2b7] px-4 py-3">
-          <DialogTitle className="text-[10px] text-center font-pixel text-[#3f2a1a] tracking-wider leading-relaxed">
+          <DialogTitle className="text-[16px] text-center font-pixel text-[#3f2a1a] tracking-wider leading-relaxed">
             Claimable Tasks
           </DialogTitle>
           <div className="mx-auto mt-1 w-full max-w-65">
@@ -103,14 +103,14 @@ export default function TaskIcon() {
                 }
               }}
             >
-              <SelectTrigger className="h-8 rounded-lg border-[#9b7a56] bg-[#f7efdf] font-pixel text-[10px] text-[#4b3522]">
+              <SelectTrigger className="h-11 rounded-lg border-[#9b7a56] bg-[#f7efdf] font-pixel text-[14px] text-[#4b3522]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
-                <SelectItem value="newest" className="font-pixel text-[10px]">
+                <SelectItem value="newest" className="font-pixel text-[14px]">
                   Newest
                 </SelectItem>
-                <SelectItem value="oldest" className="font-pixel text-[10px]">
+                <SelectItem value="oldest" className="font-pixel text-[14px]">
                   Oldest
                 </SelectItem>
               </SelectContent>
