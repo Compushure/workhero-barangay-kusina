@@ -1,55 +1,72 @@
 /**
  * Time Period Utilities
  * Utilities for calculating time period cutoffs for leaderboard snapshots.
- * Weekly periods use ISO week numbering (Week 1–52/53 per year).
+ * Weekly periods use ISO week numbering (Week 1-52/53 per year).
  */
 
-import {
-  startOfISOWeek,
-  endOfISOWeek,
-  addWeeks,
-  addDays,
-  format,
-  getISOWeek,
-} from 'date-fns';
+import { addDays, addWeeks, format, getISOWeek, startOfISOWeek } from 'date-fns';
+import { formatInTimeZone, fromZonedTime, toZonedTime } from 'date-fns-tz';
 import type { RankLogPeriodType, RankingPeriodType } from '@/types';
 
+const MANILA_TIMEZONE = 'Asia/Manila';
+
 /** Jan 4 is always in ISO week 1 of its year; used as anchor for ISO week math */
-const ISO_WEEK_1_ANCHOR = (year: number) => new Date(year, 0, 4);
+const ISO_WEEK_1_ANCHOR = (year: number) =>
+  toZonedTime(fromZonedTime(`${year}-01-04 12:00:00`, MANILA_TIMEZONE), MANILA_TIMEZONE);
 
 export type TimePeriod = 'weekly' | 'monthly' | 'yearly';
+
+function pad2(value: number): string {
+  return String(value).padStart(2, '0');
+}
+
+function manilaStartOfDay(date: Date): Date {
+  return fromZonedTime(
+    `${formatInTimeZone(date, MANILA_TIMEZONE, 'yyyy-MM-dd')} 00:00:00.000`,
+    MANILA_TIMEZONE
+  );
+}
+
+function manilaEndOfDay(date: Date): Date {
+  return fromZonedTime(
+    `${formatInTimeZone(date, MANILA_TIMEZONE, 'yyyy-MM-dd')} 23:59:59.999`,
+    MANILA_TIMEZONE
+  );
+}
+
+function manilaDateAtMidnight(year: number, month: number, day: number): Date {
+  return fromZonedTime(`${year}-${pad2(month)}-${pad2(day)} 00:00:00.000`, MANILA_TIMEZONE);
+}
+
+export function toManilaDateString(date: Date): string {
+  return formatInTimeZone(date, MANILA_TIMEZONE, 'yyyy-MM-dd');
+}
+
+export function parseManilaDateString(dateStr: string): Date {
+  return fromZonedTime(`${dateStr} 00:00:00.000`, MANILA_TIMEZONE);
+}
 
 /**
  * Compute cutoff timestamp for a given time period.
  * Returns the end of the previous completed period (timestamp just before the start of the current period).
- * 
- * @param period - The time period to calculate cutoff for
- * @returns ISO string timestamp representing the cutoff date
- * 
- * @example
- * // For weekly: Returns end of last week (Sunday 23:59:59.999)
- * // For monthly: Returns end of last month (last day 23:59:59.999)
- * // For yearly: Returns end of last year (Dec 31 23:59:59.999)
  */
 export function getCutoffForPeriod(period: TimePeriod): string {
-  const now = new Date();
+  const now = toZonedTime(new Date(), MANILA_TIMEZONE);
   let cutoff: Date;
 
   switch (period) {
     case 'weekly': {
       const startOfCurrent = startOfISOWeek(now);
-      cutoff = new Date(startOfCurrent.getTime() - 1);
+      cutoff = new Date(manilaStartOfDay(startOfCurrent).getTime() - 1);
       break;
     }
     case 'monthly': {
-      // Get first day of current month (00:00:00), then subtract 1ms to get end of previous month
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const firstDayOfMonth = manilaDateAtMidnight(now.getFullYear(), now.getMonth() + 1, 1);
       cutoff = new Date(firstDayOfMonth.getTime() - 1);
       break;
     }
     case 'yearly': {
-      // Get first day of current year (00:00:00), then subtract 1ms to get end of previous year
-      const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
+      const firstDayOfYear = manilaDateAtMidnight(now.getFullYear(), 1, 1);
       cutoff = new Date(firstDayOfYear.getTime() - 1);
       break;
     }
@@ -60,7 +77,7 @@ export function getCutoffForPeriod(period: TimePeriod): string {
 
 /**
  * Compute cutoff timestamp for a specific period (year/month/week).
- * Weekly: ISO week 1–52/53; month is ignored. Returns end of that ISO week (Sunday 23:59:59.999).
+ * Weekly: ISO week 1-52/53; month is ignored. Returns end of that ISO week in Manila time.
  */
 export function getCutoffForSpecificPeriod(
   periodType: RankLogPeriodType,
@@ -68,39 +85,41 @@ export function getCutoffForSpecificPeriod(
   month?: number,
   week?: number
 ): string {
-  let cutoff: Date;
-
   switch (periodType) {
     case 'weekly': {
       if (week == null) {
         throw new Error('week is required for weekly period');
       }
-      const week1Monday = startOfISOWeek(ISO_WEEK_1_ANCHOR(year));
-      const targetMonday = addWeeks(week1Monday, week - 1);
-      cutoff = endOfISOWeek(targetMonday);
-      break;
+      const { end } = getISOWeekDateRange(year, week);
+      return manilaEndOfDay(end).toISOString();
     }
     case 'monthly': {
       if (month == null) {
         throw new Error('month is required for monthly period');
       }
-      // Last ms of the last day of the given month
-      const lastDay = new Date(year, month, 0).getDate();
-      cutoff = new Date(year, month - 1, lastDay, 23, 59, 59, 999);
-      break;
+      const { end } = getPeriodStartEnd(periodType, year, month);
+      return manilaEndOfDay(end).toISOString();
     }
     case 'yearly': {
-      cutoff = new Date(year, 11, 31, 23, 59, 59, 999);
-      break;
+      const { end } = getPeriodStartEnd(periodType, year);
+      return manilaEndOfDay(end).toISOString();
     }
   }
-
-  return cutoff.toISOString();
 }
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ] as const;
 
 /**
@@ -132,23 +151,25 @@ export function buildPeriodLabel(
 }
 
 /**
- * Returns the start (Monday 00:00) and end (Sunday 23:59:59.999) of the given ISO week.
+ * Returns the start (Monday) and end (Sunday) of the given ISO week in Manila-local dates.
  */
 export function getISOWeekDateRange(isoYear: number, isoWeek: number): { start: Date; end: Date } {
   const week1Monday = startOfISOWeek(ISO_WEEK_1_ANCHOR(isoYear));
   const targetMonday = addWeeks(week1Monday, isoWeek - 1);
+  const targetSunday = addDays(targetMonday, 6);
+
   return {
-    start: targetMonday,
-    end: endOfISOWeek(targetMonday),
+    start: manilaStartOfDay(targetMonday),
+    end: manilaStartOfDay(targetSunday),
   };
 }
 
 /**
- * Returns a short label for the ISO week date range, e.g. "Jan 27 – Feb 2, 2026".
+ * Returns a short label for the ISO week date range, e.g. "Jan 27 - Feb 2, 2026".
  */
 export function getISOWeekDateRangeLabel(isoYear: number, isoWeek: number): string {
   const { start, end } = getISOWeekDateRange(isoYear, isoWeek);
-  return `${format(start, 'MMM d')} – ${format(end, 'MMM d, yyyy')}`;
+  return `${format(start, 'MMM d')} - ${format(end, 'MMM d, yyyy')}`;
 }
 
 /**
@@ -167,7 +188,9 @@ export function getISOWeekDateRangeLabelShort(isoYear: number, isoWeek: number):
  * Returns the number of ISO weeks in the given year (52 or 53).
  */
 export function getISOWeeksInYear(year: number): number {
-  return getISOWeek(new Date(year, 11, 28));
+  return getISOWeek(
+    toZonedTime(fromZonedTime(`${year}-12-28 12:00:00`, MANILA_TIMEZONE), MANILA_TIMEZONE)
+  );
 }
 
 /**
@@ -187,28 +210,33 @@ export function getPeriodStartEnd(
     }
     case 'monthly': {
       if (month == null) throw new Error('month is required for monthly period');
-      const start = new Date(year, month - 1, 1);
-      const end = new Date(year, month, 0); // last day of month
-      return { start, end };
+      const lastDay = new Date(year, month, 0).getDate();
+      return {
+        start: manilaDateAtMidnight(year, month, 1),
+        end: manilaDateAtMidnight(year, month, lastDay),
+      };
     }
     case 'yearly': {
-      return { start: new Date(year, 0, 1), end: new Date(year, 11, 31) };
+      return {
+        start: manilaDateAtMidnight(year, 1, 1),
+        end: manilaDateAtMidnight(year, 12, 31),
+      };
     }
   }
 }
 
 /**
  * Returns a human-readable date range subtitle, or null when not applicable.
- * For weekly rankings: "Jan 27 – Feb 2, 2026" (derived from period_start date).
+ * For weekly rankings: "Jan 27 - Feb 2, 2026" (derived from period_start date).
  */
 export function getPeriodDateRangeSubtitle(ranking: {
   period_type: RankingPeriodType;
   period_start: string;
 }): string | null {
   if (ranking.period_type === 'weekly') {
-    const start = new Date(ranking.period_start + 'T00:00:00');
+    const start = parseManilaDateString(ranking.period_start);
     const end = addDays(start, 6);
-    return `${format(start, 'MMM d')} – ${format(end, 'MMM d, yyyy')}`;
+    return `${format(start, 'MMM d')} - ${format(end, 'MMM d, yyyy')}`;
   }
   return null;
 }

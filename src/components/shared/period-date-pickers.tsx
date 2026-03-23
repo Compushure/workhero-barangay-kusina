@@ -13,7 +13,7 @@ import {
   getYearRangeStart,
 } from '@/lib/utils/period-filter-utils';
 
-export type PeriodDatePickerVariant = 'employee' | 'default';
+export type PeriodDatePickerVariant = 'employee' | 'default' | 'mercado';
 
 interface MonthPickerProps {
   selected: Date | null;
@@ -30,9 +30,10 @@ export function MonthPicker({
 }: MonthPickerProps) {
   const [year, setYear] = useState(() => selected?.getFullYear() ?? new Date().getFullYear());
   const isEmployee = variant === 'employee';
+  const isMercado = variant === 'mercado';
 
   return (
-    <div className={cn('p-3', isEmployee ? 'w-56' : 'w-64')}>
+    <div className={cn('p-3', isEmployee ? 'w-56' : 'w-64', isMercado && 'rounded-xl bg-white')}>
       <div className="flex items-center justify-between mb-4">
         {isEmployee ? (
           <>
@@ -48,6 +49,24 @@ export function MonthPicker({
               type="button"
               onClick={() => setYear((y) => y + 1)}
               className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </>
+        ) : isMercado ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setYear((y) => y - 1)}
+              className="inline-flex items-center justify-center size-8 rounded-md p-0 select-none text-foreground hover:bg-[#fed7aa] hover:text-foreground transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="text-sm font-semibold text-foreground">{year}</span>
+            <button
+              type="button"
+              onClick={() => setYear((y) => y + 1)}
+              className="inline-flex items-center justify-center size-8 rounded-md p-0 select-none text-foreground hover:bg-[#fed7aa] hover:text-foreground transition-colors"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -96,6 +115,11 @@ export function MonthPicker({
                   ? isSelected
                     ? 'bg-[#F4B925] text-[#3D2512]'
                     : 'text-white/80 hover:bg-[#b07440]/40 hover:text-white'
+                  : isMercado
+                    ? cn(
+                        'font-medium text-foreground hover:bg-[#fde7cf] hover:text-foreground',
+                        isSelected && 'bg-[#f97316] text-white hover:bg-[#f97316] hover:text-white'
+                      )
                   : cn(
                       'font-medium hover:bg-accent hover:text-accent-foreground',
                       isSelected &&
@@ -130,9 +154,10 @@ export function YearPicker({
   );
   const years = Array.from({ length: YEAR_RANGE_SIZE }, (_, i) => rangeStart + i);
   const isEmployee = variant === 'employee';
+  const isMercado = variant === 'mercado';
 
   return (
-    <div className={cn('p-3', isEmployee ? 'w-56' : 'w-64')}>
+    <div className={cn('p-3', isEmployee ? 'w-56' : 'w-64', isMercado && 'rounded-xl bg-white')}>
       <div className="flex items-center justify-between mb-4">
         {isEmployee ? (
           <>
@@ -150,6 +175,26 @@ export function YearPicker({
               type="button"
               onClick={() => setRangeStart((s) => s + YEAR_RANGE_SIZE)}
               className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-white/60 hover:bg-[#b07440]/40 hover:text-white transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </>
+        ) : isMercado ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setRangeStart((s) => s - YEAR_RANGE_SIZE)}
+              className="inline-flex items-center justify-center size-8 rounded-md p-0 select-none text-foreground hover:bg-[#fed7aa] hover:text-foreground transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="text-sm font-semibold text-foreground">
+              {rangeStart} - {rangeStart + YEAR_RANGE_SIZE - 1}
+            </span>
+            <button
+              type="button"
+              onClick={() => setRangeStart((s) => s + YEAR_RANGE_SIZE)}
+              className="inline-flex items-center justify-center size-8 rounded-md p-0 select-none text-foreground hover:bg-[#fed7aa] hover:text-foreground transition-colors"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -197,6 +242,11 @@ export function YearPicker({
                   ? isSelected
                     ? 'bg-[#F4B925] text-[#3D2512]'
                     : 'text-white/80 hover:bg-[#b07440]/40 hover:text-white'
+                  : isMercado
+                    ? cn(
+                        'font-medium text-foreground hover:bg-[#fde7cf] hover:text-foreground',
+                        isSelected && 'bg-[#f97316] text-white hover:bg-[#f97316] hover:text-white'
+                      )
                   : cn(
                       'font-medium hover:bg-accent hover:text-accent-foreground',
                       isSelected &&
@@ -226,6 +276,7 @@ function WeekDayButton({
   const variant = React.useContext(WeekVariantContext);
   const ref = React.useRef<HTMLButtonElement>(null);
   const isEmployee = variant === 'employee';
+  const isMercado = variant === 'mercado';
 
   React.useEffect(() => {
     if (modifiers.focused) ref.current?.focus();
@@ -269,7 +320,20 @@ function WeekDayButton({
               isHoveredEnd && !isRangeSelected && 'rounded-r-md rounded-l-none',
               'hover:bg-[#3D2512]/80! hover:text-white!'
             )
-          : cn(
+          : isMercado
+            ? cn(
+                !isInHoveredWeek && 'hover:bg-[#fde7cf] hover:text-foreground',
+                'data-[selected-single=true]:bg-[#f97316] data-[selected-single=true]:text-white',
+                'data-[range-start=true]:bg-[#f97316] data-[range-start=true]:text-white data-[range-start=true]:rounded-l-md data-[range-start=true]:rounded-r-none',
+                'data-[range-middle=true]:bg-[#fde7cf] data-[range-middle=true]:text-foreground data-[range-middle=true]:rounded-none',
+                'data-[range-end=true]:bg-[#f97316] data-[range-end=true]:text-white data-[range-end=true]:rounded-r-md data-[range-end=true]:rounded-l-none',
+                isInHoveredWeek && !isRangeSelected && 'bg-[#fde7cf] text-foreground',
+                isInHoveredWeek && !isRangeSelected && !isHoveredStart && !isHoveredEnd && 'rounded-none',
+                isHoveredStart && !isRangeSelected && 'rounded-l-md rounded-r-none',
+                isHoveredEnd && !isRangeSelected && 'rounded-r-md rounded-l-none',
+                'group-data-[focused=true]/day:border-transparent group-data-[focused=true]/day:ring-0'
+              )
+            : cn(
               !isInHoveredWeek && 'hover:bg-accent hover:text-accent-foreground',
               'data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground',
               'data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-start=true]:rounded-l-md data-[range-start=true]:rounded-r-none',
@@ -302,6 +366,7 @@ export function WeekCalendar({
 }: WeekCalendarProps) {
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
   const isEmployee = variant === 'employee';
+  const isMercado = variant === 'mercado';
 
   const selectedRange =
     selected !== null
@@ -335,9 +400,23 @@ export function WeekCalendar({
                 button_next:
                   'inline-flex cursor-pointer items-center justify-center rounded-md size-(--cell-size) aria-disabled:opacity-50 p-0 select-none text-[#F4B925] hover:bg-[#3D2512]/80 hover:text-[#F4B925] [&_svg]:text-[#F4B925] [&_svg]:size-4',
               }
-            : { today: '' }
+            : isMercado
+              ? {
+                  today:
+                    'rounded-md border-0 text-foreground data-[selected=true]:border-0 data-[selected=true]:bg-[#f97316] data-[selected=true]:text-white',
+                  caption_label: 'select-none text-sm font-semibold text-foreground',
+                  weekday:
+                    'text-[#f97316] rounded-md flex-1 font-normal text-[0.8rem] select-none',
+                  outside: 'text-muted-foreground/60 aria-selected:text-muted-foreground/60',
+                  disabled: 'text-muted-foreground/45 opacity-100',
+                  button_previous:
+                    'inline-flex cursor-pointer items-center justify-center rounded-md size-(--cell-size) aria-disabled:opacity-50 p-0 select-none text-foreground hover:bg-[#fde7cf] hover:text-foreground [&_svg]:size-4',
+                  button_next:
+                    'inline-flex cursor-pointer items-center justify-center rounded-md size-(--cell-size) aria-disabled:opacity-50 p-0 select-none text-foreground hover:bg-[#fde7cf] hover:text-foreground [&_svg]:size-4',
+                }
+              : { today: '' }
         }
-        className="p-3"
+        className={cn('p-3', isMercado && 'rounded-xl bg-white')}
         />
       </WeekVariantContext.Provider>
     </WeekHoverContext.Provider>

@@ -25,7 +25,7 @@ function applySearchAndSort(query: any, searchTerm: string, sort: VerificationSo
   const normalizedSearch = searchTerm.trim();
   if (normalizedSearch) {
     query = query.or(
-      `assigned_to_name.ilike.%${normalizedSearch}%,assigned_to_employee_id.ilike.%${normalizedSearch}%`
+      `assigned_to_name.ilike.%${normalizedSearch}%,assigned_to_employee_id.ilike.%${normalizedSearch}%,category_name.ilike.%${normalizedSearch}%`
     );
   }
 

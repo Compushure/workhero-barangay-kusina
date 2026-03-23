@@ -3,6 +3,10 @@
  * Shared utilities and configuration for the HR leaderboard feature
  */
 
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
+
+const MANILA_TIMEZONE = 'Asia/Manila';
+
 export const PERIODS = ['current', 'weekly', 'monthly', 'yearly'] as const;
 export type Period = (typeof PERIODS)[number];
 
@@ -56,7 +60,7 @@ export function getEmptyMessage(period: Period, error?: string | null): string {
 export function getNextReleaseDate(period: Period): Date | null {
   if (period === 'current') return null;
 
-  const now = new Date();
+  const now = toZonedTime(new Date(), MANILA_TIMEZONE);
   let nextDate: Date;
 
   switch (period) {
@@ -92,12 +96,7 @@ export function getNextReleaseDate(period: Period): Date | null {
  * Format a date for display in the empty state
  */
 export function formatNextReleaseDate(date: Date): string {
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  return formatInTimeZone(date, MANILA_TIMEZONE, 'EEEE, MMM d, yyyy');
 }
 
 /**

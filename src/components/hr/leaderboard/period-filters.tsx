@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, ChevronDown } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
@@ -47,6 +47,9 @@ export function PeriodFilters({
   onDateChange,
 }: PeriodFiltersProps) {
   const [open, setOpen] = useState(false);
+  const selectContentClassName = 'manager-dropdown-content rounded-lg bg-popover text-popover-foreground';
+  const selectItemClassName =
+    'cursor-pointer transition-all duration-300 ease-in-out hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground data-[state=checked]:bg-accent/15 data-[state=checked]:text-foreground';
   const availablePeriodKeys = useMemo(
     () => buildAvailablePeriodKeys(availablePeriods, activeTab),
     [availablePeriods, activeTab]
@@ -74,9 +77,9 @@ export function PeriodFilters({
           <SelectTrigger className="control-h w-full cursor-pointer rounded-lg border border-border bg-card px-3.5 text-xs font-semibold text-primary shadow-sm sm:text-sm">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className={selectContentClassName}>
             {PERIOD_TYPES.map((type) => (
-              <SelectItem key={type} value={type}>
+              <SelectItem key={type} value={type} className={selectItemClassName}>
                 {TAB_LABELS[type]}
               </SelectItem>
             ))}
@@ -94,27 +97,27 @@ export function PeriodFilters({
               type="button"
               disabled={!hasAnyPeriods}
               className={cn(
-                'control-h flex w-full items-center gap-2 rounded-lg border border-border bg-card px-3.5 text-left text-xs font-semibold shadow-sm transition sm:text-sm',
-                hasAnyPeriods ? 'cursor-pointer text-primary hover:bg-background/80' : 'cursor-not-allowed text-muted-foreground opacity-60'
+                'control-h flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-card px-3.5 text-left text-xs font-semibold shadow-sm transition sm:text-sm',
+                hasAnyPeriods
+                  ? 'cursor-pointer text-foreground hover:text-foreground'
+                  : 'cursor-not-allowed text-muted-foreground opacity-60'
               )}
             >
-              <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-primary sm:h-4 sm:w-4" />
-              <span className={cn('truncate', !hasSelection && 'text-muted-foreground')}>
-                {hasAnyPeriods ? triggerLabel : 'No generated periods'}
+              <span className="flex min-w-0 items-center gap-2">
+                <CalendarIcon className="h-4 w-4 shrink-0 text-accent" />
+                <span className={cn('truncate', !hasSelection && 'text-muted-foreground')}>
+                  {hasAnyPeriods ? triggerLabel : 'No generated periods'}
+                </span>
               </span>
-              {hasAnyPeriods ? (
-                <span
-                  aria-hidden="true"
-                  className="ml-auto h-3 w-3 shrink-0 rounded-full bg-primary-gradient"
-                />
-              ) : null}
+              <ChevronDown className="h-4 w-4 shrink-0 text-foreground" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto rounded-xl border border-border bg-white p-0 shadow-sm/25" align="start">
             {activeTab === 'weekly' && (
               <WeekCalendar
                 selected={selectedDate}
                 onSelect={handleSelect}
+                variant="mercado"
                 isDateSelectable={isDateSelectable}
               />
             )}
@@ -122,6 +125,7 @@ export function PeriodFilters({
               <MonthPicker
                 selected={selectedDate}
                 onSelect={handleSelect}
+                variant="mercado"
                 isDateSelectable={isDateSelectable}
               />
             )}
@@ -129,6 +133,7 @@ export function PeriodFilters({
               <YearPicker
                 selected={selectedDate}
                 onSelect={handleSelect}
+                variant="mercado"
                 isDateSelectable={isDateSelectable}
               />
             )}

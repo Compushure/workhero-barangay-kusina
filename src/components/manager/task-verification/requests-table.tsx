@@ -155,7 +155,7 @@ export function RequestsTable({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 sm:h-7 sm:w-7 text-foreground hover:bg-accent/15"
+                          className="h-6 w-6 cursor-pointer sm:h-7 sm:w-7 text-foreground hover:bg-transparent hover:text-foreground"
                           onClick={() => {
                             setSelectedRemark(request.remark || '');
                             setRemarkModalOpen(true);
@@ -179,7 +179,7 @@ export function RequestsTable({
                           size="sm"
                           onClick={() => onApprove(request.kpitask_id)}
                           disabled={isRejecting || isApproving}
-                          className="size-7 shrink-0 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 transition-all duration-200 hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:size-8"
+                          className="size-7 shrink-0 cursor-pointer rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 transition-all duration-200 hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:size-8"
                           aria-label="Approve request"
                         >
                           <Check size={14} className="sm:size-4" />
@@ -189,7 +189,7 @@ export function RequestsTable({
                           size="sm"
                           onClick={() => onDeny(request.kpitask_id)}
                           disabled={isRejecting || isApproving}
-                          className="size-7 shrink-0 rounded-md border border-destructive/30 bg-red-200 text-destructive transition-all duration-200 hover:bg-red-700 hover:text-white sm:size-8"
+                          className="size-7 shrink-0 cursor-pointer rounded-md border border-destructive/30 bg-red-200 text-destructive transition-all duration-200 hover:bg-red-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:size-8"
                           aria-label="Deny request"
                         >
                           <X size={14} className="sm:size-4" />

@@ -69,7 +69,7 @@ export function CurrentAssignedTasks() {
   const [overdueFilter, setOverdueFilter] = useState('hide-overdue');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  const debouncedSearchTerm = useDebounce(searchTerm, 900);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // ✅ Only enable the query for the active view mode to prevent unnecessary fetches
   const taskQuery = useGetCurrentAssignedTasksPaginated(

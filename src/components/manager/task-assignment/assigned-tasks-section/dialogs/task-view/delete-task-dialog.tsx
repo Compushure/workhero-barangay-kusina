@@ -39,7 +39,7 @@ function DeleteTaskDialog({
   };
   return (
     <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-white p-4 sm:p-5">
+      <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-card p-4 sm:p-5">
         <DialogHeader>
           <DialogTitle className="text-foreground text-base">Delete Task?</DialogTitle>
           <DialogDescription className="text-sm">
@@ -51,15 +51,15 @@ function DeleteTaskDialog({
           <Button
             onClick={handleDeleteTask}
             disabled={deleteTaskMutation.isPending}
-            className="bg-foreground hover:bg-red-600 text-white cursor-pointer transition-all duration-400 ease-in-out"
+            className="bg-red-700 hover:bg-red-500 text-white cursor-pointer transition-all duration-400 ease-in-out"
           >
-            {deleteTaskMutation.isPending ? 'Deleting...' : 'Delete'}
+            {deleteTaskMutation.isPending ? 'Deleting...' : 'Confirm'}
           </Button>
           <Button
             variant="outline"
             onClick={() => setShowDeleteConfirm(false)}
             disabled={deleteTaskMutation.isPending}
-            className="border-zinc-400 bg-white hover:bg-gray-300 cursor-pointer transition-all duration-400 ease-in-out"
+            className="border-zinc-400 bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground cursor-pointer transition-all duration-400 ease-in-out"
           >
             Cancel
           </Button>

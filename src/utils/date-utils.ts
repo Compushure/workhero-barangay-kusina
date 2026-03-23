@@ -7,6 +7,42 @@ import { startOfDay } from 'date-fns';
 
 const MANILA_TIMEZONE = 'Asia/Manila';
 
+function getDatePartsInTimeZone(date: Date, timeZone: string) {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+
+  const parts = formatter.formatToParts(date);
+  const year = parts.find((part) => part.type === 'year')?.value;
+  const month = parts.find((part) => part.type === 'month')?.value;
+  const day = parts.find((part) => part.type === 'day')?.value;
+
+  return {
+    year: year ?? '0000',
+    month: month ?? '01',
+    day: day ?? '01',
+  };
+}
+
+export function getCurrentManilaDateString(): string {
+  const { year, month, day } = getDatePartsInTimeZone(new Date(), MANILA_TIMEZONE);
+  return `${year}-${month}-${day}`;
+}
+
+export function getDateStringInManila(date: string | Date): string {
+  const parsedDate = typeof date === 'string' ? new Date(date) : date;
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return '';
+  }
+
+  const { year, month, day } = getDatePartsInTimeZone(parsedDate, MANILA_TIMEZONE);
+  return `${year}-${month}-${day}`;
+}
+
 /**
  * Formats a date-like value into a short readable string.
  * @param date - Date value (string/date/null)
@@ -35,9 +71,12 @@ export function formatDate(date: string | Date | null | undefined): string {
  */
 export function isTaskOverdue(endDate: string | null): boolean {
   if (!endDate) return false;
-  const taskEnd = new Date(new Date(endDate).setHours(0, 0, 0, 0));
-  const today = new Date(new Date().setHours(0, 0, 0, 0));
-  return taskEnd.getTime() < today.getTime();
+  const taskEndDate = getDateStringInManila(endDate);
+  const todayDate = getCurrentManilaDateString();
+
+  if (!taskEndDate) return false;
+
+  return taskEndDate < todayDate;
 }
 
 /**

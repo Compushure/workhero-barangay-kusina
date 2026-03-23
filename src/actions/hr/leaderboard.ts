@@ -16,9 +16,14 @@ import {
   getPeriodDateRangeSubtitle,
   getPeriodStartEnd,
   getISOWeeksInYear,
+  parseManilaDateString,
+  toManilaDateString,
 } from '@/lib/utils/time-period-utils';
 import { enrichRankingPlayers } from '@/lib/utils/enrich-ranking';
-import { format, getISOWeek, getISOWeekYear } from 'date-fns';
+import { getISOWeek, getISOWeekYear } from 'date-fns';
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
+
+const MANILA_TIMEZONE = 'Asia/Manila';
 
 // ---------------------------------------------------------------------------
 // Enriched leaderboard result — returned by getEnrichedLeaderboardByPeriod
@@ -106,19 +111,21 @@ const MIN_EMPLOYEES_FOR_RANKING = 1;
 
 /** Format a Date as YYYY-MM-DD for Supabase date columns */
 function toDateStr(d: Date): string {
-  return format(d, 'yyyy-MM-dd');
+  return toManilaDateString(d);
 }
 
 function buildPeriodLabelLikeView(periodType: RankLogPeriodType, periodStartDate: Date): string {
+  const periodStartInManila = toZonedTime(periodStartDate, MANILA_TIMEZONE);
+
   switch (periodType) {
     case 'weekly': {
-      return `Week ${getISOWeek(periodStartDate)}, ${getISOWeekYear(periodStartDate)}`;
+      return `Week ${getISOWeek(periodStartInManila)}, ${getISOWeekYear(periodStartInManila)}`;
     }
     case 'monthly': {
-      return format(periodStartDate, 'MMMM yyyy');
+      return formatInTimeZone(periodStartDate, MANILA_TIMEZONE, 'MMMM yyyy');
     }
     case 'yearly': {
-      return `Year ${format(periodStartDate, 'yyyy')}`;
+      return `Year ${formatInTimeZone(periodStartDate, MANILA_TIMEZONE, 'yyyy')}`;
     }
   }
 }
@@ -128,7 +135,7 @@ function getLatestCompletedPeriod(periodType: RankLogPeriodType): {
   month?: number;
   week?: number;
 } {
-  const now = new Date();
+  const now = toZonedTime(new Date(), MANILA_TIMEZONE);
 
   if (periodType === 'weekly') {
     const currentIsoWeek = getISOWeek(now);
@@ -461,7 +468,7 @@ export async function getLatestWeeklyPeriod(): Promise<
       return null;
     }
 
-    const startDate = new Date(data.period_start + 'T00:00:00');
+    const startDate = toZonedTime(parseManilaDateString(data.period_start), MANILA_TIMEZONE);
     return {
       year: startDate.getFullYear(),
       week: getISOWeek(startDate),
@@ -495,7 +502,7 @@ export async function getLatestMonthlyPeriod(): Promise<
       return null;
     }
 
-    const startDate = new Date(data.period_start + 'T00:00:00');
+    const startDate = toZonedTime(parseManilaDateString(data.period_start), MANILA_TIMEZONE);
     return {
       year: startDate.getFullYear(),
       month: startDate.getMonth() + 1,
@@ -529,7 +536,7 @@ export async function getLatestYearlyPeriod(): Promise<
       return null;
     }
 
-    const startDate = new Date(data.period_start + 'T00:00:00');
+    const startDate = toZonedTime(parseManilaDateString(data.period_start), MANILA_TIMEZONE);
     return { year: startDate.getFullYear(), is_visible: data.is_visible };
   });
 }

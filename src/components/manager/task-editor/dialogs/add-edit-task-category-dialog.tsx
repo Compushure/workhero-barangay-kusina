@@ -239,7 +239,7 @@ export default function AddEditTaskCategoryDialog({
                       key={type}
                       type="button"
                       onClick={() => handleTypeSelect(type)}
-                      className="w-full text-left px-3 py-1.5 hover:bg-accent-secondary/50 transition-colors text-xs text-primary border-none bg-transparent"
+                      className="w-full cursor-pointer text-left px-3 py-1.5 hover:bg-accent-secondary/50 transition-colors text-xs text-primary border-none bg-transparent"
                     >
                       {type}
                     </button>
@@ -291,7 +291,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setPoints(Math.max(1, points - 1))}
                     disabled={points <= 1 || isLoading}
-                    className="bg-foreground text-card h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
+                    className="bg-card text-foreground border border-primary/50 h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none cursor-pointer hover:bg-[#fafafa] hover:text-foreground hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm shadow-sm/25"
                   >
                     −
                   </button>
@@ -310,7 +310,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setPoints(Math.min(10000, points + 1))}
                     disabled={points >= 10000 || isLoading}
-                    className="bg-foreground text-white h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
+                    className="bg-card text-foreground border border-primary/50 h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none cursor-pointer hover:bg-[#fafafa] hover:text-foreground hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm shadow-sm/25"
                   >
                     +
                   </button>
@@ -330,7 +330,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setXp(Math.max(1, xp - 1))}
                     disabled={xp <= 1 || isLoading}
-                    className="bg-foreground text-white h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
+                    className="bg-card text-foreground border border-primary/50 h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none cursor-pointer hover:bg-[#fafafa] hover:text-foreground hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm shadow-sm/25"
                   >
                     −
                   </button>
@@ -349,7 +349,7 @@ export default function AddEditTaskCategoryDialog({
                     type="button"
                     onClick={() => setXp(Math.min(5000, xp + 1))}
                     disabled={xp >= 5000 || isLoading}
-                    className="bg-foreground text-white h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm"
+                    className="bg-card text-foreground border border-primary/50 h-7 w-7 min-h-7 min-w-7 rounded-sm flex items-center justify-center leading-none cursor-pointer hover:bg-[#fafafa] hover:text-foreground hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm shadow-sm/25"
                   >
                     +
                   </button>
@@ -372,7 +372,7 @@ export default function AddEditTaskCategoryDialog({
                 checked={isRepeatable}
                 onCheckedChange={setIsRepeatable}
                 disabled={isLoading}
-                className="scale-125 data-[state=checked]:bg-accent"
+                className="scale-125 cursor-pointer data-[state=checked]:bg-accent"
               ></Switch>
             </div>
           </section>
@@ -383,7 +383,7 @@ export default function AddEditTaskCategoryDialog({
           <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="bg-primary-gradient hover:brightness-75 text-white hover:bg-accent px-3 sm:px-6 disabled:opacity-50 disabled:brightness-75 disabled:saturate-50 disabled:cursor-not-allowed flex-1 sm:flex-initial sm:w-auto transition-all duration-400 ease-in-out h-8 text-xs"
+            className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out px-3 sm:px-6 shadow-sm/25 disabled:opacity-50 disabled:brightness-75 disabled:saturate-50 disabled:cursor-not-allowed flex-1 sm:flex-initial sm:w-auto h-8 text-xs"
           >
             {isLoading ? (
               <>
@@ -400,7 +400,7 @@ export default function AddEditTaskCategoryDialog({
             variant="outline"
             onClick={handleClose}
             disabled={isLoading}
-            className="bg-white text-primary border-primary/50 hover:bg-white hover:brightness-90 px-3 sm:px-6 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-initial sm:w-auto h-8 text-xs"
+            className="bg-card text-foreground border-primary/50 cursor-pointer hover:bg-[#fafafa] hover:text-foreground hover:brightness-90 px-3 sm:px-6 shadow-sm/25 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-initial sm:w-auto h-8 text-xs"
           >
             Cancel
           </Button>

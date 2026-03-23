@@ -23,6 +23,30 @@ export function formatDateShort(
   });
 }
 
+export function formatDateTimeShort(
+  value: string | Date | null | undefined,
+  fallback = 'N/A'
+): string {
+  if (!value) return fallback;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return fallback;
+
+  const datePart = date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+
+  const timePart = date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  return `${datePart} ${timePart}`;
+}
+
 export function formatAvailabilityLabel(value: AvailabilityValue): string {
   if (value === 'weekly') return 'Weekly';
   if (value === 'monthly') return 'Monthly';

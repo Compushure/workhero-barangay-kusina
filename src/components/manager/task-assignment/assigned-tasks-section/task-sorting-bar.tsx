@@ -1,11 +1,13 @@
 'use client';
 
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, CalendarArrowDown, CalendarArrowUp, ClockArrowDown, ClockArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -16,10 +18,10 @@ interface TaskSortingBarProps {
 
 export function TaskSortingBar({ sortBy, onSortChange }: TaskSortingBarProps) {
   const options = [
-    { value: 'recently added', label: 'Recently Added' },
-    { value: 'oldest', label: 'Oldest' },
-    { value: 'closest', label: 'Closest due' },
-    { value: 'farthest', label: 'Farthest due' },
+    { value: 'recently added', label: 'Recently Added', icon: ClockArrowDown },
+    { value: 'oldest', label: 'Oldest Added', icon: ClockArrowUp },
+    { value: 'closest', label: 'Closest Due', icon: CalendarArrowUp },
+    { value: 'farthest', label: 'Farthest Due', icon: CalendarArrowDown },
   ];
 
   const currentLabel = options.find((opt) => opt.value === sortBy)?.label || 'Sort';
@@ -36,14 +38,22 @@ export function TaskSortingBar({ sortBy, onSortChange }: TaskSortingBarProps) {
           <ArrowUpDown size={14} className="sm:size-4 text-accent" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="manager-dropdown-content">
+      <DropdownMenuContent
+        align="end"
+        className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
+      >
+        <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+          Sort by Date
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
         {options.map((opt) => (
           <DropdownMenuItem
             key={opt.value}
             onClick={() => onSortChange(opt.value)}
             className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-500 ease-in-out ${sortBy === opt.value ? 'bg-accent/15 text-foreground' : ''}`}
           >
-            {opt.label}
+            <opt.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+            <span className="truncate">{opt.label}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

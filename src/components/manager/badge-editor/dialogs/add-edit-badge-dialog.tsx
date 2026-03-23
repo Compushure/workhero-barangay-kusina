@@ -336,7 +336,7 @@ export default function AddEditBadgeDialog({
         <DialogHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-primary text-base sm:text-lg font-semibold">
-              <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Plus className="h-4 w-4 text-accent sm:h-5 sm:w-5" />
               {editingBadge ? 'Edit Badge' : 'Add New Badge'}
             </DialogTitle>
           </div>
@@ -383,7 +383,7 @@ export default function AddEditBadgeDialog({
                   type="button"
                   onClick={() => setPoints(Math.max(1, points - 1))}
                   disabled={points <= 1 || isLoading}
-                  className="bg-foreground text-white size-8 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  className="bg-primary-gradient text-card size-8 rounded flex items-center justify-center hover:bg-primary-gradient hover:brightness-85 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 cursor-pointer"
                 >
                   −
                 </button>
@@ -402,7 +402,7 @@ export default function AddEditBadgeDialog({
                   type="button"
                   onClick={() => setPoints(Math.min(10000, points + 1))}
                   disabled={points >= 10000 || isLoading}
-                  className="bg-foreground text-white size-8 rounded flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  className="bg-primary-gradient text-card size-8 rounded flex items-center justify-center hover:bg-primary-gradient hover:brightness-85 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 cursor-pointer"
                 >
                   +
                 </button>
@@ -480,7 +480,7 @@ export default function AddEditBadgeDialog({
                     variant="outline"
                     size="sm"
                     onClick={handleClearImage}
-                    className="border-foreground text-foreground hover:bg-[#fbeaea] bg-transparent"
+                    className="border-foreground text-foreground hover:bg-[#fbeaea] bg-transparent cursor-pointer"
                   >
                     <X className="h-4 w-4 mr-1" />
                     Remove Image
@@ -497,12 +497,16 @@ export default function AddEditBadgeDialog({
               value={awardAtInterval}
               onValueChange={(value) => setAwardAtInterval(value as BadgeInterval)}
             >
-              <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground">
+              <SelectTrigger className="bg-card border border-zinc-200 text-foreground shadow-sm/25 transition-all duration-200 ease-in-out hover:bg-[#fafafa] hover:brightness-90 focus:border-accent focus:ring-0 focus:ring-offset-0 cursor-pointer">
                 <SelectValue placeholder="Select interval" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="manager-dropdown-content">
                 {INTERVALS.map((interval) => (
-                  <SelectItem key={interval} value={interval}>
+                  <SelectItem
+                    key={interval}
+                    value={interval}
+                    className="manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out"
+                  >
                     {INTERVAL_LABELS[interval as BadgeInterval]}
                   </SelectItem>
                 ))}
@@ -524,7 +528,7 @@ export default function AddEditBadgeDialog({
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsConditionsCollapsed((prev) => !prev)}
-                  className="h-8 w-8 text-foreground hover:bg-foreground/10"
+                  className="h-8 w-8 text-foreground hover:bg-foreground/10 cursor-pointer"
                 >
                   {isConditionsCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
                 </Button>
@@ -534,9 +538,9 @@ export default function AddEditBadgeDialog({
                 onClick={handleAddCondition}
                 variant="outline"
                 size="sm"
-                className="border-foreground text-foreground hover:bg-gray-200 bg-card"
+                className="bg-primary-gradient text-card border-transparent hover:bg-primary-gradient hover:brightness-85 cursor-pointer"
               >
-                <PlusIcon size={16} className="mr-1" />
+                <PlusIcon size={16} className="mr-1 text-card" />
                 Add Condition
               </Button>
             </div>
@@ -602,7 +606,7 @@ export default function AddEditBadgeDialog({
                               onClick={() => handleToggleCondition(condition.id)}
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 hover:bg-foreground/10 text-foreground"
+                              className="h-8 w-8 hover:bg-foreground/10 text-foreground cursor-pointer"
                             >
                               {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                             </Button>
@@ -611,7 +615,7 @@ export default function AddEditBadgeDialog({
                               onClick={() => handleRemoveCondition(condition.id)}
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
+                              className="h-8 w-8 hover:bg-red-50 hover:text-red-600 cursor-pointer"
                             >
                               <Trash2 size={16} />
                             </Button>
@@ -632,7 +636,7 @@ export default function AddEditBadgeDialog({
                                     handleUpdateCondition(condition.id, 'logic_type', value)
                                   }
                                 >
-                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm">
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm cursor-pointer">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -659,7 +663,7 @@ export default function AddEditBadgeDialog({
                                     )
                                   }
                                 >
-                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm">
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm cursor-pointer">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -690,7 +694,7 @@ export default function AddEditBadgeDialog({
                                     )
                                   }
                                 >
-                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm">
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm cursor-pointer">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -722,7 +726,7 @@ export default function AddEditBadgeDialog({
                                     )
                                   }
                                 >
-                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm">
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm cursor-pointer">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -754,7 +758,7 @@ export default function AddEditBadgeDialog({
                                     )
                                   }
                                 >
-                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm">
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm cursor-pointer">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -846,7 +850,7 @@ export default function AddEditBadgeDialog({
                                     )
                                   }
                                 >
-                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm">
+                                  <SelectTrigger className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm cursor-pointer">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -900,7 +904,7 @@ export default function AddEditBadgeDialog({
           <Button
             onClick={handleSave}
             disabled={isSaveDisabled}
-            className="bg-foreground text-white hover:bg-accent px-4 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-initial sm:w-auto"
+            className="bg-primary-gradient text-card hover:bg-primary-gradient hover:brightness-85 px-4 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-initial sm:w-auto cursor-pointer"
           >
             {isLoading ? (
               <span className="animate-pulse">Saving...</span>
@@ -915,7 +919,7 @@ export default function AddEditBadgeDialog({
             variant="outline"
             onClick={handleClose}
             disabled={isLoading}
-            className="bg-card text-primary border hover:bg-gray-200 px-4 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-initial sm:w-auto"
+            className="bg-card text-foreground border hover:bg-[#fafafa] hover:text-foreground hover:brightness-90 px-4 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-initial sm:w-auto cursor-pointer"
           >
             Cancel
           </Button>

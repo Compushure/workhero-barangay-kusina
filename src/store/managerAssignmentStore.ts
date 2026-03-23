@@ -174,7 +174,7 @@ export const useManagerAssignmentStore = create<ManagerAssignmentState>((set, ge
           assignedEmployees: task.assignedEmployees.filter(
             (emp) =>
               !(
-                (emp.status?.toLowerCase() ?? 'assigned') === 'assigned' &&
+                (emp.status?.trim().toLowerCase() ?? 'assigned') === 'assigned' &&
                 (emp.completedOrders ?? 0) === 0 &&
                 (emp.pendingOrders ?? 0) === 0
               )
