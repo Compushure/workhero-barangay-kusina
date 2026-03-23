@@ -10,7 +10,7 @@ import { AddTaskInput, addTaskSchema, EditTaskInput, editTaskSchema } from '@/zo
  * @param page - Page number (1-indexed)
  * @param pageSize - Number of items per page
  * @param sortBy - Sort order option
- * @param searchTerm - Optional search term for filtering tasks by name, description, or type
+ * @param searchTerm - Optional search term for filtering tasks by name only
  */
 export async function fetchTaskCategoriesPaginated(
   page: number = 1,
@@ -86,9 +86,7 @@ export async function fetchTaskCategoriesPaginated(
   // Apply search filter if provided
   if (searchTerm && searchTerm.trim()) {
     const trimmedSearch = searchTerm.trim();
-    query = query.or(
-      `name.ilike.%${trimmedSearch}%,description.ilike.%${trimmedSearch}%,type.ilike.%${trimmedSearch}%`
-    );
+    query = query.ilike('name', `%${trimmedSearch}%`);
   }
 
   // Apply repeatable/non-repeatable filter category
@@ -104,9 +102,7 @@ export async function fetchTaskCategoriesPaginated(
   // Apply search filter to count query if provided
   if (searchTerm && searchTerm.trim()) {
     const trimmedSearch = searchTerm.trim();
-    countQuery = countQuery.or(
-      `name.ilike.%${trimmedSearch}%,description.ilike.%${trimmedSearch}%,type.ilike.%${trimmedSearch}%`
-    );
+    countQuery = countQuery.ilike('name', `%${trimmedSearch}%`);
   }
   
   // Apply repeatable/non-repeatable filter category to count query
