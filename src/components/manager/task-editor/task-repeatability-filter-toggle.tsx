@@ -1,17 +1,17 @@
 'use client';
 
-import { Filter } from 'lucide-react';
+import { CircleSlash2, Filter, Infinity, Layers3, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
 
 export type TaskRepeatabilityFilter = 'all' | 'repeatable' | 'non-repeatable';
 
@@ -24,55 +24,64 @@ export function TaskRepeatabilityFilterToggle({
   value,
   onChange,
 }: TaskRepeatabilityFilterToggleProps) {
-  const activeFilterCount = value === 'all' ? 0 : 1;
+  const isActive = value !== 'all';
+
+  const repeatabilityOptions = [
+    { value: 'all' as const, label: 'All tasks', icon: Layers3 },
+    { value: 'repeatable' as const, label: 'Repeatable', icon: Infinity },
+    { value: 'non-repeatable' as const, label: 'Non-Repeatable', icon: CircleSlash2 },
+  ];
 
   return (
     <div className="flex items-center gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="outline"
-            className="text-button control-h gap-2 px-4 rounded-md border-accent/25 hover:bg-accent/15 shadow-sm/25 bg-card"
+            variant="default"
+            size="default"
+            className={`text-button control-h shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer w-full sm:w-26 justify-around px-2 ${
+              isActive
+                ? 'bg-primary-gradient text-primary-foreground hover:brightness-90'
+                : 'bg-card text-foreground hover:bg-card hover:text-foreground hover:brightness-90'
+            }`}
           >
-            <Filter className="size-3 text-accent" />
-            <span className="hidden sm:inline">Filter</span>
-            {activeFilterCount > 0 && (
-              <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
-                {activeFilterCount}
-              </Badge>
-            )}
+            <Filter
+              className={`size-3 shrink-0 ${isActive ? 'text-primary-foreground' : 'text-accent'}`}
+            />
+            <span className="hidden truncate sm:inline">Filter</span>
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="start" className="manager-dropdown-content w-56">
-          <DropdownMenuLabel className="text-xs text-muted-foreground">
-            Task Type Category
+        <DropdownMenuContent align="start" className="manager-dropdown-content min-w-44">
+          <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+            Filter by Type
           </DropdownMenuLabel>
-
-          <DropdownMenuCheckboxItem
-            checked={value === 'repeatable'}
-            onCheckedChange={(checked) => onChange(checked ? 'repeatable' : 'all')}
-            className="manager-dropdown-item cursor-pointer"
+          <DropdownMenuRadioGroup
+            value={value}
+            onValueChange={(nextValue) => onChange(nextValue as TaskRepeatabilityFilter)}
           >
-            Repeatable
-          </DropdownMenuCheckboxItem>
-
-          <DropdownMenuCheckboxItem
-            checked={value === 'non-repeatable'}
-            onCheckedChange={(checked) => onChange(checked ? 'non-repeatable' : 'all')}
-            className="manager-dropdown-item cursor-pointer"
-          >
-            Non-Repeatable
-          </DropdownMenuCheckboxItem>
-
+            {repeatabilityOptions.map((option) => (
+              <DropdownMenuRadioItem
+                key={option.value}
+                value={option.value}
+                className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out pl-2 [&_span.absolute]:hidden ${
+                  value === option.value ? 'bg-accent/15 text-foreground font-medium' : ''
+                }`}
+              >
+                <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                <span className="truncate">{option.label}</span>
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuLabel className="text-xs text-muted-foreground">
+          <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
             Quick Actions
           </DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() => onChange('all')}
-            className="manager-dropdown-item cursor-pointer pl-8"
+            className="manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out"
           >
+            <Sparkles className="mr-2.5 size-3.5 shrink-0 text-accent" />
             Clear Filters
           </DropdownMenuItem>
         </DropdownMenuContent>

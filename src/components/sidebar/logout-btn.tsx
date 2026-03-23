@@ -103,22 +103,22 @@ export const LogOutBtn = memo(function LogOutBtn() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              className="cursor-pointer"
-              disabled={isPending || isNavigating || isLoggingOut}
-            >
-              Cancel
-            </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
                 handleLogout();
               }}
-              className="cursor-pointer"
+              className="bg-primary-gradient text-card hover:bg-primary-gradient hover:brightness-85 cursor-pointer"
               disabled={isPending || isNavigating || isLoggingOut}
             >
-              Yes, Logout
+              Confirm
             </AlertDialogAction>
+            <AlertDialogCancel
+              className="!bg-card !text-foreground hover:!bg-[#fafafa] hover:!text-foreground hover:brightness-90 cursor-pointer"
+              disabled={isPending || isNavigating || isLoggingOut}
+            >
+              Cancel
+            </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

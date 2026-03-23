@@ -40,17 +40,17 @@ export function PeriodNav({ periodType, onPeriodTypeChange }: PeriodNavProps) {
   const label = periodType.charAt(0).toUpperCase() + periodType.slice(1);
 
   return (
-    <div className="inline-flex w-full max-w-[248px] items-center justify-center gap-3 sm:max-w-[272px] sm:gap-4">
+    <div className="inline-flex w-full items-center justify-center gap-3 sm:gap-4">
       <button
         type="button"
         onClick={() => onPeriodTypeChange(prevType)}
-        className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B] text-white shadow-[4px_4px_0px_#000] shadow-[#3017008e] transition-all duration-150 hover:translate-y-1 hover:bg-[#7C5432] hover:shadow-[2px_2px_0px_#000] sm:h-11 sm:w-11"
+        className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B] text-white shadow-[4px_4px_0px_#000] shadow-[#3017008e] transition-all duration-150 hover:translate-y-1 hover:bg-[#7C5432] hover:shadow-[2px_2px_0px_#000] sm:h-[3.2rem] sm:w-[3.2rem]"
         aria-label="Previous period"
       >
         <ChevronLeft className="h-4 w-4 shrink-0 stroke-white sm:h-[18px] sm:w-[18px]" strokeWidth={2.25} />
       </button>
 
-      <div className="min-w-0 flex-1 text-center">
+      <div className="flex min-h-12 min-w-0 flex-1 items-center justify-center text-center sm:min-h-[3.2rem]">
         <span
           className="block font-jersey text-xl leading-none tracking-[0.08em] text-[#F4B925] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:text-2xl"
           aria-live="polite"
@@ -62,7 +62,7 @@ export function PeriodNav({ periodType, onPeriodTypeChange }: PeriodNavProps) {
       <button
         type="button"
         onClick={() => onPeriodTypeChange(nextType)}
-        className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B] text-white shadow-[4px_4px_0px_#000] shadow-[#3017008e] transition-all duration-150 hover:translate-y-1 hover:bg-[#7C5432] hover:shadow-[2px_2px_0px_#000] sm:h-11 sm:w-11"
+        className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B] text-white shadow-[4px_4px_0px_#000] shadow-[#3017008e] transition-all duration-150 hover:translate-y-1 hover:bg-[#7C5432] hover:shadow-[2px_2px_0px_#000] sm:h-[3.2rem] sm:w-[3.2rem]"
         aria-label="Next period"
       >
         <ChevronRight className="h-4 w-4 shrink-0 stroke-white sm:h-[18px] sm:w-[18px]" strokeWidth={2.25} />

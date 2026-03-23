@@ -5,12 +5,12 @@ type LeaderboardSkeletonProps = {
 function ToggleSkeleton() {
   return (
     <div
-      className="w-full max-w-[420px] rounded-[24px] border-[3px] border-[#4A2E1C] bg-[linear-gradient(180deg,#7A502E_0%,#5E3C22_100%)] p-2.5 shadow-[0_10px_0_#2F1A0D,0_16px_28px_rgba(0,0,0,0.35)]"
+      className="w-full max-w-[388px] rounded-[12px] border-[3px] border-[#47331F] bg-[linear-gradient(180deg,#6E4A2C_0%,#55361E_100%)] p-1.5 shadow-[0_10px_18px_rgba(0,0,0,0.28),4px_4px_0px_#000] shadow-[#3017008e] sm:max-w-[412px]"
       aria-hidden
     >
-      <div className="flex rounded-[18px] border-[2px] border-[#3B2415] bg-[#4D2E19] p-1.5 shadow-[inset_0_2px_0_rgba(255,255,255,0.12)]">
-        <div className="h-12 flex-1 animate-pulse rounded-[14px] bg-[#E1A22D]/35" />
-        <div className="mx-1.5 h-12 flex-1 animate-pulse rounded-[14px] bg-[#E1A22D]/70 shadow-[inset_0_3px_0_rgba(255,255,255,0.18)]" />
+      <div className="inline-flex w-full overflow-hidden rounded-[8px] border-2 border-[#7F5733] bg-[#5B3E29] shadow-[inset_0_1px_0_rgba(255,225,181,0.14)]">
+        <div className="h-10 flex-1 animate-pulse bg-[#CF8B22]/28 sm:h-11" />
+        <div className="h-10 flex-1 animate-pulse border-l-[3px] border-[#47331F] bg-[#CF8B22] sm:h-11" />
       </div>
     </div>
   );
@@ -19,27 +19,25 @@ function ToggleSkeleton() {
 function PeriodNavSkeleton() {
   return (
     <div
-      className="inline-flex w-full max-w-[248px] items-center justify-center gap-3 sm:max-w-[272px] sm:gap-4"
+      className="inline-flex w-full items-center justify-center gap-3 sm:gap-4"
       aria-hidden
     >
-      <div className="h-10 w-10 shrink-0 animate-pulse rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B]/80 shadow-[4px_4px_0px_#000] shadow-[#3017008e] sm:h-11 sm:w-11" />
-      <div className="h-6 w-24 animate-pulse rounded bg-[#F4B925]/35 sm:h-7 sm:w-28" />
-      <div className="h-10 w-10 shrink-0 animate-pulse rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B]/80 shadow-[4px_4px_0px_#000] shadow-[#3017008e] sm:h-11 sm:w-11" />
+      <div className="h-12 w-12 shrink-0 animate-pulse rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B]/80 shadow-[4px_4px_0px_#000] shadow-[#3017008e] sm:h-[3.2rem] sm:w-[3.2rem]" />
+      <div className="h-6 flex-1 animate-pulse rounded bg-[#F4B925]/35 sm:h-7" />
+      <div className="h-12 w-12 shrink-0 animate-pulse rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B]/80 shadow-[4px_4px_0px_#000] shadow-[#3017008e] sm:h-[3.2rem] sm:w-[3.2rem]" />
     </div>
   );
 }
 
 function HistoryDatePickerSkeleton() {
   return (
-    <div className="flex w-full justify-center" aria-hidden>
-      <div className="w-full max-w-[282px] sm:w-[44%] sm:min-w-[240px] sm:max-w-[264px]">
-        <div className="flex min-h-11 w-full items-center gap-2 rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B] px-3 py-2.5 shadow-[4px_4px_0px_#000] shadow-[#3017008e] sm:min-h-12 sm:px-4">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border-2 border-[#47331F] bg-[#5B3E29] shadow-[inset_0_1px_0_rgba(255,225,181,0.12)] sm:h-9 sm:w-9">
+    <div className="w-full" aria-hidden>
+      <div className="flex min-h-10 w-full items-center gap-2 rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B] px-3 py-2 shadow-[4px_4px_0px_#000] shadow-[#3017008e] sm:min-h-11 sm:px-4">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border-2 border-[#47331F] bg-[#5B3E29] shadow-[inset_0_1px_0_rgba(255,225,181,0.12)] sm:h-8 sm:w-8">
             <div className="h-4 w-4 animate-pulse rounded-sm bg-[#F4B925]/45 sm:h-[18px] sm:w-[18px]" />
           </div>
           <div className="h-4 flex-1 animate-pulse rounded bg-white/30 sm:h-5" />
           <div className="h-3.5 w-3.5 animate-pulse rounded-full bg-[#CF8B22]/75" />
-        </div>
       </div>
     </div>
   );
@@ -96,36 +94,42 @@ function SkeletonCard({ size }: { size: 'large' | 'small' }) {
 
 export function LeaderboardSkeleton({ variant = 'current' }: LeaderboardSkeletonProps) {
   return (
-    <div className={`flex w-full ${variant === 'history' ? 'max-w-5xl' : 'max-w-7xl'} flex-1 flex-col items-center`}>
+    <div className={`flex w-full ${variant === 'history' ? 'max-w-5xl' : 'max-w-5xl'} flex-1 flex-col items-center`}>
       <header
         className={`flex w-full shrink-0 flex-col items-center ${
           variant === 'history'
             ? 'max-w-3xl'
-            : 'max-w-4xl min-h-40 sm:min-h-44 md:min-h-56'
+            : 'max-w-3xl'
         }`}
       >
         {variant === 'current' && (
-          <div className="mb-7 flex w-full flex-col items-center gap-6 sm:mb-8 sm:gap-7">
+          <div className="mb-5 flex w-full flex-col items-center gap-5 px-1 sm:mb-6 sm:gap-6">
             <ToggleSkeleton />
-            <div className="flex w-full flex-col items-center gap-4 sm:gap-5">
-              <PeriodNavSkeleton />
-              <div className="h-5 w-44 animate-pulse rounded bg-white/25 sm:h-6 sm:w-56" aria-hidden />
+            <div className="flex w-full flex-col items-center gap-5 sm:gap-6">
+              <div className="flex w-full max-w-[388px] justify-center sm:max-w-[412px]">
+                <PeriodNavSkeleton />
+              </div>
+              <div className="flex min-h-10 w-full flex-col items-center justify-start sm:min-h-12" aria-hidden>
+                <div className="h-5 w-44 animate-pulse rounded bg-white/25 sm:h-6 sm:w-56" />
+              </div>
             </div>
           </div>
         )}
 
         {variant === 'history' && (
           <>
-            <div className="mb-5 w-full max-w-[420px] self-center sm:mb-6">
+            <div className="mb-5 w-full max-w-[388px] self-center sm:mb-6 sm:max-w-[412px]">
               <ToggleSkeleton />
             </div>
             <div className="relative z-10 mb-5 flex w-full max-w-3xl shrink-0 flex-col items-center gap-5 px-1 sm:mb-6 sm:gap-6">
-              <div className="mt-6 flex w-full justify-center sm:mt-7">
-                <div className="flex w-full max-w-2xl justify-center">
+              <div className="mt-6 flex w-full max-w-[388px] flex-col items-center justify-center gap-3 sm:mt-7 sm:max-w-[412px] sm:flex-row sm:items-center sm:justify-center sm:gap-3">
+                <div className="flex w-full justify-center sm:w-[52%]">
                   <PeriodNavSkeleton />
                 </div>
+                <div className="w-full sm:w-[48%]">
+                  <HistoryDatePickerSkeleton />
+                </div>
               </div>
-              <HistoryDatePickerSkeleton />
             </div>
           </>
         )}

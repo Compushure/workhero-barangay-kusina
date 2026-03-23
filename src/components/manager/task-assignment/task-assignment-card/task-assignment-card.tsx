@@ -215,7 +215,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
           <Button
             variant="outline"
             onClick={() => setShowClearConfirm(true)}
-            className="text-button flex-1 sm:flex-initial sm:w-auto text-primary bg-white hover:bg-gray-100 hover:text-accent px-4 sm:px-10 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25 h-9"
+            className="text-button flex-1 sm:flex-initial sm:w-auto bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground px-4 sm:px-10 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25 h-9"
           >
             Clear
           </Button>
@@ -242,14 +242,14 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
             <Button
               onClick={handleAssign}
               disabled={isAssigning}
-              className="text-button bg-foreground hover:bg-accent text-white cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed px-6 shadow-sm/25 h-9"
+              className="text-button bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card cursor-pointer transition-all duration-500 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed px-6 shadow-sm/25 h-9"
             >
               {isAssigning ? 'Assigning...' : 'Confirm'}
             </Button>
             <Button
               variant="outline"
               onClick={() => setShowAssignConfirm(false)}
-              className="border-zinc-400 bg-white hover:bg-gray-100 px-8 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
+              className="border-zinc-400 bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground px-8 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
             >
               Cancel
             </Button>

@@ -51,14 +51,14 @@ function UnassignEmployeeDialog({
           <Button
             onClick={handleUnassign}
             disabled={deleteTaskMutation.isPending}
-            className="bg-foreground hover:bg-[#af3b3f] text-white cursor-pointer transition-all duration-500 ease-in-out"
+            className="bg-red-700 hover:bg-red-500 text-white cursor-pointer transition-all duration-400 ease-in-out"
           >
-            {deleteTaskMutation.isPending ? 'Unassigning...' : 'Unassign'}
+            {deleteTaskMutation.isPending ? 'Unassigning...' : 'Confirm'}
           </Button>
           <Button
             variant="outline"
             onClick={() => setShowRemoveConfirm(null)}
-            className="border-gray-300 hover:bg-gray-200 cursor-pointer transition-all duration-500 ease-in-out"
+            className="border-zinc-400 bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground cursor-pointer transition-all duration-400 ease-in-out"
           >
             Cancel
           </Button>

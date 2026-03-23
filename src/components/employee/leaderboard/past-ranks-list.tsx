@@ -158,30 +158,27 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
     <div className="flex w-full flex-1 flex-col items-center gap-5">
       {!isHistoryLoading && (
         <div className="relative z-10 mb-5 flex w-full max-w-3xl shrink-0 flex-col items-center gap-5 px-1 sm:mb-6 sm:gap-6">
-          <div className="mt-6 flex w-full justify-center sm:mt-7">
-            <div className="flex w-full max-w-2xl justify-center">
+          <div className="mt-6 flex w-full max-w-[388px] flex-col items-center justify-center gap-3 sm:mt-7 sm:max-w-[412px] sm:flex-row sm:items-center sm:justify-center sm:gap-3">
+            <div className="flex w-full justify-center sm:w-[52%]">
               <PeriodNav
                 periodType={activeTab as RankLogPeriodType}
                 onPeriodTypeChange={(value) => handleTabChange(value as RankingPeriodType)}
               />
             </div>
-          </div>
-
-          <div className="flex w-full justify-center">
-            <div className="w-full max-w-[282px] sm:w-[44%] sm:min-w-[240px] sm:max-w-[264px]">
+            <div className="w-full sm:w-[48%]">
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <button
                     type="button"
                     disabled={!hasAnyPeriods}
                     className={cn(
-                      'group flex min-h-11 w-full items-center gap-2 rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B] px-3 py-2.5 font-jersey text-sm tracking-[0.08em] shadow-[4px_4px_0px_#000] shadow-[#3017008e] outline-none transition-all duration-150 sm:min-h-12 sm:px-4 sm:text-base',
+                      'group flex min-h-10 w-full items-center gap-2 rounded-sm border-[3px] border-[#47331F] bg-[#6F4A2B] px-3 py-2 font-jersey text-sm tracking-[0.08em] shadow-[4px_4px_0px_#000] shadow-[#3017008e] outline-none transition-all duration-150 sm:min-h-11 sm:px-4 sm:text-base',
                       hasAnyPeriods
                         ? 'cursor-pointer text-white hover:translate-y-1 hover:bg-[#7C5432] hover:shadow-[2px_2px_0px_#000] focus-visible:translate-y-1 focus-visible:bg-[#7C5432] focus-visible:shadow-[2px_2px_0px_#000]'
                         : 'cursor-not-allowed text-white/45 opacity-70'
                     )}
                   >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border-2 border-[#47331F] bg-[#5B3E29] text-[#F4B925] shadow-[inset_0_1px_0_rgba(255,225,181,0.12)] sm:h-9 sm:w-9">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border-2 border-[#47331F] bg-[#5B3E29] text-[#F4B925] shadow-[inset_0_1px_0_rgba(255,225,181,0.12)] sm:h-8 sm:w-8">
                       <CalendarIcon className="h-4 w-4 shrink-0 sm:h-[18px] sm:w-[18px]" />
                     </span>
                     <span

@@ -25,7 +25,10 @@ export function HideRewardDialog({
 }: HideRewardDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card text-card-foreground border border-accent/25 max-w-md rounded-3xl p-6 shadow-xl">
+      <DialogContent
+        showCloseButton={false}
+        className="bg-card text-card-foreground border border-accent/25 max-w-md rounded-3xl p-6 shadow-xl"
+      >
         <button
           type="button"
           onClick={(event) => {
@@ -58,14 +61,7 @@ export function HideRewardDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-3 mt-6">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="control-h rounded-xl border border-accent/25 bg-transparent text-button text-foreground transition-all duration-300 hover:bg-accent-secondary/10"
-          >
-            Cancel
-          </Button>
+        <div className="mt-6 grid grid-cols-2 gap-3">
           <Button
             onClick={() => {
               onConfirm();
@@ -74,6 +70,13 @@ export function HideRewardDialog({
             className="control-h rounded-xl bg-primary-gradient text-button text-white shadow-sm/25 transition-all duration-300 hover:brightness-95"
           >
             {isHidden ? 'Unhide' : 'Hide'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="control-h rounded-xl border border-gray-300 text-button text-foreground transition-all duration-300 hover:bg-gray-200 hover:text-foreground"
+          >
+            Cancel
           </Button>
         </div>
       </DialogContent>

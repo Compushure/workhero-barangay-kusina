@@ -146,64 +146,101 @@ export default function AwardBadgeDialog({
           {/* Badge List */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-primary">Available Badges</Label>
-            <div className="border border-[#e0cfcf] rounded-lg overflow-hidden bg-white">
-              <div className="max-h-80 overflow-y-auto divide-y divide-[#e0cfcf] [scrollbar-width:none] sm:[scrollbar-width:auto] [-ms-overflow-style:none] sm:[-ms-overflow-style:auto] [&::-webkit-scrollbar]:hidden sm:[&::-webkit-scrollbar]:block">
-                {filteredBadges.length === 0 ? (
-                  <div className="p-4 text-center text-secondary text-sm">
-                    No badges found matching your search
-                  </div>
-                ) : (
-                  filteredBadges.map((badge) => {
-                    const userHas = user?.badge_ids.includes(badge.id) || false;
-                    return (
-                      <div
-                        key={badge.id}
-                        onClick={() => setSelectedBadgeId(badge.id)}
-                        className={`p-4 cursor-pointer transition-colors ${
-                          selectedBadgeId === badge.id
-                            ? 'bg-foreground/10 border-l-4 border-foreground'
-                            : 'hover:bg-row-hover'
-                        } ${userHas ? 'bg-gray-100' : ''}`}
-                      >
-                        <div className="flex items-start gap-3">
-                          {/* Badge Icon */}
-                          <div className="shrink-0 w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-[#e0cfcf]">
-                            {badge.img_link ? (
-                              <img
-                                src={badge.img_link}
-                                alt={badge.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <HelpCircle size={24} className="text-gray-400" />
-                            )}
-                          </div>
+            <div className="rounded-2xl border-2 border-accent-secondary/50 bg-card overflow-hidden">
+              <div className="max-h-80 overflow-y-auto [scrollbar-width:none] sm:[scrollbar-width:auto] [-ms-overflow-style:none] sm:[-ms-overflow-style:auto] [&::-webkit-scrollbar]:hidden sm:[&::-webkit-scrollbar]:block">
+                <table className="w-full table-fixed">
+                  <thead className="sticky top-0 z-10 border-b border-accent-secondary/50 bg-primary-gradient text-card">
+                    <tr className="text-xs font-semibold">
+                      <th className="w-[10%] py-2"></th>
+                      <th className="w-[58%] py-2 pl-3 text-left">BADGE</th>
+                      <th className="w-[16%] py-2 text-center">POINTS</th>
+                      <th className="w-[16%] py-2 text-center">STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBadges.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="p-4 text-center text-sm text-secondary">
+                          No badges found matching your search
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredBadges.map((badge) => {
+                        const userHas = user?.badge_ids.includes(badge.id) || false;
+                        const isSelected = selectedBadgeId === badge.id;
 
-                          {/* Badge Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-semibold text-red-950 text-sm truncate">
-                                {badge.name}
-                              </h4>
-                              <div className="flex items-center gap-1 text-xs font-medium text-foreground">
-                                <Coins size={14} />
+                        return (
+                          <tr
+                            key={badge.id}
+                            onClick={() => setSelectedBadgeId(badge.id)}
+                            className={`border-b border-accent/25 text-primary transition-all duration-300 ease-in-out ${
+                              isSelected
+                                ? 'bg-accent-secondary/25'
+                                : userHas
+                                  ? 'bg-zinc-100/80'
+                                  : 'bg-card hover:bg-row-hover cursor-pointer'
+                            }`}
+                          >
+                            <td className="p-3 text-center align-middle">
+                              <input
+                                type="radio"
+                                checked={isSelected}
+                                onChange={() => setSelectedBadgeId(badge.id)}
+                                className="rounded-full p-1.5 cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent relative"
+                                style={{
+                                  backgroundImage: isSelected
+                                    ? "url(\"data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e\")"
+                                    : 'none',
+                                  backgroundRepeat: 'no-repeat',
+                                  backgroundPosition: 'center',
+                                  backgroundSize: '1rem',
+                                }}
+                              />
+                            </td>
+                            <td className="min-w-0 px-3 py-2 align-middle">
+                              <div className="flex items-start gap-3">
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-accent/25 bg-gray-100">
+                                  {badge.img_link ? (
+                                    <img
+                                      src={badge.img_link}
+                                      alt={badge.name}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <HelpCircle size={22} className="text-gray-400" />
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <h4 className="truncate text-sm font-semibold text-foreground">
+                                    {badge.name}
+                                  </h4>
+                                  <p className="mt-0.5 line-clamp-2 text-xs text-primary/60">
+                                    {badge.description || 'No description'}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 text-center align-middle text-sm font-medium text-primary/75">
+                              <div className="flex items-center justify-center gap-1">
+                                <Coins size={14} className="shrink-0" />
                                 {badge.points}
                               </div>
-                            </div>
-                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                              {badge.description || 'No description'}
-                            </p>
-                            {userHas && (
-                              <span className="inline-block text-xs font-medium text-foreground bg-background-soft px-2 py-1 rounded mt-2">
-                                User already has this badge
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+                            </td>
+                            <td className="px-2 py-3 text-center align-middle">
+                              {userHas ? (
+                                <span className="inline-block rounded-full bg-background-soft px-2 py-1 text-[11px] font-medium text-foreground">
+                                  Owned
+                                </span>
+                              ) : (
+                                <span className="text-xs text-secondary">Available</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -241,14 +278,14 @@ export default function AwardBadgeDialog({
           <Button
             onClick={handleAward}
             disabled={!selectedBadgeId}
-            className="bg-foreground hover:bg-accent text-zinc-50 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card font-semibold cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25 disabled:opacity-50 disabled:brightness-75 disabled:saturate-50 disabled:cursor-not-allowed"
           >
             Award Badge
           </Button>
           <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}
-            className="border-[#e0cfcf] bg-card text-primary hover:bg-gray-200 px-6"
+            className="border-[#e0cfcf] bg-card text-foreground hover:bg-[#fafafa] hover:text-foreground hover:brightness-90 px-6 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
           >
             Cancel
           </Button>

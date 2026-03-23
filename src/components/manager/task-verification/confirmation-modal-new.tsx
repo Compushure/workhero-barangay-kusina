@@ -74,9 +74,9 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-[95vw] sm:max-w-md lg:max-w-lg">
+      <DialogContent className="max-w-[95vw] sm:max-w-md lg:max-w-lg bg-card p-4 sm:p-5">
         <DialogHeader>
-          <DialogTitle className="text-base">{title}</DialogTitle>
+          <DialogTitle className="text-base text-foreground">{title}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
@@ -105,7 +105,7 @@ export function ConfirmationDialog({
                 if (error) setError(''); // Clear error on input
               }}
               disabled={isDisabled}
-              className="min-h-20 resize-none disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              className="min-h-20 resize-none disabled:opacity-50 disabled:cursor-not-allowed bg-background-soft border border-accent/50 text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
               aria-required={isRequired}
               aria-invalid={!!error}
               aria-describedby={error ? 'remark-error' : undefined}
@@ -123,15 +123,19 @@ export function ConfirmationDialog({
             variant="outline"
             onClick={handleCancel}
             disabled={isDisabled}
-            className="h-8 text-xs px-3"
+            className="h-8 text-xs px-3 !bg-card !text-foreground border-zinc-400 hover:!bg-[#fafafa] hover:!text-foreground hover:brightness-90 cursor-pointer transition-all duration-400 ease-in-out"
           >
             Cancel
           </Button>
           <Button
-            variant={type === 'approve' ? 'default' : 'destructive'}
+            variant="default"
             onClick={handleConfirm}
             disabled={isDisabled}
-            className={`h-8 text-xs px-3 ${type === 'approve' ? 'bg-foreground hover:bg-[#af3b3f]' : ''}`}
+            className={`h-8 text-xs px-3 cursor-pointer transition-all duration-400 ease-in-out ${
+              type === 'approve'
+                ? 'bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card'
+                : 'bg-red-700 hover:bg-red-500 text-white'
+            }`}
           >
             {isProcessing || isConfirming ? 'Processing...' : 'Confirm'}
           </Button>

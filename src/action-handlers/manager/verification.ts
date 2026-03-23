@@ -88,7 +88,7 @@ export async function handleFetchDeniedTasks(): Promise<VerificationRequest[]> {
 export async function handleFetchTasksToReviewPaginated(
   page: number = 1,
   searchTerm: string = '',
-  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc'
+  sort: 'date-desc' | 'date-asc' = 'date-desc'
 ): Promise<PaginatedResponse<VerificationRequest>> {
   const result = await safeAction(() => fetchTasksToReviewPaginated(page, 10, searchTerm, sort));
 
@@ -113,7 +113,7 @@ export async function handleFetchTasksToReviewPaginated(
 export async function handleFetchApprovedTasksPaginated(
   page: number = 1,
   searchTerm: string = '',
-  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc'
+  sort: 'date-desc' | 'date-asc' = 'date-desc'
 ): Promise<PaginatedResponse<VerificationRequest>> {
   const result = await safeAction(() => fetchApprovedTasksPaginated(page, 10, searchTerm, sort));
 
@@ -138,7 +138,7 @@ export async function handleFetchApprovedTasksPaginated(
 export async function handleFetchDeniedTasksPaginated(
   page: number = 1,
   searchTerm: string = '',
-  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc'
+  sort: 'date-desc' | 'date-asc' = 'date-desc'
 ): Promise<PaginatedResponse<VerificationRequest>> {
   const result = await safeAction(() => fetchDeniedTasksPaginated(page, 10, searchTerm, sort));
 

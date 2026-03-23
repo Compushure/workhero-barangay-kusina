@@ -47,7 +47,7 @@ export function LeaderboardContent({
     return (
       <div className="flex min-h-[52vh] items-center justify-center py-5 sm:py-7">
         <div className="flex max-w-md flex-col items-center gap-4 rounded-2xl border border-accent/20 bg-card px-8 py-10 text-center shadow-sm/40">
-          <div className="rounded-full bg-primary/10 p-3.5 text-primary">
+          <div className="rounded-full bg-accent-secondary/15 p-3.5 text-accent-secondary">
             <Trophy className="h-14 w-14" />
           </div>
           <h3 className="text-h3 text-foreground">No Ranking Available</h3>

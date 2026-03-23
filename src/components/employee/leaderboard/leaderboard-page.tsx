@@ -125,28 +125,11 @@ export function LeaderboardPageClient({
           paddingBottom: '0.75rem',
         }}
       >
-        <div className="flex w-full flex-col gap-2">
-          <HeaderHUD className="rounded-lg" />
-          <div className="flex w-full justify-end pr-1 sm:pr-2 lg:pr-4">
-            <button
-              type="button"
-              onClick={handleToggleHistory}
-              className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-jersey tracking-widest shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors sm:px-4 sm:text-base ${
-                view === 'history'
-                  ? 'bg-[#F4B925] text-[#3D2512]'
-                  : 'bg-[#694c33] text-white hover:bg-[#8A6342]'
-              }`}
-            >
-              <History className="h-4 w-4" />
-              Past Rankings
-            </button>
-          </div>
-        </div>
+        <HeaderHUD className="rounded-lg" />
       </div>
 
-      {/* Spacer so content doesn't hide under the fixed HUD on sm+ */}
       <div
-        className="hidden sm:block sm:h-[calc(max(0.75rem,env(safe-area-inset-top))+10rem)]"
+        className="hidden sm:block sm:h-[calc(max(0.75rem,env(safe-area-inset-top))+6.5rem)]"
         aria-hidden="true"
       />
 
@@ -157,28 +140,11 @@ export function LeaderboardPageClient({
               <button
                 type="button"
                 onClick={() => {
-                  if (view !== 'history') {
-                    handleToggleHistory();
-                  }
-                }}
-                className={`${toggleButtonClass} ${
-                  view === 'history'
-                    ? 'cursor-not-allowed rounded-none translate-y-[3px] bg-[#CF8B22] text-white shadow-[inset_0_4px_0_rgba(77,44,16,0.26),inset_0_-2px_0_rgba(255,231,189,0.16)]'
-                    : 'cursor-pointer rounded-none bg-[#CF8B22]/28 text-white/70 shadow-[0_5px_0_rgba(77,44,16,0.82)] hover:translate-y-[4px] hover:bg-[#CF8B22]/48 hover:text-white hover:shadow-[0_1px_0_rgba(77,44,16,0.78)]'
-                }`}
-                aria-pressed={view === 'history'}
-              >
-                <History className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-                Past Rankings
-              </button>
-              <button
-                type="button"
-                onClick={() => {
                   if (view !== 'current') {
                     handleToggleHistory();
                   }
                 }}
-                className={`${toggleButtonClass} border-l-[3px] border-[#47331F] ${
+                className={`${toggleButtonClass} ${
                   view === 'current'
                     ? 'cursor-not-allowed rounded-none translate-y-[3px] bg-[#CF8B22] text-white shadow-[inset_0_4px_0_rgba(77,44,16,0.26),inset_0_-2px_0_rgba(255,231,189,0.16)]'
                     : 'cursor-pointer rounded-none bg-[#CF8B22]/28 text-white/70 shadow-[0_5px_0_rgba(77,44,16,0.82)] hover:translate-y-[4px] hover:bg-[#CF8B22]/48 hover:text-white hover:shadow-[0_1px_0_rgba(77,44,16,0.78)]'
@@ -187,6 +153,23 @@ export function LeaderboardPageClient({
               >
                 <RefreshCcw className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                 Latest Rankings
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (view !== 'history') {
+                    handleToggleHistory();
+                  }
+                }}
+                className={`${toggleButtonClass} border-l-[3px] border-[#47331F] ${
+                  view === 'history'
+                    ? 'cursor-not-allowed rounded-none translate-y-[3px] bg-[#CF8B22] text-white shadow-[inset_0_4px_0_rgba(77,44,16,0.26),inset_0_-2px_0_rgba(255,231,189,0.16)]'
+                    : 'cursor-pointer rounded-none bg-[#CF8B22]/28 text-white/70 shadow-[0_5px_0_rgba(77,44,16,0.82)] hover:translate-y-[4px] hover:bg-[#CF8B22]/48 hover:text-white hover:shadow-[0_1px_0_rgba(77,44,16,0.78)]'
+                }`}
+                aria-pressed={view === 'history'}
+              >
+                <History className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+                Past Rankings
               </button>
             </div>
           </div>
@@ -203,7 +186,7 @@ export function LeaderboardPageClient({
             ) : (
               <>
                 <header className="mb-5 flex w-full max-w-3xl shrink-0 flex-col items-center gap-5 px-1 sm:mb-6 sm:gap-6">
-                  <div className="mt-6 flex w-full justify-center sm:mt-7">
+                  <div className="mt-6 flex w-full max-w-[388px] justify-center sm:mt-7 sm:max-w-[412px]">
                     <PeriodNav
                       periodType={periodType}
                       onPeriodTypeChange={handlePeriodTypeChange}

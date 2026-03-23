@@ -1,31 +1,60 @@
 'use client';
 
-import { ArrowUpDown } from 'lucide-react';
+import {
+  ArrowUpDown,
+  BadgeCheck,
+  CalendarArrowDown,
+  CalendarArrowUp,
+  CircleAlert,
+  Clock3,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { SortOption } from '@/types';
+import type { LucideIcon } from 'lucide-react';
 
 interface SortButtonProps {
-  sortBy: SortOption;
-  onSortChange: (value: SortOption) => void;
-  options?: { value: SortOption; label: string }[];
+  sortBy: SortOption | VerificationDateSort;
+  onSortChange: (value: SortOption | VerificationDateSort) => void;
+  options?: VerificationSortButtonOption[];
   styleVariant?: 'default' | 'mercado';
+  menuLabel?: string;
+  widthClassName?: string;
 }
+
+type VerificationDateSort = 'date-desc' | 'date-asc';
+
+interface VerificationSortButtonOption {
+  value: SortOption | VerificationDateSort;
+  label: string;
+  icon?: LucideIcon;
+}
+
+const defaultStatusOptions: VerificationSortButtonOption[] = [
+  { value: 'pending', label: 'Pending Requests', icon: Clock3 },
+  { value: 'approved', label: 'Approved Requests', icon: BadgeCheck },
+  { value: 'denied', label: 'Denied Requests', icon: CircleAlert },
+];
+
+const defaultDateOptions: VerificationSortButtonOption[] = [
+  { value: 'date-desc', label: 'Newest First', icon: CalendarArrowDown },
+  { value: 'date-asc', label: 'Oldest First', icon: CalendarArrowUp },
+];
 
 export function SortButton({
   sortBy,
   onSortChange,
-  options = [
-    { value: 'pending', label: 'Pending Requests' },
-    { value: 'approved', label: 'Approved Requests' },
-    { value: 'denied', label: 'Denied Requests' },
-  ],
+  options = defaultStatusOptions,
   styleVariant = 'default',
+  menuLabel,
+  widthClassName,
 }: SortButtonProps) {
   // Find the label for the current sort value
   const currentLabel = options.find((opt) => opt.value === sortBy)?.label || 'Sort';
@@ -33,17 +62,8 @@ export function SortButton({
   const isMercadoStyle = styleVariant === 'mercado';
 
   const triggerClassName = isMercadoStyle
-    ? 'group border border-gray-300 bg-zinc-50/75 text-primary hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-28 sm:flex-1 sm:min-w-[140px]'
-    : 'bg-card hover:bg-gray-200 rounded-md text-primary w-30 sm:flex-1 sm:min-w-[152px]';
-
-  const itemClassName = (isActive: boolean) =>
-    isMercadoStyle
-      ? `cursor-pointer transition-all duration-400 ease-in-out ${
-          isActive
-            ? 'bg-accent-secondary text-white font-medium'
-            : 'hover:bg-accent-secondary/80 hover:text-white data-[highlighted]:bg-accent-secondary/80 data-[highlighted]:text-white'
-        }`
-      : `cursor-pointer transition-all duration-500 ease-in-out ${isActive ? 'bg-red-100' : ''}`;
+      ? 'group border border-gray-300 bg-zinc-50/75 text-primary hover:bg-accent-secondary hover:text-white hover:shadow-sm hover:scale-103 transform-gpu rounded-lg w-28 sm:flex-1 sm:min-w-[140px]'
+    : `bg-card hover:bg-card hover:brightness-90 rounded-md text-primary ${widthClassName ?? 'w-30 sm:flex-1 sm:min-w-[152px]'}`;
 
   return (
     <DropdownMenu>
@@ -66,18 +86,31 @@ export function SortButton({
           />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="manager-dropdown-content">
+      <DropdownMenuContent
+        align="end"
+        className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
+      >
+        {menuLabel && (
+          <>
+            <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+              {menuLabel}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+          </>
+        )}
         {options.map((opt) => (
           <DropdownMenuItem
             key={opt.value}
             onClick={() => onSortChange(opt.value)}
-            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out ${sortBy === opt.value ? 'bg-accent/15 text-foreground' : ''}
-            `}
+            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out ${sortBy === opt.value ? 'bg-accent/15 text-foreground' : ''}`}
           >
-            {opt.label}
+            {opt.icon && <opt.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />}
+            <span className="truncate">{opt.label}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
+
+export { defaultStatusOptions, defaultDateOptions };

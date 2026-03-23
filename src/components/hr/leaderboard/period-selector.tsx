@@ -226,6 +226,9 @@ export function PeriodSelector({
   };
 
   const GenerateStatusIcon = generateStatus.icon;
+  const selectContentClassName = 'manager-dropdown-content rounded-lg bg-popover text-popover-foreground';
+  const selectItemClassName =
+    'cursor-pointer transition-all duration-300 ease-in-out hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground data-[state=checked]:bg-accent/15 data-[state=checked]:text-foreground';
 
   return (
     <div className={cn('manager-sticky-controls !mx-0 w-full rounded-2xl p-3 sm:p-3.5', className)}>
@@ -239,10 +242,16 @@ export function PeriodSelector({
             <SelectTrigger className="control-h w-full cursor-pointer rounded-lg border border-border bg-card px-3.5 text-xs font-semibold text-primary shadow-sm sm:text-sm">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="weekly">Weekly</SelectItem>
-              <SelectItem value="monthly">Monthly</SelectItem>
-              <SelectItem value="yearly">Yearly</SelectItem>
+            <SelectContent className={selectContentClassName}>
+              <SelectItem value="weekly" className={selectItemClassName}>
+                Weekly
+              </SelectItem>
+              <SelectItem value="monthly" className={selectItemClassName}>
+                Monthly
+              </SelectItem>
+              <SelectItem value="yearly" className={selectItemClassName}>
+                Yearly
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -257,12 +266,12 @@ export function PeriodSelector({
               <SelectTrigger className="control-h w-full cursor-pointer rounded-lg border border-border bg-card px-3.5 text-xs font-semibold text-primary shadow-sm sm:text-sm">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={selectContentClassName}>
                 {weeklySelectOptions.map(({ year: y, week: w }) => {
                   const key = `${y}-${w}`;
                   const label = getISOWeekDateRangeLabelShort(y, w);
                   return (
-                    <SelectItem key={key} value={key}>
+                    <SelectItem key={key} value={key} className={selectItemClassName}>
                       {label}
                     </SelectItem>
                   );
@@ -278,8 +287,8 @@ export function PeriodSelector({
 
         {/* Status / Action */}
         <div className="flex w-full flex-col gap-1.5 self-start">
-          <div className="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[172px_196px]">
-            <div className="flex w-full flex-col items-start gap-1.5 xl:max-w-[172px]">
+          <div className="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[176px_172px]">
+            <div className="flex w-full flex-col items-start gap-1.5 xl:max-w-[176px]">
               <div className="flex min-h-4 items-center gap-1.5">
                 <GenerateStatusIcon className={cn('h-3.5 w-3.5 shrink-0', generateStatus.tone)} />
                 <span className={generateStatus.textClassName}>

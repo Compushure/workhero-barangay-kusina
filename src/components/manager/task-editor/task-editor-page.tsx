@@ -1,12 +1,27 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Search, ArrowUpDown, ChefHat, ListTodo } from 'lucide-react';
+import {
+  ArrowDownAZ,
+  ArrowUpAZ,
+  ArrowUpDown,
+  ChefHat,
+  ClockArrowDown,
+  ClockArrowUp,
+  Coins,
+  ListTodo,
+  type LucideIcon,
+  Plus,
+  Search,
+  Trophy,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AddEditTaskCategoryDialog from './dialogs/add-edit-task-category-dialog';
@@ -33,27 +48,38 @@ import {
 import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 import { PageHeader } from '@/components/shared/page-header';
 
-const SORT_OPTIONS: { value: TaskCategorySortOption; label: string }[] = [
-  { value: 'name-asc', label: 'Name (A-Z)' },
-  { value: 'name-desc', label: 'Name (Z-A)' },
-  { value: 'recently-created', label: 'Recently Created' },
-  { value: 'points-desc', label: 'Points (High to Low)' },
-  { value: 'xp-desc', label: 'XP (High to Low)' },
+const DATE_SORT_OPTIONS: { value: TaskCategorySortOption; label: string; icon: LucideIcon }[] = [
+  { value: 'recently-created', label: 'Recently Created', icon: ClockArrowDown },
+  { value: 'oldest-created', label: 'Oldest Created', icon: ClockArrowUp },
 ];
+
+const NAME_SORT_OPTIONS: { value: TaskCategorySortOption; label: string; icon: LucideIcon }[] = [
+  { value: 'name-asc', label: 'Name (A-Z)', icon: ArrowDownAZ },
+  { value: 'name-desc', label: 'Name (Z-A)', icon: ArrowUpAZ },
+];
+
+const REWARD_SORT_OPTIONS: { value: TaskCategorySortOption; label: string; icon: LucideIcon }[] = [
+  { value: 'points-desc', label: 'Points (High to Low)', icon: Coins },
+  { value: 'points-asc', label: 'Points (Low to High)', icon: Coins },
+  { value: 'xp-desc', label: 'XP (High to Low)', icon: Trophy },
+  { value: 'xp-asc', label: 'XP (Low to High)', icon: Trophy },
+];
+
+const SORT_OPTIONS = [...DATE_SORT_OPTIONS, ...NAME_SORT_OPTIONS, ...REWARD_SORT_OPTIONS];
 
 export default function TaskEditorPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskCategory | null>(null);
   const [saveError, setSaveError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortOption, setSortOption] = useState<TaskCategorySortOption>('name-asc');
+  const [sortOption, setSortOption] = useState<TaskCategorySortOption>('recently-created');
   const [repeatabilityFilter, setRepeatabilityFilter] = useState<TaskRepeatabilityFilter>('all');
   const [page, setPage] = useState(1);
   const [hasLoadedHeaderOnce, setHasLoadedHeaderOnce] = useState(false);
   const pageSize = 10;
 
-  // Debounce search term like current-assigned-tasks (900ms)
-  const debouncedSearchTerm = useDebounce(searchTerm, 900);
+  // Debounce search term
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // Fetch tasks with debounced search and sort
   const {
@@ -169,7 +195,7 @@ export default function TaskEditorPage() {
   };
 
   const currentSortLabel =
-    SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Name (A-Z)';
+    SORT_OPTIONS.find((opt) => opt.value === sortOption)?.label || 'Recently Created';
 
   return (
     <main className="w-full min-h-screen px-2 py-3 sm:px-3 sm:py-4 lg:px-6 lg:py-6">
@@ -226,14 +252,20 @@ export default function TaskEditorPage() {
                         <Button
                           variant="default"
                           size="default"
-                          className="text-button control-h w-full justify-between border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44"
+                          className="text-button control-h bg-card text-foreground shadow-sm/25 hover:bg-card hover:text-foreground hover:brightness-90 transition-all duration-400 ease-in-out cursor-pointer w-full sm:w-44 justify-between px-2 sm:px-3"
                         >
                           <span className="truncate">{currentSortLabel}</span>
                           <ArrowUpDown size={14} className="text-accent" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="manager-dropdown-content w-48">
-                        {SORT_OPTIONS.map((option) => (
+                      <DropdownMenuContent
+                        align="end"
+                        className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
+                      >
+                        <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                          Sort by Date
+                        </DropdownMenuLabel>
+                        {DATE_SORT_OPTIONS.map((option) => (
                           <DropdownMenuItem
                             key={option.value}
                             onClick={() => handleSortChange(option.value)}
@@ -241,6 +273,39 @@ export default function TaskEditorPage() {
                               sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
                             }`}
                           >
+                            <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                            {option.label}
+                          </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                          Sort by Name
+                        </DropdownMenuLabel>
+                        {NAME_SORT_OPTIONS.map((option) => (
+                          <DropdownMenuItem
+                            key={option.value}
+                            onClick={() => handleSortChange(option.value)}
+                            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                              sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                            }`}
+                          >
+                            <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                            {option.label}
+                          </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                          Sort by Rewards
+                        </DropdownMenuLabel>
+                        {REWARD_SORT_OPTIONS.map((option) => (
+                          <DropdownMenuItem
+                            key={option.value}
+                            onClick={() => handleSortChange(option.value)}
+                            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                              sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                            }`}
+                          >
+                            <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
                             {option.label}
                           </DropdownMenuItem>
                         ))}
