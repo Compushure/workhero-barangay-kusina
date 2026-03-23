@@ -376,7 +376,9 @@
       inset 1px 1px 0 var(--cooking-glow),
       3px 3px 0 rgba(71, 51, 31, 0.6);
     text-shadow: 1px 1px 0 rgba(71, 51, 31, 0.5);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
   }
 
   .game-btn:hover {

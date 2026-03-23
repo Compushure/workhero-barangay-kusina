@@ -272,7 +272,7 @@ export function ImageCropUpload({
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Crop Profile Picture</DialogTitle>
             <DialogDescription>
