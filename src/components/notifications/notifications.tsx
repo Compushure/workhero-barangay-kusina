@@ -96,7 +96,7 @@ export function NotificationsPopover({
         <div className="border-b border-card/20 bg-black/5 px-4 py-3">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-sm font-semibold text-accent-secondary">Message Board</p>
+              <p className="text-base font-semibold text-accent-secondary">Message Board</p>
               <p className="text-xs text-card/70">Stay updated on your activity</p>
             </div>
             <Button
@@ -119,16 +119,16 @@ export function NotificationsPopover({
             onValueChange={(v) => setFilter(v as 'all' | 'unread')}
             className="w-full"
           >
-            <TabsList className="grid h-9 w-full grid-cols-2 gap-2 border border-accent/55 bg-black/10 p-1">
+            <TabsList className="grid h-9 w-full grid-cols-2 gap-2 border border-accent/55 bg-black/10">
               <TabsTrigger
                 value="all"
-                className="text-xs font-semibold text-card/75 data-[state=inactive]:hover:bg-card/25 data-[state=active]:bg-accent data-[state=active]:text-white data-[state=active]:shadow-none"
+                className="h-full text-xs font-semibold text-card/75 data-[state=inactive]:hover:bg-card/25 data-[state=active]:bg-accent data-[state=active]:text-white data-[state=active]:shadow-none"
               >
                 All {notifications.length > 0 && `(${notifications.length})`}
               </TabsTrigger>
               <TabsTrigger
                 value="unread"
-                className="text-xs font-semibold text-card/75 data-[state=inactive]:hover:bg-card/25 data-[state=active]:bg-accent data-[state=active]:text-white data-[state=active]:shadow-none"
+                className="h-full text-xs font-semibold text-card/75 data-[state=inactive]:hover:bg-card/25 data-[state=active]:bg-accent data-[state=active]:text-white data-[state=active]:shadow-none"
               >
                 Unread {unreadCount > 0 && `(${unreadCount})`}
               </TabsTrigger>
