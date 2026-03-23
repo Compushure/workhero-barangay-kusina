@@ -1,10 +1,8 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { Check, X, ImageIcon, Info, FileText, Coins } from 'lucide-react';
+import { useState } from 'react';
+import { Check, X, ImageIcon, Info, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { Pagination } from '@/components/shared/pagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Table,
@@ -23,41 +21,16 @@ import type { RedemptionRequest } from '@/types';
 
 interface RedemptionTableProps {
   data: RedemptionRequest[];
-  onApprove?: (id: string) => void;
-  onReject?: (id: string) => void;
   status?: string;
 }
 
-export function RedemptionTable({
-  data,
-  onApprove,
-  onReject,
-  status = 'pending',
-}: RedemptionTableProps) {
+export function RedemptionTable({ data, status = 'pending' }: RedemptionTableProps) {
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState<RedemptionRequest | null>(null);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [requestImageError, setRequestImageError] = useState(false);
-  const itemsPerPage = 10;
-
-  // Pagination logic
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedData = useMemo(
-    () => data.slice(startIndex, endIndex),
-    [data, startIndex, endIndex]
-  );
-
-  // Reset to page 1 when data changes and current page is invalid
-  useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(1);
-    }
-  }, [data.length, currentPage, totalPages]);
 
   const declineMutation = useDeclineRedemptionRequest();
   const acceptMutation = useAcceptRedemptionRequest();
@@ -142,7 +115,7 @@ export function RedemptionTable({
               </TableRow>
             </TableHeader>
             <TableBody className="">
-              {paginatedData.length === 0 ? (
+              {data.length === 0 ? (
                 <TableRow className="hover:bg-transparent">
                   <TableCell colSpan={6} className="py-12 text-center text-foreground">
                     <p className="text-sm">
@@ -157,7 +130,7 @@ export function RedemptionTable({
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedData.map((request) => {
+                data.map((request) => {
                   const { dateStr, timeStr } = formatDateTime(request.requestedAt);
                   const quantity = request.quantity || 1;
                   const totalCost = request.pointsCost * quantity;
@@ -269,18 +242,6 @@ export function RedemptionTable({
           </Table>
         </div>
       </div>
-
-      {/* Pagination - parent will position with mt-auto */}
-      {totalPages > 1 && (
-        <div className="mt-auto pt-3 sm:pt-4">
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-            isFixed={false}
-          />
-        </div>
-      )}
 
       {/* Remarks Dialogs */}
       <RemarksDialog

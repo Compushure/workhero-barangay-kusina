@@ -6,9 +6,21 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { HelpCircle, Coins, Search, ArrowUpDown } from 'lucide-react';
+import {
+  ArrowDown01,
+  ArrowDownAZ,
+  ArrowUp01,
+  ArrowUpAZ,
+  ArrowUpDown,
+  Coins,
+  HelpCircle,
+  Search,
+  type LucideIcon,
+} from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { BadgeAssignmentUser, BadgeSummary } from '@/types/manager/badge-assignment';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
@@ -25,12 +37,17 @@ interface QuickAssignmentPanelProps {
 
 type UserSortOption = 'name-asc' | 'name-desc' | 'employee-asc' | 'employee-desc';
 
-const USER_SORT_OPTIONS: { value: UserSortOption; label: string }[] = [
-  { value: 'name-asc', label: 'Name (A-Z)' },
-  { value: 'name-desc', label: 'Name (Z-A)' },
-  { value: 'employee-asc', label: 'Employee ID (↑)' },
-  { value: 'employee-desc', label: 'Employee ID (↓)' },
+const USER_NAME_SORT_OPTIONS: { value: UserSortOption; label: string; icon: LucideIcon }[] = [
+  { value: 'name-asc', label: 'Name (A-Z)', icon: ArrowDownAZ },
+  { value: 'name-desc', label: 'Name (Z-A)', icon: ArrowUpAZ },
 ];
+
+const USER_ID_SORT_OPTIONS: { value: UserSortOption; label: string; icon: LucideIcon }[] = [
+  { value: 'employee-asc', label: 'Employee ID (Low to High)', icon: ArrowDown01 },
+  { value: 'employee-desc', label: 'Employee ID (High to Low)', icon: ArrowUp01 },
+];
+
+const USER_SORT_OPTIONS = [...USER_NAME_SORT_OPTIONS, ...USER_ID_SORT_OPTIONS];
 
 export default function QuickAssignmentPanel({
   badges,
@@ -50,7 +67,6 @@ export default function QuickAssignmentPanel({
   const debouncedUserSearch = useDebounce(userSearchTerm, 300);
   const debouncedBadgeSearch = useDebounce(badgeSearchTerm, 300);
 
-  // Note: badges are already paginated from parent, just filter them locally
   const filteredBadges = useMemo(() => {
     const normalizedSearch = normalizeSearchQuery(debouncedBadgeSearch);
     return badges.filter(
@@ -61,7 +77,6 @@ export default function QuickAssignmentPanel({
     );
   }, [badges, debouncedBadgeSearch]);
 
-  // Filter users
   const filteredUsers = useMemo(() => {
     const normalizedSearch = normalizeSearchQuery(debouncedUserSearch);
 
@@ -131,56 +146,54 @@ export default function QuickAssignmentPanel({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-      {/* Badges List - Left Side */}
-      <div className="lg:col-span-1 space-y-4">
+    <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+      <div className="space-y-4 lg:col-span-1">
         <div className="space-y-2">
-          <h2 className="text-base sm:text-lg font-semibold text-foreground">Select Badge</h2>
+          <h2 className="text-base font-semibold text-foreground sm:text-lg">Select Badge</h2>
           <div className="relative flex">
-            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+            <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 transform text-gray-400" />
             <input
               type="text"
               placeholder="Search badges"
               value={badgeSearchTerm}
               onChange={(e) => setBadgeSearchTerm(sanitizeSearchInput(e.target.value))}
-              className="text-meta control-h w-full pl-9 pr-3 rounded-md border border-zinc-200 bg-card shadow-sm/25 focus:outline-none focus:border-accent transition-colors"
+              className="text-meta control-h w-full rounded-md border border-zinc-200 bg-card pl-9 pr-3 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
             />
           </div>
         </div>
 
-        {/* Badge List with Pagination */}
         <div className="space-y-3">
-          <div className="border border-accent/25 rounded-lg overflow-hidden max-h-96 overflow-y-auto shadow-sm/25 [scrollbar-width:none] sm:[scrollbar-width:auto] [-ms-overflow-style:none] sm:[-ms-overflow-style:auto] [&::-webkit-scrollbar]:hidden sm:[&::-webkit-scrollbar]:block">
+          <div className="max-h-96 overflow-y-auto rounded-lg border border-accent/25 shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:[scrollbar-width:auto] sm:[-ms-overflow-style:auto] sm:[&::-webkit-scrollbar]:block">
             {filteredBadges.length > 0 ? (
               <div className="divide-y divide-accent/25">
                 {filteredBadges.map((badge) => (
                   <button
                     key={badge.id}
                     onClick={() => setSelectedBadge(badge)}
-                    className={`w-full px-3 sm:px-4 py-3 text-left transition-colors ${
+                    className={`w-full px-3 py-3 text-left transition-colors sm:px-4 ${
                       selectedBadge?.id === badge.id
-                        ? 'bg-accent/15 border-l-4 border-accent'
+                        ? 'border-l-4 border-accent bg-accent/15'
                         : 'bg-card hover:bg-row-hover'
                     }`}
                   >
                     <div className="flex items-start gap-2 sm:gap-3">
-                      <div className="shrink-0 size-8 sm:size-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-accent/25">
+                      <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-accent/25 bg-gray-100 sm:size-10">
                         {badge.img_link ? (
                           <img
                             src={badge.img_link}
                             alt={badge.name}
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
                           />
                         ) : (
-                          <HelpCircle size={16} className="sm:size-5 text-gray-400" />
+                          <HelpCircle size={16} className="text-gray-400 sm:size-5" />
                         )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-xs sm:text-sm text-foreground truncate">
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-xs font-semibold text-foreground sm:text-sm">
                           {badge.name}
                         </div>
-                        <div className="flex items-center gap-1 text-[10px] sm:text-xs text-secondary mt-0.5">
-                          <Coins size={10} className="sm:size-3 shrink-0" />
+                        <div className="mt-0.5 flex items-center gap-1 text-[10px] text-secondary sm:text-xs">
+                          <Coins size={10} className="shrink-0 sm:size-3" />
                           <span>{badge.points}</span>
                         </div>
                       </div>
@@ -189,11 +202,10 @@ export default function QuickAssignmentPanel({
                 ))}
               </div>
             ) : (
-              <div className="p-4 text-center text-secondary text-sm">No badges found</div>
+              <div className="p-4 text-center text-sm text-secondary">No badges found</div>
             )}
           </div>
 
-          {/* Badge Pagination */}
           {totalBadgePages > 1 && (
             <div className="flex items-center justify-center gap-1">
               <Button
@@ -234,34 +246,32 @@ export default function QuickAssignmentPanel({
         </div>
       </div>
 
-      {/* Badge Details and User Assignment - Right Side */}
-      <div className="lg:col-span-2 space-y-4">
+      <div className="space-y-4 lg:col-span-2">
         {selectedBadge ? (
           <>
-            {/* Selected Badge Details */}
-            <div className="bg-card border border-accent/25 rounded-lg p-4 sm:p-6 space-y-4 shadow-sm/25">
+            <div className="space-y-4 rounded-lg border border-accent/25 bg-card p-4 shadow-sm/25 sm:p-6">
               <div className="flex items-start gap-3 sm:gap-4">
-                <div className="size-16 sm:w-20 sm:h-20 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-accent/25 shrink-0">
+                <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-accent/25 bg-gray-100 sm:h-20 sm:w-20">
                   {selectedBadge.img_link ? (
                     <img
                       src={selectedBadge.img_link}
                       alt={selectedBadge.name}
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                     />
                   ) : (
-                    <HelpCircle size={32} className="sm:size-10 text-gray-400" />
+                    <HelpCircle size={32} className="text-gray-400 sm:size-10" />
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg sm:text-xl font-semibold text-foreground truncate">
+                <div className="min-w-0 flex-1">
+                  <h3 className="truncate text-lg font-semibold text-foreground sm:text-xl">
                     {selectedBadge.name}
                   </h3>
-                  <p className="text-xs sm:text-sm text-secondary mt-1 line-clamp-2">
+                  <p className="mt-1 line-clamp-2 text-xs text-secondary sm:text-sm">
                     {selectedBadge.description || 'No description'}
                   </p>
-                  <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3">
-                    <Coins size={14} className="sm:size-4 text-accent shrink-0" />
-                    <span className="font-medium text-sm sm:text-base text-foreground">
+                  <div className="mt-2 flex items-center gap-1.5 sm:mt-3 sm:gap-2">
+                    <Coins size={14} className="shrink-0 text-accent sm:size-4" />
+                    <span className="text-sm font-medium text-foreground sm:text-base">
                       {selectedBadge.points} points
                     </span>
                   </div>
@@ -269,10 +279,9 @@ export default function QuickAssignmentPanel({
               </div>
             </div>
 
-            {/* User Selection */}
             <div className="space-y-2">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-                <h2 className="text-base sm:text-lg font-semibold text-foreground">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                <h2 className="text-base font-semibold text-foreground sm:text-lg">
                   Assign To Users ({selectedUsers.size} selected)
                 </h2>
                 <DropdownMenu>
@@ -280,17 +289,23 @@ export default function QuickAssignmentPanel({
                     <Button
                       variant="default"
                       size="default"
-                      className="text-button control-h bg-card shadow-sm/25 hover:bg-gray-200 transition-all duration-200 ease-in-out cursor-pointer text-primary shadow-md w-full sm:w-44 py-1.5 justify-between border border-gray-200"
+                      className="text-button control-h w-full justify-between bg-card px-2 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer hover:bg-card hover:text-foreground hover:brightness-90 sm:w-44 sm:px-3"
                     >
                       <span className="truncate">
                         {USER_SORT_OPTIONS.find((option) => option.value === userSortOption)
                           ?.label || 'Sort'}
                       </span>
-                      <ArrowUpDown size={14} className="text-accent shrink-0" />
+                      <ArrowUpDown size={14} className="shrink-0 text-accent" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="manager-dropdown-content w-48">
-                    {USER_SORT_OPTIONS.map((option) => (
+                  <DropdownMenuContent
+                    align="end"
+                    className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
+                  >
+                    <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                      Sort by Name
+                    </DropdownMenuLabel>
+                    {USER_NAME_SORT_OPTIONS.map((option) => (
                       <DropdownMenuItem
                         key={option.value}
                         onClick={() => setUserSortOption(option.value)}
@@ -298,6 +313,23 @@ export default function QuickAssignmentPanel({
                           userSortOption === option.value ? 'bg-accent/15 text-foreground' : ''
                         }`}
                       >
+                        <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                        {option.label}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                      Sort by Employee ID
+                    </DropdownMenuLabel>
+                    {USER_ID_SORT_OPTIONS.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => setUserSortOption(option.value)}
+                        className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                          userSortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                        }`}
+                      >
+                        <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
                         {option.label}
                       </DropdownMenuItem>
                     ))}
@@ -305,20 +337,19 @@ export default function QuickAssignmentPanel({
                 </DropdownMenu>
               </div>
               <div className="relative flex">
-                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3.5 text-gray-400" />
+                <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 transform text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search employee"
                   value={userSearchTerm}
                   onChange={(e) => setUserSearchTerm(sanitizeSearchInput(e.target.value))}
-                  className="text-meta control-h w-full pl-9 pr-3 rounded-md border border-zinc-200 bg-card shadow-sm/25 focus:outline-none focus:border-accent transition-colors"
+                  className="text-meta control-h w-full rounded-md border border-zinc-200 bg-card pl-9 pr-3 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
                 />
               </div>
             </div>
 
-            {/* Users Grid */}
-            <div className="border border-accent/25 rounded-lg overflow-hidden shadow-sm/25">
-              <div className="max-h-64 overflow-y-auto [scrollbar-width:none] sm:[scrollbar-width:auto] [-ms-overflow-style:none] sm:[-ms-overflow-style:auto] [&::-webkit-scrollbar]:hidden sm:[&::-webkit-scrollbar]:block">
+            <div className="overflow-hidden rounded-lg border border-accent/25 shadow-sm/25">
+              <div className="max-h-64 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:[scrollbar-width:auto] sm:[-ms-overflow-style:auto] sm:[&::-webkit-scrollbar]:block">
                 {filteredUsers.length > 0 ? (
                   <div className="divide-y divide-accent/25">
                     {filteredUsers.map((user) => (
@@ -326,9 +357,9 @@ export default function QuickAssignmentPanel({
                         key={user.id}
                         onClick={() => toggleUserSelection(user.id)}
                         disabled={selectedBadge ? user.badge_ids.includes(selectedBadge.id) : false}
-                        className={`w-full px-4 py-3 flex items-center gap-3 transition-colors ${
+                        className={`flex w-full items-center gap-3 px-4 py-3 transition-colors ${
                           selectedBadge && user.badge_ids.includes(selectedBadge.id)
-                            ? 'bg-zinc-100/80 opacity-65 cursor-not-allowed'
+                            ? 'cursor-not-allowed bg-zinc-100/80 opacity-65'
                             : selectedUsers.has(user.id)
                               ? 'bg-accent/15'
                               : 'bg-card hover:bg-row-hover'
@@ -339,50 +370,51 @@ export default function QuickAssignmentPanel({
                           checked={selectedUsers.has(user.id)}
                           onChange={() => {}}
                           disabled={selectedBadge ? user.badge_ids.includes(selectedBadge.id) : false}
-                          className="w-4 h-4 rounded border-accent/25 cursor-pointer disabled:cursor-not-allowed"
+                          className="h-4 w-4 cursor-pointer rounded border-accent/25 disabled:cursor-not-allowed"
                         />
-                        <div className="flex-1 text-left min-w-0">
-                          <p className="font-medium text-sm text-foreground">{user.name}</p>
+                        <div className="min-w-0 flex-1 text-left">
+                          <p className="text-sm font-medium text-foreground">{user.name}</p>
                           <p className="text-xs text-secondary">{user.employee_id}</p>
                           {selectedBadge && user.badge_ids.includes(selectedBadge.id) ? (
-                            <p className="text-[11px] text-muted-foreground">Already has selected badge</p>
+                            <p className="text-[11px] text-muted-foreground">
+                              Already has selected badge
+                            </p>
                           ) : null}
                         </div>
-                        <span className="text-[10px] sm:text-xs text-secondary shrink-0">
+                        <span className="shrink-0 text-[10px] text-secondary sm:text-xs">
                           {user.badge_ids.length} badge{user.badge_ids.length !== 1 ? 's' : ''}
                         </span>
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <div className="p-4 text-center text-secondary text-sm">No users found</div>
+                  <div className="p-4 text-center text-sm text-secondary">No users found</div>
                 )}
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4 border-t border-accent/25">
-              <Button
-                onClick={() => setSelectedBadge(null)}
-                variant="outline"
-                className="text-button control-h flex-1 border-accent/25 text-primary bg-card hover:bg-accent/15 shadow-sm/25"
-              >
-                Clear Selection
-              </Button>
+            <div className="flex gap-3 border-t border-accent/25 pt-4">
               <Button
                 onClick={handleAssignToSelected}
                 disabled={selectedUsers.size === 0 || isAssigning}
-                className="flex-1 bg-primary-gradient hover:bg-primary-gradient hover:brightness-85 text-card disabled:opacity-50 shadow-sm/25"
+                className="text-button control-h flex-1 bg-primary-gradient text-card shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out hover:bg-primary-gradient hover:brightness-85 disabled:cursor-not-allowed disabled:opacity-50 disabled:brightness-50"
               >
                 {isAssigning
                   ? 'Assigning...'
                   : `Assign to ${selectedUsers.size} User${selectedUsers.size !== 1 ? 's' : ''}`}
               </Button>
+              <Button
+                onClick={() => setSelectedBadge(null)}
+                variant="outline"
+                className="text-button control-h flex-1 bg-card text-foreground shadow-sm/25 cursor-pointer transition-all duration-500 ease-in-out hover:bg-[#fafafa] hover:text-foreground hover:brightness-90"
+              >
+                Clear Selection
+              </Button>
             </div>
           </>
         ) : (
-          <div className="bg-card border border-dashed border-accent/25 rounded-lg p-12 text-center">
-            <p className="text-secondary text-lg">Select a badge to assign to users</p>
+          <div className="rounded-lg border border-dashed border-accent/25 bg-card p-12 text-center">
+            <p className="text-lg text-secondary">Select a badge to assign to users</p>
           </div>
         )}
       </div>

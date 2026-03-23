@@ -43,7 +43,10 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card text-card-foreground border border-accent/25 max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl rounded-3xl p-4 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        showCloseButton={false}
+        className="bg-card text-card-foreground border border-accent/25 max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl rounded-3xl p-4 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto"
+      >
         {/* Custom Close Button */}
         <button
           onClick={() => onOpenChange(false)}
@@ -148,24 +151,24 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
 
           {/* Action Buttons */}
           <div className="grid grid-cols-1 gap-3 border-t border-accent/20 pt-4 sm:grid-cols-2">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="control-h order-2 rounded-xl border border-accent/25 text-button text-foreground transition-all duration-300 hover:bg-accent-secondary/10 sm:order-1"
-            >
-              Cancel
-            </Button>
             {onEdit && (
               <Button
                 onClick={() => {
                   onEdit();
                   onOpenChange(false);
                 }}
-                className="control-h order-1 rounded-xl bg-primary-gradient text-button text-white shadow-sm/25 transition-all duration-300 hover:opacity-95 sm:order-2"
+                className="control-h order-1 rounded-xl bg-primary-gradient text-button text-white shadow-sm/25 transition-all duration-300 hover:opacity-95 sm:order-1"
               >
                 Edit
               </Button>
             )}
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="control-h order-2 rounded-xl border border-gray-300 text-button text-foreground transition-all duration-300 hover:bg-gray-200 hover:text-foreground sm:order-2"
+            >
+              Cancel
+            </Button>
           </div>
         </div>
       </DialogContent>

@@ -1,11 +1,21 @@
 'use client';
 
-import { ArrowUpDown, ListTodo, Search } from 'lucide-react';
+import {
+  ArrowUpDown,
+  BadgeCheck,
+  Clock3,
+  ClockArrowDown,
+  ClockArrowUp,
+  ListTodo,
+  Search,
+  XCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PageHeader } from '@/components/shared/page-header';
@@ -40,22 +50,20 @@ export function RewardRequestsControls({
   requestsCount = 0,
 }: HeaderSectionProps) {
   const statusOptions = [
-    { value: 'pending', label: 'Pending' },
-    { value: 'approved', label: 'Approved' },
-    { value: 'rejected', label: 'Rejected' },
+    { value: 'pending', label: 'Pending', icon: Clock3, iconClassName: 'text-accent' },
+    { value: 'approved', label: 'Approved', icon: BadgeCheck, iconClassName: 'text-accent' },
+    { value: 'rejected', label: 'Rejected', icon: XCircle, iconClassName: 'text-accent' },
   ];
 
   const sortOptions = [
-    { value: 'date-desc', label: 'Date (Newest)' },
-    { value: 'date-asc', label: 'Date (Oldest)' },
-    { value: 'employee-asc', label: 'Employee (A-Z)' },
-    { value: 'employee-desc', label: 'Employee (Z-A)' },
+    { value: 'date-desc', label: 'Newest First', icon: ClockArrowDown },
+    { value: 'date-asc', label: 'Oldest First', icon: ClockArrowUp },
   ];
 
   const currentStatusLabel =
     statusOptions.find((option) => option.value === statusFilter)?.label || 'Pending';
   const currentSortLabel =
-    sortOptions.find((option) => option.value === sortBy)?.label || 'Date (Newest)';
+    sortOptions.find((option) => option.value === sortBy)?.label || 'Newest First';
 
   return (
     <div className="sticky top-(--sticky-top-gap) z-30">
@@ -91,22 +99,29 @@ export function RewardRequestsControls({
                   <Button
                     variant="default"
                     size="default"
-                    className="text-button control-h w-full justify-between border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44"
+                    className="text-button control-h w-full justify-between bg-card px-2 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer hover:bg-card hover:text-foreground hover:brightness-90 focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 sm:w-44 sm:px-3"
                   >
                     <span className="truncate">{currentStatusLabel}</span>
                     <ArrowUpDown size={14} className="text-accent" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="manager-dropdown-content w-44">
+                <DropdownMenuContent
+                  align="end"
+                  className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
+                >
+                  <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                    Filter by Status
+                  </DropdownMenuLabel>
                   {statusOptions.map((option) => (
                     <DropdownMenuItem
                       key={option.value}
                       onClick={() => onStatusChange(option.value)}
-                      className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                      className={`manager-dropdown-item cursor-pointer transition-all duration-300 ease-in-out ${
                         statusFilter === option.value ? 'bg-accent/15 text-foreground' : ''
                       }`}
                     >
-                      {option.label}
+                      <option.icon className={`mr-2.5 size-3.5 shrink-0 ${option.iconClassName}`} />
+                      <span>{option.label}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -118,22 +133,29 @@ export function RewardRequestsControls({
                 <Button
                   variant="default"
                   size="default"
-                  className="text-button control-h w-full justify-between border border-gray-200 bg-card py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-44"
+                  className="text-button control-h w-full justify-between bg-card px-2 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer hover:bg-card hover:text-foreground hover:brightness-90 focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 sm:w-44 sm:px-3"
                 >
                   <span className="truncate">{currentSortLabel}</span>
                   <ArrowUpDown size={14} className="text-accent" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="manager-dropdown-content w-56">
+              <DropdownMenuContent
+                align="end"
+                className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
+              >
+                <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                  Sort by Date
+                </DropdownMenuLabel>
                 {sortOptions.map((option) => (
                   <DropdownMenuItem
                     key={option.value}
                     onClick={() => onSort?.(option.value)}
-                    className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                    className={`manager-dropdown-item cursor-pointer transition-all duration-300 ease-in-out ${
                       sortBy === option.value ? 'bg-accent/15 text-foreground' : ''
                     }`}
                   >
-                    {option.label}
+                    <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                    <span>{option.label}</span>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>

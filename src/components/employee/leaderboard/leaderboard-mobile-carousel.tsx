@@ -53,7 +53,7 @@ export function LeaderboardMobileCarousel({ entries }: LeaderboardMobileCarousel
 
   return (
     <section className="w-full md:hidden">
-      <div className="rounded-2xl border-2 border-[#47331F] bg-[#3D2512]/75 px-2 py-3 shadow-xl">
+      <div className="rounded-2xl border-2 border-[#47331F] bg-[#3D2512]/75 px-2 py-3 shadow-xl sm:px-3">
         <div
           ref={trackRef}
           onScroll={handleScroll}
@@ -61,8 +61,8 @@ export function LeaderboardMobileCarousel({ entries }: LeaderboardMobileCarousel
           aria-label="Leaderboard carousel"
         >
           {slides.map((slide, index) => (
-            <div key={`slide-${index}`} className="min-w-full snap-start px-1 pb-1">
-              <div className="grid grid-cols-2 gap-2.5">
+            <div key={`slide-${index}`} className="min-w-full snap-start px-0.5 pb-1 sm:px-1">
+              <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
                 {slide.map((entry) => (
                   <PortraitCard key={entry.userId} entry={entry} size="small" />
                 ))}
@@ -72,18 +72,18 @@ export function LeaderboardMobileCarousel({ entries }: LeaderboardMobileCarousel
           ))}
         </div>
 
-        <div className="mt-3 flex items-center justify-between px-1">
+        <div className="mt-3 flex items-center justify-between gap-3 px-1">
           <button
             type="button"
             onClick={() => scrollToIndex(activeIndex - 1)}
             disabled={activeIndex <= 0}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10"
             aria-label="Previous slide"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <p className="font-jersey text-sm tracking-widest text-[#F4B925]">
+          <p className="min-w-0 text-center font-jersey text-sm tracking-widest text-[#F4B925]">
             {activeIndex + 1} / {slides.length}
           </p>
 
@@ -91,7 +91,7 @@ export function LeaderboardMobileCarousel({ entries }: LeaderboardMobileCarousel
             type="button"
             onClick={() => scrollToIndex(activeIndex + 1)}
             disabled={activeIndex >= slides.length - 1}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[-2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-[#b07440] text-white shadow-[-2px_2px_0_rgba(0,0,0,0.4)] transition-colors hover:bg-[#8A6342] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10"
             aria-label="Next slide"
           >
             <ChevronRight className="h-5 w-5" />

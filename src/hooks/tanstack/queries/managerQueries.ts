@@ -84,7 +84,7 @@ export function useGetTasksToReview(
 export function useGetTasksToReviewPaginated(
   page: number = 1,
   searchTerm: string = '',
-  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc',
+  sort: 'date-desc' | 'date-asc' = 'date-desc',
   queryOptions: { enabled?: boolean } = {}
 ): UseQueryResult<PaginatedResponse<VerificationRequest>, Error> {
   return useQuery({
@@ -134,7 +134,7 @@ export function useGetApprovedTasks(
 export function useGetApprovedTasksPaginated(
   page: number = 1,
   searchTerm: string = '',
-  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc',
+  sort: 'date-desc' | 'date-asc' = 'date-desc',
   queryOptions: { enabled?: boolean } = {}
 ): UseQueryResult<PaginatedResponse<VerificationRequest>, Error> {
   return useQuery({
@@ -184,7 +184,7 @@ export function useGetDeniedTasks(
 export function useGetDeniedTasksPaginated(
   page: number = 1,
   searchTerm: string = '',
-  sort: 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc' = 'date-desc',
+  sort: 'date-desc' | 'date-asc' = 'date-desc',
   queryOptions: { enabled?: boolean } = {}
 ): UseQueryResult<PaginatedResponse<VerificationRequest>, Error> {
   return useQuery({

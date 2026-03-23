@@ -1,13 +1,13 @@
 'use client';
 
-import { Check, Filter } from 'lucide-react';
+import { Hand, Filter, Layers3, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 
 export type BadgeFilterMode = 'all' | 'manual' | 'conditional';
@@ -17,10 +17,14 @@ interface BadgeFilterToggleProps {
   onFilterChange: (value: BadgeFilterMode) => void;
 }
 
-const badgeTypeOptions: Array<{ value: BadgeFilterMode; label: string }> = [
-  { value: 'all', label: 'Show All' },
-  { value: 'manual', label: 'Manual Only' },
-  { value: 'conditional', label: 'Conditional Only' },
+const badgeTypeOptions: Array<{
+  value: BadgeFilterMode;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}> = [
+  { value: 'all', label: 'Show All', icon: Layers3 },
+  { value: 'manual', label: 'Manual Only', icon: Hand },
+  { value: 'conditional', label: 'Conditional Only', icon: SlidersHorizontal },
 ];
 
 export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterToggleProps) {
@@ -50,19 +54,17 @@ export function BadgeFilterToggle({ filterMode, onFilterChange }: BadgeFilterTog
           Badge Type
         </DropdownMenuLabel>
         {badgeTypeOptions.map((option) => {
-          const selected = filterMode === option.value;
+          const OptionIcon = option.icon;
 
           return (
             <DropdownMenuItem
               key={option.value}
               onSelect={() => onFilterChange(option.value)}
               className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out my-1 ${
-                selected ? 'bg-accent/15 text-foreground font-medium' : ''
+                filterMode === option.value ? 'bg-accent/15 text-foreground font-medium' : ''
               }`}
             >
-              <span className="mr-2 inline-flex w-4 items-center justify-center">
-                {selected ? <Check size={14} className="text-foreground" /> : null}
-              </span>
+              <OptionIcon className="mr-2 size-3.5 shrink-0 text-accent" />
               {option.label}
             </DropdownMenuItem>
           );
