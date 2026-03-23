@@ -138,7 +138,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                 onMouseLeave={() => setIsHoveringAvatar(false)}
               >
                 <div
-                  className={`w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-full bg-primary-gradient border-2 border-accent flex items-center justify-center shrink-0 transition-colors ${
+                  className={`relative w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-13 xl:h-13 rounded-full bg-primary-gradient border-2 border-accent flex items-center justify-center shrink-0 overflow-hidden transition-colors ${
                     isHoveringAvatar ? 'bg-accent/20' : ''
                   }`}
                 >
@@ -147,7 +147,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                     <img
                       src={previewUrl}
                       alt={`${user.name}'s profile (preview)`}
-                      className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full object-cover"
+                      className="h-full w-full rounded-full object-cover"
                     />
                   ) : hasImage === true ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -155,7 +155,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                       key={`${user.id}-${imageKey}`}
                       src={imageUrl}
                       alt={`${user.name}'s profile`}
-                      className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full object-cover"
+                      className="h-full w-full rounded-full object-cover"
                       loading="lazy"
                       onLoad={(e) => {
                         e.currentTarget.style.opacity = '1';
@@ -303,7 +303,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
               </div>
             </div>
 
-            <div className='w-fit'>
+            <div className="w-fit">
               <p className="text-[11px] lg:text-xs font-semibold text-muted-foreground uppercase mb-2 sm:mb-3">
                 Address
               </p>
