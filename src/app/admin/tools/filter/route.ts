@@ -103,48 +103,18 @@ export async function GET(req: Request) {
       sb = sb.eq('employment_status', employmentStatus);
     }
 
-    // Apply search/query
-    if (query && searchColumn) {
-      // Use ilike for case-insensitive partial match on the mapped column
-      // Escape % and _ in query to avoid accidental wildcard injection
+    // Apply fuzzy search/query (contains match)
+    if (query) {
       const escaped = query.replace(/[%_]/g, '\\$&');
-      sb = sb.ilike(searchColumn, `${escaped}%`);
-    } else if (query && !searchColumn) {
-      // If queryby not provided or not recognized, search across name and email
-      const escaped = query.replace(/[%_]/g, '\\$&');
-      // Supabase JS doesn't support OR chaining easily, so use filter then or:
-      // We'll do two queries union client-side for reliability (or use rpc for more complex needs).
-      // Simpler approach: use text search on user_name first, fallback to email if zero results.
-      const primary = await sb.ilike('user_name', `${query}%`).range(from, to);
-      if (primary.error) {
-        console.error('Supabase search error', primary.error);
-        return NextResponse.json({ error: primary.error.message }, { status: 500 });
+      const fuzzyPattern = `%${escaped}%`;
+
+      if (searchColumn) {
+        sb = sb.ilike(searchColumn, fuzzyPattern);
+      } else {
+        sb = sb.or(
+          `user_name.ilike.${fuzzyPattern},user_email.ilike.${fuzzyPattern},employee_id.ilike.${fuzzyPattern}`
+        );
       }
-      const dataPrimary = primary.data ?? [];
-      if (dataPrimary.length > 0) {
-        const users = mapRowsToUsers(dataPrimary);
-        const totalCount = primary.count ?? users.length;
-        const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-        return NextResponse.json({ users, page, pageSize, count: totalCount, totalPages }, { status: 200 });
-      }
-      // fallback to email
-      const fallback = await supabase
-        .from('user_attributes')
-        .select(
-          'user_id, user_name, user_email, role_type, user_date_added, employee_id, contact_details, home_address, tin_id, sss_id, employment_status, pagibig_id',
-          { count: 'exact' }
-        )
-        .ilike('user_email', `${query}%`)
-        .order(sortColumn, { ascending: order === 'asc' })
-        .range(from, to);
-      if (fallback.error) {
-        console.error('Supabase search fallback error', fallback.error);
-        return NextResponse.json({ error: fallback.error.message }, { status: 500 });
-      }
-      const users = mapRowsToUsers(fallback.data ?? []);
-      const totalCount = fallback.count ?? users.length;
-      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-      return NextResponse.json({ users, page, pageSize, count: totalCount, totalPages }, { status: 200 });
     }
 
     // If we reach here, no special multi-column search fallback needed — execute accumulated query with pagination

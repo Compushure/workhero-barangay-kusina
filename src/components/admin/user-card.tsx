@@ -124,7 +124,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
             aria-label={isOpen ? 'Collapse user' : 'Expand user'}
             className="w-full cursor-pointer p-3 sm:p-4 lg:p-5 flex items-start justify-between gap-2 sm:gap-3 lg:gap-4 transition-colors hover:bg-accent/5"
           >
-            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 min-w-0 flex-1">
+            <div className="flex items-start gap-2 sm:gap-3 lg:gap-4 min-w-0 flex-1">
               <div
                 className="relative group cursor-zoom-in hover:opacity-90 transition-opacity"
                 onClick={handleAvatarClick}
@@ -169,8 +169,8 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                 )}
               </div>
 
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 mb-0.5 sm:mb-1 lg:mb-2">
+              <div className="min-w-0 flex-1 flex flex-col items-start gap-0.5">
+                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
                   <p className="font-semibold text-sm sm:text-base lg:text-task-title truncate text-foreground">
                     {user.name}
                   </p>
@@ -183,7 +183,9 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                     </Badge>
                   ) : null}
                 </div>
-                <p className="text-meta text-muted-foreground truncate">{user.email}</p>
+                <p className="text-meta leading-tight text-muted-foreground truncate">
+                  {user.email}
+                </p>
                 <div className="flex gap-1.5 sm:gap-2 lg:gap-3 mt-1.5 sm:mt-2 lg:mt-3 md:hidden">
                   <span
                     className={`inline-block px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[11px] font-medium capitalize ${
@@ -199,7 +201,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   </span>
                 </div>
               </div>
-              <div className="hidden md:flex items-center gap-2 lg:gap-3 xl:gap-4 shrink-0">
+              <div className="hidden md:flex items-center gap-2 lg:gap-3 xl:gap-4 shrink-0 pt-0.5">
                 <span
                   className={`px-2.5 py-1 lg:px-3.5 lg:py-1.5 rounded-full text-[11px] lg:text-xs font-medium capitalize ${
                     EMPLOYEE_TYPE_STYLES[user.employeeType]

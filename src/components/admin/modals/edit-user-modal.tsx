@@ -610,7 +610,7 @@ export function EditUserModal({
                               <SelectValue placeholder={`Current: ${user.employeeType}`} />
                             </div>
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="manager-dropdown-content bg-card">
                             <SelectItem value="no-change">
                               No change (keep {user.employeeType})
                             </SelectItem>
@@ -652,7 +652,7 @@ export function EditUserModal({
                               />
                             </div>
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="manager-dropdown-content bg-card">
                             <SelectItem value="no-change">
                               No change (keep {(user as any).employmentStatus || 'current'})
                             </SelectItem>

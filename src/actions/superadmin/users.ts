@@ -101,7 +101,9 @@ function buildQueryParams(params: UserQueryParams): string {
   const normalizedSearch = normalizeSearchQuery(sanitizedSearch);
   if (normalizedSearch) {
     searchParams.set('query', normalizedSearch);
-    searchParams.set('queryby', params.searchType ?? 'name');
+    if (params.searchType) {
+      searchParams.set('queryby', params.searchType);
+    }
   }
 
   // filters

@@ -260,9 +260,9 @@ export function ManagerPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-accent/20 bg-card/95 backdrop-blur-sm shadow-sm/25">
+      <header className="top-0 z-30 border-b border-accent/20 bg-card/95 backdrop-blur-sm shadow-sm/25">
         <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2 sm:py-2.5 md:py-3">
           {isLoading ? (
             <div className="animate-pulse flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
@@ -289,7 +289,7 @@ export function ManagerPage() {
                 <Button
                   variant="default"
                   onClick={() => setAddModalOpen(true)}
-                  className="text-[11px] h-8 sm:h-8.5 gap-1.5 md:gap-2 rounded-md bg-primary-gradient px-2.5 sm:px-3 text-card shadow-sm/25 transition-all duration-300 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85"
+                  className="text-button h-8 sm:h-8.5 gap-1.5 md:gap-2 rounded-md bg-primary-gradient px-2.5 sm:px-3 text-card shadow-sm/25 transition-all duration-300 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85"
                   aria-label="Add User"
                 >
                   <UserPlus className="h-3.5 w-3.5" />
@@ -299,7 +299,7 @@ export function ManagerPage() {
                   variant="default"
                   onClick={handleLogout}
                   disabled={isPending}
-                  className="text-[11px] h-8 sm:h-8.5 gap-1.5 md:gap-2 rounded-md bg-primary-gradient px-2.5 sm:px-3 text-card shadow-sm/25 transition-all duration-300 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 disabled:opacity-60"
+                  className="text-button h-8 sm:h-8.5 gap-1.5 md:gap-2 rounded-md bg-primary-gradient px-2.5 sm:px-3 text-card shadow-sm/25 transition-all duration-300 ease-in-out cursor-pointer hover:bg-primary-gradient hover:brightness-85 disabled:opacity-60"
                   aria-label="Logout"
                 >
                   <LogOut className="h-3.5 w-3.5" />
@@ -311,30 +311,26 @@ export function ManagerPage() {
         </div>
       </header>
 
-      <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2 sm:py-2.5 md:py-3 overflow-x-hidden">
-        <div className="sticky top-13 sm:top-14 z-20">
-          {isLoading ? (
-            <SearchFilterSkeleton />
-          ) : (
-            <SearchFilter
-              searchQuery={searchQuery}
-              onSearchChange={handleSearchChange}
-              employeeTypeFilter={employeeTypeFilter}
-              onEmployeeTypeChange={handleEmployeeTypeFilterChange}
-              employmentStatusFilter={employmentStatusFilter}
-              onEmploymentStatusChange={handleEmploymentStatusFilterChange}
-              sortBy={sortBy}
-              onSortChange={handleSortChange}
-              isDebouncing={isDebouncing}
-              isLoading={isLoading}
-              totalCount={filteredTotalCount}
-            />
-          )}
-        </div>
-      </div>
+      {isLoading ? (
+        <SearchFilterSkeleton />
+      ) : (
+        <SearchFilter
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          employeeTypeFilter={employeeTypeFilter}
+          onEmployeeTypeChange={handleEmployeeTypeFilterChange}
+          employmentStatusFilter={employmentStatusFilter}
+          onEmploymentStatusChange={handleEmploymentStatusFilterChange}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+          isDebouncing={isDebouncing}
+          isLoading={isLoading}
+          totalCount={filteredTotalCount}
+        />
+      )}
 
       {/* Content */}
-      <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 pb-5 lg:pb-6 flex flex-col min-h-[calc(100vh-260px)] overflow-x-hidden">
+      <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-5 lg:py-6 flex flex-col min-h-[calc(100vh-260px)]">
         {isLoading ? (
           <div className="grid gap-3 sm:gap-4 lg:gap-5">
             {[...Array(3)].map((_, i) => (
