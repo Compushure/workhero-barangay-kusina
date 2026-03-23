@@ -92,7 +92,7 @@ export const RewardCard = memo(function RewardCard({
   };
 
   return (
-    <Card className="p-1 group relative overflow-hidden bg-[#eadbc1] border border-t-0 border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-64 min-w-0 flex flex-col rounded-xl">
+    <Card className="p-1 group relative overflow-hidden bg-parchment border border-t-0 border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-64 min-w-0 flex flex-col rounded-xl">
       <CardContent className="p-0 flex-1 flex flex-col">
         <div className="relative h-20 w-full overflow-hidden">
           {reward.imageUrl && !imageError ? (
@@ -113,13 +113,13 @@ export const RewardCard = memo(function RewardCard({
 
           <div className="absolute top-2 right-2 flex flex-col gap-1">
             {hasPendingRequest && (
-              <Badge className="bg-[#c68a2e] text-white hover:bg-[#c68a2e] text-[9px] px-1.5 py-0">
+              <Badge className="bg-[#c68a2e] text-white hover:bg-[#c68a2e] text-xs px-1.5 py-0">
                 <Clock className="h-3 w-3 mr-1" />
                 Pending
               </Badge>
             )}
             {isOutOfStock && (
-              <Badge className="bg-[#a84b3e] text-white hover:bg-[#a84b3e] text-[9px] px-1.5 py-0">
+              <Badge className="bg-[#a84b3e] text-white hover:bg-[#a84b3e] text-xs px-1.5 py-0">
                 <XCircle className="h-3 w-3 mr-1" />
                 Out of Stock
               </Badge>
@@ -133,7 +133,7 @@ export const RewardCard = memo(function RewardCard({
               {reward.name}
             </h3>
           </div>
-          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] sm:text-xs min-w-0 text-center place-items-center">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs sm:text-xs min-w-0 text-center place-items-center">
             <span className="text-[#6b4d2f] font-semibold truncate text-center">Price:</span>
             <span className="text-[#6b4d2f] font-semibold truncate text-center">Stock:</span>
 
@@ -145,7 +145,7 @@ export const RewardCard = memo(function RewardCard({
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] sm:text-xs min-w-0 text-center place-items-center">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs sm:text-xs min-w-0 text-center place-items-center">
             <span className="text-[#6b5a46] font-medium truncate text-center">Limit:</span>
             <span className="text-[#6b5a46] font-medium truncate text-center">Total:</span>
 
@@ -190,9 +190,9 @@ export const RewardCard = memo(function RewardCard({
           onClick={handleRedeem}
           disabled={isDisabled}
           className={cn(
-            'w-full h-8 text-[10px] font-bold transition-all duration-200 border-b-2 border-[#6d472a] min-w-0 ',
+            'w-full h-8 text-xs font-bold transition-all duration-200 border-b-2 border-[#6d472a] min-w-0 ',
             canAfford && !isOutOfStock && !hasPendingRequest
-              ? 'bg-[#d6962f] hover:bg-[#c18425] text-[#22160d]'
+              ? 'bg-[#d6962f] hover:bg-[#c18425] text-primary'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed border-b-2'
           )}
         >

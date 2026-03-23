@@ -29,7 +29,7 @@ export default function KitchenRedirectButton({ status }: KitchenRedirectButtonP
     >
       <Button
         onClick={() => router.push('/employee/dashboard')}
-        className="w-72 text-3xl font-jersey flex items-center justify-center cursor-pointer gap-3 px-6 py-5
+        className="w-72 text-3xl font-jersey flex items-center justify-center cursor-pointer gap-3 px-6 py-5 mt-3
                    border-3 border-[#47331F] bg-[#D18C23] text-black
                    shadow-[4px_4px_0px_#000] shadow-[#3017008e] hover:bg-[#D18C23] hover:translate-y-1 hover:shadow-[2px_2px_0px_#000]
                    transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
