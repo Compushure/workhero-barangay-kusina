@@ -56,8 +56,8 @@ export function ManagerPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(8);
 
-  // Debounce search query to prevent excessive API calls (900ms delay)
-  const debouncedSearchQuery = useDebounce(searchQuery, 900);
+  // Debounce search query to prevent excessive API calls (500ms delay)
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const isDebouncing = searchQuery !== debouncedSearchQuery;
 
   // TanStack Query hook with debounced parameters and pagination

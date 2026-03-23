@@ -138,7 +138,7 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                 onMouseLeave={() => setIsHoveringAvatar(false)}
               >
                 <div
-                  className={`relative w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-13 xl:h-13 rounded-full bg-primary-gradient border-2 border-accent flex items-center justify-center shrink-0 overflow-hidden transition-colors ${
+                  className={`relative w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-13 xl:h-13 rounded-full bg-primary-gradient border border-accent flex items-center justify-center shrink-0 overflow-hidden transition-colors ${
                     isHoveringAvatar ? 'bg-accent/20' : ''
                   }`}
                 >
