@@ -34,6 +34,7 @@ export function RequestsTable({
 }: RequestsTableProps) {
   const [remarkModalOpen, setRemarkModalOpen] = useState(false);
   const [selectedRemark, setSelectedRemark] = useState<string>('');
+  const [isPreviousTaskRemark, setIsPreviousTaskRemark] = useState(false);
   const formatDate = (date: Date | null | string) => {
     if (!date) return 'N/A';
     const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -158,6 +159,10 @@ export function RequestsTable({
                           className="h-6 w-6 cursor-pointer sm:h-7 sm:w-7 text-foreground hover:bg-transparent hover:text-foreground"
                           onClick={() => {
                             setSelectedRemark(request.remark || '');
+                            setIsPreviousTaskRemark(
+                              (sortBy === 'pending' || request.status === 'in review') &&
+                                !!request.remark?.trim()
+                            );
                             setRemarkModalOpen(true);
                           }}
                         >
@@ -229,7 +234,7 @@ export function RequestsTable({
         <DialogContent className="w-[min(92vw,350px)] sm:w-[min(85vw,450px)] md:w-[min(75vw,550px)] lg:w-[min(65vw,650px)] rounded-2xl p-3 sm:p-4 md:p-5 bg-card">
           <DialogHeader>
             <DialogTitle className="text-sm sm:text-base font-bold text-foreground">
-              Previous Task Remark
+              {isPreviousTaskRemark ? 'Previous Task Remark' : 'Task Remark'}
             </DialogTitle>
           </DialogHeader>
           <div className="py-2 sm:py-3">
