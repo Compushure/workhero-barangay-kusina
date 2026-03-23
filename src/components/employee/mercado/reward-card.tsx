@@ -92,9 +92,9 @@ export const RewardCard = memo(function RewardCard({
   };
 
   return (
-    <Card className="p-1.5 group relative overflow-hidden bg-[#eadbc1] border border-t-0 border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-80 min-w-0 flex flex-col rounded-xl">
+    <Card className="p-1 group relative overflow-hidden bg-[#eadbc1] border border-t-0 border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-64 min-w-0 flex flex-col rounded-xl">
       <CardContent className="p-0 flex-1 flex flex-col">
-        <div className="relative h-32 w-full overflow-hidden">
+        <div className="relative h-20 w-full overflow-hidden">
           {reward.imageUrl && !imageError ? (
             <Image
               src={reward.imageUrl}
@@ -127,13 +127,13 @@ export const RewardCard = memo(function RewardCard({
           </div>
         </div>
 
-        <div className="px-4 py-2 flex-1 flex flex-col gap-3 min-w-0 text-[#4f3a26]">
-          <div className="min-h-22 flex items-center justify-center">
-            <h3 className="text-2xl sm:text-2xl leading-tight font-bold text-[#3b2615] whitespace-normal wrap-break-word pixelated-text min-w-0 text-center">
+        <div className="px-2 py-1.5 flex-1 flex flex-col gap-1 min-w-0 text-[#4f3a26]">
+          <div className="flex flex-col items-center justify-center">
+            <h3 className="text-xs sm:text-sm leading-tight font-bold text-[#3b2615] whitespace-normal break-words pixelated-text min-w-0 text-center line-clamp-2">
               {reward.name}
             </h3>
           </div>
-          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs sm:text-sm min-w-0 text-center place-items-center">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] sm:text-xs min-w-0 text-center place-items-center">
             <span className="text-[#6b4d2f] font-semibold truncate text-center">Price:</span>
             <span className="text-[#6b4d2f] font-semibold truncate text-center">Stock:</span>
 
@@ -145,7 +145,7 @@ export const RewardCard = memo(function RewardCard({
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs sm:text-sm min-w-0 text-center place-items-center">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] sm:text-xs min-w-0 text-center place-items-center">
             <span className="text-[#6b5a46] font-medium truncate text-center">Limit:</span>
             <span className="text-[#6b5a46] font-medium truncate text-center">Total:</span>
 
@@ -157,38 +157,40 @@ export const RewardCard = memo(function RewardCard({
             </span>
           </div>
 
-          <div className="mt-1 flex items-center justify-center gap-3 pt-3 pb-0">
+          <div className="mt-0.5 flex items-center justify-center gap-1 pt-1.5 pb-0">
             <Button
               type="button"
               size="icon"
               variant="ghost"
               onClick={() => setQuantity((previous) => Math.max(1, previous - 1))}
               disabled={quantity <= 1 || isDisabled}
-              className="h-8 w-8 rounded-md bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40"
+              className="h-6 w-6 rounded-md bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40"
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="h-3 w-3" />
             </Button>
-            <span className="min-w-5 text-center text-sm font-bold text-[#3f2614]">{quantity}</span>
+            <span className="min-w-4 text-center text-[10px] font-bold text-[#3f2614]">
+              {quantity}
+            </span>
             <Button
               type="button"
               size="icon"
               variant="ghost"
               onClick={() => setQuantity((previous) => Math.min(maxSelectable, previous + 1))}
               disabled={quantity >= maxSelectable || isDisabled}
-              className="h-8 w-8 rounded-md bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40"
+              className="h-6 w-6 rounded-md bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3 w-3" />
             </Button>
           </div>
         </div>
       </CardContent>
 
-      <CardFooter className="px-3 pb-4 pt-0 min-w-0">
+      <CardFooter className="px-2 pb-2 pt-0 min-w-0">
         <Button
           onClick={handleRedeem}
           disabled={isDisabled}
           className={cn(
-            'w-full h-12 text-sm font-bold transition-all duration-200 border-b-2 border-[#6d472a] min-w-0 ',
+            'w-full h-8 text-[10px] font-bold transition-all duration-200 border-b-2 border-[#6d472a] min-w-0 ',
             canAfford && !isOutOfStock && !hasPendingRequest
               ? 'bg-[#d6962f] hover:bg-[#c18425] text-[#22160d]'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed border-b-2'
@@ -196,7 +198,7 @@ export const RewardCard = memo(function RewardCard({
         >
           {redeemMutation.isPending ? (
             <>
-              <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" />
+              <div className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
               Ordering...
             </>
           ) : hasPendingRequest ? (
