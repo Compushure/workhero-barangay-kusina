@@ -15,7 +15,7 @@ import {
 } from '@/action-handlers/superadmin/users';
 import type { User, AddUserInput, EditUserInput } from '@/types';
 import { userKeys } from '../queries/userQueries';
-import { buildOptimisticUser, useAdminUserStore } from '@/store/adminUserStore';
+import { useAdminUserStore } from '@/store/adminUserStore';
 
 /**
  * Creates a new user with automatic cache invalidation
@@ -94,15 +94,9 @@ export function useDeleteProfilePicture() {
   });
 }
 
-export function useAddUser(): UseMutationResult<User, Error, AddUserInput, { tempId: string }> {
+export function useAddUser(): UseMutationResult<User, Error, AddUserInput, void> {
   const queryClient = useQueryClient();
-  const {
-    startOptimistic,
-    optimisticPrependUser,
-    optimisticReplaceUser,
-    rollback,
-    commit,
-  } = useAdminUserStore();
+  const { rollback } = useAdminUserStore();
 
   return useMutation({
     mutationFn: async (input: AddUserInput): Promise<User> => {
@@ -115,20 +109,10 @@ export function useAddUser(): UseMutationResult<User, Error, AddUserInput, { tem
 
       return user;
     },
-    onMutate: async (input: AddUserInput) => {
+    onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: userKeys.all });
-
-      startOptimistic();
-      const tempUser = buildOptimisticUser(input);
-      optimisticPrependUser(tempUser);
-
-      return { tempId: tempUser.id };
     },
-    onSuccess: (user, _input, context) => {
-      if (context?.tempId) {
-        optimisticReplaceUser(context.tempId, user);
-      }
-      commit();
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
     },
