@@ -125,10 +125,7 @@ export function BadgeEditorPage() {
   let filteredBadges = badges.filter((badge) => {
     const searchLower = normalizeSearchQuery(debouncedSearchTerm);
     if (!searchLower) return true;
-    return (
-      badge.name.toLowerCase().includes(searchLower) ||
-      badge.description?.toLowerCase().includes(searchLower)
-    );
+    return badge.name.toLowerCase().includes(searchLower);
   });
 
   if (filterMode === 'manual') {
