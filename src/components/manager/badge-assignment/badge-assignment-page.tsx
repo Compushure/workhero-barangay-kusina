@@ -8,7 +8,6 @@ import {
   ArrowUpAZ,
   ArrowUpDown,
   Award,
-  Coins,
   Search,
   Users,
   type LucideIcon,
@@ -66,18 +65,6 @@ const USER_ID_SORT_OPTIONS: { value: UserSortOption; label: string; icon: Lucide
 ];
 
 const USER_SORT_OPTIONS = [...USER_NAME_SORT_OPTIONS, ...USER_ID_SORT_OPTIONS];
-
-const BADGE_NAME_SORT_OPTIONS: { value: BadgeSortOption; label: string; icon: LucideIcon }[] = [
-  { value: 'name-asc', label: 'Name (A-Z)', icon: ArrowDownAZ },
-  { value: 'name-desc', label: 'Name (Z-A)', icon: ArrowUpAZ },
-];
-
-const BADGE_POINTS_SORT_OPTIONS: { value: BadgeSortOption; label: string; icon: LucideIcon }[] = [
-  { value: 'points-desc', label: 'Points (High to Low)', icon: Coins },
-  { value: 'points-asc', label: 'Points (Low to High)', icon: Coins },
-];
-
-const BADGE_SORT_OPTIONS = [...BADGE_NAME_SORT_OPTIONS, ...BADGE_POINTS_SORT_OPTIONS];
 
 export default function BadgeAssignmentPage() {
   const [activeTab, setActiveTab] = useState<TabType>('users');
@@ -161,7 +148,7 @@ export default function BadgeAssignmentPage() {
       (user) =>
         !normalizedSearch ||
         user.name.toLowerCase().includes(normalizedSearch) ||
-        user.email.toLowerCase().includes(normalizedSearch)
+        (user.employee_id || '').toLowerCase().includes(normalizedSearch)
     );
 
     return [...filtered].sort((a, b) => {
@@ -406,7 +393,7 @@ export default function BadgeAssignmentPage() {
                 </div>
               )}
             </div>
-          ) : (
+        ) : (
             <div className="space-y-4">
               <div className="manager-sticky-controls flex min-w-0 flex-col gap-3 rounded-xl px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3.5">
                 <div className="flex gap-3 pl-1 text-h2 text-foreground">
@@ -419,62 +406,9 @@ export default function BadgeAssignmentPage() {
                   </h5>
                 </div>
 
-                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                  <p className="text-meta hidden text-secondary lg:inline">
-                    Only manual badges (not conditional) appear here
-                  </p>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-button control-h flex w-full items-center justify-between bg-card px-2 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer hover:bg-card hover:text-foreground hover:brightness-90 sm:w-44 sm:px-3"
-                      >
-                        <span className="truncate">
-                          {BADGE_SORT_OPTIONS.find((opt) => opt.value === badgeSortOption)?.label ||
-                            'Sort'}
-                        </span>
-                        <ArrowUpDown className="shrink-0 text-accent" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="start"
-                      className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
-                    >
-                      <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
-                        Sort by Name
-                      </DropdownMenuLabel>
-                      {BADGE_NAME_SORT_OPTIONS.map((option) => (
-                        <DropdownMenuItem
-                          key={option.value}
-                          onClick={() => setBadgeSortOption(option.value)}
-                          className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
-                            badgeSortOption === option.value ? 'bg-accent/15 text-foreground' : ''
-                          }`}
-                        >
-                          <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
-                          {option.label}
-                        </DropdownMenuItem>
-                      ))}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
-                        Sort by Points
-                      </DropdownMenuLabel>
-                      {BADGE_POINTS_SORT_OPTIONS.map((option) => (
-                        <DropdownMenuItem
-                          key={option.value}
-                          onClick={() => setBadgeSortOption(option.value)}
-                          className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
-                            badgeSortOption === option.value ? 'bg-accent/15 text-foreground' : ''
-                          }`}
-                        >
-                          <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
-                          {option.label}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <p className="text-meta hidden text-secondary lg:inline">
+                  Only manual badges (not conditional) appear here
+                </p>
               </div>
 
               {isQuickAssignLoading ? (
@@ -485,6 +419,8 @@ export default function BadgeAssignmentPage() {
                   badgePage={badgePage}
                   totalBadgePages={totalBadgePages}
                   onBadgePageChange={setBadgePage}
+                  badgeSortOption={badgeSortOption}
+                  onBadgeSortChange={setBadgeSortOption}
                   users={users}
                   onAwardBadgeToUsers={handleAwardBadgesBulk}
                   isAssigning={assignBadgesBulkMutation.isPending}
