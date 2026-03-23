@@ -263,7 +263,7 @@ export function ManagerPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="top-0 z-30 border-b border-accent/20 bg-card/95 backdrop-blur-sm shadow-sm/25">
-        <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2 sm:py-2.5 md:py-3">
+        <div className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 md:px-4 lg:px-6 xl:px-8 py-2 sm:py-2.5 md:py-3">
           {isLoading ? (
             <div className="animate-pulse flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
               <div className="space-y-1.5">
@@ -276,7 +276,7 @@ export function ManagerPage() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
+            <div className="flex sm:items-center justify-between gap-2.5 sm:gap-3 md:gap-4 lg:gap-5">
               <div className="flex items-center gap-3 sm:gap-4">
                 <div>
                   <h1 className="text-lg sm:text-xl font-bold text-foreground">User Management</h1>
@@ -330,7 +330,7 @@ export function ManagerPage() {
       )}
 
       {/* Content */}
-      <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-5 lg:py-6 flex flex-col min-h-[calc(100vh-260px)]">
+      <main className="max-w-6xl lg:max-w-7xl 2xl:max-w-screen-2xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-5 lg:py-6 flex flex-col min-h-[calc(100dvh-260px)]">
         {isLoading ? (
           <div className="grid gap-3 sm:gap-4 lg:gap-5">
             {[...Array(3)].map((_, i) => (

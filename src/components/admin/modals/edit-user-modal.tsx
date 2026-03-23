@@ -324,7 +324,7 @@ export function EditUserModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card w-[95vw] max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto max-h-[94vh] p-0 rounded-xl shadow-xl flex flex-col border border-accent/20">
+      <DialogContent className="bg-card w-[95vw] max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto max-h-[94vh] p-0 rounded-xl shadow-xl flex flex-col border border-accent/20">
         <DialogHeader className="px-3 sm:px-5 lg:px-6 pt-3 sm:pt-4 lg:pt-5 pb-2.5 sm:pb-3 border-b border-accent/20 shrink-0">
           <div className="flex items-start justify-between gap-2 sm:gap-3 lg:gap-4">
             <div className="flex-1 min-w-0">
@@ -336,13 +336,13 @@ export function EditUserModal({
               </DialogDescription>
             </div>
             {/* Batch Operation Buttons */}
-            <div className="flex gap-1.5 sm:gap-2 lg:gap-3 shrink-0">
+            <div className="flex flex-wrap justify-end gap-1.5 sm:gap-2 lg:gap-3 shrink-0">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleEditAll}
-                className="text-[11px] h-7 sm:h-8 whitespace-nowrap bg-card hover:bg-gray-100 hover:text-foreground border-zinc-300 px-2 sm:px-3"
+                className="text-[11px] h-7 sm:h-8 bg-card hover:bg-gray-100 hover:text-foreground border-zinc-300 px-2 sm:px-3"
               >
                 Edit All
               </Button>
@@ -351,7 +351,7 @@ export function EditUserModal({
                 variant="outline"
                 size="sm"
                 onClick={handleClearAll}
-                className="text-[11px] h-7 sm:h-8 whitespace-nowrap bg-card hover:bg-gray-100 hover:text-foreground border-zinc-300 px-2 sm:px-3"
+                className="text-[11px] h-7 sm:h-8 bg-card hover:bg-gray-100 hover:text-foreground border-zinc-300 px-2 sm:px-3"
               >
                 Clear All
               </Button>
@@ -366,7 +366,7 @@ export function EditUserModal({
               <p className="text-xs lg:text-sm font-semibold text-foreground uppercase hidden sm:block">
                 Read-Only Information
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
                 <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
                   <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-accent shrink-0" />
                   <div className="min-w-0">
@@ -446,7 +446,7 @@ export function EditUserModal({
                     Basic Information (Optional)
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-4">
                       {/* New Name */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -588,7 +588,7 @@ export function EditUserModal({
                     Employment Details (Optional)
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-4">
                       {/* New Role */}
                       <div className="space-y-2">
                         <Label htmlFor="edit-type" className="text-foreground">
@@ -730,7 +730,7 @@ export function EditUserModal({
                     Government IDs (Optional)
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 pt-4">
                       {/* TIN */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">

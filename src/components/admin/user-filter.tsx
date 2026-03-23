@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, Users } from 'lucide-react';
 import type { EmployeeTypeValue, EmploymentStatusValue } from '@/types';
 import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
@@ -40,45 +40,44 @@ export function SearchFilter({
   totalCount,
 }: SearchFilterProps) {
   return (
-    <section className="manager-sticky-controls w-full max-w-5xl lg:max-w-6xl mx-[auto!important] mt-1 sm:mt-1.5 md:mt-2 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2 sm:py-2.5 md:py-3 overflow-hidden rounded-lg">
+    <section className="manager-sticky-controls max-lg:static! max-lg:top-auto w-full max-w-5xl lg:max-w-6xl mx-[auto!important] mt-1 sm:mt-1.5 md:mt-2 rounded-xl px-2.5 py-2.5 sm:px-3 sm:py-3">
       <div className="flex w-full min-w-0 flex-col gap-2 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex w-fit shrink-0 self-start gap-2 whitespace-nowrap rounded-md border border-gray-200 bg-card/75 px-2.5 py-2 text-meta text-primary shadow-sm/25 md:gap-3 md:px-3 xl:self-center">
-          <h5 className="leading-none">
-            Employees{' '}
-            <span className="ml-0.5 rounded-md bg-accent/75 px-1.5 py-0.5 text-[13px] text-primary-foreground shadow-sm/25 md:px-2">
-              {totalCount}
-            </span>
-          </h5>
+        <div className="flex w-fit shrink-0 self-start xl:self-center items-center gap-2 whitespace-nowrap rounded-md border border-gray-200 bg-card/75 px-2.5 py-2 text-meta text-primary shadow-sm/25 md:gap-3 md:px-3">
+          <Users className="h-3.5 w-3.5 text-accent sm:h-4 sm:w-4" />
+          <h5 className="text-h2 font-semibold leading-none text-foreground">Employees</h5>
+          <span className="rounded-md bg-accent/75 px-1.5 py-0.5 text-[13px] font-bold leading-none text-primary-foreground shadow-sm/25 md:px-2">
+            {totalCount}
+          </span>
         </div>
 
-        <div className="w-full min-w-0 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex min-w-max items-end justify-end gap-1.5 whitespace-nowrap sm:gap-2 lg:gap-3">
-            <div className="space-y-1.5 min-w-55 sm:min-w-62.5 lg:min-w-75">
-              <Label htmlFor="search" className="text-[11px] text-foreground">
-                Search by Employee Name
-              </Label>
-              <div className="relative">
-                <Search className="absolute left-2 sm:left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400 sm:h-3.5 sm:w-3.5" />
-                <input
-                  id="search"
-                  type="text"
-                  placeholder="Search by employee name"
-                  className={`text-meta control-h w-full rounded-md border border-zinc-200 bg-card pl-8 pr-2 shadow-sm/25 transition-all duration-500 ease-in-out focus:border-accent focus:outline-none sm:pr-3 ${
-                    isDebouncing ? 'bg-background/50' : 'bg-card'
-                  }`}
-                  value={searchQuery}
-                  onChange={(e) => onSearchChange(sanitizeSearchInput(e.target.value))}
-                />
-                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground">
-                  {isDebouncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-                </div>
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-1.5 sm:gap-2 lg:gap-3 xl:w-auto xl:flex-row xl:items-end xl:justify-end">
+          <div className="space-y-1 min-w-0 xl:w-76">
+            <Label htmlFor="search" className="text-[11px] font-medium text-foreground">
+              Search by Employee Name
+            </Label>
+            <div className="relative">
+              <Search className="absolute left-2 sm:left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400 sm:h-3.5 sm:w-3.5" />
+              <input
+                id="search"
+                type="text"
+                placeholder="Search by employee name"
+                className={`text-xs sm:text-meta control-h w-full rounded-md border border-zinc-200 bg-card pl-8 pr-2 shadow-sm/25 transition-all duration-500 ease-in-out focus:border-accent focus:outline-none sm:pr-3 ${
+                  isDebouncing ? 'bg-background/50' : 'bg-card'
+                }`}
+                value={searchQuery}
+                onChange={(e) => onSearchChange(sanitizeSearchInput(e.target.value))}
+              />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground">
+                {isDebouncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
               </div>
             </div>
+          </div>
 
-            <div className="space-y-1.5 min-w-37.5">
+          <div className="flex min-w-0 flex-wrap gap-1.5 sm:flex-nowrap sm:gap-2 lg:gap-3">
+            <div className="space-y-1 w-full sm:w-37.5">
               <Label
                 htmlFor="filter-type"
-                className="flex items-center gap-1.5 text-[11px] text-foreground"
+                className="flex items-center gap-1.5 text-[11px] font-medium text-foreground"
               >
                 Employee Type
                 {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
@@ -113,10 +112,10 @@ export function SearchFilter({
               </Select>
             </div>
 
-            <div className="space-y-1.5 min-w-40">
+            <div className="space-y-1 w-full sm:w-40">
               <Label
                 htmlFor="filter-status"
-                className="flex items-center gap-1.5 text-[11px] text-foreground"
+                className="flex items-center gap-1.5 text-[11px] font-medium text-foreground"
               >
                 Employment Status
                 {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
@@ -148,10 +147,10 @@ export function SearchFilter({
               </Select>
             </div>
 
-            <div className="space-y-1.5 min-w-46.25">
+            <div className="space-y-1 w-full sm:w-48">
               <Label
                 htmlFor="sort"
-                className="flex items-center gap-1.5 text-[11px] text-foreground"
+                className="flex items-center gap-1.5 text-[11px] font-medium text-foreground"
               >
                 Sort By
                 {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
@@ -190,25 +189,25 @@ export function SearchFilter({
 
 export function SearchFilterSkeleton() {
   return (
-    <section className="manager-sticky-controls w-full max-w-5xl lg:max-w-6xl xl:max-w-6xl mx-[auto!important] mt-1 sm:mt-1.5 md:mt-2 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-2 sm:py-2.5 md:py-3 overflow-hidden rounded-xl animate-pulse">
+    <section className="manager-sticky-controls max-lg:static! max-lg:top-auto w-full max-w-5xl lg:max-w-6xl mx-[auto!important] mt-1 sm:mt-1.5 md:mt-2 rounded-xl px-2.5 py-2.5 sm:px-3 sm:py-3 animate-pulse">
       <div className="flex w-full min-w-0 flex-col gap-2 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between">
-        <div className="h-7 w-34 shrink-0 rounded-md bg-background xl:self-center" />
+        <div className="h-8 w-44 shrink-0 rounded-md bg-background xl:self-center" />
 
-        <div className="w-full min-w-0 overflow-hidden">
-          <div className="flex min-w-max items-end justify-end gap-1.5 sm:gap-2 lg:gap-3">
-            <div className="space-y-1.5 min-w-55 sm:min-w-62.5 lg:min-w-75">
-              <div className="h-3.5 bg-background rounded w-28 sm:w-32" />
-              <div className="control-skeleton-h bg-background rounded-md w-full" />
-            </div>
-            <div className="space-y-1.5 min-w-37.5">
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-1.5 sm:gap-2 lg:gap-3 xl:w-auto xl:flex-row xl:items-end xl:justify-end">
+          <div className="space-y-1 min-w-0 xl:w-76">
+            <div className="h-3.5 bg-background rounded w-28 sm:w-32" />
+            <div className="control-skeleton-h bg-background rounded-md w-full" />
+          </div>
+          <div className="flex min-w-0 flex-wrap gap-1.5 sm:flex-nowrap sm:gap-2 lg:gap-3">
+            <div className="space-y-1 w-full sm:w-37.5">
               <div className="h-3.5 bg-background rounded w-20" />
               <div className="control-skeleton-h bg-background rounded-md w-full" />
             </div>
-            <div className="space-y-1.5 min-w-40">
+            <div className="space-y-1 w-full sm:w-40">
               <div className="h-3.5 bg-background rounded w-24" />
               <div className="control-skeleton-h bg-background rounded-md w-full" />
             </div>
-            <div className="space-y-1.5 min-w-46.25">
+            <div className="space-y-1 w-full sm:w-46.25">
               <div className="h-3.5 bg-background rounded w-14" />
               <div className="control-skeleton-h bg-background rounded-md w-full" />
             </div>
