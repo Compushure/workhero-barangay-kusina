@@ -36,6 +36,10 @@ export interface BadgeFormData {
   clearImage?: boolean;
 }
 
+type EditableBadgeCondition = Omit<BadgeCondition, 'requirement_attrb_value'> & {
+  requirement_attrb_value: BadgeCondition['requirement_attrb_value'] | '';
+};
+
 interface AddEditBadgeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -84,7 +88,7 @@ export default function AddEditBadgeDialog({
   const [points, setPoints] = useState(10);
   const [awardAtInterval, setAwardAtInterval] = useState<BadgeInterval>('none');
   const [imgLink, setImgLink] = useState<string | null>(null);
-  const [conditions, setConditions] = useState<BadgeCondition[]>([]);
+  const [conditions, setConditions] = useState<EditableBadgeCondition[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -100,7 +104,12 @@ export default function AddEditBadgeDialog({
       setPoints(editingBadge.points);
       setAwardAtInterval(editingBadge.award_at_interval as BadgeInterval);
       setImgLink(editingBadge.img_link || null);
-      setConditions(editingBadge.conditions);
+      setConditions(
+        editingBadge.conditions.map((condition) => ({
+          ...condition,
+          requirement_attrb_value: condition.requirement_attrb_value ?? '',
+        }))
+      );
       setImageFile(null);
       setImagePreviewUrl(null);
       setClearImage(false);
@@ -121,6 +130,13 @@ export default function AddEditBadgeDialog({
       setIsConditionsCollapsed(false);
     }
   }, [editingBadge, open]);
+
+  const normalizeConditionsForSave = (items: EditableBadgeCondition[]): BadgeCondition[] =>
+    items.map((condition) => ({
+      ...condition,
+      requirement_attrb_value:
+        condition.requirement_attrb_value === '' ? 0 : condition.requirement_attrb_value,
+    }));
 
   // Clear error when user modifies form fields
   useEffect(() => {
@@ -152,7 +168,8 @@ export default function AddEditBadgeDialog({
       points !== editingBadge.points ||
       awardAtInterval !== editingBadge.award_at_interval ||
       imgLink !== editingBadge.img_link ||
-      JSON.stringify(conditions) !== JSON.stringify(editingBadge.conditions) ||
+      JSON.stringify(normalizeConditionsForSave(conditions)) !==
+        JSON.stringify(editingBadge.conditions) ||
       clearImage ||
       !!imageFile
     );
@@ -179,7 +196,7 @@ export default function AddEditBadgeDialog({
         points,
         award_at_interval: awardAtInterval,
         img_link: imgLink,
-        conditions,
+        conditions: normalizeConditionsForSave(conditions),
         imageFile,
         clearImage,
       });
@@ -247,7 +264,7 @@ export default function AddEditBadgeDialog({
         : initialType === 'attribute'
           ? attributeOptions[0]?.id
           : attendanceOptions[0]?.id;
-    const newCondition: BadgeCondition = {
+    const newCondition: EditableBadgeCondition = {
       id: `temp-${Date.now()}`,
       requirement_type: initialType,
       requirement_operator: '=',
@@ -264,7 +281,11 @@ export default function AddEditBadgeDialog({
   };
 
   // Update a condition
-  const handleUpdateCondition = (id: string, field: keyof BadgeCondition, value: any) => {
+  const handleUpdateCondition = (
+    id: string,
+    field: keyof EditableBadgeCondition,
+    value: EditableBadgeCondition[keyof EditableBadgeCondition]
+  ) => {
     setConditions((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
   };
 
@@ -871,13 +892,14 @@ export default function AddEditBadgeDialog({
                                 <Input
                                   type="number"
                                   value={condition.requirement_attrb_value}
-                                  onChange={(e) =>
+                                  onChange={(e) => {
+                                    const nextValue = e.target.value;
                                     handleUpdateCondition(
                                       condition.id,
                                       'requirement_attrb_value',
-                                      parseInt(e.target.value) || 0
-                                    )
-                                  }
+                                      nextValue === '' ? '' : Number(nextValue)
+                                    );
+                                  }}
                                   min={0}
                                   max={10000}
                                   className="bg-white border-[#e0cfcf] focus:border-foreground h-9 text-sm"
