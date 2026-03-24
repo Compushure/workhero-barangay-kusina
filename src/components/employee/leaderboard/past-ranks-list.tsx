@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { CalendarIcon, Circle, History } from 'lucide-react';
-import { getISOWeek } from 'date-fns';
+import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { MonthPicker, YearPicker, WeekCalendar } from '@/components/shared/period-date-pickers';
@@ -34,7 +34,7 @@ const FILTER_PLACEHOLDER: Record<RankingPeriodType, string> = {
 function toPeriodParams(row: RankingPeriodWithTop): EmployeePeriodParams {
   const start = new Date(row.period_start + 'T00:00:00');
   if (row.period_type === 'weekly') {
-    return { periodType: 'weekly', year: start.getFullYear(), week: getISOWeek(start) };
+    return { periodType: 'weekly', year: getISOWeekYear(start), week: getISOWeek(start) };
   }
   if (row.period_type === 'monthly') {
     return { periodType: 'monthly', year: start.getFullYear(), month: start.getMonth() + 1 };

@@ -42,8 +42,8 @@ function findMatchingPeriod(
   );
 }
 
-function findOldestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
-  return rows.length > 0 ? rows[rows.length - 1] : null;
+function findNewestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
+  return rows.length > 0 ? rows[0] : null;
 }
 
 function PeriodEmptyState({
@@ -95,10 +95,10 @@ export function PastRanksList({
       }
 
       if (shouldResolveDefaultSelection) {
-        return findOldestPeriod(rows);
+        return findNewestPeriod(rows);
       }
 
-      return findOldestPeriod(rows);
+      return findNewestPeriod(rows);
     },
     [grouped, initialRequestedPeriod, shouldResolveDefaultSelection]
   );
