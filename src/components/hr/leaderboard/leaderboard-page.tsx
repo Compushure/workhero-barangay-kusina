@@ -1,4 +1,5 @@
 import { getISOWeek, getISOWeekYear } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import {
   checkRankingExists,
   getAllRankingPeriods,
@@ -11,6 +12,8 @@ import { PeriodSelector } from '@/components/hr/leaderboard/period-selector';
 import { PageHeader } from '@/components/shared/page-header';
 import { getISOWeeksInYear } from '@/lib/utils/time-period-utils';
 import type { RankLogPeriodType } from '@/types';
+
+const MANILA_TIMEZONE = 'Asia/Manila';
 
 type SearchParams = {
   type?: string;
@@ -33,7 +36,7 @@ function toPositiveInt(value: string | undefined): number | null {
 }
 
 function getPreviousWeek() {
-  const now = new Date();
+  const now = toZonedTime(new Date(), MANILA_TIMEZONE);
   const nowWeek = getISOWeek(now);
   const nowYear = getISOWeekYear(now);
 
@@ -46,7 +49,7 @@ function getPreviousWeek() {
 }
 
 function getPreviousMonth() {
-  const now = new Date();
+  const now = toZonedTime(new Date(), MANILA_TIMEZONE);
   const month = now.getMonth() + 1;
 
   if (month <= 1) {
@@ -57,7 +60,7 @@ function getPreviousMonth() {
 }
 
 function getPreviousYear() {
-  return new Date().getFullYear() - 1;
+  return toZonedTime(new Date(), MANILA_TIMEZONE).getFullYear() - 1;
 }
 
 function parsePeriodType(value: string | undefined): RankLogPeriodType {

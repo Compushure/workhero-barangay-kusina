@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { getISOWeek, getISOWeekYear } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import {
   getISOWeeksInYear,
   buildPeriodLabel,
@@ -22,8 +23,10 @@ import { cn } from '@/lib/utils';
 import VisibilityToggle from '@/components/hr/leaderboard/visibility-toggle';
 import type { RankLogPeriodType } from '@/types';
 
+const MANILA_TIMEZONE = 'Asia/Manila';
+
 function getPreviousWeek(): { year: number; week: number } {
-  const now = new Date();
+  const now = toZonedTime(new Date(), MANILA_TIMEZONE);
   const nowYear = getISOWeekYear(now);
   const nowWeek = getISOWeek(now);
   if (nowWeek <= 1) {
@@ -37,7 +40,7 @@ function getWeeklyPeriodOptions(): { year: number; week: number }[] {
 }
 
 function getPreviousMonth(): { year: number; month: number } {
-  const now = new Date();
+  const now = toZonedTime(new Date(), MANILA_TIMEZONE);
   const nowYear = now.getFullYear();
   const nowMonth1Based = now.getMonth() + 1;
   if (nowMonth1Based <= 1) {
@@ -47,7 +50,7 @@ function getPreviousMonth(): { year: number; month: number } {
 }
 
 function getPreviousYear(): number {
-  return new Date().getFullYear() - 1;
+  return toZonedTime(new Date(), MANILA_TIMEZONE).getFullYear() - 1;
 }
 
 interface PeriodSelectorProps {

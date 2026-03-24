@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { getISOWeek } from 'date-fns';
+import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { History } from 'lucide-react';
 import { PastRanksListSkeleton } from '@/components/hr/leaderboard/past-ranks-list-skeleton';
 import { PeriodFilters, TAB_LABELS } from '@/components/hr/leaderboard/period-filters';
@@ -30,7 +30,7 @@ function findMatchingPeriod(
 
       const start = new Date(row.period_start + 'T00:00:00');
       if (reference.type === 'weekly') {
-        return start.getFullYear() === reference.year && getISOWeek(start) === reference.week;
+        return getISOWeekYear(start) === reference.year && getISOWeek(start) === reference.week;
       }
 
       if (reference.type === 'monthly') {
@@ -168,7 +168,7 @@ export function PastRanksList({
             {selectedPeriod ? (
                 <LeaderboardContent
                   periodType={selectedPeriod.period_type}
-                  year={new Date(selectedPeriod.period_start + 'T00:00:00').getFullYear()}
+                  year={getISOWeekYear(new Date(selectedPeriod.period_start + 'T00:00:00'))}
                   week={getISOWeek(new Date(selectedPeriod.period_start + 'T00:00:00'))}
                   month={new Date(selectedPeriod.period_start + 'T00:00:00').getMonth() + 1}
                   show
