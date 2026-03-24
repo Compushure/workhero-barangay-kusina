@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 
 import {
+  createDishNotification,
   fetchNotifications,
   markAllNotificationsRead,
   markNotificationRead,
@@ -51,5 +52,20 @@ export async function handleMarkAllNotificationsRead(): Promise<{
   }
 
   toast.success('Notifications cleared');
+  return { error: null, data: true };
+}
+
+export async function handleCreateDishNotification(
+  message: string,
+  metadata?: Record<string, unknown>
+): Promise<{ error: string | null; data?: boolean }> {
+  const result = await safeAction(() => createDishNotification(message, metadata));
+
+  if (!result.success || result.data?.error) {
+    return {
+      error: result.error || result.data?.error || 'Failed to create dish notification',
+    };
+  }
+
   return { error: null, data: true };
 }

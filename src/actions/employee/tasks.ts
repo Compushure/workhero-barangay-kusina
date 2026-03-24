@@ -130,6 +130,30 @@ export async function fetchEmployeeTasks(): Promise<ServerActionResponse<Employe
 export interface ClaimTaskResult {
   pointsAdded: number;
   xpAdded: number;
+  cookOutcome: CookOutcome;
+}
+
+export interface CookDishResult {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  requiredLevel: number;
+  rngMatched: boolean;
+}
+
+export interface CookOutcome {
+  canPrepareFood: boolean;
+  orderCount: number;
+  maxOrders: number;
+  dish: CookDishResult | null;
+}
+
+interface DishRow {
+  id: string;
+  name: string | null;
+  img_link: string | null;
+  rng: number | null;
+  start_appear_level: number | null;
 }
 
 export interface SubmitVerificationResult {
@@ -348,6 +372,7 @@ export async function claimTaskPointsAndXP(
   const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
   const pendingOrders = (task as { pending_orders: number | null }).pending_orders ?? 0;
   const categoryName = (task as { category_name: string | null }).category_name ?? 'Task';
+  const isLastOrderClaim = pendingOrders > 0 && completedOrders >= maxOrders;
 
   if (assignedTo !== user.id) {
     return { error: 'You can only claim rewards for tasks assigned to you', data: undefined };
@@ -485,6 +510,50 @@ export async function claimTaskPointsAndXP(
     return { error: 'Failed to mark task as claimed', data: undefined };
   }
 
+  let cookOutcome: CookOutcome = {
+    canPrepareFood: false,
+    orderCount: maxOrders,
+    maxOrders,
+    dish: null,
+  };
+
+  if (isLastOrderClaim) {
+    const { data: dishRows, error: dishError } = await supabase
+      .from('Dishes')
+      .select('id, name, img_link, rng, start_appear_level')
+      .lte('start_appear_level', newLevel);
+
+    if (!dishError) {
+      const eligibleDishes = (dishRows ?? []) as DishRow[];
+
+      if (eligibleDishes.length > 0) {
+        const randomDish = eligibleDishes[Math.floor(Math.random() * eligibleDishes.length)];
+        const dishRng = Number(randomDish.rng ?? 1);
+        const rngMatched = Math.random() <= dishRng;
+
+        cookOutcome = {
+          canPrepareFood: true,
+          orderCount: maxOrders,
+          maxOrders,
+          dish: {
+            id: randomDish.id,
+            name: randomDish.name ?? 'Dish',
+            imageUrl: randomDish.img_link,
+            requiredLevel: randomDish.start_appear_level ?? 1,
+            rngMatched,
+          },
+        };
+      } else {
+        cookOutcome = {
+          canPrepareFood: true,
+          orderCount: maxOrders,
+          maxOrders,
+          dish: null,
+        };
+      }
+    }
+  }
+
   // Build notification message
   const pointsEarned = pointsToAdd;
   let notificationMessage = `You have claimed ${pointsEarned} points for completing the task "${categoryName}."`;
@@ -508,11 +577,14 @@ export async function claimTaskPointsAndXP(
       leveledUp: newLevel > currentLevel,
       newLevel,
       previousLevel: currentLevel,
+      cookReady: cookOutcome.canPrepareFood,
+      cookDish: cookOutcome.dish,
+      cookOrderCount: cookOutcome.orderCount,
     },
   });
 
   return {
     error: null,
-    data: { pointsAdded: pointsToAdd, xpAdded: categoryXp * pendingOrders },
+    data: { pointsAdded: pointsToAdd, xpAdded: categoryXp * pendingOrders, cookOutcome },
   };
 }

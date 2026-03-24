@@ -69,6 +69,11 @@ export async function handleClaimTaskPointsAndXP(
   completedOrders: number,
   maxOrders: number
 ): Promise<ClaimTaskResult | null> {
+  void taskName;
+  void pendingOrders;
+  void completedOrders;
+  void maxOrders;
+
   const result = await safeAction(() => claimTaskPointsAndXP(kpitaskId));
 
   if (!result.success || result.data?.error) {

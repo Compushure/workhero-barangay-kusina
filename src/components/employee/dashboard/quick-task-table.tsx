@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
 import { useClaimTaskPointsandXP } from '@/hooks/tanstack/mutations/employeeTasksMutations';
 import type { TaskStatusItem } from '@/components/employee/task-status/types';
+import type { ClaimTaskResult } from '@/actions/employee/tasks';
+import type { CookingLaunchPayload } from '@/store/cookingStore';
 
 const formatDate = (iso?: string | null) => {
   if (!iso) return '—';
@@ -20,6 +22,7 @@ const formatDate = (iso?: string | null) => {
 type TasksTableProps = {
   tasks?: TaskStatusItem[];
   sortOrder?: 'newest' | 'oldest';
+  onPrepareFood?: (payload: CookingLaunchPayload) => void;
 };
 
 const TASKS_PAGE_SIZE = 3;
@@ -27,15 +30,26 @@ const TASKS_PAGE_SIZE = 3;
 export default function TasksTable({
   tasks: fallbackTasks = [],
   sortOrder = 'newest',
+  onPrepareFood,
 }: TasksTableProps) {
   const { data, isLoading, isError } = useGetEmployeeTasks();
   const claimMutation = useClaimTaskPointsandXP();
   const [activeClaimId, setActiveClaimId] = useState<string | null>(null);
+  const [claimedTaskIds, setClaimedTaskIds] = useState<Record<string, boolean>>({});
+  const [preparingTaskId, setPreparingTaskId] = useState<string | null>(null);
+  const [cookReadyByTaskId, setCookReadyByTaskId] = useState<
+    Record<string, ClaimTaskResult['cookOutcome']>
+  >({});
   const [currentPage, setCurrentPage] = useState(1);
 
   const approvedTasks = useMemo(() => {
     const source = data?.verifiedTasks ?? fallbackTasks;
-    return source.filter((task) => task.status === 'approved' && task.pendingOrders > 0);
+    return source.filter(
+      (task) =>
+        task.status === 'approved' &&
+        task.pendingOrders > 0 &&
+        task.completedOrders === task.maxOrders
+    );
   }, [data?.verifiedTasks, fallbackTasks]);
 
   const sortedApprovedTasks = useMemo(() => {
@@ -65,8 +79,12 @@ export default function TasksTable({
   }, [currentPage, totalPages]);
 
   const handleClaim = (task: TaskStatusItem) => {
-    if (claimMutation.isPending) return;
+    if (claimMutation.isPending || claimedTaskIds[task.id]) return;
 
+    setClaimedTaskIds((previous) => ({
+      ...previous,
+      [task.id]: true,
+    }));
     setActiveClaimId(task.id);
     claimMutation.mutate(
       {
@@ -77,6 +95,30 @@ export default function TasksTable({
         maxOrders: task.maxOrders,
       },
       {
+        onSuccess: (result) => {
+          if (!result) {
+            setClaimedTaskIds((previous) => {
+              const next = { ...previous };
+              delete next[task.id];
+              return next;
+            });
+            return;
+          }
+
+          if (result?.cookOutcome?.canPrepareFood) {
+            setCookReadyByTaskId((previous) => ({
+              ...previous,
+              [task.id]: result.cookOutcome,
+            }));
+          }
+        },
+        onError: () => {
+          setClaimedTaskIds((previous) => {
+            const next = { ...previous };
+            delete next[task.id];
+            return next;
+          });
+        },
         onSettled: () => {
           setActiveClaimId(null);
         },
@@ -84,12 +126,48 @@ export default function TasksTable({
     );
   };
 
+  const handlePrepareFood = (task: TaskStatusItem) => {
+    const cookOutcome = cookReadyByTaskId[task.id];
+    if (!cookOutcome?.canPrepareFood || !onPrepareFood || preparingTaskId) {
+      return;
+    }
+
+    setPreparingTaskId(task.id);
+
+    onPrepareFood({
+      taskId: task.id,
+      taskName: task.name,
+      dishName: cookOutcome.dish?.name ?? task.name,
+      dishImageUrl: cookOutcome.dish?.imageUrl ?? '/assets/dish/food-sinigang.png',
+      orderCount: Math.max(1, cookOutcome.orderCount || task.maxOrders),
+      maxOrders: cookOutcome.maxOrders || task.maxOrders,
+    });
+
+    setCookReadyByTaskId((previous) => {
+      const next = { ...previous };
+      delete next[task.id];
+      return next;
+    });
+
+    setTimeout(() => {
+      setPreparingTaskId(null);
+    }, 300);
+  };
+
   if (isLoading) {
-    return <div className="p-5 text-center font-pixel text-[14px] text-[#f5e8d6] animate-pulse">Loading tasks...</div>;
+    return (
+      <div className="p-5 text-center font-pixel text-[14px] text-[#f5e8d6] animate-pulse">
+        Loading tasks...
+      </div>
+    );
   }
 
   if (isError) {
-    return <p className="p-5 text-center font-pixel text-[14px] text-red-300">Failed to load approved tasks.</p>;
+    return (
+      <p className="p-5 text-center font-pixel text-[14px] text-red-300">
+        Failed to load approved tasks.
+      </p>
+    );
   }
 
   return (
@@ -103,6 +181,11 @@ export default function TasksTable({
           const totalPoints = task.points * task.pendingOrders;
           const totalXp = task.xp * task.pendingOrders;
           const isClaimingTask = claimMutation.isPending && activeClaimId === task.id;
+          const isPreparingTask = preparingTaskId === task.id;
+          const isFinalApprovedClaim = task.completedOrders >= task.maxOrders;
+          const cookOutcome = cookReadyByTaskId[task.id];
+          const isClaimedTask = Boolean(claimedTaskIds[task.id]);
+          const canPrepareFood = Boolean(cookOutcome?.canPrepareFood) && !isPreparingTask;
 
           return (
             <div
@@ -133,21 +216,39 @@ export default function TasksTable({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col items-end gap-2">
                   <Badge
                     variant="outline"
                     className="rounded-md border-2 border-[#7eb07f]/45 bg-[#d8efdb] font-pixel text-[14px] text-[#1f5a36]"
                   >
                     Approved
                   </Badge>
-                  <Button
-                    size="sm"
-                    onClick={() => handleClaim(task)}
-                    disabled={claimMutation.isPending}
-                    className="kitchen-btn h-10 px-4 font-pixel text-[14px] hover:brightness-105"
-                  >
-                    {isClaimingTask ? 'Claiming...' : 'Claim'}
-                  </Button>
+
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleClaim(task)}
+                      disabled={claimMutation.isPending || isPreparingTask || isClaimedTask}
+                      className="kitchen-btn h-10 px-4 font-pixel text-[14px] hover:brightness-105"
+                    >
+                      {isClaimingTask ? 'Claiming...' : isClaimedTask ? 'Claimed' : 'Claim'}
+                    </Button>
+
+                    {isFinalApprovedClaim ? (
+                      <Button
+                        size="sm"
+                        onClick={() => handlePrepareFood(task)}
+                        disabled={!canPrepareFood}
+                        className="h-10 px-4 font-pixel text-[14px] border-2 border-[#47331F] bg-[#4d6d3a] text-[#f8edd8] shadow-[3px_3px_0px_#2e421f] hover:bg-[#5a7e45] disabled:cursor-not-allowed disabled:opacity-55"
+                      >
+                        {isPreparingTask
+                          ? 'Preparing...'
+                          : canPrepareFood
+                            ? 'Prepare Food'
+                            : 'Cook (Claim first)'}
+                      </Button>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             </div>

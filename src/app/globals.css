@@ -475,6 +475,28 @@
     animation: float 3s ease-in-out infinite;
   }
 
+  .cooking-pot-pop {
+    animation: cooking-pot-pop 0.9s ease-in-out infinite;
+  }
+
+  .pot-swirl {
+    animation: pot-swirl 1.1s ease-in-out infinite;
+  }
+
+  .steam-puff {
+    animation: steam-puff 1.4s ease-in-out infinite;
+    filter: blur(0.5px);
+  }
+
+  .poof-appear {
+    animation: poof-appear 0.42s cubic-bezier(0.2, 0.75, 0.28, 1);
+    transform-origin: center bottom;
+  }
+
+  .serve-away {
+    animation: serve-away 0.58s ease-in forwards;
+  }
+
   .bg-primary-gradient {
     background-image: var(--primary-gradient);
   }
@@ -693,5 +715,70 @@
   }
   50% {
     transform: translateY(-8px);
+  }
+}
+
+@keyframes cooking-pot-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.045);
+  }
+}
+
+@keyframes pot-swirl {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(1.2deg);
+  }
+  75% {
+    transform: rotate(-1.2deg);
+  }
+}
+
+@keyframes steam-puff {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.7);
+  }
+  45% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22px) scale(1.18);
+  }
+}
+
+@keyframes poof-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+    filter: blur(5px);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.08);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes serve-away {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.7);
   }
 }

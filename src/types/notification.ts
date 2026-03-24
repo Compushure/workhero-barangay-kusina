@@ -1,4 +1,4 @@
-export type NotificationType = 'badge' | 'user' | 'task' | 'reward';
+export type NotificationType = 'badge' | 'user' | 'task' | 'reward' | 'dish';
 
 export interface NotificationItem {
   id: string;

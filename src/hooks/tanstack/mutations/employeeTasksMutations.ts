@@ -112,7 +112,7 @@ export function useClaimTaskPointsandXP(): UseMutationResult<
       }
       console.error('Failed to claim task points:', err);
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
       // Optimistically update the points cache with the new data
       if (data) {
         queryClient.setQueryData(employeeKeys.points(), (old: any) => {
@@ -122,25 +122,20 @@ export function useClaimTaskPointsandXP(): UseMutationResult<
             points: old.points + data.pointsAdded,
           };
         });
-      }
 
-      // Remove claimed task from approved list in the shared cache after success
-      queryClient.setQueryData(employeeTasksKeys.list(), (old: any) => {
-        if (!old || !old.verifiedTasks) return old;
-        return {
-          ...old,
-          verifiedTasks: old.verifiedTasks.filter(
-            (task: { id: string }) => task.id !== variables.kpitaskId
-          ),
-        };
-      });
+        queryClient.setQueryData(employeeKeys.xp(), (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            xp: Math.max(0, Number(old.xp ?? 0) + data.xpAdded),
+          };
+        });
+      }
     },
     onSettled: () => {
       // Always refetch after error or success to make sure the server state is reflected
       queryClient.invalidateQueries({ queryKey: employeeKeys.points() });
       queryClient.invalidateQueries({ queryKey: employeeKeys.xp() });
-      // Invalidate tasks cache to reflect the claimed status
-      queryClient.invalidateQueries({ queryKey: employeeTasksKeys.lists() });
     },
   });
 }

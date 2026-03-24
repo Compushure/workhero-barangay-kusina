@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Award, CheckCircle2, Gift, User, X } from 'lucide-react';
+import { Award, CheckCircle2, Gift, User, X, CookingPot } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { cn } from '@/lib/utils';
@@ -19,6 +19,7 @@ const ICON_BY_TYPE = {
   task: CheckCircle2,
   reward: Gift,
   user: User,
+  dish: CookingPot,
 } as const;
 
 const CARD_BY_TYPE = {
@@ -26,6 +27,7 @@ const CARD_BY_TYPE = {
   task: 'border-cyan-400',
   reward: 'border-lime-400',
   user: 'border-violet-400',
+  dish: 'border-accent',
 } as const;
 
 const ICON_BY_COLOR = {
@@ -33,6 +35,7 @@ const ICON_BY_COLOR = {
   task: 'text-cyan-300',
   reward: 'text-lime-300',
   user: 'text-fuchsia-300',
+  dish: 'text-accent',
 } as const;
 
 export function RealtimeNotificationToastClient({ userId }: RealtimeNotificationToastClientProps) {

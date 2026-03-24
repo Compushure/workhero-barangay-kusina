@@ -12,11 +12,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
 import type { TaskStatusItem } from '@/components/employee/task-status/types';
+import { type CookingLaunchPayload, useCookingStore } from '@/store/cookingStore';
 
 type DialogContentProps = ComponentProps<typeof DialogContent>;
 
@@ -24,7 +31,8 @@ function WideDialogContent({ children, className, ...props }: DialogContentProps
   return (
     <DialogContent
       showCloseButton={false}
-      className={`kitchen-parchment-card w-[92vw] max-w-210 max-h-[82vh] gap-0 rounded-2xl font-pixel p-0 overflow-hidden ${className ?? ''}`}
+      overlayClassName="z-[15]"
+      className={`kitchen-parchment-card z-[15] w-[92vw] max-w-210 max-h-[82vh] gap-0 rounded-2xl font-pixel p-0 overflow-hidden ${className ?? ''}`}
       {...props}
     >
       <DialogClose
@@ -42,10 +50,23 @@ export default function TaskIcon() {
   const [open, setOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const { data } = useGetEmployeeTasks();
+  const launchCooking = useCookingStore((state) => state.launchCooking);
+
+  const handlePrepareFood = (payload: CookingLaunchPayload) => {
+    setOpen(false);
+    setTimeout(() => {
+      launchCooking(payload);
+    }, 220);
+  };
 
   const pendingCount = useMemo(() => {
     const tasks: TaskStatusItem[] = data?.verifiedTasks ?? [];
-    return tasks.filter((task) => task.status === 'approved' && task.pendingOrders > 0).length;
+    return tasks.filter(
+      (task) =>
+        task.status === 'approved' &&
+        task.pendingOrders > 0 &&
+        task.completedOrders === task.maxOrders
+    ).length;
   }, [data?.verifiedTasks]);
 
   const hasRewards = pendingCount > 0;
@@ -84,7 +105,10 @@ export default function TaskIcon() {
             </DialogTrigger>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="font-pixel bg-[#FFF2CC] text-[#3B2A1A] border-[#47331F]/30">
+        <TooltipContent
+          side="bottom"
+          className="font-pixel bg-[#FFF2CC] text-[#3B2A1A] border-[#47331F]/30"
+        >
           tasks to claim points for
         </TooltipContent>
       </Tooltip>
@@ -118,7 +142,7 @@ export default function TaskIcon() {
           </div>
         </DialogHeader>
         <div className="max-h-[54vh] overflow-y-auto bg-[#eadbc1] p-3">
-          <TasksTable sortOrder={sortOrder} />
+          <TasksTable sortOrder={sortOrder} onPrepareFood={handlePrepareFood} />
         </div>
       </WideDialogContent>
     </Dialog>
