@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { CalendarIcon, Circle, History } from 'lucide-react';
+import { CalendarIcon, Circle } from 'lucide-react';
 import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -44,15 +44,6 @@ function toPeriodParams(row: RankingPeriodWithTop): EmployeePeriodParams {
 
 function findOldestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
   return rows.length > 0 ? rows[rows.length - 1] : null;
-}
-
-function PeriodEmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex min-h-[40vh] flex-1 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[#b07440]/35 bg-[#3D2512]/45 px-6 py-10 text-center">
-      <History className="h-10 w-10 text-[#F4B925]/35" />
-      <p className="font-jersey text-sm tracking-widest text-[#F4B925]/70 sm:text-base">{message}</p>
-    </div>
-  );
 }
 
 interface PastRanksListProps {
@@ -148,11 +139,6 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
     setSelectedPeriod(fallbackPeriod ? toPeriodParams(fallbackPeriod) : null);
     setDatePickerOpen(false);
   }
-
-  const emptyMessage =
-    grouped[activeTab].length === 0
-      ? `No ${activeTab} rankings released yet.`
-      : `No ranking found for the selected ${activeTab} period.`;
 
   return (
     <div className="flex w-full flex-1 flex-col items-center gap-5">
@@ -256,15 +242,21 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
         ) : null}
 
         {!isHistoryLoading && !isError && !selectedPeriod ? (
-          <div className="w-full max-w-4xl px-3 sm:px-4">
-            <PeriodEmptyState message={emptyMessage} />
+          <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-3 sm:pt-4">
+            <LeaderboardEmptyState
+              title="Ranking for this period was hidden."
+              subtitle="Contact the Human Resources Office!"
+            />
           </div>
         ) : null}
 
         {!isHistoryLoading && !isError && selectedPeriod ? (
           <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-3 sm:pt-4">
             {!hasEntries ? (
-              <LeaderboardEmptyState />
+              <LeaderboardEmptyState
+                title="Ranking for this period was hidden."
+                subtitle="Contact the Human Resources Office!"
+              />
             ) : (
               <>
                 <LeaderboardMobileCarousel entries={rankedEntries.slice(0, 10)} />

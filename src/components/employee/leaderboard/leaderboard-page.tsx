@@ -57,6 +57,8 @@ export function LeaderboardPageClient({
     () => getLatestPeriodParams(periodType, latestPeriods),
     [periodType, latestPeriods]
   );
+  const latestPeriodMeta = latestPeriods[periodType];
+  const isLatestPeriodHidden = Boolean(latestPeriodMeta && !latestPeriodMeta.is_visible);
 
   const activeWeeklyPeriod =
     currentPeriod && currentPeriod.periodType === 'weekly' ? currentPeriod : null;
@@ -202,7 +204,20 @@ export function LeaderboardPageClient({
                 </header>
 
                 <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-3 sm:pt-4">
-                  {rankedEntries.length === 0 && <LeaderboardEmptyState />}
+                  {rankedEntries.length === 0 && (
+                    <LeaderboardEmptyState
+                      title={
+                        isLatestPeriodHidden
+                          ? 'Ranking for this period was hidden.'
+                          : "Rankings haven't been released yet."
+                      }
+                      subtitle={
+                        isLatestPeriodHidden
+                          ? 'Contact the Human Resources Office!'
+                          : 'Check back later!'
+                      }
+                    />
+                  )}
                   {hasEntries && (
                     <div className="flex w-full flex-col items-center gap-4 sm:gap-5">
                       <LeaderboardMobileCarousel entries={rankedEntries.slice(0, 10)} />
