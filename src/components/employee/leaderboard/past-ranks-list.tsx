@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { CalendarIcon, Circle } from 'lucide-react';
+import { CalendarIcon, Info } from 'lucide-react';
 import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { MonthPicker, YearPicker, WeekCalendar } from '@/components/shared/period-date-pickers';
 import {
@@ -132,14 +133,6 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
     setDatePickerOpen(false);
   }
 
-  function handleClearDate(e: React.MouseEvent) {
-    e.stopPropagation();
-    const fallbackPeriod = findNewestPeriod(grouped[activeTab]);
-    setSelectedDate(fallbackPeriod ? new Date(fallbackPeriod.period_start + 'T00:00:00') : null);
-    setSelectedPeriod(fallbackPeriod ? toPeriodParams(fallbackPeriod) : null);
-    setDatePickerOpen(false);
-  }
-
   return (
     <div className="flex w-full flex-1 flex-col items-center gap-5">
       {!isHistoryLoading && (
@@ -180,20 +173,23 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
                         : 'No generated periods'}
                     </span>
                     {selectedDate && hasAnyPeriods && (
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        aria-label="Clear filter"
-                        onClick={handleClearDate}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            handleClearDate(e as unknown as React.MouseEvent);
-                          }
-                        }}
-                        className="ml-auto rounded-full p-0.5 text-[#CF8B22] transition-colors hover:text-[#F4B925]"
-                      >
-                        <Circle className="h-3.5 w-3.5 fill-current" />
-                      </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span
+                            className="ml-auto rounded-full p-0.5 text-[#CF8B22] transition-colors hover:text-[#F4B925]"
+                            aria-label="Some rankings are hidden"
+                          >
+                            <Info className="h-4.5 w-4.5" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          sideOffset={8}
+                          className="max-w-xs border-[#47331F]/30 bg-[#FFF2CC] font-jersey text-[#3B2A1A]"
+                        >
+                          Some rankings are hidden. Contact Human Resources about this concern.
+                        </TooltipContent>
+                      </Tooltip>
                     )}
                   </button>
                 </PopoverTrigger>
