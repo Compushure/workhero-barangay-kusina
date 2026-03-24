@@ -591,7 +591,10 @@ export function EditUserModal({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-4">
                       {/* New Role */}
                       <div className="space-y-2">
-                        <Label htmlFor="edit-type" className="text-foreground">
+                        <Label
+                          htmlFor="edit-type"
+                          className="text-foreground h-6 sm:h-8 flex items-center leading-none"
+                        >
                           New Role
                         </Label>
                         <Select
@@ -628,7 +631,10 @@ export function EditUserModal({
 
                       {/* New Employment Status */}
                       <div className="space-y-2">
-                        <Label htmlFor="edit-status" className="text-foreground">
+                        <Label
+                          htmlFor="edit-status"
+                          className="text-foreground h-6 sm:h-8 flex items-center leading-none"
+                        >
                           New Employment Status
                         </Label>
                         <Select

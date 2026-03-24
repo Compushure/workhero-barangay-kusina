@@ -486,7 +486,7 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                       <div className="space-y-2">
                         <Label
                           htmlFor="add-employment-status"
-                          className="text-meta text-foreground"
+                          className="text-meta text-foreground h-6 sm:h-8 flex items-center leading-none"
                         >
                           Employment Status
                         </Label>
