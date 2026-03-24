@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { CalendarIcon, Circle, History } from 'lucide-react';
-import { getISOWeek } from 'date-fns';
+import { CalendarIcon, Circle } from 'lucide-react';
+import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { MonthPicker, YearPicker, WeekCalendar } from '@/components/shared/period-date-pickers';
@@ -34,7 +34,7 @@ const FILTER_PLACEHOLDER: Record<RankingPeriodType, string> = {
 function toPeriodParams(row: RankingPeriodWithTop): EmployeePeriodParams {
   const start = new Date(row.period_start + 'T00:00:00');
   if (row.period_type === 'weekly') {
-    return { periodType: 'weekly', year: start.getFullYear(), week: getISOWeek(start) };
+    return { periodType: 'weekly', year: getISOWeekYear(start), week: getISOWeek(start) };
   }
   if (row.period_type === 'monthly') {
     return { periodType: 'monthly', year: start.getFullYear(), month: start.getMonth() + 1 };
@@ -42,17 +42,8 @@ function toPeriodParams(row: RankingPeriodWithTop): EmployeePeriodParams {
   return { periodType: 'yearly', year: start.getFullYear() };
 }
 
-function findOldestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
-  return rows.length > 0 ? rows[rows.length - 1] : null;
-}
-
-function PeriodEmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex min-h-[40vh] flex-1 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[#b07440]/35 bg-[#3D2512]/45 px-6 py-10 text-center">
-      <History className="h-10 w-10 text-[#F4B925]/35" />
-      <p className="font-jersey text-sm tracking-widest text-[#F4B925]/70 sm:text-base">{message}</p>
-    </div>
-  );
+function findNewestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
+  return rows.length > 0 ? rows[0] : null;
 }
 
 interface PastRanksListProps {
@@ -91,7 +82,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
     if (isPeriodsLoading) return;
 
     const activeRows = grouped[activeTab];
-    const fallbackPeriod = findOldestPeriod(activeRows);
+    const fallbackPeriod = findNewestPeriod(activeRows);
     const hasMismatchedSelection = selectedPeriod !== null && selectedPeriod.periodType !== activeTab;
 
     if (selectedPeriod === null || hasMismatchedSelection) {
@@ -127,7 +118,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
     setActiveTab(tab);
     setDatePickerOpen(false);
 
-    const nextPeriod = findOldestPeriod(grouped[tab]);
+    const nextPeriod = findNewestPeriod(grouped[tab]);
     setSelectedDate(nextPeriod ? new Date(nextPeriod.period_start + 'T00:00:00') : null);
     setSelectedPeriod(nextPeriod ? toPeriodParams(nextPeriod) : null);
   }
@@ -143,16 +134,11 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
 
   function handleClearDate(e: React.MouseEvent) {
     e.stopPropagation();
-    const fallbackPeriod = findOldestPeriod(grouped[activeTab]);
+    const fallbackPeriod = findNewestPeriod(grouped[activeTab]);
     setSelectedDate(fallbackPeriod ? new Date(fallbackPeriod.period_start + 'T00:00:00') : null);
     setSelectedPeriod(fallbackPeriod ? toPeriodParams(fallbackPeriod) : null);
     setDatePickerOpen(false);
   }
-
-  const emptyMessage =
-    grouped[activeTab].length === 0
-      ? `No ${activeTab} rankings released yet.`
-      : `No ranking found for the selected ${activeTab} period.`;
 
   return (
     <div className="flex w-full flex-1 flex-col items-center gap-5">
@@ -256,15 +242,21 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
         ) : null}
 
         {!isHistoryLoading && !isError && !selectedPeriod ? (
-          <div className="w-full max-w-4xl px-3 sm:px-4">
-            <PeriodEmptyState message={emptyMessage} />
+          <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-3 sm:pt-4">
+            <LeaderboardEmptyState
+              title="Ranking for this period was hidden."
+              subtitle="Contact the Human Resources Office!"
+            />
           </div>
         ) : null}
 
         {!isHistoryLoading && !isError && selectedPeriod ? (
           <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-3 sm:pt-4">
             {!hasEntries ? (
-              <LeaderboardEmptyState />
+              <LeaderboardEmptyState
+                title="Ranking for this period was hidden."
+                subtitle="Contact the Human Resources Office!"
+              />
             ) : (
               <>
                 <LeaderboardMobileCarousel entries={rankedEntries.slice(0, 10)} />

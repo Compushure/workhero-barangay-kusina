@@ -36,6 +36,7 @@ interface PeriodFiltersProps {
   availablePeriods: RankingPeriodWithTop[];
   onTypeChange: (value: string) => void;
   onDateChange: (date: Date | null) => void;
+  trailingContent?: React.ReactNode;
 }
 
 export function PeriodFilters({
@@ -45,6 +46,7 @@ export function PeriodFilters({
   availablePeriods,
   onTypeChange,
   onDateChange,
+  trailingContent,
 }: PeriodFiltersProps) {
   const [open, setOpen] = useState(false);
   const selectContentClassName = 'manager-dropdown-content rounded-lg bg-popover text-popover-foreground';
@@ -68,7 +70,7 @@ export function PeriodFilters({
     availablePeriodKeys.has(toPeriodSelectionKey(date, activeTab));
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[130px_210px]">
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[130px_210px_186px]">
       <div className="flex w-full flex-col gap-1.5 xl:max-w-[130px]">
         <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           Select Period
@@ -140,6 +142,8 @@ export function PeriodFilters({
           </PopoverContent>
         </Popover>
       </div>
+
+      {trailingContent ? <div className="flex w-full flex-col justify-end xl:max-w-[186px]">{trailingContent}</div> : null}
     </div>
   );
 }
