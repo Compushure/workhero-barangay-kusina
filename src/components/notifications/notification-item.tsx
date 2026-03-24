@@ -69,13 +69,13 @@ export function NotificationItemCard({ notification, onMarkRead }: NotificationI
         <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-card/70">
           <span className="font-semibold text-accent-secondary">{notification.type}</span>
           {status ? (
-            <span className="rounded-full border border-accent/45 bg-black/10 px-2 py-0.5 text-[11px] font-semibold text-card">
+            <span className="rounded-full border border-accent/45 bg-black/10 px-2 py-0.5 text-[0.75rem] tracking-wider font-semibold text-card">
               {formatStatus(status)}
             </span>
           ) : null}
         </div>
         <p className="text-xs text-card">{notification.message}</p>
-        <div className="flex items-center gap-2 text-[11px] text-card/65">
+        <div className="flex items-center gap-2 text-xs text-card/65">
           <Clock3 className="h-3.5 w-3.5" />
           <span>{formatTimestamp(notification.createdAt)}</span>
         </div>

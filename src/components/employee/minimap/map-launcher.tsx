@@ -107,7 +107,7 @@ export function MapLauncher({ className, inline = false }: MapLauncherProps) {
         disabled={isNavigating}
         className={cn(
           inline
-            ? 'relative z-0 inline-flex size-12 items-center justify-center rounded-full wood-panel text-[#F4B925] transition-all duration-300 shadow-sm'
+            ? 'relative z-0 inline-flex size-12 items-center justify-center rounded-full wood-panel text-[#F4B925] hover:text-accent/75 transition-all duration-300 shadow-sm'
             : 'fixed z-55 flex h-17 w-17 items-center justify-center rounded-full wood-panel text-[#F4B925] transition-transform',
           !inline && (position ? '' : 'right-4 top-1/2 -translate-y-1/2'),
           inline
