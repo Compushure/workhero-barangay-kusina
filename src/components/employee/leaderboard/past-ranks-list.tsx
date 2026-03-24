@@ -42,8 +42,8 @@ function toPeriodParams(row: RankingPeriodWithTop): EmployeePeriodParams {
   return { periodType: 'yearly', year: start.getFullYear() };
 }
 
-function findOldestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
-  return rows.length > 0 ? rows[rows.length - 1] : null;
+function findNewestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
+  return rows.length > 0 ? rows[0] : null;
 }
 
 interface PastRanksListProps {
@@ -82,7 +82,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
     if (isPeriodsLoading) return;
 
     const activeRows = grouped[activeTab];
-    const fallbackPeriod = findOldestPeriod(activeRows);
+    const fallbackPeriod = findNewestPeriod(activeRows);
     const hasMismatchedSelection = selectedPeriod !== null && selectedPeriod.periodType !== activeTab;
 
     if (selectedPeriod === null || hasMismatchedSelection) {
@@ -118,7 +118,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
     setActiveTab(tab);
     setDatePickerOpen(false);
 
-    const nextPeriod = findOldestPeriod(grouped[tab]);
+    const nextPeriod = findNewestPeriod(grouped[tab]);
     setSelectedDate(nextPeriod ? new Date(nextPeriod.period_start + 'T00:00:00') : null);
     setSelectedPeriod(nextPeriod ? toPeriodParams(nextPeriod) : null);
   }
@@ -134,7 +134,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
 
   function handleClearDate(e: React.MouseEvent) {
     e.stopPropagation();
-    const fallbackPeriod = findOldestPeriod(grouped[activeTab]);
+    const fallbackPeriod = findNewestPeriod(grouped[activeTab]);
     setSelectedDate(fallbackPeriod ? new Date(fallbackPeriod.period_start + 'T00:00:00') : null);
     setSelectedPeriod(fallbackPeriod ? toPeriodParams(fallbackPeriod) : null);
     setDatePickerOpen(false);
