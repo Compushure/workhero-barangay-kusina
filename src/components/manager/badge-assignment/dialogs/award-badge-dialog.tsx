@@ -12,13 +12,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Search, HelpCircle, Coins } from 'lucide-react';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Search, HelpCircle, Coins, ArrowDownAZ, ArrowUpAZ, ArrowUpDown, type LucideIcon } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { BadgeAssignmentUser, BadgeSummary } from '@/types/manager/badge-assignment';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
@@ -35,6 +36,13 @@ interface AwardBadgeDialogProps {
 
 type SortOption = 'name-asc' | 'name-desc' | 'points-asc' | 'points-desc';
 
+const SORT_OPTIONS: { value: SortOption; label: string; icon: LucideIcon }[] = [
+  { value: 'name-asc', label: 'Name (A-Z)', icon: ArrowDownAZ },
+  { value: 'name-desc', label: 'Name (Z-A)', icon: ArrowUpAZ },
+  { value: 'points-asc', label: 'Points (Low to High)', icon: Coins },
+  { value: 'points-desc', label: 'Points (High to Low)', icon: Coins },
+];
+
 export default function AwardBadgeDialog({
   open,
   onOpenChange,
@@ -47,6 +55,7 @@ export default function AwardBadgeDialog({
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const selectedSortOption = SORT_OPTIONS.find((option) => option.value === sortOption) ?? SORT_OPTIONS[0];
 
   // Filter and sort badges
   let filteredBadges = availableBadges.filter(
@@ -54,8 +63,7 @@ export default function AwardBadgeDialog({
       const normalizedSearch = normalizeSearchQuery(debouncedSearchTerm);
       return (
         !normalizedSearch ||
-        badge.name.toLowerCase().includes(normalizedSearch) ||
-        badge.description?.toLowerCase().includes(normalizedSearch)
+        badge.name.toLowerCase().includes(normalizedSearch)
       );
     }
   );
@@ -110,37 +118,79 @@ export default function AwardBadgeDialog({
         </DialogHeader>
 
         <div className="space-y-4 mt-4">
-          {/* Search */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-primary">Search Badges</Label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-              <Input
-                placeholder="Search by badge name or description"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
-                className="pl-9 bg-white h-9 text-sm"
-              />
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+            {/* Search */}
+            <div className="min-w-0 flex-1 space-y-2">
+              <Label className="text-sm font-medium text-primary">Search Badges</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                <Input
+                  placeholder="Search by badge name"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(sanitizeSearchInput(e.target.value))}
+                  className="control-h bg-white pl-9 text-sm"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Sort */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-[#5a2a2a]">Sort By</Label>
-            <Select
-              value={sortOption}
-              onValueChange={(value) => setSortOption(value as SortOption)}
-            >
-              <SelectTrigger className="bg-white h-9 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-                <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-                <SelectItem value="points-asc">Points (Low to High)</SelectItem>
-                <SelectItem value="points-desc">Points (High to Low)</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Sort */}
+            <div className="space-y-2 sm:w-56 sm:flex-none">
+              <Label className="text-sm font-medium text-[#5a2a2a]">Sort By</Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="default"
+                    size="default"
+                    className="text-button control-h w-full justify-between bg-card px-2 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer hover:bg-card hover:text-foreground hover:brightness-90 sm:px-3"
+                  >
+                    <span className="truncate">{selectedSortOption.label}</span>
+                    <ArrowUpDown size={14} className="shrink-0 text-accent" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
+                >
+                  <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                    Sort by Name
+                  </DropdownMenuLabel>
+                  {SORT_OPTIONS.filter((option) => option.value.startsWith('name')).map((option) => {
+                    const OptionIcon = option.icon;
+                    return (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => setSortOption(option.value)}
+                        className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                          sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                        }`}
+                      >
+                        <OptionIcon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                        {option.label}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                    Sort by Points
+                  </DropdownMenuLabel>
+                  {SORT_OPTIONS.filter((option) => option.value.startsWith('points')).map((option) => {
+                    const OptionIcon = option.icon;
+                    return (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => setSortOption(option.value)}
+                        className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                          sortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                        }`}
+                      >
+                        <OptionIcon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                        {option.label}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           {/* Badge List */}
@@ -274,7 +324,7 @@ export default function AwardBadgeDialog({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-[#e0cfcf]">
+        <div className="mt-4 flex justify-end gap-3">
           <Button
             onClick={handleAward}
             disabled={!selectedBadgeId}
