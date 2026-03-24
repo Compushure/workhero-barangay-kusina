@@ -290,7 +290,7 @@ export function PeriodSelector({
 
         {/* Status / Action */}
         <div className="flex w-full flex-col gap-1.5 self-start">
-          <div className="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[176px_172px]">
+          <div className="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[176px_186px]">
             <div className="flex w-full flex-col items-start gap-1.5 xl:max-w-[176px]">
               <div className="flex min-h-4 items-center gap-1.5">
                 <GenerateStatusIcon className={cn('h-3.5 w-3.5 shrink-0', generateStatus.tone)} />
@@ -312,7 +312,7 @@ export function PeriodSelector({
                 rankingPeriodId={rankingPeriodId}
                 isVisible={isVisible}
                 disabled={rankingPeriodId.startsWith('optimistic-')}
-                className="w-full xl:max-w-[172px]"
+                className="w-full xl:max-w-[186px]"
               />
             ) : null}
           </div>
