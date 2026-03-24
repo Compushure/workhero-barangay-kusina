@@ -85,17 +85,17 @@ export default function TasksTable({
   };
 
   if (isLoading) {
-    return <div className="p-5 text-center font-pixel text-[10px] text-[#f5e8d6] animate-pulse">Loading tasks...</div>;
+    return <div className="p-5 text-center font-pixel text-[14px] text-[#f5e8d6] animate-pulse">Loading tasks...</div>;
   }
 
   if (isError) {
-    return <p className="p-5 text-center font-pixel text-[10px] text-red-300">Failed to load approved tasks.</p>;
+    return <p className="p-5 text-center font-pixel text-[14px] text-red-300">Failed to load approved tasks.</p>;
   }
 
   return (
     <div className="space-y-2.5 rounded-xl bg-[#eadbc1] p-1 sm:p-2 max-h-[48vh] overflow-y-auto">
       {sortedApprovedTasks.length === 0 ? (
-        <div className="rounded-xl border-2 border-[#d5c7ac] bg-[#f0e6d1] p-3 text-center font-pixel text-[9px] text-[#6d553d]">
+        <div className="rounded-xl border-2 border-[#d5c7ac] bg-[#f0e6d1] p-3 text-center font-pixel text-[14px] text-[#6d553d]">
           No approved tasks available.
         </div>
       ) : (
@@ -109,25 +109,25 @@ export default function TasksTable({
               key={task.id}
               className="rounded-xl border-2 border-[#d4c5a8] bg-[#f7efdf] p-3 transition-all duration-200 hover:-translate-y-0.5"
             >
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="font-pixel text-[10px] leading-relaxed text-[#3f2a1a] wrap-break-word">
+                  <div className="font-pixel text-[15px] leading-relaxed text-[#3f2a1a] wrap-break-word">
                     {task.name}
                   </div>
-                  <div className="mt-0.5 font-pixel text-[9px] text-[#6b5038]">
+                  <div className="mt-0.5 font-pixel text-[14px] text-[#6b5038]">
                     Approved on {formatDate(task.approvedAt)}
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    <span className="kitchen-chip px-2 py-0.5 font-pixel text-[8px]">
+                    <span className="kitchen-chip px-2 py-0.5 font-pixel text-[14px]">
                       {task.points} pts each
                     </span>
-                    <span className="kitchen-chip px-2 py-0.5 font-pixel text-[8px]">
+                    <span className="kitchen-chip px-2 py-0.5 font-pixel text-[14px]">
                       Qty {task.pendingOrders}
                     </span>
-                    <span className="rounded-md border-2 border-[#7eb07f]/30 bg-[#e3f2e6] px-2 py-0.5 font-pixel text-[8px] text-[#1f5a36]">
+                    <span className="rounded-md border-2 border-[#7eb07f]/30 bg-[#e3f2e6] px-2 py-0.5 font-pixel text-[14px] text-[#1f5a36]">
                       Total {totalPoints} pts
                     </span>
-                    <span className="rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-2 py-0.5 font-pixel text-[8px] text-[#204b61]">
+                    <span className="rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-2 py-0.5 font-pixel text-[14px] text-[#204b61]">
                       XP {totalXp}
                     </span>
                   </div>
@@ -136,7 +136,7 @@ export default function TasksTable({
                 <div className="flex items-center gap-2">
                   <Badge
                     variant="outline"
-                    className="rounded-md border-2 border-[#7eb07f]/45 bg-[#d8efdb] font-pixel text-[8px] text-[#1f5a36]"
+                    className="rounded-md border-2 border-[#7eb07f]/45 bg-[#d8efdb] font-pixel text-[14px] text-[#1f5a36]"
                   >
                     Approved
                   </Badge>
@@ -144,7 +144,7 @@ export default function TasksTable({
                     size="sm"
                     onClick={() => handleClaim(task)}
                     disabled={claimMutation.isPending}
-                    className="kitchen-btn h-8 px-3 font-pixel text-[8px] hover:brightness-105"
+                    className="kitchen-btn h-10 px-4 font-pixel text-[14px] hover:brightness-105"
                   >
                     {isClaimingTask ? 'Claiming...' : 'Claim'}
                   </Button>
@@ -161,18 +161,18 @@ export default function TasksTable({
             type="button"
             onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))}
             disabled={currentPage === 1}
-            className="h-7 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-2 font-pixel text-[8px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-10 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-4 font-pixel text-[14px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Prev
           </button>
-          <span className="font-pixel text-[8px] text-[#6b5038]">
+          <span className="font-pixel text-[14px] text-[#6b5038]">
             {currentPage}/{totalPages}
           </span>
           <button
             type="button"
             onClick={() => setCurrentPage((previous) => Math.min(totalPages, previous + 1))}
             disabled={currentPage === totalPages}
-            className="h-7 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-2 font-pixel text-[8px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-10 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-4 font-pixel text-[14px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Next
           </button>

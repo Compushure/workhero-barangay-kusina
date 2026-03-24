@@ -33,12 +33,12 @@ type SortOrder = 'newest' | 'oldest';
 const REQUESTS_PAGE_SIZE = 3;
 
 const CONTROL_TRIGGER_CLASS =
-  'h-8 rounded-lg font-pixel text-[9px] bg-[#f7efdf] border-[#9b7a56] text-[#4b3522] focus-visible:ring-[#8a6844]/40 focus-visible:border-[#8a6844] data-[state=open]:border-[#8a6844] data-[state=open]:ring-1 data-[state=open]:ring-[#8a6844]/40';
+  'h-11 rounded-lg font-pixel text-[14px] bg-[#f7efdf] border-[#9b7a56] text-[#4b3522] focus-visible:ring-[#8a6844]/40 focus-visible:border-[#8a6844] data-[state=open]:border-[#8a6844] data-[state=open]:ring-1 data-[state=open]:ring-[#8a6844]/40';
 
-const CONTROL_CONTENT_CLASS = 'bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]';
+const CONTROL_CONTENT_CLASS = 'bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] text-[14px]';
 
 const CONTROL_ITEM_CLASS =
-  'font-pixel text-[10px] text-[#4b3522] data-[state=checked]:bg-[#d8c29f] data-[state=checked]:text-[#4b3522] data-highlighted:bg-[#ccb389] data-highlighted:text-[#4b3522]';
+  'font-pixel text-[14px] text-[#4b3522] data-[state=checked]:bg-[#d8c29f] data-[state=checked]:text-[#4b3522] data-highlighted:bg-[#ccb389] data-highlighted:text-[#4b3522]';
 
 const EMPLOYEE_CANCELLED_REMARKS = ['cancelled by employee', 'canceled by employee'] as const;
 
@@ -96,7 +96,7 @@ function RequestSection({
   return (
     <section className="space-y-2.5">
       {requests.length === 0 ? (
-        <div className="kitchen-chip mx-auto max-w-105 px-3 py-2 text-center font-pixel text-[9px]">
+        <div className="kitchen-chip mx-auto max-w-105 px-3 py-2 text-center font-pixel text-[14px]">
           {emptyText}
         </div>
       ) : (
@@ -116,12 +116,12 @@ function RequestSection({
                 className="rounded-xl border-2 border-[#8ea17f] bg-[#efe8cf] px-3 py-2.5 transition-all duration-200 hover:-translate-y-0.5"
               >
                 <div className="mb-2 flex items-start justify-between gap-2">
-                  <p className="min-w-0 flex-1 wrap-break-word pr-2 font-pixel text-[10px] leading-relaxed text-[#3f2a1a]">
+                  <p className="min-w-0 flex-1 wrap-break-word pr-2 font-pixel text-[15px] leading-relaxed text-[#3f2a1a]">
                     {request.requestedItem || request.rewardName}
                   </p>
                   <div className="flex shrink-0 items-center gap-2">
                     <span
-                      className={`rounded-md border px-2 py-0.5 font-pixel text-[10px] uppercase tracking-wide ${statusClasses}`}
+                      className={`rounded-md border px-2 py-0.5 font-pixel text-[14px] uppercase tracking-wide ${statusClasses}`}
                     >
                       {statusLabel}
                     </span>
@@ -130,7 +130,7 @@ function RequestSection({
                         type="button"
                         onClick={() => toggleFeedback(request.id)}
                         aria-label={isExpanded ? 'Hide feedback' : 'Show feedback'}
-                        className={`inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors ${
+                        className={`inline-flex h-10 w-10 items-center justify-center rounded-md border transition-colors ${
                           isExpanded
                             ? 'border-[#47331F] bg-[#765332] text-[#f5e8d6]'
                             : 'border-[#9b7a56]/60 bg-[#f3e5cc] text-[#6b5038] hover:bg-[#ecdcbf]'
@@ -142,13 +142,13 @@ function RequestSection({
                   </div>
                 </div>
 
-                <p className="font-pixel text-[10px] text-[#6b5038]">
+                <p className="font-pixel text-[14px] text-[#6b5038]">
                   Qty {request.quantity} • {request.pointsCost * request.quantity} pts
                 </p>
 
                 {hasFeedback && isExpanded && (
                   <div className="mt-1.5 h-20 overflow-y-auto scrollbar-hide rounded-lg border border-[#9b7a56]/30 bg-[#f3e5cc] px-2 py-1.5 animate-in fade-in-0 zoom-in-95 duration-200">
-                    <p className="font-pixel text-[10px] text-[#4b3522]">
+                    <p className="font-pixel text-[14px] text-[#4b3522]">
                       Feedback:
                       <span className="mt-1 block font-medium whitespace-pre-wrap wrap-break-word">
                         {request.remarks?.trim() || 'No feedback provided'}
@@ -157,7 +157,7 @@ function RequestSection({
                   </div>
                 )}
 
-                <p className="mt-1 font-pixel text-[9px] text-[#7a5b3f]">
+                <p className="mt-1 font-pixel text-[14px] text-[#7a5b3f]">
                   {getRequestTimestampPrefix(request.status)}
                   {format(new Date(request.requestedAt), 'MMM dd, yyyy h:mm a')}
                 </p>
@@ -256,16 +256,16 @@ export function RewardRequestsFeedbackModal({
       >
         <DialogClose
           aria-label="Close"
-          className="absolute right-4 top-4 z-10 h-8 w-8 rounded-full bg-[#e4d3b3] text-[#3f2a1a] border-2 border-[#a88961] transition hover:scale-105 hover:bg-[#dcc7a2]"
+          className="absolute right-4 top-4 z-10 h-10 w-10 rounded-full bg-[#e4d3b3] text-[#3f2a1a] border-2 border-[#a88961] transition hover:scale-105 hover:bg-[#dcc7a2] flex items-center justify-center"
         >
           ✕
         </DialogClose>
 
         <DialogHeader className="border-b-2 border-[#8a6844]/30 bg-[#e1d2b7] px-5 py-4 gap-2">
-          <DialogTitle className="font-pixel text-[10px] text-[#3f2a1a] leading-relaxed pr-18">
+          <DialogTitle className="font-pixel text-[16px] text-[#3f2a1a] leading-relaxed pr-18">
             Reward Request Feedbacks
           </DialogTitle>
-          <DialogDescription className="font-pixel text-[9px] leading-relaxed text-[#6b5038] pr-18">
+          <DialogDescription className="font-pixel text-[14px] leading-relaxed text-[#6b5038] pr-18">
             View your approved and declined reward requests with HR feedback.
           </DialogDescription>
 
@@ -273,13 +273,13 @@ export function RewardRequestsFeedbackModal({
             <TabsList className="mx-auto grid w-full max-w-145 grid-cols-2 rounded-xl border border-[#9b7a56]/45 bg-[#efdec1] p-1">
               <TabsTrigger
                 value="approved"
-                className="font-pixel text-[10px] data-[state=active]:bg-[#d8efdb] data-[state=active]:text-[#1f5a36] data-[state=active]:border data-[state=active]:border-[#7eb07f]/45"
+                className="font-pixel text-[14px] data-[state=active]:bg-[#d8efdb] data-[state=active]:text-[#1f5a36] data-[state=active]:border data-[state=active]:border-[#7eb07f]/45"
               >
                 Approved ({approvedRequests.length})
               </TabsTrigger>
               <TabsTrigger
                 value="declined"
-                className="font-pixel text-[10px] data-[state=active]:bg-[#f8e2e2] data-[state=active]:text-[#7b2727] data-[state=active]:border data-[state=active]:border-[#9b3a3a]/35"
+                className="font-pixel text-[14px] data-[state=active]:bg-[#f8e2e2] data-[state=active]:text-[#7b2727] data-[state=active]:border data-[state=active]:border-[#9b3a3a]/35"
               >
                 Declined ({declinedRequests.length})
               </TabsTrigger>
@@ -292,7 +292,7 @@ export function RewardRequestsFeedbackModal({
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="Search items..."
-                className="h-8 w-full rounded-lg border border-[#9b7a56] bg-[#f7efdf] px-3 font-pixel text-[9px]! md:text-[9px]! text-[#4b3522] placeholder:text-[9px] placeholder:text-[#8d7255]"
+                className="h-11 w-full rounded-lg border border-[#9b7a56] bg-[#f7efdf] px-3 font-pixel text-[14px]! md:text-[14px]! text-[#4b3522] placeholder:text-[14px] placeholder:text-[#8d7255]"
               />
 
               <Select value={sortOrder} onValueChange={handleSortOrderChange}>
@@ -314,9 +314,9 @@ export function RewardRequestsFeedbackModal({
 
         <div className="max-h-[58vh] space-y-3 overflow-y-auto px-5 py-3 bg-[#eadbc1]">
           {isLoading ? (
-            <p className="font-pixel text-[10px] text-[#6b5038] animate-pulse">Loading request updates...</p>
+            <p className="font-pixel text-[14px] text-[#6b5038] animate-pulse">Loading request updates...</p>
           ) : !hasReviewedRequests ? (
-            <div className="kitchen-chip mx-auto max-w-105 px-3 py-2 text-center font-pixel text-[9px]">
+            <div className="kitchen-chip mx-auto max-w-105 px-3 py-2 text-center font-pixel text-[14px]">
               No approved or declined reward requests yet.
             </div>
           ) : (
@@ -336,18 +336,18 @@ export function RewardRequestsFeedbackModal({
                     type="button"
                     onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))}
                     disabled={currentPage === 1}
-                    className="h-7 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-2 font-pixel text-[8px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="h-10 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-4 font-pixel text-[14px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Prev
                   </button>
-                  <span className="font-pixel text-[8px] text-[#6b5038]">
+                  <span className="font-pixel text-[14px] text-[#6b5038]">
                     {currentPage}/{totalPages}
                   </span>
                   <button
                     type="button"
                     onClick={() => setCurrentPage((previous) => Math.min(totalPages, previous + 1))}
                     disabled={currentPage === totalPages}
-                    className="h-7 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-2 font-pixel text-[8px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="h-10 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-4 font-pixel text-[14px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Next
                   </button>
