@@ -20,7 +20,12 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TaskStatusSection } from './task-status-section';
 import { TaskCard } from './task-card';
-import type { TaskStatusItem, TaskOverdueFilter, TaskSortOption } from './types';
+import type {
+  TaskStatusItem,
+  TaskOverdueFilter,
+  TaskSortOption,
+  TaskStatusKind,
+} from './types';
 import { cn } from '@/lib/utils';
 import { isTaskStatusItemOverdue } from './task-status-utils';
 
@@ -104,7 +109,6 @@ export function TaskStatusBoard({
     return () => mediaQuery.removeEventListener('change', updateLayoutMode);
   }, []);
 
-  const openCount = Object.values(openSections).filter(Boolean).length;
   const filterLabel =
     overdueFilter === 'overdue'
       ? 'Overdue Only'
@@ -129,14 +133,11 @@ export function TaskStatusBoard({
     [currentTasks, inReviewTasks, verifiedTasks, rejectedTasks, overdueFilter, sortBy]
   );
 
-  const sectionClassName = (status: 'Current' | 'In Review' | 'Approved' | 'Rejected') =>
-    cn(
-      'min-h-0',
-      openSections[status] && openCount === 1 && 'md:col-span-2'
-    );
+  const sectionClassName = (status: TaskStatusKind) =>
+    cn('min-h-0 transition-all duration-200', openSections[status] ? 'flex-1' : 'flex-none');
 
   function handleSectionOpenChange(
-    status: 'Current' | 'In Review' | 'Approved' | 'Rejected',
+    status: TaskStatusKind,
     open: boolean
   ) {
     setOpenSections((prev) => {
@@ -279,57 +280,62 @@ export function TaskStatusBoard({
           </div>
         ) : (
           <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 md:grid-cols-2 xl:gap-3">
-            <div className={sectionClassName('Current')}>
-              <TaskStatusSection
-                status="Current"
-                task={current}
-                isLoading={isLoading}
-                open={openSections.Current}
-                onOpenChange={(open) => handleSectionOpenChange('Current', open)}
-              >
-                {current.map((task) => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
-              </TaskStatusSection>
+            <div className="flex min-h-0 flex-col gap-2.5 xl:gap-3">
+              <div className={sectionClassName('Current')}>
+                <TaskStatusSection
+                  status="Current"
+                  task={current}
+                  isLoading={isLoading}
+                  open={openSections.Current}
+                  onOpenChange={(open) => handleSectionOpenChange('Current', open)}
+                >
+                  {current.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
+              <div className={sectionClassName('Approved')}>
+                <TaskStatusSection
+                  status="Approved"
+                  task={verified}
+                  isLoading={isLoading}
+                  open={openSections.Approved}
+                  onOpenChange={(open) => handleSectionOpenChange('Approved', open)}
+                >
+                  {verified.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
             </div>
-            <div className={sectionClassName('In Review')}>
-              <TaskStatusSection
-                status="In Review"
-                task={onReview}
-                isLoading={isLoading}
-                open={openSections['In Review']}
-                onOpenChange={(open) => handleSectionOpenChange('In Review', open)}
-              >
-                {onReview.map((task) => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
-              </TaskStatusSection>
-            </div>
-            <div className={sectionClassName('Approved')}>
-              <TaskStatusSection
-                status="Approved"
-                task={verified}
-                isLoading={isLoading}
-                open={openSections.Approved}
-                onOpenChange={(open) => handleSectionOpenChange('Approved', open)}
-              >
-                {verified.map((task) => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
-              </TaskStatusSection>
-            </div>
-            <div className={sectionClassName('Rejected')}>
-              <TaskStatusSection
-                status="Rejected"
-                task={denied}
-                isLoading={isLoading}
-                open={openSections.Rejected}
-                onOpenChange={(open) => handleSectionOpenChange('Rejected', open)}
-              >
-                {denied.map((task) => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
-              </TaskStatusSection>
+
+            <div className="flex min-h-0 flex-col gap-2.5 xl:gap-3">
+              <div className={sectionClassName('In Review')}>
+                <TaskStatusSection
+                  status="In Review"
+                  task={onReview}
+                  isLoading={isLoading}
+                  open={openSections['In Review']}
+                  onOpenChange={(open) => handleSectionOpenChange('In Review', open)}
+                >
+                  {onReview.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
+              <div className={sectionClassName('Rejected')}>
+                <TaskStatusSection
+                  status="Rejected"
+                  task={denied}
+                  isLoading={isLoading}
+                  open={openSections.Rejected}
+                  onOpenChange={(open) => handleSectionOpenChange('Rejected', open)}
+                >
+                  {denied.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
             </div>
           </div>
         )}
