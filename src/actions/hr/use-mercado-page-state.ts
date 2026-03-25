@@ -53,6 +53,7 @@ export interface SaveMercadoItemInput {
   availableMonth?: 'weekly' | 'monthly' | 'yearly' | null;
 }
 
+// Convert a Reward record into the shape used by the add/edit modal.
 const mapRewardToEditableItem = (reward: Reward): EditableMercadoItem => ({
   id: reward.id,
   name: reward.name,
@@ -64,6 +65,7 @@ const mapRewardToEditableItem = (reward: Reward): EditableMercadoItem => ({
   availableMonth: reward.availableMonth ?? null,
 });
 
+// Convert a Reward record into the shape used by the view modal.
 const mapRewardToViewableItem = (reward: Reward): ViewableMercadoItem => ({
   id: reward.id,
   name: reward.name,
@@ -76,6 +78,7 @@ const mapRewardToViewableItem = (reward: Reward): ViewableMercadoItem => ({
   availableDate: reward.availableDate,
 });
 
+// Parse createdAt safely to support both Date objects and ISO strings.
 const getRewardTimestamp = (reward: Reward): number => {
   if (!reward.createdAt) return 0;
   return reward.createdAt instanceof Date
@@ -83,13 +86,14 @@ const getRewardTimestamp = (reward: Reward): number => {
     : new Date(reward.createdAt).getTime();
 };
 
+// Match reward against currently selected interval filter.
 const matchesIntervalFilter = (reward: Reward, intervalFilter: IntervalFilter): boolean => {
   if (intervalFilter === 'all') return true;
   return reward.availableMonth === intervalFilter;
 };
 
 export function useMercadoPageState() {
-  // Local UI state.
+  // UI-only local state for filters, pagination, and modal visibility.
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -104,12 +108,12 @@ export function useMercadoPageState() {
   const [viewingItemId, setViewingItemId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Data sources.
+  // Data inputs used by this hook.
   const { contentAreaStyle } = useSidebarContentArea();
   const debouncedSearch = useDebounce(search, 500);
   const { data: allRewards = [], isLoading } = useGetRewards();
 
-  // Filtered and sorted list.
+  // Build filtered + sorted reward list derived from source data and UI filters.
   const rewards = useMemo(() => {
     const normalizedSearch = debouncedSearch.trim().toLowerCase();
 
@@ -158,12 +162,12 @@ export function useMercadoPageState() {
     return filteredRewards;
   }, [allRewards, debouncedSearch, sortOrder, stockFilter, visibilityFilter, intervalFilter]);
 
-  // Fast ID lookup map.
+  // Create quick lookup map for reward-by-id reads.
   const rewardsById = useMemo(() => {
     return new Map(rewards.map((reward) => [reward.id, reward]));
   }, [rewards]);
 
-  // Pagination values.
+  // Compute pagination values from filtered list.
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(rewards.length / ITEMS_PER_PAGE)),
     [rewards.length]
@@ -174,7 +178,7 @@ export function useMercadoPageState() {
     return rewards.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [rewards, currentPage]);
 
-  // Modal payload data.
+  // Compute selected item payloads for each modal.
   const editingItem = useMemo(() => {
     if (!editingItemId) return null;
     const item = rewardsById.get(editingItemId);
@@ -192,32 +196,32 @@ export function useMercadoPageState() {
     return rewardsById.get(deletingItemId)?.name;
   }, [deletingItemId, rewardsById]);
 
-  // Reset page on filter change.
+  // Reset to first page whenever search/sort/filter values change.
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearch, sortOrder, stockFilter, visibilityFilter, intervalFilter]);
 
-  // Clamp invalid page index.
+  // Keep current page index within valid page range.
   useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
 
-  // Mutation hooks.
+  // Mutation hooks used for create/edit/delete/hide/upload actions.
   const addReward = useAddReward();
   const editReward = useEditReward();
   const deleteReward = useDeleteReward();
   const hideReward = useHideReward();
   const uploadRewardPicture = useUploadRewardPicture();
 
-  // Open add modal.
+  // Open add modal in create mode.
   const openAddModal = useCallback(() => {
     setEditingItemId(null);
     setIsAddModalOpen(true);
   }, []);
 
-  // Open edit modal.
+  // Open add modal in edit mode when item exists.
   const openEditModal = useCallback(
     (id: string) => {
       if (rewardsById.has(id)) {
@@ -228,7 +232,7 @@ export function useMercadoPageState() {
     [rewardsById]
   );
 
-  // Open delete modal.
+  // Open delete confirmation modal when item exists.
   const openDeleteModal = useCallback(
     (id: string) => {
       if (rewardsById.has(id)) {
@@ -239,7 +243,7 @@ export function useMercadoPageState() {
     [rewardsById]
   );
 
-  // Open view modal.
+  // Open read-only view modal when item exists.
   const openViewModal = useCallback(
     (id: string) => {
       if (rewardsById.has(id)) {
@@ -250,7 +254,7 @@ export function useMercadoPageState() {
     [rewardsById]
   );
 
-  // Jump from view to edit.
+  // Switch directly from view modal into edit mode.
   const handleEditFromView = useCallback(() => {
     if (viewingItemId) {
       openEditModal(viewingItemId);
@@ -258,7 +262,7 @@ export function useMercadoPageState() {
     }
   }, [viewingItemId, openEditModal]);
 
-  // Hide selected item.
+  // Mark selected item as hidden.
   const handleHide = useCallback(
     async (id: string) => {
       await hideReward.mutateAsync({ id, isActive: false });
@@ -266,7 +270,7 @@ export function useMercadoPageState() {
     [hideReward]
   );
 
-  // Unhide selected item.
+  // Mark selected item as visible again.
   const handleUnhide = useCallback(
     async (id: string) => {
       await hideReward.mutateAsync({ id, isActive: true });
@@ -274,7 +278,7 @@ export function useMercadoPageState() {
     [hideReward]
   );
 
-  // Confirm delete action.
+  // Execute confirmed delete and close modal.
   const handleConfirmDelete = useCallback(async () => {
     if (deletingItemId) {
       await deleteReward.mutateAsync(deletingItemId);
@@ -283,7 +287,7 @@ export function useMercadoPageState() {
     }
   }, [deletingItemId, deleteReward]);
 
-  // Save add/edit form.
+  // Save modal form: update existing item or create new item, then optionally upload image.
   const handleSaveItem = useCallback(
     async (data: SaveMercadoItemInput) => {
       setSaveError('');
@@ -333,7 +337,7 @@ export function useMercadoPageState() {
     [addReward, editReward, uploadRewardPicture]
   );
 
-  // Public hook API.
+  // Expose state and handlers to the Mercado manager page.
   return {
     contentAreaStyle,
     isLoading,
