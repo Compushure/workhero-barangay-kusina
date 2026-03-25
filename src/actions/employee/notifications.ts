@@ -1,7 +1,6 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { insertNotification } from '@/lib/notifications';
 import type { NotificationItem, ServerActionResponse } from '@/types';
 
 function mapNotificationRow(row: any): NotificationItem {
@@ -98,35 +97,6 @@ export async function markAllNotificationsRead(): Promise<ServerActionResponse<b
   if (error) {
     return { error: `Failed to clear notifications: ${error.message}`, data: undefined };
   }
-
-  return { error: null, data: true };
-}
-
-export async function createDishNotification(
-  message: string,
-  metadata?: Record<string, unknown>
-): Promise<ServerActionResponse<boolean>> {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return { error: 'Not authenticated', data: undefined };
-  }
-
-  if (!message.trim()) {
-    return { error: 'Notification message is required', data: undefined };
-  }
-
-  await insertNotification({
-    userId: user.id,
-    type: 'dish',
-    message,
-    metadata: metadata ?? null,
-  });
 
   return { error: null, data: true };
 }

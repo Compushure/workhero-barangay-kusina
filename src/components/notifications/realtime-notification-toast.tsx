@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Award, CheckCircle2, Gift, User, X, CookingPot } from 'lucide-react';
+import { Award, CheckCircle2, Gift, User, X } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { cn } from '@/lib/utils';
@@ -19,7 +19,6 @@ const ICON_BY_TYPE = {
   task: CheckCircle2,
   reward: Gift,
   user: User,
-  dish: CookingPot,
 } as const;
 
 const CARD_BY_TYPE = {
@@ -27,7 +26,6 @@ const CARD_BY_TYPE = {
   task: 'border-cyan-400',
   reward: 'border-lime-400',
   user: 'border-violet-400',
-  dish: 'border-accent',
 } as const;
 
 const ICON_BY_COLOR = {
@@ -35,7 +33,6 @@ const ICON_BY_COLOR = {
   task: 'text-cyan-300',
   reward: 'text-lime-300',
   user: 'text-fuchsia-300',
-  dish: 'text-accent',
 } as const;
 
 export function RealtimeNotificationToastClient({ userId }: RealtimeNotificationToastClientProps) {
@@ -88,13 +85,22 @@ export function RealtimeNotificationToastClient({ userId }: RealtimeNotification
           transition={{ duration: 0.22, ease: 'easeOut' }}
           className="fixed bottom-6 right-6 z-90 w-100 max-w-[calc(100vw-2rem)]"
         >
-          <div className={cn('rounded-xl border-2 p-4 shadow-xl backdrop-blur-sm bg-wood-card text-card', cardClass)}>
+          <div
+            className={cn(
+              'rounded-xl border-2 p-4 shadow-xl backdrop-blur-sm bg-wood-card text-card',
+              cardClass
+            )}
+          >
             <div className="flex items-start gap-3">
-              <div className={cn('mt-0.5 p-1.5 rounded-md bg-yellow-500/15 shadow-sm/25', iconClass)}>
+              <div
+                className={cn('mt-0.5 p-1.5 rounded-md bg-yellow-500/15 shadow-sm/25', iconClass)}
+              >
                 <Icon className="size-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[0.75rem] font-bold uppercase tracking-wide opacity-80">{current.type}</p>
+                <p className="text-[0.75rem] font-bold uppercase tracking-wide opacity-80">
+                  {current.type}
+                </p>
                 <p className="mt-0.5 text-sm leading-snug">{current.message}</p>
               </div>
               <button

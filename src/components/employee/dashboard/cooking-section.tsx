@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { handleCreateDishNotification } from '@/action-handlers/employee/notifications';
+import { showDishCookedToast, showDishServedToast } from '@/components/notifications/cooking-toast';
 import { useCookingStore } from '@/store/cookingStore';
 
 type CookingPhase = 'idle' | 'cooking' | 'revealed' | 'serving';
@@ -40,16 +40,7 @@ export default function CookingSection({ className = '' }: { className?: string 
     const revealTimer = setTimeout(() => {
       setPhase('revealed');
 
-      const orderLabel = `${trigger.orderCount} order${trigger.orderCount === 1 ? '' : 's'}`;
-      const message = `Congrats! You have finished making ${orderLabel} of ${trigger.dishName}. Ready to serve!`;
-
-      void handleCreateDishNotification(message, {
-        taskId: trigger.taskId,
-        taskName: trigger.taskName,
-        dishName: trigger.dishName,
-        orderCount: trigger.orderCount,
-        maxOrders: trigger.maxOrders,
-      });
+      showDishCookedToast(trigger.orderCount, trigger.dishName);
     }, 2100);
 
     return () => {
@@ -65,6 +56,11 @@ export default function CookingSection({ className = '' }: { className?: string 
     setPhase('serving');
 
     setTimeout(() => {
+      const servedOrderCount = activeCooking?.orderCount ?? 1;
+      const servedDishName = activeCooking?.dishName ?? 'Dish';
+
+      showDishServedToast(servedOrderCount, servedDishName);
+
       setPhase('idle');
       setActiveCooking(null);
       clearCooking();
@@ -84,7 +80,7 @@ export default function CookingSection({ className = '' }: { className?: string 
             ? dishSlots.map((slot) => (
                 <div
                   key={slot.key}
-                  className={`poof-appear relative h-20 w-20 sm:h-24 sm:w-24 rounded-lg p-1 shadow-md ${phase === 'serving' ? 'serve-away' : ''}`}
+                  className={`poof-appear relative size-15 sm:size-18 rounded-lg p-1 shadow-md ${phase === 'serving' ? 'serve-away' : ''}`}
                   style={{ animationDelay: `${slot.delayMs}ms` }}
                 >
                   <Image
