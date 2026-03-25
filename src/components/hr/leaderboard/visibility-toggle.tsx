@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToggleRankingVisibility } from '@/hooks/tanstack/mutations/hrMutations';
@@ -28,9 +28,17 @@ export default function VisibilityToggle({
   className,
 }: VisibilityToggleProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentVisibility, setCurrentVisibility] = useState(isVisible);
   const [dialogTargetVisibility, setDialogTargetVisibility] = useState<boolean | null>(null);
+  const [optimisticVisibility, setOptimisticVisibility] = useState<{
+    rankingPeriodId: string;
+    isVisible: boolean;
+  } | null>(null);
   const toggleVisibilityMutation = useToggleRankingVisibility();
+  const currentVisibility =
+    optimisticVisibility?.rankingPeriodId === rankingPeriodId &&
+    optimisticVisibility.isVisible !== isVisible
+      ? optimisticVisibility.isVisible
+      : isVisible;
   const isDisabled = disabled || toggleVisibilityMutation.isPending;
   const statusLabel = currentVisibility ? 'Visible from employee' : 'Hidden from employee';
   const nextVisibility = !currentVisibility;
@@ -43,21 +51,17 @@ export default function VisibilityToggle({
     : 'This will hide the current ranking from employees until you make it visible again.';
   const confirmLabel = pendingVisibility ? 'Make visible' : 'Hide ranking';
 
-  useEffect(() => {
-    setCurrentVisibility(isVisible);
-  }, [isVisible, rankingPeriodId]);
-
   const handleConfirm = () => {
     const previousVisibility = currentVisibility;
     const targetVisibility = dialogTargetVisibility ?? nextVisibility;
-    setCurrentVisibility(targetVisibility);
+    setOptimisticVisibility({ rankingPeriodId, isVisible: targetVisibility });
 
     toggleVisibilityMutation.mutate({
       rankingPeriodId,
       isVisible: targetVisibility,
     }, {
       onError: () => {
-        setCurrentVisibility(previousVisibility);
+        setOptimisticVisibility({ rankingPeriodId, isVisible: previousVisibility });
         setDialogTargetVisibility(null);
       },
       onSuccess: () => {

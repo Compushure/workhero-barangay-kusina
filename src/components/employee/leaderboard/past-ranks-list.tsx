@@ -54,7 +54,6 @@ interface PastRanksListProps {
 export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
   const [activeTab, setActiveTab] = useState<RankingPeriodType>('weekly');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState<EmployeePeriodParams | null>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const { data: periods, isLoading: isPeriodsLoading, isError } = useGetEmployeeVisiblePeriods();
@@ -79,18 +78,23 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
   const isDateSelectable = (date: Date) =>
     availablePeriodKeys.has(toPeriodSelectionKey(date, activeTab));
 
-  useEffect(() => {
-    if (isPeriodsLoading) return;
-
+  const resolvedSelection = useMemo(() => {
     const activeRows = grouped[activeTab];
+    const matchingPeriod =
+      selectedDate === null
+        ? null
+        : activeRows.find((row) => matchesDate(row, selectedDate, activeTab)) ?? null;
     const fallbackPeriod = findNewestPeriod(activeRows);
-    const hasMismatchedSelection = selectedPeriod !== null && selectedPeriod.periodType !== activeTab;
+    const resolvedPeriod = matchingPeriod ?? fallbackPeriod;
 
-    if (selectedPeriod === null || hasMismatchedSelection) {
-      setSelectedPeriod(fallbackPeriod ? toPeriodParams(fallbackPeriod) : null);
-      setSelectedDate(fallbackPeriod ? new Date(fallbackPeriod.period_start + 'T00:00:00') : null);
-    }
-  }, [activeTab, grouped, isPeriodsLoading, selectedPeriod]);
+    return {
+      selectedDate: resolvedPeriod ? new Date(resolvedPeriod.period_start + 'T00:00:00') : null,
+      selectedPeriod: resolvedPeriod ? toPeriodParams(resolvedPeriod) : null,
+    };
+  }, [activeTab, grouped, selectedDate]);
+
+  const selectedPeriod: EmployeePeriodParams | null = resolvedSelection.selectedPeriod;
+  const displayDate = resolvedSelection.selectedDate;
 
   const { data: entries, isLoading: isRankingsLoading } = useGetEmployeeTopRanksByPeriod(selectedPeriod, {
     enabled: selectedPeriod !== null,
@@ -112,7 +116,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
   const top3 = rankedEntries.slice(0, 3);
   const rest = rankedEntries.slice(3, 10);
   const hasEntries = rankedEntries.length > 0;
-  const triggerLabel = getTriggerLabel(activeTab, selectedDate);
+  const triggerLabel = getTriggerLabel(activeTab, displayDate);
   const pickerVariant = 'employee' as const;
 
   function handleTabChange(tab: RankingPeriodType) {
@@ -121,15 +125,12 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
 
     const nextPeriod = findNewestPeriod(grouped[tab]);
     setSelectedDate(nextPeriod ? new Date(nextPeriod.period_start + 'T00:00:00') : null);
-    setSelectedPeriod(nextPeriod ? toPeriodParams(nextPeriod) : null);
   }
 
   function handleDateSelect(date: Date) {
     if (!isDateSelectable(date)) return;
 
-    const matchingPeriod = grouped[activeTab].find((row) => matchesDate(row, date, activeTab)) ?? null;
     setSelectedDate(date);
-    setSelectedPeriod(matchingPeriod ? toPeriodParams(matchingPeriod) : null);
     setDatePickerOpen(false);
   }
 
@@ -163,16 +164,16 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
                     <span
                       className={cn(
                         'flex-1 text-left leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.75)]',
-                        selectedDate === null && 'text-white/65'
+                        displayDate === null && 'text-white/65'
                       )}
                     >
                       {hasAnyPeriods
-                        ? selectedDate
+                        ? displayDate
                           ? triggerLabel
                           : FILTER_PLACEHOLDER[activeTab]
                         : 'No generated periods'}
                     </span>
-                    {selectedDate && hasAnyPeriods && (
+                    {displayDate && hasAnyPeriods && (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <span
@@ -199,7 +200,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
                 >
                   {activeTab === 'weekly' && (
                     <WeekCalendar
-                      selected={selectedDate}
+                      selected={displayDate}
                       onSelect={handleDateSelect}
                       variant={pickerVariant}
                       isDateSelectable={isDateSelectable}
@@ -207,7 +208,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
                   )}
                   {activeTab === 'monthly' && (
                     <MonthPicker
-                      selected={selectedDate}
+                      selected={displayDate}
                       onSelect={handleDateSelect}
                       variant={pickerVariant}
                       isDateSelectable={isDateSelectable}
@@ -215,7 +216,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
                   )}
                   {activeTab === 'yearly' && (
                     <YearPicker
-                      selected={selectedDate}
+                      selected={displayDate}
                       onSelect={handleDateSelect}
                       variant={pickerVariant}
                       isDateSelectable={isDateSelectable}

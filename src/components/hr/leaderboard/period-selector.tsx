@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -123,15 +123,12 @@ export function PeriodSelector({
 }: PeriodSelectorProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [optimisticallyGenerated, setOptimisticallyGenerated] = useState(false);
+  const [optimisticallyGeneratedKey, setOptimisticallyGeneratedKey] = useState<string | null>(null);
   const generateRankingMutation = useGenerateRankingByPeriod();
   const latestWeek = getPreviousWeek();
   const latestMonth = getPreviousMonth();
   const latestYear = getPreviousYear();
-
-  useEffect(() => {
-    setOptimisticallyGenerated(false);
-  }, [currentType, currentYear, currentWeek, currentMonth]);
+  const currentPeriodKey = `${currentType}-${currentYear}-${currentMonth}-${currentWeek}`;
 
   const periodLabel =
     currentType === 'monthly'
@@ -155,13 +152,8 @@ export function PeriodSelector({
       : currentType === 'monthly'
         ? currentYear === latestMonth.year && currentMonth === latestMonth.month
         : currentYear === latestYear;
-  const latestPeriodLabel =
-    currentType === 'weekly'
-      ? getISOWeekDateRangeLabelShort(latestWeek.year, latestWeek.week)
-      : currentType === 'monthly'
-        ? buildPeriodLabel('monthly', latestMonth.year, latestMonth.month)
-        : buildPeriodLabel('yearly', latestYear);
-  const hasRanking = currentPeriodRankingExists || optimisticallyGenerated;
+  const hasRanking =
+    currentPeriodRankingExists || optimisticallyGeneratedKey === currentPeriodKey;
   const isGenerating = generateRankingMutation.isPending;
   const isGenerateDisabled = hasRanking || isPending || isGenerating || !isLatestSelected;
   const generateStatus = hasRanking
@@ -216,13 +208,13 @@ export function PeriodSelector({
       {
         onSuccess: (data) => {
           if (data && data.length > 0) {
-            setOptimisticallyGenerated(true);
+            setOptimisticallyGeneratedKey(currentPeriodKey);
           } else {
-            setOptimisticallyGenerated(false);
+            setOptimisticallyGeneratedKey(null);
           }
         },
         onError: () => {
-          setOptimisticallyGenerated(false);
+          setOptimisticallyGeneratedKey(null);
         },
       }
     );

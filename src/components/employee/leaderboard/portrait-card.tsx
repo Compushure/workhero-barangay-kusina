@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import type { EmployeeTopRankEntry } from '@/types';
 
@@ -108,10 +109,12 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
           ].join(' ')}
         >
           {entry.profilePictureUrl && !imgError ? (
-            <img
+            <Image
               src={entry.profilePictureUrl}
               alt={entry.name}
-              className="h-full w-full object-cover"
+              fill
+              sizes={isLarge ? '(min-width: 768px) 52px, 48px' : '(min-width: 640px) 40px, 32px'}
+              className="object-cover"
               onError={() => setImgError(true)}
             />
           ) : (
