@@ -144,6 +144,9 @@ export function TaskStatusBoard({
   const openCount = sections.filter(({ status }) => openSections[status]).length;
   const singleOpenSection = openCount === 1 ? sections.find(({ status }) => openSections[status]) ?? null : null;
   const collapsedSections = sections.filter(({ status }) => !openSections[status]);
+  const reorderedSectionsForTwoOpen = openCount === 2
+    ? [...sections.filter(({ status }) => openSections[status]), ...collapsedSections]
+    : sections;
 
   const sectionClassName = (status: TaskStatusKind) =>
     cn('min-h-0 transition-all duration-200', openSections[status] ? 'flex-1' : 'flex-none');
@@ -313,6 +316,30 @@ export function TaskStatusBoard({
                   task={tasks}
                   isLoading={isLoading}
                   open={false}
+                  onOpenChange={(open) => handleSectionOpenChange(status, open)}
+                >
+                  {tasks.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
+            ))}
+          </div>
+        ) : !isMobileLayout && openCount === 2 ? (
+          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 md:grid-cols-2 xl:gap-3">
+            {reorderedSectionsForTwoOpen.map(({ status, tasks }) => (
+              <div
+                key={status}
+                className={cn(
+                  'min-h-0',
+                  openSections[status] && 'md:min-h-[18rem]'
+                )}
+              >
+                <TaskStatusSection
+                  status={status}
+                  task={tasks}
+                  isLoading={isLoading}
+                  open={openSections[status]}
                   onOpenChange={(open) => handleSectionOpenChange(status, open)}
                 >
                   {tasks.map((task) => (
