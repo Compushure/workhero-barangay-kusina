@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Table,
@@ -40,18 +40,13 @@ export default function LeaderboardTable({
   const isOptimisticRanking = rankingPeriodId.startsWith('optimistic-');
 
   const totalPages = Math.max(1, Math.ceil(players.length / PAGE_SIZE));
-  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const resolvedPage = currentPage > totalPages ? 1 : currentPage;
+  const startIndex = (resolvedPage - 1) * PAGE_SIZE;
   const endIndex = startIndex + PAGE_SIZE;
   const paginatedPlayers = useMemo(
     () => players.slice(startIndex, endIndex),
     [players, startIndex, endIndex]
   );
-
-  useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(1);
-    }
-  }, [players.length, currentPage, totalPages]);
 
   if (players.length === 0) {
     return (
@@ -242,7 +237,7 @@ export default function LeaderboardTable({
       <div className={totalPages <= 1 ? 'invisible' : ''}>
         <Pagination
           totalPages={totalPages}
-          currentPage={currentPage}
+          currentPage={resolvedPage}
           onPageChange={setCurrentPage}
         />
       </div>

@@ -38,11 +38,11 @@ export function RankWidget() {
   if (!rankData || performanceScore === 0) {
     return (
       <div className={cardClassName}>
-        <h2 className="text-lg text-yellow-500 text-center mb-2">Weekly Rank</h2>
+        <h2 className="mb-2 text-center text-base text-yellow-500 sm:text-lg">Weekly Rank</h2>
         <div className="border-t-2 border-white/30 mb-3" />
 
         <div className="flex items-center justify-center min-h-[60px]">
-          <span className="text-sm text-white italic">Not available yet</span>
+          <span className="text-xs italic text-white sm:text-sm">Not available yet</span>
         </div>
       </div>
     );
@@ -50,27 +50,27 @@ export function RankWidget() {
 
   return (
     <div className={cardClassName}>
-      <h2 className="text-lg text-yellow-500 text-center mb-2">Weekly Rank</h2>
+      <h2 className="mb-2 text-center text-base text-yellow-500 sm:text-lg">Weekly Rank</h2>
 
       <div className="border-t-2 border-white/30 mb-3" />
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-center">
-        <div className="flex items-center justify-center gap-3">
-          <div className="bg-white/20 rounded-full p-2">
-            <Trophy size={20} className="text-yellow-500" />
+        <div className="flex items-center justify-center gap-2 sm:gap-3">
+          <div className="rounded-full bg-white/20 p-1.5 sm:p-2">
+            <Trophy size={18} className="text-yellow-500 sm:h-5 sm:w-5" />
           </div>
-          <span className="text-2xl text-white">#{rank}</span>
+          <span className="text-xl text-white sm:text-2xl">#{rank}</span>
         </div>
 
-        <div className="h-12 border-l-2 border-white/30" />
+        <div className="h-10 border-l-2 border-white/30 sm:h-12" />
 
         <div className="flex flex-col items-center justify-self-center">
-          <span className="text-sm leading-[1.05] text-yellow-500 text-center mb-1">
+          <span className="mb-1 text-center text-[10px] leading-[1.05] text-yellow-500 sm:text-sm">
             Performance Score
           </span>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-xl text-white cursor-help">{performanceScore}</span>
+              <span className="cursor-help text-lg text-white sm:text-xl">{performanceScore}</span>
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-60">
               {PERFORMANCE_SCORE_TOOLTIP}
