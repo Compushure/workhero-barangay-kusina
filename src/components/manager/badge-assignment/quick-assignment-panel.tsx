@@ -30,12 +30,15 @@ interface QuickAssignmentPanelProps {
   badgePage: number;
   totalBadgePages: number;
   onBadgePageChange: (page: number) => void;
+  badgeSortOption: BadgeSortOption;
+  onBadgeSortChange: (value: BadgeSortOption) => void;
   users: BadgeAssignmentUser[];
   onAwardBadgeToUsers: (badgeId: string, userIds: string[]) => void;
   isAssigning?: boolean;
 }
 
 type UserSortOption = 'name-asc' | 'name-desc' | 'employee-asc' | 'employee-desc';
+type BadgeSortOption = 'name-asc' | 'name-desc' | 'points-desc' | 'points-asc';
 
 const USER_NAME_SORT_OPTIONS: { value: UserSortOption; label: string; icon: LucideIcon }[] = [
   { value: 'name-asc', label: 'Name (A-Z)', icon: ArrowDownAZ },
@@ -49,11 +52,25 @@ const USER_ID_SORT_OPTIONS: { value: UserSortOption; label: string; icon: Lucide
 
 const USER_SORT_OPTIONS = [...USER_NAME_SORT_OPTIONS, ...USER_ID_SORT_OPTIONS];
 
+const BADGE_NAME_SORT_OPTIONS: { value: BadgeSortOption; label: string; icon: LucideIcon }[] = [
+  { value: 'name-asc', label: 'Name (A-Z)', icon: ArrowDownAZ },
+  { value: 'name-desc', label: 'Name (Z-A)', icon: ArrowUpAZ },
+];
+
+const BADGE_POINTS_SORT_OPTIONS: { value: BadgeSortOption; label: string; icon: LucideIcon }[] = [
+  { value: 'points-desc', label: 'Points (High to Low)', icon: Coins },
+  { value: 'points-asc', label: 'Points (Low to High)', icon: Coins },
+];
+
+const BADGE_SORT_OPTIONS = [...BADGE_NAME_SORT_OPTIONS, ...BADGE_POINTS_SORT_OPTIONS];
+
 export default function QuickAssignmentPanel({
   badges,
   badgePage,
   totalBadgePages,
   onBadgePageChange,
+  badgeSortOption,
+  onBadgeSortChange,
   users,
   onAwardBadgeToUsers,
   isAssigning = false,
@@ -72,8 +89,7 @@ export default function QuickAssignmentPanel({
     return badges.filter(
       (badge) =>
         !normalizedSearch ||
-        badge.name.toLowerCase().includes(normalizedSearch) ||
-        badge.description?.toLowerCase().includes(normalizedSearch)
+        badge.name.toLowerCase().includes(normalizedSearch)
     );
   }, [badges, debouncedBadgeSearch]);
 
@@ -84,7 +100,6 @@ export default function QuickAssignmentPanel({
       (user) =>
         !normalizedSearch ||
         user.name.toLowerCase().includes(normalizedSearch) ||
-        user.email.toLowerCase().includes(normalizedSearch) ||
         (user.employee_id || '').toLowerCase().includes(normalizedSearch)
     );
 
@@ -150,15 +165,68 @@ export default function QuickAssignmentPanel({
       <div className="space-y-4 lg:col-span-1">
         <div className="space-y-2">
           <h2 className="text-base font-semibold text-foreground sm:text-lg">Select Badge</h2>
-          <div className="relative flex">
-            <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 transform text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search badges"
-              value={badgeSearchTerm}
-              onChange={(e) => setBadgeSearchTerm(sanitizeSearchInput(e.target.value))}
-              className="text-meta control-h w-full rounded-md border border-zinc-200 bg-card pl-9 pr-3 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
-            />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 transform text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search badges"
+                value={badgeSearchTerm}
+                onChange={(e) => setBadgeSearchTerm(sanitizeSearchInput(e.target.value))}
+                className="text-meta control-h w-full rounded-md border border-zinc-200 bg-card pl-9 pr-3 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
+              />
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-button control-h flex w-full items-center justify-between bg-card px-2 text-foreground shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer hover:bg-card hover:text-foreground hover:brightness-90 sm:w-44 sm:px-3"
+                >
+                  <span className="truncate">
+                    {BADGE_SORT_OPTIONS.find((option) => option.value === badgeSortOption)?.label ||
+                      'Sort'}
+                  </span>
+                  <ArrowUpDown className="shrink-0 text-accent" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
+              >
+                <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                  Sort by Name
+                </DropdownMenuLabel>
+                {BADGE_NAME_SORT_OPTIONS.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => onBadgeSortChange(option.value)}
+                    className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                      badgeSortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                    }`}
+                  >
+                    <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                  Sort by Points
+                </DropdownMenuLabel>
+                {BADGE_POINTS_SORT_OPTIONS.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => onBadgeSortChange(option.value)}
+                    className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-300 ease-in-out ${
+                      badgeSortOption === option.value ? 'bg-accent/15 text-foreground' : ''
+                    }`}
+                  >
+                    <option.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -249,9 +317,9 @@ export default function QuickAssignmentPanel({
       <div className="space-y-4 lg:col-span-2">
         {selectedBadge ? (
           <>
-            <div className="space-y-4 rounded-lg border border-accent/25 bg-card p-4 shadow-sm/25 sm:p-6">
+            <div className="space-y-3 rounded-lg border border-accent/25 bg-card px-3 py-2.5 shadow-sm/25 sm:px-4 sm:py-3">
               <div className="flex items-start gap-3 sm:gap-4">
-                <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-accent/25 bg-gray-100 sm:h-20 sm:w-20">
+                <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-accent/25 bg-gray-100 py-1 sm:h-20 sm:w-20 sm:py-1.5">
                   {selectedBadge.img_link ? (
                     <img
                       src={selectedBadge.img_link}
@@ -263,15 +331,15 @@ export default function QuickAssignmentPanel({
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-lg font-semibold text-foreground sm:text-xl">
+                  <h3 className="truncate text-base font-semibold text-foreground sm:text-lg">
                     {selectedBadge.name}
                   </h3>
-                  <p className="mt-1 line-clamp-2 text-xs text-secondary sm:text-sm">
+                  <p className="mt-0.5 line-clamp-2 text-[11px] text-secondary sm:text-xs">
                     {selectedBadge.description || 'No description'}
                   </p>
-                  <div className="mt-2 flex items-center gap-1.5 sm:mt-3 sm:gap-2">
-                    <Coins size={14} className="shrink-0 text-accent sm:size-4" />
-                    <span className="text-sm font-medium text-foreground sm:text-base">
+                  <div className="mt-1.5 flex items-center gap-1.5 sm:mt-2 sm:gap-2">
+                    <Coins size={13} className="shrink-0 text-accent sm:size-3.5" />
+                    <span className="text-xs font-medium text-foreground sm:text-sm">
                       {selectedBadge.points} points
                     </span>
                   </div>
@@ -284,6 +352,18 @@ export default function QuickAssignmentPanel({
                 <h2 className="text-base font-semibold text-foreground sm:text-lg">
                   Assign To Users ({selectedUsers.size} selected)
                 </h2>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 transform text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search employee"
+                    value={userSearchTerm}
+                    onChange={(e) => setUserSearchTerm(sanitizeSearchInput(e.target.value))}
+                    className="text-meta control-h w-full rounded-md border border-zinc-200 bg-card pl-9 pr-3 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
+                  />
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -335,16 +415,6 @@ export default function QuickAssignmentPanel({
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
-              <div className="relative flex">
-                <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 transform text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search employee"
-                  value={userSearchTerm}
-                  onChange={(e) => setUserSearchTerm(sanitizeSearchInput(e.target.value))}
-                  className="text-meta control-h w-full rounded-md border border-zinc-200 bg-card pl-9 pr-3 shadow-sm/25 transition-colors focus:border-accent focus:outline-none"
-                />
               </div>
             </div>
 

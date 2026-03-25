@@ -75,9 +75,7 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
           ? 'max-w-52 p-2 pt-4 sm:w-32 sm:min-w-32 sm:max-w-32 sm:p-2.5 sm:pt-4 md:w-36 md:min-w-36 md:max-w-36 md:p-3 md:pt-4.5 lg:w-40 lg:min-w-40 lg:max-w-40'
           : 'max-w-none min-w-0 p-1 pt-3.5 sm:p-2 sm:pt-3.5',
         cardTiltClass,
-        entry.isCurrentUser &&
-          entry.rank !== 1 &&
-          'ring-2 ring-[#F4B925] ring-offset-2 ring-offset-transparent',
+        entry.isCurrentUser && 'ring-[5px] ring-[#F4B925] ring-offset-0',
       ].join(' ')}
     >
       <RankBadge rank={entry.rank} angleClass={badgeTiltClass} />

@@ -27,7 +27,7 @@ function getLogDisplay(action: AttendanceLog['action']) {
 
 export default function AttendanceLogs({ logs = [] }: AttendanceLogsProps) {
   return (
-    <div className="mt-2 w-full h-44 sm:h-48 md:h-54 overflow-y-auto space-y-2 bg-[#E8DBBF] rounded pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div className="mt-2 w-full max-h-full overflow-y-auto space-y-2 bg-[#E8DBBF] rounded pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       {logs.length === 0 ? (
         <p className="text-sm text-gray-700 text-center">🚫 No logs yet</p>
       ) : (

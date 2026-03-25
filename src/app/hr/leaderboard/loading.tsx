@@ -16,8 +16,8 @@ function ViewToggleSkeleton() {
 
 function PeriodSelectorSkeleton() {
   return (
-    <div className="sticky top-(--sticky-top-gap) z-20 !mx-0 w-full rounded-2xl border border-accent/20 bg-card p-3 shadow-sm/40 backdrop-blur-sm sm:p-3.5 xl:w-fit">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[240px_minmax(0,1fr)_auto] xl:grid-cols-[130px_210px_auto]">
+    <div className="sticky top-(--sticky-top-gap) z-20 !mx-0 w-full rounded-2xl border border-secondary/20 bg-background p-3 shadow-sm/25 sm:p-3.5 xl:max-w-[760px]">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[240px_minmax(0,1fr)_auto] xl:grid-cols-[130px_210px_186px]">
         <div className="flex w-full flex-col gap-1.5 xl:max-w-[130px]">
           <Skeleton className="h-3 w-20 rounded bg-gray-300" />
           <Skeleton className="control-h w-full rounded-lg bg-gray-300" />
@@ -26,8 +26,8 @@ function PeriodSelectorSkeleton() {
           <Skeleton className="h-3 w-14 rounded bg-gray-300" />
           <Skeleton className="control-h w-full rounded-lg bg-gray-300" />
         </div>
-        <div className="flex w-full flex-col gap-1.5 self-start">
-          <div className="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[172px_196px]">
+        <div className="flex w-full flex-col self-start">
+          <div className="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[176px_186px]">
             <div className="flex w-full flex-col items-start gap-1.5 xl:max-w-[172px]">
               <div className="flex min-h-4 items-center gap-1.5">
                 <Skeleton className="h-3.5 w-3.5 rounded-full bg-gray-300" />
@@ -35,11 +35,11 @@ function PeriodSelectorSkeleton() {
               </div>
               <Skeleton className="control-h w-full rounded-full bg-gray-300" />
             </div>
-            <div className="flex w-full flex-col items-start gap-1.5 xl:max-w-[196px]">
+            <div className="flex w-full flex-col justify-end gap-1.5 xl:max-w-[186px]">
               <Skeleton className="h-3 w-24 rounded bg-gray-300" />
-              <div className="control-h flex w-full overflow-hidden rounded-md border border-accent/25 bg-card/75 shadow-sm/25">
-                <Skeleton className="control-h flex-1 rounded-none rounded-l-md bg-gray-300/90" />
-                <Skeleton className="control-h flex-1 rounded-none rounded-r-md bg-gray-300/70" />
+              <div className="control-h flex w-full overflow-hidden rounded-md border border-border/40 bg-card">
+                <Skeleton className="h-full flex-1 rounded-none bg-gray-300" />
+                <Skeleton className="h-full flex-1 rounded-none bg-gray-300" />
               </div>
             </div>
           </div>

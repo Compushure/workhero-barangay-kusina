@@ -14,8 +14,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { safeAction, type ActionResult } from '@/lib/utils/safe-action';
-import { getPeriodStartEnd } from '@/lib/utils/time-period-utils';
-import { format } from 'date-fns';
+import { getPeriodStartEnd, toManilaDateString } from '@/lib/utils/time-period-utils';
 import type {
   EmployeeRank,
   EmployeeTopRankEntry,
@@ -304,7 +303,7 @@ export async function getEmployeeTopRanksByPeriod(
       periodType === 'monthly' ? month : undefined,
       periodType === 'weekly' ? week : undefined
     );
-    const periodStart = format(start, 'yyyy-MM-dd');
+    const periodStart = toManilaDateString(start);
 
     const { data: rows, error: rowsError } = await supabaseAdmin
       .from('ranking_leaderboard_view')

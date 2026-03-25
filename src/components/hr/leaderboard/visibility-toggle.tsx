@@ -105,7 +105,7 @@ export default function VisibilityToggle({
               'control-h flex min-w-0 basis-0 grow items-center justify-center gap-0.5 rounded-none rounded-l-md px-1.5 text-[11px] font-semibold whitespace-nowrap transition-all duration-500 ease-in-out disabled:opacity-100 sm:px-2 sm:text-sm',
               currentVisibility
                 ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm'
-                : 'bg-transparent text-secondary opacity-70 shadow-none hover:bg-accent-secondary/15 hover:opacity-100',
+                : 'bg-transparent text-secondary opacity-70 shadow-none hover:bg-accent-secondary/15 hover:text-black hover:opacity-100',
               isDisabled
                 ? 'cursor-not-allowed hover:bg-transparent'
                 : 'hover:cursor-pointer'
@@ -129,7 +129,7 @@ export default function VisibilityToggle({
               'control-h flex min-w-0 basis-0 grow items-center justify-center gap-0.5 rounded-none rounded-r-md px-1.5 text-[11px] font-semibold whitespace-nowrap transition-all duration-500 ease-in-out disabled:opacity-100 sm:px-2 sm:text-sm',
               !currentVisibility
                 ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm'
-                : 'bg-transparent text-secondary opacity-70 shadow-none hover:bg-accent-secondary/15 hover:opacity-100',
+                : 'bg-transparent text-secondary opacity-70 shadow-none hover:bg-accent-secondary/15 hover:text-black hover:opacity-100',
               isDisabled
                 ? 'cursor-not-allowed hover:bg-transparent'
                 : 'hover:cursor-pointer'

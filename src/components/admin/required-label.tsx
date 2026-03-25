@@ -17,7 +17,7 @@ export function RequiredLabel({ htmlFor, children, filled = false }: RequiredLab
   return (
     <label
       htmlFor={htmlFor}
-      className="flex items-center gap-2 text-sm font-medium text-foreground"
+      className="flex h-6 sm:h-8 items-center gap-2 text-sm font-medium leading-none text-foreground"
     >
       {!filled && <AlertCircle className="h-4 w-4 text-destructive animate-pulse" />}
       <span>{children}</span>
