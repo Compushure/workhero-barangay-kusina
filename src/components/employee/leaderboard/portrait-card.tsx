@@ -2,6 +2,15 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import type { EmployeeTopRankEntry } from '@/types';
 
 export type PortraitCardProps = {
@@ -47,6 +56,7 @@ function RankBadge({ rank, angleClass }: { rank: number; angleClass: string }) {
 export function PortraitCard({ entry, size }: PortraitCardProps) {
   const [imgError, setImgError] = useState(false);
   const isLarge = size === 'large';
+  const scoreLabel = entry.performanceScore.toLocaleString();
   const cardTiltClass =
     size === 'large'
       ? entry.rank === 1
@@ -67,6 +77,10 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
       : entry.rank % 2 === 0
         ? '-rotate-[1.2deg]'
         : 'rotate-[1.2deg]';
+  const avatarSizeClass = isLarge
+    ? 'h-11 w-11 sm:h-12 sm:w-12 md:h-13 md:w-13'
+    : 'h-8 w-8 sm:h-10 sm:w-10';
+  const initialsClass = isLarge ? 'text-xl sm:text-2xl md:text-[26px]' : 'text-xs sm:text-base';
 
   return (
     <div
@@ -102,32 +116,98 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
             : 'min-h-[116px] p-1.5 sm:min-h-[132px] sm:p-2.5',
         ].join(' ')}
       >
-        <div
-          className={[
-            'flex shrink-0 overflow-hidden rounded-none border-2 border-[#F6E8C8] bg-[#E89C30] shadow-[0_4px_10px_rgba(0,0,0,0.18)]',
-            isLarge ? 'h-11 w-11 sm:h-12 sm:w-12 md:h-13 md:w-13' : 'h-8 w-8 sm:h-10 sm:w-10',
-          ].join(' ')}
-        >
-          {entry.profilePictureUrl && !imgError ? (
-            <Image
-              src={entry.profilePictureUrl}
-              alt={entry.name}
-              fill
-              sizes={isLarge ? '(min-width: 768px) 52px, 48px' : '(min-width: 640px) 40px, 32px'}
-              className="object-cover"
-              onError={() => setImgError(true)}
-            />
-          ) : (
-            <span
-              className={[
-                'flex h-full w-full items-center justify-center text-center font-jersey font-bold leading-none text-[#47331F]',
-                isLarge ? 'text-xl sm:text-2xl md:text-[26px]' : 'text-xs sm:text-base',
-              ].join(' ')}
+        <Dialog>
+          <DialogTrigger asChild>
+            <button
+              type="button"
+              className="group cursor-pointer rounded-none outline-none transition-transform duration-150 hover:scale-[1.04] focus-visible:scale-[1.04]"
+              aria-label={`Open ${entry.name}'s ranking profile`}
             >
-              {getInitials(entry.name)}
-            </span>
-          )}
-        </div>
+              <div
+                className={[
+                  'relative flex shrink-0 overflow-hidden rounded-none border-2 border-[#F6E8C8] bg-[#E89C30] shadow-[0_4px_10px_rgba(0,0,0,0.18)]',
+                  avatarSizeClass,
+                ].join(' ')}
+              >
+                {entry.profilePictureUrl && !imgError ? (
+                  <Image
+                    src={entry.profilePictureUrl}
+                    alt={entry.name}
+                    fill
+                    sizes={isLarge ? '(min-width: 768px) 52px, 48px' : '(min-width: 640px) 40px, 32px'}
+                    className="object-cover"
+                    onError={() => setImgError(true)}
+                  />
+                ) : (
+                  <span
+                    className={[
+                      'flex h-full w-full items-center justify-center text-center font-jersey font-bold leading-none text-[#47331F]',
+                      initialsClass,
+                    ].join(' ')}
+                  >
+                    {getInitials(entry.name)}
+                  </span>
+                )}
+                <span className="absolute inset-x-0 bottom-0 bg-[#3D2512]/78 px-1 py-0.5 text-center font-jersey text-[8px] tracking-[0.08em] text-[#FFF2CC] opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 sm:text-[9px]">
+                  View
+                </span>
+              </div>
+            </button>
+          </DialogTrigger>
+          <DialogContent
+            showCloseButton={false}
+            className="w-[calc(100vw-2rem)] max-w-sm rounded-xl border-[3px] border-[#47331F] bg-[radial-gradient(circle_at_top,#FFF7E6_0%,#F0DFC1_58%,#DFC498_100%)] p-0 font-jersey text-[#3D2512] shadow-[0_18px_38px_rgba(0,0,0,0.34)]"
+          >
+            <DialogClose
+              className="absolute top-4 right-4 z-10 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[#FFF2CC]/85 transition-all duration-150 hover:bg-[#CF8B22] hover:text-white hover:shadow-[0_0_0_2px_rgba(244,185,37,0.28)] focus-visible:bg-[#CF8B22] focus-visible:text-white focus-visible:outline-none"
+              aria-label="Close profile preview"
+            >
+              <span className="text-lg leading-none">x</span>
+            </DialogClose>
+            <DialogHeader className="border-b-2 border-[#D1B48B] bg-[linear-gradient(180deg,#7D5634_0%,#5A3920_100%)] px-5 py-4 text-left">
+              <DialogTitle className="text-2xl font-normal tracking-[0.06em] text-[#FFF2CC]">
+                {entry.name}
+              </DialogTitle>
+              <DialogDescription className="font-jersey text-sm tracking-[0.06em] text-[#F2D8AC]">
+                Ranked employee profile preview
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex flex-col items-center gap-4 px-5 py-5 text-center">
+              <div className="relative h-28 w-28 overflow-hidden rounded-sm border-[2px] border-[#7B5A3B] bg-[#E89C30] shadow-[0_6px_14px_rgba(0,0,0,0.18)]">
+                {entry.profilePictureUrl && !imgError ? (
+                  <Image
+                    src={entry.profilePictureUrl}
+                    alt={entry.name}
+                    fill
+                    sizes="112px"
+                    className="object-cover"
+                    onError={() => setImgError(true)}
+                  />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center text-center font-jersey text-4xl font-bold leading-none text-[#47331F]">
+                    {getInitials(entry.name)}
+                  </span>
+                )}
+              </div>
+
+              <div className="grid w-full grid-cols-2 gap-3">
+                <div className="rounded-lg border-2 border-[#B8874D] bg-[#FFF2CC] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-[#7B5A3B]">Rank</p>
+                  <p className="mt-1 text-3xl leading-none text-[#3D2512]">#{entry.rank}</p>
+                </div>
+                <div className="rounded-lg border-2 border-[#B8874D] bg-[#FFF2CC] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-[#7B5A3B]">Points</p>
+                  <p className="mt-1 text-3xl leading-none text-[#3D2512]">{scoreLabel}</p>
+                </div>
+              </div>
+
+              <p className="text-sm leading-relaxed text-[#5B412A]">
+                This employee is currently placed at rank #{entry.rank} with {scoreLabel} performance points.
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <span
           className={[
@@ -143,7 +223,7 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
 
         <div className="mt-auto flex w-full justify-center">
           <span className="inline-flex min-w-[3.75rem] max-w-full items-center justify-center rounded-md border border-[#9B6E1A] bg-[linear-gradient(180deg,#F8D04D_0%,#D79A14_100%)] px-1.5 py-0.5 text-center text-[10px] font-jersey leading-none text-[#47331F] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-2px_0_rgba(71,51,31,0.18)] sm:min-w-[4.25rem] sm:px-2 sm:text-xs md:text-sm">
-            {entry.performanceScore.toLocaleString()}
+            {scoreLabel}
           </span>
         </div>
       </div>
