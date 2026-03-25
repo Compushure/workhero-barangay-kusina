@@ -97,7 +97,7 @@ export function RequestsTable({
                 className="bg-card hover:bg-row-hover transition-all duration-400 ease-in-out"
               >
                 <TableCell className="hidden sm:table-cell text-[10px] sm:text-xs font-medium px-2 sm:px-3 py-6 w-24 sm:w-40">
-                  {formatDate(request.kpitask_completed_at || request.kpitask_created_at)}
+                  {formatDate(request.kpitask_verification_requested_at || request.kpitask_created_at)}
                 </TableCell>
                 <TableCell className="px-2 sm:px-3 py-2 max-w-28 sm:max-w-44">
                   <Tooltip>

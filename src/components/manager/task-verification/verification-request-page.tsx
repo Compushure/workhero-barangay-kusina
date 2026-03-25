@@ -180,13 +180,13 @@ export function VerificationRequestsPage({
     return filtered.sort((a, b) => {
       switch (dateSortBy) {
         case 'date-desc': {
-          const dateA = new Date(a.kpitask_completed_at || a.kpitask_created_at || 0).getTime();
-          const dateB = new Date(b.kpitask_completed_at || b.kpitask_created_at || 0).getTime();
+          const dateA = new Date(a.kpitask_verification_requested_at || a.kpitask_created_at || 0).getTime();
+          const dateB = new Date(b.kpitask_verification_requested_at || b.kpitask_created_at || 0).getTime();
           return dateB - dateA; // Newest first
         }
         case 'date-asc': {
-          const dateA = new Date(a.kpitask_completed_at || a.kpitask_created_at || 0).getTime();
-          const dateB = new Date(b.kpitask_completed_at || b.kpitask_created_at || 0).getTime();
+          const dateA = new Date(a.kpitask_verification_requested_at || a.kpitask_created_at || 0).getTime();
+          const dateB = new Date(b.kpitask_verification_requested_at || b.kpitask_created_at || 0).getTime();
           return dateA - dateB; // Oldest first
         }
         default:
