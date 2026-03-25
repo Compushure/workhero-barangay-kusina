@@ -132,6 +132,18 @@ export function TaskStatusBoard({
     ],
     [currentTasks, inReviewTasks, verifiedTasks, rejectedTasks, overdueFilter, sortBy]
   );
+  const sections = useMemo(
+    () => [
+      { status: 'Current' as const, tasks: current },
+      { status: 'In Review' as const, tasks: onReview },
+      { status: 'Approved' as const, tasks: verified },
+      { status: 'Rejected' as const, tasks: denied },
+    ],
+    [current, onReview, verified, denied]
+  );
+  const openCount = sections.filter(({ status }) => openSections[status]).length;
+  const singleOpenSection = openCount === 1 ? sections.find(({ status }) => openSections[status]) ?? null : null;
+  const collapsedSections = sections.filter(({ status }) => !openSections[status]);
 
   const sectionClassName = (status: TaskStatusKind) =>
     cn('min-h-0 transition-all duration-200', openSections[status] ? 'flex-1' : 'flex-none');
@@ -277,6 +289,38 @@ export function TaskStatusBoard({
         {error ? (
           <div className="flex h-48 w-full flex-col items-center justify-center rounded-2xl border-2 border-[#c9b08d] bg-[#f7efdf] px-4 text-center">
             <span className="font-jersey text-[14px] tracking-[0.06em] text-[#8b2e22]">Error loading tasks. Please try again.</span>
+          </div>
+        ) : !isMobileLayout && singleOpenSection ? (
+          <div className="flex h-full min-h-0 flex-col gap-2.5 xl:gap-3">
+            <div className="min-h-0 flex-1">
+              <TaskStatusSection
+                status={singleOpenSection.status}
+                task={singleOpenSection.tasks}
+                isLoading={isLoading}
+                open
+                onOpenChange={(open) => handleSectionOpenChange(singleOpenSection.status, open)}
+              >
+                {singleOpenSection.tasks.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
+              </TaskStatusSection>
+            </div>
+
+            {collapsedSections.map(({ status, tasks }) => (
+              <div key={status} className="flex-none">
+                <TaskStatusSection
+                  status={status}
+                  task={tasks}
+                  isLoading={isLoading}
+                  open={false}
+                  onOpenChange={(open) => handleSectionOpenChange(status, open)}
+                >
+                  {tasks.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 md:grid-cols-2 xl:gap-3">
