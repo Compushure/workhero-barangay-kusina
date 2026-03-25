@@ -37,26 +37,26 @@ export function DeleteUserModal({ open, onOpenChange, userName, onConfirm }: Del
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card w-[95vw] max-w-md mx-auto rounded-xl shadow-xl border-2 border-[#f47812]/20">
-        <DialogHeader className="border-b border-[#f47812]/15 pb-3">
+      <DialogContent className="bg-card w-[95vw] max-w-sm mx-auto rounded-xl shadow-xl border border-accent/20">
+        <DialogHeader className="border-b border-accent/20 pb-2.5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
               <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
             <div>
-              <DialogTitle className="text-lg font-bold text-foreground">Delete User</DialogTitle>
-              <DialogDescription className="text-sm text-gray-600">
+              <DialogTitle className="text-base font-bold text-foreground">Delete User</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
                 This action cannot be undone
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="py-4 px-3 sm:px-4 bg-background rounded-lg border border-[#f47812]/15">
-          <p className="text-sm text-foreground">
+        <div className="py-3 px-3 sm:px-3.5 bg-background rounded-lg border border-accent/20">
+          <p className="text-xs sm:text-sm text-foreground">
             Are you sure you want to delete <strong className="text-foreground">{userName}</strong>?
           </p>
-          <p className="text-xs sm:text-sm text-gray-600 mt-2">
+          <p className="text-xs text-muted-foreground mt-1.5">
             All associated data will be permanently removed from the system.
           </p>
         </div>
@@ -66,7 +66,7 @@ export function DeleteUserModal({ open, onOpenChange, userName, onConfirm }: Del
             variant="destructive"
             onClick={handleConfirm}
             disabled={isPending}
-            className="flex-1 bg-destructive cursor-pointer text-white hover:bg-destructive/90 transition-all duration-500 ease-in-out shadow-sm/25"
+            className="text-button control-h flex-1 bg-destructive cursor-pointer text-white hover:bg-destructive/90 transition-all duration-300 ease-in-out shadow-sm/25"
           >
             {isPending ? 'Deleting...' : 'Delete User'}
           </Button>
@@ -74,7 +74,7 @@ export function DeleteUserModal({ open, onOpenChange, userName, onConfirm }: Del
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isPending}
-            className="flex-1 border-zinc-300 bg-white cursor-pointer text-foreground hover:bg-gray-100 hover:text-foreground transition-all duration-500 ease-in-out"
+            className="text-button control-h flex-1 border-zinc-300 bg-card cursor-pointer text-foreground hover:bg-gray-100 hover:text-foreground transition-all duration-300 ease-in-out"
           >
             Cancel
           </Button>

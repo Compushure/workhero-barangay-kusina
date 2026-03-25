@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { CalendarIcon, Circle, History } from 'lucide-react';
-import { getISOWeek } from 'date-fns';
+import { CalendarIcon, Info } from 'lucide-react';
+import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { MonthPicker, YearPicker, WeekCalendar } from '@/components/shared/period-date-pickers';
 import {
@@ -34,7 +35,7 @@ const FILTER_PLACEHOLDER: Record<RankingPeriodType, string> = {
 function toPeriodParams(row: RankingPeriodWithTop): EmployeePeriodParams {
   const start = new Date(row.period_start + 'T00:00:00');
   if (row.period_type === 'weekly') {
-    return { periodType: 'weekly', year: start.getFullYear(), week: getISOWeek(start) };
+    return { periodType: 'weekly', year: getISOWeekYear(start), week: getISOWeek(start) };
   }
   if (row.period_type === 'monthly') {
     return { periodType: 'monthly', year: start.getFullYear(), month: start.getMonth() + 1 };
@@ -42,17 +43,8 @@ function toPeriodParams(row: RankingPeriodWithTop): EmployeePeriodParams {
   return { periodType: 'yearly', year: start.getFullYear() };
 }
 
-function findOldestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
-  return rows.length > 0 ? rows[rows.length - 1] : null;
-}
-
-function PeriodEmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex min-h-[40vh] flex-1 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[#b07440]/35 bg-[#3D2512]/45 px-6 py-10 text-center">
-      <History className="h-10 w-10 text-[#F4B925]/35" />
-      <p className="font-jersey text-sm tracking-widest text-[#F4B925]/70 sm:text-base">{message}</p>
-    </div>
-  );
+function findNewestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
+  return rows.length > 0 ? rows[0] : null;
 }
 
 interface PastRanksListProps {
@@ -62,7 +54,6 @@ interface PastRanksListProps {
 export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
   const [activeTab, setActiveTab] = useState<RankingPeriodType>('weekly');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState<EmployeePeriodParams | null>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const { data: periods, isLoading: isPeriodsLoading, isError } = useGetEmployeeVisiblePeriods();
@@ -87,18 +78,23 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
   const isDateSelectable = (date: Date) =>
     availablePeriodKeys.has(toPeriodSelectionKey(date, activeTab));
 
-  useEffect(() => {
-    if (isPeriodsLoading) return;
-
+  const resolvedSelection = useMemo(() => {
     const activeRows = grouped[activeTab];
-    const fallbackPeriod = findOldestPeriod(activeRows);
-    const hasMismatchedSelection = selectedPeriod !== null && selectedPeriod.periodType !== activeTab;
+    const matchingPeriod =
+      selectedDate === null
+        ? null
+        : activeRows.find((row) => matchesDate(row, selectedDate, activeTab)) ?? null;
+    const fallbackPeriod = findNewestPeriod(activeRows);
+    const resolvedPeriod = matchingPeriod ?? fallbackPeriod;
 
-    if (selectedPeriod === null || hasMismatchedSelection) {
-      setSelectedPeriod(fallbackPeriod ? toPeriodParams(fallbackPeriod) : null);
-      setSelectedDate(fallbackPeriod ? new Date(fallbackPeriod.period_start + 'T00:00:00') : null);
-    }
-  }, [activeTab, grouped, isPeriodsLoading, selectedPeriod]);
+    return {
+      selectedDate: resolvedPeriod ? new Date(resolvedPeriod.period_start + 'T00:00:00') : null,
+      selectedPeriod: resolvedPeriod ? toPeriodParams(resolvedPeriod) : null,
+    };
+  }, [activeTab, grouped, selectedDate]);
+
+  const selectedPeriod: EmployeePeriodParams | null = resolvedSelection.selectedPeriod;
+  const displayDate = resolvedSelection.selectedDate;
 
   const { data: entries, isLoading: isRankingsLoading } = useGetEmployeeTopRanksByPeriod(selectedPeriod, {
     enabled: selectedPeriod !== null,
@@ -120,39 +116,23 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
   const top3 = rankedEntries.slice(0, 3);
   const rest = rankedEntries.slice(3, 10);
   const hasEntries = rankedEntries.length > 0;
-  const triggerLabel = getTriggerLabel(activeTab, selectedDate);
+  const triggerLabel = getTriggerLabel(activeTab, displayDate);
   const pickerVariant = 'employee' as const;
 
   function handleTabChange(tab: RankingPeriodType) {
     setActiveTab(tab);
     setDatePickerOpen(false);
 
-    const nextPeriod = findOldestPeriod(grouped[tab]);
+    const nextPeriod = findNewestPeriod(grouped[tab]);
     setSelectedDate(nextPeriod ? new Date(nextPeriod.period_start + 'T00:00:00') : null);
-    setSelectedPeriod(nextPeriod ? toPeriodParams(nextPeriod) : null);
   }
 
   function handleDateSelect(date: Date) {
     if (!isDateSelectable(date)) return;
 
-    const matchingPeriod = grouped[activeTab].find((row) => matchesDate(row, date, activeTab)) ?? null;
     setSelectedDate(date);
-    setSelectedPeriod(matchingPeriod ? toPeriodParams(matchingPeriod) : null);
     setDatePickerOpen(false);
   }
-
-  function handleClearDate(e: React.MouseEvent) {
-    e.stopPropagation();
-    const fallbackPeriod = findOldestPeriod(grouped[activeTab]);
-    setSelectedDate(fallbackPeriod ? new Date(fallbackPeriod.period_start + 'T00:00:00') : null);
-    setSelectedPeriod(fallbackPeriod ? toPeriodParams(fallbackPeriod) : null);
-    setDatePickerOpen(false);
-  }
-
-  const emptyMessage =
-    grouped[activeTab].length === 0
-      ? `No ${activeTab} rankings released yet.`
-      : `No ranking found for the selected ${activeTab} period.`;
 
   return (
     <div className="flex w-full flex-1 flex-col items-center gap-5">
@@ -184,30 +164,33 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
                     <span
                       className={cn(
                         'flex-1 text-left leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.75)]',
-                        selectedDate === null && 'text-white/65'
+                        displayDate === null && 'text-white/65'
                       )}
                     >
                       {hasAnyPeriods
-                        ? selectedDate
+                        ? displayDate
                           ? triggerLabel
                           : FILTER_PLACEHOLDER[activeTab]
                         : 'No generated periods'}
                     </span>
-                    {selectedDate && hasAnyPeriods && (
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        aria-label="Clear filter"
-                        onClick={handleClearDate}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            handleClearDate(e as unknown as React.MouseEvent);
-                          }
-                        }}
-                        className="ml-auto rounded-full p-0.5 text-[#CF8B22] transition-colors hover:text-[#F4B925]"
-                      >
-                        <Circle className="h-3.5 w-3.5 fill-current" />
-                      </span>
+                    {displayDate && hasAnyPeriods && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span
+                            className="ml-auto rounded-full p-0.5 text-[#CF8B22] transition-colors hover:text-[#F4B925]"
+                            aria-label="Some rankings are hidden"
+                          >
+                            <Info className="h-4.5 w-4.5" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          sideOffset={8}
+                          className="max-w-xs border-[#47331F]/30 bg-[#FFF2CC] font-jersey text-[#3B2A1A]"
+                        >
+                          Some rankings are hidden. Contact Human Resources about this concern.
+                        </TooltipContent>
+                      </Tooltip>
                     )}
                   </button>
                 </PopoverTrigger>
@@ -217,7 +200,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
                 >
                   {activeTab === 'weekly' && (
                     <WeekCalendar
-                      selected={selectedDate}
+                      selected={displayDate}
                       onSelect={handleDateSelect}
                       variant={pickerVariant}
                       isDateSelectable={isDateSelectable}
@@ -225,7 +208,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
                   )}
                   {activeTab === 'monthly' && (
                     <MonthPicker
-                      selected={selectedDate}
+                      selected={displayDate}
                       onSelect={handleDateSelect}
                       variant={pickerVariant}
                       isDateSelectable={isDateSelectable}
@@ -233,7 +216,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
                   )}
                   {activeTab === 'yearly' && (
                     <YearPicker
-                      selected={selectedDate}
+                      selected={displayDate}
                       onSelect={handleDateSelect}
                       variant={pickerVariant}
                       isDateSelectable={isDateSelectable}
@@ -256,15 +239,21 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
         ) : null}
 
         {!isHistoryLoading && !isError && !selectedPeriod ? (
-          <div className="w-full max-w-4xl px-3 sm:px-4">
-            <PeriodEmptyState message={emptyMessage} />
+          <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-3 sm:pt-4">
+            <LeaderboardEmptyState
+              title="Ranking for this period was hidden."
+              subtitle="Contact the Human Resources Office!"
+            />
           </div>
         ) : null}
 
         {!isHistoryLoading && !isError && selectedPeriod ? (
           <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-3 sm:pt-4">
             {!hasEntries ? (
-              <LeaderboardEmptyState />
+              <LeaderboardEmptyState
+                title="Ranking for this period was hidden."
+                subtitle="Contact the Human Resources Office!"
+              />
             ) : (
               <>
                 <LeaderboardMobileCarousel entries={rankedEntries.slice(0, 10)} />

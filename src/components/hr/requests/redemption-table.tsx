@@ -167,7 +167,7 @@ export function RedemptionTable({ data, status = 'pending' }: RedemptionTablePro
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-7 shrink-0 rounded-full border border-accent/30 bg-accent/10 text-accent transition-all duration-200 hover:bg-accent hover:text-white sm:size-8"
+                          className="size-7 shrink-0 rounded-full border border-accent/30 bg-accent/10 text-accent transition-all duration-200 cursor-pointer hover:bg-accent hover:text-white sm:size-8"
                           onClick={() => openRequestModal(request)}
                           title="View details"
                         >
@@ -184,7 +184,7 @@ export function RedemptionTable({ data, status = 'pending' }: RedemptionTablePro
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="size-7 shrink-0 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 transition-all duration-200 hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:size-8"
+                                className="size-7 shrink-0 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 transition-all duration-200 cursor-pointer hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:size-8"
                                 onClick={(event) => {
                                   event.stopPropagation();
                                   handleAcceptClick(request.id);
@@ -205,7 +205,7 @@ export function RedemptionTable({ data, status = 'pending' }: RedemptionTablePro
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="size-7 shrink-0 rounded-md border border-destructive/30 bg-destructive/10 text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground sm:size-8"
+                                className="size-7 shrink-0 rounded-md border border-destructive/30 bg-destructive/10 text-destructive transition-all duration-200 cursor-pointer hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed sm:size-8"
                                 onClick={(event) => {
                                   event.stopPropagation();
                                   handleDeclineClick(request.id);
@@ -249,7 +249,7 @@ export function RedemptionTable({ data, status = 'pending' }: RedemptionTablePro
         onOpenChange={setAcceptDialogOpen}
         onConfirm={handleAcceptConfirm}
         title="Accept Request (Optional Remark)"
-        description="If you wish to continue with the acceptance without any remarks, simply click OK."
+        description="If you wish to continue with the acceptance without any remarks, simply click Confirm."
         placeholder="Type in any comments you wish to send alongside the acceptance."
         isProcessing={acceptMutation.isPending || declineMutation.isPending}
       />

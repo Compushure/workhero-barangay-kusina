@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Filter } from 'lucide-react';
 import {
   Select,
@@ -14,15 +14,18 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { TaskStatusSection } from './task-status-section';
 import { TaskCard } from './task-card';
-import type { TaskStatusItem, TaskOverdueFilter, TaskSortOption } from './types';
-import { Header } from '../header';
+import type {
+  TaskStatusItem,
+  TaskOverdueFilter,
+  TaskSortOption,
+  TaskStatusKind,
+} from './types';
 import { cn } from '@/lib/utils';
 import { isTaskStatusItemOverdue } from './task-status-utils';
 
@@ -88,14 +91,36 @@ export function TaskStatusBoard({
 }: TaskStatusBoardProps) {
   const [sortBy, setSortBy] = useState<TaskSortOption>('due-date-asc');
   const [overdueFilter, setOverdueFilter] = useState<TaskOverdueFilter>('all');
+  const [openSections, setOpenSections] = useState<Record<'Current' | 'In Review' | 'Approved' | 'Rejected', boolean>>({
+    Current: true,
+    'In Review': true,
+    Approved: true,
+    Rejected: true,
+  });
+  const [isMobileLayout, setIsMobileLayout] = useState(false);
 
-  const activeFilterCount = overdueFilter !== 'all' ? 1 : 0;
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const updateLayoutMode = () => setIsMobileLayout(mediaQuery.matches);
+
+    updateLayoutMode();
+    mediaQuery.addEventListener('change', updateLayoutMode);
+
+    return () => mediaQuery.removeEventListener('change', updateLayoutMode);
+  }, []);
+
+  const filterLabel =
+    overdueFilter === 'overdue'
+      ? 'Overdue Only'
+      : overdueFilter === 'not-overdue'
+        ? 'Not Overdue'
+        : 'Filter';
 
   const checkboxItemClassName = (isActive: boolean) =>
-    `group cursor-pointer py-1.5 transition-all duration-500 ease-in-out ${
+    `group cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] transition-all duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] ${
       isActive
-        ? 'bg-accent-secondary text-white'
-        : 'hover:bg-accent-secondary/80 hover:text-white data-[highlighted]:bg-accent-secondary/80 data-[highlighted]:text-white'
+        ? 'text-[#4b3522]'
+        : 'text-[#4b3522] hover:bg-[#8a6039] hover:text-[#fff6e5] data-[highlighted]:bg-[#8a6039] data-[highlighted]:text-[#fff6e5]'
     }`;
 
   const [current, onReview, verified, denied] = useMemo(
@@ -107,123 +132,285 @@ export function TaskStatusBoard({
     ],
     [currentTasks, inReviewTasks, verifiedTasks, rejectedTasks, overdueFilter, sortBy]
   );
+  const sections = useMemo(
+    () => [
+      { status: 'Current' as const, tasks: current },
+      { status: 'In Review' as const, tasks: onReview },
+      { status: 'Approved' as const, tasks: verified },
+      { status: 'Rejected' as const, tasks: denied },
+    ],
+    [current, onReview, verified, denied]
+  );
+  const openCount = sections.filter(({ status }) => openSections[status]).length;
+  const singleOpenSection = openCount === 1 ? sections.find(({ status }) => openSections[status]) ?? null : null;
+  const collapsedSections = sections.filter(({ status }) => !openSections[status]);
+  const reorderedSectionsForTwoOpen = openCount === 2
+    ? [...sections.filter(({ status }) => openSections[status]), ...collapsedSections]
+    : sections;
+
+  const sectionClassName = (status: TaskStatusKind) =>
+    cn('min-h-0 transition-all duration-200', openSections[status] ? 'flex-1' : 'flex-none');
+
+  function handleSectionOpenChange(
+    status: TaskStatusKind,
+    open: boolean
+  ) {
+    setOpenSections((prev) => {
+      if (isMobileLayout && open) {
+        return {
+          Current: status === 'Current',
+          'In Review': status === 'In Review',
+          Approved: status === 'Approved',
+          Rejected: status === 'Rejected',
+        };
+      }
+
+      const next = { ...prev, [status]: open };
+
+      if (!Object.values(next).some(Boolean)) {
+        return prev;
+      }
+
+      return next;
+    });
+  }
 
   return (
-    <div className="flex flex-col gap-4 w-full min-w-300 overflow-hidden px-8 py-8 my-24 rounded-4xl bg-card/45 backdrop-blur-lg shadow-lg/25">
-      <div className="flex flex-row items-start justify-between gap-2 px-3">
-        <Header
-          title="Tasks Board"
-          description="View your tasks by status: Current, On Review, Verified, or Denied Approval."
-        />
-      
-        <div className="flex items-end gap-2">
-          <div>
-            <span className="text-sm text-muted-foreground">Sort by</span>
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as TaskSortOption)}>
-              <SelectTrigger className="w-58 bg-card shadow-sm/25">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border-3 border-[#47331F] bg-[#eadbc1] p-2.5 font-jersey shadow-[0_10px_28px_rgba(71,51,31,0.24)] sm:p-3">
+      <div className="flex flex-col gap-2 border-b-2 border-[#d4c5a8] pb-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          {isLoading ? (
+            <>
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-52 bg-[#dcc8aa]" />
+                <Skeleton className="h-5 w-80 max-w-full bg-[#e3d3b7]" />
+              </div>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
+                <div className="w-full space-y-1 sm:w-auto">
+                  <Skeleton className="h-5 w-20 bg-[#dcc8aa]" />
+                  <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-52" />
+                </div>
+                <div className="flex w-full items-center gap-2 self-start sm:w-auto sm:self-end">
+                  <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-32" />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <div>
+                  <h2 className="text-[28px] leading-none text-[#3f2a1a] sm:text-[32px]">
+                    Task Board
+                  </h2>
+                  <p className="mt-1 max-w-xl text-[14px] leading-snug tracking-[0.04em] text-[#6b5038] sm:text-[16px]">
+                    View your assigned tasks and track each one by status.
+                  </p>
+                </div>
+              </div>
 
-          <div className={cn('flex items-center gap-2')}>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="default"
-                  variant="outline"
-                  className="text-button control-h w-full justify-between rounded-md border border-gray-200 bg-card px-3 py-1.5 text-primary shadow-md shadow-sm/25 transition-all duration-200 ease-in-out cursor-pointer hover:bg-gray-200 sm:w-auto"
-                >
-                  <Filter className="h-4 w-4 text-accent" />
-                  <span className="hidden sm:inline">Filter</span>
-                  {activeFilterCount > 0 && (
-                    <Badge className="ml-1 h-5 min-w-5 rounded-full bg-accent/75 px-1.5 py-0 text-[11px] leading-none text-primary-foreground">
-                      {activeFilterCount}
-                    </Badge>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                sideOffset={8}
-                collisionPadding={12}
-                className="manager-dropdown-content w-72 max-h-136 overflow-visible p-1"
-              >
-                <DropdownMenuLabel className="px-2 py-1 text-xs text-muted-foreground">
-                  Due Date State
-                </DropdownMenuLabel>
-                <DropdownMenuCheckboxItem
-                  checked={overdueFilter === 'all'}
-                  onCheckedChange={(checked) => {
-                    if (checked) setOverdueFilter('all');
-                  }}
-                  className={checkboxItemClassName(overdueFilter === 'all')}
-                >
-                  All Tasks
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={overdueFilter === 'overdue'}
-                  onCheckedChange={(checked) => {
-                    if (checked) setOverdueFilter('overdue');
-                    else setOverdueFilter('all');
-                  }}
-                  className={checkboxItemClassName(overdueFilter === 'overdue')}
-                >
-                  Overdue Only
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={overdueFilter === 'not-overdue'}
-                  onCheckedChange={(checked) => {
-                    if (checked) setOverdueFilter('not-overdue');
-                    else setOverdueFilter('all');
-                  }}
-                  className={checkboxItemClassName(overdueFilter === 'not-overdue')}
-                >
-                  Not Overdue Only
-                </DropdownMenuCheckboxItem>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
+                <div className="w-full space-y-1 sm:w-auto">
+                  <span className="block text-[14px] tracking-[0.18em] text-[#8a6039] sm:text-[16px]">SORT BY</span>
+                  <Select value={sortBy} onValueChange={(value) => setSortBy(value as TaskSortOption)}>
+                    <SelectTrigger className="h-9 w-full rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-52">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 text-[#4b3522] sm:w-64">
+                      {sortOptions.map((option) => (
+                        <SelectItem
+                          key={option.value}
+                          value={option.value}
+                          className="cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] transition-colors duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] focus:bg-[#8a6039] focus:text-[#fff6e5] data-[highlighted]:bg-[#8a6039] data-[highlighted]:text-[#fff6e5]"
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                <div className={cn('flex w-full items-center gap-2 self-start sm:w-auto sm:self-end')}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="default"
+                        variant="outline"
+                        className="h-9 w-full justify-between rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-auto"
+                      >
+                        <Filter strokeWidth={2.5} className="h-4 w-4 text-[#6b5038]" />
+                        <span className="inline-flex items-center text-[16px] leading-none">{filterLabel}</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      sideOffset={8}
+                      collisionPadding={12}
+                      className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 sm:w-64"
+                    >
+                      <DropdownMenuLabel className="px-2 py-1 font-jersey text-[14px] tracking-[0.04em] text-[#8a6039]">
+                        Due Date State
+                      </DropdownMenuLabel>
+                      <DropdownMenuCheckboxItem
+                        checked={overdueFilter === 'all'}
+                        onCheckedChange={(checked) => {
+                          if (checked) setOverdueFilter('all');
+                        }}
+                        className={checkboxItemClassName(overdueFilter === 'all')}
+                      >
+                        All Tasks
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        checked={overdueFilter === 'overdue'}
+                        onCheckedChange={(checked) => {
+                          if (checked) setOverdueFilter('overdue');
+                          else setOverdueFilter('all');
+                        }}
+                        className={checkboxItemClassName(overdueFilter === 'overdue')}
+                      >
+                        Overdue Only
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        checked={overdueFilter === 'not-overdue'}
+                        onCheckedChange={(checked) => {
+                          if (checked) setOverdueFilter('not-overdue');
+                          else setOverdueFilter('all');
+                        }}
+                        className={checkboxItemClassName(overdueFilter === 'not-overdue')}
+                      >
+                        Not Overdue Only
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Single Section on small screens; 2x2 grid on lg and up (Current | On Review, Verified | Denied Approval) */}
+      <div className="min-h-0 flex-1 pt-3">
         {error ? (
-          <div className='w-full h-48 flex flex-col items-center justify-center'>
-            <span className='text-lg'>Error loading tasks. Please try again</span>
+          <div className="flex h-48 w-full flex-col items-center justify-center rounded-2xl border-2 border-[#c9b08d] bg-[#f7efdf] px-4 text-center">
+            <span className="font-jersey text-[14px] tracking-[0.06em] text-[#8b2e22]">Error loading tasks. Please try again.</span>
+          </div>
+        ) : !isMobileLayout && singleOpenSection ? (
+          <div className="flex h-full min-h-0 flex-col gap-2.5 xl:gap-3">
+            <div className="min-h-0 flex-1">
+              <TaskStatusSection
+                status={singleOpenSection.status}
+                task={singleOpenSection.tasks}
+                isLoading={isLoading}
+                open
+                onOpenChange={(open) => handleSectionOpenChange(singleOpenSection.status, open)}
+              >
+                {singleOpenSection.tasks.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
+              </TaskStatusSection>
+            </div>
+
+            {collapsedSections.map(({ status, tasks }) => (
+              <div key={status} className="flex-none">
+                <TaskStatusSection
+                  status={status}
+                  task={tasks}
+                  isLoading={isLoading}
+                  open={false}
+                  onOpenChange={(open) => handleSectionOpenChange(status, open)}
+                >
+                  {tasks.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
+            ))}
+          </div>
+        ) : !isMobileLayout && openCount === 2 ? (
+          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 md:grid-cols-2 xl:gap-3">
+            {reorderedSectionsForTwoOpen.map(({ status, tasks }) => (
+              <div
+                key={status}
+                className={cn(
+                  'min-h-0',
+                  openSections[status] && 'md:min-h-[18rem]'
+                )}
+              >
+                <TaskStatusSection
+                  status={status}
+                  task={tasks}
+                  isLoading={isLoading}
+                  open={openSections[status]}
+                  onOpenChange={(open) => handleSectionOpenChange(status, open)}
+                >
+                  {tasks.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-8 w-full min-w-0">
-          <TaskStatusSection status="Current" task={current} isLoading={isLoading}>
-            {current.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </TaskStatusSection>
-          <TaskStatusSection status="In Review" task={onReview} isLoading={isLoading}>
-            {onReview.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </TaskStatusSection>
-          <TaskStatusSection status="Approved" task={verified} isLoading={isLoading}>
-            {verified.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </TaskStatusSection>
-          <TaskStatusSection status="Rejected" task={denied} isLoading={isLoading}>
-            {denied.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </TaskStatusSection>
+          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 md:grid-cols-2 xl:gap-3">
+            <div className="flex min-h-0 flex-col gap-2.5 xl:gap-3">
+              <div className={sectionClassName('Current')}>
+                <TaskStatusSection
+                  status="Current"
+                  task={current}
+                  isLoading={isLoading}
+                  open={openSections.Current}
+                  onOpenChange={(open) => handleSectionOpenChange('Current', open)}
+                >
+                  {current.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
+              <div className={sectionClassName('Approved')}>
+                <TaskStatusSection
+                  status="Approved"
+                  task={verified}
+                  isLoading={isLoading}
+                  open={openSections.Approved}
+                  onOpenChange={(open) => handleSectionOpenChange('Approved', open)}
+                >
+                  {verified.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
+            </div>
+
+            <div className="flex min-h-0 flex-col gap-2.5 xl:gap-3">
+              <div className={sectionClassName('In Review')}>
+                <TaskStatusSection
+                  status="In Review"
+                  task={onReview}
+                  isLoading={isLoading}
+                  open={openSections['In Review']}
+                  onOpenChange={(open) => handleSectionOpenChange('In Review', open)}
+                >
+                  {onReview.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
+              <div className={sectionClassName('Rejected')}>
+                <TaskStatusSection
+                  status="Rejected"
+                  task={denied}
+                  isLoading={isLoading}
+                  open={openSections.Rejected}
+                  onOpenChange={(open) => handleSectionOpenChange('Rejected', open)}
+                >
+                  {denied.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </TaskStatusSection>
+              </div>
+            </div>
           </div>
         )}
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { getISOWeek, getISOWeekYear } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import {
   getISOWeeksInYear,
   buildPeriodLabel,
@@ -22,8 +23,10 @@ import { cn } from '@/lib/utils';
 import VisibilityToggle from '@/components/hr/leaderboard/visibility-toggle';
 import type { RankLogPeriodType } from '@/types';
 
+const MANILA_TIMEZONE = 'Asia/Manila';
+
 function getPreviousWeek(): { year: number; week: number } {
-  const now = new Date();
+  const now = toZonedTime(new Date(), MANILA_TIMEZONE);
   const nowYear = getISOWeekYear(now);
   const nowWeek = getISOWeek(now);
   if (nowWeek <= 1) {
@@ -37,7 +40,7 @@ function getWeeklyPeriodOptions(): { year: number; week: number }[] {
 }
 
 function getPreviousMonth(): { year: number; month: number } {
-  const now = new Date();
+  const now = toZonedTime(new Date(), MANILA_TIMEZONE);
   const nowYear = now.getFullYear();
   const nowMonth1Based = now.getMonth() + 1;
   if (nowMonth1Based <= 1) {
@@ -47,7 +50,7 @@ function getPreviousMonth(): { year: number; month: number } {
 }
 
 function getPreviousYear(): number {
-  return new Date().getFullYear() - 1;
+  return toZonedTime(new Date(), MANILA_TIMEZONE).getFullYear() - 1;
 }
 
 interface PeriodSelectorProps {
@@ -120,15 +123,12 @@ export function PeriodSelector({
 }: PeriodSelectorProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [optimisticallyGenerated, setOptimisticallyGenerated] = useState(false);
+  const [optimisticallyGeneratedKey, setOptimisticallyGeneratedKey] = useState<string | null>(null);
   const generateRankingMutation = useGenerateRankingByPeriod();
   const latestWeek = getPreviousWeek();
   const latestMonth = getPreviousMonth();
   const latestYear = getPreviousYear();
-
-  useEffect(() => {
-    setOptimisticallyGenerated(false);
-  }, [currentType, currentYear, currentWeek, currentMonth]);
+  const currentPeriodKey = `${currentType}-${currentYear}-${currentMonth}-${currentWeek}`;
 
   const periodLabel =
     currentType === 'monthly'
@@ -152,13 +152,8 @@ export function PeriodSelector({
       : currentType === 'monthly'
         ? currentYear === latestMonth.year && currentMonth === latestMonth.month
         : currentYear === latestYear;
-  const latestPeriodLabel =
-    currentType === 'weekly'
-      ? getISOWeekDateRangeLabelShort(latestWeek.year, latestWeek.week)
-      : currentType === 'monthly'
-        ? buildPeriodLabel('monthly', latestMonth.year, latestMonth.month)
-        : buildPeriodLabel('yearly', latestYear);
-  const hasRanking = currentPeriodRankingExists || optimisticallyGenerated;
+  const hasRanking =
+    currentPeriodRankingExists || optimisticallyGeneratedKey === currentPeriodKey;
   const isGenerating = generateRankingMutation.isPending;
   const isGenerateDisabled = hasRanking || isPending || isGenerating || !isLatestSelected;
   const generateStatus = hasRanking
@@ -213,13 +208,13 @@ export function PeriodSelector({
       {
         onSuccess: (data) => {
           if (data && data.length > 0) {
-            setOptimisticallyGenerated(true);
+            setOptimisticallyGeneratedKey(currentPeriodKey);
           } else {
-            setOptimisticallyGenerated(false);
+            setOptimisticallyGeneratedKey(null);
           }
         },
         onError: () => {
-          setOptimisticallyGenerated(false);
+          setOptimisticallyGeneratedKey(null);
         },
       }
     );
@@ -287,7 +282,7 @@ export function PeriodSelector({
 
         {/* Status / Action */}
         <div className="flex w-full flex-col gap-1.5 self-start">
-          <div className="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[176px_172px]">
+          <div className="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[176px_186px]">
             <div className="flex w-full flex-col items-start gap-1.5 xl:max-w-[176px]">
               <div className="flex min-h-4 items-center gap-1.5">
                 <GenerateStatusIcon className={cn('h-3.5 w-3.5 shrink-0', generateStatus.tone)} />
@@ -309,7 +304,7 @@ export function PeriodSelector({
                 rankingPeriodId={rankingPeriodId}
                 isVisible={isVisible}
                 disabled={rankingPeriodId.startsWith('optimistic-')}
-                className="w-full xl:max-w-[172px]"
+                className="w-full xl:max-w-[186px]"
               />
             ) : null}
           </div>

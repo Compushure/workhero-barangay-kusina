@@ -68,7 +68,7 @@ export default function AttendanceDesign() {
       </div>
 
       {/* Center column: main card + dashboard button */}
-      <div className="relative z-10 flex min-h-screen w-full items-center justify-center px-4 py-8 mt-5">
+      <div className="relative z-10 flex min-h-screen w-full items-center justify-center px-4 py-8 mt-8">
         <div className="flex w-full max-w-4xl flex-col items-center text-center pb-12">
           {/* Main card */}
           {isAttendanceLoading ? (
@@ -87,7 +87,6 @@ export default function AttendanceDesign() {
               <AttendanceIcon config={{}} />
             </div>
           )}
-
           {/* Dashboard Redirect Button directly under the card */}
           <DashboardRedirectButton status={redirectStatus} />
         </div>

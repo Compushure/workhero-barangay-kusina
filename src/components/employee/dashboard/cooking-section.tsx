@@ -27,14 +27,16 @@ export default function CookingSection({ className = '' }: { className?: string 
         </div>
 
         {/* Main kitchen pot visual */}
-        <div className="relative w-52 h-52 sm:w-64 sm:h-64 drop-shadow-[0_8px_16px_rgba(0,0,0,0.45)]">
-          <Image
-            src="/assets/kitchen-bg/kitchen-pot.png"
-            alt="Kitchen pot"
-            fill
-            className="object-contain"
-            priority
-          />
+        <div className="w-full flex justify-center">
+          <div className="relative w-52 h-52 sm:w-64 sm:h-64 drop-shadow-[0_8px_16px_rgba(0,0,0,0.45)]">
+            <Image
+              src="/assets/kitchen-bg/kitchen-pot.png"
+              alt="Kitchen pot"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

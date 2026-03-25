@@ -33,8 +33,8 @@ export function RemarksDialog({
   onOpenChange,
   onConfirm,
   title = 'Decline (Optional Remark)',
-  description = 'If you wish to continue with the confirmation without any remarks, simply click OK.',
-  confirmLabel = 'OK',
+  description = 'If you wish to continue with the confirmation without any remarks, simply click Confirm.',
+  confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
   maxLength = 500,
   placeholder = 'Type in remarks/comments you wish to send alongside the request confirmation.',
@@ -140,26 +140,26 @@ export function RemarksDialog({
 
         <DialogFooter className="flex-row gap-2 sm:gap-3">
           <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isDisabled}
-            className="control-h flex-1 rounded-full border border-accent/25 bg-transparent text-button text-foreground shadow-sm/25 transition-all duration-300 hover:bg-accent-secondary/10"
-          >
-            {cancelLabel}
-          </Button>
-          <Button
             onClick={handleConfirm}
             disabled={isConfirmDisabled}
             variant={confirmVariant}
-            className={`flex-1 rounded-3xl ${
+            className={`control-h flex-1 cursor-pointer disabled:cursor-not-allowed ${
               confirmVariant === 'default'
-                ? 'bg-primary-gradient text-white shadow-sm/25 transition-all duration-300 hover:opacity-95'
+                ? 'bg-primary-gradient text-card shadow-sm/25 transition-all duration-500 ease-in-out hover:bg-primary-gradient hover:brightness-85'
                 : confirmVariant === 'destructive'
-                  ? 'bg-destructive text-destructive-foreground transition-all duration-300 hover:bg-destructive/90'
+                  ? 'bg-red-700 text-card transition-all duration-500 ease-in-out hover:bg-red-500'
                   : ''
             }`}
           >
             {isProcessing ? 'Processing...' : confirmLabel}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isDisabled}
+            className="control-h flex-1 cursor-pointer disabled:cursor-not-allowed bg-card text-button text-foreground shadow-sm/25 transition-all duration-500 ease-in-out hover:bg-[#fafafa] hover:text-foreground hover:brightness-90"
+          >
+            {cancelLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

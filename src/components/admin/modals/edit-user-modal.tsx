@@ -324,25 +324,25 @@ export function EditUserModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card w-[95vw] max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto max-h-[90vh] p-0 rounded-xl shadow-xl flex flex-col border-2 border-[#f47812]/20">
-        <DialogHeader className="px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 lg:pt-7 pb-3 sm:pb-4 lg:pb-5 border-b border-[#f47812]/15 shrink-0">
+      <DialogContent className="bg-card w-[95vw] max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto max-h-[94vh] p-0 rounded-xl shadow-xl flex flex-col border border-accent/20">
+        <DialogHeader className="px-3 sm:px-5 lg:px-6 pt-3 sm:pt-4 lg:pt-5 pb-2.5 sm:pb-3 border-b border-accent/20 shrink-0">
           <div className="flex items-start justify-between gap-2 sm:gap-3 lg:gap-4">
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-base sm:text-xl lg:text-2xl font-bold text-foreground">
+              <DialogTitle className="text-sm sm:text-lg lg:text-xl font-bold text-foreground">
                 Edit User
               </DialogTitle>
-              <DialogDescription className="text-xs sm:text-sm lg:text-base text-gray-600 hidden sm:block">
+              <DialogDescription className="text-xs sm:text-[13px] text-muted-foreground hidden sm:block">
                 Leave fields blank to keep current values. Only filled fields will be updated.
               </DialogDescription>
             </div>
             {/* Batch Operation Buttons */}
-            <div className="flex gap-1.5 sm:gap-2 lg:gap-3 shrink-0">
+            <div className="flex flex-wrap justify-end gap-1.5 sm:gap-2 lg:gap-3 shrink-0">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleEditAll}
-                className="whitespace-nowrap bg-white hover:bg-gray-100 hover:text-foreground border-zinc-300 text-xs sm:text-sm lg:text-base h-7 sm:h-8 lg:h-9 px-2 sm:px-3 lg:px-4"
+                className="text-[11px] h-7 sm:h-8 bg-card hover:bg-gray-100 hover:text-foreground border-zinc-300 px-2 sm:px-3"
               >
                 Edit All
               </Button>
@@ -351,7 +351,7 @@ export function EditUserModal({
                 variant="outline"
                 size="sm"
                 onClick={handleClearAll}
-                className="whitespace-nowrap bg-white hover:bg-gray-100 hover:text-foreground border-zinc-300 text-xs sm:text-sm lg:text-base h-7 sm:h-8 lg:h-9 px-2 sm:px-3 lg:px-4"
+                className="text-[11px] h-7 sm:h-8 bg-card hover:bg-gray-100 hover:text-foreground border-zinc-300 px-2 sm:px-3"
               >
                 Clear All
               </Button>
@@ -360,13 +360,13 @@ export function EditUserModal({
         </DialogHeader>
 
         <ScrollArea className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden md:[&::-webkit-scrollbar]:block">
-          <div className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
+          <div className="px-3 sm:px-5 lg:px-6 py-2.5 sm:py-3.5 lg:py-4">
             {/* Read-only information section */}
-            <div className="space-y-2 sm:space-y-3 lg:space-y-4 p-3 sm:p-4 lg:p-5 bg-background rounded-lg border border-[#f47812]/15">
+            <div className="space-y-2 sm:space-y-2.5 p-2.5 sm:p-3.5 lg:p-4 bg-background rounded-lg border border-accent/20">
               <p className="text-xs lg:text-sm font-semibold text-foreground uppercase hidden sm:block">
                 Read-Only Information
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
                 <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
                   <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-accent shrink-0" />
                   <div className="min-w-0">
@@ -398,7 +398,7 @@ export function EditUserModal({
             </div>
 
             {/* Current values */}
-            <div className="p-3 bg-background rounded-lg border border-[#f47812]/15 text-sm space-y-1 mt-4">
+            <div className="p-2.5 bg-background rounded-lg border border-accent/20 text-xs sm:text-sm space-y-1 mt-3">
               <p className="text-xs text-foreground font-medium">Current Values:</p>
               <p>
                 <span className="text-gray-600">Name:</span>{' '}
@@ -430,23 +430,23 @@ export function EditUserModal({
               )}
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-6" id="edit-user-form">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4" id="edit-user-form">
               {/* Collapsible Sections */}
               <Accordion
                 type="multiple"
                 defaultValue={['basic', 'employment', 'address', 'ids']}
-                className="space-y-4"
+                className="space-y-2.5 sm:space-y-3"
               >
                 {/* Basic Information */}
                 <AccordionItem
                   value="basic"
-                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                  className="border border-accent/20 rounded-lg px-2.5 sm:px-3.5 bg-background"
                 >
-                  <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
+                  <AccordionTrigger className="text-xs sm:text-[13px] font-semibold text-foreground hover:no-underline">
                     Basic Information (Optional)
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-4">
                       {/* New Name */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -582,16 +582,19 @@ export function EditUserModal({
                 {/* Employment Details */}
                 <AccordionItem
                   value="employment"
-                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                  className="border border-accent/20 rounded-lg px-2.5 sm:px-3.5 bg-background"
                 >
-                  <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
+                  <AccordionTrigger className="text-xs sm:text-[13px] font-semibold text-foreground hover:no-underline">
                     Employment Details (Optional)
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-4">
                       {/* New Role */}
                       <div className="space-y-2">
-                        <Label htmlFor="edit-type" className="text-foreground">
+                        <Label
+                          htmlFor="edit-type"
+                          className="text-foreground h-6 sm:h-8 flex items-center leading-none"
+                        >
                           New Role
                         </Label>
                         <Select
@@ -610,7 +613,7 @@ export function EditUserModal({
                               <SelectValue placeholder={`Current: ${user.employeeType}`} />
                             </div>
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="manager-dropdown-content bg-card">
                             <SelectItem value="no-change">
                               No change (keep {user.employeeType})
                             </SelectItem>
@@ -628,7 +631,10 @@ export function EditUserModal({
 
                       {/* New Employment Status */}
                       <div className="space-y-2">
-                        <Label htmlFor="edit-status" className="text-foreground">
+                        <Label
+                          htmlFor="edit-status"
+                          className="text-foreground h-6 sm:h-8 flex items-center leading-none"
+                        >
                           New Employment Status
                         </Label>
                         <Select
@@ -652,7 +658,7 @@ export function EditUserModal({
                               />
                             </div>
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="manager-dropdown-content bg-card">
                             <SelectItem value="no-change">
                               No change (keep {(user as any).employmentStatus || 'current'})
                             </SelectItem>
@@ -676,9 +682,9 @@ export function EditUserModal({
                 {/* Address */}
                 <AccordionItem
                   value="address"
-                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                  className="border border-accent/20 rounded-lg px-2.5 sm:px-3.5 bg-background"
                 >
-                  <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
+                  <AccordionTrigger className="text-xs sm:text-[13px] font-semibold text-foreground hover:no-underline">
                     Home Address (Optional)
                   </AccordionTrigger>
                   <AccordionContent>
@@ -724,13 +730,13 @@ export function EditUserModal({
                 {/* Government IDs */}
                 <AccordionItem
                   value="ids"
-                  className="border border-[#f47812]/15 rounded-lg px-4 bg-background"
+                  className="border border-accent/20 rounded-lg px-2.5 sm:px-3.5 bg-background"
                 >
-                  <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
+                  <AccordionTrigger className="text-xs sm:text-[13px] font-semibold text-foreground hover:no-underline">
                     Government IDs (Optional)
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 pt-4">
                       {/* TIN */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -865,13 +871,13 @@ export function EditUserModal({
         </ScrollArea>
 
         {/* Footer outside ScrollArea to avoid overflow issues */}
-        <div className="px-6 py-4 border-t border-[#f47812]/15 shrink-0 bg-card">
+        <div className="px-3 sm:px-5 lg:px-6 py-3 border-t border-accent/20 shrink-0 bg-card">
           <div className="flex flex-col-reverse sm:flex-row gap-3">
             <Button
               type="submit"
               form="edit-user-form"
               disabled={isPending || !hasActiveChanges() || !isValid}
-              className="flex-1 bg-foreground cursor-pointer text-white hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 ease-in-out shadow-sm/25"
+              className="text-button control-h flex-1 rounded-md bg-primary-gradient text-card shadow-sm/25 cursor-pointer transition-all duration-300 ease-in-out hover:bg-primary-gradient hover:brightness-85 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending ? 'Saving...' : 'Save Changes'}
             </Button>
@@ -880,7 +886,7 @@ export function EditUserModal({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isPending}
-              className="flex-1 cursor-pointer border-zinc-300 bg-white text-foreground hover:bg-gray-100 hover:text-foreground transition-all duration-500 ease-in-out"
+              className="text-button control-h flex-1 rounded-md cursor-pointer border-zinc-300 bg-card text-foreground hover:bg-gray-100 hover:text-foreground transition-all duration-300 ease-in-out"
             >
               Cancel
             </Button>

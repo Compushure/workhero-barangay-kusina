@@ -66,10 +66,13 @@ export default function BadgeTable({
     if (!value) return 'Unknown date';
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return 'Unknown date';
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
     });
   };
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -407,18 +410,18 @@ export default function BadgeTable({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-700 text-card cursor-pointer transition-all duration-500 ease-in-out hover:bg-red-500"
+            >
+              Confirm
+            </AlertDialogAction>
             <AlertDialogCancel
               onClick={() => setBadgeToDelete(null)}
-              className="cursor-pointer"
+              className="!bg-card !text-foreground cursor-pointer transition-all duration-500 ease-in-out hover:!bg-[#fafafa] hover:!text-foreground hover:brightness-90"
             >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              className="bg-foreground hover:bg-red-700 text-card cursor-pointer"
-            >
-              Delete
-            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { getISOWeek } from 'date-fns';
+import { useMemo, useState } from 'react';
+import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { History } from 'lucide-react';
 import { PastRanksListSkeleton } from '@/components/hr/leaderboard/past-ranks-list-skeleton';
 import { PeriodFilters, TAB_LABELS } from '@/components/hr/leaderboard/period-filters';
 import { LeaderboardContent } from '@/components/hr/leaderboard/leaderboard-content';
+import VisibilityToggle from '@/components/hr/leaderboard/visibility-toggle';
 import { usePastRanksFilter } from '@/hooks/hr/usePastRanksFilter';
 import { matchesDate } from '@/lib/utils/period-filter-utils';
 import type { ActionResult } from '@/lib/utils/safe-action';
@@ -30,7 +31,7 @@ function findMatchingPeriod(
 
       const start = new Date(row.period_start + 'T00:00:00');
       if (reference.type === 'weekly') {
-        return start.getFullYear() === reference.year && getISOWeek(start) === reference.week;
+        return getISOWeekYear(start) === reference.year && getISOWeek(start) === reference.week;
       }
 
       if (reference.type === 'monthly') {
@@ -42,8 +43,8 @@ function findMatchingPeriod(
   );
 }
 
-function findOldestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
-  return rows.length > 0 ? rows[rows.length - 1] : null;
+function findNewestPeriod(rows: RankingPeriodWithTop[]): RankingPeriodWithTop | null {
+  return rows.length > 0 ? rows[0] : null;
 }
 
 function PeriodEmptyState({
@@ -75,8 +76,7 @@ export function PastRanksList({
 }: PastRanksListProps) {
   const [activeTab, setActiveTab] = useState<RankingPeriodType>(initialType);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState<RankingPeriodWithTop | null>(null);
-  const [hasInitializedSelection, setHasInitializedSelection] = useState(false);
+  const [useRequestedFallback, setUseRequestedFallback] = useState(initialRequestedPeriod !== null);
 
   const { periods, error, isPending, grouped } = usePastRanksFilter({
     initialData,
@@ -95,44 +95,43 @@ export function PastRanksList({
       }
 
       if (shouldResolveDefaultSelection) {
-        return findOldestPeriod(rows);
+        return findNewestPeriod(rows);
       }
 
-      return findOldestPeriod(rows);
+      return findNewestPeriod(rows);
     },
     [grouped, initialRequestedPeriod, shouldResolveDefaultSelection]
   );
 
-  useEffect(() => {
-    if (hasInitializedSelection || periods === null) return;
+  const selectedPeriod = useMemo(() => {
+    const activeRows = grouped[activeTab];
+    if (activeRows.length === 0) return null;
 
-    const initialPeriod = resolvePeriodForTab(activeTab, { useRequestedPeriod: true });
-    setSelectedPeriod(initialPeriod);
-    setSelectedDate(initialPeriod ? new Date(initialPeriod.period_start + 'T00:00:00') : null);
-    setHasInitializedSelection(true);
-  }, [activeTab, hasInitializedSelection, periods, resolvePeriodForTab]);
+    const matchingPeriod =
+      selectedDate === null
+        ? null
+        : activeRows.find((row) => matchesDate(row, selectedDate, activeTab)) ?? null;
+
+    if (matchingPeriod) {
+      return matchingPeriod;
+    }
+
+    return resolvePeriodForTab(activeTab, { useRequestedPeriod: useRequestedFallback });
+  }, [activeTab, grouped, resolvePeriodForTab, selectedDate, useRequestedFallback]);
+
+  const displayDate = selectedPeriod ? new Date(selectedPeriod.period_start + 'T00:00:00') : null;
 
   const handleTypeChange = (value: string) => {
     const nextTab = value as RankingPeriodType;
     setActiveTab(nextTab);
+    setUseRequestedFallback(false);
     const nextPeriod = resolvePeriodForTab(nextTab);
-    setSelectedPeriod(nextPeriod);
     setSelectedDate(nextPeriod ? new Date(nextPeriod.period_start + 'T00:00:00') : null);
   };
 
   const handleDateChange = (date: Date | null) => {
+    setUseRequestedFallback(false);
     setSelectedDate(date);
-
-    if (date === null) {
-      const fallbackPeriod = resolvePeriodForTab(activeTab);
-      setSelectedPeriod(fallbackPeriod);
-      return;
-    }
-
-    const matchingPeriod = grouped[activeTab].find((row) => matchesDate(row, date, activeTab));
-    if (matchingPeriod) {
-      setSelectedPeriod(matchingPeriod);
-    }
   };
 
   const emptyMessage =
@@ -152,23 +151,31 @@ export function PastRanksList({
 
       {!isPending && periods !== null ? (
         <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <div className="manager-sticky-controls !mx-0 w-full rounded-2xl p-3 sm:p-3.5 xl:max-w-[380px]">
-            <PeriodFilters
-              activeTab={activeTab}
-              selectedDate={selectedDate}
-              hasAnyPeriods={grouped[activeTab].length > 0}
-              availablePeriods={grouped[activeTab]}
-              onTypeChange={handleTypeChange}
+          <div className="manager-sticky-controls !mx-0 w-full rounded-2xl p-3 sm:p-3.5 xl:max-w-[574px]">
+              <PeriodFilters
+                activeTab={activeTab}
+                selectedDate={displayDate}
+                hasAnyPeriods={grouped[activeTab].length > 0}
+                availablePeriods={grouped[activeTab]}
+                onTypeChange={handleTypeChange}
               onDateChange={handleDateChange}
+              trailingContent={
+                selectedPeriod ? (
+                  <VisibilityToggle
+                    rankingPeriodId={selectedPeriod.id}
+                    isVisible={selectedPeriod.is_visible}
+                    className="w-full"
+                  />
+                ) : null
+              }
             />
-
           </div>
 
           <div className="flex flex-1 flex-col gap-3">
             {selectedPeriod ? (
                 <LeaderboardContent
                   periodType={selectedPeriod.period_type}
-                  year={new Date(selectedPeriod.period_start + 'T00:00:00').getFullYear()}
+                  year={getISOWeekYear(new Date(selectedPeriod.period_start + 'T00:00:00'))}
                   week={getISOWeek(new Date(selectedPeriod.period_start + 'T00:00:00'))}
                   month={new Date(selectedPeriod.period_start + 'T00:00:00').getMonth() + 1}
                   show
