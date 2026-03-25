@@ -61,18 +61,18 @@ export default function EmployeeDashboardClient() {
         {/* Foreground content */}
         <div className="relative z-10 flex gap-4 w-full">
           {/* Left column: 20% */}
-          <div className="flex-[1] basis-0 min-w-0">
+          <div className="flex-1 basis-0 min-w-0">
             <Card className="bg-transparent shadow-none border-none h-full">
               <CardContent className="h-full"></CardContent>
             </Card>
           </div>
 
           {/* Middle column: 60% */}
-          <div className="flex-[3] basis-0 min-w-0 flex justify-center">
+          <div className="flex-3 basis-0 min-w-0 flex justify-center">
             <CookingSection className="w-full h-full" />
           </div>
 
-          <div className="flex-[1] basis-0 min-w-0 flex items-start justify-start" />
+          <div className="flex-1 basis-0 min-w-0 flex items-start justify-start" />
         </div>
       </section>
 

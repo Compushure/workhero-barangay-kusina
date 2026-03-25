@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import TasksTable from './quick-task-table';
+import type { ClaimTaskResult } from '@/actions/employee/tasks';
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,11 @@ import type { TaskStatusItem } from '@/components/employee/task-status/types';
 
 export default function TaskIcon() {
   const [open, setOpen] = useState(false);
+  const [claimedTaskIds, setClaimedTaskIds] = useState<Record<string, boolean>>({});
+  const [retainedClaimTasks, setRetainedClaimTasks] = useState<Record<string, TaskStatusItem>>({});
+  const [cookReadyByTaskId, setCookReadyByTaskId] = useState<
+    Record<string, ClaimTaskResult['cookOutcome']>
+  >({});
   const { data } = useGetEmployeeTasks();
 
   const pendingCount = useMemo(() => {
@@ -61,7 +67,14 @@ export default function TaskIcon() {
           </DialogTitle>
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto">
-          <TasksTable />
+          <TasksTable
+            claimedTaskIds={claimedTaskIds}
+            setClaimedTaskIds={setClaimedTaskIds}
+            retainedClaimTasks={retainedClaimTasks}
+            setRetainedClaimTasks={setRetainedClaimTasks}
+            cookReadyByTaskId={cookReadyByTaskId}
+            setCookReadyByTaskId={setCookReadyByTaskId}
+          />
         </div>
       </DialogContent>
     </Dialog>

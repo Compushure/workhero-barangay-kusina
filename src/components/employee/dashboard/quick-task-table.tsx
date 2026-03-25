@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
@@ -23,6 +23,12 @@ type TasksTableProps = {
   tasks?: TaskStatusItem[];
   sortOrder?: 'newest' | 'oldest';
   onPrepareFood?: (payload: CookingLaunchPayload) => void;
+  claimedTaskIds: Record<string, boolean>;
+  setClaimedTaskIds: Dispatch<SetStateAction<Record<string, boolean>>>;
+  retainedClaimTasks: Record<string, TaskStatusItem>;
+  setRetainedClaimTasks: Dispatch<SetStateAction<Record<string, TaskStatusItem>>>;
+  cookReadyByTaskId: Record<string, ClaimTaskResult['cookOutcome']>;
+  setCookReadyByTaskId: Dispatch<SetStateAction<Record<string, ClaimTaskResult['cookOutcome']>>>;
 };
 
 const TASKS_PAGE_SIZE = 3;
@@ -31,26 +37,43 @@ export default function TasksTable({
   tasks: fallbackTasks = [],
   sortOrder = 'newest',
   onPrepareFood,
+  claimedTaskIds,
+  setClaimedTaskIds,
+  retainedClaimTasks,
+  setRetainedClaimTasks,
+  cookReadyByTaskId,
+  setCookReadyByTaskId,
 }: TasksTableProps) {
   const { data, isLoading, isError } = useGetEmployeeTasks();
   const claimMutation = useClaimTaskPointsandXP();
   const [activeClaimId, setActiveClaimId] = useState<string | null>(null);
-  const [claimedTaskIds, setClaimedTaskIds] = useState<Record<string, boolean>>({});
   const [preparingTaskId, setPreparingTaskId] = useState<string | null>(null);
-  const [cookReadyByTaskId, setCookReadyByTaskId] = useState<
-    Record<string, ClaimTaskResult['cookOutcome']>
-  >({});
   const [currentPage, setCurrentPage] = useState(1);
 
   const approvedTasks = useMemo(() => {
     const source = data?.verifiedTasks ?? fallbackTasks;
-    return source.filter(
+
+    const serverTasks = source.filter(
       (task) =>
         task.status === 'approved' &&
         task.pendingOrders > 0 &&
         task.completedOrders === task.maxOrders
     );
-  }, [data?.verifiedTasks, fallbackTasks]);
+
+    const merged = new Map<string, TaskStatusItem>();
+
+    for (const task of serverTasks) {
+      merged.set(task.id, task);
+    }
+
+    for (const [taskId, task] of Object.entries(retainedClaimTasks)) {
+      if (cookReadyByTaskId[taskId]?.canPrepareFood) {
+        merged.set(taskId, task);
+      }
+    }
+
+    return Array.from(merged.values());
+  }, [data?.verifiedTasks, fallbackTasks, retainedClaimTasks, cookReadyByTaskId]);
 
   const sortedApprovedTasks = useMemo(() => {
     return [...approvedTasks].sort((first, second) => {
@@ -110,10 +133,21 @@ export default function TasksTable({
               ...previous,
               [task.id]: result.cookOutcome,
             }));
+
+            setRetainedClaimTasks((previous) => ({
+              ...previous,
+              [task.id]: task,
+            }));
           }
         },
         onError: () => {
           setClaimedTaskIds((previous) => {
+            const next = { ...previous };
+            delete next[task.id];
+            return next;
+          });
+
+          setRetainedClaimTasks((previous) => {
             const next = { ...previous };
             delete next[task.id];
             return next;
@@ -144,6 +178,18 @@ export default function TasksTable({
     });
 
     setCookReadyByTaskId((previous) => {
+      const next = { ...previous };
+      delete next[task.id];
+      return next;
+    });
+
+    setRetainedClaimTasks((previous) => {
+      const next = { ...previous };
+      delete next[task.id];
+      return next;
+    });
+
+    setClaimedTaskIds((previous) => {
       const next = { ...previous };
       delete next[task.id];
       return next;
@@ -245,7 +291,7 @@ export default function TasksTable({
                           ? 'Preparing...'
                           : canPrepareFood
                             ? 'Prepare Food'
-                            : 'Cook (Claim first)'}
+                            : 'Prepare (Claim pts first)'}
                       </Button>
                     ) : null}
                   </div>
