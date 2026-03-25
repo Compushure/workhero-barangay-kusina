@@ -7,7 +7,7 @@ import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueri
 import { useClaimTaskPointsandXP } from '@/hooks/tanstack/mutations/employeeTasksMutations';
 import type { TaskStatusItem } from '@/components/employee/task-status/types';
 import type { ClaimTaskResult } from '@/actions/employee/tasks';
-import type { CookingLaunchPayload } from '@/store/cookingStore';
+import { useCookingStore, type CookingLaunchPayload } from '@/store/cookingStore';
 
 const formatDate = (iso?: string | null) => {
   if (!iso) return '—';
@@ -49,15 +49,23 @@ export default function TasksTable({
   const [activeClaimId, setActiveClaimId] = useState<string | null>(null);
   const [preparingTaskId, setPreparingTaskId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const activeCookingTaskId = useCookingStore((state) => state.trigger?.taskId ?? null);
 
   const approvedTasks = useMemo(() => {
     const source = data?.verifiedTasks ?? fallbackTasks;
 
+    const isServerPrepareEligible = (task: TaskStatusItem) =>
+      task.status === 'approved' &&
+      task.completedOrders === task.maxOrders &&
+      Boolean(task.claimedAt) &&
+      !task.completedAt;
+
     const serverTasks = source.filter(
       (task) =>
-        task.status === 'approved' &&
-        task.pendingOrders > 0 &&
-        task.completedOrders === task.maxOrders
+        (task.status === 'approved' &&
+          task.pendingOrders > 0 &&
+          task.completedOrders === task.maxOrders) ||
+        isServerPrepareEligible(task)
     );
 
     const merged = new Map<string, TaskStatusItem>();
@@ -162,7 +170,20 @@ export default function TasksTable({
 
   const handlePrepareFood = (task: TaskStatusItem) => {
     const cookOutcome = cookReadyByTaskId[task.id];
-    if (!cookOutcome?.canPrepareFood || !onPrepareFood || preparingTaskId) {
+    const isServerPrepareEligible =
+      task.status === 'approved' &&
+      task.completedOrders === task.maxOrders &&
+      Boolean(task.claimedAt) &&
+      !task.completedAt;
+
+    const isTaskCooking = activeCookingTaskId === task.id;
+
+    if (
+      (!cookOutcome?.canPrepareFood && !isServerPrepareEligible) ||
+      !onPrepareFood ||
+      preparingTaskId ||
+      isTaskCooking
+    ) {
       return;
     }
 
@@ -171,10 +192,11 @@ export default function TasksTable({
     onPrepareFood({
       taskId: task.id,
       taskName: task.name,
-      dishName: cookOutcome.dish?.name ?? task.name,
-      dishImageUrl: cookOutcome.dish?.imageUrl ?? '/assets/dish/food-sinigang.png',
-      orderCount: Math.max(1, cookOutcome.orderCount || task.maxOrders),
-      maxOrders: cookOutcome.maxOrders || task.maxOrders,
+      dishName: cookOutcome?.dish?.name ?? task.cookDishName ?? task.name,
+      dishImageUrl:
+        cookOutcome?.dish?.imageUrl ?? task.cookDishImageUrl ?? '/assets/dish/food-sinigang.png',
+      orderCount: Math.max(1, cookOutcome?.orderCount || task.cookOrderCount || task.maxOrders),
+      maxOrders: cookOutcome?.maxOrders || task.maxOrders,
     });
 
     setCookReadyByTaskId((previous) => {
@@ -230,8 +252,18 @@ export default function TasksTable({
           const isPreparingTask = preparingTaskId === task.id;
           const isFinalApprovedClaim = task.completedOrders >= task.maxOrders;
           const cookOutcome = cookReadyByTaskId[task.id];
+          const isServerPrepareEligible =
+            task.status === 'approved' &&
+            task.completedOrders === task.maxOrders &&
+            Boolean(task.claimedAt) &&
+            !task.completedAt;
+          const isTaskCooking = activeCookingTaskId === task.id;
           const isClaimedTask = Boolean(claimedTaskIds[task.id]);
-          const canPrepareFood = Boolean(cookOutcome?.canPrepareFood) && !isPreparingTask;
+          const canPrepareFood =
+            (Boolean(cookOutcome?.canPrepareFood) || isServerPrepareEligible) &&
+            !isPreparingTask &&
+            !isTaskCooking &&
+            Boolean(onPrepareFood);
 
           return (
             <div
@@ -274,10 +306,19 @@ export default function TasksTable({
                     <Button
                       size="sm"
                       onClick={() => handleClaim(task)}
-                      disabled={claimMutation.isPending || isPreparingTask || isClaimedTask}
+                      disabled={
+                        claimMutation.isPending ||
+                        isPreparingTask ||
+                        isClaimedTask ||
+                        isServerPrepareEligible
+                      }
                       className="kitchen-btn h-10 px-4 font-pixel text-[14px] hover:brightness-105"
                     >
-                      {isClaimingTask ? 'Claiming...' : isClaimedTask ? 'Claimed' : 'Claim'}
+                      {isClaimingTask
+                        ? 'Claiming...'
+                        : isClaimedTask || isServerPrepareEligible
+                          ? 'Claimed'
+                          : 'Claim'}
                     </Button>
 
                     {isFinalApprovedClaim ? (
@@ -289,9 +330,11 @@ export default function TasksTable({
                       >
                         {isPreparingTask
                           ? 'Preparing...'
-                          : canPrepareFood
-                            ? 'Prepare Food'
-                            : 'Prepare (Claim pts first)'}
+                          : isTaskCooking
+                            ? 'Preparing...'
+                            : canPrepareFood
+                              ? 'Prepare Food'
+                              : 'Prepare (Claim pts first)'}
                       </Button>
                     ) : null}
                   </div>

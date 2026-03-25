@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showDishCookedToast, showDishServedToast } from '@/components/notifications/cooking-toast';
 import { useCookingStore } from '@/store/cookingStore';
+import { useServeCookedTaskDish } from '@/hooks/tanstack/mutations/employeeTasksMutations';
 
 type CookingPhase = 'idle' | 'cooking' | 'revealed' | 'serving';
 
@@ -18,6 +19,7 @@ export default function CookingSection({ className = '' }: { className?: string 
 
   const [phase, setPhase] = useState<CookingPhase>('idle');
   const [activeCooking, setActiveCooking] = useState<typeof trigger>(null);
+  const serveMutation = useServeCookedTaskDish();
 
   const dishCount = Math.max(1, activeCooking?.orderCount ?? 3);
   const dishImage = activeCooking?.dishImageUrl || DEFAULT_DISH_IMAGE;
@@ -48,12 +50,23 @@ export default function CookingSection({ className = '' }: { className?: string 
     };
   }, [trigger, triggerVersion]);
 
-  const handleServe = () => {
+  const handleServe = async () => {
     if (phase !== 'revealed') {
       return;
     }
 
+    if (!activeCooking?.taskId || serveMutation.isPending) {
+      return;
+    }
+
     setPhase('serving');
+
+    const serveSucceeded = await serveMutation.mutateAsync(activeCooking.taskId);
+
+    if (!serveSucceeded) {
+      setPhase('revealed');
+      return;
+    }
 
     setTimeout(() => {
       const servedOrderCount = activeCooking?.orderCount ?? 1;
@@ -109,9 +122,10 @@ export default function CookingSection({ className = '' }: { className?: string 
             <Button
               type="button"
               onClick={handleServe}
+              disabled={serveMutation.isPending}
               className="relative z-40 pointer-events-auto h-10 px-4 font-pixel text-[13px] border-2 border-[#47331F] bg-[#6a3f29] text-[#f5ebd8] shadow-[3px_3px_0px_#3f2518] hover:bg-[#7b4b32]"
             >
-              Serve
+              {serveMutation.isPending ? 'Serving...' : 'Serve'}
             </Button>
           ) : null}
         </div>

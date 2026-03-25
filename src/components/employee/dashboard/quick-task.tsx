@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { type ComponentProps, useEffect, useMemo, useState } from 'react';
+import { type ComponentProps, useMemo, useState } from 'react';
 import { XIcon } from 'lucide-react';
 import TasksTable from './quick-task-table';
 import {
@@ -25,32 +25,6 @@ import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueri
 import type { TaskStatusItem } from '@/components/employee/task-status/types';
 import type { ClaimTaskResult } from '@/actions/employee/tasks';
 import { type CookingLaunchPayload, useCookingStore } from '@/store/cookingStore';
-
-const QUICK_TASK_STATE_STORAGE_KEY = 'workhero:quick-task:cook-retention:v1';
-
-interface PersistedQuickTaskState {
-  claimedTaskIds: Record<string, boolean>;
-  retainedClaimTasks: Record<string, TaskStatusItem>;
-  cookReadyByTaskId: Record<string, ClaimTaskResult['cookOutcome']>;
-}
-
-function readPersistedQuickTaskState(): PersistedQuickTaskState | null {
-  if (typeof window === 'undefined') return null;
-
-  try {
-    const raw = window.localStorage.getItem(QUICK_TASK_STATE_STORAGE_KEY);
-    if (!raw) return null;
-
-    const parsed = JSON.parse(raw) as Partial<PersistedQuickTaskState>;
-    return {
-      claimedTaskIds: parsed.claimedTaskIds ?? {},
-      retainedClaimTasks: parsed.retainedClaimTasks ?? {},
-      cookReadyByTaskId: parsed.cookReadyByTaskId ?? {},
-    };
-  } catch {
-    return null;
-  }
-}
 
 type DialogContentProps = ComponentProps<typeof DialogContent>;
 
@@ -76,7 +50,6 @@ function WideDialogContent({ children, className, ...props }: DialogContentProps
 export default function TaskIcon() {
   const [open, setOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
-  const [hasHydratedRetentionState, setHasHydratedRetentionState] = useState(false);
   const [claimedTaskIds, setClaimedTaskIds] = useState<Record<string, boolean>>({});
   const [retainedClaimTasks, setRetainedClaimTasks] = useState<Record<string, TaskStatusItem>>({});
   const [cookReadyByTaskId, setCookReadyByTaskId] = useState<
@@ -84,6 +57,7 @@ export default function TaskIcon() {
   >({});
   const { data } = useGetEmployeeTasks();
   const launchCooking = useCookingStore((state) => state.launchCooking);
+  const activeCookingTaskId = useCookingStore((state) => state.trigger?.taskId ?? null);
 
   const handlePrepareFood = (payload: CookingLaunchPayload) => {
     setOpen(false);
@@ -92,39 +66,22 @@ export default function TaskIcon() {
     }, 220);
   };
 
-  useEffect(() => {
-    const persistedState = readPersistedQuickTaskState();
-    if (persistedState) {
-      setClaimedTaskIds(persistedState.claimedTaskIds);
-      setRetainedClaimTasks(persistedState.retainedClaimTasks);
-      setCookReadyByTaskId(persistedState.cookReadyByTaskId);
-    }
-
-    setHasHydratedRetentionState(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hasHydratedRetentionState || typeof window === 'undefined') {
-      return;
-    }
-
-    const payload: PersistedQuickTaskState = {
-      claimedTaskIds,
-      retainedClaimTasks,
-      cookReadyByTaskId,
-    };
-
-    window.localStorage.setItem(QUICK_TASK_STATE_STORAGE_KEY, JSON.stringify(payload));
-  }, [claimedTaskIds, retainedClaimTasks, cookReadyByTaskId, hasHydratedRetentionState]);
-
   const pendingCount = useMemo(() => {
     const tasks: TaskStatusItem[] = data?.verifiedTasks ?? [];
+
+    const isServerPrepareEligible = (task: TaskStatusItem) =>
+      task.status === 'approved' &&
+      task.completedOrders === task.maxOrders &&
+      Boolean(task.claimedAt) &&
+      !task.completedAt;
+
     const serverTaskIds = tasks
       .filter(
         (task) =>
-          task.status === 'approved' &&
-          task.pendingOrders > 0 &&
-          task.completedOrders === task.maxOrders
+          (task.status === 'approved' &&
+            task.pendingOrders > 0 &&
+            task.completedOrders === task.maxOrders) ||
+          isServerPrepareEligible(task)
       )
       .map((task) => task.id);
 
@@ -132,8 +89,15 @@ export default function TaskIcon() {
       (taskId) => cookReadyByTaskId[taskId]?.canPrepareFood
     );
 
-    return new Set([...serverTaskIds, ...retainedTaskIds]).size;
-  }, [data?.verifiedTasks, retainedClaimTasks, cookReadyByTaskId]);
+    const pendingTaskIds = new Set([...serverTaskIds, ...retainedTaskIds]);
+
+    // While a task is actively in cooking flow, hide it from quick-task badge count.
+    if (activeCookingTaskId) {
+      pendingTaskIds.delete(activeCookingTaskId);
+    }
+
+    return pendingTaskIds.size;
+  }, [data?.verifiedTasks, retainedClaimTasks, cookReadyByTaskId, activeCookingTaskId]);
 
   const hasRewards = pendingCount > 0;
   const taskBadgeLabel = pendingCount > 99 ? '99+' : String(pendingCount);

@@ -9,6 +9,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import {
   handleSubmitTaskVerification,
   handleClaimTaskPointsAndXP,
+  handleServeCookedTaskDish,
   handleRedoTask,
 } from '@/action-handlers/employee/tasks';
 import type { SubmitVerificationResult, ClaimTaskResult } from '@/actions/employee/tasks';
@@ -136,6 +137,27 @@ export function useClaimTaskPointsandXP(): UseMutationResult<
       // Always refetch after error or success to make sure the server state is reflected
       queryClient.invalidateQueries({ queryKey: employeeKeys.points() });
       queryClient.invalidateQueries({ queryKey: employeeKeys.xp() });
+      queryClient.invalidateQueries({ queryKey: employeeTasksKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Mutation for marking a claimed completed task as served
+ * Invalidates employee tasks cache so quick-task eligibility reflects server state
+ */
+export function useServeCookedTaskDish(): UseMutationResult<boolean | null, Error, string> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (kpitaskId: string) => {
+      return await handleServeCookedTaskDish(kpitaskId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: employeeTasksKeys.lists() });
+    },
+    onError: (error) => {
+      console.error('Failed to mark cooked task as served:', error);
     },
   });
 }

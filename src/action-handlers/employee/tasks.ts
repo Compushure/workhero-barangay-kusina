@@ -11,6 +11,7 @@ import {
   fetchEmployeeTasks,
   submitTaskVerification,
   claimTaskPointsAndXP,
+  serveCookedTaskDish,
   redoTask,
   type EmployeeTasksData,
   type ClaimTaskResult,
@@ -97,6 +98,23 @@ export async function handleRedoTask(
 
   if (!result.success || result.data?.error) {
     const errorMessage = result.data?.error || result.error || 'Failed to redo task';
+    toast.error(errorMessage);
+    return null;
+  }
+
+  return true;
+}
+
+/**
+ * Marks a fully completed claimed task as served
+ * @param kpitaskId - The task ID to mark as served
+ * @returns Promise with success status or null on error
+ */
+export async function handleServeCookedTaskDish(kpitaskId: string): Promise<boolean | null> {
+  const result = await safeAction(() => serveCookedTaskDish(kpitaskId));
+
+  if (!result.success || result.data?.error) {
+    const errorMessage = result.data?.error || result.error || 'Failed to mark dish as served';
     toast.error(errorMessage);
     return null;
   }

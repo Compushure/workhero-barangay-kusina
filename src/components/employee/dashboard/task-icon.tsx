@@ -26,7 +26,14 @@ export default function TaskIcon() {
 
   const pendingCount = useMemo(() => {
     const tasks: TaskStatusItem[] = data?.verifiedTasks ?? [];
-    return tasks.filter((task) => task.status === 'approved' && task.pendingOrders > 0).length;
+    return tasks.filter(
+      (task) =>
+        (task.status === 'approved' && task.pendingOrders > 0) ||
+        (task.status === 'approved' &&
+          task.completedOrders === task.maxOrders &&
+          Boolean(task.claimedAt) &&
+          !task.completedAt)
+    ).length;
   }, [data?.verifiedTasks]);
 
   const hasRewards = pendingCount > 0;
