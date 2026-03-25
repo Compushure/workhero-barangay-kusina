@@ -3,7 +3,7 @@ import {
   fetchCurrentAssignedTasksPaginated, // ✅ use only the paginated fetch
   fetchCurrentAssignedEmployeesPaginated, // ✅ new employee-specific fetch
   clearUnstartedTaskAssignments,
-  clearAllEmployeeTasks,
+  clearUnstartedEmployeeTasks,
   deleteTask,
   deleteTaskForAllEmployees,
   updateTaskAssignment,
@@ -115,20 +115,27 @@ export async function handleClearUnstartedTaskAssignments(): Promise<boolean> {
 }
 
 /**
- * Clear all tasks for a specific employee
+ * Clear unstarted tasks for a specific employee
  */
-export async function handleClearAllEmployeeTasks(employeeId: string): Promise<boolean> {
-  const result = await safeAction<ServerActionResponse<boolean>>(() =>
-    clearAllEmployeeTasks(employeeId)
+export async function handleClearUnstartedEmployeeTasks(employeeId: string): Promise<number> {
+  const result = await safeAction<ServerActionResponse<number>>(() =>
+    clearUnstartedEmployeeTasks(employeeId)
   );
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
-    return false;
+    return 0;
   }
 
-  toast.success('All employee tasks cleared');
-  return true;
+  const clearedCount = result.data?.data ?? 0;
+
+  if (clearedCount === 0) {
+    toast.info('No unstarted tasks to clear for this employee');
+    return 0;
+  }
+
+  toast.success(`Cleared ${clearedCount} unstarted task${clearedCount === 1 ? '' : 's'}`);
+  return clearedCount;
 }
 
 /**

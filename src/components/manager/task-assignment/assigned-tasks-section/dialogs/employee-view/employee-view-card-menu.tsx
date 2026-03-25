@@ -38,7 +38,7 @@ function EmployeeViewCardMenu({
             variant="ghost"
             className="justify-start text-red-600 hover:text-red-600 hover:bg-accent-secondary/25 cursor-pointer hover:transition-all duration-500 ease-in-out px-2"
           >
-            Clear All Tasks
+            Clear Unstarted
           </Button>
         </div>
       </PopoverContent>

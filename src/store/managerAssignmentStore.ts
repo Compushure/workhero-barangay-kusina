@@ -23,7 +23,7 @@ interface ManagerAssignmentState {
   optimisticMergeAssignedTasks: (tasks: AssignedTask[]) => void;
   optimisticClearAll: () => void;
   optimisticClearUnstartedAssigned: () => void;
-  optimisticClearAllEmployeeTasks: (employeeId: string) => void;
+  optimisticClearUnstartedEmployeeTasks: (employeeId: string) => void;
   optimisticUpdateTask: (
     taskId: string,
     updates: { maxOrders?: number; newDueDate?: string; employeeIds?: string[] }
@@ -182,12 +182,20 @@ export const useManagerAssignmentStore = create<ManagerAssignmentState>((set, ge
         }))
         .filter((task) => task.assignedEmployees.length > 0),
     })),
-  optimisticClearAllEmployeeTasks: (employeeId) =>
+  optimisticClearUnstartedEmployeeTasks: (employeeId) =>
     set((state) => ({
       assignedTasks: state.assignedTasks
         .map((task) => ({
           ...task,
-          assignedEmployees: task.assignedEmployees.filter((emp) => emp.id !== employeeId),
+          assignedEmployees: task.assignedEmployees.filter(
+            (emp) =>
+              !(
+                emp.id === employeeId &&
+                (emp.status?.trim().toLowerCase() ?? 'assigned') === 'assigned' &&
+                (emp.completedOrders ?? 0) === 0 &&
+                (emp.pendingOrders ?? 0) === 0
+              )
+          ),
         }))
         .filter((task) => task.assignedEmployees.length > 0),
     })),
