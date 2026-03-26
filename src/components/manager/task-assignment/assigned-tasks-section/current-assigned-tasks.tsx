@@ -34,7 +34,10 @@ function CurrentAssignedTasksSkeleton() {
         </div>
       </div>
 
-      <section className="manager-sticky-controls rounded-xl px-2.5 py-2.5 sm:px-3 sm:py-3 flex min-w-0 flex-col gap-2 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between">
+      <section
+        className="manager-sticky-controls rounded-xl px-2.5 py-2.5 sm:px-3 sm:py-3 flex min-w-0 flex-col gap-2 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between"
+        style={{ zIndex: 200 }}
+      >
         <Skeleton className="h-7 w-52 shrink-0 rounded-md bg-gray-300" />
         <div className="flex w-full min-w-0 flex-col items-stretch gap-1.5 sm:gap-2 lg:gap-3 xl:w-auto xl:flex-row xl:items-center xl:justify-end">
           <Skeleton className="control-skeleton-h w-full flex-1 xl:max-w-md rounded-md bg-gray-300" />
@@ -206,7 +209,10 @@ export function CurrentAssignedTasks() {
       </div>
 
       {/* View Cards Number Display & Controls: Search, Sort, Clear */}
-      <section className="manager-sticky-controls mt-1 rounded-xl px-2.5 py-2.5 sm:px-3 sm:py-3 flex min-w-0 flex-col gap-2 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between">
+      <section
+        className="manager-sticky-controls mt-1 rounded-xl px-2.5 py-2.5 sm:px-3 sm:py-3 flex min-w-0 flex-col gap-2 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between"
+        style={{ zIndex: 200 }}
+      >
         {/* Counts */}
         <div className="flex w-fit shrink-0 self-start xl:self-center gap-2 whitespace-nowrap rounded-md border border-gray-200 bg-card/75 px-2.5 py-2 text-meta text-primary shadow-sm/25 md:gap-3 md:px-3">
           <h5 className="leading-none">
