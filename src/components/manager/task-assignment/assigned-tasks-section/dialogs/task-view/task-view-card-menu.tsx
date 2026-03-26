@@ -27,7 +27,7 @@ export default function TaskViewCardMenu({
           <MoreVertical className="size-5" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-32 p-1.5 bg-card" align="end">
+      <PopoverContent portalled={false} className="w-32 p-1.5 bg-card" align="end">
         <div className="flex flex-col gap-0.5">
           {isOverdue ? (
             <Tooltip>
