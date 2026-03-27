@@ -169,11 +169,15 @@ export function CurrentAssignedTasks() {
     return <CurrentAssignedTasksSkeleton />;
   }
 
+  // const number = [2, 4, 6];
+  // const double = number.map((num) => (num * 2));
+  // console.log(double);
+
   return (
     <div className="rounded-2xl bg-gray-100 px-4 md:px-5 2xl:px-6 pt-3 sm:pt-5 shadow-sm/50 flex flex-col w-full">
       {/* Header */}
-      <div className="flex items-start sm:items-center justify-between gap-1.5 mb-4">
-        <h2 className="text-h2 text-foreground pb-2 pl-2">Tasks List</h2>
+      <div className="flex items-center justify-between gap-1.5 mb-4">
+        <h2 className="text-h2 text-foreground pl-2 align-middle">Tasks List</h2>
 
         {/* View Toggle */}
         <div className="flex bg-card/75 rounded-md self-end sm:self-auto">

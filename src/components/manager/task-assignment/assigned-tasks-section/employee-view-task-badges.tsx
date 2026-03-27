@@ -95,9 +95,9 @@ export default function EmployeeViewTaskBadges({
                 <span className="truncate text-zinc-700 text-xs sm:text-sm font-semibold">
                   {task.taskName}
                 </span>
-                <div className="flex flex-wrap items-center gap-0.5 sm:gap-1">
+                <div className="flex flex-wrap items-center gap-1">
                   <p
-                    className={`block w-fit text-[0.6rem] md:text-xs 2xl:text-[0.6rem] text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}
+                    className={`block w-fit text-[0.7rem] md:text-xs 2xl:text-[0.6rem] text-gray-500 ${isTaskOverdue(task.dateRange.end) ? 'text-red-700 font-semibold' : ''}`}
                   >
                     {formatDate(task.dateRange.start)} -{' '}
                     {formatDate(task.dateRange.end) || 'No deadline'}
