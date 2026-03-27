@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Dialog,
   DialogContent,
@@ -6,11 +8,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Calendar, ChefHat, ChevronDown, Coins, Loader2, Soup } from 'lucide-react';
-import { TaskStatusItem } from './types';
-import { SetStateAction, useState, useEffect } from 'react';
+import { type SetStateAction, useEffect, useState } from 'react';
+import type { TaskStatusItem } from './types';
 import {
   useSubmitTaskVerification,
-  useClaimTaskPointsandXP,
   useRedoTask,
 } from '@/hooks/tanstack/mutations/employeeTasksMutations';
 import { formatDate } from '@/utils/date-utils';
@@ -29,39 +30,27 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
   const [remarkOpen, setRemarkOpen] = useState(true);
   const [pendingOrders, setPendingOrders] = useState(task.pendingOrders || 1);
 
-  // Reset remarkOpen to true whenever modal opens
   useEffect(() => {
     if (modalOpen) {
       setRemarkOpen(true);
+      setPendingOrders(task.pendingOrders || 1);
     }
-  }, [modalOpen]);
+  }, [modalOpen, task.pendingOrders]);
 
   const submitMutation = useSubmitTaskVerification();
-  const claimMutation = useClaimTaskPointsandXP();
   const redoMutation = useRedoTask();
 
-  const canClaim =
-    task.status?.toLowerCase() === 'approved' &&
-    task.pendingOrders !== 0 &&
-    !claimMutation.isSuccess;
+  const isApprovedTask = task.status?.toLowerCase() === 'approved';
   const isFullyCompletedAndClaimed = task.completedOrders === task.maxOrders && task.claimedAt;
   const canSubmit = task.status?.toLowerCase() === 'assigned' && !submitMutation.isSuccess;
   const canRedo = task.status?.toLowerCase() === 'rejected' && !redoMutation.isSuccess;
 
+  const actionButtonClassName =
+    'inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-[#47331F] bg-[#8A6039] px-4 py-2 font-jersey text-[13px] tracking-[0.05em] text-[#fff6e5] shadow-[3px_3px_0px_#47331F] transition-all duration-150 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#9A6E45] hover:shadow-[2px_2px_0px_#47331F] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto sm:text-[14px]';
+
   function handleRedo() {
     if (!canRedo || redoMutation.isPending) return;
     redoMutation.mutate(task.id);
-  }
-
-  function handleClaim() {
-    if (!canClaim || claimMutation.isPending) return;
-    claimMutation.mutate({
-      kpitaskId: task.id,
-      taskName: task.name,
-      pendingOrders: task.pendingOrders,
-      completedOrders: task.completedOrders,
-      maxOrders: task.maxOrders,
-    });
   }
 
   function handleSubmit() {
@@ -83,54 +72,52 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
         }
       }}
     >
-      <DialogContent className="w-full max-w-[calc(100vw-2rem)] sm:max-w-md min-w-0 overflow-hidden rounded-2xl bg-linear-0 from-[#F5DDBC] to-background to-25%">
-        <DialogHeader className="flex flex-col gap-1 text-left min-w-0 pt-2">
-          <DialogTitle className="inline-flex w-fit max-w-full text-xl font-semibold leading-tight truncate">
+      <DialogContent className="w-full min-w-0 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border-3 border-[#47331F] bg-[#f7efdf] p-0 font-jersey tracking-[0.04em] shadow-[0_14px_34px_rgba(71,51,31,0.22)] sm:max-w-xl">
+        <DialogHeader className="flex min-w-0 flex-col gap-2 border-b-2 border-[#d4c5a8] bg-[#e1d2b7] px-4 py-3.5 text-left">
+          <DialogTitle className="block w-full text-[20px] font-normal leading-tight text-[#3f2a1a] break-words">
             {task.name}
           </DialogTitle>
-          <DialogDescription className="pr-8 min-w-0 wrap-break-word text-base text-muted-foreground">
+          <DialogDescription className="min-w-0 pr-8 text-[14px] leading-relaxed text-[#6b5038]">
             {task.description}
           </DialogDescription>
         </DialogHeader>
 
-        {/* <div className="flex flex-col gap-4 text-left min-w-0 overflow-hidden"> */}
-          <section className='flex py-1 border-b border-border justify-between px-6 gap-6'>
-            {/* Rewards and Progress Section */}
-            <div className="flex flex-col justify-baseline items-around gap-6">
-              {/* Points and XP */}
-              <div className="flex flex-col gap-1">
-                <p className="text-center items-center flex gap-1 leading-0 justify-center">
-                  <span className='text-zinc-600 font-medium text-xs'>REWARDS</span>
-                  <span className='text-zinc-500 font-extralight text-xs'>( per order )</span>
+        <div className="space-y-4 px-4 py-4">
+          <section className="grid gap-4 border-b-2 border-[#d4c5a8] pb-4 md:grid-cols-2">
+            <div className="space-y-4 rounded-xl border-2 border-[#d4c5a8] bg-[#fff8ec] p-3.5">
+              <div className="flex flex-col gap-1.5">
+                <p className="flex items-center justify-center gap-1.5 text-center">
+                  <span className="text-[13px] tracking-[0.2em] text-[#8a6039]">REWARDS</span>
+                  <span className="text-[11px] text-[#9c8667]">(PER ORDER)</span>
                 </p>
-                <div className="flex items-end justify-center gap-4 text-muted-foreground">
-                  <p className="flex gap-1 items-end text-lg font-medium leading-none">
-                    <Coins strokeWidth={1.75} className="size-5" />
-                    <span className="inline-block font-semibold pb-0.5">{task.points}</span>
+                <div className="flex items-end justify-center gap-4 text-[#4b3522]">
+                  <p className="flex items-end gap-1.5 text-[17px] leading-none">
+                    <Coins strokeWidth={1.75} className="size-5 shrink-0" />
+                    <span className="inline-block pb-0.5 text-[18px]">{task.points}</span>
                   </p>
 
-                  <p className="flex gap-1.5 items-end font-medium pb-0.5">
-                    <span className="inline-block italic text-base leading-none">XP</span>
-                    <span className="inline-block font-semibold text-lg leading-none">{task.xp}</span>
+                  <p className="flex items-end gap-1.5 pb-0.5">
+                    <span className="inline-block text-[15px] leading-none">XP</span>
+                    <span className="inline-block text-[18px] leading-none">{task.xp}</span>
                   </p>
                 </div>
               </div>
 
-              {/* Orders to Submit Section */}
               <div className={`flex flex-col items-center ${canSubmit ? '' : 'opacity-50 pointer-events-none'}`}>
-                <label className="text-sm font-medium text-foreground block mb-2">
+                <label className="mb-2 block text-[14px] text-[#4b3522]">
                   Orders to Submit
                 </label>
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setPendingOrders((prev) => Math.max(1, prev - 1));
                     }}
                     disabled={!canSubmit || pendingOrders === 1}
-                    className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] disabled:hover:bg-[#690003] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex size-8 items-center justify-center rounded-md border-2 border-[#47331F] bg-[#8A6039] text-[14px] text-[#fff6e5] transition-colors hover:bg-[#9A6E45] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    −
+                    -
                   </button>
                   <input
                     type="number"
@@ -138,58 +125,56 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                     max={task.maxOrders - task.completedOrders}
                     value={!canSubmit ? 1 : pendingOrders}
                     onChange={(e) => {
-                      const newValue = parseInt(e.target.value) || 1;
+                      const newValue = parseInt(e.target.value, 10) || 1;
                       setPendingOrders(Math.max(1, Math.min(newValue, remainingOrders)));
                     }}
                     disabled={!canSubmit}
                     tabIndex={-1}
-                    className="w-20 remove-arrow rounded-md border border-gray-300 bg-card px-2 py-1 inset-shadow-xs/20 text-base text-center ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="remove-arrow w-18 rounded-md border-2 border-[#d4c5a8] bg-[#f7efdf] px-2 py-1.5 text-center text-[14px] text-[#3f2a1a] outline-none focus-visible:ring-2 focus-visible:ring-[#F4B925] disabled:cursor-not-allowed disabled:opacity-50"
                   />
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const remainingOrders = task.maxOrders - task.completedOrders;
                       setPendingOrders((prev) => Math.min(remainingOrders, prev + 1));
                     }}
                     disabled={!canSubmit || pendingOrders === remainingOrders}
-                    className="bg-[#690003] text-white size-8 rounded-md flex items-center justify-center hover:bg-[#8B0000] disabled:hover:bg-[#690003] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex size-8 items-center justify-center rounded-md border-2 border-[#47331F] bg-[#8A6039] text-[14px] text-[#fff6e5] transition-colors hover:bg-[#9A6E45] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     +
                   </button>
                 </div>
 
-                <p className={`text-xs text-muted-foreground mt-1 ${task.status === 'assigned' ? '' : 'opacity-0'}`}>
+                <p className={`mt-1.5 text-[14px] text-[#6b5038] ${task.status === 'assigned' ? '' : 'opacity-0'}`}>
                   Remaining: {task.maxOrders - task.completedOrders} orders
                 </p>
               </div>
             </div>
 
-
-            <div className='flex flex-col items-around justify-baseline gap-6 px-4 text-muted-foreground'>  
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
+            <div className="flex flex-col justify-baseline gap-4 rounded-xl border-2 border-[#d4c5a8] bg-[#fff8ec] p-3.5 text-[#4b3522]">
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-[13px] tracking-[0.2em] text-[#8a6039]">
                   DUE DATE
                 </span>
-                <p className={`flex items-center gap-1.5 text-base font-medium ${isOverdue ? 'text-red-700' : 'text-muted-foreground'}`}>
-                  <Calendar strokeWidth={2.5} className='size-4'/>
+                <p className={`flex items-center gap-2 text-[16px] ${isOverdue ? 'text-[#8b2e22]' : 'text-[#4b3522]'}`}>
+                  <Calendar strokeWidth={2.5} className="size-5" />
                   {formatDate(task.dueDate)}
                 </p>
               </div>
 
-              {/* Progress */}
-              <div className="flex flex-col text-base font-medium items-center gap-1">
-                <span className="text-xs text-center font-medium text-zinc-600 leading-none w-full">
+              <div className="flex flex-col items-center gap-1.5 text-[16px]">
+                <span className="w-full text-center text-[13px] leading-none text-[#8a6039]">
                   PROGRESS
                 </span>
-                <p className="flex items-center gap-2 text-muted-foreground">
+                <p className="flex items-center gap-2 text-[#4b3522]">
                   <Soup strokeWidth={1.75} className="size-6" />
-                  <span className="inline-block font-medium leading-0 mt-1">
+                  <span className="mt-1 inline-block text-[17px] leading-none">
                     {task.completedOrders} / {task.maxOrders} Orders
                   </span>
                 </p>
-                <div className="h-3 bg-primary-foreground inset-shadow-sm/15 border-2 border-muted-foreground rounded-full overflow-hidden w-36 mt-1">
+                <div className="mt-1 h-3 w-36 overflow-hidden rounded-full border-2 border-[#9b7a56] bg-[#f1e4cf]">
                   <div
-                    className="h-full bg-linear-to-r from-yellow-400 to-orange-500 rounded-full shadow-sm/50"
+                    className="h-full rounded-full bg-linear-to-r from-[#F4B925] to-[#D77A38]"
                     style={{ width: `${(task.completedOrders / task.maxOrders) * 100}%` }}
                   />
                 </div>
@@ -197,26 +182,24 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
             </div>
           </section>
 
-
-          {/* Approved/Rejected - View Manager Remark */}
           {task.remark ? (
-            <div className="flex flex-col gap-2 items-start min-w-0 w-full">
+            <div className="flex min-w-0 w-full flex-col items-start gap-2">
               <button
                 type="button"
                 onClick={() => setRemarkOpen((prev) => !prev)}
-                className="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-md bg-primary-foreground text-foreground text-sm font-medium shadow hover:bg-foreground hover:text-primary-foreground hover:underline hover:scale-101 transition-all ease-in-out duration-400 delay-75 px-3 py-1.5"
+                className="inline-flex w-fit shrink-0 items-center gap-2 rounded-md border-2 border-[#d4c5a8] bg-[#f3e4c9] px-3 py-1.5 text-[13px] text-[#4b3522] transition-all duration-200 hover:bg-[#eadbc1]"
                 aria-expanded={remarkOpen}
               >
-                <ChefHat className='size-5'/>
-                {remarkOpen ? 'close remark' : 'view remark'}
+                <ChefHat className="size-4.5" />
+                <span className="text-[14px] leading-none">{remarkOpen ? 'close remark' : 'view remark'}</span>
                 <ChevronDown
-                  className={`size-4 shrink-0 transition-transform duration-150 delay-75 ease-in-out ${remarkOpen ? 'rotate-180' : ''}`}
+                  className={`size-4.5 shrink-0 transition-transform duration-150 ${remarkOpen ? 'rotate-180' : ''}`}
                   aria-hidden
                 />
               </button>
               {remarkOpen ? (
-                <div className="overflow-auto w-full min-w-0 max-h-40 rounded-lg border border-border bg-white px-3 py-2.5 shadow-sm inset-shadow-xs/25 tramsition-all duration-500 delay-75 ease-in-out">
-                  <p className="text-sm text-foreground leading-relaxed wrap-break-word break-none">
+                <div className="max-h-32 w-full min-w-0 overflow-auto rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2.5">
+                  <p className="wrap-break-word text-[14px] leading-relaxed text-[#4b3522]">
                     {task.remark}
                   </p>
                 </div>
@@ -224,19 +207,18 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
             </div>
           ) : null}
 
-          {/* Assigned! - Submit for verification section */}
           {canSubmit ? (
             <div className="flex justify-end pt-2">
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitMutation.isPending}
-                className="inline-flex items-center gap-2 rounded-md bg-foreground hover:bg-primary text-primary-foreground px-4 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                className={actionButtonClassName}
               >
                 {submitMutation.isPending ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                    Submitting…
+                    <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+                    Submitting...
                   </>
                 ) : (
                   'Submit for Verification'
@@ -245,60 +227,37 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
             </div>
           ) : null}
 
-          {/* Approved! - Claim points section */}
-          {canClaim ? (
-            <div className="pt-2 flex flex-col items-end">
-              <button
-                type="button"
-                onClick={handleClaim}
-                disabled={claimMutation.isPending}
-                className="inline-flex items-center gap-2 rounded-md bg-foreground hover:bg-primary text-primary-foreground px-4 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
-              >
-                {claimMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                    Claiming…
-                  </>
-                ) : (
-                  'Claim Points & XP'
-                )}
-              </button>
-              <p className="text-sm text-muted-foreground pt-2 text-center w-full">
-                Verification request for {pendingOrders} order/s has been approved!
-              </p>
-            </div>
+          {isApprovedTask && !isFullyCompletedAndClaimed ? (
+            <p className="pt-2 text-center text-[14px] text-[#6b5038]">
+              Claim approved task rewards from the kitchen quick task.
+            </p>
           ) : isFullyCompletedAndClaimed ? (
-            <p className="text-sm text-muted-foreground pt-2 text-center flex flex-col">
-              <span>All orders are complete! </span>
+            <p className="flex flex-col pt-2 text-center text-[14px] text-[#6b5038]">
+              <span>All orders are complete!</span>
               <span>Points and XP have already been claimed.</span>
             </p>
           ) : null}
 
-          {/* In Review text marker */}
-          {task.status === 'in review' &&
-            <p className="text-sm text-muted-foreground">
+          {task.status === 'in review' ? (
+            <p className="text-center text-[14px] text-[#6b5038]">
               Submitted for verification (Pending request for {pendingOrders} order/s)
             </p>
-          }
+          ) : null}
 
-          {/* Rejected! - Redo task section */}
-          {canRedo &&
+          {canRedo ? (
             <div className="pt-2">
               <div className="space-y-3">
-                {/* <p className="text-sm text-amber-600">
-                  This task was rejected. You can redo it and submit again for verification.
-                </p> */}
                 <div className="flex justify-end">
                   <button
                     type="button"
                     onClick={handleRedo}
                     disabled={redoMutation.isPending}
-                    className="inline-flex items-center gap-2 rounded-md bg-foreground hover:bg-primary text-primary-foreground px-4 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                    className={actionButtonClassName}
                   >
                     {redoMutation.isPending ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                        Redoing…
+                        <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+                        Redoing...
                       </>
                     ) : (
                       'Redo Task'
@@ -307,7 +266,8 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                 </div>
               </div>
             </div>
-          }
+          ) : null}
+        </div>
       </DialogContent>
     </Dialog>
   );

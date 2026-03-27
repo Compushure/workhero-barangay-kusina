@@ -58,11 +58,19 @@ export default function EditTaskDialog({
 
   const [searchTerm, setSearchTerm] = useState('');
   const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
+  const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
+
   useEffect(() => {
     async function loadEmployees() {
-      const data = await handleFetchEmployeeList();
-      setEmployees(data);
+      setIsLoadingEmployees(true);
+      try {
+        const data = await handleFetchEmployeeList();
+        setEmployees(data);
+      } finally {
+        setIsLoadingEmployees(false);
+      }
     }
+
     loadEmployees();
   }, []);
 
@@ -98,7 +106,12 @@ export default function EditTaskDialog({
   }, [assignedTasks, editAssignedEmployees, task.id, task.taskId]);
 
   return (
-    <Dialog open={showEditDialog} onOpenChange={(open) => !open && handleCancelEdit()}>
+    <Dialog
+      open={showEditDialog}
+      onOpenChange={(open) => {
+        if (!open && !isProcessing) handleCancelEdit();
+      }}
+    >
       <DialogContent className="bg-card max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-2xl max-h-[90vh] flex flex-col p-4 sm:p-5">
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-xl text-foreground">Edit Task</DialogTitle>
@@ -134,26 +147,31 @@ export default function EditTaskDialog({
                 <label className="font-bold text-foreground text-sm">Max Orders</label>
                 <div className="flex items-center gap-1.5">
                   <button
+                    type="button"
                     onClick={() => setEditMaxOrders(Math.max(1, Math.min(99, editMaxOrders - 1)))}
-                    className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent hover:text-card text-primary size-7 rounded flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out"
+                    disabled={isProcessing}
+                    className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent hover:text-card text-primary size-7 rounded flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     −
                   </button>
                   <input
                     type="number"
                     value={editMaxOrders}
+                    disabled={isProcessing}
                     onChange={(e) =>
                       setEditMaxOrders(
                         Math.max(1, Math.min(99, Number.parseInt(e.target.value) || 1))
                       )
                     }
-                    className="remove-arrow w-14 text-center border border-accent/50 rounded px-1.5 py-1 bg-card text-sm"
+                    className="remove-arrow w-14 text-center border border-accent/50 rounded px-1.5 py-1 bg-card text-sm disabled:cursor-not-allowed disabled:opacity-60"
                     min="1"
                     max="99"
                   />
                   <button
+                    type="button"
                     onClick={() => setEditMaxOrders(Math.max(1, Math.min(99, editMaxOrders + 1)))}
-                    className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent hover:text-card text-primary size-7 rounded flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out"
+                    disabled={isProcessing}
+                    className="shadow-sm/15 border border-accent/50 bg-card hover:bg-accent hover:text-card text-primary size-7 rounded flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     +
                   </button>
@@ -167,7 +185,7 @@ export default function EditTaskDialog({
               <DatePickerPopover
                 deadline={editDueDate}
                 onDeadlineChange={(date) => date && setEditDueDate(date)}
-                disabled={isOverdue}
+                disabled={isOverdue || isProcessing}
               />
               {isOverdue && (
                 <p className="text-[11px] text-red-600 text-center max-w-40">
@@ -207,61 +225,78 @@ export default function EditTaskDialog({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredEmployees.map((emp) => {
-                    const isDisabled = disabledEmployeeIds.has(emp.id);
-                    const isSelected = editAssignedEmployees.includes(emp.id);
+                  {isLoadingEmployees
+                    ? Array.from({ length: 6 }).map((_, index) => (
+                        <tr key={`skeleton-${index}`} className="border-b border-accent/25 bg-card">
+                          <td className="w-[10%] p-3 align-middle">
+                            <div className="mx-auto size-4 rounded border border-accent/40 bg-accent/15 animate-pulse" />
+                          </td>
+                          <td className="w-[60%] px-1.5 py-1.5 align-middle">
+                            <div className="space-y-1">
+                              <div className="h-3.5 w-3/4 rounded bg-accent/15 animate-pulse" />
+                              <div className="h-2.5 w-1/3 rounded bg-accent/10 animate-pulse" />
+                            </div>
+                          </td>
+                          <td className="w-[30%] px-1.5 py-1.5 align-middle">
+                            <div className="h-3 w-2/3 rounded bg-accent/10 animate-pulse" />
+                          </td>
+                        </tr>
+                      ))
+                    : filteredEmployees.map((emp) => {
+                        const isDisabled = disabledEmployeeIds.has(emp.id) || isProcessing;
+                        const isSelected = editAssignedEmployees.includes(emp.id);
 
-                    return (
-                      <tr
-                        key={emp.id}
-                        className={`border-b border-accent/25 transition-all duration-300 ease-in-out text-primary ${
-                          isDisabled
-                            ? 'brightness-75 opacity-50 cursor-not-allowed'
-                            : isSelected
-                              ? 'bg-accent-secondary/25'
-                              : 'bg-card hover:bg-row-hover cursor-pointer'
-                        }`}
-                        onClick={() => !isDisabled && toggleEmployee(emp.id)}
-                      >
-                        <td className="w-[10%] p-3 text-center align-middle">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            disabled={isDisabled}
-                            onChange={() => {}}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!isDisabled) toggleEmployee(emp.id);
-                            }}
-                            className="size-4 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
-                            style={{
-                              backgroundImage: !!isSelected
-                                ? "url(\"data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e\")"
-                                : 'none',
-                              backgroundRepeat: 'no-repeat',
-                              backgroundPosition: 'center',
-                              backgroundSize: '1rem',
-                            }}
-                          />
-                        </td>
-                        <td className="w-[60%] min-w-0 px-1.5 py-1.5 align-middle">
-                          <div className="flex flex-col gap-0.5">
-                            <span className="truncate text-sm font-medium text-gray-800">
-                              {emp.name}
-                            </span>
-                            {isDisabled && (
-                              <span className="truncate text-2xs font-light text-gray-500">
-                                Already assigned
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="w-[30%] px-1.5 py-1.5 text-xs text-gray-600 align-middle">
-                          {emp.empId}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                        return (
+                          <tr
+                            key={emp.id}
+                            className={`border-b border-accent/25 transition-all duration-300 ease-in-out text-primary ${
+                              isDisabled
+                                ? 'brightness-75 opacity-50 cursor-not-allowed'
+                                : isSelected
+                                  ? 'bg-accent-secondary/25'
+                                  : 'bg-card hover:bg-row-hover cursor-pointer'
+                            }`}
+                            onClick={() => !isDisabled && toggleEmployee(emp.id)}
+                          >
+                            <td className="w-[10%] p-3 text-center align-middle">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                disabled={isDisabled}
+                                onChange={() => {}}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!isDisabled) toggleEmployee(emp.id);
+                                }}
+                                className="size-4 rounded cursor-pointer appearance-none bg-card border border-accent checked:bg-accent checked:border-accent disabled:cursor-not-allowed disabled:opacity-50 relative"
+                                style={{
+                                  backgroundImage: !!isSelected
+                                    ? "url(\"data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e\")"
+                                    : 'none',
+                                  backgroundRepeat: 'no-repeat',
+                                  backgroundPosition: 'center',
+                                  backgroundSize: '1rem',
+                                }}
+                              />
+                            </td>
+                            <td className="w-[60%] min-w-0 px-1.5 py-1.5 align-middle">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="truncate text-sm font-medium text-gray-800">
+                                  {emp.name}
+                                </span>
+                                {disabledEmployeeIds.has(emp.id) && !isProcessing && (
+                                  <span className="truncate text-2xs font-light text-gray-500">
+                                    Already assigned
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="w-[30%] px-1.5 py-1.5 text-xs text-gray-600 align-middle">
+                              {emp.empId}
+                            </td>
+                          </tr>
+                        );
+                      })}
                 </tbody>
               </table>
             </div>

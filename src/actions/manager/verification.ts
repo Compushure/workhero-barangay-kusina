@@ -36,12 +36,12 @@ function applySearchAndSort(query: any, searchTerm: string, sort: VerificationSo
       return query.order('assigned_to_name', { ascending: false, nullsLast: true });
     case 'date-asc':
       return query
-        .order('kpitask_completed_at', { ascending: true, nullsLast: true })
+        .order('kpitask_verification_requested_at', { ascending: true, nullsLast: true })
         .order('kpitask_created_at', { ascending: true, nullsLast: true });
     case 'date-desc':
     default:
       return query
-        .order('kpitask_completed_at', { ascending: false, nullsLast: true })
+        .order('kpitask_verification_requested_at', { ascending: false, nullsLast: true })
         .order('kpitask_created_at', { ascending: false, nullsLast: true });
   }
 }

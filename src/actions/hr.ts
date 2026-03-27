@@ -11,17 +11,15 @@ import {
 } from '@/types';
 import { addRewardSchema, editRewardSchema } from '@/zod/schemas';
 
-// Helper function to get public URL with cache busting
+// Build a public image URL and append a timestamp so updated images are not cached by the browser.
 function getRewardImageUrl(supabase: any, rewardId: string): string {
   const baseUrl = supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`)
     .data.publicUrl;
-  // Add cache-busting query parameter to force fresh image on every fetch
+  // The timestamp changes on each call, forcing the latest profile image to load.
   return `${baseUrl}?t=${Date.now()}`;
 }
 
-// ============================================
-// Redemption Request Actions
-// ============================================
+// Redemption request actions (approve, reject, list, and create requests).
 
 /**
  * Get all redemption requests with joined User and Reward data
@@ -34,7 +32,7 @@ export async function getRedemptionRequestsAction(
   try {
     const supabase = await createClient();
 
-    // Build query with joins
+    // Build one query that includes request details plus related user and reward fields.
     let query = supabase
       .from('RewardRequest')
       .select(
@@ -59,7 +57,7 @@ export async function getRedemptionRequestsAction(
       )
       .order('requested_at', { ascending: false });
 
-    // Apply status filter if provided
+    // Apply optional status filter when the caller asks for a specific status.
     if (status && status !== 'all') {
       query = query.eq('status', status);
     }
@@ -71,7 +69,7 @@ export async function getRedemptionRequestsAction(
       return { error: `Failed to fetch redemption requests: ${error.message}` };
     }
 
-    // Transform database response to match RedemptionRequest type
+    // Convert database field names to the app's RedemptionRequest shape.
     const requests: RedemptionRequest[] = (data || []).map((item: any) => ({
       id: item.id,
       userId: item.user_id,
@@ -108,7 +106,7 @@ export async function getMyRedemptionRequestsAction(
   try {
     const supabase = await createClient();
 
-    // Get current authenticated user
+    // Read the currently signed-in user so we only return their own requests.
     const {
       data: { user },
       error: userError,
@@ -118,7 +116,7 @@ export async function getMyRedemptionRequestsAction(
       return { error: 'Unauthorized: User not authenticated' };
     }
 
-    // Build query with joins, filtered by current user
+    // Query requests with related user/reward data, scoped to this user ID.
     let query = supabase
       .from('RewardRequest')
       .select(
@@ -144,7 +142,7 @@ export async function getMyRedemptionRequestsAction(
       .eq('user_id', user.id)
       .order('requested_at', { ascending: false });
 
-    // Apply status filter if provided
+    // Apply optional status filter when provided.
     if (status && status !== 'all') {
       query = query.eq('status', status);
     }
@@ -156,7 +154,7 @@ export async function getMyRedemptionRequestsAction(
       return { error: `Failed to fetch your redemption requests: ${error.message}` };
     }
 
-    // Transform database response to match RedemptionRequest type
+    // Convert database field names to the app's RedemptionRequest shape.
     const requests: RedemptionRequest[] = (data || []).map((item: any) => ({
       id: item.id,
       userId: item.user_id,
@@ -197,7 +195,7 @@ export async function acceptRedemptionRequestAction(
   try {
     const supabase = await createClient();
 
-    // Get current user (admin)
+    // Get the authenticated approver account.
     const {
       data: { user: admin },
       error: adminError,
@@ -207,7 +205,7 @@ export async function acceptRedemptionRequestAction(
       return { error: 'Unauthorized: Admin not authenticated' };
     }
 
-    // Fetch the redemption request with user and reward details (admin client: User join not readable by authenticated)
+    // Load request + related reward/user values via admin client because User joins are privileged.
     const { data: request, error: fetchError } = await supabaseAdmin
       .from('RewardRequest')
       .select(
@@ -243,7 +241,7 @@ export async function acceptRedemptionRequestAction(
     const totalPointsCost = pointsCostPerItem * quantity;
     const currentDeductedPoints = user?.deducted_points || 0;
 
-    // Update request status to approved with optional remarks
+    // Mark this request as approved and store optional remarks.
     const { error: updateRequestError } = await supabase
       .from('RewardRequest')
       .update({
@@ -258,7 +256,7 @@ export async function acceptRedemptionRequestAction(
       return { error: `Failed to approve request: ${updateRequestError.message}` };
     }
 
-    // Clear deducted points (admin client: User table not writable by authenticated)
+    // Finalize points by removing the pending deducted amount from the user record.
     const { error: clearDeductedPointsError } = await supabaseAdmin
       .from('User')
       .update({
@@ -268,7 +266,7 @@ export async function acceptRedemptionRequestAction(
 
     if (clearDeductedPointsError) {
       console.error('Error clearing deducted points:', clearDeductedPointsError);
-      // Try to revert the approval
+      // If points update fails, roll request status back to pending to keep data consistent.
       await supabaseAdmin
         .from('RewardRequest')
         .update({ status: 'pending', approved_by: null })
@@ -300,7 +298,7 @@ export async function declineRedemptionRequestAction(
   try {
     const supabase = await createClient();
 
-    // Get current user (admin)
+    // Get the authenticated approver account.
     const {
       data: { user: admin },
       error: adminError,
@@ -310,7 +308,7 @@ export async function declineRedemptionRequestAction(
       return { error: 'Unauthorized: Admin not authenticated' };
     }
 
-    // Fetch the redemption request with user and reward details (admin client: User join not readable by authenticated)
+    // Load request + related reward/user values via admin client because User joins are privileged.
     const { data: request, error: fetchError } = await supabaseAdmin
       .from('RewardRequest')
       .select(
@@ -348,7 +346,7 @@ export async function declineRedemptionRequestAction(
     const currentPoints = user?.points || 0;
     const currentDeductedPoints = user?.deducted_points || 0;
 
-    // Update request status to rejected with optional remarks
+    // Mark this request as rejected and store optional remarks.
     const { error: updateError } = await supabase
       .from('RewardRequest')
       .update({
@@ -363,7 +361,7 @@ export async function declineRedemptionRequestAction(
       return { error: `Failed to decline request: ${updateError.message}` };
     }
 
-    // Return points to user (admin client: User table not writable by authenticated)
+    // Return reserved points back to the user after rejection.
     const { error: returnPointsError } = await supabaseAdmin
       .from('User')
       .update({
@@ -374,7 +372,7 @@ export async function declineRedemptionRequestAction(
 
     if (returnPointsError) {
       console.error('Error returning points:', returnPointsError);
-      // Try to revert the rejection
+      // If point refund fails, roll request status back to pending to keep data consistent.
       await supabaseAdmin
         .from('RewardRequest')
         .update({ status: 'pending', approved_by: null })
@@ -406,7 +404,7 @@ export async function createRedemptionRequestAction(
   try {
     const supabase = await createClient();
 
-    // Get current authenticated user
+    // Get the signed-in employee creating the request.
     const {
       data: { user },
       error: userError,
@@ -416,7 +414,7 @@ export async function createRedemptionRequestAction(
       return { error: 'Unauthorized: User not authenticated' };
     }
 
-    // Fetch reward to validate it exists and is active
+    // Load reward details to validate availability and pricing.
     const { data: reward, error: rewardError } = await supabase
       .from('Reward')
       .select('id, name, points_cost, is_active, redeeming_limit')
@@ -431,7 +429,7 @@ export async function createRedemptionRequestAction(
       return { error: 'This reward is no longer available' };
     }
 
-    // Validate quantity against redeeming limit
+    // Validate quantity against the item's per-request redeeming limit.
     if (reward.redeeming_limit && quantity > reward.redeeming_limit) {
       return { error: `You can only redeem up to ${reward.redeeming_limit} of this item` };
     }
@@ -440,7 +438,7 @@ export async function createRedemptionRequestAction(
       return { error: 'Quantity must be at least 1' };
     }
 
-    // Fetch user's current points and deducted_points (admin client: User table not readable by authenticated)
+    // Read points values through admin client because User table access is privileged.
     const { data: userData, error: userDataError } = await supabaseAdmin
       .from('User')
       .select('points, deducted_points')
@@ -459,7 +457,7 @@ export async function createRedemptionRequestAction(
       return { error: `Insufficient points. You need ${totalCost} points but have ${userPoints}` };
     }
 
-    // Deduct points immediately and add to deducted_points (admin client: User table not writable by authenticated)
+    // Reserve points immediately: subtract from points and add to deducted_points.
     const { error: updatePointsError } = await supabaseAdmin
       .from('User')
       .update({
@@ -483,7 +481,7 @@ export async function createRedemptionRequestAction(
 
     if (insertError) {
       console.error('Error creating redemption request:', insertError);
-      // Rollback points deduction
+      // Roll back reserved points when request creation fails.
       await supabaseAdmin
         .from('User')
         .update({
@@ -504,13 +502,13 @@ export async function createRedemptionRequestAction(
   }
 }
 
-// Action to get all reward/mercado items
+// Return all Mercado items for HR management screens.
 export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>> {
   try {
-    // Get Supabase client
+    // Create scoped server client for this request.
     const supabase = await createClient();
 
-    // Fetch all rewards
+    // Load all rewards sorted by newest first.
     const { data, error } = await supabase
       .from('Reward')
       .select('*')
@@ -521,7 +519,7 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
       return { error: `Failed to fetch items: ${error.message}` };
     }
 
-    // Transform database response to match Reward type
+    // Map database columns to the Reward type used by the frontend.
     const rewards: Reward[] = (data || []).map((item) => ({
       id: item.id,
       name: item.name,
@@ -545,17 +543,17 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
   }
 }
 
-// Action to add a new reward/mercado item
+// Create a new Mercado item.
 export async function addRewardAction(
   input: AddRewardInput
 ): Promise<ServerActionResponse<Reward>> {
   try {
-    // Validate input
+    // Validate incoming payload with Zod schema before writing to database.
     const validatedData = addRewardSchema.parse(input);
 
     const supabase = await createClient();
 
-    // Additional backend validation for redeeming_limit
+    // Enforce server-side redeeming limit rules even if client validation is bypassed.
     if (validatedData.redeemingLimit !== undefined) {
       if (validatedData.redeemingLimit < 0) {
         return { error: 'Redeeming limit cannot be negative' };
@@ -568,7 +566,7 @@ export async function addRewardAction(
       }
     }
 
-    // Insert reward into database
+    // Insert item into Reward table.
     const { data, error } = await supabase
       .from('Reward')
       .insert({
@@ -587,7 +585,7 @@ export async function addRewardAction(
       return { error: `Failed to add item: ${error.message}` };
     }
 
-    // Transform database response to match Reward type
+    // Convert inserted record to app Reward shape.
     const reward: Reward = {
       id: data.id,
       name: data.name,
@@ -616,25 +614,25 @@ export async function editRewardAction(
   input: EditRewardInput
 ): Promise<ServerActionResponse<Reward>> {
   try {
-    // Validate input
+    // Validate editable fields before update.
     const validatedData = editRewardSchema.parse(input);
 
-    // Get Supabase client
+    // Create scoped server client for this request.
     const supabase = await createClient();
 
-    // Additional backend validation for redeeming_limit
+    // Enforce server-side redeeming limit rules.
     if (validatedData.redeemingLimit !== undefined) {
       if (validatedData.redeemingLimit < 0) {
         return { error: 'Redeeming limit cannot be negative' };
       }
 
-      // If quantity is also being updated, validate against it
+      // If quantity is included in this request, validate against the new quantity value.
       if (validatedData.quantity !== undefined) {
         if (validatedData.redeemingLimit > validatedData.quantity) {
           return { error: 'Redeeming limit cannot be greater than quantity' };
         }
       } else {
-        // If quantity is not being updated, fetch current quantity and validate
+        // If quantity is not in payload, validate against the current stored quantity.
         const { data: currentReward, error: fetchError } = await supabase
           .from('Reward')
           .select('quantity, redeeming_limit')
@@ -654,7 +652,7 @@ export async function editRewardAction(
       }
     }
 
-    // Build update object with only provided fields
+    // Build partial update object so only provided fields are changed.
     const updateData: Record<string, unknown> = {};
     if (validatedData.name !== undefined) updateData.name = validatedData.name;
     if (validatedData.pointsCost !== undefined) updateData.points_cost = validatedData.pointsCost;
@@ -664,7 +662,7 @@ export async function editRewardAction(
     if (validatedData.category !== undefined) updateData.category = validatedData.category;
     if (validatedData.isActive !== undefined) updateData.is_active = validatedData.isActive;
 
-    // Update reward in database
+    // Apply update in Reward table.
     const { data, error } = await supabase
       .from('Reward')
       .update(updateData)
@@ -677,7 +675,7 @@ export async function editRewardAction(
       return { error: `Failed to update item: ${error.message}` };
     }
 
-    // Transform database response to match Reward type
+    // Convert updated record to app Reward shape.
     const reward: Reward = {
       id: data.id,
       name: data.name,
@@ -703,10 +701,10 @@ export async function editRewardAction(
 
 export async function deleteRewardAction(id: string): Promise<ServerActionResponse<void>> {
   try {
-    // Get Supabase client
+    // Create scoped server client for this request.
     const supabase = await createClient();
 
-    // Delete reward from database
+    // Delete item row from Reward table.
     const { error } = await supabase.from('Reward').delete().eq('id', id);
 
     if (error) {
@@ -733,7 +731,7 @@ export async function deleteRewardAction(id: string): Promise<ServerActionRespon
 }
 
 /**
- * Server action to hide/unhide a reward/mercado item
+ * Hide or unhide a Mercado item by toggling its active state.
  * @param id - The ID of the reward to hide/unhide
  * @param isActive - Whether the item should be active (visible) or hidden
  * @returns ServerActionResponse indicating success or failure
@@ -743,10 +741,10 @@ export async function hideRewardAction(
   isActive: boolean = false
 ): Promise<ServerActionResponse<void>> {
   try {
-    // Get Supabase client
+    // Create scoped server client for this request.
     const supabase = await createClient();
 
-    // Update reward is_active status
+    // Toggle visibility by updating is_active.
     const { error } = await supabase.from('Reward').update({ is_active: isActive }).eq('id', id);
 
     if (error) {
