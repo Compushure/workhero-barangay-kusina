@@ -11,7 +11,6 @@ import {
   handleDeleteTaskForAllEmployees,
   handleClearUnstartedTaskAssignments,
   handleClearUnstartedEmployeeTasks,
-  handleClearAllEmployeeTasks,
   handleUpdateTaskAssignment,
 } from '@/action-handlers/manager/assigned-tasks';
 import { handleAddTaskAssignment } from '@/action-handlers/manager/assignments';
@@ -176,6 +175,7 @@ export function useClearUnstartedTaskAssignmentsMutation(): UseMutationResult<bo
 
 /**
  * Mutation for clearing unstarted tasks for a specific employee
+ * Automatically invalidates relevant queries on success
  */
 export function useClearUnstartedEmployeeTasksMutation(): UseMutationResult<
   number,
@@ -183,7 +183,7 @@ export function useClearUnstartedEmployeeTasksMutation(): UseMutationResult<
   { employeeId: string }
 > {
   const queryClient = useQueryClient();
-  const { startOptimistic, optimisticClearUnstartedForEmployee, rollback, commit } =
+  const { startOptimistic, optimisticClearUnstartedEmployeeTasks, rollback, commit } =
     useManagerAssignmentStore();
 
   return useMutation({
@@ -192,44 +192,7 @@ export function useClearUnstartedEmployeeTasksMutation(): UseMutationResult<
     },
     onMutate: async ({ employeeId }) => {
       startOptimistic();
-      optimisticClearUnstartedForEmployee(employeeId);
-    },
-    onSuccess: (clearedCount) => {
-      commit();
-      if (clearedCount === 0) {
-        toast.info('No unstarted tasks to clear for this employee');
-      }
-      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.tasks() });
-      queryClient.invalidateQueries({ queryKey: managerAssignmentKeys.employees() });
-    },
-    onError: (error) => {
-      rollback();
-      toast.error('Failed to clear unstarted tasks for this employee.');
-      console.error('Error clearing employee tasks:', error);
-    },
-  });
-}
-
-/**
- * Mutation for clearing all tasks for a specific employee
- * Automatically invalidates relevant queries on success
- */
-export function useClearAllEmployeeTasksMutation(): UseMutationResult<
-  boolean,
-  Error,
-  { employeeId: string }
-> {
-  const queryClient = useQueryClient();
-  const { startOptimistic, optimisticClearAllEmployeeTasks, rollback, commit } =
-    useManagerAssignmentStore();
-
-  return useMutation({
-    mutationFn: async ({ employeeId }: { employeeId: string }) => {
-      return await handleClearAllEmployeeTasks(employeeId);
-    },
-    onMutate: async ({ employeeId }) => {
-      startOptimistic();
-      optimisticClearAllEmployeeTasks(employeeId);
+      optimisticClearUnstartedEmployeeTasks(employeeId);
     },
     onSuccess: () => {
       commit();
@@ -238,8 +201,8 @@ export function useClearAllEmployeeTasksMutation(): UseMutationResult<
     },
     onError: (error) => {
       rollback();
-      toast.error('Failed to clear employee tasks. Rolling back changes.');
-      console.error('Error clearing employee tasks:', error);
+      toast.error('Failed to clear unstarted employee tasks. Rolling back changes.');
+      console.error('Error clearing unstarted employee tasks:', error);
     },
   });
 }

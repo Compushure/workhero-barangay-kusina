@@ -94,7 +94,7 @@ export function useDeleteProfilePicture() {
   });
 }
 
-export function useAddUser(): UseMutationResult<User, Error, AddUserInput, void> {
+export function useAddUser(): UseMutationResult<User, Error, AddUserInput, User> {
   const queryClient = useQueryClient();
   const { startOptimistic, optimisticPrependUser, optimisticReplaceUser, rollback, commit } =
     useAdminUserStore();
