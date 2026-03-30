@@ -111,7 +111,7 @@ export default function TaskIcon() {
               <Button
                 type="button"
                 aria-label="Open tasks to claim rewards"
-                className={`relative h-18 w-18 rounded-full border-3 border-[#47331F] bg-[#8A6039] shadow-[5px_5px_0px_#000] shadow-[#47331F]/55 transition-transform hover:bg-[#9A6E45] cursor-pointer hover:scale-105 focus-visible:ring-4 focus-visible:ring-[#F4B925]/60 ${
+                className={`relative size-18 rounded-full border-3 border-[#47331F] bg-[#8A6039] shadow-[5px_5px_0px_#000] shadow-[#47331F]/55 transition-transform hover:bg-[#9A6E45] cursor-pointer hover:scale-105 focus-visible:ring-4 focus-visible:ring-[#F4B925]/60 ${
                   hasRewards ? 'animate-pulse ring-4 ring-[#F4B925]' : ''
                 }`}
               >
@@ -120,7 +120,7 @@ export default function TaskIcon() {
                   alt="Task rewards icon"
                   width={52}
                   height={52}
-                  className="h-12 w-12 object-contain"
+                  className="size-16 object-contain"
                   priority
                 />
                 {hasRewards ? (
