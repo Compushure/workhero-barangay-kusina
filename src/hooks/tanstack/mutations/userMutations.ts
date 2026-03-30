@@ -15,7 +15,7 @@ import {
 } from '@/action-handlers/superadmin/users';
 import type { User, AddUserInput, EditUserInput } from '@/types';
 import { userKeys } from '../queries/userQueries';
-import { useAdminUserStore } from '@/store/adminUserStore';
+import { useAdminUserStore, buildOptimisticUser } from '@/store/adminUserStore';
 
 /**
  * Creates a new user with automatic cache invalidation
@@ -96,7 +96,8 @@ export function useDeleteProfilePicture() {
 
 export function useAddUser(): UseMutationResult<User, Error, AddUserInput, void> {
   const queryClient = useQueryClient();
-  const { rollback } = useAdminUserStore();
+  const { startOptimistic, optimisticPrependUser, optimisticReplaceUser, rollback, commit } =
+    useAdminUserStore();
 
   return useMutation({
     mutationFn: async (input: AddUserInput): Promise<User> => {
@@ -109,10 +110,20 @@ export function useAddUser(): UseMutationResult<User, Error, AddUserInput, void>
 
       return user;
     },
-    onMutate: async () => {
+    onMutate: async (input) => {
       await queryClient.cancelQueries({ queryKey: userKeys.all });
+      // optimistic temp user so list reflects creation instantly
+      const tempUser = buildOptimisticUser(input);
+      startOptimistic();
+      optimisticPrependUser(tempUser);
+      return tempUser;
     },
-    onSuccess: () => {
+    onSuccess: (user, _variables, tempUser) => {
+      if (tempUser) {
+        // replace temp with authoritative server user
+        optimisticReplaceUser(tempUser.id, user);
+      }
+      commit();
       queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
     },
@@ -177,6 +188,7 @@ export function useEditUser(): UseMutationResult<
     },
     onMutate: async ({ userId, data }) => {
       await queryClient.cancelQueries({ queryKey: userKeys.all });
+      // optimistic local state so the UI reflects edits immediately
       startOptimistic();
       optimisticUpdateUser(userId, data);
 
@@ -184,6 +196,7 @@ export function useEditUser(): UseMutationResult<
     },
     onSuccess: () => {
       commit();
+      // let server be source of truth after optimistic render
       queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
     },
@@ -244,12 +257,14 @@ export function useDeleteUser(): UseMutationResult<
     },
     onMutate: async ({ userId }) => {
       await queryClient.cancelQueries({ queryKey: userKeys.all });
+      // optimistic remove so UI reflects deletion immediately
       startOptimistic();
       optimisticDeleteUser(userId);
       return { previousUsers: undefined };
     },
     onSuccess: () => {
       commit();
+      // refresh lists to ensure parity with backend
       queryClient.invalidateQueries({ queryKey: userKeys.paginatedLists() });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
     },

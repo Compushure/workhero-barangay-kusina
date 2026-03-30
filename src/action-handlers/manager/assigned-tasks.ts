@@ -4,6 +4,7 @@ import {
   fetchCurrentAssignedEmployeesPaginated, // ✅ new employee-specific fetch
   clearUnstartedTaskAssignments,
   clearUnstartedEmployeeTasks,
+  clearAllEmployeeTasks,
   deleteTask,
   deleteTaskForAllEmployees,
   updateTaskAssignment,
@@ -136,6 +137,23 @@ export async function handleClearUnstartedEmployeeTasks(employeeId: string): Pro
 
   toast.success(`Cleared ${clearedCount} unstarted task${clearedCount === 1 ? '' : 's'}`);
   return clearedCount;
+}
+
+/**
+ * Clear ALL tasks for a specific employee (even if started), keeps toast feedback consistent
+ */
+export async function handleClearAllEmployeeTasks(employeeId: string): Promise<boolean> {
+  const result = await safeAction<ServerActionResponse<boolean>>(() =>
+    clearAllEmployeeTasks(employeeId)
+  );
+
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error);
+    return false;
+  }
+
+  toast.success('All tasks for this employee have been cleared');
+  return true;
 }
 
 /**

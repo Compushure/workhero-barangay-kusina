@@ -23,7 +23,8 @@ interface ManagerAssignmentState {
   optimisticMergeAssignedTasks: (tasks: AssignedTask[]) => void;
   optimisticClearAll: () => void;
   optimisticClearUnstartedAssigned: () => void;
-  optimisticClearUnstartedEmployeeTasks: (employeeId: string) => void;
+  optimisticClearUnstartedForEmployee: (employeeId: string) => void;
+  optimisticClearAllEmployeeTasks: (employeeId: string) => void;
   optimisticUpdateTask: (
     taskId: string,
     updates: { maxOrders?: number; newDueDate?: string; employeeIds?: string[] }
@@ -182,20 +183,27 @@ export const useManagerAssignmentStore = create<ManagerAssignmentState>((set, ge
         }))
         .filter((task) => task.assignedEmployees.length > 0),
     })),
-  optimisticClearUnstartedEmployeeTasks: (employeeId) =>
+  optimisticClearUnstartedForEmployee: (employeeId) =>
     set((state) => ({
       assignedTasks: state.assignedTasks
         .map((task) => ({
           ...task,
-          assignedEmployees: task.assignedEmployees.filter(
-            (emp) =>
-              !(
-                emp.id === employeeId &&
-                (emp.status?.trim().toLowerCase() ?? 'assigned') === 'assigned' &&
-                (emp.completedOrders ?? 0) === 0 &&
-                (emp.pendingOrders ?? 0) === 0
-              )
-          ),
+          assignedEmployees: task.assignedEmployees.filter((emp) => {
+            const normalizedStatus = emp.status?.trim().toLowerCase() ?? 'assigned';
+            const completed = emp.completedOrders ?? 0;
+            const pending = emp.pendingOrders ?? 0;
+            const isUnstarted = normalizedStatus === 'assigned' && completed === 0 && pending === 0;
+            return !(emp.id === employeeId && isUnstarted);
+          }),
+        }))
+        .filter((task) => task.assignedEmployees.length > 0),
+    })),
+  optimisticClearAllEmployeeTasks: (employeeId) =>
+    set((state) => ({
+      assignedTasks: state.assignedTasks
+        .map((task) => ({
+          ...task,
+          assignedEmployees: task.assignedEmployees.filter((emp) => emp.id !== employeeId),
         }))
         .filter((task) => task.assignedEmployees.length > 0),
     })),

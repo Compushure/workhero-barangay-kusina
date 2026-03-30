@@ -494,14 +494,19 @@ export async function clearUnstartedTaskAssignments(): Promise<ServerActionRespo
   return { error: null, data: true };
 }
 
+/**
+ * Clear unstarted tasks for a specific employee
+ * Returns the number of deleted assignments for that employee
+ */
 export async function clearUnstartedEmployeeTasks(
   employeeId: string
 ): Promise<ServerActionResponse<number>> {
   const supabase = await createClient();
 
+  // Fetch candidate rows first to safely filter "unstarted"
   const { data: existingAssignments, error: fetchError } = await supabase
     .from('KPITask')
-    .select('id, status, completed_orders, pending_orders')
+    .select('id, status, completed_orders, pending_orders', { count: 'exact' })
     .eq('assigned_to', employeeId);
 
   if (fetchError) return { error: fetchError.message, data: undefined };
@@ -512,12 +517,7 @@ export async function clearUnstartedEmployeeTasks(
         const normalizedStatus = assignment.status?.trim().toLowerCase();
         const completedOrders = assignment.completed_orders ?? 0;
         const pendingOrders = assignment.pending_orders ?? 0;
-
-        return (
-          normalizedStatus === 'assigned' &&
-          completedOrders === 0 &&
-          pendingOrders === 0
-        );
+        return normalizedStatus === 'assigned' && completedOrders === 0 && pendingOrders === 0;
       })
       .map((assignment) => assignment.id) ?? [];
 
@@ -531,7 +531,23 @@ export async function clearUnstartedEmployeeTasks(
     .in('id', assignmentIdsToDelete);
 
   if (deleteError) return { error: deleteError.message, data: undefined };
+
   return { error: null, data: assignmentIdsToDelete.length };
+}
+
+export async function clearAllEmployeeTasks(
+  employeeId: string
+): Promise<ServerActionResponse<boolean>> {
+  const supabase = await createClient();
+  // Delete all KPITask entries for a specific employee
+  const { error } = await supabase
+    .from('KPITask')
+    .delete()
+    .eq('assigned_to', employeeId)
+    .in('status', ['assigned']);
+
+  if (error) return { error: error.message, data: undefined };
+  return { error: null, data: true };
 }
 
 // unnassigns one employee from a task instance

@@ -202,7 +202,6 @@ export async function submitTaskVerification(
     .update({
       status: 'in review',
       pending_orders: pendingOrders,
-      verification_requested_at: new Date().toISOString(),
     })
     .eq('id', kpitaskId)
     .eq('assigned_to', user.id);
