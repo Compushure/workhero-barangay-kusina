@@ -11,11 +11,11 @@ import LevelDebugLayoutMount from '@/components/employee/widgets/test/level/leve
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   await protectEmployeeRoute();
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-dvh w-full overflow-x-clip">
       <EmployeeTypographyScope />
       <ToastViewSync view="employee" />
       <NavLoadingState />
-      <main className="flex-1">{children}</main>
+      <main className="flex min-w-0 flex-1 flex-col overflow-x-clip">{children}</main>
       {/* <div className="fixed bottom-4 left-4 z-50">
         <ConditionalLogout hideOnMercado />
       </div> */}
