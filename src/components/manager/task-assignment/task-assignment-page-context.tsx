@@ -26,7 +26,7 @@ interface TaskAssignmentContextType {
     newEmployees: AssignedEmployee[]
   ) => void;
   clearUnstarted: () => Promise<void>;
-  clearAllEmployeeTasks: (employeeId: string) => void;
+  clearUnstartedEmployeeTasks: (employeeId: string) => void;
   setAssignedTasks: (tasks: AssignedTask[]) => void;
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -49,10 +49,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
   // Remove duplicate API call - let the component handle data fetching
 
   // Server action for assigning tasks
-  const assignTasks = async (
-    filters: SelectedFilters,
-    options?: { availableTasks?: Task[] }
-  ) => {
+  const assignTasks = async (filters: SelectedFilters, options?: { availableTasks?: Task[] }) => {
     if (filters.employees.length === 0 || filters.tasks.length === 0) return;
 
     try {
@@ -61,7 +58,7 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
 
       for (const taskSelection of filters.tasks) {
         const selectedTask = options?.availableTasks?.find((task) => task.id === taskSelection.id);
-        const employeeIds = filters.employees.map(emp => emp.id);
+        const employeeIds = filters.employees.map((emp) => emp.id);
         const optimisticTask: AssignedTask = {
           id: `optimistic-${taskSelection.id}-${Date.now()}`,
           taskId: taskSelection.id,
@@ -151,12 +148,20 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
     await handleClearUnstartedTaskAssignments();
   };
 
-  const clearAllEmployeeTasks = (employeeId: string) => {
+  const clearUnstartedEmployeeTasks = (employeeId: string) => {
     updateAssignedTasks((prev) =>
       prev
         .map((task) => ({
           ...task,
-          assignedEmployees: task.assignedEmployees.filter((e) => e.id !== employeeId),
+          assignedEmployees: task.assignedEmployees.filter(
+            (e) =>
+              !(
+                e.id === employeeId &&
+                (e.status?.trim().toLowerCase() ?? 'assigned') === 'assigned' &&
+                (e.completedOrders ?? 0) === 0 &&
+                (e.pendingOrders ?? 0) === 0
+              )
+          ),
         }))
         .filter((task) => task.assignedEmployees.length > 0)
     );
@@ -172,21 +177,14 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
       deleteTask,
       editTask,
       clearUnstarted,
-      clearAllEmployeeTasks,
+      clearUnstartedEmployeeTasks,
       setAssignedTasks,
       page,
       setPage,
       totalPages,
       setTotalPages,
     }),
-    [
-      assignedTasks,
-      viewMode,
-      page,
-      totalPages,
-      setAssignedTasks,
-      updateAssignedTasks,
-    ]
+    [assignedTasks, viewMode, page, totalPages, setAssignedTasks, updateAssignedTasks]
   );
 
   return <TaskAssignmentContext.Provider value={value}>{children}</TaskAssignmentContext.Provider>;

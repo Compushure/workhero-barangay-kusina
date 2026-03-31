@@ -20,6 +20,7 @@ import {
   toManilaDateString,
 } from '@/lib/utils/time-period-utils';
 import { enrichRankingPlayers } from '@/lib/utils/enrich-ranking';
+import { insertNotification } from '@/lib/notifications';
 import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
@@ -127,6 +128,115 @@ function buildPeriodLabelLikeView(periodType: RankLogPeriodType, periodStartDate
     case 'yearly': {
       return `Year ${formatInTimeZone(periodStartDate, MANILA_TIMEZONE, 'yyyy')}`;
     }
+  }
+}
+
+function getRankingIntervalLabel(periodType: RankLogPeriodType): string {
+  switch (periodType) {
+    case 'weekly':
+      return 'weekly';
+    case 'monthly':
+      return 'monthly';
+    case 'yearly':
+      return 'yearly';
+  }
+}
+
+function formatOrdinalRank(rank: number): string {
+  const remainderTen = rank % 10;
+  const remainderHundred = rank % 100;
+
+  if (remainderTen === 1 && remainderHundred !== 11) {
+    return `${rank}st`;
+  }
+
+  if (remainderTen === 2 && remainderHundred !== 12) {
+    return `${rank}nd`;
+  }
+
+  if (remainderTen === 3 && remainderHundred !== 13) {
+    return `${rank}rd`;
+  }
+
+  return `${rank}th`;
+}
+
+async function notifyVisibleTopTenUsers(params: {
+  rankingPeriodId: string;
+  periodType: RankLogPeriodType;
+  periodStart: string;
+}): Promise<void> {
+  try {
+    const { data: topTenRows, error: topTenError } = await supabaseAdmin
+      .from('ranking_leaderboard_view')
+      .select('user_id, rank')
+      .eq('ranking_period_id', params.rankingPeriodId)
+      .lte('rank', 10)
+      .order('rank', { ascending: true })
+      .limit(10);
+
+    if (topTenError) {
+      console.error('Failed to fetch top 10 rows for leaderboard notification', {
+        rankingPeriodId: params.rankingPeriodId,
+        error: topTenError.message,
+      });
+      return;
+    }
+
+    const rankedUsers = (topTenRows ?? []) as Array<{ user_id: string; rank: number }>;
+    if (rankedUsers.length === 0) {
+      return;
+    }
+
+    const userIds = rankedUsers.map((row) => row.user_id);
+    const { data: existingNotifications, error: existingNotificationsError } = await supabaseAdmin
+      .from('Notification')
+      .select('user_id')
+      .eq('type', 'user')
+      .in('user_id', userIds)
+      .contains('metadata', {
+        notificationKind: 'leaderboard-top-10',
+        rankingPeriodId: params.rankingPeriodId,
+      });
+
+    if (existingNotificationsError) {
+      console.error('Failed to check existing leaderboard notifications', {
+        rankingPeriodId: params.rankingPeriodId,
+        error: existingNotificationsError.message,
+      });
+    }
+
+    const periodLabel = buildPeriodLabelLikeView(
+      params.periodType,
+      parseManilaDateString(params.periodStart)
+    );
+    const rankingIntervalLabel = getRankingIntervalLabel(params.periodType);
+    const existingUserIds = new Set((existingNotifications ?? []).map((row) => row.user_id));
+
+    await Promise.all(
+      rankedUsers
+        .filter((row) => !existingUserIds.has(row.user_id))
+        .map((row) =>
+          insertNotification({
+            userId: row.user_id,
+            type: 'user',
+            message: `Congratulations! You have been ranked ${formatOrdinalRank(row.rank)} in the ${rankingIntervalLabel} rankings! Check the leaderboards to view the top 10!`,
+            metadata: {
+              notificationKind: 'leaderboard-top-10',
+              rankingPeriodId: params.rankingPeriodId,
+              periodType: params.periodType,
+              periodLabel,
+              rank: row.rank,
+              status: 'leaderboard',
+            },
+          })
+        )
+    );
+  } catch (error) {
+    console.error('Unexpected error sending leaderboard notifications', {
+      rankingPeriodId: params.rankingPeriodId,
+      error,
+    });
   }
 }
 
@@ -427,6 +537,26 @@ export async function toggleRankingVisibility(
   return safeAction(async () => {
     const supabase = await createClient();
 
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Not authenticated');
+    }
+
+    const { data: rankingPeriod, error: rankingPeriodError } = await supabase
+      .from('RankingPeriod')
+      .select('id, is_visible, period_type, period_start')
+      .eq('id', rankingPeriodId)
+      .single();
+
+    if (rankingPeriodError || !rankingPeriod) {
+      throw new Error(`Failed to fetch ranking period: ${rankingPeriodError?.message ?? 'Not found'}`);
+    }
+
+    const shouldNotifyTopTen = !rankingPeriod.is_visible && isVisible;
+
     const { data, error } = await supabase
       .from('RankingPeriod')
       .update({ is_visible: isVisible })
@@ -436,6 +566,14 @@ export async function toggleRankingVisibility(
 
     if (error) {
       throw new Error(`Failed to update visibility: ${error.message}`);
+    }
+
+    if (shouldNotifyTopTen) {
+      await notifyVisibleTopTenUsers({
+        rankingPeriodId,
+        periodType: rankingPeriod.period_type,
+        periodStart: rankingPeriod.period_start,
+      });
     }
 
     return data as { id: string; is_visible: boolean };

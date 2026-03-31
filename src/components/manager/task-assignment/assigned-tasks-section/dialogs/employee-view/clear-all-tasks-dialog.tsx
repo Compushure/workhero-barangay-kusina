@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { AssignedEmployee } from '@/types';
-import { useClearAllEmployeeTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
+import { useClearUnstartedEmployeeTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
 interface ClearAllTasksDialogProps {
   showClearConfirm: string | null;
@@ -21,12 +21,12 @@ function ClearAllTasksDialog({
   setShowClearConfirm,
   employee,
 }: ClearAllTasksDialogProps) {
-  const clearAllEmployeeTasksMutation = useClearAllEmployeeTasksMutation();
+  const clearUnstartedEmployeeTasksMutation = useClearUnstartedEmployeeTasksMutation();
 
   const handleClearAllTasks = async () => {
     if (!showClearConfirm) return;
 
-    clearAllEmployeeTasksMutation.mutate(
+    clearUnstartedEmployeeTasksMutation.mutate(
       { employeeId: showClearConfirm },
       {
         onSuccess: () => {
@@ -43,24 +43,25 @@ function ClearAllTasksDialog({
     >
       <DialogContent className="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg bg-card p-4 sm:p-5">
         <DialogHeader>
-          <DialogTitle className="text-foreground text-base">Clear All Tasks Cards?</DialogTitle>
+          <DialogTitle className="text-foreground text-base">
+            Clear Unstarted Tasks For {employee.name}?
+          </DialogTitle>
           <DialogDescription className="text-sm">
-            Are you sure you want to unassign all tasks from {employee.name}? This action cannot be
-            undone for this page, but approved and rejected status will remain in verification logs.
+            This only clears tasks with no progress yet. Tasks with completed orders, or tasks that are in review, approved, or rejected status will stay untouched.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex gap-3 justify-end">
           <Button
             onClick={handleClearAllTasks}
-            disabled={clearAllEmployeeTasksMutation.isPending}
+            disabled={clearUnstartedEmployeeTasksMutation.isPending}
             className="bg-red-700 hover:bg-red-500 text-white cursor-pointer transition-all duration-400 ease-in-out"
           >
-            {clearAllEmployeeTasksMutation.isPending ? 'Clearing...' : 'Confirm'}
+            {clearUnstartedEmployeeTasksMutation.isPending ? 'Clearing...' : 'Confirm'}
           </Button>
           <Button
             variant="outline"
             onClick={() => setShowClearConfirm(null)}
-            disabled={clearAllEmployeeTasksMutation.isPending}
+            disabled={clearUnstartedEmployeeTasksMutation.isPending}
             className="border-zinc-400 bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground cursor-pointer transition-all duration-400 ease-in-out"
           >
             Cancel

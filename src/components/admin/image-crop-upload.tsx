@@ -37,17 +37,32 @@ interface ImageCropUploadProps {
   disabled?: boolean;
 }
 
-/**
- * Helper function to create image file from cropped area
- */
-async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<Blob> {
-  const image = new Image();
-  image.src = imageSrc;
-
-  await new Promise((resolve) => {
-    image.onload = resolve;
+// react-easy-crop gives us pixelCrop and rotation separately; to match preview we must rotate canvas before cropping
+const createImage = (url: string): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener('load', () => resolve(image));
+    image.addEventListener('error', (error) => reject(error));
+    image.setAttribute('crossOrigin', 'anonymous'); // avoid CORS issues
+    image.src = url;
   });
 
+const getRadianAngle = (degreeValue: number) => (degreeValue * Math.PI) / 180;
+
+function rotateSize(width: number, height: number, rotation: number) {
+  const rotRad = getRadianAngle(rotation);
+
+  return {
+    width: Math.abs(Math.cos(rotRad) * width) + Math.abs(Math.sin(rotRad) * height),
+    height: Math.abs(Math.sin(rotRad) * width) + Math.abs(Math.cos(rotRad) * height),
+  };
+}
+
+/**
+ * Helper function to create image file from cropped area with rotation applied
+ */
+async function getCroppedImg(imageSrc: string, pixelCrop: Area, rotation = 0): Promise<Blob> {
+  const image = await createImage(imageSrc);
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
@@ -55,22 +70,22 @@ async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<Blob> {
     throw new Error('Failed to get canvas context');
   }
 
-  // Set canvas size to the crop size
+  const rotRad = getRadianAngle(rotation);
+
+  // Compute bounding box of the rotated image
+  const { width: bBoxWidth, height: bBoxHeight } = rotateSize(image.width, image.height, rotation);
+
+  // Match crop dimensions
   canvas.width = pixelCrop.width;
   canvas.height = pixelCrop.height;
 
-  // Draw the cropped image
-  ctx.drawImage(
-    image,
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height,
-    0,
-    0,
-    pixelCrop.width,
-    pixelCrop.height
-  );
+  // Translate canvas context to center of crop before rotating
+  ctx.translate(-pixelCrop.x, -pixelCrop.y);
+  ctx.translate(bBoxWidth / 2, bBoxHeight / 2);
+  ctx.rotate(rotRad);
+  ctx.translate(-image.width / 2, -image.height / 2);
+
+  ctx.drawImage(image, 0, 0);
 
   // Convert canvas to blob
   return new Promise((resolve, reject) => {
@@ -194,10 +209,11 @@ export function ImageCropUpload({
   };
 
   const handleCropSave = async () => {
-    if (!selectedImage || !croppedAreaPixels) return;
+    // prevent double-submits while upload in progress
+    if (isUploading || !selectedImage || !croppedAreaPixels) return;
 
     try {
-      const croppedBlob = await getCroppedImg(selectedImage, croppedAreaPixels);
+      const croppedBlob = await getCroppedImg(selectedImage, croppedAreaPixels, rotation);
 
       // Validate cropped image size (1MB limit)
       const maxSize = 1 * 1024 * 1024; // 1MB
@@ -278,6 +294,14 @@ export function ImageCropUpload({
     }
   };
 
+  const handleResetZoom = () => {
+    setZoom(1);
+  };
+
+  const handleResetRotation = () => {
+    setRotation(0);
+  };
+
   const handleClearImage = async () => {
     if (currentImageUrl && userId && onImageClear) {
       setIsDeleting(true);
@@ -335,8 +359,8 @@ export function ImageCropUpload({
             variant="outline"
             size="sm"
             onClick={() => fileInputRef.current?.click()}
-            disabled={disabled}
-            className="gap-2"
+            disabled={disabled || isDeleting}
+            className="gap-2 border-accent text-foreground hover:text-accent hover:border-accent hover:bg-accent/10"
           >
             <Camera className="h-4 w-4" />
             {currentImageUrl ? 'Change Photo' : 'Upload Photo'}
@@ -349,7 +373,7 @@ export function ImageCropUpload({
               size="sm"
               onClick={handleClearImage}
               disabled={disabled || checkingImage || isDeleting}
-              className="gap-2 text-destructive hover:text-destructive"
+              className="gap-2 text-destructive border-destructive/60 hover:text-destructive hover:bg-destructive/10 hover:border-destructive"
             >
               <X className="h-4 w-4" />
               {isDeleting ? 'Removing...' : 'Remove'}
@@ -378,7 +402,7 @@ export function ImageCropUpload({
 
           <div className="space-y-6">
             {/* Crop Area */}
-            <div className="relative w-full h-72 bg-background rounded-lg overflow-hidden">
+            <div className="relative w-full h-64 sm:h-72 bg-background rounded-lg overflow-hidden">
               {selectedImage && (
                 <Cropper
                   image={selectedImage}
@@ -400,21 +424,47 @@ export function ImageCropUpload({
             <div className="space-y-4">
               {/* Zoom Control */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Zoom</Label>
-                <Slider
-                  value={[zoom]}
-                  onValueChange={([value]) => setZoom(value)}
-                  min={1}
-                  max={3}
-                  step={0.1}
-                  className="w-full"
-                />
+                <div className="flex items-center justify-between gap-3">
+                  <Label className="text-sm font-medium">Zoom</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleResetZoom}
+                    disabled={isUploading || disabled}
+                    className="border-accent text-foreground hover:text-accent hover:border-accent hover:bg-accent/10"
+                  >
+                    Reset
+                  </Button>
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <Slider
+                    value={[zoom]}
+                    onValueChange={([value]) => setZoom(value)}
+                    min={1}
+                    max={3}
+                    step={0.1}
+                    className="flex-1"
+                  />
+                </div>
               </div>
 
               {/* Rotation Control */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Rotation</Label>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between gap-3">
+                  <Label className="text-sm font-medium">Rotation</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleResetRotation}
+                    disabled={isUploading || disabled}
+                    className="border-accent text-foreground hover:text-accent hover:border-accent hover:bg-accent/10"
+                  >
+                    Reset
+                  </Button>
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <Slider
                     value={[rotation]}
                     onValueChange={([value]) => setRotation(value)}
@@ -423,30 +473,28 @@ export function ImageCropUpload({
                     step={1}
                     className="flex-1"
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setRotation((rotation + 90) % 360)}
-                  >
-                    <RotateCw className="h-4 w-4" />
-                  </Button>
                 </div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 justify-end">
-              <Button type="button" variant="outline" onClick={handleCancel}>
+            <div className="flex flex-col sm:flex-row gap-3 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                className="w-full sm:w-auto border-accent text-foreground hover:text-accent hover:border-accent hover:bg-accent/10"
+              >
                 Cancel
               </Button>
               <Button
                 type="button"
                 onClick={handleCropSave}
-                className="bg-accent text-white hover:bg-accent/90"
+                disabled={isUploading || disabled}
+                className="bg-accent text-white hover:bg-[#f47812] disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto transition-colors"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                Save & Upload
+                {isUploading ? 'Uploading...' : 'Save & Upload'}
               </Button>
             </div>
           </div>

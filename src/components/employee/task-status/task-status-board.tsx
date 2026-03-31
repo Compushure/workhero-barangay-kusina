@@ -1,7 +1,16 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Filter } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -10,24 +19,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { TaskStatusSection } from './task-status-section';
-import { TaskCard } from './task-card';
-import type {
-  TaskStatusItem,
-  TaskOverdueFilter,
-  TaskSortOption,
-  TaskStatusKind,
-} from './types';
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
 import { isTaskStatusItemOverdue } from './task-status-utils';
+import { TaskCard } from './task-card';
+import { TaskStatusSection } from './task-status-section';
+import type {
+  TaskOverdueFilter,
+  TaskSortOption,
+  TaskStatusItem,
+  TaskStatusKind,
+} from './types';
 
 const sortOptions: Array<{ value: TaskSortOption; label: string }> = [
   { value: 'due-date-asc', label: 'Due date (Ascending)' },
@@ -38,6 +44,13 @@ const sortOptions: Array<{ value: TaskSortOption; label: string }> = [
   { value: 'title-desc', label: 'Task Name (Z-A)' },
 ];
 
+const desktopOpenState: Record<TaskStatusKind, boolean> = {
+  Current: true,
+  'In Review': true,
+  Approved: true,
+  Rejected: true,
+};
+
 function dueDateTimeOrInfinity(value: string): number {
   const timestamp = Date.parse(value);
   return Number.isNaN(timestamp) ? Number.POSITIVE_INFINITY : timestamp;
@@ -45,19 +58,24 @@ function dueDateTimeOrInfinity(value: string): number {
 
 function sortTasks(tasks: TaskStatusItem[], sortBy: TaskSortOption): TaskStatusItem[] {
   const copy = [...tasks];
+
   switch (sortBy) {
     case 'due-date-asc':
-      return copy.sort((a, b) => dueDateTimeOrInfinity(a.dueDate) - dueDateTimeOrInfinity(b.dueDate));
+      return copy.sort(
+        (left, right) => dueDateTimeOrInfinity(left.dueDate) - dueDateTimeOrInfinity(right.dueDate)
+      );
     case 'due-date-desc':
-      return copy.sort((a, b) => dueDateTimeOrInfinity(b.dueDate) - dueDateTimeOrInfinity(a.dueDate));
+      return copy.sort(
+        (left, right) => dueDateTimeOrInfinity(right.dueDate) - dueDateTimeOrInfinity(left.dueDate)
+      );
     case 'points-asc':
-      return copy.sort((a, b) => a.points - b.points);
+      return copy.sort((left, right) => left.points - right.points);
     case 'points-desc':
-      return copy.sort((a, b) => b.points - a.points);
+      return copy.sort((left, right) => right.points - left.points);
     case 'title-asc':
-      return copy.sort((a, b) => a.name.localeCompare(b.name));
+      return copy.sort((left, right) => left.name.localeCompare(right.name));
     case 'title-desc':
-      return copy.sort((a, b) => b.name.localeCompare(a.name));
+      return copy.sort((left, right) => right.name.localeCompare(left.name));
     default:
       return copy;
   }
@@ -70,6 +88,54 @@ function filterTasksByOverdue(tasks: TaskStatusItem[], overdueFilter: TaskOverdu
     const overdue = isTaskStatusItemOverdue(task);
     return overdueFilter === 'overdue' ? overdue : !overdue;
   });
+}
+
+function getSectionHelperText(status: TaskStatusKind): string {
+  if (status === 'Current') {
+    return 'Continue cooking, then submit completed orders for verification.';
+  }
+
+  if (status === 'In Review') {
+    return 'These tasks are already with your manager for checking.';
+  }
+
+  if (status === 'Approved') {
+    return 'Approved tasks stay here until every reward is claimed.';
+  }
+
+  return 'Rejected tasks can be reopened and sent back to your current queue.';
+}
+
+function getSectionAccentClassName(status: TaskStatusKind): string {
+  if (status === 'Current') {
+    return 'border-[#c79a54] bg-[#e7c27f] text-[#4b3522]';
+  }
+
+  if (status === 'In Review') {
+    return 'border-[#87a9bc] bg-[#d7e3f4] text-[#204b61]';
+  }
+
+  if (status === 'Approved') {
+    return 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]';
+  }
+
+  return 'border-[#d18d7e] bg-[#f4d6ce] text-[#8b2e22]';
+}
+
+function MobileTaskCardSkeleton() {
+  return (
+    <div className="rounded-xl border-2 border-[#d4c5a8] bg-[#fdf5e8] p-3">
+      <div className="space-y-2.5">
+        <Skeleton className="h-5 w-32 bg-[#eadbc1]" />
+        <Skeleton className="h-4 w-40 bg-[#eadbc1]" />
+        <div className="flex flex-wrap gap-1.5">
+          <Skeleton className="h-6 w-16 bg-[#eadbc1]" />
+          <Skeleton className="h-6 w-14 bg-[#d7e3f4]" />
+          <Skeleton className="h-6 w-18 bg-[#eadbc1]" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 interface TaskStatusBoardProps {
@@ -91,13 +157,12 @@ export function TaskStatusBoard({
 }: TaskStatusBoardProps) {
   const [sortBy, setSortBy] = useState<TaskSortOption>('due-date-asc');
   const [overdueFilter, setOverdueFilter] = useState<TaskOverdueFilter>('all');
-  const [openSections, setOpenSections] = useState<Record<'Current' | 'In Review' | 'Approved' | 'Rejected', boolean>>({
-    Current: true,
-    'In Review': true,
-    Approved: true,
-    Rejected: true,
-  });
-  const [isMobileLayout, setIsMobileLayout] = useState(false);
+  const [openSections, setOpenSections] =
+    useState<Record<TaskStatusKind, boolean>>(desktopOpenState);
+  const [mobileOpenSection, setMobileOpenSection] = useState<TaskStatusKind | ''>('Current');
+  const [isMobileLayout, setIsMobileLayout] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false
+  );
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 767px)');
@@ -130,8 +195,9 @@ export function TaskStatusBoard({
       sortTasks(filterTasksByOverdue(verifiedTasks, overdueFilter), sortBy),
       sortTasks(filterTasksByOverdue(rejectedTasks, overdueFilter), sortBy),
     ],
-    [currentTasks, inReviewTasks, verifiedTasks, rejectedTasks, overdueFilter, sortBy]
+    [currentTasks, inReviewTasks, overdueFilter, rejectedTasks, sortBy, verifiedTasks]
   );
+
   const sections = useMemo(
     () => [
       { status: 'Current' as const, tasks: current },
@@ -139,78 +205,122 @@ export function TaskStatusBoard({
       { status: 'Approved' as const, tasks: verified },
       { status: 'Rejected' as const, tasks: denied },
     ],
-    [current, onReview, verified, denied]
+    [current, denied, onReview, verified]
   );
+
   const openCount = sections.filter(({ status }) => openSections[status]).length;
-  const singleOpenSection = openCount === 1 ? sections.find(({ status }) => openSections[status]) ?? null : null;
+  const singleOpenSection =
+    openCount === 1 ? sections.find(({ status }) => openSections[status]) ?? null : null;
   const collapsedSections = sections.filter(({ status }) => !openSections[status]);
-  const reorderedSectionsForTwoOpen = openCount === 2
-    ? [...sections.filter(({ status }) => openSections[status]), ...collapsedSections]
-    : sections;
+  const reorderedSectionsForTwoOpen =
+    openCount === 2
+      ? [...sections.filter(({ status }) => openSections[status]), ...collapsedSections]
+      : sections;
 
   const sectionClassName = (status: TaskStatusKind) =>
     cn('min-h-0 transition-all duration-200', openSections[status] ? 'flex-1' : 'flex-none');
 
-  function handleSectionOpenChange(
-    status: TaskStatusKind,
-    open: boolean
-  ) {
-    setOpenSections((prev) => {
-      if (isMobileLayout && open) {
-        return {
-          Current: status === 'Current',
-          'In Review': status === 'In Review',
-          Approved: status === 'Approved',
-          Rejected: status === 'Rejected',
-        };
-      }
+  const sectionSummaries = useMemo(
+    () =>
+      sections.map(({ status, tasks }) => ({
+        status,
+        count: tasks.length,
+      })),
+    [sections]
+  );
 
-      const next = { ...prev, [status]: open };
+  function handleSectionOpenChange(status: TaskStatusKind, open: boolean) {
+    setOpenSections((previous) => {
+      const next = { ...previous, [status]: open };
 
       if (!Object.values(next).some(Boolean)) {
-        return prev;
+        return previous;
       }
 
       return next;
     });
   }
 
+  function renderTaskCards(tasks: TaskStatusItem[]) {
+    return tasks.map((task) => <TaskCard key={task.id} task={task} />);
+  }
+
+  function renderDesktopSection(status: TaskStatusKind, tasks: TaskStatusItem[]) {
+    return (
+      <TaskStatusSection
+        status={status}
+        tasks={tasks}
+        isLoading={isLoading}
+        open={openSections[status]}
+        onOpenChange={(open) => handleSectionOpenChange(status, open)}
+      >
+        {renderTaskCards(tasks)}
+      </TaskStatusSection>
+    );
+  }
+
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border-3 border-[#47331F] bg-[#eadbc1] p-2.5 font-jersey shadow-[0_10px_28px_rgba(71,51,31,0.24)] sm:p-3">
-      <div className="flex flex-col gap-2 border-b-2 border-[#d4c5a8] pb-3">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-lg border-3 border-[#47331F] bg-[#eadbc1] p-2.5 font-jersey shadow-[0_10px_28px_rgba(71,51,31,0.24)] lg:h-full sm:p-3">
+      <div className="flex flex-col gap-3 border-b-2 border-[#d4c5a8] pb-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           {isLoading ? (
             <>
               <div className="space-y-2">
                 <Skeleton className="h-8 w-52 bg-[#dcc8aa]" />
                 <Skeleton className="h-5 w-80 max-w-full bg-[#e3d3b7]" />
               </div>
-              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
+              <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto lg:items-end">
                 <div className="w-full space-y-1 sm:w-auto">
                   <Skeleton className="h-5 w-20 bg-[#dcc8aa]" />
                   <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-52" />
                 </div>
-                <div className="flex w-full items-center gap-2 self-start sm:w-auto sm:self-end">
+                <div className="flex w-full items-center gap-2 self-start sm:w-auto lg:self-end">
                   <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-32" />
                 </div>
               </div>
             </>
           ) : (
             <>
-              <div className="space-y-2">
+              <div className="min-w-0 space-y-3">
                 <div>
-                  <h2 className="text-[28px] leading-none text-[#3f2a1a] sm:text-[32px]">
+                  <h2 className="text-[26px] leading-none text-[#3f2a1a] sm:text-[32px]">
                     Task Board
                   </h2>
                   <p className="mt-1 max-w-xl text-[14px] leading-snug tracking-[0.04em] text-[#6b5038] sm:text-[16px]">
-                    View your assigned tasks and track each one by status.
+                    Track your current work, review requests, approved tasks, and rejected orders in one place.
                   </p>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 min-[430px]:hidden">
+                  {sectionSummaries.map(({ status, count }) => (
+                    <div
+                      key={status}
+                      className="inline-flex items-center gap-2 rounded-full border-2 border-[#d4c5a8] bg-[#f7efdf] px-2.5 py-1 text-[12px] leading-none text-[#6b5038]"
+                    >
+                      <span className="tracking-[0.08em] text-[#8a6039]">{status}</span>
+                      <span className="text-[13px] text-[#3f2a1a]">{count}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="hidden min-[430px]:grid min-[430px]:grid-cols-2 min-[430px]:gap-2 sm:flex sm:flex-wrap">
+                  {sectionSummaries.map(({ status, count }) => (
+                    <div
+                      key={status}
+                      className="min-w-0 rounded-lg border-2 border-[#d4c5a8] bg-[#f7efdf] px-3 py-2 text-left"
+                    >
+                      <div className="truncate text-[12px] tracking-[0.12em] text-[#8a6039]">{status}</div>
+                      <div className="mt-1 text-[18px] leading-none text-[#3f2a1a]">{count}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
+              <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row lg:w-auto lg:items-end">
                 <div className="w-full space-y-1 sm:w-auto">
-                  <span className="block text-[14px] tracking-[0.18em] text-[#8a6039] sm:text-[16px]">SORT BY</span>
+                  <span className="block text-[14px] tracking-[0.18em] text-[#8a6039] sm:text-[16px]">
+                    SORT BY
+                  </span>
                   <Select value={sortBy} onValueChange={(value) => setSortBy(value as TaskSortOption)}>
                     <SelectTrigger className="h-9 w-full rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-52">
                       <SelectValue placeholder="Sort by" />
@@ -229,7 +339,7 @@ export function TaskStatusBoard({
                   </Select>
                 </div>
 
-                <div className={cn('flex w-full items-center gap-2 self-start sm:w-auto sm:self-end')}>
+                <div className="flex w-full items-center gap-2 self-start sm:w-auto lg:self-end">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -288,24 +398,79 @@ export function TaskStatusBoard({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 pt-3">
+      <div className="flex-1 pt-3 md:min-h-0">
         {error ? (
           <div className="flex h-48 w-full flex-col items-center justify-center rounded-2xl border-2 border-[#c9b08d] bg-[#f7efdf] px-4 text-center">
-            <span className="font-jersey text-[14px] tracking-[0.06em] text-[#8b2e22]">Error loading tasks. Please try again.</span>
+            <span className="font-jersey text-[14px] tracking-[0.06em] text-[#8b2e22]">
+              Error loading tasks. Please try again.
+            </span>
           </div>
-        ) : !isMobileLayout && singleOpenSection ? (
+        ) : isMobileLayout ? (
+          <div className="min-w-0 space-y-3">
+            <div className="rounded-xl border-2 border-[#d4c5a8] bg-[#f7efdf] px-3 py-2 text-[13px] tracking-[0.04em] text-[#6b5038]">
+              Open one section at a time for a cleaner view on smaller screens.
+            </div>
+
+            <Accordion
+              type="single"
+              collapsible
+              value={mobileOpenSection}
+              onValueChange={(value) => setMobileOpenSection((value as TaskStatusKind | '') ?? '')}
+              className="space-y-2"
+            >
+              {sections.map(({ status, tasks }) => (
+                <AccordionItem
+                  key={status}
+                  value={status}
+                  className="min-w-0 overflow-hidden rounded-xl border-2 border-[#9b7a56] bg-[#f7efdf] px-0"
+                >
+                  <AccordionTrigger className="px-3 py-3 text-left hover:no-underline [&>svg]:text-[#8a6039]">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span
+                        className={`inline-flex rounded-full border-2 px-2.5 py-1 text-[13px] leading-none ${getSectionAccentClassName(status)}`}
+                      >
+                        {status}
+                      </span>
+                      <span className="rounded-full border-2 border-[#d4c5a8] bg-[#fff8ec] px-2 py-1 text-[13px] leading-none text-[#6b5038]">
+                        {tasks.length}
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-3 pb-3">
+                    <div className="space-y-2">
+                      <p className="text-[13px] leading-relaxed tracking-[0.04em] text-[#6b5038]">
+                        {getSectionHelperText(status)}
+                      </p>
+
+                      {isLoading ? (
+                        <>
+                          <MobileTaskCardSkeleton />
+                          <MobileTaskCardSkeleton />
+                        </>
+                      ) : tasks.length > 0 ? (
+                        <div className="space-y-2">{renderTaskCards(tasks)}</div>
+                      ) : (
+                        <div className="rounded-lg border-2 border-dashed border-[#d4c5a8] bg-[#fdf5e8] px-4 py-5 text-center text-[14px] tracking-[0.04em] text-[#8a6039]">
+                          No tasks in this section right now.
+                        </div>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        ) : singleOpenSection ? (
           <div className="flex h-full min-h-0 flex-col gap-2.5 xl:gap-3">
             <div className="min-h-0 flex-1">
               <TaskStatusSection
                 status={singleOpenSection.status}
-                task={singleOpenSection.tasks}
+                tasks={singleOpenSection.tasks}
                 isLoading={isLoading}
                 open
                 onOpenChange={(open) => handleSectionOpenChange(singleOpenSection.status, open)}
               >
-                {singleOpenSection.tasks.map((task) => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
+                {renderTaskCards(singleOpenSection.tasks)}
               </TaskStatusSection>
             </div>
 
@@ -313,99 +478,49 @@ export function TaskStatusBoard({
               <div key={status} className="flex-none">
                 <TaskStatusSection
                   status={status}
-                  task={tasks}
+                  tasks={tasks}
                   isLoading={isLoading}
                   open={false}
                   onOpenChange={(open) => handleSectionOpenChange(status, open)}
                 >
-                  {tasks.map((task) => (
-                    <TaskCard key={task.id} task={task} />
-                  ))}
+                  {renderTaskCards(tasks)}
                 </TaskStatusSection>
               </div>
             ))}
           </div>
-        ) : !isMobileLayout && openCount === 2 ? (
-          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 md:grid-cols-2 xl:gap-3">
+        ) : openCount === 2 ? (
+          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 lg:grid-cols-2 xl:gap-3">
             {reorderedSectionsForTwoOpen.map(({ status, tasks }) => (
-              <div
-                key={status}
-                className={cn(
-                  'min-h-0',
-                  openSections[status] && 'md:min-h-[18rem]'
-                )}
-              >
+              <div key={status} className={cn('min-h-0', openSections[status] && 'lg:min-h-[18rem]')}>
                 <TaskStatusSection
                   status={status}
-                  task={tasks}
+                  tasks={tasks}
                   isLoading={isLoading}
                   open={openSections[status]}
                   onOpenChange={(open) => handleSectionOpenChange(status, open)}
                 >
-                  {tasks.map((task) => (
-                    <TaskCard key={task.id} task={task} />
-                  ))}
+                  {renderTaskCards(tasks)}
                 </TaskStatusSection>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 md:grid-cols-2 xl:gap-3">
+          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 lg:grid-cols-2 xl:gap-3">
             <div className="flex min-h-0 flex-col gap-2.5 xl:gap-3">
               <div className={sectionClassName('Current')}>
-                <TaskStatusSection
-                  status="Current"
-                  task={current}
-                  isLoading={isLoading}
-                  open={openSections.Current}
-                  onOpenChange={(open) => handleSectionOpenChange('Current', open)}
-                >
-                  {current.map((task) => (
-                    <TaskCard key={task.id} task={task} />
-                  ))}
-                </TaskStatusSection>
+                {renderDesktopSection('Current', current)}
               </div>
               <div className={sectionClassName('Approved')}>
-                <TaskStatusSection
-                  status="Approved"
-                  task={verified}
-                  isLoading={isLoading}
-                  open={openSections.Approved}
-                  onOpenChange={(open) => handleSectionOpenChange('Approved', open)}
-                >
-                  {verified.map((task) => (
-                    <TaskCard key={task.id} task={task} />
-                  ))}
-                </TaskStatusSection>
+                {renderDesktopSection('Approved', verified)}
               </div>
             </div>
 
             <div className="flex min-h-0 flex-col gap-2.5 xl:gap-3">
               <div className={sectionClassName('In Review')}>
-                <TaskStatusSection
-                  status="In Review"
-                  task={onReview}
-                  isLoading={isLoading}
-                  open={openSections['In Review']}
-                  onOpenChange={(open) => handleSectionOpenChange('In Review', open)}
-                >
-                  {onReview.map((task) => (
-                    <TaskCard key={task.id} task={task} />
-                  ))}
-                </TaskStatusSection>
+                {renderDesktopSection('In Review', onReview)}
               </div>
               <div className={sectionClassName('Rejected')}>
-                <TaskStatusSection
-                  status="Rejected"
-                  task={denied}
-                  isLoading={isLoading}
-                  open={openSections.Rejected}
-                  onOpenChange={(open) => handleSectionOpenChange('Rejected', open)}
-                >
-                  {denied.map((task) => (
-                    <TaskCard key={task.id} task={task} />
-                  ))}
-                </TaskStatusSection>
+                {renderDesktopSection('Rejected', denied)}
               </div>
             </div>
           </div>

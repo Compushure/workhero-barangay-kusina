@@ -54,7 +54,14 @@ export function DeleteUserModal({ open, onOpenChange, userName, onConfirm }: Del
 
         <div className="py-3 px-3 sm:px-3.5 bg-background rounded-lg border border-accent/20">
           <p className="text-xs sm:text-sm text-foreground">
-            Are you sure you want to delete <strong className="text-foreground">{userName}</strong>?
+            Are you sure you want to delete{' '}
+            <strong
+              className="text-foreground line-clamp-1 break-words max-w-[220px] inline-block align-middle"
+              title={userName}
+            >
+              {userName}
+            </strong>
+            ?
           </p>
           <p className="text-xs text-muted-foreground mt-1.5">
             All associated data will be permanently removed from the system.

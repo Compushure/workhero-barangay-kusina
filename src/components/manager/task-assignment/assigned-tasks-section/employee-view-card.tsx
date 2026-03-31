@@ -124,7 +124,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
               </div>
 
               {/* Triple dots menu - single instance for all breakpoints */}
-              <div className="flex relative z-50 lg:absolute lg:top-4 lg:right-4">
+              <div className="flex relative z-10 lg:absolute lg:top-4 lg:right-4">
                 <EmployeeViewCardMenu
                   openPopoverId={openPopoverId}
                   setOpenPopoverId={setOpenPopoverId}

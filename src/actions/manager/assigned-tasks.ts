@@ -494,19 +494,44 @@ export async function clearUnstartedTaskAssignments(): Promise<ServerActionRespo
   return { error: null, data: true };
 }
 
-export async function clearAllEmployeeTasks(
+export async function clearUnstartedEmployeeTasks(
   employeeId: string
-): Promise<ServerActionResponse<boolean>> {
+): Promise<ServerActionResponse<number>> {
   const supabase = await createClient();
-  // Delete all KPITask entries for a specific employee
-  const { error } = await supabase
+
+  const { data: existingAssignments, error: fetchError } = await supabase
+    .from('KPITask')
+    .select('id, status, completed_orders, pending_orders')
+    .eq('assigned_to', employeeId);
+
+  if (fetchError) return { error: fetchError.message, data: undefined };
+
+  const assignmentIdsToDelete =
+    existingAssignments
+      ?.filter((assignment) => {
+        const normalizedStatus = assignment.status?.trim().toLowerCase();
+        const completedOrders = assignment.completed_orders ?? 0;
+        const pendingOrders = assignment.pending_orders ?? 0;
+
+        return (
+          normalizedStatus === 'assigned' &&
+          completedOrders === 0 &&
+          pendingOrders === 0
+        );
+      })
+      .map((assignment) => assignment.id) ?? [];
+
+  if (assignmentIdsToDelete.length === 0) {
+    return { error: null, data: 0 };
+  }
+
+  const { error: deleteError } = await supabase
     .from('KPITask')
     .delete()
-    .eq('assigned_to', employeeId)
-    .in('status', ['assigned']);
+    .in('id', assignmentIdsToDelete);
 
-  if (error) return { error: error.message, data: undefined };
-  return { error: null, data: true };
+  if (deleteError) return { error: deleteError.message, data: undefined };
+  return { error: null, data: assignmentIdsToDelete.length };
 }
 
 // unnassigns one employee from a task instance

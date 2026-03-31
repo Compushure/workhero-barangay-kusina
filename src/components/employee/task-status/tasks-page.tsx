@@ -1,23 +1,31 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
-import { useGetAllLevelMetadata, useGetEmployeeXP } from '@/hooks/tanstack/queries/employeeQueries';
+import {
+  useGetAllLevelMetadata,
+  useGetEmployeeXP,
+} from '@/hooks/tanstack/queries/employeeQueries';
+import { useEmployeeTasksStore } from '@/store/employee';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   PointsCardWidgetSkeleton,
   XPProgressSkeleton,
 } from '../widgets/widget-skeletons';
+import { toEmployeeTaskBoardData } from './task-status-data';
 
 const HeaderHUD = dynamic(() => import('../widgets/header-hud'), {
   ssr: false,
   loading: () => <HeaderHUDLoading />,
 });
-const TaskStatusBoard = dynamic(() => import('./task-status-board').then((mod) => mod.TaskStatusBoard), {
-  ssr: false,
-  loading: () => <TaskStatusBoardLoading />,
-});
+const TaskStatusBoard = dynamic(
+  () => import('./task-status-board').then((mod) => mod.TaskStatusBoard),
+  {
+    ssr: false,
+    loading: () => <TaskStatusBoardLoading />,
+  }
+);
 
 const DEFAULT_KITCHEN_BG_URL =
   'https://ewvpbwxqkomybbhmqygm.supabase.co/storage/v1/object/public/kitchen/level_1_bg.png';
@@ -63,7 +71,7 @@ function TaskStatusBoardLoading() {
         </div>
       </div>
 
-      <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 pt-3 md:grid-cols-2 md:grid-rows-2 xl:gap-3">
+      <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 pt-3 lg:grid-cols-2 lg:grid-rows-2 xl:gap-3">
         {['Current', 'In Review', 'Approved', 'Rejected'].map((section) => (
           <div key={section} className="flex h-full min-w-0 w-full flex-col gap-2">
             <div className="flex w-full items-center justify-between gap-2 px-1">
@@ -129,6 +137,16 @@ export function TasksPage() {
   const { data, error, isLoading } = useGetEmployeeTasks();
   const { data: xpData } = useGetEmployeeXP();
   const { data: levelMetadata } = useGetAllLevelMetadata();
+  const tasks = useEmployeeTasksStore((state) => state.tasks);
+  const hydrateFromServer = useEmployeeTasksStore((state) => state.hydrateFromServer);
+
+  const normalizedTaskData = useMemo(() => toEmployeeTaskBoardData(data), [data]);
+
+  useEffect(() => {
+    if (data || !isLoading) {
+      hydrateFromServer(normalizedTaskData);
+    }
+  }, [data, hydrateFromServer, isLoading, normalizedTaskData]);
 
   const kitchenBackgroundUrl = useMemo(() => {
     const currentLevel = xpData?.level ?? 1;
@@ -138,36 +156,36 @@ export function TasksPage() {
     return dbLink && dbLink.length > 0 ? dbLink : DEFAULT_KITCHEN_BG_URL;
   }, [levelMetadata, xpData?.level]);
 
-  const {
-    currentTasks = [],
-    onReviewTasks = [],
-    verifiedTasks = [],
-    deniedTasks = [],
-  } = data ?? {};
+  const resolvedError = error ?? (!isLoading && !data ? new Error('Failed to load tasks') : null);
 
   return (
     <div
-      className="flex h-screen w-full flex-col overflow-hidden bg-cover bg-center bg-no-repeat font-jersey tracking-[0.08em]"
-      style={{ backgroundImage: `url('${kitchenBackgroundUrl}')` }}
+      className="relative isolate flex min-h-[100dvh] w-full min-w-0 flex-col overflow-x-clip font-jersey tracking-[0.08em]"
     >
-      <header className="sticky top-0 left-0 right-0 z-20 w-full px-2 pt-2 pointer-events-none sm:px-4">
+      <div
+        className="absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url('${kitchenBackgroundUrl}')` }}
+        aria-hidden
+      />
+
+      <header className="pointer-events-none sticky top-0 left-0 right-0 z-20 w-full px-2 pt-2 sm:px-4">
         <div className="pointer-events-auto flex w-full flex-col gap-2 p-1">
           <HeaderHUD className="rounded-lg" />
         </div>
       </header>
 
-      <div className="mx-auto flex min-h-0 w-full flex-1 justify-center px-2 pb-2 pt-1 sm:px-3 sm:pb-3 sm:pt-2 md:px-4 md:pb-4">
-        <div className="flex min-h-0 w-full max-w-[1180px] flex-1">
+      <main className="mx-auto flex w-full min-w-0 flex-1 justify-center px-2 pb-3 pt-1 sm:px-3 sm:pb-3 sm:pt-2 md:min-h-0 md:px-4 md:pb-4">
+        <div className="flex w-full min-w-0 max-w-[1180px] flex-1 md:min-h-0">
           <TaskStatusBoard
-            currentTasks={currentTasks}
-            inReviewTasks={onReviewTasks}
-            verifiedTasks={verifiedTasks}
-            rejectedTasks={deniedTasks}
+            currentTasks={tasks.currentTasks}
+            inReviewTasks={tasks.inReviewTasks}
+            verifiedTasks={tasks.verifiedTasks}
+            rejectedTasks={tasks.rejectedTasks}
             isLoading={isLoading}
-            error={error}
+            error={resolvedError}
           />
         </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -1,11 +1,14 @@
 /**
  * Zod Schemas - User Management
  * ==============================
- * Validation schemas for user-related forms and inputs.
+{imported module ./nodemodules/zod/v4/classic/external.js}.z.string(...).trim(...).optional(...).refine(...).max is not a function * Validation schemas for user-related forms and inputs.
  */
 
 import { z } from 'zod';
 import { EmployeeType } from '@/types';
+
+const NAME_MIN = 1;
+const NAME_MAX = 255;
 
 /**
  * Philippine TIN (Tax Identification Number) validation
@@ -67,11 +70,25 @@ const contactNumberSchemaRequired = z
     'Contact number must be 11 digits starting with 09 (format: 09XX-XXX-XXXX)'
   );
 
+const addressSchemaOptional = z
+  .string()
+  .trim()
+  .optional()
+  // no upper limit due to the possibility of addresses have long names
+  .refine(
+    (val) => !val || val.length >= 1,
+    'Address must be at least 1 character if provided'
+  );
+
 /**
  * Schema for adding a new user
  */
 export const addUserSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
+  name: z
+    .string()
+    .trim()
+    .min(NAME_MIN, 'Name is required')
+    .max(NAME_MAX, 'Name must not exceed 255 characters'),
   email: z.string().email('Invalid email address').max(255),
   password: z.string().min(6, 'Password must be at least 6 characters').max(100),
   employmentStatus: z.enum(['', 'probational', 'regular']).default(''),
@@ -79,10 +96,7 @@ export const addUserSchema = z.object({
   companyId: z.string().optional(),
   employeeId: z.string().optional(),
   contactNumber: contactNumberSchemaRequired,
-  address: z
-    .string()
-    .min(10, 'Address must be at least 10 characters')
-    .max(250, 'Address must not exceed 250 characters'),
+  address: addressSchemaOptional,
   tin: tinSchema,
   sss: sssSchema,
   pagibig: pagibigSchema,
@@ -94,8 +108,13 @@ export const addUserSchema = z.object({
 export const editUserSchema = z.object({
   name: z
     .string()
+    .trim()
+    .max(NAME_MAX, 'Name must not exceed 255 characters if provided')
     .optional()
-    .refine((val) => !val || val.length >= 2, 'Name must be at least 2 characters if provided'),
+    .refine(
+      (val) => val === undefined || val.length === 0 || val.length >= NAME_MIN,
+      'Name must be at least 1 character if provided'
+    ),
   password: z
     .string()
     .optional()
@@ -103,13 +122,7 @@ export const editUserSchema = z.object({
   employeeType: z.enum(['superadmin', 'manager', 'hr', 'regular', 'no-change', '']).optional(),
   employmentStatus: z.enum(['', 'probational', 'regular', 'no-change']).optional(),
   contactNumber: contactNumberSchemaOptional,
-  address: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || (val.length >= 10 && val.length <= 250),
-      'Address must be between 10-250 characters if provided'
-    ),
+  address: addressSchemaOptional,
   tin: tinSchema,
   sss: sssSchema,
   pagibig: pagibigSchema,
