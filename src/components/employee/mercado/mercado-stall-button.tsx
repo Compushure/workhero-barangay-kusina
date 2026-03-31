@@ -17,7 +17,7 @@ const STALL_VARIANT_CLASS = {
   desktop:
     'h-[clamp(16rem,40vw,28rem)] w-[clamp(14rem,35vw,22rem)] md:h-96 md:w-[19rem] lg:h-[28rem] lg:w-[22rem] xl:h-[30rem] xl:w-[24rem]',
   mobile:
-    'h-[clamp(14rem,50vw,20rem)] w-[clamp(14rem,50vw,20rem)] sm:h-[clamp(16rem,55vw,22rem)] sm:w-[clamp(16rem,55vw,22rem)] md:h-80 md:w-80',
+    'h-[min(62vw,22rem)] w-[min(62vw,22rem)] sm:h-[min(56vw,23rem)] sm:w-[min(56vw,23rem)] md:h-[24rem] md:w-[20rem]',
 } as const;
 
 const CLOSED_BADGE_CLASS = {
@@ -68,7 +68,7 @@ export function MercadoStallButton({
         sizes={
           variant === 'desktop'
             ? '(max-width: 768px) 256px, (max-width: 1024px) 304px, 352px'
-            : '(max-width: 768px) 256px, 320px'
+            : '(max-width: 640px) 62vw, (max-width: 768px) 56vw, 320px'
         }
       />
 
