@@ -52,7 +52,7 @@ export function DashboardPage() {
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2 text-foreground">
+          <h2 className="text-3xl font-bold mb-2 text-foreground line-clamp-2">
             Welcome{user?.name ? `, ${user.name}` : ''}
           </h2>
           <p className="text-gray-600">
@@ -67,7 +67,7 @@ export function DashboardPage() {
                 <Users className="h-6 w-6 text-accent" />
               </div>
               <CardTitle className="text-foreground text-xl">User Management</CardTitle>
-              <CardDescription className="text-gray-600">
+              <CardDescription className="text-gray-600 line-clamp-2">
                 Add, edit, and delete users. Manage employee types and permissions.
               </CardDescription>
             </CardHeader>
@@ -87,7 +87,7 @@ export function DashboardPage() {
                 <Shield className="h-6 w-6 text-muted-foreground" />
               </div>
               <CardTitle className="text-foreground text-xl">Settings</CardTitle>
-              <CardDescription className="text-gray-600">
+              <CardDescription className="text-gray-600 line-clamp-2">
                 Configure system settings and preferences. Coming soon.
               </CardDescription>
             </CardHeader>

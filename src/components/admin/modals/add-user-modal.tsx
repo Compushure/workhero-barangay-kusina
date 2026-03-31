@@ -109,6 +109,8 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
       pagibig: '',
     },
   });
+  const nameValue = watch('name') ?? '';
+  const nameCharCount = nameValue.trim().length;
   const emailValue = watch('email') ?? '';
   const debouncedEmail = useDebounce(emailValue, 450);
   const normalizedEmailValue = emailValue.trim().toLowerCase();
@@ -252,7 +254,10 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="bg-card w-[95vw] max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto max-h-[94vh] p-0 rounded-xl shadow-xl flex flex-col border border-accent/20">
+      <DialogContent
+        showCloseButton={false}
+        className="bg-card w-[95vw] max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto max-h-[94vh] p-0 rounded-xl shadow-xl flex flex-col border border-accent/20"
+      >
         <DialogHeader className="px-3 sm:px-5 lg:px-6 pt-3 sm:pt-4 lg:pt-5 pb-2 border-b border-accent/20 shrink-0">
           <DialogTitle className="text-h2 text-foreground">Add New User</DialogTitle>
           <DialogDescription className="text-meta text-muted-foreground hidden sm:block">
@@ -279,32 +284,43 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                   <AccordionTrigger className="text-meta font-semibold text-foreground hover:no-underline py-2.5">
                     Basic Information
                   </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 pt-3 sm:pt-4 lg:pt-6">
-                      <div className="space-y-1.5 sm:space-y-2">
-                        <RequiredLabel htmlFor="add-name" filled={!!watch('name')?.trim()}>
-                          <span className="text-meta min-h-6 sm:min-h-8 flex items-end">
-                            Full Name
-                          </span>
-                        </RequiredLabel>
-                        <div className="relative">
+                <AccordionContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 pt-3 sm:pt-4 lg:pt-6">
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <RequiredLabel htmlFor="add-name" filled={!!nameValue.trim()}>
+                        <span className="text-meta min-h-6 sm:min-h-8 flex items-end">
+                          {/* Note that Full name has the length 255 this is the recommended max length for most full names on a db */}
+                          Full Name
+                        </span>
+                      </RequiredLabel>
+                      <div className="relative">
                           <User className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-accent" />
                           <Input
                             id="add-name"
-                            placeholder="At least 2 characters"
+                            placeholder="At least 1 character"
                             className={`text-meta control-h pl-8 sm:pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
-                              !watch('name')?.trim()
+                              !nameValue.trim()
                                 ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]'
                                 : ''
                             }`}
+                            maxLength={255}
                             disabled={isPending}
                             {...register('name')}
                           />
                         </div>
-                        {errors.name && (
-                          <p className="text-meta text-destructive">{errors.name.message}</p>
-                        )}
-                      </div>
+                        <div className="flex items-start justify-between gap-2">
+                          <p
+                            className={`text-meta ${
+                              errors.name ? 'text-destructive' : 'text-transparent'
+                            }`}
+                          >
+                            {errors.name?.message || '\u00a0'}
+                          </p>
+                          <span className="text-[11px] text-muted-foreground">
+                            {nameCharCount}/255
+                          </span>
+                        </div>
+                    </div>
 
                       <div className="space-y-1.5 sm:space-y-2">
                         <RequiredLabel htmlFor="add-email" filled={!!watch('email')?.trim()}>
@@ -561,20 +577,24 @@ export function AddUserModal({ open, onOpenChange, onAddUser }: AddUserModalProp
                   className="border border-accent/20 rounded-lg px-2.5 sm:px-3.5 bg-background"
                 >
                   <AccordionTrigger className="text-meta font-semibold text-foreground hover:no-underline">
-                    Address Information
+                    Address Information (Optional)
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="space-y-2 pt-3 sm:pt-4 lg:pt-6">
-                      <RequiredLabel htmlFor="add-address" filled={!!watch('address')?.trim()}>
-                        <span className="text-meta">Home Address</span>
-                      </RequiredLabel>
+                      <Label
+                        htmlFor="add-address"
+                        className="text-meta text-foreground flex items-center gap-1"
+                      >
+                        Home Address
+                        <span className="text-muted-foreground">(Optional)</span>
+                      </Label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-3.5 h-4 w-4 text-accent" />
                         <Textarea
                           id="add-address"
-                          placeholder="Enter complete home address (minimum 10 characters)"
+                          placeholder="Optional: include house number, street, city"
                           className={`text-meta min-h-20 resize-y pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 ${
-                            !watch('address')?.trim()
+                            errors.address
                               ? 'border-destructive/50 shadow-[0_0_0_1px_hsl(var(--destructive)/0.5)]'
                               : ''
                           }`}

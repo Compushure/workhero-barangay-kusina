@@ -142,6 +142,7 @@ export function EditUserModal({
       pagibig: '',
     },
   });
+  const nameCharCount = (watch('name') ?? '').trim().length;
 
   // Reset form when modal opens/user changes
   useEffect(() => {
@@ -198,7 +199,7 @@ export function EditUserModal({
       if (newState[field]) {
         switch (field) {
           case 'name':
-            setValue('name', user.name);
+            setValue('name', user.name.slice(0, 255));
             break;
           case 'contactNumber':
             setValue('contactNumber', user.contactNumber || '');
@@ -324,7 +325,10 @@ export function EditUserModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card w-[95vw] max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto max-h-[94vh] p-0 rounded-xl shadow-xl flex flex-col border border-accent/20">
+      <DialogContent
+        showCloseButton={false}
+        className="bg-card w-[95vw] max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto max-h-[94vh] p-0 rounded-xl shadow-xl flex flex-col border border-accent/20"
+      >
         <DialogHeader className="px-3 sm:px-5 lg:px-6 pt-3 sm:pt-4 lg:pt-5 pb-2.5 sm:pb-3 border-b border-accent/20 shrink-0">
           <div className="flex items-start justify-between gap-2 sm:gap-3 lg:gap-4">
             <div className="flex-1 min-w-0">
@@ -451,7 +455,7 @@ export function EditUserModal({
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <Label htmlFor="edit-name" className="text-foreground">
-                            New Name
+                            New Name (1-255 chars)
                           </Label>
                           <button
                             type="button"
@@ -476,13 +480,23 @@ export function EditUserModal({
                             id="edit-name"
                             placeholder={`Current: ${user.name}`}
                             className="pl-10 border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
+                            maxLength={255}
                             disabled={isPending || !activeFields.name}
                             {...register('name')}
                           />
                         </div>
-                        {errors.name && (
-                          <p className="text-sm text-destructive">{errors.name.message}</p>
-                        )}
+                        <div className="flex items-start justify-between gap-2">
+                          <p
+                            className={`text-sm ${
+                              errors.name ? 'text-destructive' : 'text-transparent'
+                            }`}
+                          >
+                            {errors.name?.message || '\u00a0'}
+                          </p>
+                          <span className="text-[11px] text-muted-foreground">
+                            {nameCharCount}/255
+                          </span>
+                        </div>
                       </div>
 
                       {/* New Password */}
@@ -691,7 +705,7 @@ export function EditUserModal({
                     <div className="space-y-2 pt-4">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="edit-address" className="text-foreground">
-                          New Address (10-250 characters)
+                          New Address (min 1 character)
                         </Label>
                         <button
                           type="button"
@@ -712,10 +726,10 @@ export function EditUserModal({
                       </div>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-3 h-4 w-4 text-accent" />
-                        <Textarea
-                          id="edit-address"
-                          placeholder={`Current: ${(user as any).address || 'Not set'}`}
-                          className="pl-10 min-h-20 resize-none border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
+                          <Textarea
+                            id="edit-address"
+                            placeholder={`Current: ${(user as any).address || 'Not set'}`}
+                            className="pl-10 min-h-20 resize-none border-border bg-white focus:border-accent focus:ring-accent placeholder:text-gray-400 disabled:opacity-50"
                           disabled={isPending || !activeFields.address}
                           {...register('address')}
                         />

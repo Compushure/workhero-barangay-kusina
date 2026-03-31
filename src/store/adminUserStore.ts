@@ -5,6 +5,7 @@ interface AdminUserState {
   users: User[];
   isOptimistic: boolean;
   snapshot: User[] | null;
+  // optimistic helpers are intentionally explicit so other teams can extend without guessing behavior
   setUsers: (users: User[]) => void;
   hydrateFromServer: (users: User[]) => void;
   startOptimistic: () => void;
@@ -48,6 +49,7 @@ export const useAdminUserStore = create<AdminUserState>((set, get) => ({
   setUsers: (users) => set({ users }),
 
   hydrateFromServer: (users) => {
+    // do not clobber active optimistic state; wait until commit/rollback
     if (get().isOptimistic) return;
     if (areUsersEquivalent(get().users, users)) return;
     set({ users });
@@ -55,6 +57,7 @@ export const useAdminUserStore = create<AdminUserState>((set, get) => ({
 
   startOptimistic: () => {
     if (!get().snapshot) {
+      // capture snapshot once per optimistic session to support chained mutations
       set({ snapshot: get().users, isOptimistic: true });
       return;
     }
@@ -75,16 +78,19 @@ export const useAdminUserStore = create<AdminUserState>((set, get) => ({
     set({ users: snapshot, snapshot: null, isOptimistic: false });
   },
 
+  // push a temp user to the top for optimistic adds
   optimisticPrependUser: (user) =>
     set((state) => ({
       users: [user, ...state.users],
     })),
 
+  // swap temp user with server-confirmed user by id
   optimisticReplaceUser: (tempId, user) =>
     set((state) => ({
       users: state.users.map((currentUser) => (currentUser.id === tempId ? user : currentUser)),
     })),
 
+  // shallow-merge only provided fields during edit
   optimisticUpdateUser: (userId, data) =>
     set((state) => ({
       users: state.users.map((user) =>
@@ -100,11 +106,17 @@ export const useAdminUserStore = create<AdminUserState>((set, get) => ({
                 data.employmentStatus !== 'no-change' && {
                   employmentStatus: data.employmentStatus,
                 }),
+              ...(data.contactNumber && { contactNumber: data.contactNumber }),
+              ...(data.address && { address: data.address }),
+              ...(data.tin && { tin: data.tin }),
+              ...(data.sss && { sss: data.sss }),
+              ...(data.pagibig && { pagibig: data.pagibig }),
             }
           : user
       ),
     })),
 
+  // remove user locally while awaiting server delete
   optimisticDeleteUser: (userId) =>
     set((state) => ({
       users: state.users.filter((user) => user.id !== userId),

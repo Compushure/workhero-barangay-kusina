@@ -2,7 +2,7 @@
  * Employee Tasks TanStack Mutations
  * =================================
  * React Query mutation hooks for employee task operations.
- * Provides optimistic updates, error handling, and cache invalidation.
+ * Keeps the task board responsive by pairing cache updates with the local task store.
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
@@ -12,63 +12,163 @@ import {
   handleRedoTask,
 } from '@/action-handlers/employee/tasks';
 import type { SubmitVerificationResult, ClaimTaskResult } from '@/actions/employee/tasks';
+import { useEmployeeTasksStore } from '@/store/employee';
+import {
+  applyOptimisticTaskClaim,
+  applyOptimisticTaskRedo,
+  applyOptimisticTaskVerification,
+  toEmployeeTaskBoardData,
+  toEmployeeTasksQueryData,
+  type EmployeeTasksQueryShape,
+} from '@/components/employee/task-status/task-status-data';
 import { employeeTasksKeys } from '../queries/employeeTasksQueries';
 import { employeeKeys } from '../queries/employeeQueries';
+import type { EmployeePointsData } from '@/types/employee/points';
+import type { EmployeeXP } from '@/types/employee/xp';
+
+interface EmployeeTasksCacheContext {
+  previousTasks: EmployeeTasksQueryShape | null | undefined;
+}
+
+interface EmployeeTaskClaimContext extends EmployeeTasksCacheContext {
+  previousPoints: EmployeePointsData | null | undefined;
+  previousXP: EmployeeXP | null | undefined;
+}
 
 /**
- * Mutation for submitting a task for manager verification
- * Automatically invalidates tasks cache on success to refresh the UI
+ * Mutation for submitting a task for manager verification.
+ * The task moves to the review column immediately, then refetches for confirmation.
  */
 export function useSubmitTaskVerification(): UseMutationResult<
-  SubmitVerificationResult | null,
+  SubmitVerificationResult,
   Error,
-  { kpitaskId: string; pendingOrders: number }
+  { kpitaskId: string; pendingOrders: number },
+  EmployeeTasksCacheContext
 > {
   const queryClient = useQueryClient();
+  const {
+    startOptimistic,
+    optimisticSubmitTaskVerification,
+    rollback,
+    commit,
+  } = useEmployeeTasksStore();
 
   return useMutation({
     mutationFn: async ({ kpitaskId, pendingOrders }) => {
-      return await handleSubmitTaskVerification(kpitaskId, pendingOrders);
+      const result = await handleSubmitTaskVerification(kpitaskId, pendingOrders);
+
+      if (!result) {
+        throw new Error('Failed to submit task for verification');
+      }
+
+      return result;
+    },
+    onMutate: async ({ kpitaskId, pendingOrders }) => {
+      await queryClient.cancelQueries({ queryKey: employeeTasksKeys.lists() });
+
+      const previousTasks = queryClient.getQueryData<EmployeeTasksQueryShape | null>(
+        employeeTasksKeys.list()
+      );
+
+      startOptimistic();
+      optimisticSubmitTaskVerification(kpitaskId, pendingOrders);
+
+      queryClient.setQueryData<EmployeeTasksQueryShape | null>(employeeTasksKeys.list(), (old) => {
+        if (!old) return old;
+
+        return toEmployeeTasksQueryData(
+          applyOptimisticTaskVerification(toEmployeeTaskBoardData(old), {
+            taskId: kpitaskId,
+            pendingOrders,
+          })
+        );
+      });
+
+      return { previousTasks };
+    },
+    onError: (error, _variables, context) => {
+      if (typeof context?.previousTasks !== 'undefined') {
+        queryClient.setQueryData(employeeTasksKeys.list(), context.previousTasks);
+      }
+
+      rollback();
+      console.error('Failed to submit task verification:', error);
     },
     onSuccess: () => {
-      // Invalidate tasks cache to reflect the status change
-      queryClient.invalidateQueries({ queryKey: employeeTasksKeys.lists() });
+      commit();
     },
-    onError: (error) => {
-      console.error('Failed to submit task verification:', error);
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: employeeTasksKeys.lists() });
     },
   });
 }
 
 /**
- * Mutation for redoing a rejected task
- * Moves the task back to 'assigned' status so it can be resubmitted
- * Automatically invalidates tasks cache on success to reflect the status change
+ * Mutation for redoing a rejected task.
+ * The task returns to the current queue right away to reduce waiting on mobile.
  */
-export function useRedoTask(): UseMutationResult<boolean | null, Error, string> {
+export function useRedoTask(): UseMutationResult<
+  boolean,
+  Error,
+  string,
+  EmployeeTasksCacheContext
+> {
   const queryClient = useQueryClient();
+  const { startOptimistic, optimisticRedoTask, rollback, commit } = useEmployeeTasksStore();
 
   return useMutation({
     mutationFn: async (kpitaskId: string) => {
-      return await handleRedoTask(kpitaskId);
+      const result = await handleRedoTask(kpitaskId);
+
+      if (!result) {
+        throw new Error('Failed to redo task');
+      }
+
+      return result;
+    },
+    onMutate: async (kpitaskId) => {
+      await queryClient.cancelQueries({ queryKey: employeeTasksKeys.lists() });
+
+      const previousTasks = queryClient.getQueryData<EmployeeTasksQueryShape | null>(
+        employeeTasksKeys.list()
+      );
+
+      startOptimistic();
+      optimisticRedoTask(kpitaskId);
+
+      queryClient.setQueryData<EmployeeTasksQueryShape | null>(employeeTasksKeys.list(), (old) => {
+        if (!old) return old;
+
+        return toEmployeeTasksQueryData(
+          applyOptimisticTaskRedo(toEmployeeTaskBoardData(old), kpitaskId)
+        );
+      });
+
+      return { previousTasks };
+    },
+    onError: (error, _variables, context) => {
+      if (typeof context?.previousTasks !== 'undefined') {
+        queryClient.setQueryData(employeeTasksKeys.list(), context.previousTasks);
+      }
+
+      rollback();
+      console.error('Failed to redo task:', error);
     },
     onSuccess: () => {
-      // Invalidate tasks cache to reflect the status change
-      queryClient.invalidateQueries({ queryKey: employeeTasksKeys.lists() });
+      commit();
     },
-    onError: (error) => {
-      console.error('Failed to redo task:', error);
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: employeeTasksKeys.lists() });
     },
   });
 }
 
 /**
- * Mutation for claiming task points and XP
- * Automatically invalidates tasks cache on success to reflect the claimed status
- * Includes optimistic updates for immediate UI feedback on points and XP
+ * Mutation for claiming task points and XP.
+ * The reward cache still refetches, but the task columns update instantly.
  */
 export function useClaimTaskPointsandXP(): UseMutationResult<
-  ClaimTaskResult | null,
+  ClaimTaskResult,
   Error,
   {
     kpitaskId: string;
@@ -76,70 +176,88 @@ export function useClaimTaskPointsandXP(): UseMutationResult<
     pendingOrders: number;
     completedOrders: number;
     maxOrders: number;
-  }
+  },
+  EmployeeTaskClaimContext
 > {
   const queryClient = useQueryClient();
+  const {
+    startOptimistic,
+    optimisticClaimTaskRewards,
+    rollback,
+    commit,
+  } = useEmployeeTasksStore();
 
   return useMutation({
     mutationFn: async ({ kpitaskId, taskName, pendingOrders, completedOrders, maxOrders }) => {
-      return await handleClaimTaskPointsAndXP(
+      const result = await handleClaimTaskPointsAndXP(
         kpitaskId,
         taskName,
         pendingOrders,
         completedOrders,
         maxOrders
       );
+
+      if (!result) {
+        throw new Error('Failed to claim task rewards');
+      }
+
+      return result;
     },
-    onMutate: async ({}) => {
-      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+    onMutate: async ({ kpitaskId }) => {
+      await queryClient.cancelQueries({ queryKey: employeeTasksKeys.lists() });
       await queryClient.cancelQueries({ queryKey: employeeKeys.points() });
       await queryClient.cancelQueries({ queryKey: employeeKeys.xp() });
 
-      // Snapshot the previous value
-      const previousPoints = queryClient.getQueryData(employeeKeys.points());
-      const previousXP = queryClient.getQueryData(employeeKeys.xp());
+      const previousTasks = queryClient.getQueryData<EmployeeTasksQueryShape | null>(
+        employeeTasksKeys.list()
+      );
+      const previousPoints = queryClient.getQueryData<EmployeePointsData | null>(
+        employeeKeys.points()
+      );
+      const previousXP = queryClient.getQueryData<EmployeeXP | null>(employeeKeys.xp());
 
-      // Return a context object with the snapshotted value
-      return { previousPoints, previousXP };
+      startOptimistic();
+      optimisticClaimTaskRewards(kpitaskId);
+
+      queryClient.setQueryData<EmployeeTasksQueryShape | null>(employeeTasksKeys.list(), (old) => {
+        if (!old) return old;
+
+        return toEmployeeTasksQueryData(
+          applyOptimisticTaskClaim(toEmployeeTaskBoardData(old), kpitaskId)
+        );
+      });
+
+      return { previousTasks, previousPoints, previousXP };
     },
-    onError: (err, variables, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousPoints) {
+    onError: (error, _variables, context) => {
+      if (typeof context?.previousTasks !== 'undefined') {
+        queryClient.setQueryData(employeeTasksKeys.list(), context.previousTasks);
+      }
+      if (typeof context?.previousPoints !== 'undefined') {
         queryClient.setQueryData(employeeKeys.points(), context.previousPoints);
       }
-      if (context?.previousXP) {
+      if (typeof context?.previousXP !== 'undefined') {
         queryClient.setQueryData(employeeKeys.xp(), context.previousXP);
       }
-      console.error('Failed to claim task points:', err);
-    },
-    onSuccess: (data, variables) => {
-      // Optimistically update the points cache with the new data
-      if (data) {
-        queryClient.setQueryData(employeeKeys.points(), (old: any) => {
-          if (!old) return old;
-          return {
-            ...old,
-            points: old.points + data.pointsAdded,
-          };
-        });
-      }
 
-      // Remove claimed task from approved list in the shared cache after success
-      queryClient.setQueryData(employeeTasksKeys.list(), (old: any) => {
-        if (!old || !old.verifiedTasks) return old;
+      rollback();
+      console.error('Failed to claim task rewards:', error);
+    },
+    onSuccess: (data) => {
+      commit();
+
+      queryClient.setQueryData<EmployeePointsData | null>(employeeKeys.points(), (old) => {
+        if (!old) return old;
+
         return {
           ...old,
-          verifiedTasks: old.verifiedTasks.filter(
-            (task: { id: string }) => task.id !== variables.kpitaskId
-          ),
+          points: old.points + data.pointsAdded,
         };
       });
     },
     onSettled: () => {
-      // Always refetch after error or success to make sure the server state is reflected
       queryClient.invalidateQueries({ queryKey: employeeKeys.points() });
       queryClient.invalidateQueries({ queryKey: employeeKeys.xp() });
-      // Invalidate tasks cache to reflect the claimed status
       queryClient.invalidateQueries({ queryKey: employeeTasksKeys.lists() });
     },
   });
