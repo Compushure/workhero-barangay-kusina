@@ -15,64 +15,37 @@ type CookingPhase = 'idle' | 'cooking' | 'revealed' | 'serving';
 const DEFAULT_DISH_IMAGE = '/assets/dish/food-sinigang.png';
 const COOKING_REVEAL_DELAY_MS = 2100;
 const SERVE_EXIT_DELAY_MS = 680;
-const MAX_SCENE_DISHES = 25;
+const MAX_VISIBLE_DISHES = 3;
 
 function getDishSceneLayout(orderCount: number) {
-  const displayedDishCount = Math.min(MAX_SCENE_DISHES, Math.max(1, orderCount));
-  const columns = Math.min(displayedDishCount, 5);
-  const rows = Math.ceil(displayedDishCount / 5);
+  const displayedDishCount = Math.min(MAX_VISIBLE_DISHES, Math.max(1, orderCount));
 
-  if (rows <= 1) {
+  if (displayedDishCount === 1) {
     return {
       displayedDishCount,
-      columns,
-      rows,
-      dishSize: 'clamp(6.6rem, 12vw, 8rem)',
-      gridGap: '0.48rem',
-      glowSize: 'min(82vw, 36rem)',
+      dishSize: 'clamp(7.8rem, 14vw, 9rem)',
+      gridGap: '0rem',
+      glowSize: 'min(84vw, 37rem)',
+      dishGroupOffsetY: '2.4rem',
     };
   }
 
-  if (rows === 2) {
+  if (displayedDishCount === 2) {
     return {
       displayedDishCount,
-      columns,
-      rows,
-      dishSize: 'clamp(5.15rem, 9vw, 6.1rem)',
+      dishSize: 'clamp(7.1rem, 13vw, 8.2rem)',
       gridGap: '0.45rem',
       glowSize: 'min(84vw, 37rem)',
-    };
-  }
-
-  if (rows === 3) {
-    return {
-      displayedDishCount,
-      columns,
-      rows,
-      dishSize: 'clamp(4.35rem, 7.2vw, 5.05rem)',
-      gridGap: '0.36rem',
-      glowSize: 'min(84vw, 38rem)',
-    };
-  }
-
-  if (rows === 4) {
-    return {
-      displayedDishCount,
-      columns,
-      rows,
-      dishSize: 'clamp(3.7rem, 6.25vw, 4.25rem)',
-      gridGap: '0.3rem',
-      glowSize: 'min(86vw, 40rem)',
+      dishGroupOffsetY: '2.6rem',
     };
   }
 
   return {
     displayedDishCount,
-    columns,
-    rows,
-    dishSize: 'clamp(3.25rem, 5.45vw, 3.8rem)',
-    gridGap: '0.22rem',
-    glowSize: 'min(88vw, 41rem)',
+    dishSize: 'clamp(6.35rem, 11.5vw, 7.4rem)',
+    gridGap: '0.38rem',
+    glowSize: 'min(86vw, 38rem)',
+    dishGroupOffsetY: '2.8rem',
   };
 }
 
@@ -89,6 +62,7 @@ export default function CookingSection({ className = '' }: { className?: string 
   const dishImage = trigger?.dishImageUrl || DEFAULT_DISH_IMAGE;
   const orderLabel = `${actualOrderCount} order${actualOrderCount === 1 ? '' : 's'}`;
   const sceneLayout = useMemo(() => getDishSceneLayout(actualOrderCount), [actualOrderCount]);
+  const shouldShowDishMultiplier = actualOrderCount > MAX_VISIBLE_DISHES;
 
   const dishSlots = useMemo(() => {
     return Array.from({ length: sceneLayout.displayedDishCount }).map((_, index) => ({
@@ -232,11 +206,35 @@ export default function CookingSection({ className = '' }: { className?: string 
 
                       <motion.div
                         aria-hidden="true"
+                        initial={{ opacity: 0, rotate: -8 }}
+                        animate={{ opacity: phase === 'serving' ? 0.46 : 0.66, rotate: 360 }}
+                        transition={{
+                          opacity: { duration: 0.5, delay: 0.08 },
+                          rotate: { duration: 32, repeat: Infinity, ease: 'linear' },
+                        }}
+                        className="absolute left-1/2 top-[54%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+                        style={{
+                          width: `calc(${sceneLayout.glowSize} * 1.02)`,
+                          height: `calc(${sceneLayout.glowSize} * 1.02)`,
+                        }}
+                      >
+                        <Image
+                          src="/assets/light-rays-bg.png"
+                          alt=""
+                          fill
+                          priority
+                          sizes="(max-width: 768px) 80vw, 620px"
+                          className="pixelated object-contain"
+                        />
+                      </motion.div>
+
+                      <motion.div
+                        aria-hidden="true"
                         initial={{ opacity: 0, rotate: -10 }}
                         animate={{ opacity: phase === 'serving' ? 0.72 : 0.92, rotate: 360 }}
                         transition={{
                           opacity: { duration: 0.35, delay: 0.12 },
-                          rotate: { duration: 24, repeat: Infinity, ease: 'linear' },
+                          rotate: { duration: 18, repeat: Infinity, ease: 'linear' },
                         }}
                         className="absolute left-1/2 top-[54%] -translate-x-1/2 -translate-y-1/2 rounded-full"
                         style={{
@@ -250,11 +248,10 @@ export default function CookingSection({ className = '' }: { className?: string 
                       />
 
                       <div
-                        className="relative z-20 grid justify-center"
+                        className="relative z-20 flex items-center justify-center"
                         style={{
-                          gridTemplateColumns: `repeat(${sceneLayout.columns}, minmax(0, ${sceneLayout.dishSize}))`,
                           gap: sceneLayout.gridGap,
-                          marginTop: '3.2rem',
+                          marginTop: sceneLayout.dishGroupOffsetY,
                         }}
                       >
                         {dishSlots.map((slot) => (
@@ -302,6 +299,28 @@ export default function CookingSection({ className = '' }: { className?: string 
                             />
                           </motion.div>
                         ))}
+
+                        {shouldShowDishMultiplier ? (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.86, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            transition={{ duration: 0.24, delay: 0.28 }}
+                            className="absolute -right-20 -top-8 z-30 flex items-center gap-2 rounded-xl border-2 border-[#47331F] bg-[#4f2b1e]/82 px-3 py-2 shadow-[0_5px_0_#2d160e]"
+                          >
+                            <div className="relative h-11 w-11 shrink-0">
+                              <Image
+                                src={dishImage}
+                                alt=""
+                                fill
+                                sizes="44px"
+                                className="pixelated object-contain"
+                              />
+                            </div>
+                            <span className="font-pixel text-[1.45rem] leading-none text-[#fff0cb]">
+                              x {actualOrderCount}
+                            </span>
+                          </motion.div>
+                        ) : null}
                       </div>
 
                       <motion.div
