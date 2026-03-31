@@ -724,7 +724,7 @@ export async function uploadRewardPicture(
     const { data: uploadResult, error } = await supabase.storage
       .from('reward')
       .upload(`${rewardId}/profile.png`, file, {
-        cacheControl: '0',
+        // cacheControl: '0',
         upsert: true,
         contentType: file.type || 'image/png',
       });

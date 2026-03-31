@@ -64,14 +64,12 @@ function CarouselArrowButton({ direction, onClick }: CarouselArrowButtonProps) {
 }
 
 function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
-  // Shared context controls which stall interval is currently selected by the employee.
   const { setSelectedInterval } = useMercadoContext();
   // Load all rewards and interval-specific rewards to determine which stalls are open or closed.
   const { data: allRewards = [] } = useGetRewards();
   const { data: weeklyRewards = [] } = useGetAvailableRewardsByInterval('weekly');
   const { data: monthlyRewards = [] } = useGetAvailableRewardsByInterval('monthly');
   const { data: yearlyRewards = [] } = useGetAvailableRewardsByInterval('yearly');
-  // Carousel index is used on small screens where we show one stall at a time.
   const [carouselIndex, setCarouselIndex] = useState(0);
   const isTabletOrLarger = useIsTabletOrLarger();
 
@@ -112,7 +110,7 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
   // Build a rolling list of visible stalls so arrow buttons can loop seamlessly.
   const getVisibleStalls = () => {
     const stalls = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 1; i < 3; i++) {
       stalls.push(INTERVAL_STALLS[(carouselIndex + i) % INTERVAL_STALLS.length]);
     }
     return stalls;

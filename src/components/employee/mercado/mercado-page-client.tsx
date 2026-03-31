@@ -52,7 +52,7 @@ export function MercadoPageClient() {
   }, [pendingRequests]);
 
   return (
-    <MonthlyRewardsModal
+    <MonthlyRewardsModal 
       // Modal opens only when interval is selected and still valid/open.
       open={!!selectedInterval && !isSelectedIntervalClosed}
       // Closing modal clears selected interval so layout returns to neutral state.
