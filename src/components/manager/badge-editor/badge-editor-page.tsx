@@ -348,7 +348,7 @@ export function BadgeEditorPage() {
                   </div>
 
                   {/* Sort and Add Button Row */}
-                  <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
+                  <div className="flex min-w-0 flex-wrap sm:flex-nowrap">
                     {/* Sort Dropdown */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -363,7 +363,7 @@ export function BadgeEditorPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        className="manager-dropdown-content w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)]"
+                        className="manager-dropdown-content w-(--radix-dropdown-menu-trigger-width) min-w-(--radix-dropdown-menu-trigger-width)"
                       >
                         <DropdownMenuLabel className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-secondary">
                           Sort By Date
@@ -427,6 +427,10 @@ export function BadgeEditorPage() {
                       </DropdownMenuContent>
                     </DropdownMenu>
 
+                    
+                  </div>
+
+                  <div className='flex min-w-0 flex-wrap sm:flex-nowrap'>
                     {/* Add New Badge Button */}
                     <Button
                       onClick={handleOpenAddDialog}
