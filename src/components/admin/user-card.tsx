@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect as React_useEffect } from 'react';
+import { useState } from 'react';
 import * as React from 'react';
 import type { EmployeeTypeValue, User, UserWithExtras } from '@/types';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +20,6 @@ import {
   Trash2,
   Edit2,
   UserIcon,
-  Upload,
   Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -47,14 +46,15 @@ const EMPLOYMENT_STATUS_STYLES: Record<string, string> = {
   regular: 'bg-accent-secondary/85 text-primary border-2 border-orange-400/50',
 };
 
-function formatDate(value?: Date | string) {
-  if (!value) return 'N/A';
+function getFormattedDate(value?: Date | string) {
+  if (!value) return { label: 'N/A', tooltip: 'N/A' };
   const parsed = typeof value === 'string' ? new Date(value) : value;
-  return Number.isNaN(parsed.getTime()) ? 'N/A' : format(parsed, 'PPP');
+  if (Number.isNaN(parsed.getTime())) return { label: 'N/A', tooltip: 'N/A' };
+  return {
+    label: format(parsed, "PPP 'at' p"),
+    tooltip: parsed.toLocaleString(),
+  };
 }
-
-// Global version store that survives component unmounts
-const globalImageVersions = new Map<string, number>();
 
 export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload }: UserCardProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -119,7 +119,10 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
     'bg-blue-50 text-primary border-2 border-gray-300';
   const employmentStatusClass =
     EMPLOYMENT_STATUS_STYLES[employmentStatus] || 'bg-background text-foreground';
-  const dateCreated = formatDate(user.createdAt || user.date_added);
+  const { label: dateCreated, tooltip: dateCreatedTooltip } = getFormattedDate(
+    user.createdAt || user.date_added
+  );
+  const isAddressProvided = !!user.address?.trim();
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -177,7 +180,10 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
 
               <div className="min-w-0 flex-1 flex flex-col justify-center items-start gap-0.5">
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <p className="font-semibold text-sm sm:text-base lg:text-task-title truncate text-foreground">
+                  <p
+                    className="font-semibold text-sm sm:text-base lg:text-task-title truncate text-foreground"
+                    title={user.name}
+                  >
                     {user.name}
                   </p>
                   {user.employeeId ? (
@@ -189,7 +195,10 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                     </Badge>
                   ) : null}
                 </div>
-                <p className="text-xs sm:text-meta leading-tight text-muted-foreground truncate">
+                <p
+                  className="text-xs sm:text-meta leading-tight text-muted-foreground truncate"
+                  title={user.email}
+                >
                   {user.email}
                 </p>
                 <div className="flex gap-1.5 sm:gap-2 lg:gap-3 mt-1.5 sm:mt-2 lg:mt-3 md:hidden">
@@ -239,21 +248,34 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   <UserIcon className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[11px] text-muted-foreground">Name</p>
-                    <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+                    <p
+                      className="text-sm font-medium text-foreground truncate"
+                      title={user.name}
+                    >
+                      {user.name}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4 rounded-lg bg-gray-100 p-2.5 sm:p-3">
                   <Mail className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[11px] text-muted-foreground">Email</p>
-                    <p className="text-sm font-medium text-foreground break-all">{user.email}</p>
+                    <p
+                      className="text-sm font-medium text-foreground break-all line-clamp-2"
+                      title={user.email}
+                    >
+                      {user.email}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4 rounded-lg bg-gray-100 p-2.5 sm:p-3">
                   <Phone className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[11px] text-muted-foreground">Contact</p>
-                    <p className="text-sm font-medium text-foreground">
+                    <p
+                      className="text-sm font-medium text-foreground truncate break-words"
+                      title={user.contactNumber || 'N/A'}
+                    >
                       {user.contactNumber || 'N/A'}
                     </p>
                   </div>
@@ -266,11 +288,15 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                 Employment Details
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
-                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4 rounded-lg bg-gray-100 p-2.5 sm:p-3">
+                {/* feature is to be implemented by another developer team, not agree in the project scope */}
+                <div className="flex items-start gap-2 sm:gap-3 lg:gap-4 rounded-lg bg-gray-100 p-2.5 sm:p-3 opacity-70">
                   <Building2 className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[11px] text-muted-foreground">Company ID</p>
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <p
+                      className="text-sm font-medium text-muted-foreground italic truncate break-words"
+                      title={user.companyId || 'N/A'}
+                    >
                       {user.companyId || 'N/A'}
                     </p>
                   </div>
@@ -279,7 +305,10 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   <IdCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[11px] text-muted-foreground">Employee ID</p>
-                    <p className="text-sm font-medium text-foreground">
+                    <p
+                      className="text-sm font-medium text-foreground truncate break-words"
+                      title={user.employeeId || 'N/A'}
+                    >
                       {user.employeeId || 'N/A'}
                     </p>
                   </div>
@@ -288,7 +317,10 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   <BadgeCheck className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[11px] text-muted-foreground">Status</p>
-                    <p className="text-sm font-medium text-foreground capitalize">
+                    <p
+                      className="text-sm font-medium text-foreground capitalize truncate"
+                      title={employmentStatus}
+                    >
                       {employmentStatus}
                     </p>
                   </div>
@@ -297,19 +329,35 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   <Calendar className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[11px] text-muted-foreground">Date Created</p>
-                    <p className="text-sm font-medium text-foreground">{dateCreated}</p>
+                    <p
+                      className="text-sm font-medium text-foreground"
+                      title={dateCreatedTooltip}
+                    >
+                      {dateCreated}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="w-fit">
+            <div className="w-full">
               <p className="text-[11px] lg:text-xs font-semibold text-muted-foreground uppercase mb-2 sm:mb-3">
                 Address
               </p>
-              <div className="flex items-start gap-2 sm:gap-3 lg:gap-4 rounded-lg bg-gray-100 p-2.5 sm:p-3">
+              <div
+                className={`flex items-start gap-2 sm:gap-3 lg:gap-4 rounded-lg p-2.5 sm:p-3 w-full ${
+                  isAddressProvided ? 'bg-gray-100' : 'bg-gray-100 opacity-70'
+                }`}
+                title={isAddressProvided ? user.address : 'Not provided'}
+              >
                 <MapPin className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
-                <p className="min-w-0 text-sm text-foreground">{user.address || 'N/A'}</p>
+                <p
+                  className={`min-w-0 text-sm break-words line-clamp-2 overflow-hidden ${
+                    isAddressProvided ? 'text-foreground' : 'text-muted-foreground italic'
+                  }`}
+                >
+                  {user.address?.trim() ? user.address : 'Not provided'}
+                </p>
               </div>
             </div>
 
@@ -322,21 +370,36 @@ export function UserCard({ user, onEdit, onDelete, onHandleProfilePictureUpload 
                   <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[11px] text-muted-foreground">TIN</p>
-                    <p className="text-sm font-medium text-foreground">{user.tin || 'N/A'}</p>
+                    <p
+                      className="text-sm font-medium text-foreground truncate break-words"
+                      title={user.tin || 'N/A'}
+                    >
+                      {user.tin || 'N/A'}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4 rounded-lg bg-gray-100 p-2.5 sm:p-3">
                   <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[11px] text-muted-foreground">SSS</p>
-                    <p className="text-sm font-medium text-foreground">{user.sss || 'N/A'}</p>
+                    <p
+                      className="text-sm font-medium text-foreground truncate break-words"
+                      title={user.sss || 'N/A'}
+                    >
+                      {user.sss || 'N/A'}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 lg:gap-4 rounded-lg bg-gray-100 p-2.5 sm:p-3">
                   <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-accent mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[11px] text-muted-foreground">Pag-IBIG</p>
-                    <p className="text-sm font-medium text-foreground">{user.pagibig || 'N/A'}</p>
+                    <p
+                      className="text-sm font-medium text-foreground truncate break-words"
+                      title={user.pagibig || 'N/A'}
+                    >
+                      {user.pagibig || 'N/A'}
+                    </p>
                   </div>
                 </div>
               </div>
