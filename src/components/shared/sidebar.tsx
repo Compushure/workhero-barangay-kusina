@@ -333,7 +333,7 @@ export function Sidebar({ view }: SidebarProps) {
         </div>
       </aside>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-background/95 backdrop-blur supports-backdrop-filter:bg-gray-50 md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-background/95 backdrop-blur supports-backdrop-filter:bg-gray-50 min-w-md md:hidden">
         <TooltipProvider>
           <div className="px-2 py-2">
             <div className={`grid gap-1 ${view === 'manager' ? 'grid-cols-7' : 'grid-cols-5'}`}>

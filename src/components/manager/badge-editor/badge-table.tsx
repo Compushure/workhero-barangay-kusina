@@ -145,7 +145,7 @@ export default function BadgeTable({
               <TableHead className="hidden md:table-cell min-w-20 sm:min-w-24 text-center text-2xs sm:text-xs font-bold text-card">
                 CONDITIONS
               </TableHead>
-              <TableHead className="text-card text-center px-3 sm:px-6 w-20 sm:w-24 text-2xs sm:text-xs sticky right-0">
+              <TableHead className="font-bold text-card text-center px-3 sm:px-6 w-20 sm:w-24 text-2xs sm:text-xs sticky right-0">
                 ACTIONS
               </TableHead>
             </TableRow>

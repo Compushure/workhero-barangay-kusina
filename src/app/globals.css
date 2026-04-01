@@ -82,7 +82,7 @@
   --text-h1: clamp(1.65rem, 2vw, 1.95rem);
   --text-h2: clamp(1.125rem, 1.05vw, 1.25rem);
   --text-task-title: clamp(1.03rem, 1vw, 1.15rem);
-  --text-meta: clamp(0.8rem, 0.72vw, 0.86rem);
+  --text-meta: clamp(0.72rem, 2.5vw, 0.8rem);
   --text-sidebar-label: 0.84rem;
   --text-button: 0.76rem;
 
@@ -102,7 +102,7 @@
   :root {
     --text-h2: clamp(1.04rem, 0.95vw, 1.12rem);
     --text-task-title: clamp(0.97rem, 0.92vw, 1.06rem);
-    --text-meta: clamp(1rem, 0.65vw, 0.8rem);
+    --text-meta: clamp(0.72rem, 2.5vw, 0.8rem);
     --text-sidebar-label: 0.79rem;
     --text-button: 0.77rem;
     --control-height: 1.75rem;
@@ -475,6 +475,28 @@
     animation: float 3s ease-in-out infinite;
   }
 
+  .cooking-pot-pop {
+    animation: cooking-pot-pop 0.9s ease-in-out infinite;
+  }
+
+  .pot-swirl {
+    animation: pot-swirl 1.1s ease-in-out infinite;
+  }
+
+  .steam-puff {
+    animation: steam-puff 1.4s ease-in-out infinite;
+    filter: blur(0.5px);
+  }
+
+  .poof-appear {
+    animation: poof-appear 0.42s cubic-bezier(0.2, 0.75, 0.28, 1);
+    transform-origin: center bottom;
+  }
+
+  .serve-away {
+    animation: serve-away 0.58s ease-in forwards;
+  }
+
   .bg-primary-gradient {
     background-image: var(--primary-gradient);
   }
@@ -693,5 +715,70 @@
   }
   50% {
     transform: translateY(-8px);
+  }
+}
+
+@keyframes cooking-pot-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.045);
+  }
+}
+
+@keyframes pot-swirl {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(1.2deg);
+  }
+  75% {
+    transform: rotate(-1.2deg);
+  }
+}
+
+@keyframes steam-puff {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.7);
+  }
+  45% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22px) scale(1.18);
+  }
+}
+
+@keyframes poof-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+    filter: blur(5px);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.08);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes serve-away {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.7);
   }
 }

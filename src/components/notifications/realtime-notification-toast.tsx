@@ -85,13 +85,22 @@ export function RealtimeNotificationToastClient({ userId }: RealtimeNotification
           transition={{ duration: 0.22, ease: 'easeOut' }}
           className="fixed bottom-6 right-6 z-90 w-100 max-w-[calc(100vw-2rem)]"
         >
-          <div className={cn('rounded-xl border-2 p-4 shadow-xl backdrop-blur-sm bg-wood-card text-card', cardClass)}>
+          <div
+            className={cn(
+              'rounded-xl border-2 p-4 shadow-xl backdrop-blur-sm bg-wood-card text-card',
+              cardClass
+            )}
+          >
             <div className="flex items-start gap-3">
-              <div className={cn('mt-0.5 p-1.5 rounded-md bg-yellow-500/15 shadow-sm/25', iconClass)}>
+              <div
+                className={cn('mt-0.5 p-1.5 rounded-md bg-yellow-500/15 shadow-sm/25', iconClass)}
+              >
                 <Icon className="size-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[0.75rem] font-bold uppercase tracking-wide opacity-80">{current.type}</p>
+                <p className="text-sm font-bold uppercase tracking-wide opacity-80">
+                  {current.type}
+                </p>
                 <p className="mt-0.5 text-sm leading-snug">{current.message}</p>
               </div>
               <button
