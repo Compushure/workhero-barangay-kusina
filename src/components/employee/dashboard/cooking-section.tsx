@@ -263,26 +263,40 @@ export default function CookingSection({ className = '' }: { className?: string 
                               phase === 'serving'
                                 ? {
                                     opacity: 0,
-                                    scale: 0.76,
-                                    y: -34,
+                                    scale: 0.86,
+                                    y: -124,
                                     rotate: slot.index % 2 === 0 ? -11 : 11,
-                                    filter: 'blur(4px) brightness(1.68) saturate(0.2)',
+                                    filter: 'blur(3px) brightness(3.1) saturate(0)',
                                   }
                                 : {
                                     opacity: 1,
                                     scale: 1,
-                                    y: 0,
+                                    y: [0, -6, 0, 5, 0],
                                     rotate: 0,
                                     filter: 'blur(0px) brightness(1) saturate(1)',
                                   }
                             }
                             transition={{
-                              duration: phase === 'serving' ? 0.28 : 0.44,
+                              duration: phase === 'serving' ? 0.33 : 0.44,
                               delay:
                                 phase === 'serving'
                                   ? Math.min(slot.index, 14) * 0.012
                                   : 0.14 + Math.min(slot.index, 18) * 0.04,
                               ease: phase === 'serving' ? 'easeIn' : [0.2, 0.75, 0.28, 1],
+                              y:
+                                phase === 'serving'
+                                  ? {
+                                      duration: 0.33,
+                                      ease: 'easeIn',
+                                      delay: Math.min(slot.index, 14) * 0.012,
+                                    }
+                                  : {
+                                      duration: 2.8,
+                                      ease: 'easeInOut',
+                                      repeat: Infinity,
+                                      repeatType: 'loop',
+                                      delay: 0.28 + Math.min(slot.index, 10) * 0.08,
+                                    },
                             }}
                             className="relative"
                             style={{
@@ -296,7 +310,7 @@ export default function CookingSection({ className = '' }: { className?: string 
                               initial={{ opacity: 0.96, scale: 0.58, filter: 'blur(14px)' }}
                               animate={
                                 phase === 'serving'
-                                  ? { opacity: 0.82, scale: 0.82, filter: 'blur(12px)' }
+                                  ? { opacity: 1, scale: 0.9, filter: 'blur(10px) brightness(1.9)' }
                                   : {
                                       opacity: [0.96, 0.56, 0.14],
                                       scale: [0.58, 1.08, 1],
@@ -322,7 +336,7 @@ export default function CookingSection({ className = '' }: { className?: string 
                               initial={{ opacity: 0.92, scale: 0.68, filter: 'blur(16px)' }}
                               animate={
                                 phase === 'serving'
-                                  ? { opacity: 0.86, scale: 0.92, filter: 'blur(18px)' }
+                                  ? { opacity: 1, scale: 1.05, filter: 'blur(20px) brightness(2)' }
                                   : {
                                       opacity: [0.92, 0.54, 0.2],
                                       scale: [0.68, 1.18, 1],
@@ -337,6 +351,43 @@ export default function CookingSection({ className = '' }: { className?: string 
                                     : 0.13 + Math.min(slot.index, 16) * 0.03,
                                 ease: phase === 'serving' ? 'easeIn' : 'easeOut',
                               }}
+                            />
+                            <motion.span
+                              aria-hidden="true"
+                              className="pointer-events-none absolute inset-[-16%] rounded-full"
+                              style={{
+                                background:
+                                  'radial-gradient(circle, rgba(255,248,206,0.45) 0%, rgba(255,245,190,0.22) 36%, rgba(255,255,255,0) 72%)',
+                              }}
+                              initial={{ opacity: 0, scale: 0.54, filter: 'blur(20px)' }}
+                              animate={
+                                phase === 'serving'
+                                  ? {
+                                      opacity: 0.96,
+                                      scale: 0.84,
+                                      filter: 'blur(24px) brightness(2.5)',
+                                    }
+                                  : {
+                                      opacity: [0.22, 0.46, 0.26],
+                                      scale: [1, 1.08, 1],
+                                      filter: ['blur(18px)', 'blur(22px)', 'blur(18px)'],
+                                    }
+                              }
+                              transition={
+                                phase === 'serving'
+                                  ? {
+                                      duration: 0.33,
+                                      delay: Math.min(slot.index, 14) * 0.012,
+                                      ease: 'easeIn',
+                                    }
+                                  : {
+                                      duration: 2.8,
+                                      repeat: Infinity,
+                                      repeatType: 'loop',
+                                      ease: 'easeInOut',
+                                      delay: 0.2 + Math.min(slot.index, 10) * 0.08,
+                                    }
+                              }
                             />
                             <Image
                               src={dishImage}
