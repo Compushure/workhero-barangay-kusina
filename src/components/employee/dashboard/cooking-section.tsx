@@ -271,7 +271,7 @@ export default function CookingSection({ className = '' }: { className?: string 
                                 : {
                                     opacity: 1,
                                     scale: 1,
-                                    y: [0, -6, 0, 5, 0],
+                                    y: [0, -10, 0],
                                     rotate: 0,
                                     filter: 'blur(0px) brightness(1) saturate(1)',
                                   }
@@ -291,11 +291,11 @@ export default function CookingSection({ className = '' }: { className?: string 
                                       delay: Math.min(slot.index, 14) * 0.012,
                                     }
                                   : {
-                                      duration: 2.8,
+                                      duration: 2,
                                       ease: 'easeInOut',
                                       repeat: Infinity,
                                       repeatType: 'loop',
-                                      delay: 0.28 + Math.min(slot.index, 10) * 0.08,
+                                      delay: 0.5 + Math.min(slot.index, 10) * 0.08,
                                     },
                             }}
                             className="relative"
