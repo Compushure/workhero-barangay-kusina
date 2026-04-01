@@ -360,7 +360,7 @@ export default function CookingSection({ className = '' }: { className?: string 
                                 src={dishImage}
                                 alt=""
                                 fill
-                                sizes="44px"
+                                sizes="48px"
                                 className="pixelated object-contain"
                               />
                             </div>

@@ -98,7 +98,7 @@ export function RealtimeNotificationToastClient({ userId }: RealtimeNotification
                 <Icon className="size-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[0.75rem] font-bold uppercase tracking-wide opacity-80">
+                <p className="text-sm font-bold uppercase tracking-wide opacity-80">
                   {current.type}
                 </p>
                 <p className="mt-0.5 text-sm leading-snug">{current.message}</p>

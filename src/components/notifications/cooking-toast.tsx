@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, CookingPot, X } from 'lucide-react';
+import { Soup, Utensils, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -24,11 +24,11 @@ const COOKING_TOAST_OPTIONS = {
 
 function CookingToastContent({ toastId, type, orderCount, dishName }: CookingToastContentProps) {
   const isCooked = type === 'cooked';
-  const Icon = isCooked ? CookingPot : CheckCircle2;
+  const Icon = isCooked ? Soup : Utensils;
   const cardClass = isCooked ? 'border-accent' : 'border-green-400';
   const iconClass = isCooked ? 'text-accent' : 'text-green-300';
   const orderLabel = `${orderCount} order${orderCount === 1 ? '' : 's'}`;
-  const title = isCooked ? 'dish' : 'serve';
+  const title = isCooked ? 'dish' : 'served';
   const message = isCooked
     ? `Congrats! You have finished making ${orderLabel} of ${dishName}. Ready to serve!`
     : `Great service! You have served ${orderLabel} of ${dishName}.`;
@@ -41,7 +41,7 @@ function CookingToastContent({ toastId, type, orderCount, dishName }: CookingToa
             <Icon className="size-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[0.75rem] font-bold uppercase tracking-wide opacity-80">{title}</p>
+            <p className="text-sm font-bold uppercase tracking-wide opacity-80">{title}</p>
             <p className="mt-0.5 text-sm leading-snug">{message}</p>
           </div>
           <button

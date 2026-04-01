@@ -41,6 +41,9 @@ const DEFAULT_BG = 'var(--card)';
 const DEFAULT_TEXT = 'var(--primary)';
 const EMPLOYEE_BG = 'linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 100%)';
 const EMPLOYEE_TEXT = 'var(--card)';
+const EMPLOYEE_TOAST_WIDTH = '25rem';
+const EMPLOYEE_TOAST_MOBILE_WIDTH = 'calc(100vw - 2rem)';
+const EMPLOYEE_TOAST_PADDING = '1rem';
 
 // Each view shares a surface/text pairing but customizes border + icon accents per variant.
 const TOAST_VIEW_STYLES: Record<ToastView, Record<ToastVariant, VariantColors>> = {
@@ -92,6 +95,12 @@ function getToastStyleVariables(view: ToastView): CSSProperties {
   return {
     ...variantStyles,
     '--border-radius': 'var(--radius)',
+    ...(view === 'employee'
+      ? {
+          '--width': EMPLOYEE_TOAST_WIDTH,
+          '--mobile-width': EMPLOYEE_TOAST_MOBILE_WIDTH,
+        }
+      : {}),
   } as CSSProperties;
 }
 
@@ -116,7 +125,7 @@ function getToastIcons(view: ToastView) {
 
 const DEFAULT_TOAST_CLASS = 'font-medium';
 const BORDER_WIDTH = '2px';
-const EMPLOYEE_TOAST_SIZE_CLASS = 'w-[25rem] max-w-[calc(100vw-2rem)] px-4 py-4';
+const EMPLOYEE_TOAST_CLASS = 'font-jersey text-sm tracking-[0.02em]';
 
 const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
   const { theme = 'system' } = useTheme();
@@ -128,17 +137,22 @@ const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
       ...toastOptions,
       className: cn(
         DEFAULT_TOAST_CLASS,
-        view === 'employee'
-          ? `font-jersey text-base tracking-[0.02em] ${EMPLOYEE_TOAST_SIZE_CLASS}`
-          : null,
+        view === 'employee' ? EMPLOYEE_TOAST_CLASS : null,
         toastOptions?.className
       ),
       style: {
         borderWidth: BORDER_WIDTH,
+        ...(view === 'employee'
+          ? {
+              width: EMPLOYEE_TOAST_WIDTH,
+              maxWidth: EMPLOYEE_TOAST_MOBILE_WIDTH,
+              padding: EMPLOYEE_TOAST_PADDING,
+            }
+          : {}),
         ...toastOptions?.style,
       },
     };
-  }, [toastOptions]);
+  }, [toastOptions, view]);
 
   return (
     <Sonner
