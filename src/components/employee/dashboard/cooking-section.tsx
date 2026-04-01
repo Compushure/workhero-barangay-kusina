@@ -16,6 +16,7 @@ const DEFAULT_DISH_IMAGE = '/assets/dish/food-sinigang.png';
 const COOKING_REVEAL_DELAY_MS = 2100;
 const SERVE_EXIT_DELAY_MS = 680;
 const MAX_VISIBLE_DISHES = 3;
+const AURA_RADIUS_SCALE = 1.15;
 
 function getDishSceneLayout(orderCount: number) {
   const displayedDishCount = Math.min(MAX_VISIBLE_DISHES, Math.max(1, orderCount));
@@ -214,8 +215,8 @@ export default function CookingSection({ className = '' }: { className?: string 
                         }}
                         className="absolute left-1/2 top-[54%] -translate-x-1/2 -translate-y-1/2 rounded-full"
                         style={{
-                          width: `calc(${sceneLayout.glowSize} * 1.02)`,
-                          height: `calc(${sceneLayout.glowSize} * 1.02)`,
+                          width: `calc(${sceneLayout.glowSize} * ${AURA_RADIUS_SCALE})`,
+                          height: `calc(${sceneLayout.glowSize} * ${AURA_RADIUS_SCALE})`,
                         }}
                       >
                         <Image
@@ -238,8 +239,8 @@ export default function CookingSection({ className = '' }: { className?: string 
                         }}
                         className="absolute left-1/2 top-[54%] -translate-x-1/2 -translate-y-1/2 rounded-full"
                         style={{
-                          width: `calc(${sceneLayout.glowSize} * 1.15)`,
-                          height: `calc(${sceneLayout.glowSize} * 1.15)`,
+                          width: `calc(${sceneLayout.glowSize} * ${AURA_RADIUS_SCALE})`,
+                          height: `calc(${sceneLayout.glowSize} * ${AURA_RADIUS_SCALE})`,
                           backgroundImage:
                             'conic-gradient(from 0deg, rgba(255,255,255,0) 0deg, rgba(255,255,255,0.94) 18deg, rgba(255,255,255,0) 34deg, rgba(255,255,255,0) 72deg, rgba(255,248,220,0.82) 88deg, rgba(255,255,255,0) 106deg, rgba(255,255,255,0) 148deg, rgba(255,255,255,0.88) 180deg, rgba(255,255,255,0) 198deg, rgba(255,255,255,0) 236deg, rgba(255,243,201,0.78) 262deg, rgba(255,255,255,0) 280deg, rgba(255,255,255,0) 326deg, rgba(255,255,255,0.76) 344deg, rgba(255,255,255,0) 360deg)',
                           filter: 'blur(2px)',
@@ -265,14 +266,14 @@ export default function CookingSection({ className = '' }: { className?: string 
                                     scale: 0.76,
                                     y: -34,
                                     rotate: slot.index % 2 === 0 ? -11 : 11,
-                                    filter: 'blur(4px)',
+                                    filter: 'blur(4px) brightness(1.68) saturate(0.2)',
                                   }
                                 : {
                                     opacity: 1,
                                     scale: 1,
                                     y: 0,
                                     rotate: 0,
-                                    filter: 'blur(0px)',
+                                    filter: 'blur(0px) brightness(1) saturate(1)',
                                   }
                             }
                             transition={{
@@ -289,7 +290,54 @@ export default function CookingSection({ className = '' }: { className?: string 
                               height: sceneLayout.dishSize,
                             }}
                           >
-                            <span className="absolute inset-[7%] rounded-full bg-white/50 blur-lg animate-pulse" />
+                            <motion.span
+                              aria-hidden="true"
+                              className="pointer-events-none absolute inset-[10%] rounded-full bg-white mix-blend-screen"
+                              initial={{ opacity: 0.96, scale: 0.58, filter: 'blur(14px)' }}
+                              animate={
+                                phase === 'serving'
+                                  ? { opacity: 0.82, scale: 0.82, filter: 'blur(12px)' }
+                                  : {
+                                      opacity: [0.96, 0.56, 0.14],
+                                      scale: [0.58, 1.08, 1],
+                                      filter: ['blur(14px)', 'blur(8px)', 'blur(4px)'],
+                                    }
+                              }
+                              transition={{
+                                duration: phase === 'serving' ? 0.28 : 0.5,
+                                delay:
+                                  phase === 'serving'
+                                    ? Math.min(slot.index, 14) * 0.012
+                                    : 0.11 + Math.min(slot.index, 16) * 0.03,
+                                ease: phase === 'serving' ? 'easeIn' : 'easeOut',
+                              }}
+                            />
+                            <motion.span
+                              aria-hidden="true"
+                              className="pointer-events-none absolute inset-[4%] rounded-full"
+                              style={{
+                                background:
+                                  'radial-gradient(circle, rgba(255,255,255,0.82) 0%, rgba(255,248,224,0.52) 34%, rgba(255,255,255,0) 74%)',
+                              }}
+                              initial={{ opacity: 0.92, scale: 0.68, filter: 'blur(16px)' }}
+                              animate={
+                                phase === 'serving'
+                                  ? { opacity: 0.86, scale: 0.92, filter: 'blur(18px)' }
+                                  : {
+                                      opacity: [0.92, 0.54, 0.2],
+                                      scale: [0.68, 1.18, 1],
+                                      filter: ['blur(16px)', 'blur(10px)', 'blur(7px)'],
+                                    }
+                              }
+                              transition={{
+                                duration: phase === 'serving' ? 0.28 : 0.52,
+                                delay:
+                                  phase === 'serving'
+                                    ? Math.min(slot.index, 14) * 0.012
+                                    : 0.13 + Math.min(slot.index, 16) * 0.03,
+                                ease: phase === 'serving' ? 'easeIn' : 'easeOut',
+                              }}
+                            />
                             <Image
                               src={dishImage}
                               alt={titleDishName}
@@ -305,7 +353,7 @@ export default function CookingSection({ className = '' }: { className?: string 
                             initial={{ opacity: 0, scale: 0.86, y: -10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             transition={{ duration: 0.24, delay: 0.28 }}
-                            className="absolute -right-20 -top-8 z-30 flex items-center gap-2 rounded-xl border-2 border-[#47331F] bg-[#4f2b1e]/82 px-3 py-2 shadow-[0_5px_0_#2d160e]"
+                            className="absolute -right-20 -top-8 z-30 flex items-center gap-2 rounded-xl wood-panel px-3 py-2 shadow-[0_5px_0_#2d160e]/50"
                           >
                             <div className="relative h-11 w-11 shrink-0">
                               <Image
@@ -339,9 +387,7 @@ export default function CookingSection({ className = '' }: { className?: string 
                           disabled={phase !== 'revealed' || serveMutation.isPending}
                           className="pointer-events-auto h-[3.7rem] min-w-41 rounded-lg border-[3px] border-[#47331F] bg-[#f4bf21] px-7 text-[1.75rem] text-[#2b180b] shadow-[0_0_0_2px_rgba(255,243,193,0.22),0_9px_0_#5a3415] transition-transform hover:-translate-y-0.5 hover:bg-[#ffd34b] disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                          {serveMutation.isPending || phase === 'serving'
-                            ? 'Serving...'
-                            : 'Serve'}
+                          {serveMutation.isPending || phase === 'serving' ? 'Serving...' : 'Serve'}
                         </Button>
                       </motion.div>
                     </div>
@@ -361,9 +407,7 @@ export default function CookingSection({ className = '' }: { className?: string 
       <CardContent className="relative flex h-full w-full items-end justify-center overflow-hidden p-4 sm:p-6">
         <motion.div
           animate={
-            showCookedScene
-              ? { y: 18, scale: 0.92, opacity: 0.74 }
-              : { y: 0, scale: 1, opacity: 1 }
+            showCookedScene ? { y: 18, scale: 0.92, opacity: 0.74 } : { y: 0, scale: 1, opacity: 1 }
           }
           transition={{ duration: 0.38, ease: 'easeInOut' }}
           className="relative z-10"
@@ -390,7 +434,6 @@ export default function CookingSection({ className = '' }: { className?: string 
             ) : null}
           </div>
         </motion.div>
-
       </CardContent>
       {cookedSceneOverlay}
     </Card>

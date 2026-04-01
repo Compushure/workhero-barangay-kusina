@@ -116,6 +116,7 @@ function getToastIcons(view: ToastView) {
 
 const DEFAULT_TOAST_CLASS = 'font-medium';
 const BORDER_WIDTH = '2px';
+const EMPLOYEE_TOAST_SIZE_CLASS = 'w-[25rem] max-w-[calc(100vw-2rem)] px-4 py-4';
 
 const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
   const { theme = 'system' } = useTheme();
@@ -127,7 +128,9 @@ const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
       ...toastOptions,
       className: cn(
         DEFAULT_TOAST_CLASS,
-        view === 'employee' ? 'font-jersey text-base tracking-[0.02em]' : null,
+        view === 'employee'
+          ? `font-jersey text-base tracking-[0.02em] ${EMPLOYEE_TOAST_SIZE_CLASS}`
+          : null,
         toastOptions?.className
       ),
       style: {

@@ -11,6 +11,17 @@ interface CookingToastContentProps {
   dishName: string;
 }
 
+const COOKING_TOAST_OPTIONS = {
+  duration: 7000,
+  className: '!w-auto !max-w-none !p-0 !bg-transparent !border-0 !shadow-none',
+  style: {
+    background: 'transparent',
+    border: 'none',
+    boxShadow: 'none',
+    padding: 0,
+  },
+} as const;
+
 function CookingToastContent({ toastId, type, orderCount, dishName }: CookingToastContentProps) {
   const isCooked = type === 'cooked';
   const Icon = isCooked ? CookingPot : CheckCircle2;
@@ -56,7 +67,7 @@ export function showDishCookedToast(orderCount: number, dishName: string): void 
         dishName={dishName || 'Dish'}
       />
     ),
-    { duration: 7000 }
+    COOKING_TOAST_OPTIONS
   );
 }
 
@@ -70,6 +81,6 @@ export function showDishServedToast(orderCount: number, dishName: string): void 
         dishName={dishName || 'Dish'}
       />
     ),
-    { duration: 7000 }
+    COOKING_TOAST_OPTIONS
   );
 }
