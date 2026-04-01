@@ -237,7 +237,7 @@ export default function TaskEditorPage() {
                 </div>
 
                 <div className="flex min-w-0 flex-wrap gap-2 sm:gap-3 xl:flex-nowrap xl:justify-end">
-                  <div className="shrink-0">
+                  <div className="shrink-0 h-fit">
                     <TaskRepeatabilityFilterToggle
                       value={repeatabilityFilter}
                       onChange={handleRepeatabilityFilterChange}
@@ -310,8 +310,10 @@ export default function TaskEditorPage() {
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuContent>
-                    </DropdownMenu>
-
+                    </DropdownMenu> 
+                  </div>
+                  
+                  <div className="flex min-w-0 flex-wrap sm:flex-nowrap">
                     {/* Add New Category Button */}
                     <Button
                       onClick={handleOpenAddDialog}

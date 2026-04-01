@@ -19,6 +19,14 @@ export interface TaskStatusItem {
   remark?: string;
   /** When the employee claimed points/XP for this task; null if not yet claimed. */
   claimedAt?: string | null;
+  /** When food for this fully completed task has been served; null if not served yet. */
+  completedAt?: string | null;
+  /** Hydrated dish name for cook-ready tasks (from latest claim metadata). */
+  cookDishName?: string | null;
+  /** Hydrated dish image URL for cook-ready tasks (from latest claim metadata). */
+  cookDishImageUrl?: string | null;
+  /** Hydrated cook order count for cook-ready tasks. */
+  cookOrderCount?: number | null;
   /** Task status: assigned | in review | approved | rejected. */
   status?: string;
 }

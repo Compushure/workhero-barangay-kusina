@@ -10,7 +10,7 @@ import {
 import { getISOWeekDateRangeLabel } from '@/lib/utils/time-period-utils';
 import type { RankLogPeriodType } from '@/types';
 import type { LatestPeriods } from './period-nav';
-import { PeriodNav, getLeaderboardTitle, getLatestPeriodParams } from './period-nav';
+import { PeriodNav, getLatestPeriodParams } from './period-nav';
 import HeaderHUD from '../widgets/header-hud';
 import { LeaderboardEmptyState } from './leaderboard-empty-state';
 import { LeaderboardPodium } from './leaderboard-podium';

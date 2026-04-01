@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body className="bg-background text-foreground" suppressHydrationWarning>
+      <body className="bg-background text-foreground min-w-md" suppressHydrationWarning>
         <ToastViewRootProvider>
           <QueryProvider>
             <AuthProvider>{children}</AuthProvider>

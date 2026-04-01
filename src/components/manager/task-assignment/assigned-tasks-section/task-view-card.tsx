@@ -174,41 +174,39 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
           </header>
 
           {/* Task max orders, fiesta points and XP */}
-          <div className="flex flex-col shrink-0 pt-2">
-            {/* Keep both rows on the same column template so labels stay aligned to their stats */}
-            <div className="grid grid-cols-[auto_auto_auto_auto] gap-x-2 sm:gap-x-3 items-baseline text-meta text-secondary/85">
-              {/* Soup icon + max orders */}
-              <div className="flex items-baseline gap-0.5">
+          <div className="flex flex-wrap items-start gap-x-3 gap-y-1.5 sm:gap-x-4 sm:gap-y-2 shrink-0 pt-1.5 sm:pt-2 text-meta text-secondary/85">
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-baseline gap-0.5 sm:gap-1 whitespace-nowrap">
                 <Soup strokeWidth={1.5} className="size-4 sm:size-5 shrink-0" />
-                <span className="font-semibold text-[14px] sm:text-[15px] leading-none">
+                <span className="font-semibold text-[13px] sm:text-[15px] leading-none">
                   {task.maxOrders} max order/s
                 </span>
               </div>
-
-              {/* Divider */}
-              <span className="text-secondary/50">|</span>
-
-              {/* Coins icon + points */}
-              <div className="flex items-baseline gap-0.5">
-                <Coins strokeWidth={1.75} className="size-3.5 sm:size-5 shrink-0" />
-                <span className="font-semibold text-[15px] sm:text-[18px] leading-none">
-                  {task.points}
-                </span>
-              </div>
-
-              {/* XP label + value */}
-              <div className="flex items-baseline gap-0.5 sm:gap-1">
-                <span className="italic text-[14px] sm:text-base leading-none">XP</span>
-                <span className="font-semibold text-[15px] sm:text-[18px] leading-none">
-                  {task.xp}
-                </span>
-              </div>
+              <span className="pl-6 text-[11px] sm:text-[12px] font-normal text-zinc-500 leading-none whitespace-nowrap">
+                per employee
+              </span>
             </div>
 
-            <div className="mt-0.5 grid grid-cols-[auto_auto_auto_auto] gap-x-2 sm:gap-x-3 text-[12px] font-normal text-zinc-500">
-              <span className="justify-self-end">per employee</span>
-              <span className="invisible">|</span>
-              <span className="col-span-2 justify-self-center">per order</span>
+            <span className="inline text-secondary/45 self-start pt-0.5">|</span>
+
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-baseline gap-1 sm:gap-1.5 whitespace-nowrap">
+                <div className="flex items-baseline gap-1">
+                  <Coins strokeWidth={1.75} className="size-3.5 sm:size-5 shrink-0" />
+                  <span className="font-semibold text-[14px] sm:text-[18px] leading-none">
+                    {task.points}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="italic text-[13px] sm:text-base leading-none">XP</span>
+                  <span className="font-semibold text-[14px] sm:text-[18px] leading-none">
+                    {task.xp}
+                  </span>
+                </div>
+              </div>
+              <span className="pl-3 sm:pl-4 text-[11px] sm:text-[12px] font-normal text-zinc-500 leading-none whitespace-nowrap">
+                per order
+              </span>
             </div>
           </div>
         </section>

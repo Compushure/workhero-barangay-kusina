@@ -27,6 +27,7 @@ const ViewItemModal = dynamic(() =>
 );
 
 export function MercadoPageContent() {
+  // This custom hook centralizes all page state (filters, pagination, modal state).
   const {
     isLoading,
     totalItemsCount,
@@ -69,6 +70,7 @@ export function MercadoPageContent() {
     handleSaveItem,
   } = useMercadoPageState();
 
+  // Helper that explains why the list is empty when there are no results after filtering/searching.
   const getEmptyStateMessage = () => {
     if (search) {
       return `No items found matching "${search}".`;
@@ -104,12 +106,14 @@ export function MercadoPageContent() {
           ) : (
             <Suspense fallback={<MercadoHeaderSkeleton />}>
               <div className="space-y-4 sm:space-y-5">
+                {/* HR-facing heading that explains this page manages Mercado inventory. */}
                 <MercadoHeader
                   title="Mercado Manager"
                   description="Manage items visible in mercado"
                   showAddButton={false}
                 />
 
+                {/* Control bar for searching, sorting, filtering, and adding items. */}
                 <section className="manager-sticky-controls rounded-xl px-3 py-3 sm:px-4 sm:py-3.5 flex min-w-0 flex-col gap-3 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
                   <div className="flex shrink-0 self-start xl:self-center gap-2 whitespace-nowrap pl-0.5 text-h2 text-foreground sm:gap-3 sm:pl-1">
                     <h5 className="flex items-center gap-1.5">
@@ -160,7 +164,7 @@ export function MercadoPageContent() {
             </Suspense>
           )}
 
-          {/* Catalog grid section */}
+          {/* Render item cards for the current page after filters/search are applied. */}
           <div className="flex-1 md:min-h-[18rem] lg:min-h-[23rem] xl:min-h-[27rem]">
             {isLoading ? (
               <MercadoSkeleton />
@@ -200,7 +204,7 @@ export function MercadoPageContent() {
           </div>
         </div>
 
-        {/* Pagination as footer */}
+        {/* Show pagination only when there are multiple result pages. */}
         {totalPages > 1 && (
           <div className="mt-auto pt-4 sm:pt-6 flex justify-center">
             <Pagination
@@ -213,6 +217,7 @@ export function MercadoPageContent() {
         )}
       </div>
 
+      {/* Add/Edit modal shares one form, controlled by selected editing item. */}
       <AddItemsModal
         open={isAddModalOpen}
         onOpenChange={(open) => {
@@ -226,6 +231,7 @@ export function MercadoPageContent() {
         onErrorClear={() => setSaveError('')}
       />
 
+      {/* Read-only preview modal, with shortcut to switch into edit mode. */}
       <ViewItemModal
         open={isViewModalOpen}
         onOpenChange={(open) => {
@@ -236,6 +242,7 @@ export function MercadoPageContent() {
         item={viewingItem}
       />
 
+      {/* Confirmation modal prevents accidental item deletion. */}
       <DeleteModal
         open={isDeleteModalOpen}
         onOpenChange={(open) => {

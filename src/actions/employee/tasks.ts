@@ -17,6 +17,7 @@ interface TaskInfoRow {
   kpitask_id: string;
   status: string | null;
   points_claimed_at: string | null;
+  kpitask_completed_at: string | null;
   category_name: string | null;
   category_description: string | null;
   category_points: number | null;
@@ -27,6 +28,17 @@ interface TaskInfoRow {
   completed_orders: number | null;
   pending_orders: number | null;
   max_orders: number | null;
+}
+
+interface NotificationMetadataRow {
+  metadata: Record<string, unknown> | null;
+  created_at: string | null;
+}
+
+interface CookNotificationSnapshot {
+  dishName: string | null;
+  dishImageUrl: string | null;
+  orderCount: number | null;
 }
 
 // function formatDueDate(iso: string | null): string {
@@ -68,6 +80,7 @@ function rowToTaskStatusItem(row: TaskInfoRow): TaskStatusItem {
     // dueDate: formatDueDate(row.k_deadline_date),
     ...(row.remark?.trim() ? { remark: row.remark.trim() } : {}),
     claimedAt: row.points_claimed_at ?? undefined,
+    completedAt: row.kpitask_completed_at ?? undefined,
     status: row.status ?? undefined,
   };
 }
@@ -87,7 +100,7 @@ export async function fetchEmployeeTasks(): Promise<ServerActionResponse<Employe
   const { data: rows, error } = await supabase
     .from('task_info_view')
     .select(
-      'kpitask_id, status, points_claimed_at, category_name, category_description, category_points, category_xp, k_deadline_date, kpitask_created_at, remark, completed_orders, pending_orders, max_orders'
+      'kpitask_id, status, points_claimed_at, kpitask_completed_at, category_name, category_description, category_points, category_xp, k_deadline_date, kpitask_created_at, remark, completed_orders, pending_orders, max_orders'
     )
     .eq('assigned_to', user.id);
 
@@ -101,9 +114,73 @@ export async function fetchEmployeeTasks(): Promise<ServerActionResponse<Employe
   const verifiedTasks: TaskStatusItem[] = [];
   const deniedTasks: TaskStatusItem[] = [];
 
-  for (const row of list) {
-    const item = rowToTaskStatusItem(row);
-    const status = (row.status ?? '').toLowerCase();
+  const taskItems = list.map((row) => rowToTaskStatusItem(row));
+  const claimReadyTaskIds = new Set(
+    taskItems
+      .filter(
+        (task) =>
+          task.status === 'approved' &&
+          task.completedOrders === task.maxOrders &&
+          Boolean(task.claimedAt) &&
+          !task.completedAt
+      )
+      .map((task) => task.id)
+  );
+
+  if (claimReadyTaskIds.size > 0) {
+    const { data: notificationRows, error: notificationError } = await supabase
+      .from('Notification')
+      .select('metadata, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(300);
+
+    if (!notificationError) {
+      const latestCookSnapshotByTaskId = new Map<string, CookNotificationSnapshot>();
+
+      for (const row of (notificationRows ?? []) as NotificationMetadataRow[]) {
+        const metadata = row.metadata;
+        if (!metadata) continue;
+
+        const taskId = typeof metadata.taskId === 'string' ? metadata.taskId : null;
+        if (!taskId || !claimReadyTaskIds.has(taskId) || latestCookSnapshotByTaskId.has(taskId)) {
+          continue;
+        }
+
+        if (metadata.cookReady !== true) {
+          continue;
+        }
+
+        const cookDish =
+          metadata.cookDish && typeof metadata.cookDish === 'object'
+            ? (metadata.cookDish as Record<string, unknown>)
+            : null;
+
+        const dishName = cookDish && typeof cookDish.name === 'string' ? cookDish.name : null;
+        const dishImageUrl =
+          cookDish && typeof cookDish.imageUrl === 'string' ? cookDish.imageUrl : null;
+        const orderCountValue = Number(metadata.cookOrderCount ?? Number.NaN);
+
+        latestCookSnapshotByTaskId.set(taskId, {
+          dishName,
+          dishImageUrl,
+          orderCount: Number.isFinite(orderCountValue) ? Math.max(1, orderCountValue) : null,
+        });
+      }
+
+      for (const task of taskItems) {
+        const snapshot = latestCookSnapshotByTaskId.get(task.id);
+        if (!snapshot) continue;
+
+        task.cookDishName = snapshot.dishName;
+        task.cookDishImageUrl = snapshot.dishImageUrl;
+        task.cookOrderCount = snapshot.orderCount;
+      }
+    }
+  }
+
+  for (const item of taskItems) {
+    const status = (item.status ?? '').toLowerCase();
 
     if (status === 'assigned') {
       currentTasks.push(item);
@@ -130,11 +207,101 @@ export async function fetchEmployeeTasks(): Promise<ServerActionResponse<Employe
 export interface ClaimTaskResult {
   pointsAdded: number;
   xpAdded: number;
+  cookOutcome: CookOutcome;
+}
+
+export interface CookDishResult {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  requiredLevel: number;
+  rngMatched: boolean;
+}
+
+export interface CookOutcome {
+  canPrepareFood: boolean;
+  orderCount: number;
+  maxOrders: number;
+  dish: CookDishResult | null;
+}
+
+interface DishRow {
+  id: string;
+  name: string | null;
+  img_link: string | null;
+  rng: number | null;
+  start_appear_level: number | null;
 }
 
 export interface SubmitVerificationResult {
   success: boolean;
   pendingOrdersSubmitted: number;
+}
+
+export async function serveCookedTaskDish(
+  kpitaskId: string
+): Promise<ServerActionResponse<boolean>> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: 'Not authenticated', data: undefined };
+  }
+
+  const { data: task, error: taskError } = await supabase
+    .from('task_info_view')
+    .select('assigned_to, status, points_claimed_at, completed_orders, max_orders, kpitask_completed_at')
+    .eq('kpitask_id', kpitaskId)
+    .single();
+
+  if (taskError || !task) {
+    return { error: 'Task not found', data: undefined };
+  }
+
+  const assignedTo = (task as { assigned_to: string | null }).assigned_to;
+  const status = ((task as { status: string | null }).status ?? '').toLowerCase();
+  const pointsClaimedAt = (task as { points_claimed_at: string | null }).points_claimed_at;
+  const completedOrders = (task as { completed_orders: number | null }).completed_orders ?? 0;
+  const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
+  const completedAt = (task as { kpitask_completed_at: string | null }).kpitask_completed_at;
+
+  if (assignedTo !== user.id) {
+    return { error: 'You can only serve dishes for your own task', data: undefined };
+  }
+
+  if (status !== 'approved') {
+    return { error: 'Only approved tasks can be served', data: undefined };
+  }
+
+  if (!pointsClaimedAt) {
+    return { error: 'Claim task rewards first before serving food', data: undefined };
+  }
+
+  if (completedOrders < maxOrders) {
+    return { error: 'Only fully completed tasks can be served', data: undefined };
+  }
+
+  if (completedAt) {
+    return { error: null, data: true };
+  }
+
+  const { error: updateError } = await supabaseAdmin
+    .from('KPITask')
+    .update({
+      completed_at: new Date().toISOString(),
+    })
+    .eq('id', kpitaskId)
+    .eq('assigned_to', user.id);
+
+  if (updateError) {
+    return { error: 'Failed to mark task as served: ' + updateError.message, data: undefined };
+  }
+
+  return { error: null, data: true };
 }
 
 export async function submitTaskVerification(
@@ -202,6 +369,7 @@ export async function submitTaskVerification(
     .update({
       status: 'in review',
       pending_orders: pendingOrders,
+      verification_requested_at: new Date().toISOString(),
     })
     .eq('id', kpitaskId)
     .eq('assigned_to', user.id);
@@ -348,6 +516,7 @@ export async function claimTaskPointsAndXP(
   const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
   const pendingOrders = (task as { pending_orders: number | null }).pending_orders ?? 0;
   const categoryName = (task as { category_name: string | null }).category_name ?? 'Task';
+  const isLastOrderClaim = pendingOrders > 0 && completedOrders >= maxOrders;
 
   if (assignedTo !== user.id) {
     return { error: 'You can only claim rewards for tasks assigned to you', data: undefined };
@@ -485,6 +654,50 @@ export async function claimTaskPointsAndXP(
     return { error: 'Failed to mark task as claimed', data: undefined };
   }
 
+  let cookOutcome: CookOutcome = {
+    canPrepareFood: false,
+    orderCount: maxOrders,
+    maxOrders,
+    dish: null,
+  };
+
+  if (isLastOrderClaim) {
+    const { data: dishRows, error: dishError } = await supabase
+      .from('Dishes')
+      .select('id, name, img_link, rng, start_appear_level')
+      .lte('start_appear_level', newLevel);
+
+    if (!dishError) {
+      const eligibleDishes = (dishRows ?? []) as DishRow[];
+
+      if (eligibleDishes.length > 0) {
+        const randomDish = eligibleDishes[Math.floor(Math.random() * eligibleDishes.length)];
+        const dishRng = Number(randomDish.rng ?? 1);
+        const rngMatched = Math.random() <= dishRng;
+
+        cookOutcome = {
+          canPrepareFood: true,
+          orderCount: maxOrders,
+          maxOrders,
+          dish: {
+            id: randomDish.id,
+            name: randomDish.name ?? 'Dish',
+            imageUrl: randomDish.img_link,
+            requiredLevel: randomDish.start_appear_level ?? 1,
+            rngMatched,
+          },
+        };
+      } else {
+        cookOutcome = {
+          canPrepareFood: true,
+          orderCount: maxOrders,
+          maxOrders,
+          dish: null,
+        };
+      }
+    }
+  }
+
   // Build notification message
   const pointsEarned = pointsToAdd;
   let notificationMessage = `You have claimed ${pointsEarned} points for completing the task "${categoryName}."`;
@@ -508,11 +721,14 @@ export async function claimTaskPointsAndXP(
       leveledUp: newLevel > currentLevel,
       newLevel,
       previousLevel: currentLevel,
+      cookReady: cookOutcome.canPrepareFood,
+      cookDish: cookOutcome.dish,
+      cookOrderCount: cookOutcome.orderCount,
     },
   });
 
   return {
     error: null,
-    data: { pointsAdded: pointsToAdd, xpAdded: categoryXp * pendingOrders },
+    data: { pointsAdded: pointsToAdd, xpAdded: categoryXp * pendingOrders, cookOutcome },
   };
 }
