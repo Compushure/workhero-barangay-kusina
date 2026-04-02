@@ -426,13 +426,13 @@ export function CookingSceneOverlay({
                       : { opacity: 1, y: 0, scale: 1 }
                   }
                   transition={{ duration: 0.28, delay: 0.18 }}
-                  className="absolute bottom-[6%] left-1/2 z-20 -translate-x-1/2"
+                  className="absolute bottom-[18%] left-1/2 z-20 -translate-x-1/2"
                 >
                   <Button
                     type="button"
                     onClick={onServe}
                     disabled={phase !== 'revealed' || !shouldShowRevealedDishes || isServePending}
-                    className="pointer-events-auto h-[3.7rem] min-w-41 rounded-lg border-[3px] border-[#47331F] bg-[#f4bf21] px-7 text-[1.75rem] text-[#2b180b] shadow-[0_5px_0_#2d160e] transition-transform hover:-translate-y-0.5 hover:bg-[#ffd34b] hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.75)] disabled:cursor-not-allowed disabled:opacity-70"
+                    className="pointer-events-auto h-[3.7rem] min-w-41 rounded-lg border-[3px] border-[#47331F] bg-[#f4bf21] px-7 text-[1.75rem] text-[#2b180b] shadow-[0_5px_0_#2d160e] transition-transform hover:-translate-y-0.5 hover:bg-[#ffd34b] hover:drop-shadow-[0_0_16px_rgba(255,255,255,0.75)] hover:border-[#52361a] disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {isServePending || phase === 'serving' ? 'Serving...' : 'Serve'}
                   </Button>

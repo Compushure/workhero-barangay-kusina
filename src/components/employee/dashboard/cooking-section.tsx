@@ -238,8 +238,11 @@ export default function CookingSection({ className = '' }: { className?: string 
             style={
               isCooking ? {
               filter:
-                'drop-shadow(0 8px 16px rgba(0,0,0,0.45)) drop-shadow(0 0 16px rgba(255,204,110,0.65)) drop-shadow(0 0 20px rgba(244,120,18,0.5))',
-            } : null}
+                'drop-shadow(0 0 16px rgba(255,204,110,0.65)) drop-shadow(0 0 20px rgba(244,120,18,0.5))',
+            } : {
+              filter:
+                'drop-shadow(0 0 12px rgba(255,204,110,0.75))',
+            }}
             animate={
               isCooking
                 ? {
