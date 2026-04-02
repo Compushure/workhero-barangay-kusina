@@ -156,7 +156,7 @@ export default function CookingSection({ className = '' }: { className?: string 
           {isCooking ? (
             <motion.div
               aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-[56%] z-0 -translate-x-1/2 -translate-y-1/2"
+              className="pointer-events-none absolute left-1/2 top-[45%] z-0 -translate-x-1/2 -translate-y-1/2"
               animate={{
                 opacity: [1, 1, 1],
                 scale: [1.08, 1.18, 1.1],
@@ -171,7 +171,7 @@ export default function CookingSection({ className = '' }: { className?: string 
               <FlameSprite
                 variant="pot"
                 scale={9}
-                className="drop-shadow-[0_0_28px_rgba(255,144,34,0.8)] -top-8"
+                className="drop-shadow-[0_0_28px_rgba(255,144,34,0.8)]"
               />
             </motion.div>
           ) : null}

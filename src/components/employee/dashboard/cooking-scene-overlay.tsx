@@ -213,7 +213,7 @@ export function CookingSceneOverlay({
                       animate={{ opacity: [0.98, 1, 0], scale: [0.88, 1.02, 1.08], y: [10, 0, -6] }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.62, ease: 'easeOut' }}
-                      className="pointer-events-none absolute left-1/2 top-[50%] z-30 -translate-x-1/2 -translate-y-1/2"
+                      className="pointer-events-none absolute left-1/2 top-[45%] z-30 -translate-x-1/2 -translate-y-1/2"
                     >
                       <FlameSprite
                         variant="dishReveal"
