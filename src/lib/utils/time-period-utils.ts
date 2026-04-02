@@ -151,21 +151,21 @@ export function buildPeriodLabel(
 }
 
 /**
- * Returns the start (Monday) and end (Sunday) of the given ISO week in Manila-local dates.
+ * Returns the start (Monday) and end (Saturday) of the given ISO week in Manila-local dates.
  */
 export function getISOWeekDateRange(isoYear: number, isoWeek: number): { start: Date; end: Date } {
   const week1Monday = startOfISOWeek(ISO_WEEK_1_ANCHOR(isoYear));
   const targetMonday = addWeeks(week1Monday, isoWeek - 1);
-  const targetSunday = addDays(targetMonday, 6);
+  const targetSaturday = addDays(targetMonday, 5);
 
   return {
     start: manilaStartOfDay(targetMonday),
-    end: manilaStartOfDay(targetSunday),
+    end: manilaStartOfDay(targetSaturday),
   };
 }
 
 /**
- * Returns a short label for the ISO week date range, e.g. "Jan 27 - Feb 2, 2026".
+ * Returns a short label for the ISO week date range, e.g. "Jan 27 - Feb 1, 2026".
  */
 export function getISOWeekDateRangeLabel(isoYear: number, isoWeek: number): string {
   const { start, end } = getISOWeekDateRange(isoYear, isoWeek);
@@ -173,7 +173,7 @@ export function getISOWeekDateRangeLabel(isoYear: number, isoWeek: number): stri
 }
 
 /**
- * Returns a compact ISO week date range, e.g. "Mar 9-15, 2026"
+ * Returns a compact ISO week date range, e.g. "Mar 9-14, 2026"
  * or "Feb 23-Mar 1, 2026" when the week crosses months.
  */
 export function getISOWeekDateRangeLabelShort(isoYear: number, isoWeek: number): string {
@@ -227,7 +227,7 @@ export function getPeriodStartEnd(
 
 /**
  * Returns a human-readable date range subtitle, or null when not applicable.
- * For weekly rankings: "Jan 27 - Feb 2, 2026" (derived from period_start date).
+ * For weekly rankings: "Jan 27 - Feb 1, 2026" (derived from period_start date).
  */
 export function getPeriodDateRangeSubtitle(ranking: {
   period_type: RankingPeriodType;
@@ -235,7 +235,7 @@ export function getPeriodDateRangeSubtitle(ranking: {
 }): string | null {
   if (ranking.period_type === 'weekly') {
     const start = parseManilaDateString(ranking.period_start);
-    const end = addDays(start, 6);
+    const end = addDays(start, 5);
     return `${format(start, 'MMM d')} - ${format(end, 'MMM d, yyyy')}`;
   }
   return null;

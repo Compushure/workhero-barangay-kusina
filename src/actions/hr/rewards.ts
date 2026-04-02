@@ -47,15 +47,24 @@ function toAnchorString(date?: Date | string | null): string | null {
 }
 
 /**
- * Returns the Sunday-start beginning of the week for a given date.
+ * Returns the Monday-start beginning of the week for a given date.
  * This is used for weekly interval comparisons.
  */
-function startOfWeekSunday(date: Date): Date {
+function startOfWeekMonday(date: Date): Date {
   const copy = new Date(date);
   const day = copy.getDay();
-  copy.setDate(copy.getDate() - day);
+  const daysFromMonday = (day + 6) % 7;
+  copy.setDate(copy.getDate() - daysFromMonday);
   copy.setHours(0, 0, 0, 0);
   return copy;
+}
+
+function getWeeklyIntervalRange(date: Date): { start: Date; end: Date } {
+  const start = startOfWeekMonday(date);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 5);
+
+  return { start, end };
 }
 
 /**
@@ -77,7 +86,9 @@ function isDateInCurrentInterval(anchorDate: Date | null, interval: 'weekly' | '
   const now = new Date();
 
   if (interval === 'weekly') {
-    return startOfWeekSunday(anchorDate).getTime() === startOfWeekSunday(now).getTime();
+    const { start, end } = getWeeklyIntervalRange(anchorDate);
+    const today = startOfDayLocal(now);
+    return today.getTime() >= start.getTime() && today.getTime() <= end.getTime();
   }
 
   if (interval === 'monthly') {

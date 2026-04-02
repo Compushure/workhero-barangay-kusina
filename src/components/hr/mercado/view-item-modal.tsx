@@ -5,7 +5,7 @@ import { ImageIcon, X, Calendar } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { isItemAvailableNow } from '@/utils/date-utils';
+import { hasItemPassedAvailabilityInterval } from '@/utils/date-utils';
 import {
   AvailabilityValue,
   formatAvailabilityLabel,
@@ -38,8 +38,18 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
 
   if (!item) return null;
 
-  // Check if item is scheduled for future
-  const isScheduled = item.availableDate && !isItemAvailableNow(item.availableDate);
+  const availabilityInterval =
+    item.availableMonth === 'weekly' ||
+    item.availableMonth === 'monthly' ||
+    item.availableMonth === 'yearly'
+      ? item.availableMonth
+      : null;
+
+  const isAvailabilityExpired = hasItemPassedAvailabilityInterval(
+    item.availableDate,
+    availabilityInterval
+  );
+  const shouldShowHiddenBadge = !item.isActive || isAvailabilityExpired;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -91,19 +101,27 @@ export function ViewItemModal({ open, onOpenChange, onEdit, item }: ViewItemModa
                 {item.name}
               </p>
               <div className="flex items-center gap-2 flex-wrap justify-center">
-                {isScheduled && (
+                {item.availableDate && (
                   <Badge
                     variant="secondary"
-                    className="rounded-lg border border-accent/25 bg-accent/10 text-[11px] font-semibold uppercase tracking-wide text-accent"
+                    className={`rounded-lg text-[11px] font-semibold uppercase tracking-wide ${
+                      isAvailabilityExpired
+                        ? 'border border-red-300 bg-red-50 text-red-700'
+                        : 'border border-accent/25 bg-accent/10 text-accent'
+                    }`}
                   >
                     <Calendar className="h-3 w-3 mr-1" />
                     Available {formatDateShort(item.availableDate)}
                   </Badge>
                 )}
-                {!item.isActive && (
+                {shouldShowHiddenBadge && (
                   <Badge
                     variant="secondary"
-                    className="rounded-lg border border-border bg-muted/70 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+                    className={`rounded-lg text-[11px] font-semibold uppercase tracking-wide ${
+                      isAvailabilityExpired
+                        ? 'border border-red-300 bg-red-50 text-red-700'
+                        : 'border border-border bg-muted/70 text-muted-foreground'
+                    }`}
                   >
                     Hidden
                   </Badge>
