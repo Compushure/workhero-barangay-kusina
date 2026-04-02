@@ -121,6 +121,7 @@ export async function fetchEmployeeTasks(): Promise<ServerActionResponse<Employe
         (task) =>
           task.status === 'approved' &&
           task.completedOrders === task.maxOrders &&
+          task.pendingOrders === 0 &&
           Boolean(task.claimedAt) &&
           !task.completedAt
       )
