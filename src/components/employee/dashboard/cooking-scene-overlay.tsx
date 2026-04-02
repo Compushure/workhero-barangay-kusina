@@ -68,7 +68,7 @@ export function CookingSceneOverlay({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.28, ease: 'easeOut' }}
-          className="fixed inset-0 z-220 h-screen max-h-screen overflow-hidden bg-black/78 backdrop-blur-[2px]"
+          className="fixed inset-0 z-220 h-screen max-h-screen overflow-hidden bg-black/75 backdrop-blur-[2px]"
         >
           <div
             className="absolute inset-0"
@@ -94,7 +94,7 @@ export function CookingSceneOverlay({
                 initial={{ opacity: 0, y: -18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.08 }}
-                className="absolute left-1/2 top-[10%] z-20 w-full max-w-120 -translate-x-1/2 px-4 text-center bg-amber-950/50 py-2 rounded-lg"
+                className="absolute left-1/2 top-[10%] z-20 w-full max-w-120 -translate-x-1/2 px-4 text-center wood-panel py-2 rounded-lg shadow-[0_2px_0_#2d160e]/50"
               >
                 <p className="text-[1.25rem] tracking-[0.2em] leading-5 text-[#ffe38a] drop-shadow-[0_1.75px_0_#301705]">
                   {overlayTitle}
@@ -115,7 +115,7 @@ export function CookingSceneOverlay({
                     width: sceneLayout.glowSize,
                     height: sceneLayout.glowSize,
                     background:
-                      'radial-gradient(circle, rgba(255,250,228,0.72) 0%, rgba(255,232,163,0.38) 34%, rgba(255,255,255,0) 70%)',
+                      'radial-gradient(circle, rgba(255,246,179,0.72) 0%, rgba(255,246,179,0.38) 34%, rgba(255,246,179,0) 70%)',
                     filter: 'blur(20px)',
                   }}
                 />
@@ -157,7 +157,7 @@ export function CookingSceneOverlay({
                     width: `calc(${sceneLayout.glowSize} * ${AURA_RADIUS_SCALE})`,
                     height: `calc(${sceneLayout.glowSize} * ${AURA_RADIUS_SCALE})`,
                     backgroundImage:
-                      'conic-gradient(from 0deg, rgba(255,255,255,0) 0deg, rgba(255,255,255,0.94) 18deg, rgba(255,255,255,0) 34deg, rgba(255,255,255,0) 72deg, rgba(255,248,220,0.82) 88deg, rgba(255,255,255,0) 106deg, rgba(255,255,255,0) 148deg, rgba(255,255,255,0.88) 180deg, rgba(255,255,255,0) 198deg, rgba(255,255,255,0) 236deg, rgba(255,243,201,0.78) 262deg, rgba(255,255,255,0) 280deg, rgba(255,255,255,0) 326deg, rgba(255,255,255,0.76) 344deg, rgba(255,255,255,0) 360deg)',
+                      'conic-gradient(from 0deg, rgba(255,246,179,0) 0deg, rgba(255,246,179,0.94) 18deg, rgba(255,246,179,0) 34deg, rgba(255,246,179,0) 72deg, rgba(255,246,179,0.82) 88deg, rgba(255,246,179,0) 106deg, rgba(255,246,179,0) 148deg, rgba(255,246,179,0.88) 180deg, rgba(255,246,179,0) 198deg, rgba(255,246,179,0) 236deg, rgba(255,246,179,0.78) 262deg, rgba(255,246,179,0) 280deg, rgba(255,246,179,0) 326deg, rgba(255,246,179,0.76) 344deg, rgba(255,246,179,0) 360deg)',
                     filter: 'blur(2px)',
                     mixBlendMode: 'screen',
                   }}
@@ -221,7 +221,7 @@ export function CookingSceneOverlay({
                     >
                       <motion.span
                         aria-hidden="true"
-                        className="pointer-events-none absolute inset-[10%] rounded-full bg-white mix-blend-screen"
+                        className="pointer-events-none absolute inset-[10%] rounded-full bg-amber-50/75 mix-blend-screen"
                         initial={{ opacity: 0.96, scale: 0.58, filter: 'blur(14px)' }}
                         animate={
                           phase === 'serving'
@@ -229,7 +229,7 @@ export function CookingSceneOverlay({
                             : {
                                 opacity: [0.96, 0.56, 0.14],
                                 scale: [0.58, 1.08, 1],
-                                filter: ['blur(14px)', 'blur(8px)', 'blur(4px)'],
+                                filter: ['blur(10px)', 'blur(8px)', 'blur(4px)'],
                               }
                         }
                         transition={{
@@ -246,7 +246,7 @@ export function CookingSceneOverlay({
                         className="pointer-events-none absolute inset-[4%] rounded-full"
                         style={{
                           background:
-                            'radial-gradient(circle, rgba(255,255,255,0.82) 0%, rgba(255,248,224,0.52) 34%, rgba(255,255,255,0) 74%)',
+                            'radial-gradient(circle, rgba(255,255,100,0.82) 0%, rgba(255,255,100,0.52) 34%, rgba(255,255,100,0) 74%)',
                         }}
                         initial={{ opacity: 0.92, scale: 0.68, filter: 'blur(16px)' }}
                         animate={
@@ -272,7 +272,7 @@ export function CookingSceneOverlay({
                         className="pointer-events-none absolute inset-[-16%] rounded-full"
                         style={{
                           background:
-                            'radial-gradient(circle, rgba(255,248,206,0.45) 0%, rgba(255,245,190,0.22) 36%, rgba(255,255,255,0) 72%)',
+                            'radial-gradient(circle, rgba(255,255,200,0.5) 0%, rgba(255,255,200,0.5) 36%, rgba(255,255,200,0.50) 72%)',
                         }}
                         initial={{ opacity: 0, scale: 0.54, filter: 'blur(20px)' }}
                         animate={
@@ -319,7 +319,7 @@ export function CookingSceneOverlay({
                       initial={{ opacity: 0, scale: 0.86, y: -10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       transition={{ duration: 0.24, delay: 0.28 }}
-                      className="absolute -right-20 -top-8 z-30 flex items-center gap-2 rounded-xl wood-panel px-3 py-2 shadow-[0_5px_0_#2d160e]/50"
+                      className="absolute -right-22 -top-12 z-30 flex items-center gap-2 rounded-xl wood-panel px-3 py-2 shadow-[0_2px_0_#2d160e]/50"
                     >
                       <div className="relative h-11 w-11 shrink-0">
                         <Image
@@ -351,7 +351,7 @@ export function CookingSceneOverlay({
                     type="button"
                     onClick={onServe}
                     disabled={phase !== 'revealed' || isServePending}
-                    className="pointer-events-auto h-[3.7rem] min-w-41 rounded-lg border-[3px] border-[#47331F] bg-[#f4bf21] px-7 text-[1.75rem] text-[#2b180b] shadow-[0_0_0_2px_rgba(255,243,193,0.22),0_9px_0_#5a3415] transition-transform hover:-translate-y-0.5 hover:bg-[#ffd34b] disabled:cursor-not-allowed disabled:opacity-70"
+                    className="pointer-events-auto h-[3.7rem] min-w-41 rounded-lg border-[3px] border-[#47331F] bg-[#f4bf21] px-7 text-[1.75rem] text-[#2b180b] shadow-[0_5px_0_#2d160e] transition-transform hover:-translate-y-0.5 hover:bg-[#ffd34b] disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {isServePending || phase === 'serving' ? 'Serving...' : 'Serve'}
                   </Button>
