@@ -225,12 +225,21 @@ export default function CookingSection({ className = '' }: { className?: string 
                 ease: 'easeInOut',
               }}
             >
-              <FlameSprite variant="pot" scale={9} className="" />
+              <FlameSprite
+                variant="pot"
+                scale={9}
+                className="filter-[brightness(1.24)_saturate(1.18)_contrast(1.08)_drop-shadow(0_0_12px_rgba(255,215,130,0.9))_drop-shadow(0_0_20px_rgba(245,135,35,0.62))]"
+              />
             </motion.div>
           ) : null}
 
           <motion.div
-            className="relative z-10 size-52 overflow-visible drop-shadow-[0_8px_16px_rgba(0,0,0,0.45)] sm:size-64"
+            className="relative z-10 size-52 overflow-visible sm:size-64"
+            style={
+              isCooking ? {
+              filter:
+                'drop-shadow(0 8px 16px rgba(0,0,0,0.45)) drop-shadow(0 0 16px rgba(255,204,110,0.65)) drop-shadow(0 0 20px rgba(244,120,18,0.5))',
+            } : null}
             animate={
               isCooking
                 ? {
