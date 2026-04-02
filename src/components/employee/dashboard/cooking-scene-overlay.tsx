@@ -131,13 +131,14 @@ export function CookingSceneOverlay({
               transition={{ duration: 0.32, ease: 'easeOut' }}
               className="relative h-full w-full max-w-[min(96vw,58rem)] overflow-hidden"
             >
+              {/* Title Card on top */}
               <motion.div
                 initial={{ opacity: 0, y: -18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.08 }}
-                className="absolute left-1/2 top-[10%] z-20 w-full max-w-120 -translate-x-1/2 px-4 text-center wood-panel py-2 rounded-lg shadow-[0_2px_0_#2d160e]/50"
+                className="absolute left-1/2 top-[10%] z-20 w-full max-w-120 -translate-x-1/2 px-3 text-center wood-panel py-2 rounded-lg shadow-[0_2px_0_#2d160e]/50"
               >
-                <p className="text-[1.25rem] tracking-[0.2em] leading-5 text-[#ffe38a] drop-shadow-[0_1.75px_0_#301705]">
+                <p className="text-[1.25rem] tracking-[0.2em] leading-6 text-[#ffe38a] drop-shadow-[0_1.75px_0_#301705]">
                   {overlayTitle}
                 </p>
                 <h2 className="text-[2rem] text-[#ffd54a] drop-shadow-[0_1.75px_0_#301705]">
@@ -146,6 +147,8 @@ export function CookingSceneOverlay({
               </motion.div>
 
               <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
+                
+                {/* light rays part */}
                 <motion.div
                   aria-hidden="true"
                   initial={{ opacity: 0, scale: 0.88 }}
@@ -204,6 +207,7 @@ export function CookingSceneOverlay({
                   }}
                 />
 
+                {/* dish reveal blue flame */}
                 <AnimatePresence>
                   {phase === 'revealed' && isRevealFlameBurstActive ? (
                     <motion.div
@@ -225,6 +229,7 @@ export function CookingSceneOverlay({
                   ) : null}
                 </AnimatePresence>
 
+                {/* the dishes at the center */}
                 <div
                   className="relative z-20 flex items-center justify-center"
                   style={{
@@ -394,7 +399,7 @@ export function CookingSceneOverlay({
                       initial={{ opacity: 0, scale: 0.86, y: -10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       transition={{ duration: 0.24, delay: 0.28 }}
-                      className="absolute -right-22 -top-12 z-30 flex items-center gap-2 rounded-xl wood-panel px-3 py-2 shadow-[0_2px_0_#2d160e]/50"
+                      className="absolute -right-22 -top-14 z-30 flex items-center gap-2 rounded-xl wood-panel px-3 py-2 shadow-[0_2px_0_#2d160e]/50"
                     >
                       <div className="relative h-11 w-11 shrink-0">
                         <Image
@@ -402,16 +407,17 @@ export function CookingSceneOverlay({
                           alt=""
                           fill
                           sizes="48px"
-                          className="pixelated object-contain"
+                          className="pixelated object-contain drop-shadow-[0_0_2px_rgba(255,255,255,0.4)]"
                         />
                       </div>
-                      <span className="font-pixel text-[1.45rem] leading-none text-[#fff0cb]">
+                      <span className="font-pixel text-[1.5rem] leading-none text-[#fff0cb]">
                         x {actualOrderCount}
                       </span>
                     </motion.div>
                   ) : null}
                 </div>
 
+                {/* hit the serve button */}
                 <motion.div
                   initial={{ opacity: 0, y: 18 }}
                   animate={
@@ -426,7 +432,7 @@ export function CookingSceneOverlay({
                     type="button"
                     onClick={onServe}
                     disabled={phase !== 'revealed' || !shouldShowRevealedDishes || isServePending}
-                    className="pointer-events-auto h-[3.7rem] min-w-41 rounded-lg border-[3px] border-[#47331F] bg-[#f4bf21] px-7 text-[1.75rem] text-[#2b180b] shadow-[0_5px_0_#2d160e] transition-transform hover:-translate-y-0.5 hover:bg-[#ffd34b] disabled:cursor-not-allowed disabled:opacity-70"
+                    className="pointer-events-auto h-[3.7rem] min-w-41 rounded-lg border-[3px] border-[#47331F] bg-[#f4bf21] px-7 text-[1.75rem] text-[#2b180b] shadow-[0_5px_0_#2d160e] transition-transform hover:-translate-y-0.5 hover:bg-[#ffd34b] hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.75)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {isServePending || phase === 'serving' ? 'Serving...' : 'Serve'}
                   </Button>

@@ -16,6 +16,63 @@ const DEFAULT_DISH_IMAGE = '/assets/dish/food-sinigang.png';
 const COOKING_REVEAL_DELAY_MS = 2100;
 const SERVE_EXIT_DELAY_MS = 680;
 const MAX_VISIBLE_DISHES = 3;
+const COOKING_BUBBLE_COUNT = 16;
+
+interface CookingBubbleSpec {
+  id: string;
+  leftPercent: number;
+  topPercent: number;
+  sizeRem: number;
+  rise: number;
+  xDrift: number;
+  startScale: number;
+  midScale: number;
+  endScale: number;
+  maxOpacity: number;
+  duration: number;
+  delay: number;
+  repeatDelay: number;
+  glowRadius: number;
+  glowOpacity: number;
+}
+
+function createSeededRandom(seed: number) {
+  let state = seed >>> 0;
+
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function buildCookingBubbleSpecs(count: number): CookingBubbleSpec[] {
+  const random = createSeededRandom(20260402);
+
+  return Array.from({ length: count }, (_, index) => {
+    const sizeRem = 0.75 + random() * 0.65;
+    const duration = 1.25 + random() * 0.95;
+
+    return {
+      id: `cooking-bubble-${index}`,
+      leftPercent: 6 + random() * 88,
+      topPercent: 0 + random() * 26,
+      sizeRem,
+      rise: 12 + random() * 40,
+      xDrift: -7 + random() * 18,
+      startScale: 0.62 + random() * 0.25,
+      midScale: 0.92 + random() * 0.2,
+      endScale: 1.08 + random() * 0.22,
+      maxOpacity: 0.84 + random() * 0.16,
+      duration,
+      delay: random() * 0.95,
+      repeatDelay: random() * 0.3,
+      glowRadius: 7 + random() * 7,
+      glowOpacity: 0.58 + random() * 0.3,
+    };
+  });
+}
 
 function getDishSceneLayout(orderCount: number) {
   const displayedDishCount = Math.min(MAX_VISIBLE_DISHES, Math.max(1, orderCount));
@@ -63,6 +120,7 @@ export default function CookingSection({ className = '' }: { className?: string 
   const orderLabel = `${actualOrderCount} order${actualOrderCount === 1 ? '' : 's'}`;
   const sceneLayout = useMemo(() => getDishSceneLayout(actualOrderCount), [actualOrderCount]);
   const shouldShowDishMultiplier = actualOrderCount > MAX_VISIBLE_DISHES;
+  const cookingBubbleSpecs = useMemo(() => buildCookingBubbleSpecs(COOKING_BUBBLE_COUNT), []);
 
   const dishSlots = useMemo(() => {
     return Array.from({ length: sceneLayout.displayedDishCount }).map((_, index) => ({
@@ -158,21 +216,16 @@ export default function CookingSection({ className = '' }: { className?: string 
               aria-hidden="true"
               className="pointer-events-none absolute left-1/2 top-[45%] z-0 -translate-x-1/2 -translate-y-1/2"
               animate={{
-                opacity: [1, 1, 1],
                 scale: [1.08, 1.18, 1.1],
               }}
               transition={{
-                duration: 0.95,
+                duration: 1,
                 repeat: Infinity,
                 repeatType: 'loop',
                 ease: 'easeInOut',
               }}
             >
-              <FlameSprite
-                variant="pot"
-                scale={9}
-                className="drop-shadow-[0_0_28px_rgba(255,144,34,0.8)]"
-              />
+              <FlameSprite variant="pot" scale={9} className="" />
             </motion.div>
           ) : null}
 
@@ -226,37 +279,35 @@ export default function CookingSection({ className = '' }: { className?: string 
               />
             </motion.div>
 
-            {isCooking ? (
-              <>
-                <motion.span
-                  className="absolute left-10 top-6 z-10 h-4 w-4 rounded-full bg-[#fff4da]/75 blur-[0.5px]"
-                  animate={{
-                    opacity: [0, 0.8, 0],
-                    y: [0, -11, -22],
-                    scale: [0.7, 1, 1.18],
-                  }}
-                  transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
-                />
-                <motion.span
-                  className="absolute right-10 top-8 z-10 h-3 w-3 rounded-full bg-[#fff4da]/70 blur-[0.5px]"
-                  animate={{
-                    opacity: [0, 0.78, 0],
-                    y: [0, -10, -21],
-                    scale: [0.7, 0.98, 1.14],
-                  }}
-                  transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut', delay: 0.28 }}
-                />
-                <motion.span
-                  className="absolute left-1/2 top-2 z-10 h-5 w-5 -translate-x-1/2 rounded-full bg-[#fff4da]/80 blur-[0.5px]"
-                  animate={{
-                    opacity: [0, 0.82, 0],
-                    y: [0, -12, -24],
-                    scale: [0.72, 1.03, 1.2],
-                  }}
-                  transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut', delay: 0.56 }}
-                />
-              </>
-            ) : null}
+            {isCooking
+              ? cookingBubbleSpecs.map((bubble) => (
+                  <motion.span
+                    key={bubble.id}
+                    className="absolute z-30 rounded-full bg-[#fff8df]/95 blur-[0.35px]"
+                    style={{
+                      left: `${bubble.leftPercent}%`,
+                      top: `${bubble.topPercent}%`,
+                      width: `${bubble.sizeRem}rem`,
+                      height: `${bubble.sizeRem}rem`,
+                      boxShadow: `0 0 ${bubble.glowRadius}px rgba(255, 246, 210, ${bubble.glowOpacity})`,
+                    }}
+                    animate={{
+                      opacity: [0, bubble.maxOpacity, 0],
+                      y: [0, -bubble.rise * 0.55, -bubble.rise],
+                      x: [0, bubble.xDrift, 0],
+                      scale: [bubble.startScale, bubble.midScale, bubble.endScale],
+                    }}
+                    transition={{
+                      duration: bubble.duration,
+                      repeat: Infinity,
+                      repeatType: 'loop',
+                      repeatDelay: bubble.repeatDelay,
+                      ease: 'easeInOut',
+                      delay: bubble.delay,
+                    }}
+                  />
+                ))
+              : null}
           </motion.div>
         </motion.div>
       </CardContent>
