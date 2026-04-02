@@ -497,6 +497,26 @@
     animation: serve-away 0.58s ease-in forwards;
   }
 
+  .flame-sprite-sheet {
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    will-change: background-position;
+  }
+
+  .animate-pot-flame-sprite {
+    animation: pot-flame-sprite 0.56s steps(4) infinite;
+  }
+
+  .animate-dish-reveal-flame-sprite {
+    animation: dish-reveal-flame-sprite 0.56s steps(8) infinite;
+  }
+
+  .flame-sprite-paused {
+    animation-play-state: paused;
+  }
+
   .bg-primary-gradient {
     background-image: var(--primary-gradient);
   }
@@ -780,5 +800,23 @@
   100% {
     opacity: 0;
     transform: translateY(-16px) scale(0.7);
+  }
+}
+
+@keyframes pot-flame-sprite {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: -128px;
+  }
+}
+
+@keyframes dish-reveal-flame-sprite {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: -256px;
   }
 }

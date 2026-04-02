@@ -2,11 +2,14 @@
 
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { type CookingLaunchPayload } from '@/store/cookingStore';
+import { FlameSprite } from './flame-sprite';
 
 const AURA_RADIUS_SCALE = 1.15;
+const DISH_REVEAL_FLAME_BURST_MS = 680;
 
 type CookingPhase = 'idle' | 'cooking' | 'revealed' | 'serving';
 
@@ -55,6 +58,44 @@ export function CookingSceneOverlay({
   onServe,
   isServePending,
 }: CookingSceneOverlayProps) {
+  const [isRevealFlameBurstActive, setIsRevealFlameBurstActive] = useState(false);
+  const [revealFlameBurstKey, setRevealFlameBurstKey] = useState(0);
+  const revealFlameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (phase !== 'revealed') {
+      if (revealFlameTimerRef.current) {
+        clearTimeout(revealFlameTimerRef.current);
+        revealFlameTimerRef.current = null;
+      }
+
+      setIsRevealFlameBurstActive(false);
+      return;
+    }
+
+    if (revealFlameTimerRef.current) {
+      clearTimeout(revealFlameTimerRef.current);
+    }
+
+    setRevealFlameBurstKey((previous) => previous + 1);
+    setIsRevealFlameBurstActive(true);
+
+    revealFlameTimerRef.current = setTimeout(() => {
+      setIsRevealFlameBurstActive(false);
+      revealFlameTimerRef.current = null;
+    }, DISH_REVEAL_FLAME_BURST_MS);
+  }, [phase]);
+
+  useEffect(() => {
+    return () => {
+      if (revealFlameTimerRef.current) {
+        clearTimeout(revealFlameTimerRef.current);
+      }
+    };
+  }, []);
+
+  const shouldShowRevealedDishes = phase !== 'revealed' || !isRevealFlameBurstActive;
+
   if (!portalTarget || !trigger) {
     return null;
   }
@@ -163,6 +204,27 @@ export function CookingSceneOverlay({
                   }}
                 />
 
+                <AnimatePresence>
+                  {phase === 'revealed' && isRevealFlameBurstActive ? (
+                    <motion.div
+                      key={`reveal-flame-${revealFlameBurstKey}`}
+                      aria-hidden="true"
+                      initial={{ opacity: 0.98, scale: 0.88, y: 10 }}
+                      animate={{ opacity: [0.98, 1, 0], scale: [0.88, 1.02, 1.08], y: [10, 0, -6] }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.62, ease: 'easeOut' }}
+                      className="pointer-events-none absolute left-1/2 top-[50%] z-30 -translate-x-1/2 -translate-y-1/2"
+                    >
+                      <FlameSprite
+                        variant="dishReveal"
+                        scale={8.8}
+                        className="drop-shadow-[0_0_24px_rgba(113,193,255,0.8)]"
+                        loop={false}
+                      />
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+
                 <div
                   className="relative z-20 flex items-center justify-center"
                   style={{
@@ -173,7 +235,12 @@ export function CookingSceneOverlay({
                   {dishSlots.map((slot) => (
                     <motion.div
                       key={slot.key}
-                      initial={{ opacity: 0, scale: 0.22, y: 40, filter: 'blur(8px)' }}
+                      initial={{
+                        opacity: 0,
+                        scale: 1,
+                        y: 0,
+                        filter: 'blur(0px) brightness(1) saturate(1)',
+                      }}
                       animate={
                         phase === 'serving'
                           ? {
@@ -183,21 +250,27 @@ export function CookingSceneOverlay({
                               rotate: slot.index % 2 === 0 ? -11 : 11,
                               filter: 'blur(3px) brightness(3.1) saturate(0)',
                             }
-                          : {
-                              opacity: 1,
-                              scale: 1,
-                              y: [0, -10, 0],
-                              rotate: 0,
-                              filter: 'blur(0px) brightness(1) saturate(1)',
-                            }
+                          : !shouldShowRevealedDishes
+                            ? {
+                                opacity: 0,
+                                scale: 1,
+                                y: 0,
+                                rotate: 0,
+                                filter: 'blur(0px) brightness(1) saturate(1)',
+                              }
+                            : {
+                                opacity: 1,
+                                scale: 1,
+                                y: [0, -10, 0],
+                                rotate: 0,
+                                filter: 'blur(0px) brightness(1) saturate(1)',
+                              }
                       }
                       transition={{
-                        duration: phase === 'serving' ? 0.33 : 0.44,
-                        delay:
-                          phase === 'serving'
-                            ? Math.min(slot.index, 14) * 0.012
-                            : 0.14 + Math.min(slot.index, 18) * 0.04,
-                        ease: phase === 'serving' ? 'easeIn' : [0.2, 0.75, 0.28, 1],
+                        duration:
+                          phase === 'serving' ? 0.33 : shouldShowRevealedDishes ? 0.01 : 0.01,
+                        delay: phase === 'serving' ? Math.min(slot.index, 14) * 0.012 : 0,
+                        ease: phase === 'serving' ? 'easeIn' : 'easeOut',
                         y:
                           phase === 'serving'
                             ? {
@@ -205,13 +278,15 @@ export function CookingSceneOverlay({
                                 ease: 'easeIn',
                                 delay: Math.min(slot.index, 14) * 0.012,
                               }
-                            : {
-                                duration: 2,
-                                ease: 'easeInOut',
-                                repeat: Infinity,
-                                repeatType: 'loop',
-                                delay: 0.5 + Math.min(slot.index, 10) * 0.08,
-                              },
+                            : !shouldShowRevealedDishes
+                              ? { duration: 0.01 }
+                              : {
+                                  duration: 2,
+                                  ease: 'easeInOut',
+                                  repeat: Infinity,
+                                  repeatType: 'loop',
+                                  delay: 0.2 + Math.min(slot.index, 10) * 0.08,
+                                },
                       }}
                       className="relative"
                       style={{
@@ -309,7 +384,7 @@ export function CookingSceneOverlay({
                         alt={titleDishName}
                         fill
                         sizes="(max-width: 640px) 128px, 156px"
-                        className="pixelated scale-[1.25] object-contain drop-shadow-[1px_4px_0_rgba(0,0,0,0.46)]"
+                        className="pixelated relative z-10 scale-[1.25] object-contain drop-shadow-[1px_4px_0_rgba(0,0,0,0.46)]"
                       />
                     </motion.div>
                   ))}
@@ -350,7 +425,7 @@ export function CookingSceneOverlay({
                   <Button
                     type="button"
                     onClick={onServe}
-                    disabled={phase !== 'revealed' || isServePending}
+                    disabled={phase !== 'revealed' || !shouldShowRevealedDishes || isServePending}
                     className="pointer-events-auto h-[3.7rem] min-w-41 rounded-lg border-[3px] border-[#47331F] bg-[#f4bf21] px-7 text-[1.75rem] text-[#2b180b] shadow-[0_5px_0_#2d160e] transition-transform hover:-translate-y-0.5 hover:bg-[#ffd34b] disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {isServePending || phase === 'serving' ? 'Serving...' : 'Serve'}

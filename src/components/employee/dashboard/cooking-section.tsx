@@ -8,6 +8,7 @@ import { showDishCookedToast, showDishServedToast } from '@/components/notificat
 import { useCookingStore } from '@/store/cookingStore';
 import { useServeCookedTaskDish } from '@/hooks/tanstack/mutations/employeeTasksMutations';
 import { CookingSceneOverlay } from './cooking-scene-overlay';
+import { FlameSprite } from './flame-sprite';
 
 type CookingPhase = 'idle' | 'cooking' | 'revealed' | 'serving';
 
@@ -142,18 +143,41 @@ export default function CookingSection({ className = '' }: { className?: string 
 
   return (
     <Card
-      className={`relative isolate flex h-full w-full overflow-hidden border-none bg-transparent p-0 shadow-none ${className}`}
+      className={`relative isolate flex h-full w-full overflow-visible border-none bg-transparent p-0 shadow-none ${className}`}
     >
-      <CardContent className="relative flex h-full w-full items-end justify-center overflow-hidden p-4 sm:p-6">
+      <CardContent className="relative flex h-full w-full items-end justify-center overflow-visible p-4 sm:p-6">
         <motion.div
           animate={
             showCookedScene ? { y: 18, scale: 0.92, opacity: 0.74 } : { y: 0, scale: 1, opacity: 1 }
           }
           transition={{ duration: 0.38, ease: 'easeInOut' }}
-          className="relative z-10"
+          className="relative z-10 overflow-visible"
         >
+          {isCooking ? (
+            <motion.div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-1/2 top-[56%] z-0 -translate-x-1/2 -translate-y-1/2"
+              animate={{
+                opacity: [1, 1, 1],
+                scale: [1.08, 1.18, 1.1],
+              }}
+              transition={{
+                duration: 0.95,
+                repeat: Infinity,
+                repeatType: 'loop',
+                ease: 'easeInOut',
+              }}
+            >
+              <FlameSprite
+                variant="pot"
+                scale={9}
+                className="drop-shadow-[0_0_28px_rgba(255,144,34,0.8)] -top-8"
+              />
+            </motion.div>
+          ) : null}
+
           <motion.div
-            className="relative h-52 w-52 drop-shadow-[0_8px_16px_rgba(0,0,0,0.45)] sm:h-64 sm:w-64"
+            className="relative z-10 size-52 overflow-visible drop-shadow-[0_8px_16px_rgba(0,0,0,0.45)] sm:size-64"
             animate={
               isCooking
                 ? {
@@ -174,7 +198,7 @@ export default function CookingSection({ className = '' }: { className?: string 
             }
           >
             <motion.div
-              className="absolute inset-0"
+              className="absolute inset-0 z-10"
               animate={
                 isCooking
                   ? {
@@ -236,7 +260,7 @@ export default function CookingSection({ className = '' }: { className?: string 
           </motion.div>
         </motion.div>
       </CardContent>
-      
+
       <CookingSceneOverlay
         portalTarget={portalTarget}
         trigger={trigger}
