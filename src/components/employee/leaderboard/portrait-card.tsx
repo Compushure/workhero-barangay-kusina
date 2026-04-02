@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import type { EmployeeTopRankEntry } from '@/types';
+import { useProfileImage } from '@/hooks/useProfileImage';
 
 export type PortraitCardProps = {
   entry: EmployeeTopRankEntry;
@@ -54,8 +55,14 @@ function RankBadge({ rank, angleClass }: { rank: number; angleClass: string }) {
 }
 
 export function PortraitCard({ entry, size }: PortraitCardProps) {
-  const [imgError, setImgError] = useState(false);
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
   const isLarge = size === 'large';
+  const { imageUrl } = useProfileImage({
+    userId: entry.userId,
+    profilePictureUrl: entry.profilePictureUrl ?? undefined,
+  });
+  const canShowImage = Boolean(imageUrl && failedImageUrl !== imageUrl);
+  const displayImageUrl = canShowImage ? imageUrl! : null;
   const scoreLabel = entry.performanceScore.toLocaleString();
   const cardTiltClass =
     size === 'large'
@@ -129,14 +136,15 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
                   avatarSizeClass,
                 ].join(' ')}
               >
-                {entry.profilePictureUrl && !imgError ? (
+                {displayImageUrl ? (
                   <Image
-                    src={entry.profilePictureUrl}
+                    src={displayImageUrl}
                     alt={entry.name}
                     fill
+                    unoptimized
                     sizes={isLarge ? '(min-width: 768px) 52px, 48px' : '(min-width: 640px) 40px, 32px'}
                     className="object-cover"
-                    onError={() => setImgError(true)}
+                    onError={() => setFailedImageUrl(displayImageUrl)}
                   />
                 ) : (
                   <span
@@ -175,14 +183,15 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
 
             <div className="flex flex-col items-center gap-4 px-5 py-5 text-center">
               <div className="relative h-28 w-28 overflow-hidden rounded-sm border-[2px] border-[#7B5A3B] bg-[#E89C30] shadow-[0_6px_14px_rgba(0,0,0,0.18)]">
-                {entry.profilePictureUrl && !imgError ? (
+                {displayImageUrl ? (
                   <Image
-                    src={entry.profilePictureUrl}
+                    src={displayImageUrl}
                     alt={entry.name}
                     fill
+                    unoptimized
                     sizes="112px"
                     className="object-cover"
-                    onError={() => setImgError(true)}
+                    onError={() => setFailedImageUrl(displayImageUrl)}
                   />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center text-center font-jersey text-4xl font-bold leading-none text-[#47331F]">

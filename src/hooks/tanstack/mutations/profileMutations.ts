@@ -13,6 +13,7 @@ import {
 } from '@/action-handlers/shared/profile';
 import { profileKeys } from '../queries/profileQueries';
 import { userKeys } from '../queries/userQueries';
+import { employeeKeys } from '../queries/employeeQueries';
 
 /**
  * Updates current user's own profile
@@ -60,6 +61,8 @@ export function useUpdateOwnProfile(userId: string): UseMutationResult<
       queryClient.invalidateQueries({ queryKey: profileKeys.detail(userId) });
       // Also invalidate session user cache
       queryClient.invalidateQueries({ queryKey: userKeys.session() });
+      // Refresh employee pages that render the same profile details
+      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
     },
   });
 }
@@ -115,6 +118,8 @@ export function useUploadOwnProfilePicture(userId: string): UseMutationResult<
       queryClient.invalidateQueries({ queryKey: userKeys.session() });
       // Invalidate all user queries to update any user lists
       queryClient.invalidateQueries({ queryKey: userKeys.all });
+      // Invalidate employee-facing caches that surface the profile image/name
+      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       // Dispatch event with actual timestamp
       window.dispatchEvent(
         new CustomEvent('profile-image-updated', {
@@ -191,6 +196,8 @@ export function useDeleteOwnProfilePicture(userId: string): UseMutationResult<
       queryClient.invalidateQueries({ queryKey: userKeys.session() });
       // Invalidate all user queries to update any user lists
       queryClient.invalidateQueries({ queryKey: userKeys.all });
+      // Invalidate employee-facing caches that surface the profile image/name
+      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       // Dispatch confirmed deletion event
       window.dispatchEvent(
         new CustomEvent('profile-image-deleted', {
