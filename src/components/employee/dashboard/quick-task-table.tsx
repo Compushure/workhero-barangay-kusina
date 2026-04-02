@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
@@ -32,6 +32,7 @@ type TasksTableProps = {
 };
 
 const TASKS_PAGE_SIZE = 3;
+const MIN_CLAIMING_FEEDBACK_MS = 450;
 
 export default function TasksTable({
   tasks: fallbackTasks = [],
@@ -48,24 +49,30 @@ export default function TasksTable({
   const claimMutation = useClaimTaskPointsandXP();
   const [activeClaimId, setActiveClaimId] = useState<string | null>(null);
   const [preparingTaskId, setPreparingTaskId] = useState<string | null>(null);
+  const [claimingTaskIds, setClaimingTaskIds] = useState<Record<string, boolean>>({});
+  const [claimingTaskSnapshots, setClaimingTaskSnapshots] = useState<
+    Record<string, TaskStatusItem>
+  >({});
+  const claimStartTimesRef = useRef<Record<string, number>>({});
+  const claimFeedbackTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const activeCookingTaskId = useCookingStore((state) => state.trigger?.taskId ?? null);
 
   const approvedTasks = useMemo(() => {
     const source = data?.verifiedTasks ?? fallbackTasks;
 
+    const isServerClaimablePoints = (task: TaskStatusItem) =>
+      task.status === 'approved' && task.pendingOrders > 0;
+
     const isServerPrepareEligible = (task: TaskStatusItem) =>
       task.status === 'approved' &&
       task.completedOrders === task.maxOrders &&
+      task.pendingOrders === 0 &&
       Boolean(task.claimedAt) &&
       !task.completedAt;
 
     const serverTasks = source.filter(
-      (task) =>
-        (task.status === 'approved' &&
-          task.pendingOrders > 0 &&
-          task.completedOrders === task.maxOrders) ||
-        isServerPrepareEligible(task)
+      (task) => isServerClaimablePoints(task) || isServerPrepareEligible(task)
     );
 
     const merged = new Map<string, TaskStatusItem>();
@@ -80,8 +87,21 @@ export default function TasksTable({
       }
     }
 
+    for (const [taskId, task] of Object.entries(claimingTaskSnapshots)) {
+      if (claimingTaskIds[taskId]) {
+        merged.set(taskId, task);
+      }
+    }
+
     return Array.from(merged.values());
-  }, [data?.verifiedTasks, fallbackTasks, retainedClaimTasks, cookReadyByTaskId]);
+  }, [
+    data?.verifiedTasks,
+    fallbackTasks,
+    retainedClaimTasks,
+    cookReadyByTaskId,
+    claimingTaskSnapshots,
+    claimingTaskIds,
+  ]);
 
   const sortedApprovedTasks = useMemo(() => {
     return [...approvedTasks].sort((first, second) => {
@@ -109,8 +129,61 @@ export default function TasksTable({
     }
   }, [currentPage, totalPages]);
 
+  useEffect(() => {
+    return () => {
+      for (const timer of Object.values(claimFeedbackTimersRef.current)) {
+        clearTimeout(timer);
+      }
+      claimFeedbackTimersRef.current = {};
+      claimStartTimesRef.current = {};
+    };
+  }, []);
+
+  const finishClaimingFeedback = (taskId: string) => {
+    const startedAt = claimStartTimesRef.current[taskId] ?? Date.now();
+    const elapsed = Date.now() - startedAt;
+    const remaining = Math.max(0, MIN_CLAIMING_FEEDBACK_MS - elapsed);
+
+    const existingTimer = claimFeedbackTimersRef.current[taskId];
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+    }
+
+    claimFeedbackTimersRef.current[taskId] = setTimeout(() => {
+      setClaimingTaskIds((previous) => {
+        const next = { ...previous };
+        delete next[taskId];
+        return next;
+      });
+
+      setClaimingTaskSnapshots((previous) => {
+        const next = { ...previous };
+        delete next[taskId];
+        return next;
+      });
+
+      delete claimStartTimesRef.current[taskId];
+      delete claimFeedbackTimersRef.current[taskId];
+      setActiveClaimId((previous) => (previous === taskId ? null : previous));
+    }, remaining);
+  };
+
   const handleClaim = (task: TaskStatusItem) => {
-    if (claimMutation.isPending || claimedTaskIds[task.id]) return;
+    const hasLocalFinalClaimReady =
+      Boolean(cookReadyByTaskId[task.id]?.canPrepareFood) || Boolean(retainedClaimTasks[task.id]);
+    const isClaimedForCurrentBatch =
+      Boolean(claimedTaskIds[task.id]) && (task.pendingOrders === 0 || hasLocalFinalClaimReady);
+    if (claimMutation.isPending || isClaimedForCurrentBatch) return;
+
+    claimStartTimesRef.current[task.id] = Date.now();
+    setClaimingTaskIds((previous) => ({
+      ...previous,
+      [task.id]: true,
+    }));
+    setClaimingTaskSnapshots((previous) => ({
+      ...previous,
+      [task.id]: task,
+    }));
 
     setClaimedTaskIds((previous) => ({
       ...previous,
@@ -162,7 +235,7 @@ export default function TasksTable({
           });
         },
         onSettled: () => {
-          setActiveClaimId(null);
+          finishClaimingFeedback(task.id);
         },
       }
     );
@@ -170,9 +243,12 @@ export default function TasksTable({
 
   const handlePrepareFood = (task: TaskStatusItem) => {
     const cookOutcome = cookReadyByTaskId[task.id];
+    const isTaskBeingClaimed = claimMutation.isPending && activeClaimId === task.id;
+    const isTaskClaimingFeedbackActive = Boolean(claimingTaskIds[task.id]);
     const isServerPrepareEligible =
       task.status === 'approved' &&
       task.completedOrders === task.maxOrders &&
+      task.pendingOrders === 0 &&
       Boolean(task.claimedAt) &&
       !task.completedAt;
 
@@ -182,7 +258,9 @@ export default function TasksTable({
       (!cookOutcome?.canPrepareFood && !isServerPrepareEligible) ||
       !onPrepareFood ||
       preparingTaskId ||
-      isTaskCooking
+      isTaskCooking ||
+      isTaskBeingClaimed ||
+      isTaskClaimingFeedbackActive
     ) {
       return;
     }
@@ -248,20 +326,27 @@ export default function TasksTable({
         paginatedTasks.map((task) => {
           const totalPoints = task.points * task.pendingOrders;
           const totalXp = task.xp * task.pendingOrders;
-          const isClaimingTask = claimMutation.isPending && activeClaimId === task.id;
+          const isClaimingTask = Boolean(claimingTaskIds[task.id]);
           const isPreparingTask = preparingTaskId === task.id;
           const isFinalApprovedClaim = task.completedOrders >= task.maxOrders;
           const cookOutcome = cookReadyByTaskId[task.id];
           const isServerPrepareEligible =
             task.status === 'approved' &&
             task.completedOrders === task.maxOrders &&
+            task.pendingOrders === 0 &&
             Boolean(task.claimedAt) &&
             !task.completedAt;
           const isTaskCooking = activeCookingTaskId === task.id;
-          const isClaimedTask = Boolean(claimedTaskIds[task.id]);
+          const hasLocalFinalClaimReady =
+            Boolean(cookOutcome?.canPrepareFood) || Boolean(retainedClaimTasks[task.id]);
+          const isClaimedTask =
+            (Boolean(claimedTaskIds[task.id]) &&
+              (task.pendingOrders === 0 || hasLocalFinalClaimReady)) ||
+            isServerPrepareEligible;
           const canPrepareFood =
             (Boolean(cookOutcome?.canPrepareFood) || isServerPrepareEligible) &&
             !isPreparingTask &&
+            !isClaimingTask &&
             !isTaskCooking &&
             Boolean(onPrepareFood);
 
