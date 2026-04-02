@@ -110,7 +110,7 @@ export function LeaderboardPageClient({
     'inline-flex min-h-10 min-w-0 basis-0 grow items-center justify-center gap-1.5 px-2.5 py-2 text-[13px] font-jersey leading-none tracking-[0.08em] whitespace-nowrap transition-all duration-150 ease-out sm:gap-2 sm:px-3 sm:text-[16px] sm:tracking-[0.08em] md:text-[18px]';
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col overflow-x-hidden font-jersey tracking-widest">
+    <div className="relative min-h-screen w-full flex flex-col overflow-x-hidden font-jersey tracking-widest [overscroll-behavior-x:none]">
       <div
         className="fixed inset-0 -z-10 bg-cover bg-center"
         style={{ backgroundImage: 'url(/assets/leaderboard-bg.png)' }}
@@ -119,7 +119,7 @@ export function LeaderboardPageClient({
       <div className="fixed inset-0 -z-10 pointer-events-none bg-black/50" aria-hidden="true" />
 
       <div
-        className="relative z-20 w-full sm:fixed sm:left-0 sm:right-0 sm:top-0"
+        className="relative z-20 w-full lg:fixed lg:left-0 lg:right-0 lg:top-0"
         style={{
           paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
           paddingLeft: 'max(0.75rem, env(safe-area-inset-left))',
@@ -131,11 +131,11 @@ export function LeaderboardPageClient({
       </div>
 
       <div
-        className="hidden sm:block sm:h-[calc(max(0.75rem,env(safe-area-inset-top))+6.5rem)]"
+        className="hidden lg:block lg:h-[calc(max(0.75rem,env(safe-area-inset-top))+6.5rem)]"
         aria-hidden="true"
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center px-3 pb-5 pt-4 sm:px-4 sm:pb-7 sm:pt-6 md:pt-7">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center px-3 pb-5 pt-3 sm:px-4 sm:pb-6 sm:pt-4 md:px-5 md:pb-7 md:pt-5 lg:pt-7">
         {!((view === 'current' && isLoading) || (view === 'history' && isHistoryLoading)) && (
           <div className="mb-5 w-full max-w-[388px] self-center rounded-[12px] border-[3px] border-[#47331F] bg-[linear-gradient(180deg,#6E4A2C_0%,#55361E_100%)] p-1.5 shadow-[0_10px_18px_rgba(0,0,0,0.28),4px_4px_0px_#000] shadow-[#3017008e] sm:mb-6 sm:max-w-[412px]">
             <div className="inline-flex w-full overflow-hidden rounded-[8px] border-2 border-[#7F5733] bg-[#5B3E29] shadow-[inset_0_1px_0_rgba(255,225,181,0.14)]">
@@ -187,23 +187,23 @@ export function LeaderboardPageClient({
               <LeaderboardSkeleton variant="current" />
             ) : (
               <>
-                <header className="mb-5 flex w-full max-w-3xl shrink-0 flex-col items-center gap-5 px-1 sm:mb-6 sm:gap-6">
-                  <div className="mt-6 flex w-full max-w-[388px] justify-center sm:mt-7 sm:max-w-[412px]">
+                <header className="mb-4 flex w-full max-w-3xl shrink-0 flex-col items-center gap-4 px-1 sm:mb-5 sm:gap-5">
+                  <div className="mt-2 flex w-full max-w-[388px] justify-center sm:mt-3 sm:max-w-[412px]">
                     <PeriodNav
                       periodType={periodType}
                       onPeriodTypeChange={handlePeriodTypeChange}
                     />
                   </div>
-                  <div className="flex min-h-10 w-full flex-col items-center justify-start sm:min-h-12">
+                  <div className="flex min-h-8 w-full flex-col items-center justify-start sm:min-h-10">
                     {hasEntries && activePeriodLabel && (
-                      <p className="text-center text-sm tracking-[0.16em] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.75)] sm:text-base md:text-lg">
+                      <p className="text-center text-xs tracking-[0.14em] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.75)] sm:text-sm md:text-base lg:text-lg">
                         {activePeriodLabel}
                       </p>
                     )}
                   </div>
                 </header>
 
-                <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-3 sm:pt-4">
+                <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-2 sm:pt-3 lg:pt-4">
                   {rankedEntries.length === 0 && (
                     <LeaderboardEmptyState
                       title={
@@ -221,7 +221,7 @@ export function LeaderboardPageClient({
                   {hasEntries && (
                     <div className="flex w-full flex-col items-center gap-4 sm:gap-5">
                       <LeaderboardMobileCarousel entries={rankedEntries.slice(0, 10)} />
-                      <div className="hidden w-full flex-col items-center gap-4 md:flex md:gap-5">
+                      <div className="hidden w-full flex-col items-center gap-4 lg:flex lg:gap-5">
                         <LeaderboardPodium entries={top3} />
                         <LeaderboardShelf entries={rest} />
                       </div>

@@ -47,7 +47,7 @@ export default function XPProgress() {
 
   return (
     <>
-      <div className="w-full sm:w-[clamp(12rem,70vw,20rem)] wood-panel rounded-lg shadow-md px-1.5 sm:px-2 pt-1 pb-1.5 sm:pb-2 flex items-center gap-1.5 sm:gap-2">
+      <div className="w-full lg:w-[clamp(12rem,70vw,20rem)] wood-panel rounded-lg shadow-md px-1.5 sm:px-2 pt-1 pb-1.5 sm:pb-2 flex items-center gap-1.5 sm:gap-2">
         <div
           onClick={() => setModalOpen(true)}
           className="h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center wood-panel shrink-0 overflow-hidden cursor-pointer hover:scale-105 transition-transform shadow-[2px_2px_2px_#000] shadow-[#47331F]/50"

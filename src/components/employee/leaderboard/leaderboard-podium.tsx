@@ -15,11 +15,11 @@ export function LeaderboardPodium({ entries }: LeaderboardPodiumProps) {
 
   return (
     <section className="relative flex w-full justify-center pt-2">
-      <div className="relative mt-[1.7rem] flex w-full flex-col items-center gap-2.5 sm:mt-[2.15rem] sm:flex-row sm:items-end sm:justify-center sm:gap-3 md:-translate-y-7 md:gap-4">
+      <div className="relative mt-[1.45rem] flex w-full max-w-4xl flex-col items-center gap-2.5 sm:mt-[1.7rem] sm:flex-row sm:items-end sm:justify-center sm:gap-3 md:gap-3.5 lg:mt-[2.15rem] lg:-translate-y-7 lg:gap-4">
         {podiumOrder.map((entry) => (
           <div
             key={entry.userId}
-            className={`relative flex justify-center ${entry.rank === 1 ? 'sm:translate-y-4' : 'sm:translate-y-8'}`}
+            className={`relative flex justify-center ${entry.rank === 1 ? 'sm:translate-y-2 md:translate-y-3 lg:translate-y-4' : 'sm:translate-y-4 md:translate-y-6 lg:translate-y-8'}`}
           >
             <div
               className="absolute left-1/2 top-[-3.2rem] hidden h-7 w-32 -translate-x-1/2 rounded-[999px] border-2 border-[#8B613A] bg-[linear-gradient(180deg,#A87445_0%,#8D6038_22%,#734927_70%,#5B351D_100%)] shadow-[0_10px_18px_rgba(0,0,0,0.24),inset_0_2px_0_rgba(255,229,186,0.28),inset_0_-3px_0_rgba(78,47,24,0.35)] md:block"
