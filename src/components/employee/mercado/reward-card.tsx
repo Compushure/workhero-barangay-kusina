@@ -92,7 +92,7 @@ export const RewardCard = memo(function RewardCard({
   };
 
   return (
-    <Card className="p-1 group relative overflow-hidden bg-parchment border border-t-0 border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-64 min-w-0 flex flex-col rounded-xl">
+    <Card className="p-1 group relative overflow-hidden bg-parchment border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-64 min-w-0 flex flex-col rounded-xl">
       <CardContent className="p-0 flex-1 flex flex-col">
         <div className="relative h-20 w-full overflow-hidden">
           {reward.imageUrl && !imageError ? (
@@ -129,7 +129,7 @@ export const RewardCard = memo(function RewardCard({
 
         <div className="px-2 py-1.5 flex-1 flex flex-col gap-1 min-w-0 text-[#4f3a26]">
           <div className="flex flex-col items-center justify-center">
-            <h3 className="text-xs sm:text-sm leading-tight font-bold text-[#3b2615] whitespace-normal break-words pixelated-text min-w-0 text-center line-clamp-2">
+            <h3 className="text-xs sm:text-sm leading-tight font-bold text-[#3b2615] whitespace-normal wrap-break-word pixelated-text min-w-0 text-center line-clamp-2">
               {reward.name}
             </h3>
           </div>

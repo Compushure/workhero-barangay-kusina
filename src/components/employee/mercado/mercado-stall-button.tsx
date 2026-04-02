@@ -34,6 +34,13 @@ const LABEL_CLASS = {
     'bg-[#E8DBBF] border-2 border-[#47331F] text-[#47331F] px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg shadow-[4px_4px_0px_rgba(71,51,31,0.5)] text-[clamp(0.85rem,2vw,1rem)] font-bold whitespace-nowrap transition-transform group-hover:scale-110',
 } as const;
 
+const DESCRIPTION_CLASS = {
+  desktop:
+    'mt-1 max-w-[10rem] text-center text-[clamp(0.55rem,0.9vw,0.72rem)] leading-tight text-[#47331F]/85 sm:max-w-[11rem] md:max-w-[12rem]',
+  mobile:
+    'mt-1 max-w-[8rem] text-center text-[clamp(0.5rem,1.6vw,0.65rem)] leading-tight text-[#47331F]/85 sm:max-w-[9rem]',
+} as const;
+
 export function MercadoStallButton({
   stall,
   isClosed,
@@ -85,7 +92,10 @@ export function MercadoStallButton({
 
       <div className="absolute top-1 left-1/2 -translate-x-1/2">
         <div className={LABEL_CLASS[variant]} style={{ fontFamily: '"Jersey 10", sans-serif' }}>
-          {stall.label}
+          <div className="flex flex-col items-center">
+            <span>{stall.label}</span>
+            <p className={DESCRIPTION_CLASS[variant]}>{stall.description}</p>
+          </div>
         </div>
       </div>
     </button>

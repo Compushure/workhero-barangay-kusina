@@ -41,9 +41,9 @@ interface MonthlyRewardsModalProps {
 }
 
 const MODAL_CONTENT_CLASS =
-  'bg-[#e8d9c0] border border-[#8a6844] !w-[88vw] sm:!w-[82vw] lg:!w-[68vw] xl:!w-[60vw] !max-w-[88vw] sm:!max-w-[82vw] lg:!max-w-[68vw] xl:!max-w-[980px] h-[90vh] rounded-2xl p-0 flex flex-col overflow-hidden shadow-xl';
+  'bg-[#e8d9c0] border border-[#8a6844] !w-[88vw] sm:!w-[82vw] lg:!w-[68vw] xl:!w-[60vw] !max-w-[88vw] sm:!max-w-[82vw] lg:!max-w-[68vw] xl:!max-w-[980px] h-[min(92dvh,56rem)] max-h-[92dvh] rounded-2xl p-0 flex min-h-0 flex-col overflow-hidden shadow-xl';
 const MODAL_GRID_CLASS =
-  'grid auto-rows-fr [grid-template-columns:repeat(auto-fit,minmax(260px,300px))] justify-center items-start gap-3 sm:gap-4';
+  'grid [grid-template-columns:repeat(auto-fit,minmax(240px,300px))] justify-center items-start gap-3 sm:gap-4';
 const INTERVAL_LABELS: Record<RewardInterval, string> = {
   weekly: 'Weekly',
   monthly: 'Monthly',
@@ -168,7 +168,7 @@ export function MonthlyRewardsModal({
                   value={interval || 'weekly'}
                   onValueChange={(value: RewardInterval) => onIntervalChange(value)}
                 >
-                  <SelectTrigger className="h-8 w-[100px] sm:w-32 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
+                  <SelectTrigger className="h-8 w-25 sm:w-32 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
@@ -182,14 +182,14 @@ export function MonthlyRewardsModal({
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search items..."
-                  className="h-8 w-[140px] sm:w-52 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
+                  className="h-8 w-35 sm:w-52 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
                 />
 
                 <Select
                   value={sortOrder}
                   onValueChange={(value: 'newest' | 'oldest') => setSortOrder(value)}
                 >
-                  <SelectTrigger className="h-8 w-[100px] sm:w-28 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
+                  <SelectTrigger className="h-8 w-25 sm:w-28 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
@@ -204,7 +204,7 @@ export function MonthlyRewardsModal({
                   value={interval || 'weekly'}
                   onValueChange={(value: RewardInterval) => onIntervalChange(value)}
                 >
-                  <SelectTrigger className="h-8 w-[100px] sm:w-32 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
+                  <SelectTrigger className="h-8 w-25 sm:w-32 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
@@ -218,7 +218,7 @@ export function MonthlyRewardsModal({
                   value={pendingSearchTerm}
                   onChange={(event) => setPendingSearchTerm(event.target.value)}
                   placeholder="Search pending..."
-                  className="h-8 w-[140px] sm:w-56 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
+                  className="h-8 w-35 sm:w-56 text-xs bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
                 />
                 <p className="text-xs text-[#6b5038] font-medium w-full text-center sm:w-auto sm:text-left mt-1 sm:mt-0">
                   Pending requests for {intervalName}: {filteredPendingRequests.length}
@@ -241,7 +241,7 @@ export function MonthlyRewardsModal({
           </div>
         )}
 
-        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-3 sm:p-4 bg-[#e6d7bf]">
+        <div ref={scrollAreaRef} className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-4 bg-[#e6d7bf]">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Loader2 className="h-10 w-10 text-[#6a4a2d] animate-spin mx-auto mb-3" />
@@ -311,7 +311,7 @@ function PendingRequestsView({
       {requests.map((request) => (
         <Card
           key={request.id}
-          className="group relative overflow-hidden bg-[#eadbc1] border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-72 min-w-0 flex flex-col rounded-lg"
+          className="group relative overflow-hidden bg-[#eadbc1] border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md min-h-72 min-w-0 flex flex-col rounded-lg"
         >
           <CardContent className="p-0 flex-1 flex flex-col">
             <div className="relative h-24 w-full overflow-hidden bg-[#dfcfb3] border-b border-[#8a6844]/20">
