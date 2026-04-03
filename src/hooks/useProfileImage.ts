@@ -21,17 +21,27 @@ import type { ProfileImageState, ProfileImageEvent, ProfileImageHookOptions } fr
 export function useProfileImage(options: ProfileImageHookOptions) {
   const { userId, profilePictureUrl, enabled = true } = options;
   
-  const [state, setState] = useState<ProfileImageState>({
+  const [state, setState] = useState<ProfileImageState>(() => ({
     exists: false,
     checking: true,
     error: false,
     key: Date.now(),
-  });
+    previewUrl: undefined,
+  }));
+
+  const revokePreviewUrl = useCallback((previewUrl?: string) => {
+    if (previewUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+  }, []);
 
   // Memoized storage check function
   const checkImageExists = useCallback(async () => {
     if (!enabled || !userId) {
-      setState(prev => ({ ...prev, exists: false, checking: false }));
+      setState(prev => {
+        revokePreviewUrl(prev.previewUrl);
+        return { ...prev, exists: false, checking: false, previewUrl: undefined };
+      });
       return;
     }
 
@@ -56,17 +66,37 @@ export function useProfileImage(options: ProfileImageHookOptions) {
       console.error('[useProfileImage] Storage check error:', error);
       setState(prev => ({ ...prev, exists: false, error: true, checking: false }));
     }
-  }, [userId, profilePictureUrl, enabled]);
+  }, [enabled, revokePreviewUrl, userId]);
 
   // Initial check and event listener setup
   useEffect(() => {
-    checkImageExists();
+    const initialRefresh = window.setTimeout(() => {
+      void checkImageExists();
+    }, 0);
 
     // Event handlers
     const handleImageUpdated = (event: Event) => {
-      const { userId: eventUserId, timestamp } = (event as CustomEvent<ProfileImageEvent>).detail;
+      const { userId: eventUserId, timestamp, tempUrl } = (event as CustomEvent<ProfileImageEvent>).detail;
       if (eventUserId === userId) {
-        setState(prev => ({ ...prev, key: timestamp, error: false }));
+        setState(prev => {
+          if (prev.previewUrl && prev.previewUrl !== tempUrl) {
+            revokePreviewUrl(prev.previewUrl);
+          }
+
+          return {
+            ...prev,
+            key: timestamp,
+            error: false,
+            checking: !tempUrl,
+            exists: tempUrl ? true : prev.exists,
+            previewUrl: tempUrl,
+          };
+        });
+
+        if (tempUrl) {
+          return;
+        }
+
         checkImageExists();
       }
     };
@@ -74,7 +104,17 @@ export function useProfileImage(options: ProfileImageHookOptions) {
     const handleImageDeleted = (event: Event) => {
       const { userId: eventUserId } = (event as CustomEvent<ProfileImageEvent>).detail;
       if (eventUserId === userId) {
-        setState(prev => ({ ...prev, exists: false, error: true, key: Date.now() }));
+        setState(prev => {
+          revokePreviewUrl(prev.previewUrl);
+          return {
+            ...prev,
+            exists: false,
+            error: false,
+            checking: false,
+            key: Date.now(),
+            previewUrl: undefined,
+          };
+        });
       }
     };
 
@@ -82,20 +122,28 @@ export function useProfileImage(options: ProfileImageHookOptions) {
     window.addEventListener('profile-image-deleted', handleImageDeleted);
 
     return () => {
+      window.clearTimeout(initialRefresh);
       window.removeEventListener('profile-image-updated', handleImageUpdated);
       window.removeEventListener('profile-image-deleted', handleImageDeleted);
     };
-  }, [userId, checkImageExists]);
+  }, [userId, profilePictureUrl, checkImageExists, revokePreviewUrl]);
+
+  useEffect(() => {
+    return () => {
+      revokePreviewUrl(state.previewUrl);
+    };
+  }, [state.previewUrl, revokePreviewUrl]);
 
   // Memoized image URL with cache busting - build URL from storage directly
   const imageUrl = useMemo(() => {
+    if (state.previewUrl) return state.previewUrl;
     if (!state.exists || !userId || state.error) return undefined;
     // Build the public URL directly from Supabase storage
     const supabase = createClient();
     const { data } = supabase.storage.from('employees').getPublicUrl(`${userId}/profile.png`);
     if (!data?.publicUrl) return undefined;
     return `${data.publicUrl}?t=${state.key}`;
-  }, [state.exists, state.error, state.key, userId]);
+  }, [state.exists, state.error, state.key, state.previewUrl, userId]);
 
   // Memoized initials helper
   const getInitials = useCallback((name: string) => {

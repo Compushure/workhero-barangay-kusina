@@ -135,10 +135,10 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
   }
 
   return (
-    <div className="flex w-full flex-1 flex-col items-center gap-5">
+    <div className="flex w-full flex-1 flex-col items-center gap-4 [overscroll-behavior-x:none] sm:gap-5">
       {!isHistoryLoading && (
-        <div className="relative z-10 mb-5 flex w-full max-w-3xl shrink-0 flex-col items-center gap-5 px-1 sm:mb-6 sm:gap-6">
-          <div className="mt-6 flex w-full max-w-[388px] flex-col items-center justify-center gap-3 sm:mt-7 sm:max-w-[412px] sm:flex-row sm:items-center sm:justify-center sm:gap-3">
+        <div className="relative z-10 mb-4 flex w-full max-w-3xl shrink-0 flex-col items-center gap-4 px-1 sm:mb-5 sm:gap-5">
+          <div className="mt-2 flex w-full max-w-[388px] flex-col items-center justify-center gap-3 sm:mt-3 sm:max-w-[412px] sm:flex-row sm:items-center sm:justify-center sm:gap-3">
             <div className="flex w-full justify-center sm:w-[52%]">
               <PeriodNav
                 periodType={activeTab as RankLogPeriodType}
@@ -239,7 +239,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
         ) : null}
 
         {!isHistoryLoading && !isError && !selectedPeriod ? (
-          <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-3 sm:pt-4">
+          <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-2 sm:pt-3 lg:pt-4">
             <LeaderboardEmptyState
               title="Ranking for this period was hidden."
               subtitle="Contact the Human Resources Office!"
@@ -248,7 +248,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
         ) : null}
 
         {!isHistoryLoading && !isError && selectedPeriod ? (
-          <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-3 sm:pt-4">
+          <div className="flex w-full max-w-5xl flex-1 flex-col items-center pt-2 sm:pt-3 lg:pt-4">
             {!hasEntries ? (
               <LeaderboardEmptyState
                 title="Ranking for this period was hidden."
@@ -257,7 +257,7 @@ export function PastRanksList({ onLoadingChange }: PastRanksListProps) {
             ) : (
               <>
                 <LeaderboardMobileCarousel entries={rankedEntries.slice(0, 10)} />
-                <div className="hidden w-full flex-col items-center gap-4 md:flex md:gap-5">
+                <div className="hidden w-full flex-col items-center gap-4 lg:flex lg:gap-5">
                   <LeaderboardPodium entries={top3} />
                   <LeaderboardShelf entries={rest} />
                 </div>

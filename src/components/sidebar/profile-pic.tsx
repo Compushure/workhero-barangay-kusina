@@ -1,9 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useState, useMemo, useTransition } from 'react';
+import { useState } from 'react';
 import { UserWithExtras } from '@/types';
 import { ProfileModal } from './profile-modal';
+import { ProfileAvatar } from '@/components/shared/ProfileAvatar';
 
 interface ProfilePicProps {
   user?: UserWithExtras | null;
@@ -18,28 +18,8 @@ export function ProfilePic({
   disabled = false,
   isLoading = false,
 }: ProfilePicProps) {
-  const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
-  const [hasImage, setHasImage] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
-  // Add cache-busting timestamp to image URL to force refresh when profile picture changes
-  const imageUrlWithCacheBust = useMemo(() => {
-    if (!user?.profilePictureUrl) return undefined;
-    const separator = user.profilePictureUrl.includes('?') ? '&' : '?';
-    return `${user.profilePictureUrl}${separator}t=${Date.now()}`;
-  }, [user?.profilePictureUrl]);
-
-  // Get initials from user name
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const handleProfileClick = () => {
     if (disabled) return;
@@ -56,34 +36,29 @@ export function ProfilePic({
         onClick={handleProfileClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        disabled={isPending || disabled || isLoading}
+        disabled={disabled || isLoading}
         className="relative size-10 bg-white border-4 border-[#FFAB57]/85 rounded-full flex items-center justify-center shrink-0 cursor-pointer transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md disabled:hover:shadow-none"
       >
         {isLoading ? (
           <div className="h-full w-full rounded-full bg-gray-200 animate-pulse" />
-        ) : imageUrlWithCacheBust && hasImage ? (
+        ) : user ? (
           <>
-            <img
-              src={imageUrlWithCacheBust}
-              alt={user?.name || 'User profile'}
-              className="w-full h-full rounded-full object-cover"
-              loading="lazy"
-              onError={() => setHasImage(false)}
-              onLoad={(e) => {
-                e.currentTarget.style.opacity = '1';
-              }}
-              style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
+            <ProfileAvatar
+              userId={user.id}
+              userName={user.name}
+              profilePictureUrl={user.profilePictureUrl}
+              size="sm"
+              showBorder={false}
+              className="h-full w-full"
             />
-            {isHovered && !isPending && (
+            {isHovered && (
               <div className="absolute inset-0 bg-gray-400/40 rounded-full transition-opacity duration-200" />
             )}
           </>
         ) : (
           <>
-            <span className="text-sm font-semibold text-[#730202]">
-              {user?.name ? getInitials(user.name) : '?'}
-            </span>
-            {isHovered && !isPending && (
+            <span className="text-sm font-semibold text-[#730202]">?</span>
+            {isHovered && (
               <div className="absolute inset-0 bg-gray-400/40 rounded-full transition-opacity duration-200" />
             )}
           </>
