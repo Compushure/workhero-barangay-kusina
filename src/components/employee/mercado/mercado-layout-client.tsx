@@ -3,11 +3,14 @@
 import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import mercadoBackground from '../../../../public/mercado/mercado-bg.png';
 import { MercadoProvider, useMercadoContext } from './mercado-context';
 import {
   useGetAvailableRewardsByInterval,
   useGetRewards,
 } from '@/hooks/tanstack/queries/rewardQueries';
+
 import { NavLoadingState } from '@/components/employee/nav-loading-state';
 import { MercadoStallButton } from './mercado-stall-button';
 import { INTERVAL_STALLS } from './mercado-stall-config';
@@ -16,6 +19,8 @@ import { buildClosedByInterval, buildIntervalCounts } from './mercado-stall-stat
 const HeaderHUD = dynamic(() => import('@/components/employee/widgets/header-hud'), {
   ssr: false,
 });
+
+const MERCADO_BACKGROUND_IMAGE = mercadoBackground.src;
 
 interface MercadoLayoutClientProps {
   children: React.ReactNode;
@@ -48,17 +53,20 @@ function useIsTabletOrLarger() {
 }
 
 function CarouselArrowButton({ direction, onClick }: CarouselArrowButtonProps) {
-  const arrow = direction === 'left' ? '←' : '→';
+  const ArrowIcon = direction === 'left' ? ChevronLeft : ChevronRight;
   const altText = direction === 'left' ? 'Previous stall' : 'Next stall';
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-[#47331F] bg-[#765332]/90 transition-all hover:scale-110 active:scale-95 text-lg font-bold text-[#F5E6D3] sm:h-12 sm:w-12 sm:text-xl md:h-13 md:w-13 lg:h-16 lg:w-16"
+      className="relative flex h-10 w-10 sm:h-11 sm:w-11 md:h-12 md:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center rounded-full border-2 border-[#9b7a56] bg-[#f6eddd] text-[#4b3522] shadow-[0_2px_6px_rgba(75,53,34,0.18)] transition-all duration-200 hover:scale-110 active:scale-95"
       aria-label={altText}
     >
-      {arrow}
+      <ArrowIcon
+        className="h-5 w-5 sm:h-5.5 sm:w-5.5 md:h-6 md:w-6 lg:h-7 lg:w-7"
+        strokeWidth={2.3}
+      />
     </button>
   );
 }
@@ -107,41 +115,41 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
     setCarouselIndex((prev) => (prev === INTERVAL_STALLS.length - 1 ? 0 : prev + 1));
   };
 
-  // Build a rolling list of visible stalls so arrow buttons can loop seamlessly.
-  const getVisibleStalls = () => {
-    const stalls = [];
-    for (let i = 1; i < 3; i++) {
-      stalls.push(INTERVAL_STALLS[(carouselIndex + i) % INTERVAL_STALLS.length]);
-    }
-    return stalls;
-  };
-
-  const visibleStalls = getVisibleStalls();
+  // Mobile/tablet shows one active stall card at a time.
+  // Keeping index at 0 ensures Weekly is shown first by default on smaller screens.
+  const activeCarouselStall = INTERVAL_STALLS[carouselIndex];
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
+    <div
+      className="relative h-svh min-h-svh max-h-svh w-full overflow-hidden overscroll-none bg-[#9b642f] bg-cover bg-bottom bg-no-repeat"
+      style={{ backgroundImage: `url(${MERCADO_BACKGROUND_IMAGE})` }}
+    >
       {/* Shows loading feedback for page-level navigation transitions. */}
       <NavLoadingState />
       <Image
-        src="/mercado/mercado-bg.png"
+        src={MERCADO_BACKGROUND_IMAGE}
         alt="Mercado Background"
         fill
-        className="object-cover object-bottom"
+        className="object-cover object-center sm:object-bottom saturate-[0.82] brightness-[0.84] contrast-[0.96]"
+        sizes="100vw"
         priority
         quality={100}
       />
 
+      {/* Muted overlay to make foreground stalls more readable on all screen sizes. */}
+      <div className="pointer-events-none absolute inset-0 z-1 bg-linear-to-b from-[#2a1d12]/8 via-[#2a1d12]/10 to-[#2a1d12]/14" />
+
       {/* Top overlay HUD (profile/points/notifications) stays above the mercado background. */}
-      <div className="pointer-events-none absolute top-0 left-0 right-0 z-40 w-full px-2 pt-2 sm:px-4">
-        <div className="pointer-events-auto flex w-full flex-col gap-2">
+      <div className="pointer-events-none absolute top-0 left-0 right-0 z-40 w-full px-2 sm:px-3 md:px-4 lg:px-6 pt-2 sm:pt-2.5 md:pt-4 lg:pt-6">
+        <div className="pointer-events-auto flex w-full flex-col gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
           <HeaderHUD className="rounded-lg" hideNotificationsOnMercado={false} />
         </div>
       </div>
 
-      <div className="relative z-10 flex h-full w-full items-end justify-center overflow-hidden pb-4 sm:pb-6 md:pb-8 lg:pb-10">
-        <div className="flex h-full w-full max-w-6xl items-end justify-center px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="relative z-10 flex h-full w-full items-end justify-center overflow-hidden px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] sm:px-3 sm:pb-2 md:px-4 md:pb-3 lg:px-6 lg:pb-4 xl:px-8 xl:pb-6">
+        <div className="flex h-full w-full max-w-7xl items-end justify-center">
           {/* Desktop: 3 stalls grid (lg+) */}
-          <div className="hidden items-end justify-center gap-4 sm:gap-6 md:gap-8 lg:flex lg:gap-10 xl:gap-12">
+          <div className="hidden items-end justify-center gap-6 sm:gap-8 md:gap-10 lg:flex lg:gap-12 xl:gap-16">
             {INTERVAL_STALLS.map((stall) => (
               <MercadoStallButton
                 key={stall.interval}
@@ -154,11 +162,11 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
           </div>
 
           {/* Mobile/tablet: single-stall carousel controlled by left/right arrows. */}
-          <div className="flex w-full items-center justify-center gap-2 sm:gap-3 md:gap-4 pb-2 sm:pb-3 md:pb-4 lg:hidden">
+          <div className="flex w-full items-center justify-center gap-2.5 pb-1 sm:gap-3 sm:pb-1.5 md:gap-4 md:pb-2 lg:hidden">
             <CarouselArrowButton direction="left" onClick={handlePreviousStall} />
             <MercadoStallButton
-              stall={visibleStalls[0]}
-              isClosed={closedByInterval[visibleStalls[0].interval]}
+              stall={activeCarouselStall}
+              isClosed={closedByInterval[activeCarouselStall.interval]}
               variant={isTabletOrLarger ? 'desktop' : 'mobile'}
               onSelect={handleStallClick}
             />
