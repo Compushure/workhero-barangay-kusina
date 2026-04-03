@@ -7,6 +7,7 @@
 export interface ProfileImageEvent {
   userId: string;
   timestamp: number;
+  tempUrl?: string;
 }
 
 export interface ProfileImageState {
@@ -14,6 +15,7 @@ export interface ProfileImageState {
   checking: boolean;
   error: boolean;
   key: number;
+  previewUrl?: string;
 }
 
 export interface ProfileImageHookOptions {

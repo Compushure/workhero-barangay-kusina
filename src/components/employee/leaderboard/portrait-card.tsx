@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import type { EmployeeTopRankEntry } from '@/types';
+import { useProfileImage } from '@/hooks/useProfileImage';
 
 export type PortraitCardProps = {
   entry: EmployeeTopRankEntry;
@@ -54,8 +55,14 @@ function RankBadge({ rank, angleClass }: { rank: number; angleClass: string }) {
 }
 
 export function PortraitCard({ entry, size }: PortraitCardProps) {
-  const [imgError, setImgError] = useState(false);
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
   const isLarge = size === 'large';
+  const { imageUrl } = useProfileImage({
+    userId: entry.userId,
+    profilePictureUrl: entry.profilePictureUrl ?? undefined,
+  });
+  const canShowImage = Boolean(imageUrl && failedImageUrl !== imageUrl);
+  const displayImageUrl = canShowImage ? imageUrl! : null;
   const scoreLabel = entry.performanceScore.toLocaleString();
   const cardTiltClass =
     size === 'large'
@@ -78,17 +85,17 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
         ? '-rotate-[1.2deg]'
         : 'rotate-[1.2deg]';
   const avatarSizeClass = isLarge
-    ? 'h-11 w-11 sm:h-12 sm:w-12 md:h-13 md:w-13'
-    : 'h-8 w-8 sm:h-10 sm:w-10';
-  const initialsClass = isLarge ? 'text-xl sm:text-2xl md:text-[26px]' : 'text-xs sm:text-base';
+    ? 'h-10 w-10 sm:h-11 sm:w-11 md:h-12 md:w-12'
+    : 'h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10';
+  const initialsClass = isLarge ? 'text-lg sm:text-xl md:text-2xl' : 'text-xs sm:text-sm';
 
   return (
     <div
       className={[
         'relative flex w-full shrink-0 flex-col items-center rounded-none border-[5px] border-[#5A3920] bg-[linear-gradient(180deg,#7D5634_0%,#4D311B_100%)] shadow-[0_18px_32px_rgba(0,0,0,0.34),inset_0_0_0_2px_rgba(255,214,165,0.08)]',
         isLarge
-          ? 'max-w-52 p-2 pt-4 sm:w-32 sm:min-w-32 sm:max-w-32 sm:p-2.5 sm:pt-4 md:w-36 md:min-w-36 md:max-w-36 md:p-3 md:pt-4.5 lg:w-40 lg:min-w-40 lg:max-w-40'
-          : 'max-w-none min-w-0 p-1 pt-3.5 sm:p-2 sm:pt-3.5',
+          ? 'max-w-44 p-2 pt-3.5 sm:w-30 sm:min-w-30 sm:max-w-30 sm:p-2.5 sm:pt-4 md:w-34 md:min-w-34 md:max-w-34 md:p-3 md:pt-4.5 lg:w-40 lg:min-w-40 lg:max-w-40'
+          : 'max-w-none min-w-0 p-1 pt-3 sm:p-1.5 sm:pt-3.5 md:p-2 md:pt-3.5',
         cardTiltClass,
         entry.isCurrentUser && 'ring-[5px] ring-[#F4B925] ring-offset-0',
       ].join(' ')}
@@ -112,8 +119,8 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
         className={[
           'flex w-full min-w-0 flex-col items-center justify-between gap-2 text-center rounded-none border-2 border-[#D9C29E] bg-[radial-gradient(circle_at_top,#FBF3DE_0%,#F2E3C3_55%,#E8D3AC_100%)] shadow-[inset_0_0_22px_rgba(255,255,255,0.3)]',
           isLarge
-            ? 'min-h-[150px] p-2.5 sm:min-h-[162px] sm:p-2.5 md:min-h-[178px] md:p-3'
-            : 'min-h-[116px] p-1.5 sm:min-h-[132px] sm:p-2.5',
+            ? 'min-h-[132px] p-2 sm:min-h-[145px] sm:p-2.5 md:min-h-[162px] md:p-3 lg:min-h-[178px]'
+            : 'min-h-[104px] p-1.5 sm:min-h-[116px] sm:p-2 md:min-h-[132px] md:p-2.5',
         ].join(' ')}
       >
         <Dialog>
@@ -129,14 +136,15 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
                   avatarSizeClass,
                 ].join(' ')}
               >
-                {entry.profilePictureUrl && !imgError ? (
+                {displayImageUrl ? (
                   <Image
-                    src={entry.profilePictureUrl}
+                    src={displayImageUrl}
                     alt={entry.name}
                     fill
+                    unoptimized
                     sizes={isLarge ? '(min-width: 768px) 52px, 48px' : '(min-width: 640px) 40px, 32px'}
                     className="object-cover"
-                    onError={() => setImgError(true)}
+                    onError={() => setFailedImageUrl(displayImageUrl)}
                   />
                 ) : (
                   <span
@@ -175,14 +183,15 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
 
             <div className="flex flex-col items-center gap-4 px-5 py-5 text-center">
               <div className="relative h-28 w-28 overflow-hidden rounded-sm border-[2px] border-[#7B5A3B] bg-[#E89C30] shadow-[0_6px_14px_rgba(0,0,0,0.18)]">
-                {entry.profilePictureUrl && !imgError ? (
+                {displayImageUrl ? (
                   <Image
-                    src={entry.profilePictureUrl}
+                    src={displayImageUrl}
                     alt={entry.name}
                     fill
+                    unoptimized
                     sizes="112px"
                     className="object-cover"
-                    onError={() => setImgError(true)}
+                    onError={() => setFailedImageUrl(displayImageUrl)}
                   />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center text-center font-jersey text-4xl font-bold leading-none text-[#47331F]">
@@ -213,8 +222,8 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
           className={[
             'flex w-full min-w-0 flex-1 items-center justify-center text-center font-jersey leading-tight tracking-[0.04em] text-[#3D2512]',
             isLarge
-              ? 'min-h-10 text-[13px] sm:min-h-11 sm:text-sm md:min-h-12 md:text-base'
-              : 'line-clamp-2 min-h-7 text-[10px] sm:min-h-8 sm:text-[13px]',
+              ? 'min-h-8 text-[12px] sm:min-h-9 sm:text-[13px] md:min-h-10 md:text-sm lg:min-h-12 lg:text-base'
+              : 'line-clamp-2 min-h-6 text-[10px] sm:min-h-7 sm:text-[11px] md:min-h-8 md:text-[13px]',
           ].join(' ')}
           title={entry.name}
         >
@@ -222,7 +231,7 @@ export function PortraitCard({ entry, size }: PortraitCardProps) {
         </span>
 
         <div className="mt-auto flex w-full justify-center">
-          <span className="inline-flex min-w-[3.75rem] max-w-full items-center justify-center rounded-md border border-[#9B6E1A] bg-[linear-gradient(180deg,#F8D04D_0%,#D79A14_100%)] px-1.5 py-0.5 text-center text-[10px] font-jersey leading-none text-[#47331F] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-2px_0_rgba(71,51,31,0.18)] sm:min-w-[4.25rem] sm:px-2 sm:text-xs md:text-sm">
+          <span className="inline-flex min-w-[3.2rem] max-w-full items-center justify-center rounded-md border border-[#9B6E1A] bg-[linear-gradient(180deg,#F8D04D_0%,#D79A14_100%)] px-1.5 py-0.5 text-center text-[9px] font-jersey leading-none text-[#47331F] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-2px_0_rgba(71,51,31,0.18)] sm:min-w-[3.8rem] sm:px-2 sm:text-[11px] md:text-xs lg:min-w-[4.25rem] lg:text-sm">
             {scoreLabel}
           </span>
         </div>
