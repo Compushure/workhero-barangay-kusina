@@ -13,7 +13,7 @@ export default function PointsCardWidget() {
   }
 
   return (
-    <div className="flex h-12 items-center justify-start gap-1.5 rounded-lg wood-panel px-2 shadow-md font-jersey tracking-wider sm:h-15 sm:gap-2 sm:px-2.5 w-[clamp(6rem,12vw,8rem)] md:h-16 md:w-[clamp(9.5rem,18vw,12.5rem)]">
+    <div className="flex h-12 items-center justify-start gap-1.5 rounded-lg wood-panel px-2 shadow-md font-jersey tracking-wider sm:h-14 sm:gap-2 sm:px-2.5 w-[clamp(6rem,12vw,8rem)] md:h-16 md:w-[clamp(10rem,18vw,14rem)]">
       <div className="rounded-full bg-wood-light p-1 shadow-xs/25 sm:p-1.5">
         <Coins className="size-4 text-yellow-500 sm:size-5" />
       </div>

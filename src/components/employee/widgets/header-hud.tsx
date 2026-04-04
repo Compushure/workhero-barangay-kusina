@@ -53,7 +53,7 @@ export default function HeaderHUD({
         </div>
       </div>
 
-      <div className="drop-shadow-md/50 sm:drop-shadow-md/0 pointer-events-auto fixed right-3 top-4/5 z-30 flex -translate-y-1/2 flex-col items-center gap-2 md:static md:ml-auto md:z-auto md:translate-y-0 md:flex-row md:gap-3">
+      <div className="drop-shadow-md/50 sm:drop-shadow-md/0 pointer-events-auto fixed right-3 top-[85%] z-30 flex -translate-y-1/2 flex-col items-center gap-2 md:static md:ml-auto md:z-auto md:translate-y-0 md:flex-row md:gap-3">
         {showMobileRankButton && (
           <div className="shrink-0 lg:hidden">
             <Dialog>

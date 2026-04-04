@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bell, CheckCheck, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -29,9 +29,19 @@ export function NotificationsPopover({
   popoverContentClassName,
 }: NotificationsPopoverProps = {}) {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [isMobile, setIsMobile] = useState(false);
   const { data, isLoading, isFetching } = useNotifications(false);
   const markNotificationRead = useMarkNotificationRead();
   const markAllNotificationsRead = useMarkAllNotificationsRead();
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const updateIsMobile = () => setIsMobile(mediaQuery.matches);
+
+    updateIsMobile();
+    mediaQuery.addEventListener('change', updateIsMobile);
+    return () => mediaQuery.removeEventListener('change', updateIsMobile);
+  }, []);
 
   const notifications = data ?? [];
 
@@ -46,6 +56,8 @@ export function NotificationsPopover({
   }, [notifications]);
 
   const displayNotifications = filter === 'unread' ? unreadNotifications : notifications;
+  const popoverSide = isMobile ? 'left' : 'bottom';
+  const popoverAlign = isMobile ? 'start' : 'end';
 
   if (isLoading && notifications.length === 0) {
     return (
@@ -77,7 +89,7 @@ export function NotificationsPopover({
           {unreadCount > 0 && (
             <span
               className={cn(
-                'absolute -right-2 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-sm font-semibold leading-none text-white',
+                'absolute -right-2 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-sm font-medium leading-none text-white',
                 badgeClassName
               )}
             >
@@ -87,22 +99,24 @@ export function NotificationsPopover({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        align="end"
+        side={popoverSide}
+        align={popoverAlign}
+        collisionPadding={isMobile ? { top: 8, bottom: 24, left: 8, right: 56 } : 8}
         className={cn(
-          'w-95 overflow-hidden rounded-xl p-0 wood-panel text-card shadow-[0_10px_28px_rgba(32,20,10,0.45)]',
+          'w-[min(24rem,calc(100vw-4.25rem))] overflow-hidden rounded-xl p-0 wood-panel font-jersey tracking-wide text-card subpixel-antialiased [-webkit-font-smoothing:auto] [text-rendering:geometricPrecision] data-[state=open]:animate-none data-[state=closed]:animate-none shadow-[0_10px_28px_rgba(32,20,10,0.45)] md:w-105',
           popoverContentClassName
         )}
       >
-        <div className="border-b border-card/20 bg-black/5 px-4 py-3">
-          <div className="flex items-center justify-between mb-3">
+        <div className="border-b border-card/20 bg-black/5 px-3 py-3 sm:px-4">
+          <div className="mb-3 flex items-start justify-between gap-2 sm:items-center">
             <div>
-              <p className="text-base font-semibold text-accent-secondary">Message Board</p>
-              <p className="text-xs text-card/70">Stay updated on your activity</p>
+              <p className="text-[1.25rem] text-accent-secondary leading-8">Message Board</p>
+              <p className="text-[0.9rem] sm:text-xs md:text-base text-card">Stay updated on your activity</p>
             </div>
             <Button
               size="sm"
               variant="ghost"
-              className="h-7 px-2 text-xs text-card/70 bg-wood-light shadow-sm border border-wood hover:bg-card/10 hover:text-accent-secondary"
+              className="h-full sm:h-7 border border-wood bg-wood-light px-2 font-jersey text-xs tracking-wide text-card shadow-sm hover:bg-card/10 hover:text-accent-secondary"
               onClick={() => markAllNotificationsRead.mutate()}
               disabled={markAllNotificationsRead.isPending || unreadCount === 0}
             >
@@ -111,41 +125,41 @@ export function NotificationsPopover({
               ) : (
                 <CheckCheck className="mr-2 h-4 w-4" />
               )}
-              Mark all read
+              <span className='w-12 sm:w-full text-wrap text-left text-[0.9rem] sm:text-xs'>Mark all read</span>
             </Button>
           </div>
           <Tabs
             value={filter}
             onValueChange={(v) => setFilter(v as 'all' | 'unread')}
-            className="w-full"
+            className="w-full px-2"
           >
             <TabsList className="grid h-9 w-full grid-cols-2 gap-2 border border-accent/55 bg-black/10">
               <TabsTrigger
                 value="all"
-                className="h-full text-xs font-semibold text-card/75 data-[state=inactive]:hover:bg-card/25 data-[state=active]:bg-accent data-[state=active]:text-white data-[state=active]:shadow-none"
+                className="h-full font-jersey text-xs font-medium tracking-wide text-card data-[state=inactive]:hover:bg-card/25 data-[state=active]:bg-accent data-[state=active]:text-white data-[state=active]:shadow-none"
               >
                 All {notifications.length > 0 && `(${notifications.length})`}
               </TabsTrigger>
               <TabsTrigger
                 value="unread"
-                className="h-full text-xs font-semibold text-card/75 data-[state=inactive]:hover:bg-card/25 data-[state=active]:bg-accent data-[state=active]:text-white data-[state=active]:shadow-none"
+                className="h-full font-jersey text-xs font-medium tracking-wide text-card data-[state=inactive]:hover:bg-card/25 data-[state=active]:bg-accent data-[state=active]:text-white data-[state=active]:shadow-none"
               >
                 Unread {unreadCount > 0 && `(${unreadCount})`}
               </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
-        <div className="h-90 scrollbar-hide bg-black/10">
+        <div className="h-100 scrollbar-hide bg-black/10">
           <ScrollArea className="h-full pl-2 pr-3">
             {isLoading ? (
-              <div className="flex items-center justify-center py-12 text-sm text-card/75">
+              <div className="flex items-center justify-center py-12 text-sm text-card">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Loading notifications...
               </div>
             ) : displayNotifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-2 py-10 text-center text-card/75">
+              <div className="flex flex-col items-center justify-center gap-2 py-10 text-center text-card">
                 <Bell className="h-5 w-5" />
-                <p className="text-sm font-semibold text-card">
+                <p className="text-sm font-medium text-card">
                   {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
                 </p>
                 <p className="text-xs">
@@ -159,7 +173,7 @@ export function NotificationsPopover({
                 {filter === 'all' && unreadNotifications.length > 0 && (
                   <>
                     <div className="px-3 py-1">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-accent-secondary">
+                      <p className="text-xs font-medium uppercase tracking-wider text-accent-secondary">
                         Unread ({unreadNotifications.length})
                       </p>
                     </div>
@@ -179,7 +193,7 @@ export function NotificationsPopover({
                 {filter === 'all' && readNotifications.length > 0 && (
                   <>
                     <div className="px-3 py-1 mt-3">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-card/65">
+                      <p className="text-xs font-medium uppercase tracking-wider text-card/65">
                         Read ({readNotifications.length})
                       </p>
                     </div>
@@ -205,7 +219,7 @@ export function NotificationsPopover({
                     />
                   ))}
                 {isFetching && (
-                  <div className="flex items-center gap-2 px-3 pb-2 text-xs text-card/70">
+                  <div className="flex items-center gap-2 px-3 pb-2 text-xs text-card">
                     <Loader2 className="h-3 w-3 animate-spin" />
                     Refreshing...
                   </div>
