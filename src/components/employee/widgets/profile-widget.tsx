@@ -1,25 +1,16 @@
 'use client';
 
 import { ProfileLevelSkeleton } from './widget-skeletons';
-import { useMemo } from 'react';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import { useGetEmployeeXP } from '@/hooks/tanstack/queries/employeeQueries';
-import type { EmployeeXP } from '@/types';
 import { ProfileModal } from '@/components/sidebar/profile-modal';
 import { useState } from 'react';
+import { ProfileAvatar } from '@/components/shared/ProfileAvatar';
 
 export default function ProfileLevelCard() {
   const [modalOpen, setModalOpen] = useState(false);
   const { data: user, isLoading: userLoading } = useGetSessionUser();
-  const { data: xpData, isLoading: xpLoading } = useGetEmployeeXP();
-  const [hasImage, setHasImage] = useState(true);
-
-  const imageUrlWithCacheBust = useMemo(() => {
-    if (!user?.profilePictureUrl) return undefined;
-    const separator = user.profilePictureUrl.includes('?') ? '&' : '?';
-    const version = user?.id ?? 'v1';
-    return `${user.profilePictureUrl}${separator}v=${encodeURIComponent(version)}`;
-  }, [user?.profilePictureUrl, user?.id]);
+  const { isLoading: xpLoading } = useGetEmployeeXP();
 
   const initials = (() => {
     if (!user?.name) return 'U';
@@ -47,12 +38,14 @@ export default function ProfileLevelCard() {
           onClick={() => setModalOpen(true)}
           className="w-12 h-12 rounded-full flex items-center justify-center wood-panel shrink-0 mr-3 overflow-hidden cursor-pointer hover:scale-105 transition-transform shadow-[2px_2px_2px_#000] shadow-[#47331F]/50"
         >
-          {imageUrlWithCacheBust && hasImage ? (
-            <img
-              src={imageUrlWithCacheBust}
-              alt={user?.name || 'User profile'}
-              className="w-full h-full rounded-full object-cover"
-              onError={() => setHasImage(false)}
+          {user ? (
+            <ProfileAvatar
+              userId={user.id}
+              userName={user.name}
+              profilePictureUrl={user.profilePictureUrl}
+              size="sm"
+              showBorder={false}
+              className="h-full w-full"
             />
           ) : (
             <span className="text-base text-muted">{initials}</span>

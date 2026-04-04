@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useGetEmployeeXP, useGetXPRequiredForNextLevel } from '@/hooks/tanstack';
-import { handleFetchEmployeeXP } from '@/action-handlers/employee/stats';
-import type { EmployeeXP } from '@/types';
 import { XPProgressSkeleton } from './widget-skeletons';
 import { useGetSessionUser } from '@/hooks/tanstack/queries/userQueries';
 import { ProfileModal } from '@/components/sidebar/profile-modal';
+import { ProfileAvatar } from '@/components/shared/ProfileAvatar';
 
 export default function XPProgress() {
   const { data: xpData, isLoading: xpLoading } = useGetEmployeeXP();
@@ -21,28 +20,8 @@ export default function XPProgress() {
   const nextLevelXP = requiredXP ?? 100;
   const progressPercent = nextLevelXP > 0 ? Math.min((currentXP / nextLevelXP) * 100, 100) : 0;
 
-  const [hasImage, setHasImage] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const { data: user, isLoading: userLoading } = useGetSessionUser();
-
-  // const [xpData, setXpData] = useState<EmployeeXP | null>(null);
-  // const [loading, setLoading] = useState(true);
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     setLoading(true);
-  //     const xp = await handleFetchEmployeeXP();
-  //     setXpData(xp);
-  //     setLoading(false);
-  //   }
-  //   fetchData();
-  // }, []);
-
-  const imageUrlWithCacheBust = useMemo(() => {
-    if (!user?.profilePictureUrl) return undefined;
-    const separator = user.profilePictureUrl.includes('?') ? '&' : '?';
-    const version = user?.id ?? 'v1';
-    return `${user.profilePictureUrl}${separator}v=${encodeURIComponent(version)}`;
-  }, [user?.profilePictureUrl, user?.id]);
 
   if (loading) {
     // ✅ Show skeleton while loading
@@ -68,17 +47,19 @@ export default function XPProgress() {
 
   return (
     <>
-      <div className="w-[clamp(12rem,70vw,20rem)] wood-panel rounded-lg shadow-md px-1.5 sm:px-2 pt-1 pb-1.5 sm:pb-2 flex items-center gap-1.5 sm:gap-2">
+      <div className="w-full lg:w-[clamp(12rem,70vw,20rem)] wood-panel rounded-lg shadow-md px-1.5 sm:px-2 pt-1 pb-1.5 sm:pb-2 flex items-center gap-1.5 sm:gap-2">
         <div
           onClick={() => setModalOpen(true)}
           className="h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center wood-panel shrink-0 overflow-hidden cursor-pointer hover:scale-105 transition-transform shadow-[2px_2px_2px_#000] shadow-[#47331F]/50"
         >
-          {imageUrlWithCacheBust && hasImage ? (
-            <img
-              src={imageUrlWithCacheBust}
-              alt={user?.name || 'User profile'}
-              className="h-full w-full rounded-full object-cover"
-              onError={() => setHasImage(false)}
+          {user ? (
+            <ProfileAvatar
+              userId={user.id}
+              userName={user.name}
+              profilePictureUrl={user.profilePictureUrl}
+              size="sm"
+              showBorder={false}
+              className="h-full w-full"
             />
           ) : (
             <span className="text-sm sm:text-base text-muted">{initials}</span>

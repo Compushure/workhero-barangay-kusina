@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, X, Eye, EyeOff } from 'lucide-react';
+import { X, Eye, EyeOff } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { UserWithExtras } from '@/types';
 import { maskSensitiveId } from '@/lib/format';
+import { ProfileAvatar } from '@/components/shared/ProfileAvatar';
 
 interface ProfileModalProps {
   open: boolean;
@@ -34,7 +35,6 @@ function formatDate(date: string | Date | undefined): string {
 }
 
 export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
-  const [imageError, setImageError] = useState(false);
   const [showUnmaskedIds, setShowUnmaskedIds] = useState(false);
 
   if (!user) return null;
@@ -63,24 +63,13 @@ export function ProfileModal({ open, onOpenChange, user }: ProfileModalProps) {
         <div className="flex flex-col gap-6 py-2">
           {/* Profile Picture */}
           <div className="flex justify-center">
-            <div className="h-32 w-32 bg-[#f2e1c9] rounded-full flex items-center justify-center overflow-hidden border-4 border-[#730202]/10">
-              {user.profilePictureUrl && !imageError ? (
-                <img
-                  src={user.profilePictureUrl}
-                  alt={`${user.name} profile picture`}
-                  className="h-full w-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                  onError={() => setImageError(true)}
-                  onLoad={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                  style={{ opacity: 0, transition: 'opacity 0.2s' }}
-                />
-              ) : (
-                <User className="h-16 w-16 text-[#730202]/40" />
-              )}
-            </div>
+            <ProfileAvatar
+              userId={user.id}
+              userName={user.name}
+              profilePictureUrl={user.profilePictureUrl}
+              size="xl"
+              className="bg-[#f2e1c9] border-[#730202]/10"
+            />
           </div>
 
           {/* Basic Information */}
