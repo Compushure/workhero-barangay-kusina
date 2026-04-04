@@ -56,20 +56,6 @@ export function NotificationsPopover({
   }, [notifications]);
 
   const displayNotifications = filter === 'unread' ? unreadNotifications : notifications;
-  if (isLoading && notifications.length === 0) {
-    return (
-      <div
-        className={cn(
-          'relative inline-flex size-12 items-center justify-center rounded-full wood-panel shadow-sm',
-          triggerClassName
-        )}
-        aria-hidden="true"
-      >
-        <div className="absolute inset-2 rounded-full bg-wood-light/70 animate-pulse" />
-      </div>
-    );
-  }
-
   return (
     <Popover>
       <PopoverTrigger asChild>

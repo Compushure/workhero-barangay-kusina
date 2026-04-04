@@ -26,18 +26,21 @@ export function RankWidget({ className }: RankWidgetProps = {}) {
   if (isRankLoading) {
     return (
       <div className={`${cardClassName} animate-pulse`}>
-        <div className="w-28 h-5 bg-white/20 rounded mx-auto mb-3" />
-        <div className="border-t-2 border-white/30 mb-3" />
+        <div className="mx-auto mb-2 h-5 w-28 rounded bg-white/20" />
+        <div className="mb-3 border-t-2 border-white/30" />
 
         <div className="grid grid-cols-[1fr_auto_1fr] items-center">
-          <div className="flex items-center justify-center gap-3">
-            <div className="h-10 w-10 bg-white/20 rounded-full" />
-            <div className="h-7 w-12 bg-white/20 rounded" />
+          <div className="flex items-center justify-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 rounded-full bg-white/20 sm:h-10 sm:w-10" />
+            <div className="h-6 w-10 rounded bg-white/20 sm:h-7 sm:w-12" />
           </div>
 
-          <div className="hidden sm:block h-12 border-l-2 border-white/30 mx-2 sm:mx-4" />
+          <div className="h-10 border-l-2 border-white/30 sm:h-12" />
 
-          <div className="h-7 w-14 bg-white/20 rounded justify-self-center" />
+          <div className="justify-self-center">
+            <div className="mb-1 h-3 w-16 rounded bg-white/20 sm:h-4 sm:w-20" />
+            <div className="h-6 w-12 rounded bg-white/20 sm:h-7 sm:w-14" />
+          </div>
         </div>
       </div>
     );
