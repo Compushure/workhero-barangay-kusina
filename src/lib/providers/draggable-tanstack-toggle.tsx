@@ -17,6 +17,15 @@ function clampToViewport(x: number, y: number, width: number, height: number): P
   };
 }
 
+function snapToHorizontalEdge(pos: Position, width: number, height: number): Position {
+  const clamped = clampToViewport(pos.x, pos.y, width, height);
+  const midX = window.innerWidth / 2;
+  const isLeft = clamped.x + width / 2 < midX;
+  const snappedX = isLeft ? PADDING : Math.max(PADDING, window.innerWidth - width - PADDING);
+
+  return clampToViewport(snappedX, clamped.y, width, height);
+}
+
 function readStoredPosition(): Position | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -43,7 +52,18 @@ function applyPosition(container: HTMLDivElement, pos: Position) {
   container.style.top = `${pos.y}px`;
   container.style.right = 'auto';
   container.style.bottom = 'auto';
+  container.style.transform = 'none';
   container.style.zIndex = '9999';
+}
+
+function applyAndPersistPosition(container: HTMLDivElement, pos: Position) {
+  applyPosition(container, pos);
+  writeStoredPosition(pos);
+
+  // Re-apply in the next frame so our edge snap wins over any same-tick style updates.
+  requestAnimationFrame(() => {
+    applyPosition(container, pos);
+  });
 }
 
 export function DraggableTanstackToggle() {
@@ -61,27 +81,48 @@ export function DraggableTanstackToggle() {
       const rect = container.getBoundingClientRect();
       const stored = readStoredPosition();
       const initialPos = stored
-        ? clampToViewport(stored.x, stored.y, rect.width, rect.height)
-        : clampToViewport(rect.left, rect.top, rect.width, rect.height);
+        ? snapToHorizontalEdge(stored, rect.width, rect.height)
+        : snapToHorizontalEdge({ x: rect.left, y: rect.top }, rect.width, rect.height);
       applyPosition(container, initialPos);
+      writeStoredPosition(initialPos);
 
       let dragging = false;
       let moved = false;
       let offsetX = 0;
       let offsetY = 0;
+      let activePointerId: number | null = null;
+
+      const finalizeSnap = () => {
+        const currentRect = container.getBoundingClientRect();
+        const finalPos = clampToViewport(
+          currentRect.left,
+          currentRect.top,
+          currentRect.width,
+          currentRect.height
+        );
+        const snapped = snapToHorizontalEdge(finalPos, currentRect.width, currentRect.height);
+        applyAndPersistPosition(container, snapped);
+      };
 
       const onPointerDown = (event: PointerEvent) => {
         event.preventDefault();
+        event.stopPropagation();
 
         const currentRect = container.getBoundingClientRect();
         offsetX = event.clientX - currentRect.left;
         offsetY = event.clientY - currentRect.top;
         moved = false;
         dragging = true;
-        button.setPointerCapture(event.pointerId);
+        activePointerId = event.pointerId;
+        try {
+          button.setPointerCapture(event.pointerId);
+        } catch {
+          // Some environments may reject pointer capture; window listeners still handle drag.
+        }
       };
 
-      const onPointerMove = (event: PointerEvent) => {
+      const onWindowPointerMove = (event: PointerEvent) => {
+        if (activePointerId !== null && event.pointerId !== activePointerId) return;
         if (!dragging) return;
 
         const currentRect = container.getBoundingClientRect();
@@ -96,20 +137,25 @@ export function DraggableTanstackToggle() {
         applyPosition(container, next);
       };
 
-      const onPointerUp = (event: PointerEvent) => {
+      const onWindowPointerUp = (event: PointerEvent) => {
+        if (activePointerId !== null && event.pointerId !== activePointerId) return;
         if (!dragging) return;
         dragging = false;
-        button.releasePointerCapture(event.pointerId);
+        activePointerId = null;
+        try {
+          button.releasePointerCapture(event.pointerId);
+        } catch {
+          // Ignore release failures when capture was not acquired.
+        }
+        finalizeSnap();
+      };
 
-        const currentRect = container.getBoundingClientRect();
-        const finalPos = clampToViewport(
-          currentRect.left,
-          currentRect.top,
-          currentRect.width,
-          currentRect.height
-        );
-        applyPosition(container, finalPos);
-        writeStoredPosition(finalPos);
+      const onWindowPointerCancel = (event: PointerEvent) => {
+        if (activePointerId !== null && event.pointerId !== activePointerId) return;
+        if (!dragging) return;
+        dragging = false;
+        activePointerId = null;
+        finalizeSnap();
       };
 
       const onClickCapture = (event: MouseEvent) => {
@@ -127,22 +173,24 @@ export function DraggableTanstackToggle() {
           currentRect.width,
           currentRect.height
         );
-        applyPosition(container, clamped);
-        writeStoredPosition(clamped);
+        const snapped = snapToHorizontalEdge(clamped, currentRect.width, currentRect.height);
+        applyAndPersistPosition(container, snapped);
       };
 
       button.addEventListener('pointerdown', onPointerDown);
-      button.addEventListener('pointermove', onPointerMove);
-      button.addEventListener('pointerup', onPointerUp);
       button.addEventListener('click', onClickCapture, true);
+      window.addEventListener('pointermove', onWindowPointerMove);
+      window.addEventListener('pointerup', onWindowPointerUp);
+      window.addEventListener('pointercancel', onWindowPointerCancel);
       window.addEventListener('resize', onResize);
 
       container.dataset.draggableCleanup = 'true';
       (container as HTMLDivElement & { __cleanup?: () => void }).__cleanup = () => {
         button.removeEventListener('pointerdown', onPointerDown);
-        button.removeEventListener('pointermove', onPointerMove);
-        button.removeEventListener('pointerup', onPointerUp);
         button.removeEventListener('click', onClickCapture, true);
+        window.removeEventListener('pointermove', onWindowPointerMove);
+        window.removeEventListener('pointerup', onWindowPointerUp);
+        window.removeEventListener('pointercancel', onWindowPointerCancel);
         window.removeEventListener('resize', onResize);
       };
     };
