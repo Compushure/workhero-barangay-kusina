@@ -38,7 +38,7 @@ export default function EmployeeDashboardClient() {
       {/* Overlay top widgets (do not affect layout flow) */}
       <div className="pointer-events-none absolute top-0 left-0 right-0 z-20 w-full px-2 pt-2 sm:px-4">
         <div className="pointer-events-none flex w-full flex-col gap-2">
-          <HeaderHUD className="rounded-lg pointer-events-auto" showMobileRankButton />
+          <HeaderHUD className="rounded-lg pointer-events-auto" />
           <div className="flex w-full justify-end pr-1 sm:pr-2 lg:pr-4 pointer-events-none">
             <div className="pointer-events-auto hidden lg:block">
               <RankWidget />

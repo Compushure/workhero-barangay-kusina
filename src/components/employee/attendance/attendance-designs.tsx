@@ -60,7 +60,7 @@ export default function AttendanceDesign() {
       {/* Overlay top widgets (do not affect layout flow) */}
       <div className="pointer-events-none absolute top-0 left-0 right-0 z-20 w-full px-2 pt-2 sm:px-4">
         <div className="pointer-events-auto flex w-full flex-col gap-2">
-          <HeaderHUD className="rounded-lg" showMobileRankButton />
+          <HeaderHUD className="rounded-lg" />
           <div className="hidden w-full justify-end pr-1 sm:pr-2 lg:flex lg:pr-4">
             <RankWidget />
           </div>

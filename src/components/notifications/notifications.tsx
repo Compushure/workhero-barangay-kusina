@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Bell, CheckCheck, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,11 @@ interface NotificationsPopoverProps {
   iconClassName?: string;
   badgeClassName?: string;
   popoverContentClassName?: string;
+  popoverSide?: 'top' | 'right' | 'bottom' | 'left';
+  popoverAlign?: 'start' | 'center' | 'end';
+  popoverCollisionPadding?: number | { top?: number; right?: number; bottom?: number; left?: number };
+  popoverSideOffset?: number;
+  popoverAlignOffset?: number;
 }
 
 export function NotificationsPopover({
@@ -27,21 +32,16 @@ export function NotificationsPopover({
   iconClassName,
   badgeClassName,
   popoverContentClassName,
+  popoverSide = 'bottom',
+  popoverAlign = 'end',
+  popoverCollisionPadding = 8,
+  popoverSideOffset = 8,
+  popoverAlignOffset = 0,
 }: NotificationsPopoverProps = {}) {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
-  const [isMobile, setIsMobile] = useState(false);
   const { data, isLoading, isFetching } = useNotifications(false);
   const markNotificationRead = useMarkNotificationRead();
   const markAllNotificationsRead = useMarkAllNotificationsRead();
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 767px)');
-    const updateIsMobile = () => setIsMobile(mediaQuery.matches);
-
-    updateIsMobile();
-    mediaQuery.addEventListener('change', updateIsMobile);
-    return () => mediaQuery.removeEventListener('change', updateIsMobile);
-  }, []);
 
   const notifications = data ?? [];
 
@@ -56,9 +56,6 @@ export function NotificationsPopover({
   }, [notifications]);
 
   const displayNotifications = filter === 'unread' ? unreadNotifications : notifications;
-  const popoverSide = isMobile ? 'left' : 'bottom';
-  const popoverAlign = isMobile ? 'start' : 'end';
-
   if (isLoading && notifications.length === 0) {
     return (
       <div
@@ -101,7 +98,9 @@ export function NotificationsPopover({
       <PopoverContent
         side={popoverSide}
         align={popoverAlign}
-        collisionPadding={isMobile ? { top: 8, bottom: 24, left: 8, right: 56 } : 8}
+        sideOffset={popoverSideOffset}
+        alignOffset={popoverAlignOffset}
+        collisionPadding={popoverCollisionPadding}
         className={cn(
           'w-[min(24rem,calc(100vw-4.25rem))] overflow-hidden rounded-xl p-0 wood-panel font-jersey tracking-wide text-card subpixel-antialiased [-webkit-font-smoothing:auto] [text-rendering:geometricPrecision] data-[state=open]:animate-none data-[state=closed]:animate-none shadow-[0_10px_28px_rgba(32,20,10,0.45)] md:w-105',
           popoverContentClassName
