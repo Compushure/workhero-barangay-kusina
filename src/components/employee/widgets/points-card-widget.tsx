@@ -13,7 +13,7 @@ export default function PointsCardWidget() {
   }
 
   return (
-    <div className="flex h-14 items-center justify-start gap-1.5 rounded-lg wood-panel px-2 shadow-md font-jersey tracking-wider sm:h-15 sm:gap-2 sm:px-2.5 w-[clamp(7rem,15vw,10rem)] md:h-16 md:w-[clamp(9.5rem,18vw,12.5rem)]">
+    <div className="flex h-12 items-center justify-start gap-1.5 rounded-lg wood-panel px-2 shadow-md font-jersey tracking-wider sm:h-15 sm:gap-2 sm:px-2.5 w-[clamp(6rem,12vw,8rem)] md:h-16 md:w-[clamp(9.5rem,18vw,12.5rem)]">
       <div className="rounded-full bg-wood-light p-1 shadow-xs/25 sm:p-1.5">
         <Coins className="size-4 text-yellow-500 sm:size-5" />
       </div>
@@ -21,7 +21,7 @@ export default function PointsCardWidget() {
         <span className="hidden whitespace-nowrap text-xs leading-4 text-yellow-500 md:inline-block lg:text-sm">
           Fiesta Points
         </span>
-        <span className="text-3xl font-bold leading-none tracking-wider text-white sm:text-2xl md:text-[1.85rem]">
+        <span className="font-bold leading-none tracking-wider text-white text-2xl md:text-[1.85rem]">
           {totalPoints.toLocaleString()}
         </span>
       </div>

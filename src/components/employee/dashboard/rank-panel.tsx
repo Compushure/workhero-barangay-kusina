@@ -3,17 +3,25 @@
 import { Trophy } from 'lucide-react';
 import { useGetEmployeeRank } from '@/hooks/tanstack/queries/employeeQueries';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
-const PERFORMANCE_SCORE_TOOLTIP = 'Performance Score = (Task Points × Completed Tasks) + Badge Points';
+const PERFORMANCE_SCORE_TOOLTIP =
+  'Performance Score = (Task Points × Completed Tasks) + Badge Points';
 
-export function RankWidget() {
+interface RankWidgetProps {
+  className?: string;
+}
+
+export function RankWidget({ className }: RankWidgetProps = {}) {
   const { data: rankData, isLoading: isRankLoading } = useGetEmployeeRank();
 
   const performanceScore = rankData?.performanceScore ?? 0;
   const rank = rankData?.rank ?? 1;
 
-  const cardClassName =
-    'rounded-lg shadow-md wood-panel p-2 mb-4 -ml-2 w-[320px] min-h-[90px] shrink-0 font-jersey tracking-widest';
+  const cardClassName = cn(
+    'rounded-lg shadow-md wood-panel p-2 mb-4 -ml-2 w-[320px] min-h-[90px] shrink-0 font-jersey tracking-widest',
+    className
+  );
 
   if (isRankLoading) {
     return (
@@ -41,7 +49,7 @@ export function RankWidget() {
         <h2 className="mb-2 text-center text-base text-yellow-500 sm:text-lg">Weekly Rank</h2>
         <div className="border-t-2 border-white/30 mb-3" />
 
-        <div className="flex items-center justify-center min-h-[60px]">
+        <div className="flex items-center justify-center min-h-15">
           <span className="text-xs italic text-white sm:text-sm">Not available yet</span>
         </div>
       </div>

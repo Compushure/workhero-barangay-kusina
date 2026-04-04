@@ -2,7 +2,7 @@
 
 export function XPProgressSkeleton() {
   return (
-    <div className="flex h-14 w-full items-center gap-1.5 rounded-lg wood-panel px-1.5 py-1 shadow-md sm:h-15 sm:gap-2 sm:px-2 sm:py-1.5 md:h-16 md:w-[clamp(15rem,30vw,21rem)] md:px-2.5">
+    <div className="flex h-14 w-full min-w-0 items-center gap-1.5 rounded-lg wood-panel px-1.5 py-1 shadow-md sm:h-15 sm:gap-2 sm:px-2 sm:py-1.5 md:h-16 md:w-[clamp(16rem,31vw,22rem)] md:px-2.5">
       <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full wood-panel shadow-[2px_2px_2px_#000] shadow-[#47331F]/50 sm:h-9 sm:w-9 md:h-10 md:w-10">
         <div className="h-full w-full rounded-full bg-wood-light/70 animate-pulse" />
       </div>
@@ -40,7 +40,7 @@ export function ProfileLevelSkeleton() {
 
 export function PointsCardWidgetSkeleton() {
   return (
-    <div className="flex h-14 w-full items-center justify-start gap-1.5 rounded-lg wood-panel px-2 shadow-md font-jersey tracking-wider sm:h-15 sm:gap-2 sm:px-2.5 md:h-16 md:w-[clamp(9.5rem,18vw,12.5rem)]">
+    <div className="flex h-14 w-full min-w-0 items-center justify-start gap-1.5 rounded-lg wood-panel px-2 shadow-md font-jersey tracking-wider sm:h-15 sm:gap-2 sm:px-2.5 md:h-16 md:w-[clamp(8.75rem,16vw,11.5rem)]">
       <div className="rounded-full bg-white/20 p-1 sm:p-1.5">
         <div className="h-3.5 w-3.5 rounded-full bg-wood-light/70 animate-pulse sm:h-4 sm:w-4" />
       </div>
