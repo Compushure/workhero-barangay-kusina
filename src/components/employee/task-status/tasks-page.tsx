@@ -3,16 +3,10 @@
 import { useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
-import {
-  useGetAllLevelMetadata,
-  useGetEmployeeXP,
-} from '@/hooks/tanstack/queries/employeeQueries';
+import { useGetAllLevelMetadata, useGetEmployeeXP } from '@/hooks/tanstack/queries/employeeQueries';
 import { useEmployeeTasksStore } from '@/store/employee';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  PointsCardWidgetSkeleton,
-  XPProgressSkeleton,
-} from '../widgets/widget-skeletons';
+import { PointsCardWidgetSkeleton, XPProgressSkeleton } from '../widgets/widget-skeletons';
 import { toEmployeeTaskBoardData } from './task-status-data';
 
 const HeaderHUD = dynamic(() => import('../widgets/header-hud'), {
@@ -32,16 +26,16 @@ const DEFAULT_KITCHEN_BG_URL =
 
 function HeaderHUDLoading() {
   return (
-    <div className="flex min-h-24 w-full items-center justify-start gap-3 overflow-x-hidden px-3 sm:pl-12 sm:pr-24">
-      <div className="shrink-0 font-jersey">
+    <div className="flex min-h-16 w-full items-center justify-start gap-2 overflow-x-hidden px-2 pr-14 sm:gap-2.5 sm:pl-2 sm:pr-16 md:pr-20">
+      <div className="min-w-0 flex-[1.3] font-jersey md:min-w-fit md:flex-none">
         <XPProgressSkeleton />
       </div>
 
-      <div className="shrink-0 font-jersey">
+      <div className="min-w-0 flex-1 font-jersey md:min-w-fit md:flex-none">
         <PointsCardWidgetSkeleton />
       </div>
 
-      <div className="ml-auto flex shrink-0 items-center gap-3">
+      <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
         <Skeleton className="size-12 rounded-full bg-[#8a6039]/65" />
         <Skeleton className="size-12 rounded-full bg-[#8a6039]/65" />
         <Skeleton className="size-12 rounded-full bg-[#8a6039]/65" />
@@ -159,9 +153,7 @@ export function TasksPage() {
   const resolvedError = error ?? (!isLoading && !data ? new Error('Failed to load tasks') : null);
 
   return (
-    <div
-      className="relative isolate flex min-h-[100dvh] w-full min-w-0 flex-col overflow-x-clip font-jersey tracking-[0.08em]"
-    >
+    <div className="relative isolate flex min-h-[100dvh] w-full min-w-0 flex-col overflow-x-clip font-jersey tracking-[0.08em]">
       <div
         className="absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url('${kitchenBackgroundUrl}')` }}

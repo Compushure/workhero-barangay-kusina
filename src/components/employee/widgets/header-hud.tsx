@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { ConditionalNotifications } from '../conditional-notifications';
 import XPProgress from './xp-level-widget';
 import PointsCardWidget from './points-card-widget';
@@ -17,32 +18,48 @@ export default function HeaderHUD({
   className,
   hideNotificationsOnMercado = true,
 }: HeaderHUDProps) {
+  const [isMdUp, setIsMdUp] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    const updateIsMdUp = () => setIsMdUp(mediaQuery.matches);
+
+    updateIsMdUp();
+    mediaQuery.addEventListener('change', updateIsMdUp);
+    return () => mediaQuery.removeEventListener('change', updateIsMdUp);
+  }, []);
+
+  const tooltipSide = isMdUp ? 'bottom' : 'left';
+
   return (
     <div
       className={cn(
-        'flex min-h-20 w-full flex-col gap-2 overflow-x-hidden px-2 sm:px-3 lg:flex-row lg:items-center lg:justify-start lg:gap-3 lg:pl-2 lg:pr-20',
+        'flex min-h-16 w-full items-center justify-start gap-2 sm:gap-2.5 overflow-x-hidden px-2 pr-14 sm:pl-2 sm:pr-16 md:pr-20 sticky',
         className
       )}
     >
-      <div className="flex w-full min-w-0 items-stretch gap-2 lg:w-auto lg:flex-none lg:items-center lg:gap-3">
-        <div className="min-w-0 flex-[1.25] font-jersey lg:min-w-fit lg:flex-none">
+      <div className="flex w-full min-w-0 items-center gap-2 sm:gap-2.5 md:w-auto md:flex-none md:gap-3">
+        <div className="min-w-0 shrink-0 font-jersey md:min-w-fit md:flex-none">
           <XPProgress />
         </div>
 
-        <div className="min-w-0 flex-1 font-jersey lg:min-w-fit lg:flex-none">
+        <div className="min-w-0 shrink-0 font-jersey md:min-w-fit md:flex-none">
           <PointsCardWidget />
         </div>
       </div>
 
-      <div className="ml-auto flex w-full items-center justify-end gap-2 px-0.5 py-1 sm:gap-2.5 lg:w-auto lg:px-0 lg:py-0">
+      <div className="drop-shadow-md/50 sm:drop-shadow-md/0 pointer-events-auto fixed right-3 top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-2 md:static md:ml-auto md:z-auto md:translate-y-0 md:flex-row md:gap-3">
         <div className="shrink-0">
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="inline-flex">
-                <ConditionalNotifications hideOnMercado={hideNotificationsOnMercado} />
+                <ConditionalNotifications
+                  hideOnMercado={hideNotificationsOnMercado}
+                  triggerClassName="size-10 md:size-12"
+                />
               </div>
             </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={8}>
+            <TooltipContent side={tooltipSide} sideOffset={8}>
               Notifications
             </TooltipContent>
           </Tooltip>
@@ -52,10 +69,10 @@ export default function HeaderHUD({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="inline-flex">
-                <MapLauncher inline />
+                <MapLauncher inline className="size-10 md:size-12" />
               </div>
             </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={8}>
+            <TooltipContent side={tooltipSide} sideOffset={8}>
               Navigation Map
             </TooltipContent>
           </Tooltip>
@@ -68,11 +85,11 @@ export default function HeaderHUD({
                 <LogOutBtn
                   iconOnly
                   requireConfirmation
-                  className="wood-panel text-card hover:text-accent-secondary"
+                  className="size-10 md:size-12 wood-panel text-card hover:text-accent-secondary"
                 />
               </div>
             </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={8}>
+            <TooltipContent side={tooltipSide} sideOffset={8}>
               Logout
             </TooltipContent>
           </Tooltip>

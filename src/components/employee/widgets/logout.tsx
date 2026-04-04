@@ -96,7 +96,7 @@ export const LogOutBtn = memo(function LogOutBtn({
       <Hand className={iconOnly ? 'size-4.5' : 'size-6'} />
     </span>
   ) : (
-    <DoorOpen className={iconOnly ? 'size-6 object-contain text-card group-hover:text-accent-secondary transition-all duration-300' : 'w-full h-full object-contain'}/>
+    <DoorOpen className={iconOnly ? 'size-5 sm:size-6 object-contain text-card group-hover:text-accent-secondary transition-all duration-300' : 'w-full h-full object-contain'}/>
   );
 
   const triggerButton = iconOnly ? (
