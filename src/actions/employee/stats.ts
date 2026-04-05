@@ -27,6 +27,18 @@ export interface EmployeePointsData {
   deductedPoints: number;
 }
 
+function isSupabaseGatewayError(message: string | undefined): boolean {
+  if (!message) {
+    return false;
+  }
+
+  const normalized = message.toLowerCase();
+  return (
+    (normalized.includes('502') || normalized.includes('bad gateway'))
+    && (normalized.includes('<!doctype html') || normalized.includes('<html') || normalized.includes('cloudflare'))
+  );
+}
+
 export async function getEmployeeLevel(): Promise<ActionResult<number>> {
   return safeAction(async () => {
     const supabase = await createClient();
@@ -230,6 +242,11 @@ export async function getEmployeeTopWeeklyRanks(): Promise<
       .maybeSingle();
 
     if (periodError) {
+      if (isSupabaseGatewayError(periodError.message)) {
+        console.warn('Supabase returned a transient 502 while fetching the latest weekly ranking period.');
+        return null;
+      }
+
       throw new Error(`Failed to fetch latest ranking period: ${periodError.message}`);
     }
 
