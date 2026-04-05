@@ -60,11 +60,11 @@ function CarouselArrowButton({ direction, onClick }: CarouselArrowButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className="relative flex h-10 w-10 sm:h-11 sm:w-11 md:h-12 md:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center rounded-full border-2 border-[#9b7a56] bg-[#f6eddd] text-[#4b3522] shadow-[0_2px_6px_rgba(75,53,34,0.18)] transition-all duration-200 hover:scale-110 active:scale-95"
+      className="relative flex h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-12 lg:w-12 shrink-0 items-center justify-center rounded-full border-2 border-[#9b7a56] bg-[#f6eddd] text-[#4b3522] shadow-[0_2px_6px_rgba(75,53,34,0.18)] transition-all duration-200 hover:scale-105 active:scale-95"
       aria-label={altText}
     >
       <ArrowIcon
-        className="h-5 w-5 sm:h-5.5 sm:w-5.5 md:h-6 md:w-6 lg:h-7 lg:w-7"
+        className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 lg:h-6 lg:w-6"
         strokeWidth={2.3}
       />
     </button>
@@ -121,7 +121,7 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
 
   return (
     <div
-      className="relative h-svh min-h-svh max-h-svh w-full overflow-hidden overscroll-none bg-[#9b642f] bg-cover bg-bottom bg-no-repeat"
+      className="relative h-dvh min-h-dvh max-h-dvh w-full overflow-hidden overscroll-none bg-[#9b642f] bg-cover bg-bottom bg-no-repeat"
       style={{ backgroundImage: `url(${MERCADO_BACKGROUND_IMAGE})` }}
     >
       {/* Shows loading feedback for page-level navigation transitions. */}
@@ -162,7 +162,7 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
           </div>
 
           {/* Mobile/tablet: single-stall carousel controlled by left/right arrows. */}
-          <div className="flex w-full items-center justify-center gap-2.5 pb-1 sm:gap-3 sm:pb-1.5 md:gap-4 md:pb-2 lg:hidden">
+          <div className="flex w-full items-center justify-center gap-1.5 pb-1 sm:gap-2 sm:pb-1.5 md:gap-2.5 md:pb-2 lg:hidden">
             <CarouselArrowButton direction="left" onClick={handlePreviousStall} />
             <MercadoStallButton
               stall={activeCarouselStall}

@@ -16,7 +16,7 @@ interface MercadoStallButtonProps {
 const STALL_VARIANT_CLASS = {
   desktop:
     'h-[clamp(220px,45vw,380px)] w-[clamp(200px,40vw,320px)] md:h-auto md:w-auto lg:h-96 lg:w-80 xl:h-[420px] xl:w-96',
-  mobile: 'h-[248px] w-[248px] sm:h-[276px] sm:w-[276px] md:h-80 md:w-64',
+  mobile: 'h-[268px] w-[268px] sm:h-[296px] sm:w-[296px] md:h-80 md:w-64',
 } as const;
 
 const CLOSED_BADGE_CLASS = {
@@ -74,7 +74,7 @@ export function MercadoStallButton({
         sizes={
           variant === 'desktop'
             ? '(max-width: 768px) 256px, (max-width: 1024px) 304px, 352px'
-            : '(max-width: 640px) 248px, (max-width: 768px) 276px, 320px'
+            : '(max-width: 640px) 268px, (max-width: 768px) 296px, 320px'
         }
       />
 
