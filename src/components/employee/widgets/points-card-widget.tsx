@@ -17,11 +17,11 @@ export default function PointsCardWidget() {
       <div className="rounded-full bg-wood-light p-1 shadow-xs/25 sm:p-1.5">
         <Coins className="size-4 text-yellow-500 sm:size-5" />
       </div>
-      <div className="flex min-w-0 flex-col justify-center sm:py-0.5">
+      <div className="flex min-w-0 flex-col justify-center sm:pb-1">
         <span className="hidden whitespace-nowrap text-xs text-yellow-500 md:inline-block lg:text-sm">
           Fiesta Points
         </span>
-        <span className="font-bold leading-none tracking-wider text-white text-2xl md:text-[1.85rem]">
+        <span className="font-bold leading-5 tracking-wider text-white text-2xl md:text-[1.85rem]">
           {totalPoints.toLocaleString()}
         </span>
       </div>

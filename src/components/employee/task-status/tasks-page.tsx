@@ -8,14 +8,15 @@ import { useEmployeeTasksStore } from '@/store/employee';
 import { Skeleton } from '@/components/ui/skeleton';
 import HeaderHUD from '../widgets/header-hud';
 import { toEmployeeTaskBoardData } from './task-status-data';
+import { TaskStatusBoard } from './task-status-board';
 
-const TaskStatusBoard = dynamic(
-  () => import('./task-status-board').then((mod) => mod.TaskStatusBoard),
-  {
-    ssr: false,
-    loading: () => <TaskStatusBoardLoading />,
-  }
-);
+// const TaskStatusBoard = dynamic(
+//   () => import('./task-status-board').then((mod) => mod.TaskStatusBoard),
+//   {
+//     ssr: false,
+//     loading: () => <TaskStatusBoardLoading />,
+//   }
+// );
 
 const DEFAULT_KITCHEN_BG_URL =
   'https://ewvpbwxqkomybbhmqygm.supabase.co/storage/v1/object/public/kitchen/level_1_bg.png';
@@ -129,7 +130,7 @@ export function TasksPage() {
   const resolvedError = error ?? (!isLoading && !data ? new Error('Failed to load tasks') : null);
 
   return (
-    <div className="relative isolate flex min-h-[100dvh] w-full min-w-0 flex-col overflow-x-clip font-jersey tracking-[0.08em]">
+    <div className="relative isolate flex min-h-dvh w-full min-w-0 flex-col overflow-x-clip font-jersey tracking-[0.08em]">
       <div
         className="absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url('${kitchenBackgroundUrl}')` }}
@@ -143,15 +144,19 @@ export function TasksPage() {
       </header>
 
       <main className="mx-auto flex w-full min-w-0 flex-1 justify-center px-2 pb-3 pt-1 sm:px-3 sm:pb-3 sm:pt-2 md:min-h-0 md:px-4 md:pb-4">
-        <div className="flex w-full min-w-0 max-w-[1180px] flex-1 md:min-h-0">
-          <TaskStatusBoard
-            currentTasks={tasks.currentTasks}
-            inReviewTasks={tasks.inReviewTasks}
-            verifiedTasks={tasks.verifiedTasks}
-            rejectedTasks={tasks.rejectedTasks}
-            isLoading={isLoading}
-            error={resolvedError}
-          />
+        <div className="flex w-full min-w-0 max-w-295 flex-1 md:min-h-0">
+          { isLoading ? (
+            <TaskStatusBoardLoading/>
+          ) : (
+            <TaskStatusBoard
+              currentTasks={tasks.currentTasks}
+              inReviewTasks={tasks.inReviewTasks}
+              verifiedTasks={tasks.verifiedTasks}
+              rejectedTasks={tasks.rejectedTasks}
+              isLoading={isLoading}
+              error={resolvedError}
+            />
+          )}
         </div>
       </main>
     </div>
