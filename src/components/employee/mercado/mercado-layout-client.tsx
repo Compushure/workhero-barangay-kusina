@@ -125,7 +125,7 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
         </div>
       </div>
 
-      <main className="relative z-10 mx-auto flex w-full flex-1 min-w-0 items-end justify-center overflow-hidden px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] sm:px-3 sm:pb-2 md:px-4 md:pb-3 lg:px-4 lg:pb-4 xl:px-5 xl:pb-6">
+      <main className="relative z-10 mx-auto flex w-full flex-1 min-w-0 items-end justify-center overflow-hidden px-2 pb-[max(env(safe-area-inset-bottom),3rem)] sm:px-3 sm:pb-[max(env(safe-area-inset-bottom),2.5rem)] md:px-4 md:pb-[max(env(safe-area-inset-bottom),2rem)] lg:px-4 lg:pb-4 xl:px-5 xl:pb-6">
         <div className="flex w-full flex-1 min-w-0 max-w-295 items-end justify-center">
           {/* Desktop: 3 stalls grid (lg+) */}
           <div className="hidden items-end justify-center gap-6 sm:gap-8 md:gap-10 lg:flex lg:gap-12 xl:gap-16">
@@ -141,8 +141,8 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
           </div>
 
           {/* Mobile/tablet: single-stall carousel with arrows anchored near stall edges. */}
-          <div className="relative flex w-full min-w-0 max-w-lg items-center justify-center pb-0 sm:max-w-xl sm:pb-0.5 md:max-w-160 md:pb-1 lg:hidden">
-            <div className="relative inline-flex w-auto translate-y-8 items-center justify-center sm:translate-y-8 md:translate-y-7">
+          <div className="relative flex w-full min-w-0 max-w-lg items-center justify-center pb-1 sm:max-w-xl sm:pb-1 md:max-w-160 md:pb-1.5 lg:hidden">
+            <div className="relative inline-flex w-auto translate-y-0 items-center justify-center sm:translate-y-1 md:translate-y-2">
               <MercadoStallButton
                 stall={activeCarouselStall}
                 isClosed={closedByInterval[activeCarouselStall.interval]}
