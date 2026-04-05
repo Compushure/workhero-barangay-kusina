@@ -40,7 +40,7 @@ export default function EmployeeDashboardClient() {
         <div className="pointer-events-none flex w-full flex-col gap-2">
           <HeaderHUD className="rounded-lg pointer-events-auto" />
           <div className="flex w-full justify-end pr-1 sm:pr-2 lg:pr-4 pointer-events-none">
-            <div className="pointer-events-auto">
+            <div className="pointer-events-auto hidden lg:block">
               <RankWidget />
             </div>
           </div>

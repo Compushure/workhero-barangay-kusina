@@ -132,7 +132,7 @@ export function MapLauncher({ className, inline = false }: MapLauncherProps) {
               aria-hidden
             />
           )}
-          <Map className={inline ? 'size-6' : 'size-8'} aria-hidden />
+          <Map className={inline ? 'size-5 sm:size-6' : 'size-8'} aria-hidden />
         </div>
       </button>
     </>

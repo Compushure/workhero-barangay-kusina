@@ -13,15 +13,15 @@ export default function PointsCardWidget() {
   }
 
   return (
-    <div className="flex h-[clamp(2.75rem,8vw,4.25rem)] w-full lg:w-[clamp(8rem,50vw,10rem)] items-stretch justify-start gap-2 rounded-lg wood-panel px-1.5 shadow-md font-jersey tracking-wider sm:gap-3 sm:px-2 lg:items-center">
-      <div className="flex self-center rounded-full bg-white/20 p-1 sm:p-1.5">
-        <Coins className="size-4 sm:size-5 text-yellow-500" />
+    <div className="flex h-12 items-center justify-start gap-1.5 rounded-lg wood-panel px-2 shadow-md font-jersey tracking-wider sm:h-13 sm:gap-2 sm:px-2.5 w-[clamp(6rem,12vw,8rem)] md:h-14 md:w-[clamp(10rem,16vw,12rem)]">
+      <div className="rounded-full bg-wood-light p-1 shadow-xs/25 sm:p-1.5">
+        <Coins className="size-4 text-yellow-500 sm:size-5" />
       </div>
-      <div className="flex min-w-0 flex-1 flex-col justify-center self-stretch gap-0 sm:gap-0.5 lg:flex-none lg:self-auto lg:pt-2">
-        <span className="text-xs leading-none whitespace-nowrap text-yellow-500 sm:text-sm lg:leading-tight">
+      <div className="flex min-w-0 flex-col justify-center sm:pb-1">
+        <span className="hidden whitespace-nowrap text-xs text-yellow-500 md:inline-block lg:text-sm">
           Fiesta Points
         </span>
-        <span className="text-lg leading-none text-white font-bold wrap-break-word sm:text-xl lg:text-2xl">
+        <span className="font-bold leading-5 tracking-wider text-white text-2xl md:text-[1.85rem]">
           {totalPoints.toLocaleString()}
         </span>
       </div>
