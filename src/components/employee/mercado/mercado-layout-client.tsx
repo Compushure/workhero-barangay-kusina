@@ -38,7 +38,7 @@ function CarouselArrowButton({ direction, onClick }: CarouselArrowButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className="relative flex h-9 w-9 max-[380px]:h-10 max-[380px]:w-10 sm:h-10 sm:w-10 md:h-10 md:w-10 lg:h-12 lg:w-12 max-[640px]:p-2 shrink-0 items-center justify-center rounded-full border-2 border-[#9b7a56] bg-[#f6eddd] text-[#4b3522] shadow-[0_2px_6px_rgba(75,53,34,0.18)] transition-all duration-200 hover:scale-105 active:scale-95"
+      className="relative flex h-9 w-9 max-[380px]:h-10 max-[380px]:w-10 sm:h-10 sm:w-10 md:h-10 md:w-10 lg:h-12 lg:w-12 max-[640px]:p-2 shrink-0 items-center justify-center rounded-full wood-panel text-card shadow-md transition-all duration-200 hover:scale-105 hover:text-accent-secondary active:scale-95"
       aria-label={altText}
     >
       <ArrowIcon
