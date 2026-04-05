@@ -6,11 +6,23 @@ import { NotificationsPopover } from '@/components/notifications/notifications';
 interface ConditionalNotificationsProps {
   hideOnMercado?: boolean;
   triggerClassName?: string;
+  popoverSide?: 'top' | 'right' | 'bottom' | 'left';
+  popoverAlign?: 'start' | 'center' | 'end';
+  popoverCollisionPadding?: number | { top?: number; right?: number; bottom?: number; left?: number };
+  popoverSideOffset?: number;
+  popoverAlignOffset?: number;
+  popoverContentClassName?: string;
 }
 
 export function ConditionalNotifications({
   hideOnMercado = false,
   triggerClassName,
+  popoverSide,
+  popoverAlign,
+  popoverCollisionPadding,
+  popoverSideOffset,
+  popoverAlignOffset,
+  popoverContentClassName,
 }: ConditionalNotificationsProps) {
   const pathname = usePathname();
 
@@ -18,5 +30,15 @@ export function ConditionalNotifications({
     return null;
   }
 
-  return <NotificationsPopover triggerClassName={triggerClassName} />;
+  return (
+    <NotificationsPopover
+      triggerClassName={triggerClassName}
+      popoverSide={popoverSide}
+      popoverAlign={popoverAlign}
+      popoverCollisionPadding={popoverCollisionPadding}
+      popoverSideOffset={popoverSideOffset}
+      popoverAlignOffset={popoverAlignOffset}
+      popoverContentClassName={popoverContentClassName}
+    />
+  );
 }

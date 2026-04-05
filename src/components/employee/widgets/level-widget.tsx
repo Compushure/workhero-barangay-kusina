@@ -1,3 +1,5 @@
+// OUTDATED COMPONENT - not in use anymore
+
 'use client';
 
 import { useGetEmployeeXP, useGetXPRequiredForNextLevel } from '@/hooks/tanstack';
@@ -28,7 +30,7 @@ export default function LevelIcon() {
       {/* Progress bar + XP text stacked vertically */}
       <div className="flex flex-col flex-1 mt-4">
         {/* Responsive XP bar */}
-        <div className="h-5 bg-white border-4 border-[#9d3411] rounded-full overflow-hidden min-w-120 max-w-2xl">
+        <div className="h-5 bg-white border-4 border-[#9d3411] rounded-full overflow-hidden min-w-120z max-w-2xl">
           <div
             className="h-full bg-linear-to-r from-yellow-400 to-orange-500 rounded-full"
             style={{ width: `${progressPercent}%` }}
