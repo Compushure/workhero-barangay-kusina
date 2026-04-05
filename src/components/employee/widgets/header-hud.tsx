@@ -23,7 +23,7 @@ export default function HeaderHUD({
   return (
     <div
       className={cn(
-        'sticky flex min-h-16 w-full items-center justify-start gap-2 overflow-x-hidden px-0.5 sm:gap-2.5 sm:pl-2 lg:pr-20',
+        'sticky flex min-h-16 w-full items-center justify-start gap-2 overflow-x-hidden px-0.5 sm:gap-2.5 sm:pl-2 lg:pr-20 lg:mt-4',
         className
       )}
     >
