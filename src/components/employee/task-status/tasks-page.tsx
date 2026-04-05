@@ -26,19 +26,30 @@ const DEFAULT_KITCHEN_BG_URL =
 
 function HeaderHUDLoading() {
   return (
-    <div className="flex min-h-16 w-full items-center justify-start gap-2 overflow-x-hidden px-2 pr-14 sm:gap-2.5 sm:pl-2 sm:pr-16 md:pr-20">
-      <div className="min-w-0 flex-[1.3] font-jersey md:min-w-fit md:flex-none">
-        <XPProgressSkeleton />
+    <div className="sticky flex min-h-15 w-full items-center justify-start gap-2 overflow-x-hidden px-0.5 sm:gap-2.5 sm:pl-2 lg:pr-20">
+      <div className="flex w-full min-w-0 items-center gap-2 sm:gap-2.5 lg:w-auto lg:flex-none lg:gap-3">
+        <div className="min-w-0 shrink-0 font-jersey lg:min-w-fit lg:flex-none">
+          <XPProgressSkeleton />
+        </div>
+
+        <div className="min-w-0 shrink-0 font-jersey lg:min-w-fit lg:flex-none">
+          <PointsCardWidgetSkeleton />
+        </div>
       </div>
 
-      <div className="min-w-0 flex-1 font-jersey md:min-w-fit md:flex-none">
-        <PointsCardWidgetSkeleton />
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
+        <div className="flex items-center gap-5 rounded-lg bg-black/25 px-3 py-1.5 shadow-md/25 backdrop-blur-[1px]">
+          <Skeleton className="size-10 rounded-full bg-[#8a6039]/70" />
+          <Skeleton className="size-10 rounded-full bg-[#8a6039]/70" />
+          <Skeleton className="size-10 rounded-full bg-[#8a6039]/70" />
+          <Skeleton className="size-10 rounded-full bg-[#8a6039]/70" />
+        </div>
       </div>
 
-      <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
-        <Skeleton className="size-12 rounded-full bg-[#8a6039]/65" />
-        <Skeleton className="size-12 rounded-full bg-[#8a6039]/65" />
-        <Skeleton className="size-12 rounded-full bg-[#8a6039]/65" />
+      <div className="ml-auto hidden shrink-0 items-center gap-3 lg:flex">
+        <Skeleton className="size-12 rounded-full bg-[#8a6039]/70" />
+        <Skeleton className="size-12 rounded-full bg-[#8a6039]/70" />
+        <Skeleton className="size-12 rounded-full bg-[#8a6039]/70" />
       </div>
     </div>
   );

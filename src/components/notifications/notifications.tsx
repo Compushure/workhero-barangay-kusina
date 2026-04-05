@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bell, CheckCheck, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,9 @@ interface NotificationsPopoverProps {
   popoverContentClassName?: string;
   popoverSide?: 'top' | 'right' | 'bottom' | 'left';
   popoverAlign?: 'start' | 'center' | 'end';
-  popoverCollisionPadding?: number | { top?: number; right?: number; bottom?: number; left?: number };
+  popoverCollisionPadding?:
+    | number
+    | { top?: number; right?: number; bottom?: number; left?: number };
   popoverSideOffset?: number;
   popoverAlignOffset?: number;
 }
@@ -39,6 +41,7 @@ export function NotificationsPopover({
   popoverAlignOffset = 0,
 }: NotificationsPopoverProps = {}) {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [open, setOpen] = useState(false);
   const { data, isLoading, isFetching } = useNotifications(false);
   const markNotificationRead = useMarkNotificationRead();
   const markAllNotificationsRead = useMarkAllNotificationsRead();
@@ -56,8 +59,25 @@ export function NotificationsPopover({
   }, [notifications]);
 
   const displayNotifications = filter === 'unread' ? unreadNotifications : notifications;
+
+  useEffect(() => {
+    const closePopover = () => setOpen(false);
+
+    window.addEventListener('resize', closePopover);
+    window.visualViewport?.addEventListener('resize', closePopover);
+
+    return () => {
+      window.removeEventListener('resize', closePopover);
+      window.visualViewport?.removeEventListener('resize', closePopover);
+    };
+  }, []);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [popoverSide, popoverAlign]);
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
@@ -96,7 +116,9 @@ export function NotificationsPopover({
           <div className="mb-3 flex items-start justify-between gap-2 sm:items-center">
             <div>
               <p className="text-[1.25rem] text-accent-secondary leading-8">Message Board</p>
-              <p className="text-[0.9rem] sm:text-xs md:text-base text-card">Stay updated on your activity</p>
+              <p className="text-[0.9rem] sm:text-xs md:text-base text-card">
+                Stay updated on your activity
+              </p>
             </div>
             <Button
               size="sm"
@@ -110,7 +132,9 @@ export function NotificationsPopover({
               ) : (
                 <CheckCheck className="mr-2 h-4 w-4" />
               )}
-              <span className='w-12 sm:w-full text-wrap text-left text-[0.9rem] sm:text-xs'>Mark all read</span>
+              <span className="w-12 sm:w-full text-wrap text-left text-[0.9rem] sm:text-[1.1rem]">
+                Mark all read
+              </span>
             </Button>
           </div>
           <Tabs
