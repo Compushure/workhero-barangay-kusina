@@ -58,24 +58,24 @@ export function NotificationItemCard({ notification, onMarkRead }: NotificationI
   return (
     <div
       className={cn(
-        'group flex items-start gap-3 rounded-lg border px-3 py-2.5 shadow-sm transition',
+        'group flex items-start gap-3 rounded-lg border px-3 py-2.5 font-jersey tracking-wide subpixel-antialiased [-webkit-font-smoothing:auto] [text-rendering:geometricPrecision] shadow-sm transition',
         isUnread
           ? 'border-accent-secondary/50 bg-card/12 hover:border-accent-secondary/75'
           : 'border-card/20 bg-card/5 hover:border-accent/45'
       )}
     >
-      <Dot className={cn('mt-1 h-5 w-5 text-card/40', isUnread && 'text-accent-secondary')} />
+      <Dot className={cn('mt-1 h-5 w-5 text-card/65', isUnread && 'text-accent-secondary')} />
       <div className="flex-1 space-y-1">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-card/70">
-          <span className="font-semibold text-accent-secondary">{notification.type}</span>
+        <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-card">
+          <span className="font-medium text-accent-secondary">{notification.type}</span>
           {status ? (
-            <span className="rounded-full border border-accent/45 bg-black/10 px-2 py-0.5 text-[0.75rem] tracking-wider font-semibold text-card">
+            <span className="rounded-full border border-accent/45 bg-black/10 px-2 py-0.5 text-[0.75rem] tracking-wider font-medium text-card">
               {formatStatus(status)}
             </span>
           ) : null}
         </div>
         <p className="text-xs text-card">{notification.message}</p>
-        <div className="flex items-center gap-2 text-xs text-card/65">
+        <div className="flex items-center gap-2 text-xs text-card/85">
           <Clock3 className="h-3.5 w-3.5" />
           <span>{formatTimestamp(notification.createdAt)}</span>
         </div>

@@ -53,7 +53,7 @@ export function HrManagerMobileAttendanceTrigger({
           } ${shouldRemind ? 'animate-pulse' : ''}`}
         >
           <Clock3 className="size-4" strokeWidth={1.9} />
-          <span className="text-sidebar-label mt-1 w-full truncate text-center leading-tight">
+          <span className="text-[0.7rem] font-medium mt-1 w-full truncate text-center leading-tight">
             {label}
           </span>
           {statusText && (
