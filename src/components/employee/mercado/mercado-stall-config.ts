@@ -5,6 +5,7 @@ export interface IntervalStall {
   label: string;
   description: string;
   image: string;
+  imageAdjustClassName?: string;
 }
 
 export const INTERVAL_STALLS: IntervalStall[] = [
@@ -12,19 +13,23 @@ export const INTERVAL_STALLS: IntervalStall[] = [
     interval: 'weekly',
     label: 'Weekly',
     description: 'Available items to redeem for this week',
-    image: '/mercado/stall-weekly.png',
+    image: '/mercado/weeklystall.png',
+    // Weekly art has slightly more transparent padding; scale it up a bit for visual parity.
+    imageAdjustClassName: 'scale-105',
   },
   {
     interval: 'monthly',
     label: 'Monthly',
     description: 'Available items to redeem for this month',
-    image: '/mercado/stall-monthly.png',
+    image: '/mercado/monthlystall.png',
+    imageAdjustClassName: 'scale-100',
   },
   {
     interval: 'yearly',
     label: 'Yearly',
     description: 'Available items to redeem for this year',
-    image: '/mercado/stall-yearly.png',
+    image: '/mercado/yearlystall.png',
+    imageAdjustClassName: 'scale-100',
   },
 ];
 

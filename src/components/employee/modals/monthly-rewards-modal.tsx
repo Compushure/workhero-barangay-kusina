@@ -32,7 +32,6 @@ interface MonthlyRewardsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   interval: RewardInterval | null;
-  onIntervalChange: (interval: RewardInterval) => void;
   rewards: Reward[];
   isLoading?: boolean;
   userPoints: number;
@@ -80,7 +79,6 @@ export function MonthlyRewardsModal({
   open,
   onOpenChange,
   interval,
-  onIntervalChange,
   rewards,
   isLoading = false,
   userPoints,
@@ -166,25 +164,11 @@ export function MonthlyRewardsModal({
           <div className="px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 bg-[#e3d4bb] border-b border-[#8a6844]/20 flex flex-col gap-2 sm:gap-2.5 md:gap-3">
             {activeView === 'items' && rewards.length > 0 ? (
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3 w-full">
-                <Select
-                  value={interval || 'weekly'}
-                  onValueChange={(value: RewardInterval) => onIntervalChange(value)}
-                >
-                  <SelectTrigger className="h-8 sm:h-9 md:h-10 w-28 sm:w-32 md:w-36 text-xs sm:text-sm bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="yearly">Yearly</SelectItem>
-                  </SelectContent>
-                </Select>
-
                 <Input
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search items..."
-                  className="h-8 sm:h-9 md:h-10 flex-1 min-w-40 sm:min-w-48 md:min-w-56 text-xs sm:text-sm bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
+                  className="h-8 sm:h-9 md:h-10 flex-1 min-w-48 sm:min-w-56 md:min-w-64 text-xs sm:text-sm bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
                 />
 
                 <Select
@@ -202,25 +186,11 @@ export function MonthlyRewardsModal({
               </div>
             ) : (
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3 w-full">
-                <Select
-                  value={interval || 'weekly'}
-                  onValueChange={(value: RewardInterval) => onIntervalChange(value)}
-                >
-                  <SelectTrigger className="h-8 sm:h-9 md:h-10 w-28 sm:w-32 md:w-36 text-xs sm:text-sm bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="yearly">Yearly</SelectItem>
-                  </SelectContent>
-                </Select>
-
                 <Input
                   value={pendingSearchTerm}
                   onChange={(event) => setPendingSearchTerm(event.target.value)}
                   placeholder="Search pending..."
-                  className="h-8 sm:h-9 md:h-10 flex-1 min-w-40 sm:min-w-48 md:min-w-56 text-xs sm:text-sm bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
+                  className="h-8 sm:h-9 md:h-10 flex-1 min-w-48 sm:min-w-56 md:min-w-64 text-xs sm:text-sm bg-[#f6eddd] border-[#9b7a56] text-[#4b3522] placeholder:text-[#8d7255]"
                 />
                 <p className="text-xs sm:text-sm text-[#6b5038] font-medium w-full sm:w-auto mt-0.5 sm:mt-0">
                   Pending: {filteredPendingRequests.length}
