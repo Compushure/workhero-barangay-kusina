@@ -6,13 +6,9 @@ import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueri
 import { useGetAllLevelMetadata, useGetEmployeeXP } from '@/hooks/tanstack/queries/employeeQueries';
 import { useEmployeeTasksStore } from '@/store/employee';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PointsCardWidgetSkeleton, XPProgressSkeleton } from '../widgets/widget-skeletons';
+import HeaderHUD from '../widgets/header-hud';
 import { toEmployeeTaskBoardData } from './task-status-data';
 
-const HeaderHUD = dynamic(() => import('../widgets/header-hud'), {
-  ssr: false,
-  loading: () => <HeaderHUDLoading />,
-});
 const TaskStatusBoard = dynamic(
   () => import('./task-status-board').then((mod) => mod.TaskStatusBoard),
   {
@@ -23,37 +19,6 @@ const TaskStatusBoard = dynamic(
 
 const DEFAULT_KITCHEN_BG_URL =
   'https://ewvpbwxqkomybbhmqygm.supabase.co/storage/v1/object/public/kitchen/level_1_bg.png';
-
-function HeaderHUDLoading() {
-  return (
-    <div className="sticky flex min-h-15 w-full items-center justify-start gap-2 overflow-x-hidden px-0.5 sm:gap-2.5 sm:pl-2 lg:pr-20">
-      <div className="flex w-full min-w-0 items-center gap-2 sm:gap-2.5 lg:w-auto lg:flex-none lg:gap-3">
-        <div className="min-w-0 shrink-0 font-jersey lg:min-w-fit lg:flex-none">
-          <XPProgressSkeleton />
-        </div>
-
-        <div className="min-w-0 shrink-0 font-jersey lg:min-w-fit lg:flex-none">
-          <PointsCardWidgetSkeleton />
-        </div>
-      </div>
-
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
-        <div className="flex items-center gap-5 rounded-lg bg-black/25 px-3 py-1.5 shadow-md/25 backdrop-blur-[1px]">
-          <Skeleton className="size-10 rounded-full bg-[#8a6039]/70" />
-          <Skeleton className="size-10 rounded-full bg-[#8a6039]/70" />
-          <Skeleton className="size-10 rounded-full bg-[#8a6039]/70" />
-          <Skeleton className="size-10 rounded-full bg-[#8a6039]/70" />
-        </div>
-      </div>
-
-      <div className="ml-auto hidden shrink-0 items-center gap-3 lg:flex">
-        <Skeleton className="size-12 rounded-full bg-[#8a6039]/70" />
-        <Skeleton className="size-12 rounded-full bg-[#8a6039]/70" />
-        <Skeleton className="size-12 rounded-full bg-[#8a6039]/70" />
-      </div>
-    </div>
-  );
-}
 
 function TaskStatusBoardLoading() {
   return (
