@@ -72,6 +72,20 @@ type SeedTaskOptions = {
   deadlineDate?: string | null;
 };
 
+type SeedAttendanceLogOptions = {
+  employeeId: string;
+  timeIn: string;
+  timeOut?: string;
+  isOnTime?: boolean;
+  isOvertime?: boolean;
+  isAbsent?: boolean;
+  noTimeout?: boolean;
+  isUndertime?: boolean;
+  breakStart?: string | null;
+  breakEnd?: string | null;
+  overBreaktime?: boolean;
+};
+
 type SeedNotificationOptions = {
   userId: string;
   type: 'badge' | 'user' | 'task' | 'reward';
@@ -211,7 +225,9 @@ async function getRoleIdMap(client: SupabaseClient) {
     throw new Error(`Failed to load role ids for integration tests: ${error.message}`);
   }
 
-  return new Map<string, string>((data || []).map((row: any) => [row.type, row.id]));
+  return new Map<string, string>(
+    (data || []).map((row) => [row.type, row.id] as const)
+  );
 }
 
 export class RemoteSupabaseTestContext {
@@ -223,6 +239,7 @@ export class RemoteSupabaseTestContext {
   private readonly trackedBadgeIds = new Set<string>();
   private readonly trackedCategoryIds = new Set<string>();
   private readonly trackedTaskIds = new Set<string>();
+  private readonly trackedAttendanceLogIds = new Set<string>();
   private readonly trackedNotificationIds = new Set<string>();
   private readonly trackedUserBadgeIds = new Set<string>();
   private readonly trackedStorageTargets: StorageTarget[] = [];
@@ -258,6 +275,10 @@ export class RemoteSupabaseTestContext {
 
   trackTaskId(taskId: string) {
     this.trackedTaskIds.add(taskId);
+  }
+
+  trackAttendanceLogId(attendanceLogId: string) {
+    this.trackedAttendanceLogIds.add(attendanceLogId);
   }
 
   trackUserBadgeId(userBadgeId: string) {
@@ -450,6 +471,33 @@ export class RemoteSupabaseTestContext {
     return data;
   }
 
+  async seedAttendanceLog(options: SeedAttendanceLogOptions) {
+    const { data, error } = await this.serviceClient
+      .from('AttendanceLog')
+      .insert({
+        employee_id: options.employeeId,
+        timein_time: options.timeIn,
+        timeout_time: options.timeOut ?? options.timeIn,
+        is_ontime: options.isOnTime ?? true,
+        is_overtime: options.isOvertime ?? false,
+        is_absent: options.isAbsent ?? false,
+        no_timeout: options.noTimeout ?? false,
+        is_undertime: options.isUndertime ?? false,
+        breaktime_start: options.breakStart ?? null,
+        breaktime_end: options.breakEnd ?? null,
+        over_breaktime: options.overBreaktime ?? false,
+      })
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      throw new Error(`Failed to seed attendance log: ${error?.message || 'Unknown error'}`);
+    }
+
+    this.trackedAttendanceLogIds.add(data.id);
+    return data;
+  }
+
   async seedNotification(options: SeedNotificationOptions) {
     const { data, error } = await this.serviceClient
       .from('Notification')
@@ -564,6 +612,16 @@ export class RemoteSupabaseTestContext {
       }
     }
 
+    if (this.trackedAttendanceLogIds.size) {
+      const { error } = await this.serviceClient
+        .from('AttendanceLog')
+        .delete()
+        .in('id', [...this.trackedAttendanceLogIds]);
+      if (error) {
+        cleanupErrors.push(`Failed to remove attendance logs: ${error.message}`);
+      }
+    }
+
     if (this.trackedBadgeIds.size) {
       const { error } = await this.serviceClient
         .from('Badges')
@@ -605,6 +663,7 @@ export class RemoteSupabaseTestContext {
     this.trackedNotificationIds.clear();
     this.trackedUserBadgeIds.clear();
     this.trackedTaskIds.clear();
+    this.trackedAttendanceLogIds.clear();
     this.trackedBadgeIds.clear();
     this.trackedCategoryIds.clear();
     this.trackedUserIds.clear();
