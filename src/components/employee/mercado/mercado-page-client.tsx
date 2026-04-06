@@ -58,7 +58,6 @@ export function MercadoPageClient() {
       // Closing modal clears selected interval so layout returns to neutral state.
       onOpenChange={(open) => !open && setSelectedInterval(null)}
       interval={selectedInterval}
-      onIntervalChange={setSelectedInterval}
       rewards={intervalRewards}
       isLoading={intervalRewardsLoading}
       userPoints={userPoints}

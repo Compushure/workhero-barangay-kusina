@@ -32,10 +32,10 @@ export default function LevelXPDebuggerPanel() {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-24 sm:bottom-6 md:bottom-8 right-3 sm:right-4 z-50">
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-[#7a3510] text-white px-4 py-3 rounded-lg shadow-lg hover:bg-[#8d3f13] flex items-center gap-2 font-medium"
+          className="bg-[#7a3510] text-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg shadow-lg hover:bg-[#8d3f13] flex items-center gap-2 font-medium text-xs sm:text-sm"
         >
           <Bug className="w-4 h-4" />
           <span>XP Debug</span>
@@ -45,7 +45,7 @@ export default function LevelXPDebuggerPanel() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 w-[340px] max-h-[85vh] bg-white border border-[#7a3510]/30 rounded-lg shadow-2xl z-50 flex flex-col">
+    <div className="fixed bottom-24 sm:bottom-6 md:bottom-8 right-3 sm:right-4 w-[min(92vw,340px)] max-h-[min(80dvh,34rem)] bg-white border border-[#7a3510]/30 rounded-lg shadow-2xl z-50 flex flex-col">
       <div className="bg-[#7a3510] text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bug className="w-4 h-4" />
@@ -84,7 +84,11 @@ export default function LevelXPDebuggerPanel() {
               disabled={adjustXP.isPending}
               className="h-9 rounded border text-xs font-semibold hover:bg-gray-50 disabled:opacity-50"
             >
-              {delta > 0 ? <Plus className="inline w-3 h-3 mr-1" /> : <Minus className="inline w-3 h-3 mr-1" />}
+              {delta > 0 ? (
+                <Plus className="inline w-3 h-3 mr-1" />
+              ) : (
+                <Minus className="inline w-3 h-3 mr-1" />
+              )}
               {formatSigned(delta)}
             </button>
           ))}
