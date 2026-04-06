@@ -26,6 +26,18 @@ import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
 const MANILA_TIMEZONE = 'Asia/Manila';
 
+function isSupabaseGatewayError(message: string | undefined): boolean {
+  if (!message) {
+    return false;
+  }
+
+  const normalized = message.toLowerCase();
+  return (
+    (normalized.includes('502') || normalized.includes('bad gateway'))
+    && (normalized.includes('<!doctype html') || normalized.includes('<html') || normalized.includes('cloudflare'))
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Enriched leaderboard result — returned by getEnrichedLeaderboardByPeriod
 // ---------------------------------------------------------------------------
@@ -599,6 +611,11 @@ export async function getLatestWeeklyPeriod(): Promise<
       .maybeSingle();
 
     if (error) {
+      if (isSupabaseGatewayError(error.message)) {
+        console.warn('Supabase returned a transient 502 while fetching the latest weekly ranking period.');
+        return null;
+      }
+
       throw new Error(`Failed to fetch latest ranking period: ${error.message}`);
     }
 
@@ -633,6 +650,11 @@ export async function getLatestMonthlyPeriod(): Promise<
       .maybeSingle();
 
     if (error) {
+      if (isSupabaseGatewayError(error.message)) {
+        console.warn('Supabase returned a transient 502 while fetching the latest monthly ranking period.');
+        return null;
+      }
+
       throw new Error(`Failed to fetch latest monthly period: ${error.message}`);
     }
 
@@ -667,6 +689,11 @@ export async function getLatestYearlyPeriod(): Promise<
       .maybeSingle();
 
     if (error) {
+      if (isSupabaseGatewayError(error.message)) {
+        console.warn('Supabase returned a transient 502 while fetching the latest yearly ranking period.');
+        return null;
+      }
+
       throw new Error(`Failed to fetch latest yearly period: ${error.message}`);
     }
 
