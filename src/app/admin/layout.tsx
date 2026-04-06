@@ -3,7 +3,7 @@ import { protectAdminRoute } from '@/actions/shared/auth';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Admin Dashboard | WorkHero',
+  title: 'WorkHero | Admin Dashboard',
   description: 'Manage employees, roles, and system settings',
   robots: 'noindex, nofollow', // Prevent search engines from indexing admin pages
 };

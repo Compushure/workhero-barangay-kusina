@@ -3,13 +3,34 @@ import type { MercadoInterval } from './mercado-context';
 export interface IntervalStall {
   interval: MercadoInterval;
   label: string;
+  description: string;
   image: string;
+  imageAdjustClassName?: string;
 }
 
 export const INTERVAL_STALLS: IntervalStall[] = [
-  { interval: 'weekly', label: 'Weekly', image: '/mercado/stall-weekly.png' },
-  { interval: 'monthly', label: 'Monthly', image: '/mercado/stall-monthly.png' },
-  { interval: 'yearly', label: 'Yearly', image: '/mercado/stall-yearly.png' },
+  {
+    interval: 'weekly',
+    label: 'Weekly',
+    description: 'Available items to redeem for this week',
+    image: '/mercado/weeklystall.png',
+    // Weekly art has slightly more transparent padding; scale it up a bit for visual parity.
+    imageAdjustClassName: 'scale-105',
+  },
+  {
+    interval: 'monthly',
+    label: 'Monthly',
+    description: 'Available items to redeem for this month',
+    image: '/mercado/monthlystall.png',
+    imageAdjustClassName: 'scale-100',
+  },
+  {
+    interval: 'yearly',
+    label: 'Yearly',
+    description: 'Available items to redeem for this year',
+    image: '/mercado/yearlystall.png',
+    imageAdjustClassName: 'scale-100',
+  },
 ];
 
 export const STALL_HOVER_GLOW_CLASS =

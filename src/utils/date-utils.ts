@@ -2,10 +2,25 @@
  * Utility functions for date-related operations in task assignment and mercado items
  */
 
-import { toZonedTime } from 'date-fns-tz';
-import { startOfDay } from 'date-fns';
+import { addDays, startOfDay } from 'date-fns';
+import { formatInTimeZone, fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 const MANILA_TIMEZONE = 'Asia/Manila';
+
+function getManilaStartOfDay(date: Date): Date {
+  return fromZonedTime(
+    `${formatInTimeZone(date, MANILA_TIMEZONE, 'yyyy-MM-dd')} 00:00:00.000`,
+    MANILA_TIMEZONE
+  );
+}
+
+function getWeeklyIntervalRange(anchorDate: Date): { start: Date; end: Date } {
+  const isoDay = Number(formatInTimeZone(anchorDate, MANILA_TIMEZONE, 'i'));
+  const start = addDays(getManilaStartOfDay(anchorDate), -(isoDay - 1));
+  const end = addDays(start, 5);
+
+  return { start, end };
+}
 
 function getDatePartsInTimeZone(date: Date, timeZone: string) {
   const formatter = new Intl.DateTimeFormat('en-US', {
@@ -106,6 +121,43 @@ export function isItemAvailableNow(availableDate: Date | string | null | undefin
 
   // Item is available if current date >= available date (both at start of day)
   return todayStartOfDay.getTime() >= availableDateStartOfDay.getTime();
+}
+
+/**
+ * Checks whether a mercado item has passed its active availability interval.
+ * Uses Philippines timezone (Asia/Manila) for comparison.
+ */
+export function hasItemPassedAvailabilityInterval(
+  availableDate: Date | string | null | undefined,
+  availableMonth: 'weekly' | 'monthly' | 'yearly' | null | undefined
+): boolean {
+  if (!availableDate || !availableMonth) {
+    return false;
+  }
+
+  const dateObj = typeof availableDate === 'string' ? new Date(availableDate) : availableDate;
+
+  if (Number.isNaN(dateObj.getTime())) {
+    return false;
+  }
+
+  const currentDate = getManilaStartOfDay(new Date());
+  const anchorDate = getManilaStartOfDay(dateObj);
+
+  if (availableMonth === 'weekly') {
+    const { end } = getWeeklyIntervalRange(anchorDate);
+    return currentDate.getTime() > end.getTime();
+  }
+
+  if (availableMonth === 'monthly') {
+    return (
+      currentDate.getFullYear() > anchorDate.getFullYear() ||
+      (currentDate.getFullYear() === anchorDate.getFullYear() &&
+        currentDate.getMonth() > anchorDate.getMonth())
+    );
+  }
+
+  return currentDate.getFullYear() > anchorDate.getFullYear();
 }
 
 /**

@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { HideRewardDialog } from './hide-items';
-import { isItemAvailableNow } from '@/utils/date-utils';
+import { hasItemPassedAvailabilityInterval } from '@/utils/date-utils';
 import {
   AvailabilityInterval,
   formatDateShort,
@@ -64,6 +64,10 @@ export const MercadoCard = memo(function MercadoCard({
   );
   const isHidden = item.isActive === false;
   const isOutOfStock = item.quantity !== undefined && item.quantity === 0;
+  const isAvailabilityExpired = hasItemPassedAvailabilityInterval(
+    item.availableDate,
+    item.availableMonth
+  );
 
   const handleHideConfirm = useCallback(() => {
     if (isHidden) {
@@ -128,16 +132,24 @@ export const MercadoCard = memo(function MercadoCard({
           {availableDateText && (
             <Badge
               variant="secondary"
-              className="shrink-0 rounded-lg border border-accent/30 bg-accent-secondary/25 px-1.5 sm:px-2 text-primary hover:bg-accent-secondary/25 text-[10px] sm:text-[11px] leading-tight"
+              className={`shrink-0 rounded-lg px-1.5 text-[10px] leading-tight sm:px-2 sm:text-[11px] ${
+                isAvailabilityExpired
+                  ? 'border border-red-300 bg-red-50 text-red-700 hover:bg-red-50'
+                  : 'border border-accent/30 bg-accent-secondary/25 text-primary hover:bg-accent-secondary/25'
+              }`}
             >
               <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
               {availableDateText}
             </Badge>
           )}
-          {isHidden && (
+          {(isHidden || isAvailabilityExpired) && (
             <Badge
               variant="secondary"
-              className="shrink-0 rounded-lg border border-gray-300 bg-gray-200 px-1.5 sm:px-2 text-gray-700 hover:bg-gray-200 text-[10px] sm:text-[11px] leading-tight"
+              className={`shrink-0 rounded-lg px-1.5 text-[10px] leading-tight sm:px-2 sm:text-[11px] ${
+                isAvailabilityExpired
+                  ? 'border border-red-300 bg-red-50 text-red-700 hover:bg-red-50'
+                  : 'border border-gray-300 bg-gray-200 text-gray-700 hover:bg-gray-200'
+              }`}
             >
               <EyeOff className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
               Hidden
