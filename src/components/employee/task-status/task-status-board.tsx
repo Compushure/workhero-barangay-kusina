@@ -1,8 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowUpDown, Filter } from 'lucide-react';
+import { ArrowUpDown, Filter, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -24,6 +25,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { useDebounce } from '@/hooks/useDebounce';
+import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 import { isTaskStatusItemOverdue } from './task-status-utils';
 import { TaskCard } from './task-card';
 import { TaskStatusSection } from './task-status-section';
@@ -87,6 +90,12 @@ function filterTasksByOverdue(
     const overdue = isTaskStatusItemOverdue(task);
     return overdueFilter === 'overdue' ? overdue : !overdue;
   });
+}
+
+function filterTasksByName(tasks: TaskStatusItem[], query: string): TaskStatusItem[] {
+  if (!query) return tasks;
+
+  return tasks.filter((task) => normalizeSearchQuery(task.name).includes(query));
 }
 
 function getSectionHelperText(status: TaskStatusKind): string {
@@ -156,11 +165,18 @@ export function TaskStatusBoard({
 }: TaskStatusBoardProps) {
   const [sortBy, setSortBy] = useState<TaskSortOption>('due-date-asc');
   const [overdueFilter, setOverdueFilter] = useState<TaskOverdueFilter>('all');
+  const [searchInput, setSearchInput] = useState('');
   const [openSections, setOpenSections] =
     useState<Record<TaskStatusKind, boolean>>(desktopOpenState);
   const [mobileOpenSection, setMobileOpenSection] = useState<TaskStatusKind | ''>(
     mobileDefaultSection
   );
+  const debouncedSearchInput = useDebounce(searchInput, 300);
+  const normalizedSearchQuery = useMemo(
+    () => normalizeSearchQuery(debouncedSearchInput),
+    [debouncedSearchInput]
+  );
+  const hasActiveSearch = normalizedSearchQuery.length > 0;
 
   const filterLabel =
     overdueFilter === 'overdue'
@@ -176,14 +192,31 @@ export function TaskStatusBoard({
         : 'text-[#4b3522] hover:bg-[#8a6039] hover:text-[#fff6e5] data-[highlighted]:bg-[#8a6039] data-[highlighted]:text-[#fff6e5]'
     }`;
 
-  const [current, onReview, verified, denied] = useMemo(
+  const [currentByOverdue, onReviewByOverdue, verifiedByOverdue, deniedByOverdue] = useMemo(
     () => [
-      sortTasks(filterTasksByOverdue(currentTasks, overdueFilter), sortBy),
-      sortTasks(filterTasksByOverdue(inReviewTasks, overdueFilter), sortBy),
-      sortTasks(filterTasksByOverdue(verifiedTasks, overdueFilter), sortBy),
-      sortTasks(filterTasksByOverdue(rejectedTasks, overdueFilter), sortBy),
+      filterTasksByOverdue(currentTasks, overdueFilter),
+      filterTasksByOverdue(inReviewTasks, overdueFilter),
+      filterTasksByOverdue(verifiedTasks, overdueFilter),
+      filterTasksByOverdue(rejectedTasks, overdueFilter),
     ],
     [currentTasks, inReviewTasks, overdueFilter, rejectedTasks, sortBy, verifiedTasks]
+  );
+
+  const [current, onReview, verified, denied] = useMemo(
+    () => [
+      sortTasks(filterTasksByName(currentByOverdue, normalizedSearchQuery), sortBy),
+      sortTasks(filterTasksByName(onReviewByOverdue, normalizedSearchQuery), sortBy),
+      sortTasks(filterTasksByName(verifiedByOverdue, normalizedSearchQuery), sortBy),
+      sortTasks(filterTasksByName(deniedByOverdue, normalizedSearchQuery), sortBy),
+    ],
+    [
+      currentByOverdue,
+      deniedByOverdue,
+      normalizedSearchQuery,
+      onReviewByOverdue,
+      sortBy,
+      verifiedByOverdue,
+    ]
   );
 
   const sections = useMemo(
@@ -201,8 +234,22 @@ export function TaskStatusBoard({
       sections.map(({ status, tasks }) => ({
         status,
         count: tasks.length,
+        totalCount:
+          status === 'Current'
+            ? currentByOverdue.length
+            : status === 'In Review'
+              ? onReviewByOverdue.length
+              : status === 'Approved'
+                ? verifiedByOverdue.length
+                : deniedByOverdue.length,
       })),
-    [sections]
+    [
+      currentByOverdue.length,
+      deniedByOverdue.length,
+      onReviewByOverdue.length,
+      sections,
+      verifiedByOverdue.length,
+    ]
   );
 
   function handleSectionOpenChange(status: TaskStatusKind, open: boolean) {
@@ -252,6 +299,10 @@ export function TaskStatusBoard({
                   <Skeleton className="h-5 w-20 bg-[#dcc8aa]" />
                   <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-52" />
                 </div>
+                <div className="w-full space-y-1 sm:w-auto">
+                  <Skeleton className="h-5 w-24 bg-[#dcc8aa]" />
+                  <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-56" />
+                </div>
                 <div className="flex w-full items-center gap-2 self-start sm:w-auto lg:self-end">
                   <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-32" />
                 </div>
@@ -261,7 +312,7 @@ export function TaskStatusBoard({
             <>
               <div className="hidden sm:flex min-w-0 w-full lg:w-auto">
                 <div className="flex min-w-0 w-full gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                  {sectionSummaries.map(({ status, count }) => (
+                  {sectionSummaries.map(({ status, count, totalCount }) => (
                     <div
                       key={status}
                       className="inline-flex shrink-0 items-center gap-2 rounded-full border-2 border-[#d4c5a8] bg-[#f7efdf] px-2.5 py-1.5 text-[12px] leading-none text-[#6b5038]"
@@ -271,90 +322,105 @@ export function TaskStatusBoard({
                       >
                         {status}
                       </span>
-                      <span className="text-[13px] text-[#3f2a1a]">{count}</span>
+                      <span className="text-[13px] text-[#3f2a1a]">
+                        {hasActiveSearch ? `${count}/${totalCount}` : count}
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="flex w-full min-w-0 gap-2 lg:w-auto lg:items-end">
-                <div className="flex w-full space-y-1 sm:w-auto">
-                  <Select
-                    value={sortBy}
-                    onValueChange={(value) => setSortBy(value as TaskSortOption)}
-                  >
-                    <SelectTrigger className="h-9 w-full rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-52">
-                      <ArrowUpDown className='text-[#8a6039] size-4'/>
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 text-[#4b3522] sm:w-64">
-                      {sortOptions.map((option) => (
-                        <SelectItem
-                          key={option.value}
-                          value={option.value}
-                          className="cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] transition-colors duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] focus:bg-[#8a6039] focus:text-[#fff6e5] data-highlighted:bg-[#8a6039] data-highlighted:text-[#fff6e5]"
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div className="flex w-full min-w-0 flex-col gap-2 lg:w-auto lg:flex-row lg:items-end">
+                <div className="relative w-full lg:w-56">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#8a6039]" />
+                  <Input
+                    value={searchInput}
+                    onChange={(event) => setSearchInput(sanitizeSearchInput(event.target.value))}
+                    placeholder="Search task name"
+                    className="h-9 rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] pl-9 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] placeholder:text-[#8a6039]/85 focus-visible:border-[#F4B925] focus-visible:ring-0"
+                    aria-label="Search task name"
+                  />
                 </div>
 
-                <div className="flex w-full items-center gap-2 self-start sm:w-auto lg:self-end">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        size="default"
-                        variant="outline"
-                        className="h-9 w-full justify-start gap-2 rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-auto"
-                      >
-                        <Filter strokeWidth={2.5} className="h-4 w-4 text-[#6b5038]" />
-                        <span className="inline-flex items-center text-[16px] leading-none">
-                          {filterLabel}
-                        </span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      sideOffset={8}
-                      collisionPadding={12}
-                      className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 sm:w-64"
+                <div className="flex w-full min-w-0 gap-2 lg:w-auto lg:items-end">
+                  <div className="flex w-full space-y-1 sm:w-auto">
+                    <Select
+                      value={sortBy}
+                      onValueChange={(value) => setSortBy(value as TaskSortOption)}
                     >
-                      <DropdownMenuLabel className="px-2 py-1 font-jersey text-[14px] tracking-[0.04em] text-[#8a6039]">
-                        Due Date State
-                      </DropdownMenuLabel>
-                      <DropdownMenuCheckboxItem
-                        checked={overdueFilter === 'all'}
-                        onCheckedChange={(checked) => {
-                          if (checked) setOverdueFilter('all');
-                        }}
-                        className={checkboxItemClassName(overdueFilter === 'all')}
+                      <SelectTrigger className="h-9 w-full rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-52">
+                        <ArrowUpDown className="size-4 text-[#8a6039]" />
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 text-[#4b3522] sm:w-64">
+                        {sortOptions.map((option) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] transition-colors duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] focus:bg-[#8a6039] focus:text-[#fff6e5] data-highlighted:bg-[#8a6039] data-highlighted:text-[#fff6e5]"
+                          >
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex w-full items-center gap-2 self-start sm:w-auto lg:self-end">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="default"
+                          variant="outline"
+                          className="h-9 w-full justify-start gap-2 rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-auto"
+                        >
+                          <Filter strokeWidth={2.5} className="h-4 w-4 text-[#6b5038]" />
+                          <span className="inline-flex items-center text-[16px] leading-none">
+                            {filterLabel}
+                          </span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        sideOffset={8}
+                        collisionPadding={12}
+                        className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 sm:w-64"
                       >
-                        All Tasks
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem
-                        checked={overdueFilter === 'overdue'}
-                        onCheckedChange={(checked) => {
-                          if (checked) setOverdueFilter('overdue');
-                          else setOverdueFilter('all');
-                        }}
-                        className={checkboxItemClassName(overdueFilter === 'overdue')}
-                      >
-                        Overdue Only
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem
-                        checked={overdueFilter === 'not-overdue'}
-                        onCheckedChange={(checked) => {
-                          if (checked) setOverdueFilter('not-overdue');
-                          else setOverdueFilter('all');
-                        }}
-                        className={checkboxItemClassName(overdueFilter === 'not-overdue')}
-                      >
-                        Not Overdue Only
-                      </DropdownMenuCheckboxItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <DropdownMenuLabel className="px-2 py-1 font-jersey text-[14px] tracking-[0.04em] text-[#8a6039]">
+                          Due Date State
+                        </DropdownMenuLabel>
+                        <DropdownMenuCheckboxItem
+                          checked={overdueFilter === 'all'}
+                          onCheckedChange={(checked) => {
+                            if (checked) setOverdueFilter('all');
+                          }}
+                          className={checkboxItemClassName(overdueFilter === 'all')}
+                        >
+                          All Tasks
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem
+                          checked={overdueFilter === 'overdue'}
+                          onCheckedChange={(checked) => {
+                            if (checked) setOverdueFilter('overdue');
+                            else setOverdueFilter('all');
+                          }}
+                          className={checkboxItemClassName(overdueFilter === 'overdue')}
+                        >
+                          Overdue Only
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem
+                          checked={overdueFilter === 'not-overdue'}
+                          onCheckedChange={(checked) => {
+                            if (checked) setOverdueFilter('not-overdue');
+                            else setOverdueFilter('all');
+                          }}
+                          className={checkboxItemClassName(overdueFilter === 'not-overdue')}
+                        >
+                          Not Overdue Only
+                        </DropdownMenuCheckboxItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </div>
             </>
@@ -385,46 +451,52 @@ export function TaskStatusBoard({
                 }
                 className="space-y-2"
               >
-                {sections.map(({ status, tasks }) => (
-                  <AccordionItem
-                    key={status}
-                    value={status}
-                    className="min-w-0 overflow-hidden rounded-xl border-2 border-[#9b7a56] bg-[#f7efdf] px-0"
-                  >
-                    <AccordionTrigger className="px-3 py-3 text-left hover:no-underline [&>svg]:text-[#8a6039]">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <span
-                          className={`inline-flex rounded-full border-2 px-2.5 py-1 text-[13px] leading-none ${getSectionAccentClassName(status)}`}
-                        >
-                          {status}
-                        </span>
-                        <span className="rounded-full border-2 border-[#d4c5a8] bg-[#fff8ec] px-2 py-1 text-[13px] leading-none text-[#6b5038]">
-                          {tasks.length}
-                        </span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-3 pb-3">
-                      <div className="space-y-2">
-                        <p className="text-[13px] leading-relaxed tracking-[0.04em] text-[#6b5038]">
-                          {getSectionHelperText(status)}
-                        </p>
+                {sectionSummaries.map(({ status, count, totalCount }) => {
+                  const tasks = sections.find((section) => section.status === status)?.tasks ?? [];
 
-                        {isLoading ? (
-                          <>
-                            <MobileTaskCardSkeleton />
-                            <MobileTaskCardSkeleton />
-                          </>
-                        ) : tasks.length > 0 ? (
-                          <div className="space-y-2">{renderTaskCards(tasks)}</div>
-                        ) : (
-                          <div className="rounded-lg border-2 border-dashed border-[#d4c5a8] bg-[#fdf5e8] px-4 py-5 text-center text-[14px] tracking-[0.04em] text-[#8a6039]">
-                            No tasks in this section right now.
-                          </div>
-                        )}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
+                  return (
+                    <AccordionItem
+                      key={status}
+                      value={status}
+                      className="min-w-0 overflow-hidden rounded-xl border-2 border-[#9b7a56] bg-[#f7efdf] px-0"
+                    >
+                      <AccordionTrigger className="sticky top-0 z-10 bg-[#f7efdf] px-3 py-3 text-left hover:no-underline [&>svg]:text-[#8a6039]">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span
+                            className={`inline-flex rounded-full border-2 px-2.5 py-1 text-[13px] leading-none ${getSectionAccentClassName(status)}`}
+                          >
+                            {status}
+                          </span>
+                          <span className="rounded-full border-2 border-[#d4c5a8] bg-[#fff8ec] px-2 py-1 text-[13px] leading-none text-[#6b5038]">
+                            {hasActiveSearch ? `${count}/${totalCount}` : count}
+                          </span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-3 pb-3">
+                        <div className="space-y-2">
+                          <p className="text-[13px] leading-relaxed tracking-[0.04em] text-[#6b5038]">
+                            {getSectionHelperText(status)}
+                          </p>
+
+                          {isLoading ? (
+                            <>
+                              <MobileTaskCardSkeleton />
+                              <MobileTaskCardSkeleton />
+                            </>
+                          ) : tasks.length > 0 ? (
+                            <div className="space-y-2">{renderTaskCards(tasks)}</div>
+                          ) : (
+                            <div className="rounded-lg border-2 border-dashed border-[#d4c5a8] bg-[#fdf5e8] px-4 py-5 text-center text-[14px] tracking-[0.04em] text-[#8a6039]">
+                              {hasActiveSearch
+                                ? 'No tasks match this search in this section.'
+                                : 'No tasks in this section right now.'}
+                            </div>
+                          )}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
               </Accordion>
             </div>
 

@@ -9,7 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
+  usePerformMoreOrders,
   useRedoTask,
   useSubmitTaskVerification,
 } from '@/hooks/tanstack/mutations/employeeTasksMutations';
@@ -53,11 +55,7 @@ function getStatusChipClassName(status?: string): string {
   }
 }
 
-export default function TaskCardDialog({
-  task,
-  modalOpen,
-  setModalOpen,
-}: TaskCardDialogProps) {
+export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCardDialogProps) {
   const remainingOrders = Math.max(0, task.maxOrders - task.completedOrders);
   const isOverdue = isTaskStatusItemOverdue(task);
   const progressPercent =
@@ -75,17 +73,27 @@ export default function TaskCardDialog({
 
   const submitMutation = useSubmitTaskVerification();
   const redoMutation = useRedoTask();
+  const performMoreOrdersMutation = usePerformMoreOrders();
 
   const isApprovedTask = task.status?.toLowerCase() === 'approved';
-  const isFullyCompletedAndClaimed = task.completedOrders === task.maxOrders && Boolean(task.claimedAt);
-  const canSubmit =
-    task.status?.toLowerCase() === 'assigned' &&
-    remainingOrders > 0 &&
-    !submitMutation.isSuccess;
+  const hasClaimedRewards = Boolean(task.claimedAt);
+  const isFullyCompletedAndClaimed = task.completedOrders === task.maxOrders && hasClaimedRewards;
+  const canSubmitRaw =
+    task.status?.toLowerCase() === 'assigned' && remainingOrders > 0 && !submitMutation.isSuccess;
+  const isSubmitOverdueBlocked = canSubmitRaw && isOverdue;
+  const canSubmit = canSubmitRaw && !isOverdue;
   const canRedo = task.status?.toLowerCase() === 'rejected' && !redoMutation.isSuccess;
+  const canPerformMoreOrdersRaw =
+    isApprovedTask &&
+    hasClaimedRewards &&
+    task.pendingOrders === 0 &&
+    remainingOrders > 0 &&
+    !performMoreOrdersMutation.isSuccess;
+  const isPerformOverdueBlocked = canPerformMoreOrdersRaw && isOverdue;
+  const canPerformMoreOrders = canPerformMoreOrdersRaw && !isOverdue;
 
   const actionButtonClassName =
-    'inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-[#47331F] bg-[#8A6039] px-4 py-2.5 font-jersey text-[13px] tracking-[0.05em] text-[#fff6e5] shadow-[3px_3px_0px_#47331F] transition-all duration-150 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#9A6E45] hover:shadow-[2px_2px_0px_#47331F] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto sm:text-[14px]';
+    'inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-[#47331F] bg-[#8A6039] px-4 py-2.5 font-jersey text-[14px] tracking-[0.05em] text-[#fff6e5] shadow-[3px_3px_0px_#47331F] transition-all duration-150 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#9A6E45] hover:shadow-[2px_2px_0px_#47331F] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50 sm:w-auto sm:text-[15px]';
 
   const summaryChips = useMemo(
     () => [
@@ -127,6 +135,16 @@ export default function TaskCardDialog({
     setModalOpen(false);
   }
 
+  function handlePerformMoreOrders() {
+    if (!canPerformMoreOrders || performMoreOrdersMutation.isPending) return;
+
+    performMoreOrdersMutation.mutate(task.id, {
+      onSuccess: () => {
+        setModalOpen(false);
+      },
+    });
+  }
+
   return (
     <Dialog
       open={modalOpen}
@@ -141,10 +159,10 @@ export default function TaskCardDialog({
       <DialogContent className="bottom-2 top-auto flex h-[min(100dvh-1rem,56rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] translate-y-0 flex-col overflow-hidden rounded-[1.4rem] border-3 border-[#47331F] bg-[#f7efdf] p-0 font-jersey tracking-[0.04em] shadow-[0_14px_34px_rgba(71,51,31,0.22)] sm:top-[50%] sm:bottom-auto sm:h-auto sm:max-w-2xl sm:translate-y-[-50%]">
         <DialogHeader className="flex min-w-0 flex-col gap-3 border-b-2 border-[#d4c5a8] bg-[#e1d2b7] px-4 py-3.5 text-left sm:px-5">
           <div className="space-y-2">
-            <DialogTitle className="block w-full wrap-break-word pr-8 text-[20px] font-normal leading-tight text-[#3f2a1a] sm:text-[22px]">
+            <DialogTitle className="block w-full wrap-break-word pr-8 text-[22px] font-normal leading-tight text-[#3f2a1a] sm:text-[24px]">
               {task.name}
             </DialogTitle>
-            <DialogDescription className="min-w-0 pr-8 text-[14px] leading-relaxed text-[#6b5038] sm:pr-10">
+            <DialogDescription className="min-w-0 pr-8 text-[15px] leading-relaxed text-[#6b5038] sm:pr-10 sm:text-[16px]">
               {task.description}
             </DialogDescription>
           </div>
@@ -153,14 +171,14 @@ export default function TaskCardDialog({
             {summaryChips.map((chip) => (
               <span
                 key={chip.label}
-                className={`inline-flex items-center gap-2 rounded-full border-2 px-2.5 py-1 text-[12px] leading-none ${chip.className}`}
+                className={`inline-flex items-center gap-2 rounded-full border-2 px-2.5 py-1 text-[13px] leading-none ${chip.className}`}
               >
                 <span className="tracking-[0.12em]">{chip.label}</span>
-                <span className="text-[13px]">{chip.value}</span>
+                <span className="text-[14px]">{chip.value}</span>
               </span>
             ))}
             {isOverdue ? (
-              <span className="inline-flex items-center rounded-full border-2 border-[#d18d7e] bg-[#f4d6ce] px-2.5 py-1 text-[12px] leading-none text-[#8b2e22]">
+              <span className="inline-flex items-center rounded-full border-2 border-[#d18d7e] bg-[#f4d6ce] px-2.5 py-1 text-[13px] leading-none text-[#8b2e22]">
                 OVERDUE
               </span>
             ) : null}
@@ -189,8 +207,10 @@ export default function TaskCardDialog({
                   </div>
                 </div>
 
-                <div className={`flex flex-col items-center ${canSubmit ? '' : 'pointer-events-none opacity-50'}`}>
-                  <label className="mb-2 block text-[14px] text-[#4b3522]">Orders to Submit</label>
+                <div
+                  className={`flex flex-col items-center ${canSubmit ? '' : 'pointer-events-none opacity-50'}`}
+                >
+                  <label className="mb-2 block text-[15px] text-[#4b3522]">Orders to Submit</label>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -199,7 +219,7 @@ export default function TaskCardDialog({
                         setPendingOrders((previous) => Math.max(1, previous - 1));
                       }}
                       disabled={!canSubmit || pendingOrders === 1}
-                      className="flex size-9 items-center justify-center rounded-md border-2 border-[#47331F] bg-[#8A6039] text-[14px] text-[#fff6e5] transition-colors hover:bg-[#9A6E45] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex size-9 items-center justify-center rounded-md border-2 border-[#47331F] bg-[#8A6039] text-[15px] text-[#fff6e5] transition-colors hover:bg-[#9A6E45] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       -
                     </button>
@@ -210,11 +230,13 @@ export default function TaskCardDialog({
                       value={!canSubmit ? 1 : pendingOrders}
                       onChange={(event) => {
                         const nextValue = Number.parseInt(event.target.value, 10) || 1;
-                        setPendingOrders(Math.max(1, Math.min(nextValue, Math.max(1, remainingOrders))));
+                        setPendingOrders(
+                          Math.max(1, Math.min(nextValue, Math.max(1, remainingOrders)))
+                        );
                       }}
                       disabled={!canSubmit}
                       tabIndex={-1}
-                      className="remove-arrow w-20 rounded-md border-2 border-[#d4c5a8] bg-[#f7efdf] px-2 py-1.5 text-center text-[14px] text-[#3f2a1a] outline-none focus-visible:ring-2 focus-visible:ring-[#F4B925] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="remove-arrow w-20 rounded-md border-2 border-[#d4c5a8] bg-[#f7efdf] px-2 py-1.5 text-center text-[15px] text-[#3f2a1a] outline-none focus-visible:ring-2 focus-visible:ring-[#F4B925] disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <button
                       type="button"
@@ -225,13 +247,15 @@ export default function TaskCardDialog({
                         );
                       }}
                       disabled={!canSubmit || pendingOrders === Math.max(1, remainingOrders)}
-                      className="flex size-9 items-center justify-center rounded-md border-2 border-[#47331F] bg-[#8A6039] text-[14px] text-[#fff6e5] transition-colors hover:bg-[#9A6E45] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex size-9 items-center justify-center rounded-md border-2 border-[#47331F] bg-[#8A6039] text-[15px] text-[#fff6e5] transition-colors hover:bg-[#9A6E45] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       +
                     </button>
                   </div>
 
-                  <p className={`mt-1.5 text-[14px] text-[#6b5038] ${canSubmit ? '' : 'opacity-0'}`}>
+                  <p
+                    className={`mt-1.5 text-[15px] text-[#6b5038] ${canSubmit ? '' : 'opacity-0'}`}
+                  >
                     Remaining: {remainingOrders} order{remainingOrders === 1 ? '' : 's'}
                   </p>
                 </div>
@@ -239,20 +263,22 @@ export default function TaskCardDialog({
 
               <div className="flex flex-col gap-4 rounded-xl border-2 border-[#d4c5a8] bg-[#fff8ec] p-3.5 text-[#4b3522]">
                 <div className="flex flex-col items-center gap-1.5">
-                  <span className="text-[13px] tracking-[0.2em] text-[#8a6039]">DUE DATE</span>
-                  <p className={`flex items-center gap-2 text-[16px] ${isOverdue ? 'text-[#8b2e22]' : 'text-[#4b3522]'}`}>
+                  <span className="text-[14px] tracking-[0.2em] text-[#8a6039]">DUE DATE</span>
+                  <p
+                    className={`flex items-center gap-2 text-[17px] ${isOverdue ? 'text-[#8b2e22]' : 'text-[#4b3522]'}`}
+                  >
                     <Calendar strokeWidth={2.5} className="size-5" />
                     {formatDate(task.dueDate)}
                   </p>
                 </div>
 
-                <div className="flex flex-col items-center gap-1.5 text-[16px]">
-                  <span className="w-full text-center text-[13px] leading-none text-[#8a6039]">
+                <div className="flex flex-col items-center gap-1.5 text-[17px]">
+                  <span className="w-full text-center text-[14px] leading-none text-[#8a6039]">
                     PROGRESS
                   </span>
                   <p className="flex items-center gap-2 text-[#4b3522]">
                     <Soup strokeWidth={1.75} className="size-6" />
-                    <span className="mt-1 inline-block text-[17px] leading-none">
+                    <span className="mt-1 inline-block text-[18px] leading-none">
                       {task.completedOrders} / {task.maxOrders} Orders
                     </span>
                   </p>
@@ -271,11 +297,13 @@ export default function TaskCardDialog({
                 <button
                   type="button"
                   onClick={() => setRemarkOpen((previous) => !previous)}
-                  className="inline-flex w-fit shrink-0 items-center gap-2 rounded-md border-2 border-[#d4c5a8] bg-[#f3e4c9] px-3 py-1.5 text-[13px] text-[#4b3522] transition-all duration-200 hover:bg-[#eadbc1]"
+                  className="inline-flex w-fit shrink-0 items-center gap-2 rounded-md border-2 border-[#d4c5a8] bg-[#f3e4c9] px-3 py-1.5 text-[14px] text-[#4b3522] transition-all duration-200 hover:bg-[#eadbc1]"
                   aria-expanded={remarkOpen}
                 >
                   <ChefHat className="size-4.5" />
-                  <span className="text-[14px] leading-none">{remarkOpen ? 'Hide remark' : 'View remark'}</span>
+                  <span className="text-[15px] leading-none">
+                    {remarkOpen ? 'Hide remark' : 'View remark'}
+                  </span>
                   <ChevronDown
                     className={`size-4.5 shrink-0 transition-transform duration-150 ${remarkOpen ? 'rotate-180' : ''}`}
                     aria-hidden
@@ -284,7 +312,7 @@ export default function TaskCardDialog({
 
                 {remarkOpen ? (
                   <div className="max-h-40 w-full min-w-0 overflow-auto rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2.5">
-                    <p className="wrap-break-word text-[14px] leading-relaxed text-[#4b3522]">
+                    <p className="wrap-break-word text-[15px] leading-relaxed text-[#4b3522]">
                       {task.remark}
                     </p>
                   </div>
@@ -292,9 +320,13 @@ export default function TaskCardDialog({
               </div>
             ) : null}
 
-            {isApprovedTask && !isFullyCompletedAndClaimed ? (
+            {isApprovedTask && !hasClaimedRewards ? (
               <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
                 Claim approved task rewards from the kitchen quick task.
+              </p>
+            ) : isApprovedTask && hasClaimedRewards && remainingOrders > 0 ? (
+              <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
+                Rewards are already claimed. Use Perform More Orders to continue this task.
               </p>
             ) : isFullyCompletedAndClaimed ? (
               <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
@@ -309,7 +341,7 @@ export default function TaskCardDialog({
               </p>
             ) : null}
 
-            {canSubmit || canRedo ? (
+            {canSubmitRaw || canRedo || canPerformMoreOrdersRaw ? (
               <div className="sticky bottom-0 -mx-4 border-t-2 border-[#d4c5a8] bg-[#f7efdf]/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:py-0">
                 <div className="flex flex-col justify-end gap-2 sm:flex-row">
                   {canRedo ? (
@@ -346,6 +378,54 @@ export default function TaskCardDialog({
                         'Submit for Verification'
                       )}
                     </button>
+                  ) : null}
+
+                  {isSubmitOverdueBlocked ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span tabIndex={0} className="inline-flex w-full sm:w-auto">
+                          <button type="button" disabled className={actionButtonClassName}>
+                            Submit for Verification
+                          </button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs border-[#9b7a56] bg-[#FFF2CC] text-center font-jersey text-[14px] leading-snug tracking-[0.04em] text-[#3B2A1A]">
+                        unable to submit overdue tasks
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : null}
+
+                  {canPerformMoreOrders ? (
+                    <button
+                      type="button"
+                      onClick={handlePerformMoreOrders}
+                      disabled={performMoreOrdersMutation.isPending}
+                      className={actionButtonClassName}
+                    >
+                      {performMoreOrdersMutation.isPending ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+                          Continuing...
+                        </>
+                      ) : (
+                        'Perform More Orders'
+                      )}
+                    </button>
+                  ) : null}
+
+                  {isPerformOverdueBlocked ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span tabIndex={0} className="inline-flex w-full sm:w-auto">
+                          <button type="button" disabled className={actionButtonClassName}>
+                            Perform More Orders
+                          </button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs border-[#9b7a56] bg-[#FFF2CC] text-center font-jersey text-[14px] leading-snug tracking-[0.04em] text-[#3B2A1A]">
+                        unable to submit remaining orders for overdue tasks
+                      </TooltipContent>
+                    </Tooltip>
                   ) : null}
                 </div>
               </div>

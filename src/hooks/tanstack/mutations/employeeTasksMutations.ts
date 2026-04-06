@@ -11,11 +11,13 @@ import {
   handleClaimTaskPointsAndXP,
   handleServeCookedTaskDish,
   handleRedoTask,
+  handlePerformMoreOrders,
 } from '@/action-handlers/employee/tasks';
 import type { SubmitVerificationResult, ClaimTaskResult } from '@/actions/employee/tasks';
 import { useEmployeeTasksStore } from '@/store/employee';
 import {
   applyOptimisticTaskClaim,
+  applyOptimisticPerformMoreOrders,
   applyOptimisticTaskRedo,
   applyOptimisticTaskVerification,
   toEmployeeTaskBoardData,
@@ -154,6 +156,67 @@ export function useRedoTask(): UseMutationResult<
 
       rollback();
       console.error('Failed to redo task:', error);
+    },
+    onSuccess: () => {
+      commit();
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: employeeTasksKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Mutation for continuing approved tasks that still have remaining orders.
+ * Moves the task back to the current queue while keeping rewards already claimed.
+ */
+export function usePerformMoreOrders(): UseMutationResult<
+  boolean,
+  Error,
+  string,
+  EmployeeTasksCacheContext
+> {
+  const queryClient = useQueryClient();
+  const { startOptimistic, optimisticPerformMoreOrders, rollback, commit } =
+    useEmployeeTasksStore();
+
+  return useMutation({
+    mutationFn: async (kpitaskId: string) => {
+      const result = await handlePerformMoreOrders(kpitaskId);
+
+      if (!result) {
+        throw new Error('Failed to continue task orders');
+      }
+
+      return result;
+    },
+    onMutate: async (kpitaskId) => {
+      await queryClient.cancelQueries({ queryKey: employeeTasksKeys.lists() });
+
+      const previousTasks = queryClient.getQueryData<EmployeeTasksQueryShape | null>(
+        employeeTasksKeys.list()
+      );
+
+      startOptimistic();
+      optimisticPerformMoreOrders(kpitaskId);
+
+      queryClient.setQueryData<EmployeeTasksQueryShape | null>(employeeTasksKeys.list(), (old) => {
+        if (!old) return old;
+
+        return toEmployeeTasksQueryData(
+          applyOptimisticPerformMoreOrders(toEmployeeTaskBoardData(old), kpitaskId)
+        );
+      });
+
+      return { previousTasks };
+    },
+    onError: (error, _variables, context) => {
+      if (typeof context?.previousTasks !== 'undefined') {
+        queryClient.setQueryData(employeeTasksKeys.list(), context.previousTasks);
+      }
+
+      rollback();
+      console.error('Failed to continue task orders:', error);
     },
     onSuccess: () => {
       commit();

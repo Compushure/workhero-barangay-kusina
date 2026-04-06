@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import {
   applyOptimisticTaskClaim,
+  applyOptimisticPerformMoreOrders,
   applyOptimisticTaskRedo,
   applyOptimisticTaskVerification,
   areEmployeeTaskBoardsEquivalent,
@@ -21,6 +22,7 @@ interface EmployeeTasksStore {
   optimisticSubmitTaskVerification: (taskId: string, pendingOrders: number) => void;
   optimisticRedoTask: (taskId: string) => void;
   optimisticClaimTaskRewards: (taskId: string) => void;
+  optimisticPerformMoreOrders: (taskId: string) => void;
 }
 
 export const useEmployeeTasksStore = create<EmployeeTasksStore>((set, get) => ({
@@ -66,5 +68,9 @@ export const useEmployeeTasksStore = create<EmployeeTasksStore>((set, get) => ({
   optimisticClaimTaskRewards: (taskId) =>
     set((state) => ({
       tasks: applyOptimisticTaskClaim(state.tasks, taskId),
+    })),
+  optimisticPerformMoreOrders: (taskId) =>
+    set((state) => ({
+      tasks: applyOptimisticPerformMoreOrders(state.tasks, taskId),
     })),
 }));
