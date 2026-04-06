@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3008",
-    "test": "cross-env NODE_ENV=test jest --runInBand",
-    "test:watch": "jest --watch",
+    "test": "cross-env NODE_ENV=test jest --runInBand --verbose",
+    "test:unit": "cross-env NODE_ENV=test jest --runInBand --verbose __tests___/unit",
+    "test:integration": "cross-env NODE_ENV=test jest --runInBand --verbose __tests___/integration",
+    "test:watch": "jest --watch --verbose",
     "build": "cross-env NODE_ENV=production next build",
     "start": "next start",
     "lint": "eslint .",

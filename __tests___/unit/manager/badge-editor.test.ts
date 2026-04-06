@@ -9,6 +9,8 @@
  * Test Coverage: ()
  *
  */
+// Test scope: Unit tests for manager badge editor server actions and action handlers.
+// Run this file only: npm test -- --runTestsByPath __tests___/unit/manager/badge-editor.test.ts
 import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals';
 import {
   fetchBadges,
@@ -102,6 +104,7 @@ type SupabaseMockCfg = {
 
 let supabaseConfig: SupabaseMockCfg = {};
 
+// Shapes the badge view rows returned by the read-only badge query.
 const buildBadgeViewRows = () =>
   memDb.badges.map((badge) => ({
     badge_id: badge.id,
@@ -118,6 +121,7 @@ const buildBadgeViewRows = () =>
       .map((r) => ({ ...r })),
   }));
 
+// Builds a mocked Supabase client that covers badge CRUD, storage, and supporting lookups.
 const makeSupabaseClient = () => {
   return {
     auth: {
@@ -149,6 +153,18 @@ const makeSupabaseClient = () => {
 
       if (table === 'Badges') {
         return {
+          select: () => ({
+            in: (_field: string, ids: string[]) => ({
+              data: memDb.badges
+                .filter((badge) => ids.includes(badge.id))
+                .map((badge) => ({
+                  id: badge.id,
+                  date_created: '2024-01-01T00:00:00.000Z',
+                  created_by: badge.created_by,
+                })),
+              error: null,
+            }),
+          }),
           insert: (rows: any[]) => {
             if (supabaseConfig.failBadgeInsert) {
               return { select: () => ({ single: async () => ({ data: null, error: { message: 'insert fail' } }) }) } as any;
@@ -221,6 +237,20 @@ const makeSupabaseClient = () => {
         } as any;
       }
 
+      if (table === 'User') {
+        return {
+          select: () => ({
+            in: (_field: string, ids: string[]) => ({
+              data: ids.map((id) => ({
+                id,
+                name: id === 'manager-1' ? 'Manager One' : 'Unknown User',
+              })),
+              error: null,
+            }),
+          }),
+        } as any;
+      }
+
       if (table === 'BadgeRequirements') {
         return {
           insert: (rows: any[]) => {
@@ -262,6 +292,7 @@ jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(async () => supabaseClient),
 }));
 
+// Resets the in-memory badge state and supporting mocks between tests.
 const resetState = () => {
   memDb.badges.splice(0, memDb.badges.length);
   memDb.requirements.splice(0, memDb.requirements.length);
@@ -616,32 +647,3 @@ describe('Badge Editor Handlers (safeAction + toasts)', () => {
   });
 });
 
-describe('Integration - in-memory badge lifecycle', () => {
-  beforeEach(() => resetState());
-
-  test('add -> list -> edit -> delete flow', async () => {
-    const created = await handleAddBadge(VALID_BADGE);
-    expect(created?.name).toBe('Punctuality');
-
-    const listAfterAdd = await handleFetchBadges();
-    expect(listAfterAdd).toHaveLength(1);
-
-    await handleEditBadge('badge-1', EDIT_BADGE);
-    const listAfterEdit = await handleFetchBadges();
-    expect(listAfterEdit[0].name).toBe('Consistency');
-
-    const deleted = await handleDeleteBadge('badge-1');
-    expect(deleted).toBe(true);
-    const finalList = await handleFetchBadges();
-    expect(finalList).toHaveLength(0);
-  });
-
-  test('duplicate add prevented by zod validation differences', async () => {
-    await handleAddBadge(VALID_BADGE);
-    const result = await handleAddBadge({ ...VALID_BADGE, name: 'A' } as any);
-    expect(result).toBeNull();
-    expect(toastError).toHaveBeenCalled();
-    const list = await handleFetchBadges();
-    expect(list).toHaveLength(1);
-  });
-});
