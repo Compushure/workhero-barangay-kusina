@@ -14,6 +14,7 @@ Part of [Linear Issue ID](INSERT_ISSUE_LINK_HERE)
 - [ ] 🎨 Style (style) - Tailwind CSS / UI adjustments
 - [ ] 📝 Documentation (docs) - Readme updates
 - [ ] 🔧 Chore (chore) - Config updates, dependency bumps
+- [ ] 🧪 Test (test) - Testing related updates
 
 ## 📸 Screenshots (If applicable)
 

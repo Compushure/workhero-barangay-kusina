@@ -9,8 +9,8 @@ import type { UserWithExtras } from '@/types';
 export async function fetchUserProfileByIdHandler(userId: string): Promise<UserWithExtras | null> {
   const result = await safeAction(() => fetchUserProfileById(userId));
 
-  if (!result.success) {
-    toast.error(result.error);
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error || 'Failed to load profile');
     return null;
   }
 
@@ -27,8 +27,8 @@ export async function updateOwnProfileHandler(profileData: {
 }) {
   const result = await safeAction(() => updateOwnProfile(profileData));
 
-  if (!result.success) {
-    toast.error(result.error);
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error || 'Failed to update profile');
     return null;
   }
 
@@ -42,8 +42,8 @@ export async function updateOwnProfileHandler(profileData: {
 export async function uploadOwnProfilePictureHandler(file: File) {
   const result = await safeAction(() => uploadOwnProfilePicture(file));
 
-  if (!result.success) {
-    toast.error(result.error);
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error || 'Failed to upload profile picture');
     return null;
   }
 
@@ -57,8 +57,8 @@ export async function uploadOwnProfilePictureHandler(file: File) {
 export async function deleteOwnProfilePictureHandler() {
   const result = await safeAction(() => deleteOwnProfilePicture());
 
-  if (!result.success) {
-    toast.error(result.error);
+  if (!result.success || result.data?.error) {
+    toast.error(result.error || result.data?.error || 'Failed to remove profile picture');
     return false;
   }
 

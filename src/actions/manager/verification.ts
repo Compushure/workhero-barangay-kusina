@@ -190,6 +190,7 @@ export async function approveTaskAction(
     .update({
       status: 'approved',
       remark: reqmark,
+      pending_orders: 0,
       completed_orders: newCompleted,
     })
     .eq('id', kpitask_id);

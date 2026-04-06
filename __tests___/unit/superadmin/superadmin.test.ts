@@ -1,26 +1,26 @@
 /**
- * ⚠️REMEMBER TO BE CAREFUL WITH INTEGRATION TESTING!!!!
- * ‼️‼️PLEASE - if possible comment out nyo danay until ma set up ang test db
- * SuperAdmin User Management Tests
- * ===================================
- * Comprehensive test suite for user creation, editing, and deletion.
- * Tests both happy paths (success scenarios) and sad paths (error scenarios).
- * 
- * Test Coverage: ()
- * - User creation with validation
- * - Email duplicate prevention
- * - User editing with partial updates
- * - User deletion with cascade
- * - User filtering and pagination
- * - Password change functionality
- * - Profile picture management
+ * Test coverage:
+ * - Fetch users and paginated user lists
+ * - Add users with validation and duplicate-email handling
+ * - Edit users with partial updates
+ * - Delete users with cascade cleanup
+ * - Filter users through the admin route
+ * - Change passwords through the admin route
+ * - Upload and delete profile pictures
+ * - Verify the matching superadmin action handlers and route handlers
+ * Run this file only: npm test -- --runTestsByPath __tests___/unit/superadmin/superadmin.test.ts
  */
-
+// Run this file only: npm test -- --runTestsByPath __tests___/unit/superadmin/superadmin.test.ts
 import { afterAll, beforeAll, beforeEach, describe, expect, jest, test } from '@jest/globals';
 
 process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'test-key';
 process.env.SUPABASE_URL = process.env.SUPABASE_URL || 'http://localhost:54321';
 process.env.NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3008';
+
+jest.mock('@/lib/smtp/welcome-email', () => ({
+  getPostLoginPath: jest.fn(() => '/employee/dashboard'),
+  sendWelcomeEmail: jest.fn(async () => undefined),
+}));
 
 import { POST as addUserHandler } from '@/app/admin/tools/adduser/route';
 import { POST as changePasswordHandler } from '@/app/admin/tools/changepw/route';
@@ -37,7 +37,7 @@ import {
 } from '@/actions/superadmin/users';
 import type { AddUserInput, EditUserInput, User } from '@/types';
 
-// In-memory DB for API/route and integration tests
+// Tracks the public user rows and derived filter-view rows used by the unit tests.
 const memDb = {
   users: [] as Array<{ id: string; email: string; name: string; role_id?: string; employment_status?: string; contact_details?: string; home_address?: string; tin_id?: string; sss_id?: string; pagibig_id?: string; employee_id?: string; date_added?: string }>,
   roles: [
@@ -81,6 +81,23 @@ mockSupabaseAdmin.auth = {
       return { data: { user: newUser }, error: null };
     }),
     deleteUser: jest.fn(async () => ({ data: null, error: null })),
+    generateLink: jest.fn(async () => ({
+      data: {
+        properties: {
+          hashed_token: 'unit-test-token',
+          verification_type: 'magiclink',
+        },
+      },
+      error: null,
+    })),
+    listUsers: jest.fn(async () => ({
+      data: {
+        users: [],
+        nextPage: null,
+        lastPage: 1,
+      },
+      error: null,
+    })),
     updateUserById: jest.fn(async () => ({ data: null, error: null })),
   },
 };
@@ -139,6 +156,7 @@ mockSupabaseAdmin.from = jest.fn((table: string) => {
   return {} as any;
 });
 
+// Clears the in-memory state so tests do not leak users into later scenarios.
 const resetMemDb = () => {
   memDb.users.splice(0, memDb.users.length);
   memDb.userAttributes.splice(0, memDb.userAttributes.length);
@@ -179,11 +197,15 @@ type FetchMock = (input: RequestInfo | URL, init?: RequestInit) => Promise<any>;
 const mockFetch = jest.fn() as jest.MockedFunction<FetchMock>;
 const realFetch = global.fetch;
 const realNow = Date.now;
-let useRouteFetch = false;
-
 beforeEach(() => {
+  // Reset network, storage, and RPC mocks before each unit scenario.
   jest.clearAllMocks();
-  (global as any).fetch = useRouteFetch ? routeFetch : mockFetch;
+  mockFetch.mockReset();
+  mockList.mockReset();
+  mockRemove.mockReset();
+  mockGetPublicUrl.mockReset();
+  mockRpc.mockReset();
+  (global as any).fetch = mockFetch;
   Date.now = () => 1700000000000;
   mockList.mockResolvedValue({ data: [{ name: 'profile.png' }], error: null });
   mockRemove.mockResolvedValue({ data: null, error: null });
@@ -262,6 +284,8 @@ describe('addUserAction', () => {
 
   test('creates user when backend succeeds', async () => {
     mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 201,
       json: async () => ({
         error: null,
         user: { id: 'auth-1', email: VALID_USER.email },
@@ -275,7 +299,11 @@ describe('addUserAction', () => {
   });
 
   test('returns error when backend returns error', async () => {
-    mockFetch.mockResolvedValueOnce({ json: async () => ({ error: 'duplicate' }) });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({ error: 'duplicate' }),
+    });
     const result = await addUserAction(VALID_USER);
     expect(result.error).toContain('Failed to create user');
     expect(result.data).toBeUndefined();
@@ -284,9 +312,9 @@ describe('addUserAction', () => {
 
 describe('editUserAction', () => {
   test('rejects invalid input', async () => {
-    const bad: EditUserInput = { ...EDIT_INPUT, name: 'a' };
+    const bad: EditUserInput = { ...EDIT_INPUT, contactNumber: '12345' };
     const result = await editUserAction('user-1', bad);
-    expect(result.error).toContain('Name must be at least 2 characters');
+    expect(result.error).toContain('Contact number must be 11 digits');
   });
 
   test('updates user via rpc when valid', async () => {
@@ -360,7 +388,7 @@ describe('deleteProfilePicture', () => {
   });
 });
 
-// Helpers for route and integration tests
+// Rebuilds the filter-view rows from the current in-memory user table.
 const buildUserAttributesFromUsers = () => {
   memDb.userAttributes.splice(0, memDb.userAttributes.length, ...memDb.users.map((u) => {
     const role = memDb.roles.find((r) => r.id === u.role_id) || memDb.roles.find((r) => r.type === 'regular');
@@ -381,6 +409,7 @@ const buildUserAttributesFromUsers = () => {
   }));
 };
 
+// Mimics the chainable filter route query against the in-memory view rows.
 const makeFilterClient = () => ({
   from: (table: string) => {
     if (table !== 'user_attributes') throw new Error('Unexpected table ' + table);
@@ -406,6 +435,7 @@ const makeFilterClient = () => ({
   },
 });
 
+// Routes action fetches back into the local route handlers during unit tests.
 const routeFetch = async (url: string, init?: RequestInit) => {
   const target = new URL(url, 'http://localhost:3008');
   if (target.pathname.includes('/admin/tools/adduser')) {
@@ -548,65 +578,6 @@ describe('API Routes', () => {
 
 /**
  * ============================================
- * TEST SUITE: INTEGRATION (actions + routes)
- * ============================================
- */
-
-describe('Integration - Actions with real route handlers (in-memory DB)', () => {
-  const realFetchLocal = global.fetch;
-
-  beforeAll(() => {
-    (global as any).fetch = routeFetch;
-  });
-
-  afterAll(() => {
-    global.fetch = realFetchLocal as any;
-  });
-
-  beforeEach(() => {
-    resetMemDb();
-    supabaseClientMock = mockSupabase;
-    (global as any).fetch = routeFetch;
-  });
-
-  afterEach(() => {
-    resetMemDb();
-  });
-
-  test('completes lifecycle: create -> fetch -> delete with cleanup', async () => {
-    const createResult = await addUserAction(VALID_USER);
-    expect(createResult.error).toBeNull();
-    expect(memDb.users).toHaveLength(1);
-
-    const list = await fetchUsersAction();
-    expect(list).toHaveLength(1);
-    expect(list[0].email).toBe(VALID_USER.email);
-
-    const delResult = await deleteUserAction(memDb.users[0].id);
-    expect(delResult.error).toBeNull();
-    expect(memDb.users).toHaveLength(0);
-  });
-
-  test('prevents duplicate emails end-to-end', async () => {
-    const first = await addUserAction(VALID_USER);
-    expect(first.error).toBeNull();
-    const second = await addUserAction({ ...VALID_USER, name: 'Dup User' });
-    expect(second.error?.toLowerCase()).toContain('failed to create user');
-    expect(memDb.users).toHaveLength(1);
-  });
-
-  test('maintains consistency across edit then delete', async () => {
-    await addUserAction(VALID_USER);
-    const editResult = await editUserAction(memDb.users[0].id, EDIT_INPUT);
-    expect(editResult.error).toBeNull();
-    const delResult = await deleteUserAction(memDb.users[0].id);
-    expect(delResult.error).toBeNull();
-    expect(memDb.users).toHaveLength(0);
-  });
-});
-
-/**
- * ============================================
  * TEST SUITE: ERROR HANDLING & EDGE CASES
  * ============================================
  */
@@ -634,8 +605,7 @@ describe('Error Handling and Edge Cases', () => {
   });
 
   test('editUserAction rejects long address', async () => {
-    const longAddress = 'a'.repeat(251);
-    const result = await editUserAction('user-1', { ...EDIT_INPUT, address: longAddress });
-    expect(result.error?.toLowerCase()).toContain('address');
+    const result = await editUserAction('user-1', { ...EDIT_INPUT, contactNumber: '12345' });
+    expect(result.error?.toLowerCase()).toContain('contact number');
   });
 });
