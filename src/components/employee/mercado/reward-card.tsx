@@ -92,9 +92,9 @@ export const RewardCard = memo(function RewardCard({
   };
 
   return (
-    <Card className="p-1 group relative overflow-hidden bg-parchment border border-t-0 border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full min-h-64 min-w-0 flex flex-col rounded-xl">
+    <Card className="p-1.5 sm:p-2 md:p-2.5 lg:p-3 group relative overflow-hidden bg-parchment border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full hover:shadow-xl min-h-auto min-w-0 flex flex-col rounded-lg hover:scale-105">
       <CardContent className="p-0 flex-1 flex flex-col">
-        <div className="relative h-20 w-full overflow-hidden">
+        <div className="relative h-24 sm:h-28 md:h-32 lg:h-36 w-full overflow-hidden bg-[#f0e6d2]">
           {reward.imageUrl && !imageError ? (
             <Image
               src={reward.imageUrl}
@@ -107,68 +107,76 @@ export const RewardCard = memo(function RewardCard({
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Package className="h-10 w-10 text-[#8a6844]/60" />
+              <Package className="h-6 w-6 sm:h-7 sm:w-7 md:h-9 md:w-9 text-[#8a6844]/60" />
             </div>
           )}
 
-          <div className="absolute top-2 right-2 flex flex-col gap-1">
+          <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 md:top-1.5 md:right-1.5 flex flex-col gap-0.5 sm:gap-1">
             {hasPendingRequest && (
-              <Badge className="bg-[#c68a2e] text-white hover:bg-[#c68a2e] text-xs px-1.5 py-0">
-                <Clock className="h-3 w-3 mr-1" />
+              <Badge className="bg-[#c68a2e] text-white hover:bg-[#c68a2e] text-[7px] sm:text-[8px] md:text-xs px-1 sm:px-1.5 md:px-2 py-0.5">
+                <Clock className="h-2 w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3 mr-0.5 sm:mr-1" />
                 Pending
               </Badge>
             )}
             {isOutOfStock && (
-              <Badge className="bg-[#a84b3e] text-white hover:bg-[#a84b3e] text-xs px-1.5 py-0">
-                <XCircle className="h-3 w-3 mr-1" />
-                Out of Stock
+              <Badge className="bg-[#a84b3e] text-white hover:bg-[#a84b3e] text-[7px] sm:text-[8px] md:text-xs px-1 sm:px-1.5 md:px-2 py-0.5">
+                <XCircle className="h-2 w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3 mr-0.5 sm:mr-1" />
+                Stock
               </Badge>
             )}
           </div>
         </div>
 
-        <div className="px-2 py-1.5 flex-1 flex flex-col gap-1 min-w-0 text-[#4f3a26]">
+        <div className="px-2 sm:px-2.5 md:px-3 py-1.5 sm:py-2 md:py-2.5 flex-1 flex flex-col gap-0.75 sm:gap-1 md:gap-1.5 min-w-0 text-[#4f3a26]">
           <div className="flex flex-col items-center justify-center">
-            <h3 className="text-xs sm:text-sm leading-tight font-bold text-[#3b2615] whitespace-normal break-words pixelated-text min-w-0 text-center line-clamp-2">
+            <h3 className="text-sm sm:text-base md:text-lg lg:text-xl leading-snug font-bold text-[#3b2615] whitespace-normal wrap-break-word pixelated-text min-w-0 text-center line-clamp-2">
               {reward.name}
             </h3>
           </div>
-          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs sm:text-xs min-w-0 text-center place-items-center">
-            <span className="text-[#6b4d2f] font-semibold truncate text-center">Price:</span>
-            <span className="text-[#6b4d2f] font-semibold truncate text-center">Stock:</span>
-
-            <span className="text-[#a56d1f] font-semibold truncate text-center">
-              {reward.pointsCost.toLocaleString()} {pointLabel(reward.pointsCost)}
+          <div className="grid grid-cols-2 gap-x-2 sm:gap-x-2.5 gap-y-1.5 sm:gap-y-2 min-w-0 text-center place-items-center">
+            <span className="text-[#6b4d2f] font-semibold truncate text-center text-sm sm:text-base md:text-base">
+              Price:
             </span>
-            <span className="text-[#8f6435] font-semibold truncate text-center">
-              {reward.quantity ?? 'Unlimited'}
+            <span className="text-[#6b4d2f] font-semibold truncate text-center text-sm sm:text-base md:text-base">
+              Stock:
+            </span>
+
+            <span className="text-[#a56d1f] font-bold truncate text-center text-base sm:text-lg md:text-xl">
+              {reward.pointsCost.toLocaleString()}
+            </span>
+            <span className="text-[#8f6435] font-bold truncate text-center text-base sm:text-lg md:text-xl">
+              {reward.quantity ?? '∞'}
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs sm:text-xs min-w-0 text-center place-items-center">
-            <span className="text-[#6b5a46] font-medium truncate text-center">Limit:</span>
-            <span className="text-[#6b5a46] font-medium truncate text-center">Total:</span>
+          <div className="grid grid-cols-2 gap-x-2 sm:gap-x-2.5 gap-y-1.5 sm:gap-y-2 min-w-0 text-center place-items-center">
+            <span className="text-[#6b5a46] font-semibold truncate text-center text-sm sm:text-base md:text-base">
+              Limit:
+            </span>
+            <span className="text-[#6b5a46] font-semibold truncate text-center text-sm sm:text-base md:text-base">
+              Total:
+            </span>
 
-            <span className="text-[#5d4a34] font-semibold truncate text-center">
+            <span className="text-[#5d4a34] font-bold truncate text-center text-base sm:text-lg md:text-xl">
               {reward.redeemingLimit ?? 1}
             </span>
-            <span className="text-[#6f4f31] font-semibold truncate text-center">
+            <span className="text-[#6f4f31] font-bold truncate text-center text-base sm:text-lg md:text-xl">
               {totalPoints.toLocaleString()}
             </span>
           </div>
 
-          <div className="mt-0.5 flex items-center justify-center gap-1 pt-1.5 pb-0">
+          <div className="mt-1 flex items-center justify-center gap-1.5 pt-0.5 pb-0">
             <Button
               type="button"
               size="icon"
               variant="ghost"
               onClick={() => setQuantity((previous) => Math.max(1, previous - 1))}
               disabled={quantity <= 1 || isDisabled}
-              className="h-6 w-6 rounded-md bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40"
+              className="h-6 sm:h-7 md:h-8 w-6 sm:w-7 md:w-8 rounded bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40 transition-colors"
             >
-              <Minus className="h-3 w-3" />
+              <Minus className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
             </Button>
-            <span className="min-w-4 text-center text-[10px] font-bold text-[#3f2614]">
+            <span className="min-w-5 text-center text-sm sm:text-base md:text-lg font-bold text-[#3f2614]">
               {quantity}
             </span>
             <Button
@@ -177,42 +185,42 @@ export const RewardCard = memo(function RewardCard({
               variant="ghost"
               onClick={() => setQuantity((previous) => Math.min(maxSelectable, previous + 1))}
               disabled={quantity >= maxSelectable || isDisabled}
-              className="h-6 w-6 rounded-md bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40"
+              className="h-6 sm:h-7 md:h-8 w-6 sm:w-7 md:w-8 rounded bg-[#6d472a] text-white hover:bg-[#5a3a22] disabled:opacity-40 transition-colors"
             >
-              <Plus className="h-3 w-3" />
+              <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
             </Button>
           </div>
         </div>
       </CardContent>
 
-      <CardFooter className="px-2 pb-2 pt-0 min-w-0">
+      <CardFooter className="px-2 sm:px-2.5 md:px-3 pb-1.5 sm:pb-2 md:pb-2.5 pt-0.5 min-w-0">
         <Button
           onClick={handleRedeem}
           disabled={isDisabled}
           className={cn(
-            'w-full h-8 text-xs font-bold transition-all duration-200 border-b-2 border-[#6d472a] min-w-0 ',
+            'w-full h-7 sm:h-8 md:h-9 lg:h-10 text-sm sm:text-base md:text-lg font-bold transition-all duration-200 border-b-2 sm:border-b-3 md:border-b-3 border-[#6d472a] min-w-0 px-2 ',
             canAfford && !isOutOfStock && !hasPendingRequest
               ? 'bg-[#d6962f] hover:bg-[#c18425] text-primary'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed border-b-2'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed border-b-2 sm:border-b-2 md:border-b-3'
           )}
         >
           {redeemMutation.isPending ? (
             <>
-              <div className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+              <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
               Ordering...
             </>
           ) : hasPendingRequest ? (
-            'Already Requested'
+            'Requested'
           ) : isOutOfStock ? (
-            'Out of Stock'
+            'Out Stock'
           ) : !canAfford ? (
             <span className="inline-flex items-center gap-1 min-w-0 truncate">
-              Need {(totalPoints - userPoints).toLocaleString()} more <Coins className="h-3 w-3" />
+              Need {(totalPoints - userPoints).toLocaleString()}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 min-w-0 truncate">
-              <Package className="h-3.5 w-3.5 mr-1" />
-              Order ({totalPoints.toLocaleString()} <Coins className="h-3 w-3" />)
+              <Package className="h-2 w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3" />
+              Order ({totalPoints.toLocaleString()})
             </span>
           )}
         </Button>
