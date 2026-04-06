@@ -27,15 +27,23 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'userid is required' }, { status: 400 });
     }
 
-    // Delete auth user
-    const { data: deleteData, error: deleteError } = await supabaseAdmin
+    const { error: rowDeleteError } = await supabaseAdmin
       .from('User')
       .delete()
       .eq('id', userid);
 
-    if (deleteError) {
+    if (rowDeleteError) {
       return NextResponse.json(
-        { error: deleteError?.message ?? `Failed to delete auth user with id ${userid}` },
+        { error: rowDeleteError.message ?? `Failed to delete user row with id ${userid}` },
+        { status: 500 }
+      );
+    }
+
+    const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userid);
+
+    if (authDeleteError && !/user not found/i.test(authDeleteError.message ?? '')) {
+      return NextResponse.json(
+        { error: authDeleteError.message ?? `Failed to delete auth user with id ${userid}` },
         { status: 500 }
       );
     }
