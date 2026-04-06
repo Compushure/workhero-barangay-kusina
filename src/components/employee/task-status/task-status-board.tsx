@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Filter } from 'lucide-react';
+import { ArrowUpDown, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -107,11 +107,11 @@ function getSectionHelperText(status: TaskStatusKind): string {
 
 function getSectionAccentClassName(status: TaskStatusKind): string {
   if (status === 'Current') {
-    return 'border-[#c79a54] bg-[#e7c27f] text-[#4b3522]';
+    return 'border-[#87a9bc] bg-[#d7e3f4] text-[#204b61]';
   }
 
   if (status === 'In Review') {
-    return 'border-[#87a9bc] bg-[#d7e3f4] text-[#204b61]';
+    return 'border-[#c79a54] bg-[#e7c27f] text-[#4b3522]';
   }
 
   if (status === 'Approved') {
@@ -236,7 +236,7 @@ export function TaskStatusBoard({
   }
 
   return (
-    <div className="flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-lg border-3 border-[#47331F] bg-[#eadbc1] p-2.5 font-jersey shadow-[0_10px_28px_rgba(71,51,31,0.24)] md:h-full sm:p-3 xl:h-full">
+    <div className="flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-lg border-3 border-[#47331F] bg-[#eadbc1] p-2.5 font-jersey shadow-[0_10px_28px_rgba(71,51,31,0.24)] min-h-[55vh] h-fit md:h-full sm:p-3 xl:h-full">
       <div className="flex flex-col gap-3 border-b-2 border-[#d4c5a8] pb-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           {isLoading ? (
@@ -259,7 +259,7 @@ export function TaskStatusBoard({
             </>
           ) : (
             <>
-              <div className="min-w-0 w-full lg:w-auto">
+              <div className="hidden sm:flex min-w-0 w-full lg:w-auto">
                 <div className="flex min-w-0 w-full gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   {sectionSummaries.map(({ status, count }) => (
                     <div
@@ -277,16 +277,14 @@ export function TaskStatusBoard({
                 </div>
               </div>
 
-              <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row lg:w-auto lg:items-end">
-                <div className="w-full space-y-1 sm:w-auto">
-                  <span className="block text-[14px] tracking-[0.18em] text-[#8a6039] sm:text-[16px]">
-                    SORT BY
-                  </span>
+              <div className="flex w-full min-w-0 gap-2 lg:w-auto lg:items-end">
+                <div className="flex w-full space-y-1 sm:w-auto">
                   <Select
                     value={sortBy}
                     onValueChange={(value) => setSortBy(value as TaskSortOption)}
                   >
                     <SelectTrigger className="h-9 w-full rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-52">
+                      <ArrowUpDown className='text-[#8a6039] size-4'/>
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
                     <SelectContent className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 text-[#4b3522] sm:w-64">
@@ -309,7 +307,7 @@ export function TaskStatusBoard({
                       <Button
                         size="default"
                         variant="outline"
-                        className="h-9 w-full justify-between rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-auto"
+                        className="h-9 w-full justify-start gap-2 rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-auto"
                       >
                         <Filter strokeWidth={2.5} className="h-4 w-4 text-[#6b5038]" />
                         <span className="inline-flex items-center text-[16px] leading-none">
@@ -374,7 +372,7 @@ export function TaskStatusBoard({
         ) : (
           <>
             <div className="min-w-0 space-y-3 md:hidden">
-              <div className="rounded-xl border-2 border-[#d4c5a8] bg-[#f7efdf] px-3 py-2 text-[13px] tracking-[0.04em] text-[#6b5038]">
+              <div className="rounded-xl border-2 border-[#d4c5a8] bg-[#f7efdf] px-3 py-1 sm:py-2 text-[0.7rem] sm:text-[0.85rem] tracking-[0.04em] text-[#6b5038]">
                 Open one section at a time to keep tasks easy to scan on small screens.
               </div>
 

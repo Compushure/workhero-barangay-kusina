@@ -141,7 +141,7 @@ export default function TaskCardDialog({
       <DialogContent className="bottom-2 top-auto flex h-[min(100dvh-1rem,56rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] translate-y-0 flex-col overflow-hidden rounded-[1.4rem] border-3 border-[#47331F] bg-[#f7efdf] p-0 font-jersey tracking-[0.04em] shadow-[0_14px_34px_rgba(71,51,31,0.22)] sm:top-[50%] sm:bottom-auto sm:h-auto sm:max-w-2xl sm:translate-y-[-50%]">
         <DialogHeader className="flex min-w-0 flex-col gap-3 border-b-2 border-[#d4c5a8] bg-[#e1d2b7] px-4 py-3.5 text-left sm:px-5">
           <div className="space-y-2">
-            <DialogTitle className="block w-full break-words pr-8 text-[20px] font-normal leading-tight text-[#3f2a1a] sm:text-[22px]">
+            <DialogTitle className="block w-full wrap-break-word pr-8 text-[20px] font-normal leading-tight text-[#3f2a1a] sm:text-[22px]">
               {task.name}
             </DialogTitle>
             <DialogDescription className="min-w-0 pr-8 text-[14px] leading-relaxed text-[#6b5038] sm:pr-10">
@@ -284,7 +284,7 @@ export default function TaskCardDialog({
 
                 {remarkOpen ? (
                   <div className="max-h-40 w-full min-w-0 overflow-auto rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2.5">
-                    <p className="break-words text-[14px] leading-relaxed text-[#4b3522]">
+                    <p className="wrap-break-word text-[14px] leading-relaxed text-[#4b3522]">
                       {task.remark}
                     </p>
                   </div>

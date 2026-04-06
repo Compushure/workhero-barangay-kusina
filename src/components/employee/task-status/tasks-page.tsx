@@ -125,7 +125,7 @@ export function TasksPage() {
   return (
     <div className="relative isolate flex min-h-dvh w-full min-w-0 flex-col overflow-x-clip font-jersey tracking-[0.08em] xl:h-dvh xl:overflow-hidden">
       <div
-        className="absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat"
+        className="pointer-events-none fixed inset-x-0 top-0 h-dvh -z-10 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url('${kitchenBackgroundUrl}')` }}
         aria-hidden
       />
@@ -136,7 +136,7 @@ export function TasksPage() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full min-w-0 flex-1 justify-center px-2 pb-24 pt-1 sm:px-3 sm:pb-3 sm:pt-2 md:min-h-0 md:px-4 md:pb-4 xl:overflow-hidden">
+      <main className="mx-auto flex w-full min-w-0 flex-1 justify-center px-1 pb-24 pt-1 sm:px-3 sm:pb-3 sm:pt-2 md:min-h-0 md:px-4 md:pb-4 xl:overflow-hidden">
         <div className="flex w-full min-w-0 max-w-screen flex-1 md:min-h-0">
           {isLoading ? (
             <TaskStatusBoardLoading />

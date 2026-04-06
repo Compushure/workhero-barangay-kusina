@@ -39,7 +39,7 @@ export default function HeaderHUD({
       </div>
 
       <div className="pointer-events-auto fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
-        <div className="flex items-center gap-5 rounded-lg bg-black/25 shadow-md/25 px-3 py-1.5 backdrop-blur-[1px]">
+        <div className="flex items-center gap-5 rounded-lg border-2 border-[#47331F]/50 bg-[#eadbc1]/75 shadow-md/25 px-3 py-1.5 backdrop-blur-[1px]">
             <div className="shrink-0">
               <Dialog>
                 <Tooltip>

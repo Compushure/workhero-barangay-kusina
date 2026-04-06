@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar, Coins, Soup } from 'lucide-react';
+import { Calendar, ChefHat, Coins, Soup } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDate } from '@/utils/date-utils';
 import { isTaskStatusItemOverdue } from './task-status-utils';
@@ -59,65 +59,59 @@ export function TaskCard({ task }: TaskCardProps) {
                 {task.name}
               </p>
 
-              <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] leading-none sm:text-[13px]">
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.85rem] leading-none sm:text-[13px]">
                 <span
                   className={`flex items-center gap-1.5 ${isOverdue ? 'text-[#8b2e22]' : 'text-[#6b5038]'}`}
                 >
                   <Calendar strokeWidth={2.5} className="size-4.5 shrink-0" />
                   Due {formatDate(task.dueDate)}
                 </span>
-                <span className="flex items-center gap-1.5 text-[#6b5038] sm:hidden">
+
+                <p className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-full border-2 border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038] text-[0.9rem] sm:hidden">
                   <Soup className="size-4.5 shrink-0" />
-                  {task.completedOrders}/{task.maxOrders} done
-                </span>
+                  <span>ORDERS</span>
+                  {task.completedOrders}/{task.maxOrders}
+                </p>
               </div>
             </div>
 
-            <div className="shrink-0 rounded-xl border-2 border-[#d4c5a8] bg-[#f3e4c9] px-2.5 py-1.5 text-center text-[11px] leading-none text-[#6b5038] max-[430px]:w-full max-[430px]:text-left">
+            <div className="hidden sm:block shrink-0 rounded-xl px-2.5 py-1.5 text-center text-[11px] leading-none border-2 border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038] max-[430px]:w-full max-[430px]:text-left">
               <div className="max-[430px]:flex max-[430px]:items-center max-[430px]:justify-between">
-                <div>
-                  <div>ORDERS</div>
-                  <div className="mt-1 text-[15px] text-[#3f2a1a]">
-                    {task.completedOrders}/{task.maxOrders}
-                  </div>
-                </div>
-                <div className="hidden text-right max-[430px]:block">
-                  <div>PENDING</div>
-                  <div className="mt-1 text-[15px] text-[#3f2a1a]">{task.pendingOrders}</div>
+                <div>ORDERS</div>
+                <div className="mt-1 text-[15px] text-[#3f2a1a]">
+                  {task.completedOrders}/{task.maxOrders}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-1">
-            <span
-              className="inline-flex min-w-0 items-center justify-center gap-0.5 rounded-md border-2 border-[#d4c5a8] bg-[#fff8ec] px-1.5 py-0.5 text-[10px] leading-none text-[#6b5038]"
+          <div className="flex gap-1 text-[0.9rem]">
+            
+            <p
+              className="inline-flex min-w-0 items-center justify-center gap-1 rounded-md border-2 border-[#e5d08a] bg-amber-100 px-1.5 py-0.5 leading-none text-[#6b5038]"
               title={`${task.points} points`}
             >
               <Coins className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate text-[11px] leading-none text-[#3f2a1a]">
-                {task.points}P
+              <span className="truncate leading-none text-[#3f2a1a]">
+                {task.points}
               </span>
-            </span>
-            <span
-              className="inline-flex min-w-0 items-center justify-center rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-1.5 py-0.5 text-[11px] leading-none text-[#204b61]"
+            </p>
+            <p
+              className="inline-flex min-w-0 gap-1 items-center justify-center rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-1.5 py-0.5 leading-none text-[#204b61]"
               title={`${task.xp} XP`}
             >
-              XP {task.xp}
-            </span>
+              <span className='italic'>XP</span>
+              <span>{task.xp}</span>
+            </p>
+            {task.status === 'in review' &&
             <span
-              className="inline-flex min-w-0 items-center justify-center rounded-md border-2 border-[#d4c5a8] bg-[#fff8ec] px-1.5 py-0.5 text-[11px] leading-none text-[#6b5038]"
+              className="inline-flex min-w-0 items-center justify-center rounded-md border-2 gap-1 border-[#d4c5a8] bg-[#f3e4c9] px-2 py-0.5 leading-none"
               title={`${task.pendingOrders} pending orders`}
             >
-              Pen {task.pendingOrders}
+              <ChefHat className='size-3.5'/>
+              <span>Pending {task.pendingOrders}</span>
             </span>
-            <span
-              className="inline-flex min-w-0 items-center justify-center gap-0.5 rounded-md border-2 border-[#d4c5a8] bg-[#fff8ec] px-1.5 py-0.5 text-[10px] leading-none text-[#6b5038]"
-              title={`${task.completedOrders} completed orders`}
-            >
-              <Soup className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate text-[11px] leading-none">{task.completedOrders}D</span>
-            </span>
+            }
           </div>
         </CardContent>
       </Card>

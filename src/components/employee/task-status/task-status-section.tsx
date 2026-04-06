@@ -18,7 +18,7 @@ interface TaskStatusSectionProps {
 
 function TaskCardSkeleton() {
   return (
-    <div className="w-full rounded-lg border-2 border-[#d4c5a8] bg-[#fdf5e8] px-3.5 py-3">
+    <div className="w-full rounded-xl border-2 border-[#d4c5a8] bg-[#fdf5e8] px-3.5 py-3">
       <div className="flex flex-col gap-2.5">
         <div className="flex items-start justify-between gap-2.5">
           <div className="min-w-0 flex-1 space-y-2">
@@ -45,11 +45,11 @@ function TaskCardSkeleton() {
 
 function getStatusAccentClassName(status: TaskStatusKind): string {
   if (status === 'Current') {
-    return 'border-[#c79a54] bg-[#e7c27f] text-[#4b3522]';
+    return 'border-[#87a9bc] bg-[#d7e3f4] text-[#204b61]';
   }
 
   if (status === 'In Review') {
-    return 'border-[#87a9bc] bg-[#d7e3f4] text-[#204b61]';
+    return 'border-[#c79a54] bg-[#e7c27f] text-[#4b3522]';
   }
 
   if (status === 'Approved') {
@@ -132,7 +132,7 @@ export function TaskStatusSection({
       </header>
 
       <CollapsibleContent className="min-h-0 overflow-hidden data-[state=closed]:hidden xl:h-full xl:flex-1">
-        <div className="flex min-h-0 w-full flex-col overflow-hidden rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] shadow-[0_0_0_1px_rgba(155,122,86,0.2),inset_0_1px_0_rgba(255,255,255,0.35)] xl:h-full xl:flex-1">
+        <div className="flex min-h-0 w-full flex-col overflow-hidden rounded-xl border-2 border-[#9b7a56] bg-[#f7efdf] shadow-[0_0_0_1px_rgba(155,122,86,0.2),inset_0_1px_0_rgba(255,255,255,0.35)] xl:h-full xl:flex-1">
           <ScrollArea className="min-h-0 w-full h-96 sm:h-112 md:h-[46vh] lg:h-[50vh] xl:h-full">
             <div className="flex min-w-0 w-full flex-col items-stretch gap-2 p-2">
               {isLoading ? (
