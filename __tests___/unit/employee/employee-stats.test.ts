@@ -1,5 +1,10 @@
 /**
- * Test scope: Unit tests for employee stats server actions and employee stats action handlers.
+ * Test coverage:
+ * - Fetch employee points and XP
+ * - Fetch XP required for the next level
+ * - Fetch level metadata
+ * - Adjust active employee XP for level progression
+ * - Verify the matching action handlers for each employee stats action
  * Run this file only: npm test -- --runTestsByPath __tests___/unit/employee/employee-stats.test.ts
  */
 

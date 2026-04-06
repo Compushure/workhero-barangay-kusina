@@ -1,6 +1,11 @@
 /**
- *WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
- * Test scope: Remote integration tests for superadmin user-management actions and route-backed handlers.
+ *  WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
+ * Test coverage:
+ * - Create, edit, and delete remote users
+ * - Filter and paginate remote users through the admin route
+ * - Change passwords through the admin route
+ * - Upload and delete remote profile pictures
+ * - Verify the matching remote superadmin action and route handlers
  * Run this file only: npm test -- --runTestsByPath __tests___/integration/superadmin/superadmin.integration.test.ts
  */
 

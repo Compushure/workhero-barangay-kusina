@@ -1,15 +1,12 @@
 /**
- * ⚠️REMEMBER TO BE CAREFUL WITH INTEGRATION TESTING!!!!
- * ‼️‼️PLEASE - if possible comment out nyo danay until ma set up ang test db
- * BADGE EDITOR Management Tests
- * ===================================
- * Comprehensive test suite for badge creation, editing, and deletion.
- * Tests both happy paths (success scenarios) and sad paths (error scenarios).
- * 
- * Test Coverage: ()
- *
+ * Test coverage:
+ * - Fetch badges and badge configuration options
+ * - Fetch badge task, attribute, and attendance options
+ * - Upload and delete badge images
+ * - Add, edit, and delete badges
+ * - Verify the matching action handlers for badge editor workflows
+ * Run this file only: npm test -- --runTestsByPath __tests___/unit/manager/badge-editor.test.ts
  */
-// Test scope: Unit tests for manager badge editor server actions and action handlers.
 // Run this file only: npm test -- --runTestsByPath __tests___/unit/manager/badge-editor.test.ts
 import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals';
 import {

@@ -1,5 +1,10 @@
 /**
- * Test scope: Unit tests for employee profile server actions and profile action handlers.
+ * Test coverage:
+ * - Fetch an employee profile by ID
+ * - Update the employee's own profile
+ * - Upload an employee profile picture
+ * - Delete an employee profile picture
+ * - Verify the matching action handlers for employee profile flows
  * Run this file only: npm test -- --runTestsByPath __tests___/unit/employee/profile.test.ts
  */
 

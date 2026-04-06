@@ -1,6 +1,11 @@
 /**
- * WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
- * Test scope: Remote integration tests for manager task verification actions and handlers.
+ *  WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
+ * Test coverage:
+ * - Load remote tasks awaiting review
+ * - Load remote approved and denied tasks
+ * - Load remote paginated review results
+ * - Approve and reject remote task submissions
+ * - Verify the matching remote action handlers for task verification
  * Run this file only: npm test -- --runTestsByPath __tests___/integration/manager/task-verification.integration.test.ts
  */
 

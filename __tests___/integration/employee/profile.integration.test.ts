@@ -1,6 +1,11 @@
 /**
- * WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
- * Test scope: Remote integration tests for employee profile actions and profile action handlers.
+ *  WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
+ * Test coverage:
+ * - Fetch a remote employee profile by ID
+ * - Update a remote employee profile
+ * - Upload a remote employee profile picture
+ * - Delete a remote employee profile picture
+ * - Verify the matching remote action handlers for profile workflows
  * Run this file only: npm test -- --runTestsByPath __tests___/integration/employee/profile.integration.test.ts
  */
 

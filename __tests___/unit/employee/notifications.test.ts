@@ -1,5 +1,9 @@
 /**
- * Test scope: Unit tests for employee notification server actions and notification action handlers.
+ * Test coverage:
+ * - Fetch employee notifications
+ * - Mark a single notification as read
+ * - Mark all notifications as read
+ * - Verify the matching action handlers for employee notifications
  * Run this file only: npm test -- --runTestsByPath __tests___/unit/employee/notifications.test.ts
  */
 

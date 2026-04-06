@@ -1,5 +1,9 @@
 /**
- * Test scope: Remote integration tests for attendance server actions and attendance action handlers.
+ *  WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
+ * Test coverage:
+ * - Fetch remote attendance configuration, status, and timeline data
+ * - Time in, start break, end break, and time out remotely
+ * - Verify the matching remote action handlers for attendance flows
  * Run this file only: npm test -- --runTestsByPath __tests___/integration/shared/attendance.integration.test.ts
  */
 

@@ -1,22 +1,15 @@
 /**
- * ⚠️REMEMBER TO BE CAREFUL WITH INTEGRATION TESTING!!!!
- * ‼️‼️PLEASE - if possible comment out nyo danay until ma set up ang test db
- * SuperAdmin User Management Tests
- * ===================================
- * Comprehensive test suite for user creation, editing, and deletion.
- * Tests both happy paths (success scenarios) and sad paths (error scenarios).
- * 
- * Test Coverage: ()
- * - User creation with validation
- * - Email duplicate prevention
- * - User editing with partial updates
- * - User deletion with cascade
- * - User filtering and pagination
- * - Password change functionality
- * - Profile picture management
+ * Test coverage:
+ * - Fetch users and paginated user lists
+ * - Add users with validation and duplicate-email handling
+ * - Edit users with partial updates
+ * - Delete users with cascade cleanup
+ * - Filter users through the admin route
+ * - Change passwords through the admin route
+ * - Upload and delete profile pictures
+ * - Verify the matching superadmin action handlers and route handlers
+ * Run this file only: npm test -- --runTestsByPath __tests___/unit/superadmin/superadmin.test.ts
  */
-
-// Test scope: Unit tests for superadmin user-management actions and route handlers.
 // Run this file only: npm test -- --runTestsByPath __tests___/unit/superadmin/superadmin.test.ts
 import { afterAll, beforeAll, beforeEach, describe, expect, jest, test } from '@jest/globals';
 

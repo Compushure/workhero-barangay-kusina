@@ -1,6 +1,11 @@
 /**
- * WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
- * Test scope: Remote integration tests for manager badge editor actions and handlers.
+ *  WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
+ * Test coverage:
+ * - Load remote badges and task options
+ * - Add and edit remote badges
+ * - Upload and delete remote badge images
+ * - Delete remote badges
+ * - Verify the matching remote action handlers for badge editor workflows
  * Run this file only: npm test -- --runTestsByPath __tests___/integration/manager/badge-editor.integration.test.ts
  */
 

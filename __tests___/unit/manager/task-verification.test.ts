@@ -1,5 +1,12 @@
 /**
- * Test scope: Unit tests for manager task verification server actions and action handlers.
+ * Test coverage:
+ * - Fetch tasks awaiting review
+ * - Fetch paginated tasks awaiting review
+ * - Fetch approved tasks
+ * - Fetch denied tasks
+ * - Approve a task submission
+ * - Reject a task submission
+ * - Verify the matching action handlers for task verification
  * Run this file only: npm test -- --runTestsByPath __tests___/unit/manager/task-verification.test.ts
  */
 

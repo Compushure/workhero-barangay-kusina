@@ -1,6 +1,10 @@
 /**
- * WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
- * Test scope: Remote integration tests for manager badge assignment actions and handlers.
+ *  WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
+ * Test coverage:
+ * - Load remote manual badges, all badges, and badge assignment users
+ * - Assign and remove remote manual badge awards
+ * - Fetch remote badge award debug entries
+ * - Verify the matching remote action handlers for badge assignment
  * Run this file only: npm test -- --runTestsByPath __tests___/integration/manager/badge-assignment.integration.test.ts
  */
 

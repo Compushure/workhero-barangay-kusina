@@ -1,5 +1,10 @@
 /**
- * Test scope: Remote integration tests for employee stats server actions and employee stats action handlers.
+ *  WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
+ * Test coverage:
+ * - Fetch remote employee points and XP data
+ * - Fetch remote level metadata and XP thresholds
+ * - Adjust remote XP for level progression
+ * - Verify the matching remote action handlers for employee stats
  * Run this file only: npm test -- --runTestsByPath __tests___/integration/employee/employee-stats.integration.test.ts
  */
 

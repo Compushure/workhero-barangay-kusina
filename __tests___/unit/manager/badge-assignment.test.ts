@@ -1,5 +1,12 @@
 /**
- * Test scope: Unit tests for manager badge assignment server actions and action handlers.
+ * Test coverage:
+ * - Fetch manual badges
+ * - Fetch badge assignment users
+ * - Assign a manual badge to a user
+ * - Fetch badge award debug entries
+ * - Remove a badge award
+ * - Fetch all badges for assignment workflows
+ * - Verify the matching action handlers for badge assignment
  * Run this file only: npm test -- --runTestsByPath __tests___/unit/manager/badge-assignment.test.ts
  */
 

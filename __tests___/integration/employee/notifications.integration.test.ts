@@ -1,6 +1,10 @@
 /**
- * WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
- * Test scope: Remote integration tests for employee notification actions and notification action handlers.
+ *  WARNING: MAKE SURE YOU HAVE THE RIGHT ENV FOR THE TEST DB DIOS MIOKO
+ * Test coverage:
+ * - Fetch remote employee notifications
+ * - Mark one remote notification as read
+ * - Mark all remote notifications as read
+ * - Verify the matching remote action handlers for notifications
  * Run this file only: npm test -- --runTestsByPath __tests___/integration/employee/notifications.integration.test.ts
  */
 

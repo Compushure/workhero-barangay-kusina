@@ -1,5 +1,5 @@
 /**
- * Test scope: Unit tests for attendance server actions and attendance action handlers.
+ * Test coverage: Unit tests for attendance server actions and attendance action handlers.
  * Run this file only: npm test -- --runTestsByPath __tests___/unit/shared/attendance.test.ts
  */
 
