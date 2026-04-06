@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import dynamic from 'next/dynamic';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
 import { useGetAllLevelMetadata, useGetEmployeeXP } from '@/hooks/tanstack/queries/employeeQueries';
 import { useEmployeeTasksStore } from '@/store/employee';
@@ -10,14 +9,6 @@ import HeaderHUD from '../widgets/header-hud';
 import { toEmployeeTaskBoardData } from './task-status-data';
 import { TaskStatusBoard } from './task-status-board';
 
-// const TaskStatusBoard = dynamic(
-//   () => import('./task-status-board').then((mod) => mod.TaskStatusBoard),
-//   {
-//     ssr: false,
-//     loading: () => <TaskStatusBoardLoading />,
-//   }
-// );
-
 const DEFAULT_KITCHEN_BG_URL =
   'https://ewvpbwxqkomybbhmqygm.supabase.co/storage/v1/object/public/kitchen/level_1_bg.png';
 
@@ -25,10 +16,12 @@ function TaskStatusBoardLoading() {
   return (
     <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border-3 border-[#47331F] bg-[#eadbc1] p-2.5 font-jersey shadow-[0_10px_28px_rgba(71,51,31,0.24)] sm:p-3">
       <div className="flex flex-col gap-2 border-b-2 border-[#d4c5a8] pb-3">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-44 bg-[#dcc8aa]" />
-            <Skeleton className="h-5 w-72 bg-[#eadbc1]" />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex w-full gap-2 overflow-hidden sm:w-auto">
+            <Skeleton className="h-9 w-28 rounded-full bg-[#dcc8aa]" />
+            <Skeleton className="h-9 w-32 rounded-full bg-[#dcc8aa]" />
+            <Skeleton className="h-9 w-30 rounded-full bg-[#dcc8aa]" />
+            <Skeleton className="h-9 w-30 rounded-full bg-[#dcc8aa]" />
           </div>
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
             <div className="w-full space-y-1 sm:w-auto">
@@ -42,7 +35,7 @@ function TaskStatusBoardLoading() {
         </div>
       </div>
 
-      <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 pt-3 lg:grid-cols-2 lg:grid-rows-2 xl:gap-3">
+      <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 pt-3 md:grid-cols-2 xl:grid-cols-4 xl:gap-3">
         {['Current', 'In Review', 'Approved', 'Rejected'].map((section) => (
           <div key={section} className="flex h-full min-w-0 w-full flex-col gap-2">
             <div className="flex w-full items-center justify-between gap-2 px-1">
@@ -130,7 +123,7 @@ export function TasksPage() {
   const resolvedError = error ?? (!isLoading && !data ? new Error('Failed to load tasks') : null);
 
   return (
-    <div className="relative isolate flex min-h-dvh w-full min-w-0 flex-col overflow-x-clip font-jersey tracking-[0.08em]">
+    <div className="relative isolate flex min-h-dvh w-full min-w-0 flex-col overflow-x-clip font-jersey tracking-[0.08em] xl:h-dvh xl:overflow-hidden">
       <div
         className="absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url('${kitchenBackgroundUrl}')` }}
@@ -143,10 +136,10 @@ export function TasksPage() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full min-w-0 flex-1 justify-center px-2 pb-3 pt-1 sm:px-3 sm:pb-3 sm:pt-2 md:min-h-0 md:px-4 md:pb-4">
-        <div className="flex w-full min-w-0 max-w-295 flex-1 md:min-h-0">
-          { isLoading ? (
-            <TaskStatusBoardLoading/>
+      <main className="mx-auto flex w-full min-w-0 flex-1 justify-center px-2 pb-24 pt-1 sm:px-3 sm:pb-3 sm:pt-2 md:min-h-0 md:px-4 md:pb-4 xl:overflow-hidden">
+        <div className="flex w-full min-w-0 max-w-screen flex-1 md:min-h-0">
+          {isLoading ? (
+            <TaskStatusBoardLoading />
           ) : (
             <TaskStatusBoard
               currentTasks={tasks.currentTasks}

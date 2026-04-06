@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,16 +24,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { cn } from '@/lib/utils';
 import { isTaskStatusItemOverdue } from './task-status-utils';
 import { TaskCard } from './task-card';
 import { TaskStatusSection } from './task-status-section';
-import type {
-  TaskOverdueFilter,
-  TaskSortOption,
-  TaskStatusItem,
-  TaskStatusKind,
-} from './types';
+import type { TaskOverdueFilter, TaskSortOption, TaskStatusItem, TaskStatusKind } from './types';
 
 const sortOptions: Array<{ value: TaskSortOption; label: string }> = [
   { value: 'due-date-asc', label: 'Due date (Ascending)' },
@@ -50,6 +44,8 @@ const desktopOpenState: Record<TaskStatusKind, boolean> = {
   Approved: true,
   Rejected: true,
 };
+
+const mobileDefaultSection: TaskStatusKind = 'Current';
 
 function dueDateTimeOrInfinity(value: string): number {
   const timestamp = Date.parse(value);
@@ -81,7 +77,10 @@ function sortTasks(tasks: TaskStatusItem[], sortBy: TaskSortOption): TaskStatusI
   }
 }
 
-function filterTasksByOverdue(tasks: TaskStatusItem[], overdueFilter: TaskOverdueFilter): TaskStatusItem[] {
+function filterTasksByOverdue(
+  tasks: TaskStatusItem[],
+  overdueFilter: TaskOverdueFilter
+): TaskStatusItem[] {
   if (overdueFilter === 'all') return tasks;
 
   return tasks.filter((task) => {
@@ -159,20 +158,9 @@ export function TaskStatusBoard({
   const [overdueFilter, setOverdueFilter] = useState<TaskOverdueFilter>('all');
   const [openSections, setOpenSections] =
     useState<Record<TaskStatusKind, boolean>>(desktopOpenState);
-  const [mobileOpenSection, setMobileOpenSection] = useState<TaskStatusKind | ''>('Current');
-  const [isMobileLayout, setIsMobileLayout] = useState(() =>
-    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false
+  const [mobileOpenSection, setMobileOpenSection] = useState<TaskStatusKind | ''>(
+    mobileDefaultSection
   );
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 767px)');
-    const updateLayoutMode = () => setIsMobileLayout(mediaQuery.matches);
-
-    updateLayoutMode();
-    mediaQuery.addEventListener('change', updateLayoutMode);
-
-    return () => mediaQuery.removeEventListener('change', updateLayoutMode);
-  }, []);
 
   const filterLabel =
     overdueFilter === 'overdue'
@@ -207,18 +195,6 @@ export function TaskStatusBoard({
     ],
     [current, denied, onReview, verified]
   );
-
-  const openCount = sections.filter(({ status }) => openSections[status]).length;
-  const singleOpenSection =
-    openCount === 1 ? sections.find(({ status }) => openSections[status]) ?? null : null;
-  const collapsedSections = sections.filter(({ status }) => !openSections[status]);
-  const reorderedSectionsForTwoOpen =
-    openCount === 2
-      ? [...sections.filter(({ status }) => openSections[status]), ...collapsedSections]
-      : sections;
-
-  const sectionClassName = (status: TaskStatusKind) =>
-    cn('min-h-0 transition-all duration-200', openSections[status] ? 'flex-1' : 'flex-none');
 
   const sectionSummaries = useMemo(
     () =>
@@ -260,14 +236,16 @@ export function TaskStatusBoard({
   }
 
   return (
-    <div className="flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-lg border-3 border-[#47331F] bg-[#eadbc1] p-2.5 font-jersey shadow-[0_10px_28px_rgba(71,51,31,0.24)] lg:h-full sm:p-3">
+    <div className="flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-lg border-3 border-[#47331F] bg-[#eadbc1] p-2.5 font-jersey shadow-[0_10px_28px_rgba(71,51,31,0.24)] md:h-full sm:p-3 xl:h-full">
       <div className="flex flex-col gap-3 border-b-2 border-[#d4c5a8] pb-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           {isLoading ? (
             <>
-              <div className="space-y-2">
-                <Skeleton className="h-8 w-52 bg-[#dcc8aa]" />
-                <Skeleton className="h-5 w-80 max-w-full bg-[#e3d3b7]" />
+              <div className="flex w-full gap-2 overflow-hidden">
+                <Skeleton className="h-9 w-28 rounded-full bg-[#dcc8aa]" />
+                <Skeleton className="h-9 w-32 rounded-full bg-[#dcc8aa]" />
+                <Skeleton className="h-9 w-30 rounded-full bg-[#dcc8aa]" />
+                <Skeleton className="h-9 w-30 rounded-full bg-[#dcc8aa]" />
               </div>
               <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto lg:items-end">
                 <div className="w-full space-y-1 sm:w-auto">
@@ -281,36 +259,19 @@ export function TaskStatusBoard({
             </>
           ) : (
             <>
-              <div className="min-w-0 space-y-3">
-                <div>
-                  <h2 className="text-[26px] leading-none text-[#3f2a1a] sm:text-[32px]">
-                    Task Board
-                  </h2>
-                  <p className="mt-1 max-w-xl text-[14px] leading-snug tracking-[0.04em] text-[#6b5038] sm:text-[16px]">
-                    Track your current work, review requests, approved tasks, and rejected orders in one place.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-1.5 min-[430px]:hidden">
+              <div className="min-w-0 w-full lg:w-auto">
+                <div className="flex min-w-0 w-full gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   {sectionSummaries.map(({ status, count }) => (
                     <div
                       key={status}
-                      className="inline-flex items-center gap-2 rounded-full border-2 border-[#d4c5a8] bg-[#f7efdf] px-2.5 py-1 text-[12px] leading-none text-[#6b5038]"
+                      className="inline-flex shrink-0 items-center gap-2 rounded-full border-2 border-[#d4c5a8] bg-[#f7efdf] px-2.5 py-1.5 text-[12px] leading-none text-[#6b5038]"
                     >
-                      <span className="tracking-[0.08em] text-[#8a6039]">{status}</span>
+                      <span
+                        className={`rounded-full border-2 px-2 py-0.5 tracking-[0.08em] ${getSectionAccentClassName(status)}`}
+                      >
+                        {status}
+                      </span>
                       <span className="text-[13px] text-[#3f2a1a]">{count}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="hidden min-[430px]:grid min-[430px]:grid-cols-2 min-[430px]:gap-2 sm:flex sm:flex-wrap">
-                  {sectionSummaries.map(({ status, count }) => (
-                    <div
-                      key={status}
-                      className="min-w-0 rounded-lg border-2 border-[#d4c5a8] bg-[#f7efdf] px-3 py-2 text-left"
-                    >
-                      <div className="truncate text-[12px] tracking-[0.12em] text-[#8a6039]">{status}</div>
-                      <div className="mt-1 text-[18px] leading-none text-[#3f2a1a]">{count}</div>
                     </div>
                   ))}
                 </div>
@@ -321,7 +282,10 @@ export function TaskStatusBoard({
                   <span className="block text-[14px] tracking-[0.18em] text-[#8a6039] sm:text-[16px]">
                     SORT BY
                   </span>
-                  <Select value={sortBy} onValueChange={(value) => setSortBy(value as TaskSortOption)}>
+                  <Select
+                    value={sortBy}
+                    onValueChange={(value) => setSortBy(value as TaskSortOption)}
+                  >
                     <SelectTrigger className="h-9 w-full rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-52">
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
@@ -330,7 +294,7 @@ export function TaskStatusBoard({
                         <SelectItem
                           key={option.value}
                           value={option.value}
-                          className="cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] transition-colors duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] focus:bg-[#8a6039] focus:text-[#fff6e5] data-[highlighted]:bg-[#8a6039] data-[highlighted]:text-[#fff6e5]"
+                          className="cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] transition-colors duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] focus:bg-[#8a6039] focus:text-[#fff6e5] data-highlighted:bg-[#8a6039] data-highlighted:text-[#fff6e5]"
                         >
                           {option.label}
                         </SelectItem>
@@ -348,7 +312,9 @@ export function TaskStatusBoard({
                         className="h-9 w-full justify-between rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-auto"
                       >
                         <Filter strokeWidth={2.5} className="h-4 w-4 text-[#6b5038]" />
-                        <span className="inline-flex items-center text-[16px] leading-none">{filterLabel}</span>
+                        <span className="inline-flex items-center text-[16px] leading-none">
+                          {filterLabel}
+                        </span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
@@ -398,132 +364,80 @@ export function TaskStatusBoard({
         </div>
       </div>
 
-      <div className="flex-1 pt-3 md:min-h-0">
+      <div className="flex-1 pt-3 md:min-h-0 xl:min-h-0 xl:overflow-hidden">
         {error ? (
           <div className="flex h-48 w-full flex-col items-center justify-center rounded-2xl border-2 border-[#c9b08d] bg-[#f7efdf] px-4 text-center">
             <span className="font-jersey text-[14px] tracking-[0.06em] text-[#8b2e22]">
               Error loading tasks. Please try again.
             </span>
           </div>
-        ) : isMobileLayout ? (
-          <div className="min-w-0 space-y-3">
-            <div className="rounded-xl border-2 border-[#d4c5a8] bg-[#f7efdf] px-3 py-2 text-[13px] tracking-[0.04em] text-[#6b5038]">
-              Open one section at a time for a cleaner view on smaller screens.
-            </div>
-
-            <Accordion
-              type="single"
-              collapsible
-              value={mobileOpenSection}
-              onValueChange={(value) => setMobileOpenSection((value as TaskStatusKind | '') ?? '')}
-              className="space-y-2"
-            >
-              {sections.map(({ status, tasks }) => (
-                <AccordionItem
-                  key={status}
-                  value={status}
-                  className="min-w-0 overflow-hidden rounded-xl border-2 border-[#9b7a56] bg-[#f7efdf] px-0"
-                >
-                  <AccordionTrigger className="px-3 py-3 text-left hover:no-underline [&>svg]:text-[#8a6039]">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <span
-                        className={`inline-flex rounded-full border-2 px-2.5 py-1 text-[13px] leading-none ${getSectionAccentClassName(status)}`}
-                      >
-                        {status}
-                      </span>
-                      <span className="rounded-full border-2 border-[#d4c5a8] bg-[#fff8ec] px-2 py-1 text-[13px] leading-none text-[#6b5038]">
-                        {tasks.length}
-                      </span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-3 pb-3">
-                    <div className="space-y-2">
-                      <p className="text-[13px] leading-relaxed tracking-[0.04em] text-[#6b5038]">
-                        {getSectionHelperText(status)}
-                      </p>
-
-                      {isLoading ? (
-                        <>
-                          <MobileTaskCardSkeleton />
-                          <MobileTaskCardSkeleton />
-                        </>
-                      ) : tasks.length > 0 ? (
-                        <div className="space-y-2">{renderTaskCards(tasks)}</div>
-                      ) : (
-                        <div className="rounded-lg border-2 border-dashed border-[#d4c5a8] bg-[#fdf5e8] px-4 py-5 text-center text-[14px] tracking-[0.04em] text-[#8a6039]">
-                          No tasks in this section right now.
-                        </div>
-                      )}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        ) : singleOpenSection ? (
-          <div className="flex h-full min-h-0 flex-col gap-2.5 xl:gap-3">
-            <div className="min-h-0 flex-1">
-              <TaskStatusSection
-                status={singleOpenSection.status}
-                tasks={singleOpenSection.tasks}
-                isLoading={isLoading}
-                open
-                onOpenChange={(open) => handleSectionOpenChange(singleOpenSection.status, open)}
-              >
-                {renderTaskCards(singleOpenSection.tasks)}
-              </TaskStatusSection>
-            </div>
-
-            {collapsedSections.map(({ status, tasks }) => (
-              <div key={status} className="flex-none">
-                <TaskStatusSection
-                  status={status}
-                  tasks={tasks}
-                  isLoading={isLoading}
-                  open={false}
-                  onOpenChange={(open) => handleSectionOpenChange(status, open)}
-                >
-                  {renderTaskCards(tasks)}
-                </TaskStatusSection>
-              </div>
-            ))}
-          </div>
-        ) : openCount === 2 ? (
-          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 lg:grid-cols-2 xl:gap-3">
-            {reorderedSectionsForTwoOpen.map(({ status, tasks }) => (
-              <div key={status} className={cn('min-h-0', openSections[status] && 'lg:min-h-[18rem]')}>
-                <TaskStatusSection
-                  status={status}
-                  tasks={tasks}
-                  isLoading={isLoading}
-                  open={openSections[status]}
-                  onOpenChange={(open) => handleSectionOpenChange(status, open)}
-                >
-                  {renderTaskCards(tasks)}
-                </TaskStatusSection>
-              </div>
-            ))}
-          </div>
         ) : (
-          <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 lg:grid-cols-2 xl:gap-3">
-            <div className="flex min-h-0 flex-col gap-2.5 xl:gap-3">
-              <div className={sectionClassName('Current')}>
-                {renderDesktopSection('Current', current)}
+          <>
+            <div className="min-w-0 space-y-3 md:hidden">
+              <div className="rounded-xl border-2 border-[#d4c5a8] bg-[#f7efdf] px-3 py-2 text-[13px] tracking-[0.04em] text-[#6b5038]">
+                Open one section at a time to keep tasks easy to scan on small screens.
               </div>
-              <div className={sectionClassName('Approved')}>
-                {renderDesktopSection('Approved', verified)}
-              </div>
+
+              <Accordion
+                type="single"
+                collapsible
+                value={mobileOpenSection}
+                onValueChange={(value) =>
+                  setMobileOpenSection((value as TaskStatusKind | '') ?? '')
+                }
+                className="space-y-2"
+              >
+                {sections.map(({ status, tasks }) => (
+                  <AccordionItem
+                    key={status}
+                    value={status}
+                    className="min-w-0 overflow-hidden rounded-xl border-2 border-[#9b7a56] bg-[#f7efdf] px-0"
+                  >
+                    <AccordionTrigger className="px-3 py-3 text-left hover:no-underline [&>svg]:text-[#8a6039]">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span
+                          className={`inline-flex rounded-full border-2 px-2.5 py-1 text-[13px] leading-none ${getSectionAccentClassName(status)}`}
+                        >
+                          {status}
+                        </span>
+                        <span className="rounded-full border-2 border-[#d4c5a8] bg-[#fff8ec] px-2 py-1 text-[13px] leading-none text-[#6b5038]">
+                          {tasks.length}
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-3 pb-3">
+                      <div className="space-y-2">
+                        <p className="text-[13px] leading-relaxed tracking-[0.04em] text-[#6b5038]">
+                          {getSectionHelperText(status)}
+                        </p>
+
+                        {isLoading ? (
+                          <>
+                            <MobileTaskCardSkeleton />
+                            <MobileTaskCardSkeleton />
+                          </>
+                        ) : tasks.length > 0 ? (
+                          <div className="space-y-2">{renderTaskCards(tasks)}</div>
+                        ) : (
+                          <div className="rounded-lg border-2 border-dashed border-[#d4c5a8] bg-[#fdf5e8] px-4 py-5 text-center text-[14px] tracking-[0.04em] text-[#8a6039]">
+                            No tasks in this section right now.
+                          </div>
+                        )}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
 
-            <div className="flex min-h-0 flex-col gap-2.5 xl:gap-3">
-              <div className={sectionClassName('In Review')}>
-                {renderDesktopSection('In Review', onReview)}
-              </div>
-              <div className={sectionClassName('Rejected')}>
-                {renderDesktopSection('Rejected', denied)}
-              </div>
+            <div className="hidden h-full min-h-0 grid-cols-1 gap-2.5 md:grid md:grid-cols-2 xl:h-full xl:min-h-0 xl:grid-cols-4 xl:auto-rows-fr xl:gap-3">
+              {sections.map(({ status, tasks }) => (
+                <div key={status} className="min-h-0 xl:h-full xl:overflow-hidden">
+                  {renderDesktopSection(status, tasks)}
+                </div>
+              ))}
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
