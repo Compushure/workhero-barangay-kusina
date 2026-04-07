@@ -50,9 +50,9 @@ function getStatusLabel(status?: string): string {
 function getStatusChipClassName(status?: string): string {
   switch (status?.toLowerCase()) {
     case 'assigned':
-      return 'border-[#c79a54] bg-[#e7c27f] text-[#4b3522]';
-    case 'in review':
       return 'border-[#87a9bc] bg-[#d7e3f4] text-[#204b61]';
+    case 'in review':
+      return 'border-[#c79a54] bg-[#e7c27f] text-[#4b3522]';
     case 'approved':
       return 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]';
     case 'rejected':
@@ -83,6 +83,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
   const performMoreOrdersMutation = usePerformMoreOrders();
 
   const isApprovedTask = task.status?.toLowerCase() === 'approved';
+  const isInReviewTask = task.status?.toLowerCase() === 'in review';
   const hasClaimedRewards = Boolean(task.claimedAt);
   const hasRemainingOrders = remainingOrders > 0;
   const hasDishServed = !hasRemainingOrders && Boolean(task.completedAt);
@@ -124,21 +125,25 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
   const actionButtonClassName =
     'inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-[#47331F] bg-[#8A6039] px-4 py-2.5 font-jersey text-[14px] tracking-[0.05em] text-[#fff6e5] shadow-[3px_3px_0px_#47331F] transition-all duration-150 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#9A6E45] hover:shadow-[2px_2px_0px_#47331F] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50 sm:w-auto sm:text-[15px]';
 
-  const summaryChips = useMemo(
-    () => [
+  const summaryChips = useMemo(() => {
+    const chips: Array<{ label: string; value: string; className: string }> = [
       {
         label: 'Status',
         value: getStatusLabel(task.status),
         className: getStatusChipClassName(task.status),
       },
-      {
+    ];
+
+    if (isInReviewTask) {
+      chips.push({
         label: 'Pending',
         value: `${task.pendingOrders}`,
         className: 'border-[#d4c5a8] bg-[#fff8ec] text-[#6b5038]',
-      },
-    ],
-    [task.completedOrders, task.maxOrders, task.pendingOrders, task.status]
-  );
+      });
+    }
+
+    return chips;
+  }, [isInReviewTask, task.pendingOrders, task.status]);
 
   function handleRedo() {
     if (!canRedo || redoMutation.isPending) return;
@@ -180,7 +185,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
         }
       }}
     >
-      <DialogContent className="bottom-2 top-auto flex h-[min(100dvh-0.75rem,56rem)] w-[calc(100vw-0.75rem)] max-w-[calc(100vw-0.75rem)] translate-y-0 flex-col overflow-hidden rounded-[1.15rem] border-3 border-[#47331F] bg-[#f7efdf] p-0 font-jersey tracking-[0.04em] shadow-[0_14px_34px_rgba(71,51,31,0.22)] sm:top-[50%] sm:bottom-auto sm:h-auto sm:max-w-2xl sm:translate-y-[-50%] sm:rounded-[1.4rem]">
+      <DialogContent className="top-[50%] bottom-auto flex h-auto max-h-[calc(100dvh-0.75rem)] w-[calc(100vw-0.75rem)] max-w-[calc(100vw-0.75rem)] translate-y-[-50%] flex-col overflow-hidden rounded-[1.15rem] border-3 border-[#47331F] bg-[#f7efdf] p-0 font-jersey tracking-[0.04em] shadow-[0_14px_34px_rgba(71,51,31,0.22)] sm:max-h-[85dvh] sm:max-w-2xl sm:rounded-[1.4rem]">
         <DialogHeader className="flex min-w-0 flex-col gap-2.5 border-b-2 border-[#d4c5a8] bg-[#e1d2b7] px-3 py-3 text-left sm:gap-3 sm:px-5 sm:py-3.5">
           <div className="space-y-1 sm:space-y-2">
             <DialogTitle className="block w-full wrap-break-word pr-8 text-[1.35rem] font-normal leading-7 text-[#3f2a1a] sm:text-[1.5rem]">
@@ -195,10 +200,14 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
             {summaryChips.map((chip) => (
               <span
                 key={chip.label}
-                className={`inline-flex items-center gap-2 rounded-full border-2 px-2.5 py-1 text-[12px] leading-none sm:text-[13px] ${chip.className}`}
+                className={`inline-flex items-baseline gap-2 rounded-full border-2 px-2.5 py-1 text-[12px] leading-none sm:text-[13px] ${chip.className}`}
               >
-                <span className="tracking-[0.12em] align">{chip.label}</span>
-                <span className="text-[13px] sm:text-[14px]">{chip.value}</span>
+                <span className="inline-flex items-center leading-none tracking-[0.12em]">
+                  {chip.label}
+                </span>
+                <span className="inline-flex items-center text-[13px] leading-none sm:text-[14px]">
+                  {chip.value}
+                </span>
               </span>
             ))}
             {isOverdue ? (
@@ -209,24 +218,32 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
           </div>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
+        <div className="overflow-x-hidden overflow-y-auto px-3 py-2.5 sm:px-5 sm:py-4">
           <div className="space-y-3 sm:space-y-4">
-            <section className="grid gap-3 border-b-2 border-[#d4c5a8] pb-3 sm:gap-4 sm:pb-4 md:grid-cols-2">
-              <div className="space-y-3 rounded-xl border-2 border-[#d4c5a8] bg-[#fff8ec] p-3 sm:space-y-4 sm:p-3.5">
+            <section className="grid grid-cols-2 gap-2 border-b-2 border-[#d4c5a8] pb-2.5 sm:gap-4 sm:pb-4">
+              <div className="min-w-0 space-y-2 rounded-xl border-2 border-[#d4c5a8] bg-[#fff8ec] p-2.5 sm:space-y-4 sm:p-3.5">
                 <div className="flex flex-col gap-1.5">
                   <p className="flex items-center justify-center gap-1.5 text-center">
-                    <span className="text-[13px] tracking-[0.2em] text-[#8a6039]">REWARDS</span>
+                    <span className="text-[11px] tracking-[0.16em] text-[#8a6039] sm:text-[13px] sm:tracking-[0.2em]">
+                      REWARDS
+                    </span>
                     <span className="text-[11px] text-[#9c8667]">(PER ORDER)</span>
                   </p>
-                  <div className="flex items-end justify-center gap-4 text-[#4b3522]">
-                    <p className="flex items-end gap-1.5 text-[17px] leading-none">
-                      <Coins strokeWidth={1.75} className="size-5 shrink-0" />
-                      <span className="inline-block pb-0.5 text-[18px]">{task.points}</span>
+                  <div className="flex items-end justify-center gap-2 text-[#4b3522] sm:gap-4">
+                    <p className="flex items-end gap-1 text-[14px] leading-none sm:gap-1.5 sm:text-[17px]">
+                      <Coins strokeWidth={1.75} className="size-4 shrink-0 sm:size-5" />
+                      <span className="inline-block pb-0.5 text-[15px] sm:text-[18px]">
+                        {task.points}
+                      </span>
                     </p>
 
-                    <p className="flex items-end gap-1.5 pb-0.5">
-                      <span className="inline-block text-[15px] leading-none">XP</span>
-                      <span className="inline-block text-[18px] leading-none">{task.xp}</span>
+                    <p className="flex items-end gap-1 pb-0.5 sm:gap-1.5">
+                      <span className="inline-block text-[12px] leading-none sm:text-[15px]">
+                        XP
+                      </span>
+                      <span className="inline-block text-[15px] leading-none sm:text-[18px]">
+                        {task.xp}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -234,10 +251,10 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                 <div
                   className={`flex flex-col items-center ${canSubmit ? '' : 'pointer-events-none opacity-50'}`}
                 >
-                  <label className="mb-1.5 block text-[14px] text-[#4b3522] sm:mb-2 sm:text-[15px]">
+                  <label className="mb-1 block text-[12px] text-[#4b3522] sm:mb-2 sm:text-[15px]">
                     Orders to Submit
                   </label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
                     <button
                       type="button"
                       onClick={(event) => {
@@ -245,7 +262,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                         setPendingOrders((previous) => Math.max(1, previous - 1));
                       }}
                       disabled={!canSubmit || pendingOrders === 1}
-                      className="flex size-9 items-center justify-center rounded-md border-2 border-[#47331F] bg-[#8A6039] text-[15px] text-[#fff6e5] transition-colors hover:bg-[#9A6E45] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex size-8 items-center justify-center rounded-md border-2 border-[#47331F] bg-[#8A6039] text-[13px] text-[#fff6e5] transition-colors hover:bg-[#9A6E45] disabled:cursor-not-allowed disabled:opacity-50 sm:size-9 sm:text-[15px]"
                     >
                       -
                     </button>
@@ -262,7 +279,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                       }}
                       disabled={!canSubmit}
                       tabIndex={-1}
-                      className="remove-arrow w-20 rounded-md border-2 border-[#d4c5a8] bg-[#f7efdf] px-2 py-1.5 text-center text-[15px] text-[#3f2a1a] outline-none focus-visible:ring-2 focus-visible:ring-[#F4B925] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="remove-arrow w-14 rounded-md border-2 border-[#d4c5a8] bg-[#f7efdf] px-1.5 py-1.5 text-center text-[13px] text-[#3f2a1a] outline-none focus-visible:ring-2 focus-visible:ring-[#F4B925] disabled:cursor-not-allowed disabled:opacity-50 sm:w-20 sm:px-2 sm:text-[15px]"
                     />
                     <button
                       type="button"
@@ -273,44 +290,44 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                         );
                       }}
                       disabled={!canSubmit || pendingOrders === Math.max(1, remainingOrders)}
-                      className="flex size-9 items-center justify-center rounded-md border-2 border-[#47331F] bg-[#8A6039] text-[15px] text-[#fff6e5] transition-colors hover:bg-[#9A6E45] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex size-8 items-center justify-center rounded-md border-2 border-[#47331F] bg-[#8A6039] text-[13px] text-[#fff6e5] transition-colors hover:bg-[#9A6E45] disabled:cursor-not-allowed disabled:opacity-50 sm:size-9 sm:text-[15px]"
                     >
                       +
                     </button>
                   </div>
 
                   <p
-                    className={`mt-1 text-[14px] text-[#6b5038] sm:mt-1.5 sm:text-[15px] ${canSubmit ? '' : 'opacity-0'}`}
+                    className={`mt-1 text-[11px] text-[#6b5038] sm:mt-1.5 sm:text-[15px] ${canSubmit ? '' : 'opacity-0'}`}
                   >
                     Remaining: {remainingOrders} order{remainingOrders === 1 ? '' : 's'}
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 rounded-xl border-2 border-[#d4c5a8] bg-[#fff8ec] p-3 text-[#4b3522] sm:gap-4 sm:p-3.5">
+              <div className="min-w-0 flex flex-col gap-2 rounded-xl border-2 border-[#d4c5a8] bg-[#fff8ec] p-2.5 text-[#4b3522] sm:gap-4 sm:p-3.5">
                 <div className="flex flex-col items-center gap-1.5">
                   <span className="text-[13px] tracking-[0.2em] text-[#8a6039] sm:text-[14px]">
                     DUE DATE
                   </span>
                   <p
-                    className={`flex items-center gap-2 text-[16px] sm:text-[17px] ${isOverdue ? 'text-[#8b2e22]' : 'text-[#4b3522]'}`}
+                    className={`flex items-center gap-1 text-[12px] sm:gap-2 sm:text-[17px] ${isOverdue ? 'text-[#8b2e22]' : 'text-[#4b3522]'}`}
                   >
-                    <Calendar strokeWidth={2.5} className="size-5" />
+                    <Calendar strokeWidth={2.5} className="size-3.5 sm:size-5" />
                     {formatDate(task.dueDate)}
                   </p>
                 </div>
 
-                <div className="flex flex-col items-center gap-1.5 text-[16px] sm:text-[17px]">
+                <div className="flex flex-col items-center gap-1 text-[16px] sm:gap-1.5 sm:text-[17px]">
                   <span className="w-full text-center text-[13px] leading-none text-[#8a6039] sm:text-[14px]">
                     PROGRESS
                   </span>
-                  <p className="flex items-center gap-2 text-[#4b3522]">
-                    <Soup strokeWidth={1.75} className="size-6" />
-                    <span className="mt-1 inline-block text-[17px] leading-none sm:text-[18px]">
+                  <p className="flex items-center gap-1 text-[#4b3522] sm:gap-2">
+                    <Soup strokeWidth={1.75} className="size-4.5 sm:size-6" />
+                    <span className="mt-1 inline-block text-[13px] leading-none sm:text-[18px]">
                       {task.completedOrders} / {task.maxOrders} Orders
                     </span>
                   </p>
-                  <div className="mt-1 h-3 w-full max-w-56 overflow-hidden rounded-full border-2 border-[#9b7a56] bg-[#f1e4cf]">
+                  <div className="mt-1 h-2.5 w-full max-w-56 overflow-hidden rounded-full border-2 border-[#9b7a56] bg-[#f1e4cf] sm:h-3">
                     <div
                       className="h-full rounded-full bg-linear-to-r from-[#F4B925] to-[#D77A38]"
                       style={{ width: `${progressPercent}%` }}
