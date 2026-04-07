@@ -429,7 +429,7 @@ export async function redoTask(kpitaskId: string): Promise<ServerActionResponse<
   // Fetch task details to verify ownership and status
   const { data: task, error: taskError } = await supabase
     .from('task_info_view')
-    .select('assigned_to, status')
+    .select('assigned_to, status, k_deadline_date')
     .eq('kpitask_id', kpitaskId)
     .single();
 
@@ -439,6 +439,7 @@ export async function redoTask(kpitaskId: string): Promise<ServerActionResponse<
 
   const assignedTo = (task as { assigned_to: string | null }).assigned_to;
   const status = ((task as { status: string | null }).status ?? '').toLowerCase();
+  const dueDate = (task as { k_deadline_date: string | null }).k_deadline_date;
 
   // Validation checks
   if (assignedTo !== user.id) {
@@ -447,6 +448,10 @@ export async function redoTask(kpitaskId: string): Promise<ServerActionResponse<
 
   if (status !== 'rejected') {
     return { error: 'Only rejected tasks can be redone', data: undefined };
+  }
+
+  if (isTaskOverdue(dueDate)) {
+    return { error: 'unable to redo overdue tasks', data: undefined };
   }
 
   // Update task status back to 'assigned'

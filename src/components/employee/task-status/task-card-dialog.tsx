@@ -114,7 +114,9 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
     task.status?.toLowerCase() === 'assigned' && remainingOrders > 0 && !submitMutation.isSuccess;
   const isSubmitOverdueBlocked = canSubmitRaw && isOverdue;
   const canSubmit = canSubmitRaw && !isOverdue;
-  const canRedo = task.status?.toLowerCase() === 'rejected' && !redoMutation.isSuccess;
+  const canRedoRaw = task.status?.toLowerCase() === 'rejected' && !redoMutation.isSuccess;
+  const isRedoOverdueBlocked = canRedoRaw && isOverdue;
+  const canRedo = canRedoRaw && !isOverdue;
   const canPerformMoreOrdersRaw =
     approvedTaskState === 'claimed-with-remaining' &&
     task.pendingOrders === 0 &&
@@ -397,7 +399,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
               </p>
             ) : null}
 
-            {canSubmitRaw || canRedo || canPerformMoreOrdersRaw ? (
+            {canSubmitRaw || canRedoRaw || canPerformMoreOrdersRaw ? (
               <div className="sticky bottom-0 -mx-4 border-t-2 border-[#d4c5a8] bg-[#f7efdf]/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:py-0">
                 <div className="flex flex-col justify-end gap-2 sm:flex-row">
                   {canRedo ? (
@@ -416,6 +418,21 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                         'Redo Task'
                       )}
                     </button>
+                  ) : null}
+
+                  {isRedoOverdueBlocked ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span tabIndex={0} className="inline-flex w-full sm:w-auto">
+                          <button type="button" disabled className={actionButtonClassName}>
+                            Redo Task
+                          </button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs border-[#9b7a56] bg-[#FFF2CC] text-center font-jersey text-[14px] leading-snug tracking-[0.04em] text-[#3B2A1A]">
+                        unable to redo overdue tasks
+                      </TooltipContent>
+                    </Tooltip>
                   ) : null}
 
                   {canSubmit ? (
