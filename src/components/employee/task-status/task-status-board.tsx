@@ -330,7 +330,7 @@ export function TaskStatusBoard({
                 </div>
               </div>
 
-              <div className="flex w-full min-w-0 flex-col gap-2 lg:w-auto lg:flex-row lg:items-end">
+              <div className="flex w-full min-w-0 flex-col gap-2 lg:w-auto sm:flex-row lg:items-end">
                 <div className="relative w-full lg:w-56">
                   <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#8a6039]" />
                   <Input

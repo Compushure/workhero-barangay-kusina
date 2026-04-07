@@ -67,7 +67,8 @@ export function TaskCard({ task }: TaskCardProps) {
                   Due {formatDate(task.dueDate)}
                 </span>
 
-                <p className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-full border-2 border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038] text-[0.9rem] sm:hidden">
+                <p className={`flex items-center gap-1.5 px-1.5 py-0.5 rounded-full border-2 text-[0.9rem] sm:hidden
+                  ${task.completedOrders === task.maxOrders ? 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]' : 'border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038]'}`}>
                   <Soup className="size-4.5 shrink-0" />
                   <span>ORDERS</span>
                   {task.completedOrders}/{task.maxOrders}
@@ -75,7 +76,8 @@ export function TaskCard({ task }: TaskCardProps) {
               </div>
             </div>
 
-            <div className="hidden sm:block shrink-0 rounded-xl px-2.5 py-1.5 text-center text-[11px] leading-none border-2 border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038] max-[430px]:w-full max-[430px]:text-left">
+            <div className={`hidden sm:block shrink-0 rounded-xl px-2.5 py-1.5 text-center text-[11px] leading-none border-2 max-[430px]:w-full max-[430px]:text-left
+              ${task.completedOrders === task.maxOrders ? 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]' : 'border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038]'}`}>
               <div className="max-[430px]:flex max-[430px]:items-center max-[430px]:justify-between">
                 <div>ORDERS</div>
                 <div className="mt-1 text-[15px] text-[#3f2a1a]">

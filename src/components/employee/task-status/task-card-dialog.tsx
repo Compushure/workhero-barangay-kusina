@@ -25,6 +25,13 @@ interface TaskCardDialogProps {
   setModalOpen: (value: SetStateAction<boolean>) => void;
 }
 
+type ApprovedTaskState =
+  | 'unclaimed-with-remaining'
+  | 'claimed-with-remaining'
+  | 'unclaimed-no-remaining'
+  | 'claimed-no-remaining-unserved'
+  | 'claimed-no-remaining-served';
+
 function getStatusLabel(status?: string): string {
   switch (status?.toLowerCase()) {
     case 'assigned':
@@ -77,17 +84,39 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
 
   const isApprovedTask = task.status?.toLowerCase() === 'approved';
   const hasClaimedRewards = Boolean(task.claimedAt);
-  const isFullyCompletedAndClaimed = task.completedOrders === task.maxOrders && hasClaimedRewards;
+  const hasRemainingOrders = remainingOrders > 0;
+  const hasDishServed = !hasRemainingOrders && Boolean(task.completedAt);
+
+  const approvedTaskState: ApprovedTaskState | null = useMemo(() => {
+    if (!isApprovedTask) return null;
+
+    if (!hasClaimedRewards && hasRemainingOrders) {
+      return 'unclaimed-with-remaining';
+    }
+
+    if (hasClaimedRewards && hasRemainingOrders) {
+      return 'claimed-with-remaining';
+    }
+
+    if (!hasClaimedRewards && !hasRemainingOrders) {
+      return 'unclaimed-no-remaining';
+    }
+
+    if (hasDishServed) {
+      return 'claimed-no-remaining-served';
+    }
+
+    return 'claimed-no-remaining-unserved';
+  }, [hasClaimedRewards, hasDishServed, hasRemainingOrders, isApprovedTask]);
+
   const canSubmitRaw =
     task.status?.toLowerCase() === 'assigned' && remainingOrders > 0 && !submitMutation.isSuccess;
   const isSubmitOverdueBlocked = canSubmitRaw && isOverdue;
   const canSubmit = canSubmitRaw && !isOverdue;
   const canRedo = task.status?.toLowerCase() === 'rejected' && !redoMutation.isSuccess;
   const canPerformMoreOrdersRaw =
-    isApprovedTask &&
-    hasClaimedRewards &&
+    approvedTaskState === 'claimed-with-remaining' &&
     task.pendingOrders === 0 &&
-    remainingOrders > 0 &&
     !performMoreOrdersMutation.isSuccess;
   const isPerformOverdueBlocked = canPerformMoreOrdersRaw && isOverdue;
   const canPerformMoreOrders = canPerformMoreOrdersRaw && !isOverdue;
@@ -101,11 +130,6 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
         label: 'Status',
         value: getStatusLabel(task.status),
         className: getStatusChipClassName(task.status),
-      },
-      {
-        label: 'Orders',
-        value: `${task.completedOrders}/${task.maxOrders}`,
-        className: 'border-[#d4c5a8] bg-[#fff8ec] text-[#6b5038]',
       },
       {
         label: 'Pending',
@@ -156,13 +180,13 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
         }
       }}
     >
-      <DialogContent className="bottom-2 top-auto flex h-[min(100dvh-1rem,56rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] translate-y-0 flex-col overflow-hidden rounded-[1.4rem] border-3 border-[#47331F] bg-[#f7efdf] p-0 font-jersey tracking-[0.04em] shadow-[0_14px_34px_rgba(71,51,31,0.22)] sm:top-[50%] sm:bottom-auto sm:h-auto sm:max-w-2xl sm:translate-y-[-50%]">
-        <DialogHeader className="flex min-w-0 flex-col gap-3 border-b-2 border-[#d4c5a8] bg-[#e1d2b7] px-4 py-3.5 text-left sm:px-5">
-          <div className="space-y-2">
-            <DialogTitle className="block w-full wrap-break-word pr-8 text-[22px] font-normal leading-tight text-[#3f2a1a] sm:text-[24px]">
+      <DialogContent className="bottom-2 top-auto flex h-[min(100dvh-0.75rem,56rem)] w-[calc(100vw-0.75rem)] max-w-[calc(100vw-0.75rem)] translate-y-0 flex-col overflow-hidden rounded-[1.15rem] border-3 border-[#47331F] bg-[#f7efdf] p-0 font-jersey tracking-[0.04em] shadow-[0_14px_34px_rgba(71,51,31,0.22)] sm:top-[50%] sm:bottom-auto sm:h-auto sm:max-w-2xl sm:translate-y-[-50%] sm:rounded-[1.4rem]">
+        <DialogHeader className="flex min-w-0 flex-col gap-2.5 border-b-2 border-[#d4c5a8] bg-[#e1d2b7] px-3 py-3 text-left sm:gap-3 sm:px-5 sm:py-3.5">
+          <div className="space-y-1 sm:space-y-2">
+            <DialogTitle className="block w-full wrap-break-word pr-8 text-[1.35rem] font-normal leading-7 text-[#3f2a1a] sm:text-[1.5rem]">
               {task.name}
             </DialogTitle>
-            <DialogDescription className="min-w-0 pr-8 text-[15px] leading-relaxed text-[#6b5038] sm:pr-10 sm:text-[16px]">
+            <DialogDescription className="min-w-0 pr-8 text-[0.9rem] leading-5 text-[#6b5038] sm:pr-10 sm:text-[1rem]">
               {task.description}
             </DialogDescription>
           </div>
@@ -171,24 +195,24 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
             {summaryChips.map((chip) => (
               <span
                 key={chip.label}
-                className={`inline-flex items-center gap-2 rounded-full border-2 px-2.5 py-1 text-[13px] leading-none ${chip.className}`}
+                className={`inline-flex items-center gap-2 rounded-full border-2 px-2.5 py-1 text-[12px] leading-none sm:text-[13px] ${chip.className}`}
               >
-                <span className="tracking-[0.12em]">{chip.label}</span>
-                <span className="text-[14px]">{chip.value}</span>
+                <span className="tracking-[0.12em] align">{chip.label}</span>
+                <span className="text-[13px] sm:text-[14px]">{chip.value}</span>
               </span>
             ))}
             {isOverdue ? (
-              <span className="inline-flex items-center rounded-full border-2 border-[#d18d7e] bg-[#f4d6ce] px-2.5 py-1 text-[13px] leading-none text-[#8b2e22]">
+              <span className="inline-flex items-center rounded-full border-2 border-[#d18d7e] bg-[#f4d6ce] px-2.5 py-1 text-[12px] leading-none text-[#8b2e22] sm:text-[13px]">
                 OVERDUE
               </span>
             ) : null}
           </div>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
-          <div className="space-y-4">
-            <section className="grid gap-4 border-b-2 border-[#d4c5a8] pb-4 md:grid-cols-2">
-              <div className="space-y-4 rounded-xl border-2 border-[#d4c5a8] bg-[#fff8ec] p-3.5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
+          <div className="space-y-3 sm:space-y-4">
+            <section className="grid gap-3 border-b-2 border-[#d4c5a8] pb-3 sm:gap-4 sm:pb-4 md:grid-cols-2">
+              <div className="space-y-3 rounded-xl border-2 border-[#d4c5a8] bg-[#fff8ec] p-3 sm:space-y-4 sm:p-3.5">
                 <div className="flex flex-col gap-1.5">
                   <p className="flex items-center justify-center gap-1.5 text-center">
                     <span className="text-[13px] tracking-[0.2em] text-[#8a6039]">REWARDS</span>
@@ -210,7 +234,9 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                 <div
                   className={`flex flex-col items-center ${canSubmit ? '' : 'pointer-events-none opacity-50'}`}
                 >
-                  <label className="mb-2 block text-[15px] text-[#4b3522]">Orders to Submit</label>
+                  <label className="mb-1.5 block text-[14px] text-[#4b3522] sm:mb-2 sm:text-[15px]">
+                    Orders to Submit
+                  </label>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -254,31 +280,33 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                   </div>
 
                   <p
-                    className={`mt-1.5 text-[15px] text-[#6b5038] ${canSubmit ? '' : 'opacity-0'}`}
+                    className={`mt-1 text-[14px] text-[#6b5038] sm:mt-1.5 sm:text-[15px] ${canSubmit ? '' : 'opacity-0'}`}
                   >
                     Remaining: {remainingOrders} order{remainingOrders === 1 ? '' : 's'}
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-4 rounded-xl border-2 border-[#d4c5a8] bg-[#fff8ec] p-3.5 text-[#4b3522]">
+              <div className="flex flex-col gap-3 rounded-xl border-2 border-[#d4c5a8] bg-[#fff8ec] p-3 text-[#4b3522] sm:gap-4 sm:p-3.5">
                 <div className="flex flex-col items-center gap-1.5">
-                  <span className="text-[14px] tracking-[0.2em] text-[#8a6039]">DUE DATE</span>
+                  <span className="text-[13px] tracking-[0.2em] text-[#8a6039] sm:text-[14px]">
+                    DUE DATE
+                  </span>
                   <p
-                    className={`flex items-center gap-2 text-[17px] ${isOverdue ? 'text-[#8b2e22]' : 'text-[#4b3522]'}`}
+                    className={`flex items-center gap-2 text-[16px] sm:text-[17px] ${isOverdue ? 'text-[#8b2e22]' : 'text-[#4b3522]'}`}
                   >
                     <Calendar strokeWidth={2.5} className="size-5" />
                     {formatDate(task.dueDate)}
                   </p>
                 </div>
 
-                <div className="flex flex-col items-center gap-1.5 text-[17px]">
-                  <span className="w-full text-center text-[14px] leading-none text-[#8a6039]">
+                <div className="flex flex-col items-center gap-1.5 text-[16px] sm:text-[17px]">
+                  <span className="w-full text-center text-[13px] leading-none text-[#8a6039] sm:text-[14px]">
                     PROGRESS
                   </span>
                   <p className="flex items-center gap-2 text-[#4b3522]">
                     <Soup strokeWidth={1.75} className="size-6" />
-                    <span className="mt-1 inline-block text-[18px] leading-none">
+                    <span className="mt-1 inline-block text-[17px] leading-none sm:text-[18px]">
                       {task.completedOrders} / {task.maxOrders} Orders
                     </span>
                   </p>
@@ -320,17 +348,28 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
               </div>
             ) : null}
 
-            {isApprovedTask && !hasClaimedRewards ? (
+            {approvedTaskState === 'unclaimed-with-remaining' ? (
               <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
-                Claim approved task rewards from the kitchen quick task.
+                This approved task still has remaining orders and unclaimed rewards. Claim points
+                and XP first from the kitchen quick task.
               </p>
-            ) : isApprovedTask && hasClaimedRewards && remainingOrders > 0 ? (
+            ) : approvedTaskState === 'claimed-with-remaining' ? (
               <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
                 Rewards are already claimed. Use Perform More Orders to continue this task.
               </p>
-            ) : isFullyCompletedAndClaimed ? (
+            ) : approvedTaskState === 'unclaimed-no-remaining' ? (
               <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
-                All orders are complete. Points and XP have already been claimed.
+                All orders are completed, but rewards are not yet claimed. Claim points and XP from
+                the kitchen quick task.
+              </p>
+            ) : approvedTaskState === 'claimed-no-remaining-served' ? (
+              <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
+                All orders are complete and dishes have been served. Points and XP are already
+                claimed.
+              </p>
+            ) : approvedTaskState === 'claimed-no-remaining-unserved' ? (
+              <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
+                All orders are complete. Points and XP are already claimed.
               </p>
             ) : null}
 
