@@ -110,13 +110,13 @@ export function LeaderboardPageClient({
     'inline-flex min-h-10 min-w-0 basis-0 grow items-center justify-center gap-1.5 px-2.5 py-2 text-[13px] font-jersey leading-none tracking-[0.08em] whitespace-nowrap transition-all duration-150 ease-out sm:gap-2 sm:px-3 sm:text-[16px] sm:tracking-[0.08em] md:text-[18px]';
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col overflow-x-hidden font-jersey tracking-widest [overscroll-behavior-x:none]">
+    <div className="relative isolate min-h-screen w-full flex flex-col overflow-x-hidden font-jersey tracking-widest [overscroll-behavior-x:none]">
       <div
-        className="fixed inset-0 -z-10 bg-cover bg-center"
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: 'url(/assets/leaderboard-bg.png)' }}
         aria-hidden="true"
       />
-      <div className="fixed inset-0 -z-10 pointer-events-none bg-black/50" aria-hidden="true" />
+      <div className="absolute inset-0 z-0 pointer-events-none bg-black/50" aria-hidden="true" />
 
       <div
         className="relative z-20 w-full lg:fixed lg:left-0 lg:right-0 lg:top-0"
