@@ -16,6 +16,7 @@ import {
   handleFetchCurrentAssignedTasksPaginated,
 } from '@/action-handlers/manager/assigned-tasks';
 import { RemoteSupabaseTestContext } from '../../utils/remoteSupabaseTestUtils';
+import { managerAssignedTasksIntegrationNames } from '../../mockData/managerAssignedTasksMockData';
 
 type ServerClient = ReturnType<RemoteSupabaseTestContext['createServerClientForUser']>;
 let currentServerClient: ServerClient;
@@ -53,20 +54,20 @@ describe('When the manager loads remote assigned tasks', () => {
   test('Then assigned-task handlers return seeded task rows in both task and employee views', async () => {
     const manager = await remoteContext.seedUser({
       roleType: 'manager',
-      namePrefix: 'Assigned Tasks Manager',
-      emailPrefix: 'assigned.tasks.manager',
+      namePrefix: managerAssignedTasksIntegrationNames.load.managerNamePrefix,
+      emailPrefix: managerAssignedTasksIntegrationNames.load.managerEmailPrefix,
     });
     const employee = await remoteContext.seedUser({
       roleType: 'regular',
-      namePrefix: 'Assigned Tasks Employee',
-      emailPrefix: 'assigned.tasks.employee',
-      employeeIdPrefix: 'ASSIGN-EMP',
+      namePrefix: managerAssignedTasksIntegrationNames.load.employeeNamePrefix,
+      emailPrefix: managerAssignedTasksIntegrationNames.load.employeeEmailPrefix,
+      employeeIdPrefix: managerAssignedTasksIntegrationNames.load.employeeIdPrefix,
       points: 0,
       xp: 0,
       totalPointsEarned: 0,
     });
     const category = await remoteContext.seedCategory({
-      namePrefix: 'Assigned Tasks Category',
+      namePrefix: managerAssignedTasksIntegrationNames.load.categoryNamePrefix,
       points: 20,
       xp: 7,
     });
@@ -102,19 +103,19 @@ describe('When the manager clears unstarted tasks for a specific employee', () =
   test('Then the clear handler removes seeded unstarted assigned tasks only for the target employee', async () => {
     const manager = await remoteContext.seedUser({
       roleType: 'manager',
-      namePrefix: 'Clear Assigned Manager',
-      emailPrefix: 'clear.assigned.manager',
+      namePrefix: managerAssignedTasksIntegrationNames.clear.managerNamePrefix,
+      emailPrefix: managerAssignedTasksIntegrationNames.clear.managerEmailPrefix,
     });
     const employee = await remoteContext.seedUser({
       roleType: 'regular',
-      namePrefix: 'Clear Assigned Employee',
-      emailPrefix: 'clear.assigned.employee',
+      namePrefix: managerAssignedTasksIntegrationNames.clear.employeeNamePrefix,
+      emailPrefix: managerAssignedTasksIntegrationNames.clear.employeeEmailPrefix,
       points: 0,
       xp: 0,
       totalPointsEarned: 0,
     });
     const category = await remoteContext.seedCategory({
-      namePrefix: 'Clear Assigned Category',
+      namePrefix: managerAssignedTasksIntegrationNames.clear.categoryNamePrefix,
       points: 10,
       xp: 3,
     });
@@ -149,19 +150,19 @@ describe('When the manager deletes a specific assigned task', () => {
   test('Then the delete handler removes the seeded assignment row', async () => {
     const manager = await remoteContext.seedUser({
       roleType: 'manager',
-      namePrefix: 'Delete Assigned Manager',
-      emailPrefix: 'delete.assigned.manager',
+      namePrefix: managerAssignedTasksIntegrationNames.delete.managerNamePrefix,
+      emailPrefix: managerAssignedTasksIntegrationNames.delete.managerEmailPrefix,
     });
     const employee = await remoteContext.seedUser({
       roleType: 'regular',
-      namePrefix: 'Delete Assigned Employee',
-      emailPrefix: 'delete.assigned.employee',
+      namePrefix: managerAssignedTasksIntegrationNames.delete.employeeNamePrefix,
+      emailPrefix: managerAssignedTasksIntegrationNames.delete.employeeEmailPrefix,
       points: 0,
       xp: 0,
       totalPointsEarned: 0,
     });
     const category = await remoteContext.seedCategory({
-      namePrefix: 'Delete Assigned Category',
+      namePrefix: managerAssignedTasksIntegrationNames.delete.categoryNamePrefix,
       points: 12,
       xp: 4,
     });

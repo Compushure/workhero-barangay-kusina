@@ -9,8 +9,8 @@ function ToggleSkeleton() {
       aria-hidden
     >
       <div className="inline-flex w-full overflow-hidden rounded-[8px] border-2 border-[#7F5733] bg-[#5B3E29] shadow-[inset_0_1px_0_rgba(255,225,181,0.14)]">
-        <div className="h-10 flex-1 animate-pulse bg-[#CF8B22]/28 sm:h-11" />
-        <div className="h-10 flex-1 animate-pulse border-l-[3px] border-[#47331F] bg-[#CF8B22] sm:h-11" />
+        <div className="h-10 flex-1 animate-pulse bg-[#6F4A2B] sm:h-11" />
+        <div className="h-10 flex-1 animate-pulse border-l-[3px] border-[#47331F] bg-[#6F4A2B] sm:h-11" />
       </div>
     </div>
   );

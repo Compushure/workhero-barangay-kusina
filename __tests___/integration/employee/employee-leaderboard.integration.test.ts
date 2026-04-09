@@ -15,6 +15,11 @@ import {
 } from '@/action-handlers/employee/stats';
 import { getPeriodStartEnd, toManilaDateString } from '@/lib/utils/time-period-utils';
 import { RemoteSupabaseTestContext } from '../../utils/remoteSupabaseTestUtils';
+import {
+  employeeLeaderboardIntegrationNames,
+  employeeLeaderboardIntegrationPeriodA,
+  employeeLeaderboardIntegrationPeriodB,
+} from '../../mockData/employeeLeaderboardMockData';
 
 const remoteContext = new RemoteSupabaseTestContext('employee-leaderboard');
 let currentServerClient: typeof remoteContext.admin = remoteContext.admin;
@@ -128,27 +133,35 @@ describe('When the employee reads remote leaderboard period entries', () => {
   test('Then the top ranks by period handler returns seeded ranking rows with current-user mapping', async () => {
     const employee = await remoteContext.seedUser({
       roleType: 'regular',
-      namePrefix: 'Leaderboard Employee',
-      emailPrefix: 'leaderboard.employee',
+      namePrefix: employeeLeaderboardIntegrationNames.employee.namePrefix,
+      emailPrefix: employeeLeaderboardIntegrationNames.employee.emailPrefix,
       points: 0,
       xp: 0,
       totalPointsEarned: 0,
     });
     const competitor = await remoteContext.seedUser({
       roleType: 'regular',
-      namePrefix: 'Leaderboard Competitor',
-      emailPrefix: 'leaderboard.competitor',
+      namePrefix: employeeLeaderboardIntegrationNames.competitor.namePrefix,
+      emailPrefix: employeeLeaderboardIntegrationNames.competitor.emailPrefix,
       points: 0,
       xp: 0,
       totalPointsEarned: 0,
     });
 
     await seedWeeklyRanking({
-      year: 2099,
-      week: 1,
+      year: employeeLeaderboardIntegrationPeriodA.year,
+      week: employeeLeaderboardIntegrationPeriodA.week,
       rows: [
-        { userId: competitor.id, rank: 1, performanceScore: 320 },
-        { userId: employee.id, rank: 2, performanceScore: 280 },
+        {
+          userId: competitor.id,
+          rank: 1,
+          performanceScore: employeeLeaderboardIntegrationPeriodA.firstScore,
+        },
+        {
+          userId: employee.id,
+          rank: 2,
+          performanceScore: employeeLeaderboardIntegrationPeriodA.secondScore,
+        },
       ],
       isVisible: true,
     });
@@ -157,8 +170,8 @@ describe('When the employee reads remote leaderboard period entries', () => {
 
     const rows = await handleFetchEmployeeTopRanksByPeriod({
       periodType: 'weekly',
-      year: 2099,
-      week: 1,
+      year: employeeLeaderboardIntegrationPeriodA.year,
+      week: employeeLeaderboardIntegrationPeriodA.week,
     });
 
     expect(rows).toHaveLength(2);
@@ -184,27 +197,35 @@ describe('When the employee reads the latest remote rank snapshot', () => {
   test('Then the rank handler returns the current employee rank from the latest visible weekly period', async () => {
     const employee = await remoteContext.seedUser({
       roleType: 'regular',
-      namePrefix: 'Leaderboard Rank Employee',
-      emailPrefix: 'leaderboard.rank.employee',
+      namePrefix: employeeLeaderboardIntegrationNames.rankEmployee.namePrefix,
+      emailPrefix: employeeLeaderboardIntegrationNames.rankEmployee.emailPrefix,
       points: 0,
       xp: 0,
       totalPointsEarned: 0,
     });
     const competitor = await remoteContext.seedUser({
       roleType: 'regular',
-      namePrefix: 'Leaderboard Rank Competitor',
-      emailPrefix: 'leaderboard.rank.competitor',
+      namePrefix: employeeLeaderboardIntegrationNames.rankCompetitor.namePrefix,
+      emailPrefix: employeeLeaderboardIntegrationNames.rankCompetitor.emailPrefix,
       points: 0,
       xp: 0,
       totalPointsEarned: 0,
     });
 
     await seedWeeklyRanking({
-      year: 2099,
-      week: 2,
+      year: employeeLeaderboardIntegrationPeriodB.year,
+      week: employeeLeaderboardIntegrationPeriodB.week,
       rows: [
-        { userId: competitor.id, rank: 1, performanceScore: 500 },
-        { userId: employee.id, rank: 2, performanceScore: 450 },
+        {
+          userId: competitor.id,
+          rank: 1,
+          performanceScore: employeeLeaderboardIntegrationPeriodB.firstScore,
+        },
+        {
+          userId: employee.id,
+          rank: 2,
+          performanceScore: employeeLeaderboardIntegrationPeriodB.secondScore,
+        },
       ],
       isVisible: true,
     });
@@ -228,8 +249,8 @@ describe('When leaderboard handlers run without an authenticated employee', () =
 
     const rows = await handleFetchEmployeeTopRanksByPeriod({
       periodType: 'weekly',
-      year: 2099,
-      week: 1,
+      year: employeeLeaderboardIntegrationPeriodA.year,
+      week: employeeLeaderboardIntegrationPeriodA.week,
     });
 
     expect(rows).toBeNull();

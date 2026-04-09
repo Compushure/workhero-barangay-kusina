@@ -16,6 +16,7 @@ import {
 } from '@/action-handlers/manager/assigned-tasks';
 import type { AssignedTask } from '@/types';
 import type { ServerActionResponse } from '@/types';
+import { createAssignedTaskMockData } from '../../mockData/managerAssignedTasksMockData';
 
 type SafeActionResult<T> =
   | { success: true; data: T; error: null }
@@ -151,42 +152,12 @@ beforeEach(() => {
   });
 });
 
-function createAssignedTask(taskId: string, employeeId: string): AssignedTask {
-  return {
-    id: taskId,
-    taskId: 'category-1',
-    taskName: 'Kitchen Checklist',
-    taskDescription: 'Daily checklist',
-    isRepeatable: true,
-    points: 15,
-    xp: 5,
-    status: 'assigned',
-    dateRange: {
-      start: '2026-04-01T00:00:00.000Z',
-      end: '2099-12-31',
-    },
-    maxOrders: 3,
-    assignedEmployees: [
-      {
-        assignmentId: taskId,
-        id: employeeId,
-        name: 'Employee Seed',
-        empId: 'EMP-001',
-        assignedTasks: [],
-        completedOrders: 0,
-        pendingOrders: 1,
-        status: 'assigned',
-      },
-    ],
-  };
-}
-
 describe('When the manager loads assigned-task data through handlers', () => {
   test('Then task-view pagination handler returns assigned-task payload without error toast', async () => {
     fetchCurrentAssignedTasksPaginatedMock.mockResolvedValue({
       error: null,
       data: {
-        data: [createAssignedTask('task-1', 'employee-1')],
+        data: [createAssignedTaskMockData('task-1', 'employee-1')],
         count: 1,
         totalPages: 1,
         employeeCount: 1,
@@ -212,7 +183,7 @@ describe('When the manager loads assigned-task data through handlers', () => {
     fetchCurrentAssignedEmployeesPaginatedMock.mockResolvedValue({
       error: null,
       data: {
-        data: [createAssignedTask('task-2', 'employee-2')],
+        data: [createAssignedTaskMockData('task-2', 'employee-2')],
         count: 1,
         totalPages: 1,
         taskCount: 1,

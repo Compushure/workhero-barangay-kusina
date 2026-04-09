@@ -19,6 +19,13 @@ import {
   handleFetchEmployeeTopRanksByPeriod,
   handleFetchEmployeeTopWeeklyRanks,
 } from '@/action-handlers/employee/stats';
+import {
+  employeeLeaderboardLatestPeriod,
+  employeeLeaderboardPeriodSelection,
+  employeeLeaderboardRankingEntries,
+  employeeLeaderboardRows,
+  employeeLeaderboardSessionUser,
+} from '../../mockData/employeeLeaderboardMockData';
 
 type QueryError = { message: string } | null;
 type SessionUser = { id: string; email: string };
@@ -183,22 +190,10 @@ function createLeaderboardAdminClient(state: LeaderboardState) {
 
 beforeEach(() => {
   leaderboardState = {
-    sessionUser: { id: 'employee-1', email: 'employee.one@example.com' },
-    latestPeriod: {
-      id: 'period-weekly-2026-14',
-      period_start: '2026-03-30',
-      is_visible: true,
-    },
-    rankingEntries: [
-      { user_id: 'employee-2', rank: 1, performance_score: 220 },
-      { user_id: 'employee-1', rank: 2, performance_score: 180 },
-      { user_id: 'employee-3', rank: 3, performance_score: 160 },
-    ],
-    leaderboardRows: [
-      { user_id: 'employee-2', user_name: 'Employee Two', rank: 1, performance_score: 220 },
-      { user_id: 'employee-1', user_name: 'Employee One', rank: 2, performance_score: 180 },
-      { user_id: 'employee-3', user_name: 'Employee Three', rank: 3, performance_score: 160 },
-    ],
+    sessionUser: { ...employeeLeaderboardSessionUser },
+    latestPeriod: { ...employeeLeaderboardLatestPeriod },
+    rankingEntries: [...employeeLeaderboardRankingEntries],
+    leaderboardRows: [...employeeLeaderboardRows],
   };
 
   createClientMock.mockReset();
@@ -270,9 +265,9 @@ describe('When employee leaderboard handlers process action responses', () => {
     const rank = await handleFetchEmployeeRank();
     const weeklyTop = await handleFetchEmployeeTopWeeklyRanks();
     const byPeriodTop = await handleFetchEmployeeTopRanksByPeriod({
-      periodType: 'weekly',
-      year: 2026,
-      week: 14,
+      periodType: employeeLeaderboardPeriodSelection.periodType,
+      year: employeeLeaderboardPeriodSelection.year,
+      week: employeeLeaderboardPeriodSelection.week,
     });
 
     expect(rank).toEqual({ rank: 2, performanceScore: 180, totalEmployees: 3 });
@@ -285,9 +280,9 @@ describe('When employee leaderboard handlers process action responses', () => {
     leaderboardState.sessionUser = null;
 
     const result = await handleFetchEmployeeTopRanksByPeriod({
-      periodType: 'weekly',
-      year: 2026,
-      week: 14,
+      periodType: employeeLeaderboardPeriodSelection.periodType,
+      year: employeeLeaderboardPeriodSelection.year,
+      week: employeeLeaderboardPeriodSelection.week,
     });
 
     expect(result).toBeNull();

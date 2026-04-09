@@ -11,6 +11,10 @@ import {
   handleToggleRankingVisibilityAction,
 } from '@/action-handlers/hr/leaderboard';
 import type { RankLogPeriodType, RankingLeaderboardViewRow } from '@/types';
+import {
+  hrLeaderboardUnitGeneratedRows,
+  hrLeaderboardUnitSelection,
+} from '../../mockData/hrLeaderboardMockData';
 
 type ActionResult<T> =
   | { success: true; data: T; error: null }
@@ -69,25 +73,7 @@ beforeEach(() => {
 
 describe('When HR generates leaderboard rankings through the action handler', () => {
   test('Then the generate handler returns rows when the wrapped server action succeeds', async () => {
-    const rows: RankingLeaderboardViewRow[] = [
-      {
-        ranking_period_id: 'period-1',
-        period_type: 'weekly',
-        period_start: '2026-03-30',
-        period_end: '2026-04-05',
-        is_visible: false,
-        generated_at: '2026-04-06T00:00:00.000Z',
-        period_label: 'Week 14, 2026',
-        entry_id: 'entry-1',
-        user_id: 'employee-1',
-        user_name: 'Employee One',
-        rank: 1,
-        performance_score: 300,
-        total_kpi_points: 260,
-        badge_points: 40,
-        completed_task_count: 12,
-      },
-    ];
+    const rows: RankingLeaderboardViewRow[] = hrLeaderboardUnitGeneratedRows;
 
     generateRankingByPeriodMock.mockResolvedValue({
       success: true,
@@ -96,14 +82,19 @@ describe('When HR generates leaderboard rankings through the action handler', ()
     });
 
     const result = await handleGenerateRankingByPeriodAction(
-      'weekly' as RankLogPeriodType,
-      2026,
+      hrLeaderboardUnitSelection.periodType,
+      hrLeaderboardUnitSelection.year,
       undefined,
-      14
+      hrLeaderboardUnitSelection.week
     );
 
     expect(result).toEqual(rows);
-    expect(generateRankingByPeriodMock).toHaveBeenCalledWith('weekly', 2026, undefined, 14);
+    expect(generateRankingByPeriodMock).toHaveBeenCalledWith(
+      hrLeaderboardUnitSelection.periodType,
+      hrLeaderboardUnitSelection.year,
+      undefined,
+      hrLeaderboardUnitSelection.week
+    );
   });
 
   test('Then the generate handler throws when the wrapped server action result contains an error', async () => {
@@ -114,7 +105,12 @@ describe('When HR generates leaderboard rankings through the action handler', ()
     });
 
     await expect(
-      handleGenerateRankingByPeriodAction('weekly' as RankLogPeriodType, 2026, undefined, 14)
+      handleGenerateRankingByPeriodAction(
+        hrLeaderboardUnitSelection.periodType,
+        hrLeaderboardUnitSelection.year,
+        undefined,
+        hrLeaderboardUnitSelection.week
+      )
     ).rejects.toThrow('Not authenticated');
   });
 });

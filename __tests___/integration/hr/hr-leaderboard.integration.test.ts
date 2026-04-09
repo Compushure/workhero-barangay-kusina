@@ -15,6 +15,12 @@ import {
 } from '@/actions/hr/leaderboard';
 import { getPeriodStartEnd, toManilaDateString } from '@/lib/utils/time-period-utils';
 import { RemoteSupabaseTestContext } from '../../utils/remoteSupabaseTestUtils';
+import {
+  createHrLeaderboardSeedRows,
+  hrLeaderboardIntegrationNames,
+  hrLeaderboardIntegrationPeriodA,
+  hrLeaderboardIntegrationPeriodB,
+} from '../../mockData/hrLeaderboardMockData';
 
 const remoteContext = new RemoteSupabaseTestContext('hr-leaderboard');
 let currentServerClient: typeof remoteContext.admin = remoteContext.admin;
@@ -137,40 +143,52 @@ describe('When HR reads enriched leaderboard data for a generated period', () =>
   test('Then getEnrichedLeaderboardByPeriod returns enriched players and period metadata', async () => {
     const hrUser = await remoteContext.seedUser({
       roleType: 'hr',
-      namePrefix: 'HR Leaderboard Reader',
-      emailPrefix: 'hr.leaderboard.reader',
+      namePrefix: hrLeaderboardIntegrationNames.hrReader.namePrefix,
+      emailPrefix: hrLeaderboardIntegrationNames.hrReader.emailPrefix,
     });
     const employeeOne = await remoteContext.seedUser({
       roleType: 'regular',
-      namePrefix: 'HR Leaderboard Employee One',
-      emailPrefix: 'hr.leaderboard.employee.one',
+      namePrefix: hrLeaderboardIntegrationNames.employeeOne.namePrefix,
+      emailPrefix: hrLeaderboardIntegrationNames.employeeOne.emailPrefix,
       points: 0,
       xp: 0,
       totalPointsEarned: 0,
     });
     const employeeTwo = await remoteContext.seedUser({
       roleType: 'regular',
-      namePrefix: 'HR Leaderboard Employee Two',
-      emailPrefix: 'hr.leaderboard.employee.two',
+      namePrefix: hrLeaderboardIntegrationNames.employeeTwo.namePrefix,
+      emailPrefix: hrLeaderboardIntegrationNames.employeeTwo.emailPrefix,
       points: 0,
       xp: 0,
       totalPointsEarned: 0,
     });
 
     await seedWeeklyRanking({
-      year: 2099,
-      week: 3,
+      year: hrLeaderboardIntegrationPeriodA.year,
+      week: hrLeaderboardIntegrationPeriodA.week,
       isVisible: true,
-      rows: [
-        { userId: employeeOne.id, rank: 1, performanceScore: 420 },
-        { userId: employeeTwo.id, rank: 2, performanceScore: 380 },
-      ],
+      rows: createHrLeaderboardSeedRows({
+        firstUserId: employeeOne.id,
+        secondUserId: employeeTwo.id,
+        firstScore: hrLeaderboardIntegrationPeriodA.firstScore,
+        secondScore: hrLeaderboardIntegrationPeriodA.secondScore,
+      }),
     });
 
     currentServerClient = remoteContext.createServerClientForUser(hrUser);
 
-    const existsResult = await checkRankingExists('weekly', 2099, undefined, 3);
-    const enrichedResult = await getEnrichedLeaderboardByPeriod('weekly', 2099, undefined, 3);
+    const existsResult = await checkRankingExists(
+      'weekly',
+      hrLeaderboardIntegrationPeriodA.year,
+      undefined,
+      hrLeaderboardIntegrationPeriodA.week
+    );
+    const enrichedResult = await getEnrichedLeaderboardByPeriod(
+      'weekly',
+      hrLeaderboardIntegrationPeriodA.year,
+      undefined,
+      hrLeaderboardIntegrationPeriodA.week
+    );
 
     expect(existsResult.success).toBe(true);
     expect(existsResult.data).toBe(true);
@@ -191,34 +209,36 @@ describe('When HR reads past ranking periods', () => {
   test('Then getAllRankingPeriods returns top performer and participant count for seeded period', async () => {
     const hrUser = await remoteContext.seedUser({
       roleType: 'hr',
-      namePrefix: 'HR Leaderboard History',
-      emailPrefix: 'hr.leaderboard.history',
+      namePrefix: hrLeaderboardIntegrationNames.hrHistory.namePrefix,
+      emailPrefix: hrLeaderboardIntegrationNames.hrHistory.emailPrefix,
     });
     const employeeOne = await remoteContext.seedUser({
       roleType: 'regular',
-      namePrefix: 'HR History Employee One',
-      emailPrefix: 'hr.history.employee.one',
+      namePrefix: hrLeaderboardIntegrationNames.historyEmployeeOne.namePrefix,
+      emailPrefix: hrLeaderboardIntegrationNames.historyEmployeeOne.emailPrefix,
       points: 0,
       xp: 0,
       totalPointsEarned: 0,
     });
     const employeeTwo = await remoteContext.seedUser({
       roleType: 'regular',
-      namePrefix: 'HR History Employee Two',
-      emailPrefix: 'hr.history.employee.two',
+      namePrefix: hrLeaderboardIntegrationNames.historyEmployeeTwo.namePrefix,
+      emailPrefix: hrLeaderboardIntegrationNames.historyEmployeeTwo.emailPrefix,
       points: 0,
       xp: 0,
       totalPointsEarned: 0,
     });
 
     await seedWeeklyRanking({
-      year: 2099,
-      week: 4,
+      year: hrLeaderboardIntegrationPeriodB.year,
+      week: hrLeaderboardIntegrationPeriodB.week,
       isVisible: false,
-      rows: [
-        { userId: employeeOne.id, rank: 1, performanceScore: 510 },
-        { userId: employeeTwo.id, rank: 2, performanceScore: 490 },
-      ],
+      rows: createHrLeaderboardSeedRows({
+        firstUserId: employeeOne.id,
+        secondUserId: employeeTwo.id,
+        firstScore: hrLeaderboardIntegrationPeriodB.firstScore,
+        secondScore: hrLeaderboardIntegrationPeriodB.secondScore,
+      }),
     });
 
     currentServerClient = remoteContext.createServerClientForUser(hrUser);
@@ -240,7 +260,12 @@ describe('When HR leaderboard actions run without an authenticated user', () => 
   test('Then getEnrichedLeaderboardByPeriod returns a failed action result with not-authenticated error', async () => {
     currentServerClient = remoteContext.createServerClientForUser(null);
 
-    const result = await getEnrichedLeaderboardByPeriod('weekly', 2099, undefined, 3);
+    const result = await getEnrichedLeaderboardByPeriod(
+      'weekly',
+      hrLeaderboardIntegrationPeriodA.year,
+      undefined,
+      hrLeaderboardIntegrationPeriodA.week
+    );
 
     expect(result.success).toBe(false);
     expect(result.error).toContain('Not authenticated');
