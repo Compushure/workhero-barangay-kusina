@@ -127,6 +127,13 @@ export default defineConfig({
 
           if (existingUser?.id) {
             console.log("[task:addUser] User already exists in User table");
+            await supabase.auth.admin
+              .updateUserById(existingUser.id, {
+                password: payload.password,
+                user_metadata: { name: payload.name ?? null },
+                app_metadata: { user_role: roleType },
+              })
+              .catch(() => undefined);
             return { userId: existingUser.id, email: normalizedEmail, existed: true };
           }
 
@@ -221,27 +228,47 @@ export default defineConfig({
             throw new Error(`Failed to lookup user row: ${userRowError.message}`);
           }
 
-          if (!userRow?.id) {
-            console.log("[task:deleteUser] User row not found; nothing to delete");
+          let userId = userRow?.id ?? null;
+
+          if (!userId) {
+            const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers({
+              page: 1,
+              perPage: 1000,
+            });
+
+            if (listError) {
+              throw new Error(`Failed to list auth users: ${listError.message}`);
+            }
+
+            const matchedUser = authUsers?.users?.find(
+              (user) => user.email?.toLowerCase() === normalizedEmail
+            );
+            userId = matchedUser?.id ?? null;
+          }
+
+          if (!userId) {
+            console.log("[task:deleteUser] User not found; nothing to delete");
             return { deleted: false };
           }
 
-          const { error: rowDeleteError } = await supabase
-            .from("User")
-            .delete()
-            .eq("id", userRow.id);
+          if (userRow?.id) {
+            const { error: rowDeleteError } = await supabase
+              .from("User")
+              .delete()
+              .eq("id", userRow.id);
 
-          if (rowDeleteError) {
-            throw new Error(`Failed to delete user row: ${rowDeleteError.message}`);
+            if (rowDeleteError) {
+              throw new Error(`Failed to delete user row: ${rowDeleteError.message}`);
+            }
           }
 
-          const { error: authDeleteError } = await supabase.auth.admin.deleteUser(userRow.id);
+          const { error: authDeleteError } = await supabase.auth.admin.deleteUser(userId);
 
           if (authDeleteError && !/user not found/i.test(authDeleteError.message ?? "")) {
             throw new Error(`Failed to delete auth user: ${authDeleteError.message}`);
           }
 
-          console.log("[task:deleteUser] Deleted user", userRow.id);
+          console.log("[task:deleteUser] Deleted user", userId);
           return { deleted: true };
         },
       });
