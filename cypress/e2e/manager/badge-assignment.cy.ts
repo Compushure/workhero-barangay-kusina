@@ -18,7 +18,12 @@ describe('When the manager tries to assign badges', () => {
 
   beforeEach(() => {
     cy.login(testManagerUser.email, testManagerUser.password)
-    cy.visit('/manager/dashboard/badge-assignment')
+    cy.visit('/manager/badge-assignment#users')
+  })
+
+  it('should allow the manager to access the badge assignment page', () => {
+    cy.url().should('not.include', '/error')
+    cy.get('body').should('be.visible')
   })
 
 })
