@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 import { type ComponentProps, useMemo, useState } from 'react';
-import { XIcon } from 'lucide-react';
-import TasksTable from './quick-task-table';
+import { ArrowUpDown, Filter, XIcon } from 'lucide-react';
+import TasksTable, { type QuickTaskFilter } from './quick-task-table';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
@@ -50,6 +57,7 @@ function WideDialogContent({ children, className, ...props }: DialogContentProps
 export default function TaskIcon() {
   const [open, setOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [filterBy, setFilterBy] = useState<QuickTaskFilter>('all');
   const [claimedTaskIds, setClaimedTaskIds] = useState<Record<string, boolean>>({});
   const [retainedClaimTasks, setRetainedClaimTasks] = useState<Record<string, TaskStatusItem>>({});
   const [cookReadyByTaskId, setCookReadyByTaskId] = useState<
@@ -105,6 +113,21 @@ export default function TaskIcon() {
 
   const hasRewards = pendingCount > 0;
   const taskBadgeLabel = pendingCount > 99 ? '99+' : String(pendingCount);
+  const filterLabel =
+    filterBy === 'claim-points-only'
+      ? 'Claim Points Only'
+      : filterBy === 'prepare-dish-only'
+        ? 'Prepare Dish Only'
+        : filterBy === 'points-and-dishes'
+          ? 'Points and Dishes'
+          : 'All';
+
+  const checkboxItemClassName = (isActive: boolean) =>
+    `group cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] transition-all duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] ${
+      isActive
+        ? 'text-[#4b3522]'
+        : 'text-[#4b3522] hover:bg-[#8a6039] hover:text-[#fff6e5] data-[highlighted]:bg-[#8a6039] data-[highlighted]:text-[#fff6e5]'
+    }`;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -152,7 +175,7 @@ export default function TaskIcon() {
           <DialogTitle className="text-[16px] text-center font-pixel text-[#3f2a1a] tracking-wider leading-relaxed">
             Claimable Tasks
           </DialogTitle>
-          <div className="mx-auto mt-1 w-full max-w-65">
+          <div className="mt-1 flex w-full flex-col gap-2 sm:flex-row sm:items-end sm:justify-end">
             <Select
               value={sortOrder}
               onValueChange={(value) => {
@@ -161,23 +184,95 @@ export default function TaskIcon() {
                 }
               }}
             >
-              <SelectTrigger className="h-11 rounded-lg border-[#9b7a56] bg-[#f7efdf] font-pixel text-[14px] text-[#4b3522]">
-                <SelectValue />
+              <SelectTrigger className="h-9 w-full rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-52">
+                <ArrowUpDown className="size-4 text-[#8a6039]" />
+                <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent className="bg-[#f6eddd] border-[#9b7a56] text-[#4b3522]">
-                <SelectItem value="newest" className="font-pixel text-[14px]">
+              <SelectContent className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 text-[#4b3522] sm:w-64">
+                <SelectItem
+                  value="newest"
+                  className="cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] transition-colors duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] focus:bg-[#8a6039] focus:text-[#fff6e5] data-highlighted:bg-[#8a6039] data-highlighted:text-[#fff6e5]"
+                >
                   Newest
                 </SelectItem>
-                <SelectItem value="oldest" className="font-pixel text-[14px]">
+                <SelectItem
+                  value="oldest"
+                  className="cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] transition-colors duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] focus:bg-[#8a6039] focus:text-[#fff6e5] data-highlighted:bg-[#8a6039] data-highlighted:text-[#fff6e5]"
+                >
                   Oldest
                 </SelectItem>
               </SelectContent>
             </Select>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="default"
+                  variant="outline"
+                  className="h-9 w-full justify-start gap-2 rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] px-3 py-1 font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#efe2ca] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-auto"
+                >
+                  <Filter strokeWidth={2.5} className="h-4 w-4 text-[#6b5038]" />
+                  <span className="inline-flex items-center text-[16px] leading-none">
+                    {filterLabel}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                sideOffset={8}
+                collisionPadding={12}
+                className="w-64 border-[#9b7a56] bg-[#f6eddd] p-1"
+              >
+                <DropdownMenuLabel className="px-2 py-1 font-jersey text-[14px] tracking-[0.04em] text-[#8a6039]">
+                  Quick Task Filter
+                </DropdownMenuLabel>
+                <DropdownMenuCheckboxItem
+                  checked={filterBy === 'all'}
+                  onCheckedChange={(checked) => {
+                    if (checked) setFilterBy('all');
+                  }}
+                  className={checkboxItemClassName(filterBy === 'all')}
+                >
+                  All
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={filterBy === 'claim-points-only'}
+                  onCheckedChange={(checked) => {
+                    if (checked) setFilterBy('claim-points-only');
+                    else setFilterBy('all');
+                  }}
+                  className={checkboxItemClassName(filterBy === 'claim-points-only')}
+                >
+                  Claim Points Only
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={filterBy === 'prepare-dish-only'}
+                  onCheckedChange={(checked) => {
+                    if (checked) setFilterBy('prepare-dish-only');
+                    else setFilterBy('all');
+                  }}
+                  className={checkboxItemClassName(filterBy === 'prepare-dish-only')}
+                >
+                  Prepare Dish Only
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={filterBy === 'points-and-dishes'}
+                  onCheckedChange={(checked) => {
+                    if (checked) setFilterBy('points-and-dishes');
+                    else setFilterBy('all');
+                  }}
+                  className={checkboxItemClassName(filterBy === 'points-and-dishes')}
+                >
+                  Points and Dishes
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </DialogHeader>
         <div className="max-h-[54vh] overflow-y-auto bg-[#eadbc1] p-3">
           <TasksTable
             sortOrder={sortOrder}
+            filterBy={filterBy}
             onPrepareFood={handlePrepareFood}
             claimedTaskIds={claimedTaskIds}
             setClaimedTaskIds={setClaimedTaskIds}
