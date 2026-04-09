@@ -199,7 +199,7 @@ export function TaskStatusBoard({
       filterTasksByOverdue(verifiedTasks, overdueFilter),
       filterTasksByOverdue(rejectedTasks, overdueFilter),
     ],
-    [currentTasks, inReviewTasks, overdueFilter, rejectedTasks, sortBy, verifiedTasks]
+    [currentTasks, inReviewTasks, overdueFilter, rejectedTasks, verifiedTasks]
   );
 
   const [current, onReview, verified, denied] = useMemo(

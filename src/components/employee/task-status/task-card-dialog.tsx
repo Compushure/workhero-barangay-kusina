@@ -15,6 +15,7 @@ import {
   useRedoTask,
   useSubmitTaskVerification,
 } from '@/hooks/tanstack/mutations/employeeTasksMutations';
+import { formatInTimeZone } from 'date-fns-tz';
 import { formatDate } from '@/utils/date-utils';
 import { isTaskStatusItemOverdue } from './task-status-utils';
 import type { TaskStatusItem } from './types';
@@ -31,6 +32,8 @@ type ApprovedTaskState =
   | 'unclaimed-no-remaining'
   | 'claimed-no-remaining-unserved'
   | 'claimed-no-remaining-served';
+
+const MANILA_TIMEZONE = 'Asia/Manila';
 
 function getStatusLabel(status?: string): string {
   switch (status?.toLowerCase()) {
@@ -62,9 +65,22 @@ function getStatusChipClassName(status?: string): string {
   }
 }
 
+function formatDateTimeInManila(value: string | Date | null | undefined): string {
+  if (!value) return 'N/A';
+
+  const parsedDate = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return 'Invalid date';
+  }
+
+  return `${formatInTimeZone(parsedDate, MANILA_TIMEZONE, 'MMM d, yyyy, h:mm a')} PHT`;
+}
+
 export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCardDialogProps) {
   const remainingOrders = Math.max(0, task.maxOrders - task.completedOrders);
   const isOverdue = isTaskStatusItemOverdue(task);
+  const latestClaimedAtLabel = task.claimedAt ? formatDateTimeInManila(task.claimedAt) : null;
   const progressPercent =
     task.maxOrders > 0 ? Math.min(100, (task.completedOrders / task.maxOrders) * 100) : 0;
 
@@ -520,6 +536,12 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                   ) : null}
                 </div>
               </div>
+            ) : null}
+
+            {latestClaimedAtLabel ? (
+              <p className="pt-1 text-center text-[11px] leading-none tracking-[0.04em] text-[#8a6039] sm:text-[12px]">
+                latest points were claimed: {latestClaimedAtLabel}
+              </p>
             ) : null}
           </div>
         </div>

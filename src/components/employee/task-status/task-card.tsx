@@ -15,10 +15,16 @@ interface TaskCardProps {
 export function TaskCard({ task }: TaskCardProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const isOverdue = isTaskStatusItemOverdue(task);
-  const isFullyClaimed =
-    task.status === 'approved' &&
-    task.completedOrders === task.maxOrders &&
-    task.pendingOrders === 0;
+  const normalizedStatus = task.status?.toLowerCase();
+  const isApprovedTask = normalizedStatus === 'approved';
+  const isInReviewTask = normalizedStatus === 'in review';
+  const hasClaimedRewards = Boolean(task.claimedAt);
+  const hasDishServed = Boolean(task.completedAt);
+
+  // Claimed means rewards were already claimed for an approved task.
+  const isClaimedTask = isApprovedTask && hasClaimedRewards;
+  // Fully done means task is claimed and the dish has been served.
+  const isTaskFullyServed = isClaimedTask && hasDishServed;
 
   return (
     <>
@@ -43,16 +49,21 @@ export function TaskCard({ task }: TaskCardProps) {
                     OVERDUE
                   </span>
                 ) : null}
-                {isFullyClaimed ? (
+                {isClaimedTask ? (
                   <span className="rounded-md border-2 border-[#d4c5a8] bg-[#efe2ca] px-2 py-0.5 text-[12px] leading-none text-[#6b5038]">
                     CLAIMED
+                  </span>
+                ) : null}
+                {isTaskFullyServed ? (
+                  <span className="rounded-md border-2 border-violet-400 bg-violet-200 px-2 py-0.5 text-[12px] leading-none text-violet-800">
+                    SERVED
                   </span>
                 ) : null}
               </div>
 
               <p
                 className={`line-clamp-2 text-[15px] leading-[1.1] sm:text-[17px] ${
-                  isFullyClaimed ? 'text-[#8e7a64] line-through' : 'text-[#3f2a1a]'
+                  isTaskFullyServed ? 'text-[#8e7a64] line-through' : 'text-[#3f2a1a]'
                 }`}
                 title={task.name}
               >
@@ -67,8 +78,10 @@ export function TaskCard({ task }: TaskCardProps) {
                   Due {formatDate(task.dueDate)}
                 </span>
 
-                <p className={`flex items-center gap-1.5 px-1.5 py-0.5 rounded-full border-2 text-[0.9rem] sm:hidden
-                  ${task.completedOrders === task.maxOrders ? 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]' : 'border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038]'}`}>
+                <p
+                  className={`flex items-center gap-1.5 px-1.5 py-0.5 rounded-full border-2 text-[0.9rem] sm:hidden
+                  ${task.completedOrders === task.maxOrders ? 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]' : 'border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038]'}`}
+                >
                   <Soup className="size-4.5 shrink-0" />
                   <span>ORDERS</span>
                   {task.completedOrders}/{task.maxOrders}
@@ -76,8 +89,10 @@ export function TaskCard({ task }: TaskCardProps) {
               </div>
             </div>
 
-            <div className={`hidden sm:block shrink-0 rounded-xl px-2.5 py-1.5 text-center text-[11px] leading-none border-2 max-[430px]:w-full max-[430px]:text-left
-              ${task.completedOrders === task.maxOrders ? 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]' : 'border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038]'}`}>
+            <div
+              className={`hidden sm:block shrink-0 rounded-xl px-2.5 py-1.5 text-center text-[11px] leading-none border-2 max-[430px]:w-full max-[430px]:text-left
+              ${task.completedOrders === task.maxOrders ? 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]' : 'border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038]'}`}
+            >
               <div className="max-[430px]:flex max-[430px]:items-center max-[430px]:justify-between">
                 <div>ORDERS</div>
                 <div className="mt-1 text-[15px] text-[#3f2a1a]">
@@ -88,32 +103,29 @@ export function TaskCard({ task }: TaskCardProps) {
           </div>
 
           <div className="flex gap-1 text-[0.9rem]">
-            
             <p
               className="inline-flex min-w-0 items-center justify-center gap-1 rounded-md border-2 border-[#e5d08a] bg-amber-100 px-1.5 py-0.5 leading-none text-[#6b5038]"
               title={`${task.points} points`}
             >
               <Coins className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate leading-none text-[#3f2a1a]">
-                {task.points}
-              </span>
+              <span className="truncate leading-none text-[#3f2a1a]">{task.points}</span>
             </p>
             <p
               className="inline-flex min-w-0 gap-1 items-center justify-center rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-1.5 py-0.5 leading-none text-[#204b61]"
               title={`${task.xp} XP`}
             >
-              <span className='italic'>XP</span>
+              <span className="italic">XP</span>
               <span>{task.xp}</span>
             </p>
-            {task.status === 'in review' &&
-            <span
-              className="inline-flex min-w-0 items-center justify-center rounded-md border-2 gap-1 border-[#d4c5a8] bg-[#f3e4c9] px-2 py-0.5 leading-none"
-              title={`${task.pendingOrders} pending orders`}
-            >
-              <ChefHat className='size-3.5'/>
-              <span>Pending {task.pendingOrders}</span>
-            </span>
-            }
+            {isInReviewTask ? (
+              <span
+                className="inline-flex min-w-0 items-center justify-center gap-1 rounded-md border-2 border-[#d4c5a8] bg-[#f3e4c9] px-2 py-0.5 leading-none"
+                title={`${task.pendingOrders} pending orders`}
+              >
+                <ChefHat className="size-3.5" />
+                <span>Pending {task.pendingOrders}</span>
+              </span>
+            ) : null}
           </div>
         </CardContent>
       </Card>
