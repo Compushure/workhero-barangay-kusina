@@ -34,6 +34,12 @@ type TasksTableProps = {
 const TASKS_PAGE_SIZE = 3;
 const MIN_CLAIMING_FEEDBACK_MS = 450;
 
+function getClaimableOrderCount(task: TaskStatusItem): number {
+  if (task.pendingOrders > 0) return task.pendingOrders;
+  if (!task.claimedAt && task.completedOrders > 0) return task.completedOrders;
+  return 0;
+}
+
 export default function TasksTable({
   tasks: fallbackTasks = [],
   sortOrder = 'newest',
@@ -62,7 +68,7 @@ export default function TasksTable({
     const source = data?.verifiedTasks ?? fallbackTasks;
 
     const isServerClaimablePoints = (task: TaskStatusItem) =>
-      task.status === 'approved' && task.pendingOrders > 0;
+      task.status === 'approved' && getClaimableOrderCount(task) > 0;
 
     const isServerPrepareEligible = (task: TaskStatusItem) =>
       task.status === 'approved' &&
@@ -169,10 +175,11 @@ export default function TasksTable({
   };
 
   const handleClaim = (task: TaskStatusItem) => {
+    const claimableOrderCount = getClaimableOrderCount(task);
     const hasLocalFinalClaimReady =
       Boolean(cookReadyByTaskId[task.id]?.canPrepareFood) || Boolean(retainedClaimTasks[task.id]);
     const isClaimedForCurrentBatch =
-      Boolean(claimedTaskIds[task.id]) && (task.pendingOrders === 0 || hasLocalFinalClaimReady);
+      Boolean(claimedTaskIds[task.id]) && (claimableOrderCount === 0 || hasLocalFinalClaimReady);
     if (claimMutation.isPending || isClaimedForCurrentBatch) return;
 
     claimStartTimesRef.current[task.id] = Date.now();
@@ -194,7 +201,7 @@ export default function TasksTable({
       {
         kpitaskId: task.id,
         taskName: task.name,
-        pendingOrders: task.pendingOrders,
+        pendingOrders: claimableOrderCount,
         completedOrders: task.completedOrders,
         maxOrders: task.maxOrders,
       },
@@ -324,8 +331,9 @@ export default function TasksTable({
         </div>
       ) : (
         paginatedTasks.map((task) => {
-          const totalPoints = task.points * task.pendingOrders;
-          const totalXp = task.xp * task.pendingOrders;
+          const claimableOrderCount = getClaimableOrderCount(task);
+          const totalPoints = task.points * claimableOrderCount;
+          const totalXp = task.xp * claimableOrderCount;
           const isClaimingTask = Boolean(claimingTaskIds[task.id]);
           const isPreparingTask = preparingTaskId === task.id;
           const isFinalApprovedClaim = task.completedOrders >= task.maxOrders;
@@ -341,7 +349,7 @@ export default function TasksTable({
             Boolean(cookOutcome?.canPrepareFood) || Boolean(retainedClaimTasks[task.id]);
           const isClaimedTask =
             (Boolean(claimedTaskIds[task.id]) &&
-              (task.pendingOrders === 0 || hasLocalFinalClaimReady)) ||
+              (claimableOrderCount === 0 || hasLocalFinalClaimReady)) ||
             isServerPrepareEligible;
           const canPrepareFood =
             (Boolean(cookOutcome?.canPrepareFood) || isServerPrepareEligible) &&
@@ -368,7 +376,7 @@ export default function TasksTable({
                       {task.points} pts each
                     </span>
                     <span className="kitchen-chip px-2 py-0.5 font-pixel text-[14px]">
-                      Qty {task.pendingOrders}
+                      Qty {claimableOrderCount}
                     </span>
                     <span className="rounded-md border-2 border-[#7eb07f]/30 bg-[#e3f2e6] px-2 py-0.5 font-pixel text-[14px] text-[#1f5a36]">
                       Total {totalPoints} pts
@@ -395,7 +403,8 @@ export default function TasksTable({
                         claimMutation.isPending ||
                         isPreparingTask ||
                         isClaimedTask ||
-                        isServerPrepareEligible
+                        isServerPrepareEligible ||
+                        claimableOrderCount <= 0
                       }
                       className="kitchen-btn h-10 px-4 font-pixel text-[14px] hover:brightness-105"
                     >

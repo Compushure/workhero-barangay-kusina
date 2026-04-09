@@ -13,6 +13,7 @@ import {
   claimTaskPointsAndXP,
   serveCookedTaskDish,
   redoTask,
+  performMoreOrders,
   type EmployeeTasksData,
   type ClaimTaskResult,
   type SubmitVerificationResult,
@@ -98,6 +99,26 @@ export async function handleRedoTask(
 
   if (!result.success || result.data?.error) {
     const errorMessage = result.data?.error || result.error || 'Failed to redo task';
+    toast.error(errorMessage);
+    return null;
+  }
+
+  return true;
+}
+
+/**
+ * Moves an approved task with remaining orders back to current work
+ * @param kpitaskId - The ID of the approved task to continue
+ * @returns Promise with success status or null on error
+ */
+export async function handlePerformMoreOrders(
+  kpitaskId: string
+): Promise<boolean | null> {
+  const result = await safeAction(() => performMoreOrders(kpitaskId));
+
+  if (!result.success || result.data?.error) {
+    const errorMessage =
+      result.data?.error || result.error || 'Failed to continue task orders';
     toast.error(errorMessage);
     return null;
   }

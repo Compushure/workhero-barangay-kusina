@@ -21,7 +21,7 @@ export default function PointsCardWidget() {
         <span className="hidden whitespace-nowrap text-xs text-yellow-500 md:inline-block lg:text-sm">
           Fiesta Points
         </span>
-        <span className="font-bold leading-5 tracking-wider text-white text-2xl md:text-[1.85rem]">
+        <span className="font-medium leading-5 tracking-wider text-white text-2xl md:text-[1.85rem]">
           {totalPoints.toLocaleString()}
         </span>
       </div>

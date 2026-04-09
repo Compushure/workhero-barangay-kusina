@@ -11,4 +11,5 @@ export { useGetEmployeeTasks, employeeTasksKeys } from './queries/employeeTasksQ
 export {
   useSubmitTaskVerification,
   useClaimTaskPointsandXP,
+  usePerformMoreOrders,
 } from './mutations/employeeTasksMutations';
