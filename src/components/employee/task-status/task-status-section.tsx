@@ -80,7 +80,7 @@ export function TaskStatusSection({
       className="flex min-h-0 min-w-0 w-full flex-col gap-2 transition-all duration-200 xl:h-full"
     >
       <header className="flex w-full items-center justify-between gap-2 px-1">
-        <h5 className="flex min-w-0 items-center gap-1.5 font-jersey text-[14px] leading-none tracking-[0.06em] text-[#3f2a1a] sm:gap-2 sm:text-[16px]">
+        <h5 className="flex min-w-0 items-center gap-1.5 font-jersey text-[0.75rem] leading-none tracking-[0.06em] text-[#3f2a1a] sm:gap-2 sm:text-[0.85rem]">
           <span
             className={`inline-flex w-fit items-center gap-1 rounded-full border-2 px-2.5 py-1 ${statusChipMeta.className}`}
           >

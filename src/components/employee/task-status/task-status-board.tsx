@@ -141,6 +141,24 @@ interface TaskStatusBoardProps {
   error?: Error | null;
 }
 
+interface TaskStatusSectionData {
+  status: TaskStatusKind;
+  tasks: TaskStatusItem[];
+}
+
+function groupSectionsByColumn(
+  sections: TaskStatusSectionData[],
+  columnCount: number
+): TaskStatusSectionData[][] {
+  const columns: TaskStatusSectionData[][] = Array.from({ length: columnCount }, () => []);
+
+  sections.forEach((section, index) => {
+    columns[index % columnCount].push(section);
+  });
+
+  return columns;
+}
+
 export function TaskStatusBoard({
   currentTasks = [],
   inReviewTasks = [],
@@ -205,7 +223,7 @@ export function TaskStatusBoard({
     ]
   );
 
-  const sections = useMemo(
+  const sections = useMemo<TaskStatusSectionData[]>(
     () => [
       { status: 'Current' as const, tasks: current },
       { status: 'In Review' as const, tasks: onReview },
@@ -238,6 +256,9 @@ export function TaskStatusBoard({
     ]
   );
 
+  const sectionsByMdColumns = useMemo(() => groupSectionsByColumn(sections, 2), [sections]);
+  const sectionsByLgColumns = useMemo(() => groupSectionsByColumn(sections, 3), [sections]);
+
   function handleSectionOpenChange(status: TaskStatusKind, open: boolean) {
     setOpenSections((previous) => {
       const next = { ...previous, [status]: open };
@@ -266,6 +287,14 @@ export function TaskStatusBoard({
         {renderTaskCards(tasks)}
       </TaskStatusSection>
     );
+  }
+
+  function getXlSectionContainerClass(status: TaskStatusKind): string {
+    if (openSections[status]) {
+      return 'min-h-0 min-w-0 flex-[1_1_0%] xl:h-full xl:overflow-hidden';
+    }
+
+    return 'min-h-0 w-[13.25rem] min-w-[12.5rem] max-w-[14rem] flex-none xl:h-full xl:overflow-hidden';
   }
 
   return (
@@ -495,9 +524,36 @@ export function TaskStatusBoard({
               </Accordion>
             </div>
 
-            <div className="hidden h-full min-h-0 grid-cols-1 gap-2.5 md:grid md:grid-cols-2 lg:grid-cols-3 xl:h-full xl:min-h-0 xl:grid-cols-4 xl:auto-rows-fr xl:gap-3">
+            <div className="hidden min-h-0 gap-2.5 md:grid md:grid-cols-2 lg:hidden">
+              {sectionsByMdColumns.map((columnSections, columnIndex) => (
+                <div key={`md-column-${columnIndex}`} className="flex min-h-0 flex-col gap-2.5">
+                  {columnSections.map(({ status, tasks }) => (
+                    <div key={status} className="min-h-0">
+                      {renderDesktopSection(status, tasks)}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden min-h-0 gap-2.5 lg:grid lg:grid-cols-3 xl:hidden">
+              {sectionsByLgColumns.map((columnSections, columnIndex) => (
+                <div key={`lg-column-${columnIndex}`} className="flex min-h-0 flex-col gap-2.5">
+                  {columnSections.map(({ status, tasks }) => (
+                    <div key={status} className="min-h-0">
+                      {renderDesktopSection(status, tasks)}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden h-full min-h-0 xl:flex xl:gap-3">
               {sections.map(({ status, tasks }) => (
-                <div key={status} className="min-h-0 xl:h-full xl:overflow-hidden">
+                <div
+                  key={status}
+                  className={`transition-[flex-basis,width,max-width] duration-300 ${getXlSectionContainerClass(status)}`}
+                >
                   {renderDesktopSection(status, tasks)}
                 </div>
               ))}
