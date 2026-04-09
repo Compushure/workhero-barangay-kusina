@@ -376,8 +376,8 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
 
             {approvedTaskState === 'unclaimed-with-remaining' ? (
               <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
-                This approved task still has remaining orders and unclaimed rewards. Claim points
-                and XP first from the kitchen quick task.
+                This approved task still has unclaimed rewards. Claim points
+                and XP from the kitchen quick task. You can still perform more orders after
               </p>
             ) : approvedTaskState === 'claimed-with-remaining' ? (
               <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
