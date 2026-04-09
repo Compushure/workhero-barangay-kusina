@@ -182,7 +182,7 @@ export async function approveTaskAction(
     return { error: 'Failed to fetch task details: ' + taskError.message, data: undefined };
   }
 
-  // This is what I fixed - Always update status to approved, increment completed_orders, reset pending_orders, and include remark.
+  // Approving a submission keeps pending_orders for the employee claim flow.
   const newCompleted = (taskData.completed_orders ?? 0) + (taskData.pending_orders ?? 1);
 
   const { error: updateError } = await supabase
@@ -190,7 +190,6 @@ export async function approveTaskAction(
     .update({
       status: 'approved',
       remark: reqmark,
-      pending_orders: 0,
       completed_orders: newCompleted,
     })
     .eq('id', kpitask_id);

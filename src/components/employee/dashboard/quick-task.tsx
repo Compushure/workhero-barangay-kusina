@@ -69,8 +69,14 @@ export default function TaskIcon() {
   const pendingCount = useMemo(() => {
     const tasks: TaskStatusItem[] = data?.verifiedTasks ?? [];
 
+    const getClaimableOrderCount = (task: TaskStatusItem) => {
+      if (task.pendingOrders > 0) return task.pendingOrders;
+      if (!task.claimedAt && task.completedOrders > 0) return task.completedOrders;
+      return 0;
+    };
+
     const isServerClaimablePoints = (task: TaskStatusItem) =>
-      task.status === 'approved' && task.pendingOrders > 0;
+      task.status === 'approved' && getClaimableOrderCount(task) > 0;
 
     const isServerPrepareEligible = (task: TaskStatusItem) =>
       task.status === 'approved' &&
