@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/accordion';
 import { useDebounce } from '@/hooks/useDebounce';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
-import { isTaskStatusItemOverdue } from './task-status-utils';
+import { getTaskSectionStatusChipMeta, isTaskStatusItemOverdue } from './task-status-utils';
 import { TaskCard } from './task-card';
 import { TaskStatusSection } from './task-status-section';
 import type { TaskOverdueFilter, TaskSortOption, TaskStatusItem, TaskStatusKind } from './types';
@@ -114,32 +114,18 @@ function getSectionHelperText(status: TaskStatusKind): string {
   return 'Rejected tasks can be reopened and sent back to your current queue.';
 }
 
-function getSectionAccentClassName(status: TaskStatusKind): string {
-  if (status === 'Current') {
-    return 'border-[#87a9bc] bg-[#d7e3f4] text-[#204b61]';
-  }
-
-  if (status === 'In Review') {
-    return 'border-[#c79a54] bg-[#e7c27f] text-[#4b3522]';
-  }
-
-  if (status === 'Approved') {
-    return 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]';
-  }
-
-  return 'border-[#d18d7e] bg-[#f4d6ce] text-[#8b2e22]';
-}
-
 function MobileTaskCardSkeleton() {
   return (
     <div className="rounded-xl border-2 border-[#d4c5a8] bg-[#fdf5e8] p-3">
-      <div className="space-y-2.5">
-        <Skeleton className="h-5 w-32 bg-[#eadbc1]" />
-        <Skeleton className="h-4 w-40 bg-[#eadbc1]" />
-        <div className="flex flex-wrap gap-1.5">
-          <Skeleton className="h-6 w-16 bg-[#eadbc1]" />
-          <Skeleton className="h-6 w-14 bg-[#d7e3f4]" />
-          <Skeleton className="h-6 w-18 bg-[#eadbc1]" />
+      <div className="space-y-2">
+        <Skeleton className="h-5 w-40 bg-[#eadbc1]" />
+        <Skeleton className="h-4 w-36 bg-[#eadbc1]" />
+        <div className="flex flex-wrap gap-1">
+          <Skeleton className="h-6 w-18 rounded-md bg-[#d7e3f4]" />
+          <Skeleton className="h-6 w-16 rounded-md bg-[#eadbc1]" />
+          <Skeleton className="h-6 w-14 rounded-md bg-[#d7e3f4]" />
+          <Skeleton className="h-6 w-16 rounded-md bg-[#f4d6ce]" />
+          <Skeleton className="h-6 w-16 rounded-md bg-[#efe2ca]" />
         </div>
       </div>
     </div>
@@ -312,21 +298,27 @@ export function TaskStatusBoard({
             <>
               <div className="hidden sm:flex min-w-0 w-full lg:w-auto">
                 <div className="flex min-w-0 w-full gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                  {sectionSummaries.map(({ status, count, totalCount }) => (
-                    <div
-                      key={status}
-                      className="inline-flex shrink-0 items-center gap-2 rounded-full border-2 border-[#d4c5a8] bg-[#f7efdf] px-2.5 py-1.5 text-[12px] leading-none text-[#6b5038]"
-                    >
-                      <span
-                        className={`rounded-full border-2 px-2 py-0.5 tracking-[0.08em] ${getSectionAccentClassName(status)}`}
+                  {sectionSummaries.map(({ status, count, totalCount }) => {
+                    const statusChipMeta = getTaskSectionStatusChipMeta(status);
+                    const StatusIcon = statusChipMeta.icon;
+
+                    return (
+                      <div
+                        key={status}
+                        className="inline-flex shrink-0 items-center gap-2 rounded-full border-2 border-[#d4c5a8] bg-[#f7efdf] px-2.5 py-1.5 text-[12px] leading-none text-[#6b5038]"
                       >
-                        {status}
-                      </span>
-                      <span className="text-[13px] text-[#3f2a1a]">
-                        {hasActiveSearch ? `${count}/${totalCount}` : count}
-                      </span>
-                    </div>
-                  ))}
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full border-2 px-2 py-0.5 tracking-[0.08em] ${statusChipMeta.className}`}
+                        >
+                          <StatusIcon className="size-3.5 shrink-0" />
+                          <span>{status}</span>
+                        </span>
+                        <span className="text-[13px] text-[#3f2a1a]">
+                          {hasActiveSearch ? `${count}/${totalCount}` : count}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -453,6 +445,8 @@ export function TaskStatusBoard({
               >
                 {sectionSummaries.map(({ status, count, totalCount }) => {
                   const tasks = sections.find((section) => section.status === status)?.tasks ?? [];
+                  const statusChipMeta = getTaskSectionStatusChipMeta(status);
+                  const StatusIcon = statusChipMeta.icon;
 
                   return (
                     <AccordionItem
@@ -463,9 +457,10 @@ export function TaskStatusBoard({
                       <AccordionTrigger className="sticky top-0 z-10 bg-[#f7efdf] px-3 py-3 text-left hover:no-underline [&>svg]:text-[#8a6039]">
                         <div className="flex min-w-0 items-center gap-2">
                           <span
-                            className={`inline-flex rounded-full border-2 px-2.5 py-1 text-[13px] leading-none ${getSectionAccentClassName(status)}`}
+                            className={`inline-flex items-center gap-1 rounded-full border-2 px-2.5 py-1 text-[13px] leading-none ${statusChipMeta.className}`}
                           >
-                            {status}
+                            <StatusIcon className="size-3.5 shrink-0" />
+                            <span>{status}</span>
                           </span>
                           <span className="rounded-full border-2 border-[#d4c5a8] bg-[#fff8ec] px-2 py-1 text-[13px] leading-none text-[#6b5038]">
                             {hasActiveSearch ? `${count}/${totalCount}` : count}
@@ -500,7 +495,7 @@ export function TaskStatusBoard({
               </Accordion>
             </div>
 
-            <div className="hidden h-full min-h-0 grid-cols-1 gap-2.5 md:grid md:grid-cols-2 xl:h-full xl:min-h-0 xl:grid-cols-4 xl:auto-rows-fr xl:gap-3">
+            <div className="hidden h-full min-h-0 grid-cols-1 gap-2.5 md:grid md:grid-cols-2 lg:grid-cols-3 xl:h-full xl:min-h-0 xl:grid-cols-4 xl:auto-rows-fr xl:gap-3">
               {sections.map(({ status, tasks }) => (
                 <div key={status} className="min-h-0 xl:h-full xl:overflow-hidden">
                   {renderDesktopSection(status, tasks)}

@@ -35,7 +35,7 @@ function TaskStatusBoardLoading() {
         </div>
       </div>
 
-      <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 pt-3 md:grid-cols-2 xl:grid-cols-4 xl:gap-3">
+      <div className="grid h-full min-h-0 grid-cols-1 gap-2.5 pt-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-3">
         {['Current', 'In Review', 'Approved', 'Rejected'].map((section) => (
           <div key={section} className="flex h-full min-w-0 w-full flex-col gap-2">
             <div className="flex w-full items-center justify-between gap-2 px-1">
@@ -51,40 +51,47 @@ function TaskStatusBoardLoading() {
             <div className="flex min-h-0 flex-1 w-full flex-col overflow-hidden rounded-lg border-2 border-[#c5ac84] bg-[#f7efdf] p-2 shadow-[0_0_0_1px_rgba(155,122,86,0.2),inset_0_1px_0_rgba(255,255,255,0.35)]">
               <div className="flex flex-col gap-2">
                 <div className="w-full rounded-lg border-2 border-[#d4c5a8] bg-[#fdf5e8] px-3.5 py-3">
-                  <div className="flex flex-col gap-2.5">
-                    <div className="flex items-start justify-between gap-2.5">
-                      <div className="min-w-0 flex-1 space-y-2">
-                        <Skeleton className="h-6 w-40 bg-[#eadbc1]" />
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <Skeleton className="h-6 w-44 bg-[#eadbc1]" />
                         <div className="flex items-center gap-1.5">
-                          <Skeleton className="h-5 w-5 rounded-sm bg-[#eadbc1]" />
-                          <Skeleton className="h-4 w-32 bg-[#eadbc1]" />
+                          <Skeleton className="h-4 w-4 rounded-sm bg-[#eadbc1]" />
+                          <Skeleton className="h-4 w-28 bg-[#eadbc1]" />
                         </div>
                       </div>
                       <div className="rounded-xl border-2 border-[#d4c5a8] bg-[#f3e4c9] px-2 py-1.5">
                         <Skeleton className="h-12 w-12 bg-[#eadbc1]" />
                       </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <Skeleton className="h-7 w-22 rounded-md bg-[#eadbc1]" />
-                      <Skeleton className="h-7 w-16 rounded-md bg-[#d7e3f4]" />
-                      <Skeleton className="h-7 w-22 rounded-md bg-[#eadbc1]" />
-                      <Skeleton className="h-7 w-22 rounded-md bg-[#eadbc1]" />
+                    <div className="flex flex-wrap items-center gap-1">
+                      <Skeleton className="h-7 w-18 rounded-md bg-[#d7e3f4]" />
+                      <Skeleton className="h-7 w-16 rounded-md bg-[#eadbc1]" />
+                      <Skeleton className="h-7 w-14 rounded-md bg-[#d7e3f4]" />
+                      <Skeleton className="h-7 w-16 rounded-md bg-[#f4d6ce]" />
+                      <Skeleton className="h-7 w-16 rounded-md bg-[#efe2ca]" />
                     </div>
                   </div>
                 </div>
                 <div className="w-full rounded-lg border-2 border-[#d4c5a8] bg-[#fdf5e8] px-3.5 py-3">
-                  <div className="flex flex-col gap-2.5">
-                    <div className="flex items-start justify-between gap-2.5">
-                      <div className="min-w-0 flex-1 space-y-2">
-                        <Skeleton className="h-6 w-36 bg-[#eadbc1]" />
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <Skeleton className="h-6 w-40 bg-[#eadbc1]" />
                         <div className="flex items-center gap-1.5">
-                          <Skeleton className="h-5 w-5 rounded-sm bg-[#eadbc1]" />
-                          <Skeleton className="h-4 w-30 bg-[#eadbc1]" />
+                          <Skeleton className="h-4 w-4 rounded-sm bg-[#eadbc1]" />
+                          <Skeleton className="h-4 w-24 bg-[#eadbc1]" />
                         </div>
                       </div>
                       <div className="rounded-xl border-2 border-[#d4c5a8] bg-[#f3e4c9] px-2 py-1.5">
                         <Skeleton className="h-12 w-12 bg-[#eadbc1]" />
                       </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <Skeleton className="h-7 w-18 rounded-md bg-[#d7e3f4]" />
+                      <Skeleton className="h-7 w-16 rounded-md bg-[#eadbc1]" />
+                      <Skeleton className="h-7 w-14 rounded-md bg-[#d7e3f4]" />
+                      <Skeleton className="h-7 w-16 rounded-md bg-[#f4d6ce]" />
                     </div>
                   </div>
                 </div>

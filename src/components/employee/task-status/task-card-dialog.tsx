@@ -1,7 +1,15 @@
 'use client';
 
 import { type SetStateAction, useEffect, useMemo, useState } from 'react';
-import { Calendar, ChefHat, ChevronDown, Coins, Loader2, Soup } from 'lucide-react';
+import {
+  Calendar,
+  ChefHat,
+  ChevronDown,
+  Coins,
+  Loader2,
+  Soup,
+  type LucideIcon,
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +25,13 @@ import {
 } from '@/hooks/tanstack/mutations/employeeTasksMutations';
 import { formatInTimeZone } from 'date-fns-tz';
 import { formatDate } from '@/utils/date-utils';
-import { isTaskStatusItemOverdue } from './task-status-utils';
+import {
+  deriveTaskLifecycleState,
+  getTaskBaseStatusChipMeta,
+  getTaskRemainingOrders,
+  getTaskSignalChipMeta,
+  isTaskStatusItemOverdue,
+} from './task-status-utils';
 import type { TaskStatusItem } from './types';
 
 interface TaskCardDialogProps {
@@ -26,44 +40,7 @@ interface TaskCardDialogProps {
   setModalOpen: (value: SetStateAction<boolean>) => void;
 }
 
-type ApprovedTaskState =
-  | 'unclaimed-with-remaining'
-  | 'claimed-with-remaining'
-  | 'unclaimed-no-remaining'
-  | 'claimed-no-remaining-unserved'
-  | 'claimed-no-remaining-served';
-
 const MANILA_TIMEZONE = 'Asia/Manila';
-
-function getStatusLabel(status?: string): string {
-  switch (status?.toLowerCase()) {
-    case 'assigned':
-      return 'Current';
-    case 'in review':
-      return 'In Review';
-    case 'approved':
-      return 'Approved';
-    case 'rejected':
-      return 'Rejected';
-    default:
-      return 'Task';
-  }
-}
-
-function getStatusChipClassName(status?: string): string {
-  switch (status?.toLowerCase()) {
-    case 'assigned':
-      return 'border-[#87a9bc] bg-[#d7e3f4] text-[#204b61]';
-    case 'in review':
-      return 'border-[#c79a54] bg-[#e7c27f] text-[#4b3522]';
-    case 'approved':
-      return 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]';
-    case 'rejected':
-      return 'border-[#d18d7e] bg-[#f4d6ce] text-[#8b2e22]';
-    default:
-      return 'border-[#d4c5a8] bg-[#efe2ca] text-[#6b5038]';
-  }
-}
 
 function formatDateTimeInManila(value: string | Date | null | undefined): string {
   if (!value) return 'N/A';
@@ -78,8 +55,10 @@ function formatDateTimeInManila(value: string | Date | null | undefined): string
 }
 
 export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCardDialogProps) {
-  const remainingOrders = Math.max(0, task.maxOrders - task.completedOrders);
+  const remainingOrders = getTaskRemainingOrders(task);
   const isOverdue = isTaskStatusItemOverdue(task);
+  const lifecycle = deriveTaskLifecycleState(task, isOverdue);
+  const approvedTaskState = lifecycle.approvedTaskState;
   const latestClaimedAtLabel = task.claimedAt ? formatDateTimeInManila(task.claimedAt) : null;
   const progressPercent =
     task.maxOrders > 0 ? Math.min(100, (task.completedOrders / task.maxOrders) * 100) : 0;
@@ -98,63 +77,20 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
   const redoMutation = useRedoTask();
   const performMoreOrdersMutation = usePerformMoreOrders();
 
-  // Normalize status once so all checks are consistent and easier to read.
-  const normalizedStatus = task.status?.toLowerCase();
-  const isAssignedTask = normalizedStatus === 'assigned';
-  const isRejectedTask = normalizedStatus === 'rejected';
-  const isApprovedTask = normalizedStatus === 'approved';
-  const isInReviewTask = normalizedStatus === 'in review';
-
-  // High-level task facts used to derive approved-state and action availability.
-  const hasClaimedRewards = Boolean(task.claimedAt);
-  const hasRemainingOrders = remainingOrders > 0;
-  const hasNoPendingOrders = task.pendingOrders === 0;
-  const hasNoRemainingOrders = !hasRemainingOrders;
-  const hasDishServed = !hasRemainingOrders && Boolean(task.completedAt);
-
-  const approvedTaskState: ApprovedTaskState | null = useMemo(() => {
-    // Approved-state variants only apply when the task is already approved.
-    if (!isApprovedTask) return null;
-
-    // Rewards not claimed yet, and there is still work left.
-    if (!hasClaimedRewards && hasRemainingOrders) {
-      return 'unclaimed-with-remaining';
-    }
-
-    // Rewards already claimed, but user can still continue orders.
-    if (hasClaimedRewards && hasRemainingOrders) {
-      return 'claimed-with-remaining';
-    }
-
-    // No orders left, but rewards still unclaimed.
-    if (!hasClaimedRewards && hasNoRemainingOrders) {
-      return 'unclaimed-no-remaining';
-    }
-
-    // No remaining orders and rewards were claimed.
-    // Distinguish whether dish serving was completed.
-    if (hasDishServed) {
-      return 'claimed-no-remaining-served';
-    }
-
-    return 'claimed-no-remaining-unserved';
-  }, [hasClaimedRewards, hasDishServed, hasNoRemainingOrders, hasRemainingOrders, isApprovedTask]);
-
   // "Raw" action flags ignore overdue checks.
   // These are useful for showing disabled actions + tooltip reasons when overdue.
-  const canSubmitRaw = isAssignedTask && hasRemainingOrders && !submitMutation.isSuccess;
+  const canSubmitRaw =
+    lifecycle.isAssignedTask && lifecycle.hasRemainingOrders && !submitMutation.isSuccess;
   const isSubmitOverdueBlocked = canSubmitRaw && isOverdue;
   const canSubmit = canSubmitRaw && !isOverdue;
 
-  const canRedoRaw = isRejectedTask && !redoMutation.isSuccess;
+  const canRedoRaw = lifecycle.isRejectedTask && !redoMutation.isSuccess;
   const isRedoOverdueBlocked = canRedoRaw && isOverdue;
   const canRedo = canRedoRaw && !isOverdue;
 
   const canPerformMoreOrdersRaw =
-    // User can continue only after claiming rewards and clearing pending verification count.
-    approvedTaskState === 'claimed-with-remaining' &&
-    hasNoPendingOrders &&
-    !performMoreOrdersMutation.isSuccess;
+    // User can continue only when the latest approved batch was already claimed.
+    approvedTaskState === 'claimed-with-remaining' && !performMoreOrdersMutation.isSuccess;
   const isPerformOverdueBlocked = canPerformMoreOrdersRaw && isOverdue;
   const canPerformMoreOrders = canPerformMoreOrdersRaw && !isOverdue;
 
@@ -162,24 +98,64 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
     'inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-[#47331F] bg-[#8A6039] px-4 py-2.5 font-jersey text-[14px] tracking-[0.05em] text-[#fff6e5] shadow-[3px_3px_0px_#47331F] transition-all duration-150 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#9A6E45] hover:shadow-[2px_2px_0px_#47331F] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50 sm:w-auto sm:text-[15px]';
 
   const summaryChips = useMemo(() => {
-    const chips: Array<{ label: string; value: string; className: string }> = [
+    const baseStatusChip = getTaskBaseStatusChipMeta(task.status);
+    const chips: Array<{ key: string; label: string; className: string; icon: LucideIcon }> = [
       {
-        label: 'Status',
-        value: getStatusLabel(task.status),
-        className: getStatusChipClassName(task.status),
+        key: 'status',
+        label: baseStatusChip.label,
+        className: baseStatusChip.className,
+        icon: baseStatusChip.icon,
       },
     ];
 
-    if (isInReviewTask) {
+    if (lifecycle.isInReviewTask) {
       chips.push({
-        label: 'Pending',
-        value: `${task.pendingOrders}`,
+        key: 'pending',
+        label: `Pending ${task.pendingOrders}`,
         className: 'border-[#d4c5a8] bg-[#fff8ec] text-[#6b5038]',
+        icon: ChefHat,
+      });
+    }
+
+    if (lifecycle.showOverdueChip) {
+      const overdueChip = getTaskSignalChipMeta('overdue');
+      chips.push({
+        key: 'overdue',
+        label: overdueChip.label,
+        className: overdueChip.className,
+        icon: overdueChip.icon,
+      });
+    }
+
+    if (lifecycle.showClaimedChip) {
+      const claimedChip = getTaskSignalChipMeta('claimed');
+      chips.push({
+        key: 'claimed',
+        label: claimedChip.label,
+        className: claimedChip.className,
+        icon: claimedChip.icon,
+      });
+    }
+
+    if (lifecycle.showServedChip) {
+      const servedChip = getTaskSignalChipMeta('served');
+      chips.push({
+        key: 'served',
+        label: servedChip.label,
+        className: servedChip.className,
+        icon: servedChip.icon,
       });
     }
 
     return chips;
-  }, [isInReviewTask, task.pendingOrders, task.status]);
+  }, [
+    lifecycle.isInReviewTask,
+    lifecycle.showClaimedChip,
+    lifecycle.showOverdueChip,
+    lifecycle.showServedChip,
+    task.pendingOrders,
+    task.status,
+  ]);
 
   function handleRedo() {
     if (!canRedo || redoMutation.isPending) return;
@@ -233,24 +209,21 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {summaryChips.map((chip) => (
-              <span
-                key={chip.label}
-                className={`inline-flex items-baseline gap-2 rounded-full border-2 px-2.5 py-1 text-[12px] leading-none sm:text-[13px] ${chip.className}`}
-              >
-                <span className="inline-flex items-center leading-none tracking-[0.12em]">
-                  {chip.label}
+            {summaryChips.map((chip) => {
+              const ChipIcon = chip.icon;
+
+              return (
+                <span
+                  key={chip.key}
+                  className={`inline-flex items-center gap-1.5 rounded-full border-2 px-2.5 py-1 text-[12px] leading-none sm:text-[13px] ${chip.className}`}
+                >
+                  <ChipIcon className="size-3.5 shrink-0" />
+                  <span className="inline-flex items-center leading-none tracking-[0.08em]">
+                    {chip.label}
+                  </span>
                 </span>
-                <span className="inline-flex items-center text-[13px] leading-none sm:text-[14px]">
-                  {chip.value}
-                </span>
-              </span>
-            ))}
-            {isOverdue ? (
-              <span className="inline-flex items-center rounded-full border-2 border-[#d18d7e] bg-[#f4d6ce] px-2.5 py-1 text-[12px] leading-none text-[#8b2e22] sm:text-[13px]">
-                OVERDUE
-              </span>
-            ) : null}
+              );
+            })}
           </div>
         </DialogHeader>
 
@@ -353,7 +326,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                   </p>
                 </div>
 
-                <div className="flex flex-col items-center gap-1 text-[16px] sm:gap-1.5 sm:text-[17px]">
+                <div className="px-4 flex flex-col items-center gap-1 text-[16px] sm:gap-1.5 sm:text-[17px]">
                   <span className="w-full text-center text-[13px] leading-none text-[#8a6039] sm:text-[14px]">
                     PROGRESS
                   </span>
@@ -422,11 +395,12 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
               </p>
             ) : approvedTaskState === 'claimed-no-remaining-unserved' ? (
               <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
-                All orders are complete. Points and XP are already claimed.
+                All orders are complete. Points and XP are already claimed. Proceed to kitchen to
+                serve dishes
               </p>
             ) : null}
 
-            {isInReviewTask ? (
+            {lifecycle.isInReviewTask ? (
               <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
                 Submitted for verification. Pending request for {task.pendingOrders} order
                 {task.pendingOrders === 1 ? '' : 's'}.
@@ -539,8 +513,8 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
             ) : null}
 
             {latestClaimedAtLabel ? (
-              <p className="pt-1 text-center text-[11px] leading-none tracking-[0.04em] text-[#8a6039] sm:text-[12px]">
-                latest points were claimed: {latestClaimedAtLabel}
+              <p className="pt-1 text-center text-[0.75rem] leading-none tracking-[0.04em] text-[#8a6039] sm:text-[0.9rem]">
+                FIESTA POINTS from latest request claimed at: {latestClaimedAtLabel}
               </p>
             ) : null}
           </div>

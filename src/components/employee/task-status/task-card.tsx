@@ -4,7 +4,11 @@ import { useState } from 'react';
 import { Calendar, ChefHat, Coins, Soup } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDate } from '@/utils/date-utils';
-import { isTaskStatusItemOverdue } from './task-status-utils';
+import {
+  deriveTaskLifecycleState,
+  getTaskSignalChipMeta,
+  isTaskStatusItemOverdue,
+} from './task-status-utils';
 import type { TaskStatusItem } from './types';
 import TaskCardDialog from './task-card-dialog';
 
@@ -15,16 +19,15 @@ interface TaskCardProps {
 export function TaskCard({ task }: TaskCardProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const isOverdue = isTaskStatusItemOverdue(task);
-  const normalizedStatus = task.status?.toLowerCase();
-  const isApprovedTask = normalizedStatus === 'approved';
-  const isInReviewTask = normalizedStatus === 'in review';
-  const hasClaimedRewards = Boolean(task.claimedAt);
-  const hasDishServed = Boolean(task.completedAt);
-
-  // Claimed means rewards were already claimed for an approved task.
-  const isClaimedTask = isApprovedTask && hasClaimedRewards;
-  // Fully done means task is claimed and the dish has been served.
-  const isTaskFullyServed = isClaimedTask && hasDishServed;
+  const lifecycle = deriveTaskLifecycleState(task, isOverdue);
+  const overdueChip = getTaskSignalChipMeta('overdue');
+  const claimedChip = getTaskSignalChipMeta('claimed');
+  const servedChip = getTaskSignalChipMeta('served');
+  const OverdueIcon = overdueChip.icon;
+  const ClaimedIcon = claimedChip.icon;
+  const ServedIcon = servedChip.icon;
+  const isTaskFullyDone =
+    lifecycle.showServedChip && task.pendingOrders === 0 && task.completedOrders >= task.maxOrders;
 
   return (
     <>
@@ -43,27 +46,9 @@ export function TaskCard({ task }: TaskCardProps) {
         <CardContent className="flex flex-col gap-2 p-0 font-jersey tracking-[0.04em]">
           <div className="flex items-start justify-between gap-3 max-[430px]:flex-col">
             <div className="min-w-0 flex-1">
-              <div className="mb-1.5 flex flex-wrap items-center gap-1">
-                {isOverdue ? (
-                  <span className="rounded-md border-2 border-[#d18d7e] bg-[#f4d6ce] px-2 py-0.5 text-[12px] leading-none text-[#8b2e22]">
-                    OVERDUE
-                  </span>
-                ) : null}
-                {isClaimedTask ? (
-                  <span className="rounded-md border-2 border-[#d4c5a8] bg-[#efe2ca] px-2 py-0.5 text-[12px] leading-none text-[#6b5038]">
-                    CLAIMED
-                  </span>
-                ) : null}
-                {isTaskFullyServed ? (
-                  <span className="rounded-md border-2 border-violet-400 bg-violet-200 px-2 py-0.5 text-[12px] leading-none text-violet-800">
-                    SERVED
-                  </span>
-                ) : null}
-              </div>
-
               <p
                 className={`line-clamp-2 text-[15px] leading-[1.1] sm:text-[17px] ${
-                  isTaskFullyServed ? 'text-[#8e7a64] line-through' : 'text-[#3f2a1a]'
+                  isTaskFullyDone ? 'text-[#8e7a64] line-through' : 'text-[#3f2a1a]'
                 }`}
                 title={task.name}
               >
@@ -72,7 +57,7 @@ export function TaskCard({ task }: TaskCardProps) {
 
               <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.85rem] leading-none sm:text-[13px]">
                 <span
-                  className={`flex items-center gap-1.5 ${isOverdue ? 'text-[#8b2e22]' : 'text-[#6b5038]'}`}
+                  className={`flex items-center gap-1.5 ${lifecycle.showOverdueChip ? 'text-[#8b2e22]' : 'text-[#6b5038]'}`}
                 >
                   <Calendar strokeWidth={2.5} className="size-4.5 shrink-0" />
                   Due {formatDate(task.dueDate)}
@@ -102,28 +87,59 @@ export function TaskCard({ task }: TaskCardProps) {
             </div>
           </div>
 
-          <div className="flex gap-1 text-[0.9rem]">
+          <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[0.9rem]">
             <p
-              className="inline-flex min-w-0 items-center justify-center gap-1 rounded-md border-2 border-[#e5d08a] bg-amber-100 px-1.5 py-0.5 leading-none text-[#6b5038]"
+              className="inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 border-[#e5d08a] bg-amber-100 px-1.5 py-0.5 leading-none text-[#6b5038]"
               title={`${task.points} points`}
             >
               <Coins className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate leading-none text-[#3f2a1a]">{task.points}</span>
+              <span className="leading-none text-[#3f2a1a]">{task.points}</span>
             </p>
             <p
-              className="inline-flex min-w-0 gap-1 items-center justify-center rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-1.5 py-0.5 leading-none text-[#204b61]"
+              className="inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-1.5 py-0.5 leading-none text-[#204b61]"
               title={`${task.xp} XP`}
             >
               <span className="italic">XP</span>
               <span>{task.xp}</span>
             </p>
-            {isInReviewTask ? (
+
+            {lifecycle.isInReviewTask ? (
               <span
-                className="inline-flex min-w-0 items-center justify-center gap-1 rounded-md border-2 border-[#d4c5a8] bg-[#f3e4c9] px-2 py-0.5 leading-none"
+                className="inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 border-[#d4c5a8] bg-[#f3e4c9] px-2 py-0.5 leading-none"
                 title={`${task.pendingOrders} pending orders`}
               >
                 <ChefHat className="size-3.5" />
                 <span>Pending {task.pendingOrders}</span>
+              </span>
+            ) : null}
+
+            {lifecycle.showOverdueChip ? (
+              <span
+                className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 px-2 py-0.5 leading-none ${overdueChip.className}`}
+                title="Task is overdue"
+              >
+                <OverdueIcon className="h-3.5 w-3.5" />
+                <span>{overdueChip.label}</span>
+              </span>
+            ) : null}
+
+            {lifecycle.showClaimedChip ? (
+              <span
+                className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 px-2 py-0.5 leading-none ${claimedChip.className}`}
+                title="Points for current approved orders are already claimed"
+              >
+                <ClaimedIcon className="h-3.5 w-3.5" />
+                <span>{claimedChip.label}</span>
+              </span>
+            ) : null}
+
+            {lifecycle.showServedChip ? (
+              <span
+                className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 px-2 py-0.5 leading-none ${servedChip.className}`}
+                title="Dish has already been served"
+              >
+                <ServedIcon className="h-3.5 w-3.5" />
+                <span>{servedChip.label}</span>
               </span>
             ) : null}
           </div>
