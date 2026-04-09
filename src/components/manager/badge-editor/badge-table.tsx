@@ -229,23 +229,23 @@ export default function BadgeTable({
                     <TableCell className="text-center align-middle sticky right-0 px-4 sm:px-6">
                       <div className="flex justify-center items-center gap-0.5 sm:gap-1">
                         <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onEdit(badge)}
-                        className="size-7 sm:size-9 hover:bg-card hover:text-foreground border hover:border-accent/50 transition-colors cursor-pointer"
-                        title="Edit task"
-                      >
-                        <Pencil className="size-3 sm:size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteClick(badge)}
-                        className="size-7 sm:size-9 hover:bg-card hover:text-red-600 border hover:border-accent/50 transition-colors cursor-pointer"
-                        title="Delete task"
-                      >
-                        <Trash2 className="size-3 sm:size-4" />
-                      </Button>
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onEdit(badge)}
+                          className="size-7 sm:size-9 hover:bg-card hover:text-foreground border hover:border-accent/50 transition-colors cursor-pointer"
+                          title="Edit task"
+                        >
+                          <Pencil className="size-3 sm:size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteClick(badge)}
+                          className="size-7 sm:size-9 hover:bg-card hover:text-red-600 border hover:border-accent/50 transition-colors cursor-pointer"
+                          title="Delete task"
+                        >
+                          <Trash2 className="size-3 sm:size-4" />
+                        </Button>
                         {/* <Button
                           variant="ghost"
                           size="icon"
