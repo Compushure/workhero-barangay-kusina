@@ -26,4 +26,6 @@ describe('When the manager tries to assign badges', () => {
     cy.get('body').should('be.visible')
   })
 
+  
+
 })
