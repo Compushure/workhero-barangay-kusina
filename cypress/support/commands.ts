@@ -35,3 +35,29 @@
 //     }
 //   }
 // }
+
+Cypress.Commands.add('login', (email: string, password: string) => {
+  cy.task('login', {
+    email: email,
+    password: password,
+  }).then((session) => {
+    console.log(JSON.stringify(session))
+    cy.setCookie('sb-kudwgdpppjanzmclyugl-auth-token', JSON.stringify(session))
+  })
+})
+ 
+// EDIT THIS ADD COMMAND SO THAT IT It works with the actions in the server actions and not the API routes
+Cypress.Commands.add(
+  'addUser',
+  (name: string, email: string, password: string, roleType: string = 'superadmin') => {
+    cy.task('addUser', {
+      name: name,
+      email: email,
+      password: password,
+      roleType: roleType,
+    })
+  }
+)
+Cypress.Commands.add('deleteUser', (email: string) => {
+  cy.task('deleteUser', { email })
+})

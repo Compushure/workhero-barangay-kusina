@@ -15,7 +15,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
-    "smtp:verify": "node scripts/smtp-verify.js"
+    "smtp:verify": "node scripts/smtp-verify.js",
+    "cypress:open": "cross-env NODE_ENV=test cypress open"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -82,6 +83,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "cypress": "^15.10.0",
+    "dotenv": "^16.6.1",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.2.1",
     "husky": "^9.1.7",
