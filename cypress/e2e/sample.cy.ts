@@ -14,9 +14,10 @@ describe('Cypress user-management smoke', () => {
     cy.deleteUser(testUser.email)
   })
 
-  it('visits the root page with a session', () => {
+  it('retains session on admin/manage', () => {
     cy.login(testUser.email, testUser.password)
-    cy.visit('/')
+    cy.visit('/admin/manage')
+    cy.url().should('not.include', '/error')
     cy.get('body').should('be.visible')
   })
 })

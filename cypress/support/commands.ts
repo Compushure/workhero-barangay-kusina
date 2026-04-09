@@ -36,23 +36,16 @@
 //   }
 // }
 
-// need to set cookie to provide session for user when testing
-type LoginTaskResult = {
-  session: Record<string, unknown>;
-  cookieName: string;
-}
-
 Cypress.Commands.add('login', (email: string, password: string) => {
   cy.task('login', {
     email: email,
     password: password,
-  }).then((result) => {
-    const typedResult = result as LoginTaskResult
-    console.log(JSON.stringify(typedResult))
-    cy.setCookie(typedResult.cookieName, JSON.stringify(typedResult.session))
+  }).then((session) => {
+    console.log(JSON.stringify(session))
+    cy.setCookie('sb-kudwgdpppjanzmclyugl-auth-token', JSON.stringify(session))
   })
 })
-
+ 
 // EDIT THIS ADD COMMAND SO THAT IT It works with the actions in the server actions and not the API routes
 Cypress.Commands.add(
   'addUser',

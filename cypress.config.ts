@@ -108,11 +108,8 @@ export default defineConfig({
             throw error ?? new Error("Failed to sign in user");
           }
 
-          const projectRef = getProjectRefFromUrl(getRequiredEnv("NEXT_PUBLIC_SUPABASE_URL"));
-          const cookieName = projectRef ? `sb-${projectRef}-auth-token` : "sb-auth-token";
-
-          console.log("[task:login] Success; returning session and cookie name");
-          return { session: data.session, cookieName };
+          console.log("[task:login] Success; returning session");
+          return data.session;
         },
 
         async addUser(payload: AddUserPayload) {
@@ -171,6 +168,7 @@ export default defineConfig({
             password: payload.password,
             email_confirm: true,
             user_metadata: { name: payload.name ?? null },
+            app_metadata: { user_role: roleType },
           });
 
           if (createError || !createData?.user) {
