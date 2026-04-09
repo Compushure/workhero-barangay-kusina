@@ -82,44 +82,62 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
   const redoMutation = useRedoTask();
   const performMoreOrdersMutation = usePerformMoreOrders();
 
-  const isApprovedTask = task.status?.toLowerCase() === 'approved';
-  const isInReviewTask = task.status?.toLowerCase() === 'in review';
+  // Normalize status once so all checks are consistent and easier to read.
+  const normalizedStatus = task.status?.toLowerCase();
+  const isAssignedTask = normalizedStatus === 'assigned';
+  const isRejectedTask = normalizedStatus === 'rejected';
+  const isApprovedTask = normalizedStatus === 'approved';
+  const isInReviewTask = normalizedStatus === 'in review';
+
+  // High-level task facts used to derive approved-state and action availability.
   const hasClaimedRewards = Boolean(task.claimedAt);
   const hasRemainingOrders = remainingOrders > 0;
+  const hasNoPendingOrders = task.pendingOrders === 0;
+  const hasNoRemainingOrders = !hasRemainingOrders;
   const hasDishServed = !hasRemainingOrders && Boolean(task.completedAt);
 
   const approvedTaskState: ApprovedTaskState | null = useMemo(() => {
+    // Approved-state variants only apply when the task is already approved.
     if (!isApprovedTask) return null;
 
+    // Rewards not claimed yet, and there is still work left.
     if (!hasClaimedRewards && hasRemainingOrders) {
       return 'unclaimed-with-remaining';
     }
 
+    // Rewards already claimed, but user can still continue orders.
     if (hasClaimedRewards && hasRemainingOrders) {
       return 'claimed-with-remaining';
     }
 
-    if (!hasClaimedRewards && !hasRemainingOrders) {
+    // No orders left, but rewards still unclaimed.
+    if (!hasClaimedRewards && hasNoRemainingOrders) {
       return 'unclaimed-no-remaining';
     }
 
+    // No remaining orders and rewards were claimed.
+    // Distinguish whether dish serving was completed.
     if (hasDishServed) {
       return 'claimed-no-remaining-served';
     }
 
     return 'claimed-no-remaining-unserved';
-  }, [hasClaimedRewards, hasDishServed, hasRemainingOrders, isApprovedTask]);
+  }, [hasClaimedRewards, hasDishServed, hasNoRemainingOrders, hasRemainingOrders, isApprovedTask]);
 
-  const canSubmitRaw =
-    task.status?.toLowerCase() === 'assigned' && remainingOrders > 0 && !submitMutation.isSuccess;
+  // "Raw" action flags ignore overdue checks.
+  // These are useful for showing disabled actions + tooltip reasons when overdue.
+  const canSubmitRaw = isAssignedTask && hasRemainingOrders && !submitMutation.isSuccess;
   const isSubmitOverdueBlocked = canSubmitRaw && isOverdue;
   const canSubmit = canSubmitRaw && !isOverdue;
-  const canRedoRaw = task.status?.toLowerCase() === 'rejected' && !redoMutation.isSuccess;
+
+  const canRedoRaw = isRejectedTask && !redoMutation.isSuccess;
   const isRedoOverdueBlocked = canRedoRaw && isOverdue;
   const canRedo = canRedoRaw && !isOverdue;
+
   const canPerformMoreOrdersRaw =
+    // User can continue only after claiming rewards and clearing pending verification count.
     approvedTaskState === 'claimed-with-remaining' &&
-    task.pendingOrders === 0 &&
+    hasNoPendingOrders &&
     !performMoreOrdersMutation.isSuccess;
   const isPerformOverdueBlocked = canPerformMoreOrdersRaw && isOverdue;
   const canPerformMoreOrders = canPerformMoreOrdersRaw && !isOverdue;
@@ -392,7 +410,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
               </p>
             ) : null}
 
-            {task.status === 'in review' ? (
+            {isInReviewTask ? (
               <p className="rounded-lg border-2 border-[#d4c5a8] bg-[#fff8ec] px-3 py-2 text-center text-[14px] text-[#6b5038]">
                 Submitted for verification. Pending request for {task.pendingOrders} order
                 {task.pendingOrders === 1 ? '' : 's'}.
