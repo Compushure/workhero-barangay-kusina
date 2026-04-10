@@ -555,8 +555,8 @@
   }
 
   .kitchen-btn {
-    background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dark) 100%);
-    border: 3px solid var(--pixel-border);
+    background: linear-gradient(180deg, #fbbe45 0%, #e89d2d 100%);
+    border: 2.5px solid var(--pixel-border);
     color: #211a12;
     box-shadow: 4px 4px 0 rgba(71, 51, 31, 0.72);
     transition: all 0.15s ease;
