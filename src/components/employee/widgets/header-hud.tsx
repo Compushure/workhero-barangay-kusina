@@ -10,6 +10,7 @@ import { MapLauncher } from '../minimap/map-launcher';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { RankWidget } from '../dashboard/rank-panel';
+import { DialogTitle } from '@radix-ui/react-dialog';
 
 interface HeaderHUDProps {
   className?: string;
@@ -38,7 +39,7 @@ export default function HeaderHUD({
       </div>
 
       <div className="pointer-events-auto fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
-        <div className="flex items-center gap-5 rounded-lg bg-black/25 shadow-md/25 px-3 py-1.5 backdrop-blur-[1px]">
+        <div className="flex items-center gap-5 rounded-lg border-2 border-[#47331F]/50 bg-[#eadbc1]/75 shadow-md/25 px-3 py-1.5 backdrop-blur-[1px]">
             <div className="shrink-0">
               <Dialog>
                 <Tooltip>
@@ -61,6 +62,7 @@ export default function HeaderHUD({
                 </Tooltip>
 
                 <DialogContent className="w-[92vw] max-w-sm border-none bg-transparent p-0 shadow-none [&>button]:text-white">
+                  <DialogTitle className='hidden'>Rank Widget</DialogTitle>
                   <RankWidget className="mb-0! ml-0! w-full!" />
                 </DialogContent>
               </Dialog>

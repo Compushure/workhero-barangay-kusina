@@ -177,20 +177,35 @@ export function applyOptimisticTaskClaim(
     ...existingTask,
     claimedAt: new Date().toISOString(),
     pendingOrders: 0,
+    status: 'approved',
   };
 
-  if (claimedTask.completedOrders < claimedTask.maxOrders) {
-    nextData.verifiedTasks.splice(verifiedIndex, 1);
-    nextData.currentTasks = prependTask(nextData.currentTasks, {
-      ...claimedTask,
-      status: 'assigned',
-    });
-    return nextData;
+  nextData.verifiedTasks.splice(verifiedIndex, 1, claimedTask);
+
+  return nextData;
+}
+
+export function applyOptimisticPerformMoreOrders(
+  data: EmployeeTaskBoardData,
+  taskId: string
+): EmployeeTaskBoardData {
+  const verifiedIndex = data.verifiedTasks.findIndex((task) => task.id === taskId);
+
+  if (verifiedIndex < 0) {
+    return data;
   }
 
-  nextData.verifiedTasks.splice(verifiedIndex, 1, {
-    ...claimedTask,
-    status: 'approved',
+  const nextData = cloneEmployeeTaskBoardData(data);
+  const [verifiedTask] = nextData.verifiedTasks.splice(verifiedIndex, 1);
+
+  if (!verifiedTask) {
+    return data;
+  }
+
+  nextData.currentTasks = prependTask(nextData.currentTasks, {
+    ...verifiedTask,
+    status: 'assigned',
+    pendingOrders: 0,
   });
 
   return nextData;

@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import type { ServerActionResponse } from '@/types';
 import type { TaskStatusItem } from '@/components/employee/task-status/types';
 import { insertNotification } from '@/lib/notifications';
+import { isTaskOverdue } from '@/utils/date-utils';
 
 export interface EmployeeTasksData {
   currentTasks: TaskStatusItem[];
@@ -329,7 +330,7 @@ export async function submitTaskVerification(
   const { data: task, error: taskError } = await supabase
     .from('task_info_view')
     .select(
-      'assigned_to, status, completed_orders, pending_orders, max_orders, points_claimed_at, category_name'
+      'assigned_to, status, completed_orders, pending_orders, max_orders, points_claimed_at, category_name, k_deadline_date'
     )
     .eq('kpitask_id', kpitaskId)
     .single();
@@ -344,6 +345,7 @@ export async function submitTaskVerification(
   const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
   const pointsClaimedAt = (task as { points_claimed_at: string | null }).points_claimed_at;
   const taskName = (task as { category_name: string | null }).category_name ?? 'Task';
+  const dueDate = (task as { k_deadline_date: string | null }).k_deadline_date;
 
   // Validation checks
   if (assignedTo !== user.id) {
@@ -352,6 +354,10 @@ export async function submitTaskVerification(
 
   if (status !== 'assigned') {
     return { error: 'Only assigned tasks can be submitted for verification', data: undefined };
+  }
+
+  if (isTaskOverdue(dueDate)) {
+    return { error: 'unable to submit overdue tasks', data: undefined };
   }
 
   // Calculate remaining orders that can be submitted
@@ -423,7 +429,7 @@ export async function redoTask(kpitaskId: string): Promise<ServerActionResponse<
   // Fetch task details to verify ownership and status
   const { data: task, error: taskError } = await supabase
     .from('task_info_view')
-    .select('assigned_to, status')
+    .select('assigned_to, status, k_deadline_date')
     .eq('kpitask_id', kpitaskId)
     .single();
 
@@ -433,6 +439,7 @@ export async function redoTask(kpitaskId: string): Promise<ServerActionResponse<
 
   const assignedTo = (task as { assigned_to: string | null }).assigned_to;
   const status = ((task as { status: string | null }).status ?? '').toLowerCase();
+  const dueDate = (task as { k_deadline_date: string | null }).k_deadline_date;
 
   // Validation checks
   if (assignedTo !== user.id) {
@@ -441,6 +448,10 @@ export async function redoTask(kpitaskId: string): Promise<ServerActionResponse<
 
   if (status !== 'rejected') {
     return { error: 'Only rejected tasks can be redone', data: undefined };
+  }
+
+  if (isTaskOverdue(dueDate)) {
+    return { error: 'unable to redo overdue tasks', data: undefined };
   }
 
   // Update task status back to 'assigned'
@@ -484,6 +495,99 @@ export async function redoTask(kpitaskId: string): Promise<ServerActionResponse<
   };
 }
 
+export async function performMoreOrders(
+  kpitaskId: string
+): Promise<ServerActionResponse<boolean>> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: 'Not authenticated', data: undefined };
+  }
+
+  const { data: task, error: taskError } = await supabase
+    .from('task_info_view')
+    .select(
+      'assigned_to, status, points_claimed_at, completed_orders, pending_orders, max_orders, category_name, k_deadline_date'
+    )
+    .eq('kpitask_id', kpitaskId)
+    .single();
+
+  if (taskError || !task) {
+    return { error: 'Task not found', data: undefined };
+  }
+
+  const assignedTo = (task as { assigned_to: string | null }).assigned_to;
+  const status = ((task as { status: string | null }).status ?? '').toLowerCase();
+  const pointsClaimedAt = (task as { points_claimed_at: string | null }).points_claimed_at;
+  const completedOrders = (task as { completed_orders: number | null }).completed_orders ?? 0;
+  const pendingOrders = (task as { pending_orders: number | null }).pending_orders ?? 0;
+  const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
+  const taskName = (task as { category_name: string | null }).category_name ?? 'Task';
+  const dueDate = (task as { k_deadline_date: string | null }).k_deadline_date;
+
+  if (assignedTo !== user.id) {
+    return { error: 'You can only continue tasks assigned to you', data: undefined };
+  }
+
+  if (status !== 'approved') {
+    return { error: 'Only approved tasks can be moved back to current', data: undefined };
+  }
+
+  if (!pointsClaimedAt) {
+    return { error: 'Claim task rewards first before continuing this task', data: undefined };
+  }
+
+  if (pendingOrders > 0) {
+    return { error: 'Claim pending approved orders before continuing this task', data: undefined };
+  }
+
+  if (completedOrders >= maxOrders) {
+    return { error: 'This task is already fully completed', data: undefined };
+  }
+
+  if (isTaskOverdue(dueDate)) {
+    return { error: 'unable to submit remaining orders for overdue tasks', data: undefined };
+  }
+
+  const { error: updateError } = await supabase
+    .from('KPITask')
+    .update({
+      status: 'assigned',
+      pending_orders: 0,
+    })
+    .eq('id', kpitaskId)
+    .eq('assigned_to', user.id);
+
+  if (updateError) {
+    return {
+      error: 'Failed to move task back to current: ' + updateError.message,
+      data: undefined,
+    };
+  }
+
+  await insertNotification({
+    userId: user.id,
+    type: 'task',
+    message: `You can continue cooking "${taskName}". Submit more completed orders once ready.`,
+    metadata: {
+      taskId: kpitaskId,
+      taskName,
+      status: 'assigned',
+      action: 'perform-more-orders',
+    },
+  });
+
+  return {
+    error: null,
+    data: true,
+  };
+}
+
 export async function claimTaskPointsAndXP(
   kpitaskId: string
 ): Promise<ServerActionResponse<ClaimTaskResult>> {
@@ -517,7 +621,13 @@ export async function claimTaskPointsAndXP(
   const maxOrders = (task as { max_orders: number | null }).max_orders ?? 1;
   const pendingOrders = (task as { pending_orders: number | null }).pending_orders ?? 0;
   const categoryName = (task as { category_name: string | null }).category_name ?? 'Task';
-  const isLastOrderClaim = pendingOrders > 0 && completedOrders >= maxOrders;
+  const claimableOrders =
+    pendingOrders > 0
+      ? pendingOrders
+      : !pointsClaimedAt && completedOrders > 0
+        ? completedOrders
+        : 0;
+  const isLastOrderClaim = claimableOrders > 0 && completedOrders >= maxOrders;
 
   if (assignedTo !== user.id) {
     return { error: 'You can only claim rewards for tasks assigned to you', data: undefined };
@@ -526,12 +636,11 @@ export async function claimTaskPointsAndXP(
     return { error: 'Only approved tasks can be claimed', data: undefined };
   }
 
-  // Check if there are unclaimed completed orders
-  if (pendingOrders === 0 && completedOrders === maxOrders) {
+  if (claimableOrders <= 0) {
     return { error: 'No completed orders available to claim', data: undefined };
   }
 
-  const pointsToAdd = categoryPoints * pendingOrders;
+  const pointsToAdd = categoryPoints * claimableOrders;
 
   const { data: currentPointsData, error: currentPointsError } = await supabaseAdmin
     .from('User')
@@ -571,7 +680,7 @@ export async function claimTaskPointsAndXP(
   const currentLevel = (userRow as { level: number | null }).level ?? 0;
   const currentXp = (userRow as { xp: number | null }).xp ?? 0;
   const currentTotalXp = (userRow as { total_xp: number | null }).total_xp;
-  const xpToAdd = categoryXp * pendingOrders;
+  const xpToAdd = categoryXp * claimableOrders;
 
   const { data: levelRows, error: levelRowsError } = await supabase
     .from('Level')
@@ -645,8 +754,7 @@ export async function claimTaskPointsAndXP(
     .from('KPITask')
     .update({
       points_claimed_at: new Date().toISOString(),
-      // Update status back to assigned if there are remaining orders after this claim
-      status: completedOrders < maxOrders ? 'assigned' : 'approved',
+      status: 'approved',
       pending_orders: 0,
     })
     .eq('id', kpitaskId);
@@ -716,9 +824,9 @@ export async function claimTaskPointsAndXP(
     metadata: {
       taskId: kpitaskId,
       taskName: categoryName,
-      status: completedOrders < maxOrders ? 'assigned' : 'completed',
+      status: 'approved',
       pointsEarned,
-      xpEarned: categoryXp * pendingOrders,
+      xpEarned: categoryXp * claimableOrders,
       leveledUp: newLevel > currentLevel,
       newLevel,
       previousLevel: currentLevel,
@@ -730,6 +838,6 @@ export async function claimTaskPointsAndXP(
 
   return {
     error: null,
-    data: { pointsAdded: pointsToAdd, xpAdded: categoryXp * pendingOrders, cookOutcome },
+    data: { pointsAdded: pointsToAdd, xpAdded: categoryXp * claimableOrders, cookOutcome },
   };
 }
