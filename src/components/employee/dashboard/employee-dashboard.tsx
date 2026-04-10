@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 // import ProfileAndLevel from '../attendance/profile-level';
 // import XPProgressAndPoints from '../attendance/xp-points';
 // import NavSection from '../nav-section';
@@ -15,6 +15,7 @@ import { useGetAllLevelMetadata, useGetEmployeeXP } from '@/hooks/tanstack/queri
 
 export default function EmployeeDashboardClient() {
   const [isRewardFeedbackModalOpen, setIsRewardFeedbackModalOpen] = useState(false);
+  const [isBackgroundReady, setIsBackgroundReady] = useState(false);
   const { data: xpData, isLoading: isXpLoading } = useGetEmployeeXP();
   const { data: levelMetadata, isLoading: isLevelMetadataLoading } = useGetAllLevelMetadata();
 
@@ -30,22 +31,63 @@ export default function EmployeeDashboardClient() {
     return dbLink && dbLink.length > 0 ? dbLink : null;
   }, [levelMetadata, xpData?.level]);
 
-  const showBackgroundSkeleton = !kitchenBackgroundUrl && (isXpLoading || isLevelMetadataLoading);
+  useEffect(() => {
+    if (!kitchenBackgroundUrl) {
+      setIsBackgroundReady(false);
+      return;
+    }
+
+    let isCancelled = false;
+    const preloadImage = new window.Image();
+
+    const markReady = () => {
+      if (!isCancelled) {
+        setIsBackgroundReady(true);
+      }
+    };
+
+    setIsBackgroundReady(false);
+    preloadImage.onload = markReady;
+    preloadImage.onerror = markReady;
+    preloadImage.src = kitchenBackgroundUrl;
+
+    if (preloadImage.complete) {
+      markReady();
+    }
+
+    return () => {
+      isCancelled = true;
+      preloadImage.onload = null;
+      preloadImage.onerror = null;
+    };
+  }, [kitchenBackgroundUrl]);
+
+  const isBackgroundMetadataLoading = isXpLoading || isLevelMetadataLoading;
+  const showBackgroundSkeleton =
+    isBackgroundMetadataLoading || (Boolean(kitchenBackgroundUrl) && !isBackgroundReady);
 
   return (
-    <div
-      className="relative flex min-h-screen flex-col overflow-hidden bg-[#e3bf73] bg-cover bg-center bg-no-repeat"
-      style={
-        kitchenBackgroundUrl ? { backgroundImage: `url('${kitchenBackgroundUrl}')` } : undefined
-      }
-    >
-      {showBackgroundSkeleton ? (
-        <div className="pointer-events-none absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-linear-to-br from-[#f6e5b3] via-[#f9cb5e] to-[#c7831d]" />
-          <div className="absolute inset-0 animate-[pulse_1.8s_ease-in-out_infinite] bg-linear-to-r from-[#fff6d5]/0 via-[#fff6d5]/55 to-[#fff6d5]/0" />
-          <div className="absolute inset-0 animate-[pulse_2.6s_ease-in-out_infinite] bg-linear-to-b from-[#f9d882]/28 via-transparent to-[#c9862f]/18" />
-        </div>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#e3bf73]">
+      {kitchenBackgroundUrl ? (
+        <div
+          className={`pointer-events-none absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 ease-out ${
+            isBackgroundReady ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ backgroundImage: `url('${kitchenBackgroundUrl}')` }}
+          aria-hidden
+        />
       ) : null}
+
+      <div
+        className={`pointer-events-none absolute inset-0 z-1 transition-opacity duration-500 ease-out ${
+          showBackgroundSkeleton ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden
+      >
+        <div className="absolute inset-0 bg-linear-to-br from-[#f6e5b3] via-[#f9cb5e] to-[#c7831d]" />
+        <div className="absolute inset-0 animate-[pulse_1.8s_ease-in-out_infinite] bg-linear-to-r from-[#fff6d5]/0 via-[#fff6d5]/55 to-[#fff6d5]/0" />
+        <div className="absolute inset-0 animate-[pulse_2.6s_ease-in-out_infinite] bg-linear-to-b from-[#f9d882]/28 via-transparent to-[#c9862f]/18" />
+      </div>
 
       <div className="relative z-10 flex min-h-screen flex-col">
         {/* Overlay top widgets (do not affect layout flow) */}
@@ -60,10 +102,8 @@ export default function EmployeeDashboardClient() {
           </div>
         </div>
 
-        {/* Preserve original vertical placement after moving HUD to overlay */}
         <div className="h-26 sm:h-28" aria-hidden="true" />
 
-        {/* Row 2: Nav (20%) + Cooking (60%) + Rank (20%) */}
         <section className="relative flex h-87 flex-none gap-4 p-4">
           {/* Background image layer only for Row 2 */}
           <div
