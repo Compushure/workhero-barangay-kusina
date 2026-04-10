@@ -45,7 +45,7 @@ function WideDialogContent({ children, className, ...props }: DialogContentProps
     >
       <DialogClose
         aria-label="Close"
-        className="absolute right-4 top-3 z-10 h-10 w-10 rounded-full bg-[#e4d3b3] text-[#3f2a1a] border-2 border-[#a88961] transition hover:scale-105 hover:bg-[#dcc7a2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8a6844]/60 focus-visible:ring-offset-[#eadbc1] cursor-pointer flex items-center justify-center"
+        className="absolute right-4 top-4 z-20 h-10 w-10 rounded-full border-2 border-[#a88961] bg-[#e4d3b3] text-[#3f2a1a] transition hover:scale-105 hover:bg-[#dcc7a2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8a6844]/60 focus-visible:ring-offset-[#eadbc1] cursor-pointer flex items-center justify-center"
       >
         <XIcon className="h-5 w-5" />
       </DialogClose>
@@ -152,7 +152,7 @@ export default function TaskIcon() {
                 />
                 {hasRewards ? (
                   <span
-                    className="absolute -top-2 -right-2 min-w-[1.35rem] h-[1.1rem] rounded-full bg-[#F4B925] px-1 text-center font-pixel text-[8px] leading-[1.1rem] text-[#2f2115] border border-[#47331F] shadow-[0_0_8px_2px_#F4B925]"
+                    className="absolute -top-2 -right-2 min-w-[1.35rem] rounded-full bg-[#F4B925] px-2 py-0.5 text-center font-pixel text-[1.1rem] leading-[1.1rem] text-[#2f2115] border border-[#47331F] shadow-[0_0_8px_2px_#F4B925]"
                     aria-label={`${taskBadgeLabel} claimable quick tasks`}
                   >
                     {taskBadgeLabel}
@@ -171,7 +171,7 @@ export default function TaskIcon() {
       </Tooltip>
 
       <WideDialogContent>
-        <DialogHeader className="border-b border-[#8a6844]/30 bg-[#e1d2b7] px-4 py-3">
+        <DialogHeader className="space-y-2 border-b border-[#8a6844]/30 bg-[#e1d2b7] px-4 py-3 pr-16 text-left">
           <DialogTitle className="text-[16px] text-center font-pixel text-[#3f2a1a] tracking-wider leading-relaxed">
             Claimable Tasks
           </DialogTitle>

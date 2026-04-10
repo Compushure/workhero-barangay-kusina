@@ -424,34 +424,22 @@ export default function TasksTable({
                       <span>{task.xp}</span>
                     </span>
                     <span
-                      className="inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 border-[#d4c5a8] bg-[#f3e4c9] px-2 py-0.5 leading-none text-[#6b5038]"
-                      title="Approved orders for this request"
+                      className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 px-2 py-0.5 leading-none ${
+                        task.completedOrders === task.maxOrders
+                          ? 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]'
+                          : 'border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038]'
+                      }`}
+                      title="Order progress"
                     >
                       <Soup className="h-3.5 w-3.5 shrink-0" />
                       <span>
-                        {Math.max(
-                          1,
-                          claimableOrderCount,
-                          cookOutcome?.orderCount || 0,
-                          task.cookOrderCount || 0,
-                          task.maxOrders
-                        )}{' '}
-                        ORDER
-                        {Math.max(
-                          1,
-                          claimableOrderCount,
-                          cookOutcome?.orderCount || 0,
-                          task.cookOrderCount || 0,
-                          task.maxOrders
-                        ) === 1
-                          ? ''
-                          : 'S'}
+                        ORDERS {task.completedOrders}/{task.maxOrders}
                       </span>
                     </span>
                   </div>
                 </div>
 
-                <div className="flex w-full flex-col gap-2 sm:flex-row md:w-auto md:justify-end">
+                <div className="flex flex-row gap-2 md:flex-col w-auto md:justify-end">
                   <Button
                     size="sm"
                     onClick={() => handleClaim(task)}
@@ -462,7 +450,7 @@ export default function TasksTable({
                       isServerPrepareEligible ||
                       claimableOrderCount <= 0
                     }
-                    className="kitchen-btn h-10 px-4 font-pixel text-[14px] hover:brightness-105"
+                    className="kitchen-btn h-10 px-4 font-pixel text-[0.9rem] hover:brightness-105"
                   >
                     {isClaimingTask ? (
                       'Claiming...'
@@ -470,7 +458,7 @@ export default function TasksTable({
                       'Claimed'
                     ) : (
                       <span className="inline-flex items-center gap-1">
-                        <span>CLAIM</span>
+                        <span className='pr-0.5'>CLAIM</span>
                         <Coins className="h-3.5 w-3.5 shrink-0" />
                         <span>{totalPoints}</span>
                         <span>|</span>
@@ -484,7 +472,7 @@ export default function TasksTable({
                       size="sm"
                       onClick={() => handlePrepareFood(task)}
                       disabled={!canPrepareFood}
-                      className="h-10 px-4 font-pixel text-[14px] border-2 border-[#47331F] bg-[#4d6d3a] text-[#f8edd8] shadow-[3px_3px_0px_#2e421f] hover:bg-[#5a7e45] disabled:cursor-not-allowed disabled:opacity-55"
+                      className="h-10 px-4 font-pixel text-[0.9rem] border-2 border-[#47331F] bg-[#4d6d3a] text-[#f8edd8] shadow-[3px_3px_0px_#2e421f] hover:bg-[#5a7e45] disabled:cursor-not-allowed disabled:opacity-55"
                     >
                       {isPreparingTask
                         ? 'Preparing...'

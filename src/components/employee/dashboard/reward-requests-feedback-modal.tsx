@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
-import { MessageSquareMore } from 'lucide-react';
+import { Coins, MessageSquareMore, Package } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -106,6 +106,7 @@ function RequestSection({
             const isApproved = request.status === 'approved';
             const hasFeedback = Boolean(request.remarks?.trim());
             const statusLabel = isApproved ? 'Approved' : 'Declined';
+            const totalPointsCost = request.pointsCost * request.quantity;
             const statusClasses = isApproved
               ? 'border-[#2f7b4a]/35 bg-[#e3f2e6] text-[#1f5a36]'
               : 'border-[#9b3a3a]/35 bg-[#f8e2e2] text-[#7b2727]';
@@ -142,9 +143,22 @@ function RequestSection({
                   </div>
                 </div>
 
-                <p className="font-pixel text-[14px] text-[#6b5038]">
-                  Qty {request.quantity} • {request.pointsCost * request.quantity} pts
-                </p>
+                <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                  <span
+                    className="inline-flex items-center gap-1 rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-2 py-0.5 font-pixel text-[14px] text-[#204b61]"
+                    title="Requested quantity"
+                  >
+                    <Package className="h-3.5 w-3.5 shrink-0" />
+                    <span>Qty {request.quantity}</span>
+                  </span>
+                  <span
+                    className="inline-flex items-center gap-1 rounded-md border-2 border-[#e5d08a] bg-amber-100 px-2 py-0.5 font-pixel text-[14px] text-[#6b5038]"
+                    title="Total points cost"
+                  >
+                    <Coins className="h-3.5 w-3.5 shrink-0" />
+                    <span>{totalPointsCost} pts</span>
+                  </span>
+                </div>
 
                 {hasFeedback && isExpanded && (
                   <div className="mt-1.5 h-20 overflow-y-auto scrollbar-hide rounded-lg border border-[#9b7a56]/30 bg-[#f3e5cc] px-2 py-1.5 animate-in fade-in-0 zoom-in-95 duration-200">
@@ -261,32 +275,36 @@ export function RewardRequestsFeedbackModal({
           ✕
         </DialogClose>
 
-        <DialogHeader className="border-b-2 border-[#8a6844]/30 bg-[#e1d2b7] px-5 py-4 gap-2">
-          <DialogTitle className="font-pixel text-[16px] text-[#3f2a1a] leading-relaxed pr-18">
+        <DialogHeader className="space-y-2 border-b-2 border-[#8a6844]/30 bg-[#e1d2b7] px-5 py-3 text-left">
+          <DialogTitle className="pr-14 font-pixel text-base leading-relaxed text-[#3f2a1a]">
             Reward Request Feedbacks
           </DialogTitle>
-          <DialogDescription className="font-pixel text-[14px] leading-relaxed text-[#6b5038] pr-18">
+          <DialogDescription className="pr-14 font-pixel text-[14px] leading-relaxed text-[#6b5038]">
             View your approved and declined reward requests with HR feedback.
           </DialogDescription>
 
-          <Tabs value={statusFilter} onValueChange={handleStatusFilterChange} className="mt-2">
-            <TabsList className="mx-auto grid w-full max-w-145 grid-cols-2 rounded-xl border border-[#9b7a56]/45 bg-[#efdec1] p-1">
+          <Tabs
+            value={statusFilter}
+            onValueChange={handleStatusFilterChange}
+            className="w-full px-1"
+          >
+            <TabsList className="grid h-9 w-full grid-cols-2 gap-2 rounded-lg border border-[#9b7a56]/45 bg-[#efdec1]">
               <TabsTrigger
                 value="approved"
-                className="font-pixel text-[14px] data-[state=active]:bg-[#d8efdb] data-[state=active]:text-[#1f5a36] data-[state=active]:border data-[state=active]:border-[#7eb07f]/45"
+                className="h-full rounded-md border border-transparent font-pixel text-[14px] font-medium tracking-wide text-[#6b5038] data-[state=inactive]:hover:bg-[#e6d7b9] data-[state=active]:border-[#7eb07f]/45 data-[state=active]:bg-[#d8efdb] data-[state=active]:text-[#1f5a36] data-[state=active]:shadow-none"
               >
                 Approved ({approvedRequests.length})
               </TabsTrigger>
               <TabsTrigger
                 value="declined"
-                className="font-pixel text-[14px] data-[state=active]:bg-[#f8e2e2] data-[state=active]:text-[#7b2727] data-[state=active]:border data-[state=active]:border-[#9b3a3a]/35"
+                className="h-full rounded-md border border-transparent font-pixel text-[14px] font-medium tracking-wide text-[#6b5038] data-[state=inactive]:hover:bg-[#e6d7b9] data-[state=active]:border-[#9b3a3a]/35 data-[state=active]:bg-[#f8e2e2] data-[state=active]:text-[#7b2727] data-[state=active]:shadow-none"
               >
                 Declined ({declinedRequests.length})
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <div className="mt-2 grid w-full max-w-145 gap-2 sm:grid-cols-[1fr_auto] sm:mx-auto">
+          <div className="grid w-full gap-2 sm:grid-cols-[1fr_auto]">
             <div className="flex items-center gap-2 w-full">
               <Input
                 value={searchTerm}
@@ -314,7 +332,9 @@ export function RewardRequestsFeedbackModal({
 
         <div className="max-h-[58vh] space-y-3 overflow-y-auto px-5 py-3 bg-[#eadbc1]">
           {isLoading ? (
-            <p className="font-pixel text-[14px] text-[#6b5038] animate-pulse">Loading request updates...</p>
+            <p className="font-pixel text-[14px] text-[#6b5038] animate-pulse">
+              Loading request updates...
+            </p>
           ) : !hasReviewedRequests ? (
             <div className="kitchen-chip mx-auto max-w-105 px-3 py-2 text-center font-pixel text-[14px]">
               No approved or declined reward requests yet.
