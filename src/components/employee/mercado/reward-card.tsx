@@ -74,7 +74,14 @@ export const RewardCard = memo(function RewardCard({
       redeemMutation.isPending ||
       maxSelectable <= 0
     );
-  }, [canAfford, isOutOfStock, hasPendingRequest, isSubmitting, redeemMutation.isPending, maxSelectable]);
+  }, [
+    canAfford,
+    isOutOfStock,
+    hasPendingRequest,
+    isSubmitting,
+    redeemMutation.isPending,
+    maxSelectable,
+  ]);
 
   const isProcessing = isSubmitting || redeemMutation.isPending;
 
