@@ -21,6 +21,14 @@ type AddUserPayload = {
   pagibigId?: string | null;
 };
 
+type AddBadgePayload = {
+  name: string;
+  description?: string | null;
+  points?: number;
+  awardAtInterval?: "none" | "daily" | "monthly" | "anually";
+  createdByEmail?: string | null;
+};
+
 function getRequiredEnv(key: string): string {
   const value = process.env[key]?.trim();
 
@@ -125,18 +133,6 @@ export default defineConfig({
             .eq("email", normalizedEmail)
             .maybeSingle();
 
-          if (existingUser?.id) {
-            console.log("[task:addUser] User already exists in User table");
-            await supabase.auth.admin
-              .updateUserById(existingUser.id, {
-                password: payload.password,
-                user_metadata: { name: payload.name ?? null },
-                app_metadata: { user_role: roleType },
-              })
-              .catch(() => undefined);
-            return { userId: existingUser.id, email: normalizedEmail, existed: true };
-          }
-
           let roleId: string | null = null;
           const roleQuery = await supabase
             .from("Role")
@@ -170,26 +166,60 @@ export default defineConfig({
             roleId = roleInsert.id;
           }
 
-          const { data: createData, error: createError } = await supabase.auth.admin.createUser({
-            email: normalizedEmail,
-            password: payload.password,
-            email_confirm: true,
-            user_metadata: { name: payload.name ?? null },
-            app_metadata: { user_role: roleType },
+          let authUser = null as null | { id: string; email?: string | null };
+          const { data: existingAuthUsers, error: listError } = await supabase.auth.admin.listUsers({
+            page: 1,
+            perPage: 1000,
           });
 
-          if (createError || !createData?.user) {
-            throw new Error(createError?.message || "Failed to create auth user");
+          if (listError) {
+            throw new Error(`Failed to list auth users: ${listError.message}`);
           }
 
-          const newUser = createData.user;
+          authUser =
+            existingAuthUsers?.users?.find(
+              (user) => user.email?.toLowerCase() === normalizedEmail
+            ) ?? null;
+
+          if (!authUser) {
+            const { data: createData, error: createError } = await supabase.auth.admin.createUser({
+              email: normalizedEmail,
+              password: payload.password,
+              email_confirm: true,
+              user_metadata: { name: payload.name ?? null },
+              app_metadata: { user_role: roleType },
+            });
+
+            if (createError || !createData?.user) {
+              throw new Error(createError?.message || "Failed to create auth user");
+            }
+
+            authUser = createData.user;
+          } else {
+            await supabase.auth.admin
+              .updateUserById(authUser.id, {
+                password: payload.password,
+                user_metadata: { name: payload.name ?? null },
+                app_metadata: { user_role: roleType },
+              })
+              .catch(() => undefined);
+          }
+
+          if (existingUser?.id && authUser && existingUser.id !== authUser.id) {
+            console.log(
+              "[task:addUser] Found public user row with mismatched id; recreating",
+              existingUser.id,
+              authUser.id
+            );
+            await supabase.from("User").delete().eq("id", existingUser.id);
+          }
 
           const normalizedEmploymentStatus = payload.employmentStatus?.trim().toLowerCase();
 
           const insertPayload = {
-            id: newUser.id,
+            id: authUser.id,
             email: normalizedEmail,
-            name: payload.name ?? newUser.email ?? null,
+            name: payload.name ?? authUser.email ?? null,
             date_added: new Date().toISOString(),
             employee_id: payload.employeeId || null,
             contact_details: payload.contactDetails || null,
@@ -201,15 +231,16 @@ export default defineConfig({
             role_id: roleId,
           };
 
-          const { error: insertError } = await supabase.from("User").insert([insertPayload]);
+          const { error: insertError } = await supabase
+            .from("User")
+            .upsert([insertPayload], { onConflict: "id" });
 
           if (insertError) {
-            await supabase.auth.admin.deleteUser(newUser.id).catch(() => undefined);
             throw new Error(`Failed to insert user row: ${insertError.message}`);
           }
 
-          console.log("[task:addUser] Created user", newUser.id);
-          return { userId: newUser.id, email: normalizedEmail, existed: false };
+          console.log("[task:addUser] Created user", authUser.id);
+          return { userId: authUser.id, email: normalizedEmail, existed: false };
         },
 
         async deleteUser({ email }: { email: string }) {
@@ -269,6 +300,93 @@ export default defineConfig({
           }
 
           console.log("[task:deleteUser] Deleted user", userId);
+          return { deleted: true };
+        },
+
+        async addBadge(payload: AddBadgePayload) {
+          console.log("[task:addBadge] Creating badge", payload.name);
+
+          const supabase = createServiceRoleClient();
+          const badgeName = payload.name.trim();
+          const description = payload.description?.trim() || null;
+          const points = payload.points ?? 10;
+          const awardAtInterval = payload.awardAtInterval ?? "none";
+
+          let createdBy: string | null = null;
+          if (payload.createdByEmail) {
+            const { data: creatorRow } = await supabase
+              .from("User")
+              .select("id")
+              .eq("email", normalizeEmail(payload.createdByEmail))
+              .maybeSingle();
+            createdBy = creatorRow?.id ?? null;
+          }
+
+          const { data: existingBadge, error: existingBadgeError } = await supabase
+            .from("Badges")
+            .select("id")
+            .eq("name", badgeName)
+            .maybeSingle();
+
+          if (existingBadgeError) {
+            throw new Error(`Failed to lookup badge by name: ${existingBadgeError.message}`);
+          }
+
+          if (existingBadge?.id) {
+            const { error: updateError } = await supabase
+              .from("Badges")
+              .update({
+                description,
+                points,
+                award_at_interval: awardAtInterval,
+                img_link: null,
+                created_by: createdBy,
+              })
+              .eq("id", existingBadge.id);
+
+            if (updateError) {
+              throw new Error(`Failed to update badge: ${updateError.message}`);
+            }
+
+            console.log("[task:addBadge] Updated existing badge", existingBadge.id);
+            return { badgeId: existingBadge.id };
+          }
+
+          const { data: badgeRow, error: badgeError } = await supabase
+            .from("Badges")
+            .insert({
+              name: badgeName,
+              description,
+              points,
+              award_at_interval: awardAtInterval,
+              img_link: null,
+              created_by: createdBy,
+            })
+            .select("id")
+            .single();
+
+          if (badgeError || !badgeRow?.id) {
+            throw new Error(`Failed to add badge: ${badgeError?.message || "Unknown error"}`);
+          }
+
+          console.log("[task:addBadge] Created badge", badgeRow.id);
+          return { badgeId: badgeRow.id };
+        },
+
+        async deleteBadge({ badgeId }: { badgeId: string }) {
+          console.log("[task:deleteBadge] Deleting badge", badgeId);
+
+          const supabase = createServiceRoleClient();
+
+          await supabase.from("BadgeRequirements").delete().eq("badge_id", badgeId);
+
+          const { error } = await supabase.from("Badges").delete().eq("id", badgeId);
+
+          if (error) {
+            throw new Error(`Failed to delete badge: ${error.message}`);
+          }
+
+          console.log("[task:deleteBadge] Deleted badge", badgeId);
           return { deleted: true };
         },
       });
