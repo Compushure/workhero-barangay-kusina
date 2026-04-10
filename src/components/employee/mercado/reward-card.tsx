@@ -116,7 +116,7 @@ export const RewardCard = memo(function RewardCard({
       )}
 
       <CardContent className="p-0 flex-1 flex flex-col">
-        <div className="relative h-24 sm:h-28 md:h-32 lg:h-36 w-full overflow-hidden bg-[#f0e6d2]">
+        <div className="relative h-20 sm:h-24 md:h-28 lg:h-32 w-full overflow-hidden bg-[#f0e6d2]">
           {reward.imageUrl && !imageError ? (
             <Image
               src={reward.imageUrl}
