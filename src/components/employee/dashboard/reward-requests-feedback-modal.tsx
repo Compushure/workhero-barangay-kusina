@@ -286,18 +286,18 @@ export function RewardRequestsFeedbackModal({
           <Tabs
             value={statusFilter}
             onValueChange={handleStatusFilterChange}
-            className="w-full px-1"
+            className="w-full px-2"
           >
-            <TabsList className="grid h-9 w-full grid-cols-2 gap-2 rounded-lg border border-[#9b7a56]/45 bg-[#efdec1]">
+            <TabsList className="grid h-9 w-full grid-cols-2 gap-2 overflow-hidden rounded-lg border border-[#9b7a56]/45 bg-[#efdec1] p-0.5">
               <TabsTrigger
                 value="approved"
-                className="h-full rounded-md border border-transparent font-pixel text-[14px] font-medium tracking-wide text-[#6b5038] data-[state=inactive]:hover:bg-[#e6d7b9] data-[state=active]:border-[#7eb07f]/45 data-[state=active]:bg-[#d8efdb] data-[state=active]:text-[#1f5a36] data-[state=active]:shadow-none"
+                className="h-full rounded-md border border-transparent font-pixel text-[14px] font-medium tracking-wide text-[#6b5038] shadow-none! data-[state=inactive]:hover:bg-[#e6d7b9] data-[state=active]:border-[#7eb07f]/45 data-[state=active]:bg-[#d8efdb] data-[state=active]:text-[#1f5a36] data-[state=active]:shadow-none!"
               >
                 Approved ({approvedRequests.length})
               </TabsTrigger>
               <TabsTrigger
                 value="declined"
-                className="h-full rounded-md border border-transparent font-pixel text-[14px] font-medium tracking-wide text-[#6b5038] data-[state=inactive]:hover:bg-[#e6d7b9] data-[state=active]:border-[#9b3a3a]/35 data-[state=active]:bg-[#f8e2e2] data-[state=active]:text-[#7b2727] data-[state=active]:shadow-none"
+                className="h-full rounded-md border border-transparent font-pixel text-[14px] font-medium tracking-wide text-[#6b5038] shadow-none! data-[state=inactive]:hover:bg-[#e6d7b9] data-[state=active]:border-[#9b3a3a]/35 data-[state=active]:bg-[#f8e2e2] data-[state=active]:text-[#7b2727] data-[state=active]:shadow-none!"
               >
                 Declined ({declinedRequests.length})
               </TabsTrigger>
