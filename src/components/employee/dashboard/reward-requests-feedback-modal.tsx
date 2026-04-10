@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
-import { Coins, MessageSquareMore, Package } from 'lucide-react';
+import { Coins, MessageSquareMore, Package, XIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -114,10 +114,10 @@ function RequestSection({
             return (
               <article
                 key={request.id}
-                className="rounded-xl border-2 border-[#8ea17f] bg-[#efe8cf] px-3 py-2.5 transition-all duration-200 hover:-translate-y-0.5"
+                className="rounded-xl border-2 border-[#8ea17f] bg-[#efe8cf] px-3 py-2 transition-all duration-200 hover:-translate-y-0.5"
               >
-                <div className="mb-2 flex items-start justify-between gap-2">
-                  <p className="min-w-0 flex-1 wrap-break-word pr-2 font-pixel text-[15px] leading-relaxed text-[#3f2a1a]">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <p className="min-w-0 flex-1 wrap-break-word pr-2 font-pixel text-[1rem] text-[#3f2a1a]">
                     {request.requestedItem || request.rewardName}
                   </p>
                   <div className="flex shrink-0 items-center gap-2">
@@ -143,7 +143,7 @@ function RequestSection({
                   </div>
                 </div>
 
-                <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1.5">
                   <span
                     className="inline-flex items-center gap-1 rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-2 py-0.5 font-pixel text-[14px] text-[#204b61]"
                     title="Requested quantity"
@@ -270,25 +270,25 @@ export function RewardRequestsFeedbackModal({
       >
         <DialogClose
           aria-label="Close"
-          className="absolute right-4 top-4 z-10 h-10 w-10 rounded-full bg-[#e4d3b3] text-[#3f2a1a] border-2 border-[#a88961] transition hover:scale-105 hover:bg-[#dcc7a2] flex items-center justify-center"
+          className="absolute right-4 top-4 z-20 h-10 w-10 rounded-full border-2 border-[#a88961] bg-[#e4d3b3] text-[#3f2a1a] transition hover:scale-105 hover:bg-[#dcc7a2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8a6844]/60 focus-visible:ring-offset-[#eadbc1] cursor-pointer flex items-center justify-center"
         >
-          ✕
+          <XIcon className="h-5 w-5" />
         </DialogClose>
 
-        <DialogHeader className="space-y-2 border-b-2 border-[#8a6844]/30 bg-[#e1d2b7] px-5 py-3 text-left">
-          <DialogTitle className="pr-14 font-pixel text-base leading-relaxed text-[#3f2a1a]">
+        <DialogHeader className="space-y-0.5 border-b-2 border-[#8a6844]/30 bg-[#e1d2b7] px-5 py-3 text-left">
+          <DialogTitle className="pr-14 font-pixel text-base leading-2 text-[#3f2a1a] pt-2">
             Reward Request Feedbacks
           </DialogTitle>
-          <DialogDescription className="pr-14 font-pixel text-[14px] leading-relaxed text-[#6b5038]">
+          <DialogDescription className="pr-14 font-pixel text-[14px] leading-1 text-[#6b5038] pb-4">
             View your approved and declined reward requests with HR feedback.
           </DialogDescription>
 
           <Tabs
             value={statusFilter}
             onValueChange={handleStatusFilterChange}
-            className="w-full px-2"
+            className="w-full px-8"
           >
-            <TabsList className="grid h-9 w-full grid-cols-2 gap-2 overflow-hidden rounded-lg border border-[#9b7a56]/45 bg-[#efdec1] p-0.5">
+            <TabsList className="grid h-9 w-full grid-cols-2 overflow-hidden rounded-lg border-2 border-[#9b7a56]/45 bg-[#efdec1] p-0.5">
               <TabsTrigger
                 value="approved"
                 className="h-full rounded-md border border-transparent font-pixel text-[14px] font-medium tracking-wide text-[#6b5038] shadow-none! data-[state=inactive]:hover:bg-[#e6d7b9] data-[state=active]:border-[#7eb07f]/45 data-[state=active]:bg-[#d8efdb] data-[state=active]:text-[#1f5a36] data-[state=active]:shadow-none!"
