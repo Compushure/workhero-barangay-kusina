@@ -43,7 +43,7 @@ const DESCRIPTION_CLASS = {
 
 const LABEL_WRAPPER_CLASS = {
   desktop: 'absolute top-[11%] left-1/2 z-20 -translate-x-1/2',
-  mobile: 'absolute top-[-3%] left-1/2 z-20 -translate-x-1/2 md:top-[6%]',
+  mobile: 'absolute top-[0.5%] left-1/2 z-20 -translate-x-1/2 sm:top-[3%] md:top-[4%]',
 } as const;
 
 const STALL_POSITION_CLASS = {
