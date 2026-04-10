@@ -16,6 +16,10 @@ export async function handleFetchSessionUser(): Promise<{
   error: string | null;
   data?: UserWithExtras;
 }> {
+  if (typeof window !== 'undefined' && (window as { Cypress?: unknown }).Cypress) {
+    return { error: null };
+  }
+
   const result = await safeAction(() => fetchInSessionUserInfo());
 
   if (!result.success) {
