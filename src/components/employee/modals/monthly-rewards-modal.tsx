@@ -106,9 +106,17 @@ export function MonthlyRewardsModal({
   const [pendingSearchTerm, setPendingSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [activeView, setActiveView] = useState<'items' | 'pending'>('items');
+  const [postRedeemLoading, setPostRedeemLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
   const intervalName = interval ? INTERVAL_LABELS[interval] : '';
+
+  const switchViewWithLoading = (nextView: 'items' | 'pending') => {
+    if (nextView === activeView) return;
+
+    setPostRedeemLoading(true);
+    setActiveView(nextView);
+  };
 
   const filteredAndSortedRewards = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -149,7 +157,19 @@ export function MonthlyRewardsModal({
     setPendingSearchTerm('');
     setSortOrder('newest');
     setActiveView('items');
+    setPostRedeemLoading(false);
   }, [interval, open]);
+
+  useEffect(() => {
+    if (!postRedeemLoading) return;
+
+    // Keep a short transition loader after redeem so stock state changes don't flash.
+    const timeout = setTimeout(() => {
+      setPostRedeemLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [postRedeemLoading]);
 
   useEffect(() => {
     if (!open) return;
@@ -157,6 +177,8 @@ export function MonthlyRewardsModal({
   }, [open, interval, activeView, searchTerm, pendingSearchTerm, sortOrder]);
 
   if (!interval) return null;
+
+  const shouldShowLoading = isLoading || postRedeemLoading;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -232,7 +254,7 @@ export function MonthlyRewardsModal({
                         View
                       </DropdownMenuLabel>
                       <DropdownMenuItem
-                        onClick={() => setActiveView('items' as const)}
+                        onClick={() => switchViewWithLoading('items')}
                         className={
                           (activeView as 'items' | 'pending') === 'items' ? 'bg-[#8a6844]/15' : ''
                         }
@@ -240,7 +262,7 @@ export function MonthlyRewardsModal({
                         Available Items
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => setActiveView('pending' as const)}
+                        onClick={() => switchViewWithLoading('pending')}
                         className={
                           (activeView as 'items' | 'pending') === 'pending' ? 'bg-[#8a6844]/15' : ''
                         }
@@ -289,7 +311,7 @@ export function MonthlyRewardsModal({
                         View
                       </DropdownMenuLabel>
                       <DropdownMenuItem
-                        onClick={() => setActiveView('items' as const)}
+                        onClick={() => switchViewWithLoading('items')}
                         className={
                           (activeView as 'items' | 'pending') === 'items' ? 'bg-[#8a6844]/15' : ''
                         }
@@ -297,7 +319,7 @@ export function MonthlyRewardsModal({
                         Available Items
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => setActiveView('pending' as const)}
+                        onClick={() => switchViewWithLoading('pending')}
                         className={
                           (activeView as 'items' | 'pending') === 'pending' ? 'bg-[#8a6844]/15' : ''
                         }
@@ -316,7 +338,7 @@ export function MonthlyRewardsModal({
           ref={scrollAreaRef}
           className="min-h-0 flex-1 overflow-y-auto p-0 sm:p-0 md:p-2 lg:p-2 bg-[#e6d7bf]"
         >
-          {isLoading ? (
+          {shouldShowLoading ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Loader2 className="h-10 w-10 text-[#6a4a2d] animate-spin mx-auto mb-3" />
               <p className="text-[#4b3522] font-semibold">Loading rewards...</p>
@@ -340,7 +362,9 @@ export function MonthlyRewardsModal({
                   reward={reward}
                   userPoints={userPoints}
                   hasPendingRequest={pendingRewardIds.has(reward.id)}
-                  onRedeemSuccess={() => setActiveView('pending')}
+                  onRedeemSuccess={() => {
+                    switchViewWithLoading('pending');
+                  }}
                 />
               ))}
             </div>
