@@ -21,6 +21,14 @@ type AddUserPayload = {
   pagibigId?: string | null;
 };
 
+type AddBadgePayload = {
+  name: string;
+  description?: string | null;
+  points?: number;
+  awardAtInterval?: "none" | "daily" | "monthly" | "anually";
+  createdByEmail?: string | null;
+};
+
 function getRequiredEnv(key: string): string {
   const value = process.env[key]?.trim();
 
@@ -292,6 +300,93 @@ export default defineConfig({
           }
 
           console.log("[task:deleteUser] Deleted user", userId);
+          return { deleted: true };
+        },
+
+        async addBadge(payload: AddBadgePayload) {
+          console.log("[task:addBadge] Creating badge", payload.name);
+
+          const supabase = createServiceRoleClient();
+          const badgeName = payload.name.trim();
+          const description = payload.description?.trim() || null;
+          const points = payload.points ?? 10;
+          const awardAtInterval = payload.awardAtInterval ?? "none";
+
+          let createdBy: string | null = null;
+          if (payload.createdByEmail) {
+            const { data: creatorRow } = await supabase
+              .from("User")
+              .select("id")
+              .eq("email", normalizeEmail(payload.createdByEmail))
+              .maybeSingle();
+            createdBy = creatorRow?.id ?? null;
+          }
+
+          const { data: existingBadge, error: existingBadgeError } = await supabase
+            .from("Badges")
+            .select("id")
+            .eq("name", badgeName)
+            .maybeSingle();
+
+          if (existingBadgeError) {
+            throw new Error(`Failed to lookup badge by name: ${existingBadgeError.message}`);
+          }
+
+          if (existingBadge?.id) {
+            const { error: updateError } = await supabase
+              .from("Badges")
+              .update({
+                description,
+                points,
+                award_at_interval: awardAtInterval,
+                img_link: null,
+                created_by: createdBy,
+              })
+              .eq("id", existingBadge.id);
+
+            if (updateError) {
+              throw new Error(`Failed to update badge: ${updateError.message}`);
+            }
+
+            console.log("[task:addBadge] Updated existing badge", existingBadge.id);
+            return { badgeId: existingBadge.id };
+          }
+
+          const { data: badgeRow, error: badgeError } = await supabase
+            .from("Badges")
+            .insert({
+              name: badgeName,
+              description,
+              points,
+              award_at_interval: awardAtInterval,
+              img_link: null,
+              created_by: createdBy,
+            })
+            .select("id")
+            .single();
+
+          if (badgeError || !badgeRow?.id) {
+            throw new Error(`Failed to add badge: ${badgeError?.message || "Unknown error"}`);
+          }
+
+          console.log("[task:addBadge] Created badge", badgeRow.id);
+          return { badgeId: badgeRow.id };
+        },
+
+        async deleteBadge({ badgeId }: { badgeId: string }) {
+          console.log("[task:deleteBadge] Deleting badge", badgeId);
+
+          const supabase = createServiceRoleClient();
+
+          await supabase.from("BadgeRequirements").delete().eq("badge_id", badgeId);
+
+          const { error } = await supabase.from("Badges").delete().eq("id", badgeId);
+
+          if (error) {
+            throw new Error(`Failed to delete badge: ${error.message}`);
+          }
+
+          console.log("[task:deleteBadge] Deleted badge", badgeId);
           return { deleted: true };
         },
       });
