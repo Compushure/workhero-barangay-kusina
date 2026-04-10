@@ -19,7 +19,7 @@ export function RankWidget({ className }: RankWidgetProps = {}) {
   const rank = rankData?.rank ?? 1;
 
   const cardClassName = cn(
-    'rounded-lg shadow-md wood-panel p-2 mb-4 -ml-2 w-64 min-h-[90px] shrink-0 font-jersey tracking-widest',
+    'rounded-lg shadow-md wood-panel p-2 mb-4 -ml-2 w-62 min-h-[90px] shrink-0 font-jersey tracking-widest',
     className
   );
 
