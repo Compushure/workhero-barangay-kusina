@@ -73,7 +73,7 @@ function ProfileAvatarComponent({
         />
       ) : (
         <div className="flex items-center justify-center w-full h-full bg-primary/10">
-          <span className={cn('font-semibold text-primary/60', initialsSizeClasses[size])}>
+          <span className={cn('font-semibold text-card/60', initialsSizeClasses[size])}>
             {getInitials(userName)}
           </span>
         </div>
