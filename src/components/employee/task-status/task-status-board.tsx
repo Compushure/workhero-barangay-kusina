@@ -1,9 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowUpDown, Filter, Search } from 'lucide-react';
+import { ArrowUpDown, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -25,8 +24,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { useDebounce } from '@/hooks/useDebounce';
-import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 import { getTaskSectionStatusChipMeta, isTaskStatusItemOverdue } from './task-status-utils';
 import { TaskCard } from './task-card';
 import { TaskStatusSection } from './task-status-section';
@@ -90,12 +87,6 @@ function filterTasksByOverdue(
     const overdue = isTaskStatusItemOverdue(task);
     return overdueFilter === 'overdue' ? overdue : !overdue;
   });
-}
-
-function filterTasksByName(tasks: TaskStatusItem[], query: string): TaskStatusItem[] {
-  if (!query) return tasks;
-
-  return tasks.filter((task) => normalizeSearchQuery(task.name).includes(query));
 }
 
 function getSectionHelperText(status: TaskStatusKind): string {
@@ -169,18 +160,11 @@ export function TaskStatusBoard({
 }: TaskStatusBoardProps) {
   const [sortBy, setSortBy] = useState<TaskSortOption>('due-date-asc');
   const [overdueFilter, setOverdueFilter] = useState<TaskOverdueFilter>('all');
-  const [searchInput, setSearchInput] = useState('');
   const [openSections, setOpenSections] =
     useState<Record<TaskStatusKind, boolean>>(desktopOpenState);
   const [mobileOpenSection, setMobileOpenSection] = useState<TaskStatusKind | ''>(
     mobileDefaultSection
   );
-  const debouncedSearchInput = useDebounce(searchInput, 300);
-  const normalizedSearchQuery = useMemo(
-    () => normalizeSearchQuery(debouncedSearchInput),
-    [debouncedSearchInput]
-  );
-  const hasActiveSearch = normalizedSearchQuery.length > 0;
 
   const filterLabel =
     overdueFilter === 'overdue'
@@ -208,19 +192,12 @@ export function TaskStatusBoard({
 
   const [current, onReview, verified, denied] = useMemo(
     () => [
-      sortTasks(filterTasksByName(currentByOverdue, normalizedSearchQuery), sortBy),
-      sortTasks(filterTasksByName(onReviewByOverdue, normalizedSearchQuery), sortBy),
-      sortTasks(filterTasksByName(verifiedByOverdue, normalizedSearchQuery), sortBy),
-      sortTasks(filterTasksByName(deniedByOverdue, normalizedSearchQuery), sortBy),
+      sortTasks(currentByOverdue, sortBy),
+      sortTasks(onReviewByOverdue, sortBy),
+      sortTasks(verifiedByOverdue, sortBy),
+      sortTasks(deniedByOverdue, sortBy),
     ],
-    [
-      currentByOverdue,
-      deniedByOverdue,
-      normalizedSearchQuery,
-      onReviewByOverdue,
-      sortBy,
-      verifiedByOverdue,
-    ]
+    [currentByOverdue, deniedByOverdue, onReviewByOverdue, sortBy, verifiedByOverdue]
   );
 
   const sections = useMemo<TaskStatusSectionData[]>(
@@ -238,22 +215,8 @@ export function TaskStatusBoard({
       sections.map(({ status, tasks }) => ({
         status,
         count: tasks.length,
-        totalCount:
-          status === 'Current'
-            ? currentByOverdue.length
-            : status === 'In Review'
-              ? onReviewByOverdue.length
-              : status === 'Approved'
-                ? verifiedByOverdue.length
-                : deniedByOverdue.length,
       })),
-    [
-      currentByOverdue.length,
-      deniedByOverdue.length,
-      onReviewByOverdue.length,
-      sections,
-      verifiedByOverdue.length,
-    ]
+    [sections]
   );
 
   const sectionsByMdColumns = useMemo(() => groupSectionsByColumn(sections, 2), [sections]);
@@ -327,7 +290,7 @@ export function TaskStatusBoard({
             <>
               <div className="hidden sm:flex min-w-0 w-full lg:w-auto">
                 <div className="flex min-w-0 w-full gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                  {sectionSummaries.map(({ status, count, totalCount }) => {
+                  {sectionSummaries.map(({ status, count }) => {
                     const statusChipMeta = getTaskSectionStatusChipMeta(status);
                     const StatusIcon = statusChipMeta.icon;
 
@@ -342,9 +305,7 @@ export function TaskStatusBoard({
                           <StatusIcon className="size-3.5 shrink-0" />
                           <span>{status}</span>
                         </span>
-                        <span className="text-[13px] text-[#3f2a1a]">
-                          {hasActiveSearch ? `${count}/${totalCount}` : count}
-                        </span>
+                        <span className="text-[13px] text-[#3f2a1a]">{count}</span>
                       </div>
                     );
                   })}
@@ -352,17 +313,6 @@ export function TaskStatusBoard({
               </div>
 
               <div className="flex w-full min-w-0 flex-col gap-2 lg:w-auto sm:flex-row lg:items-end">
-                <div className="relative w-full lg:w-56">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#8a6039]" />
-                  <Input
-                    value={searchInput}
-                    onChange={(event) => setSearchInput(sanitizeSearchInput(event.target.value))}
-                    placeholder="Search task name"
-                    className="h-9 rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] pl-9 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] placeholder:text-[#8a6039]/85 focus-visible:border-[#F4B925] focus-visible:ring-0"
-                    aria-label="Search task name"
-                  />
-                </div>
-
                 <div className="flex w-full min-w-0 gap-2 lg:w-auto lg:items-end">
                   <div className="flex w-full space-y-1 sm:w-auto">
                     <Select
@@ -472,7 +422,7 @@ export function TaskStatusBoard({
                 }
                 className="space-y-2"
               >
-                {sectionSummaries.map(({ status, count, totalCount }) => {
+                {sectionSummaries.map(({ status, count }) => {
                   const tasks = sections.find((section) => section.status === status)?.tasks ?? [];
                   const statusChipMeta = getTaskSectionStatusChipMeta(status);
                   const StatusIcon = statusChipMeta.icon;
@@ -492,7 +442,7 @@ export function TaskStatusBoard({
                             <span>{status}</span>
                           </span>
                           <span className="rounded-full border-2 border-[#d4c5a8] bg-[#fff8ec] px-2 py-1 text-[13px] leading-none text-[#6b5038]">
-                            {hasActiveSearch ? `${count}/${totalCount}` : count}
+                            {count}
                           </span>
                         </div>
                       </AccordionTrigger>
@@ -511,9 +461,7 @@ export function TaskStatusBoard({
                             <div className="space-y-2">{renderTaskCards(tasks)}</div>
                           ) : (
                             <div className="rounded-lg border-2 border-dashed border-[#d4c5a8] bg-[#fdf5e8] px-4 py-5 text-center text-[14px] tracking-[0.04em] text-[#8a6039]">
-                              {hasActiveSearch
-                                ? 'No tasks match this search in this section.'
-                                : 'No tasks in this section right now.'}
+                              No tasks in this section right now.
                             </div>
                           )}
                         </div>

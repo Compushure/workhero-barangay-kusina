@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react';
+import { Coins, Soup } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
 import { useClaimTaskPointsandXP } from '@/hooks/tanstack/mutations/employeeTasksMutations';
 import type { TaskStatusItem } from '@/components/employee/task-status/types';
@@ -19,9 +19,16 @@ const formatDate = (iso?: string | null) => {
   });
 };
 
+export type QuickTaskFilter =
+  | 'all'
+  | 'claim-points-only'
+  | 'prepare-dish-only'
+  | 'points-and-dishes';
+
 type TasksTableProps = {
   tasks?: TaskStatusItem[];
   sortOrder?: 'newest' | 'oldest';
+  filterBy?: QuickTaskFilter;
   onPrepareFood?: (payload: CookingLaunchPayload) => void;
   claimedTaskIds: Record<string, boolean>;
   setClaimedTaskIds: Dispatch<SetStateAction<Record<string, boolean>>>;
@@ -43,6 +50,7 @@ function getClaimableOrderCount(task: TaskStatusItem): number {
 export default function TasksTable({
   tasks: fallbackTasks = [],
   sortOrder = 'newest',
+  filterBy = 'all',
   onPrepareFood,
   claimedTaskIds,
   setClaimedTaskIds,
@@ -110,13 +118,42 @@ export default function TasksTable({
   ]);
 
   const sortedApprovedTasks = useMemo(() => {
-    return [...approvedTasks].sort((first, second) => {
+    const filteredTasks = approvedTasks.filter((task) => {
+      const claimableOrderCount = getClaimableOrderCount(task);
+      const isClaimPointsReady = claimableOrderCount > 0;
+      const isServerPrepareEligible =
+        task.status === 'approved' &&
+        task.completedOrders === task.maxOrders &&
+        task.pendingOrders === 0 &&
+        Boolean(task.claimedAt) &&
+        !task.completedAt;
+      const hasLocalPrepareReady = Boolean(cookReadyByTaskId[task.id]?.canPrepareFood);
+      const isPrepareDishReady = isServerPrepareEligible || hasLocalPrepareReady;
+      const isPointsAndDishesFlow =
+        isClaimPointsReady && task.completedOrders >= task.maxOrders && !task.completedAt;
+
+      if (filterBy === 'claim-points-only') {
+        return isClaimPointsReady && !isPrepareDishReady;
+      }
+
+      if (filterBy === 'prepare-dish-only') {
+        return isPrepareDishReady && !isClaimPointsReady;
+      }
+
+      if (filterBy === 'points-and-dishes') {
+        return isPointsAndDishesFlow;
+      }
+
+      return true;
+    });
+
+    return [...filteredTasks].sort((first, second) => {
       const firstTime = first.approvedAt ? new Date(first.approvedAt).getTime() : 0;
       const secondTime = second.approvedAt ? new Date(second.approvedAt).getTime() : 0;
 
       return sortOrder === 'newest' ? secondTime - firstTime : firstTime - secondTime;
     });
-  }, [approvedTasks, sortOrder]);
+  }, [approvedTasks, cookReadyByTaskId, filterBy, sortOrder]);
 
   const totalPages = Math.max(1, Math.ceil(sortedApprovedTasks.length / TASKS_PAGE_SIZE));
 
@@ -127,7 +164,7 @@ export default function TasksTable({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [sortOrder, data?.verifiedTasks, fallbackTasks]);
+  }, [filterBy, sortOrder, data?.verifiedTasks, fallbackTasks]);
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -363,8 +400,8 @@ export default function TasksTable({
               key={task.id}
               className="rounded-xl border-2 border-[#d4c5a8] bg-[#f7efdf] p-3 transition-all duration-200 hover:-translate-y-0.5"
             >
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="min-w-0">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="min-w-0 flex-1">
                   <div className="font-pixel text-[15px] leading-relaxed text-[#3f2a1a] wrap-break-word">
                     {task.name}
                   </div>
@@ -372,66 +409,81 @@ export default function TasksTable({
                     Approved on {formatDate(task.approvedAt)}
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    <span className="kitchen-chip px-2 py-0.5 font-pixel text-[14px]">
-                      {task.points} pts each
+                    <span
+                      className="inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 border-[#e5d08a] bg-amber-100 px-1.5 py-0.5 leading-none text-[#6b5038]"
+                      title={`${task.points} points each`}
+                    >
+                      <Coins className="h-3.5 w-3.5 shrink-0" />
+                      <span className="leading-none text-[#3f2a1a]">{task.points}</span>
                     </span>
-                    <span className="kitchen-chip px-2 py-0.5 font-pixel text-[14px]">
-                      Qty {claimableOrderCount}
+                    <span
+                      className="inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-1.5 py-0.5 leading-none text-[#204b61]"
+                      title={`${task.xp} XP each`}
+                    >
+                      <span className="italic">XP</span>
+                      <span>{task.xp}</span>
                     </span>
-                    <span className="rounded-md border-2 border-[#7eb07f]/30 bg-[#e3f2e6] px-2 py-0.5 font-pixel text-[14px] text-[#1f5a36]">
-                      Total {totalPoints} pts
-                    </span>
-                    <span className="rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5] px-2 py-0.5 font-pixel text-[14px] text-[#204b61]">
-                      XP {totalXp}
+                    <span
+                      className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 px-2 py-0.5 leading-none ${
+                        task.completedOrders === task.maxOrders
+                          ? 'border-[#7eb07f] bg-[#d8efdb] text-[#1f5a36]'
+                          : 'border-[#d4c5a8] bg-[#f3e4c9] text-[#6b5038]'
+                      }`}
+                      title="Order progress"
+                    >
+                      <Soup className="h-3.5 w-3.5 shrink-0" />
+                      <span>
+                        ORDERS {task.completedOrders}/{task.maxOrders}
+                      </span>
                     </span>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-2">
-                  <Badge
-                    variant="outline"
-                    className="rounded-md border-2 border-[#7eb07f]/45 bg-[#d8efdb] font-pixel text-[14px] text-[#1f5a36]"
+                <div className="flex flex-row gap-2 md:flex-col w-auto md:justify-end">
+                  <Button
+                    size="sm"
+                    onClick={() => handleClaim(task)}
+                    disabled={
+                      claimMutation.isPending ||
+                      isPreparingTask ||
+                      isClaimedTask ||
+                      isServerPrepareEligible ||
+                      claimableOrderCount <= 0
+                    }
+                    className="kitchen-btn h-10 px-4 font-pixel text-[0.9rem] hover:brightness-105"
                   >
-                    Approved
-                  </Badge>
+                    {isClaimingTask ? (
+                      'Claiming...'
+                    ) : isClaimedTask || isServerPrepareEligible ? (
+                      'Claimed'
+                    ) : (
+                      <span className="inline-flex items-center gap-1">
+                        <span className='pr-0.5'>CLAIM</span>
+                        <Coins className="h-3.5 w-3.5 shrink-0" />
+                        <span>{totalPoints}</span>
+                        <span>|</span>
+                        <span>XP {totalXp}</span>
+                      </span>
+                    )}
+                  </Button>
 
-                  <div className="flex flex-wrap justify-end gap-2">
+                  {isFinalApprovedClaim ? (
                     <Button
                       size="sm"
-                      onClick={() => handleClaim(task)}
-                      disabled={
-                        claimMutation.isPending ||
-                        isPreparingTask ||
-                        isClaimedTask ||
-                        isServerPrepareEligible ||
-                        claimableOrderCount <= 0
-                      }
-                      className="kitchen-btn h-10 px-4 font-pixel text-[14px] hover:brightness-105"
+                      onClick={() => handlePrepareFood(task)}
+                      disabled={!canPrepareFood}
+                      className="h-10 px-4 font-pixel text-[0.9rem] border-2 border-[#47331F] bg-[#4d6d3a] text-[#f8edd8] shadow-[3px_3px_0px_#2e421f] hover:bg-[#5a7e45] disabled:cursor-not-allowed disabled:opacity-55"
                     >
-                      {isClaimingTask
-                        ? 'Claiming...'
-                        : isClaimedTask || isServerPrepareEligible
-                          ? 'Claimed'
-                          : 'Claim'}
-                    </Button>
-
-                    {isFinalApprovedClaim ? (
-                      <Button
-                        size="sm"
-                        onClick={() => handlePrepareFood(task)}
-                        disabled={!canPrepareFood}
-                        className="h-10 px-4 font-pixel text-[14px] border-2 border-[#47331F] bg-[#4d6d3a] text-[#f8edd8] shadow-[3px_3px_0px_#2e421f] hover:bg-[#5a7e45] disabled:cursor-not-allowed disabled:opacity-55"
-                      >
-                        {isPreparingTask
+                      {isPreparingTask
+                        ? 'Preparing...'
+                        : isTaskCooking
                           ? 'Preparing...'
-                          : isTaskCooking
-                            ? 'Preparing...'
-                            : canPrepareFood
-                              ? 'Prepare Food'
-                              : 'Prepare (Claim pts first)'}
-                      </Button>
-                    ) : null}
-                  </div>
+                          : `PREPARE ${task.maxOrders}`}
+                      {!isPreparingTask && !isTaskCooking ? (
+                        <Soup className="ml-1 h-4 w-4 shrink-0" />
+                      ) : null}
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useGetEmployeeTasks } from '@/hooks/tanstack/queries/employeeTasksQueries';
 import { useGetAllLevelMetadata, useGetEmployeeXP } from '@/hooks/tanstack/queries/employeeQueries';
 import { useEmployeeTasksStore } from '@/store/employee';
@@ -8,9 +8,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import HeaderHUD from '../widgets/header-hud';
 import { toEmployeeTaskBoardData } from './task-status-data';
 import { TaskStatusBoard } from './task-status-board';
-
-const DEFAULT_KITCHEN_BG_URL =
-  'https://ewvpbwxqkomybbhmqygm.supabase.co/storage/v1/object/public/kitchen/level_1_bg.png';
 
 function TaskStatusBoardLoading() {
   return (
@@ -106,8 +103,9 @@ function TaskStatusBoardLoading() {
 
 export function TasksPage() {
   const { data, error, isLoading } = useGetEmployeeTasks();
-  const { data: xpData } = useGetEmployeeXP();
-  const { data: levelMetadata } = useGetAllLevelMetadata();
+  const { data: xpData, isLoading: isXpLoading } = useGetEmployeeXP();
+  const { data: levelMetadata, isLoading: isLevelMetadataLoading } = useGetAllLevelMetadata();
+  const [isBackgroundReady, setIsBackgroundReady] = useState(false);
   const tasks = useEmployeeTasksStore((state) => state.tasks);
   const hydrateFromServer = useEmployeeTasksStore((state) => state.hydrateFromServer);
 
@@ -120,22 +118,76 @@ export function TasksPage() {
   }, [data, hydrateFromServer, isLoading, normalizedTaskData]);
 
   const kitchenBackgroundUrl = useMemo(() => {
-    const currentLevel = xpData?.level ?? 1;
+    const currentLevel = xpData?.level;
+    if (!currentLevel || !levelMetadata || levelMetadata.length === 0) {
+      return null;
+    }
+
     const levelRow = levelMetadata?.find((row) => row.level === currentLevel);
     const dbLink = levelRow?.bg_img_link?.trim();
 
-    return dbLink && dbLink.length > 0 ? dbLink : DEFAULT_KITCHEN_BG_URL;
+    return dbLink && dbLink.length > 0 ? dbLink : null;
   }, [levelMetadata, xpData?.level]);
+
+  useEffect(() => {
+    if (!kitchenBackgroundUrl) {
+      setIsBackgroundReady(false);
+      return;
+    }
+
+    let isCancelled = false;
+    const preloadImage = new window.Image();
+
+    const markReady = () => {
+      if (!isCancelled) {
+        setIsBackgroundReady(true);
+      }
+    };
+
+    setIsBackgroundReady(false);
+    preloadImage.onload = markReady;
+    preloadImage.onerror = markReady;
+    preloadImage.src = kitchenBackgroundUrl;
+
+    if (preloadImage.complete) {
+      markReady();
+    }
+
+    return () => {
+      isCancelled = true;
+      preloadImage.onload = null;
+      preloadImage.onerror = null;
+    };
+  }, [kitchenBackgroundUrl]);
+
+  const isBackgroundMetadataLoading = isXpLoading || isLevelMetadataLoading;
+  const showBackgroundSkeleton =
+    isBackgroundMetadataLoading || (Boolean(kitchenBackgroundUrl) && !isBackgroundReady);
 
   const resolvedError = error ?? (!isLoading && !data ? new Error('Failed to load tasks') : null);
 
   return (
-    <div className="relative isolate flex min-h-dvh w-full min-w-0 flex-col overflow-x-clip font-jersey tracking-[0.08em] xl:h-dvh xl:overflow-hidden">
+    <div className="relative isolate flex min-h-dvh w-full min-w-0 flex-col overflow-x-clip bg-[#e3bf73] font-jersey tracking-[0.08em] xl:h-dvh xl:overflow-hidden">
+      {kitchenBackgroundUrl ? (
+        <div
+          className={`pointer-events-none fixed inset-x-0 top-0 h-dvh -z-20 bg-cover bg-center bg-no-repeat transition-opacity duration-500 ease-out ${
+            isBackgroundReady ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ backgroundImage: `url('${kitchenBackgroundUrl}')` }}
+          aria-hidden
+        />
+      ) : null}
+
       <div
-        className="pointer-events-none fixed inset-x-0 top-0 h-dvh -z-10 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url('${kitchenBackgroundUrl}')` }}
+        className={`pointer-events-none fixed inset-x-0 top-0 h-dvh -z-10 transition-opacity duration-500 ease-out ${
+          showBackgroundSkeleton ? 'opacity-100' : 'opacity-0'
+        }`}
         aria-hidden
-      />
+      >
+        <div className="absolute inset-0 bg-linear-to-br from-[#f6e2a4] via-[#eac777] to-[#d8a253]" />
+        <div className="absolute inset-0 animate-[pulse_1.8s_ease-in-out_infinite] bg-linear-to-r from-[#fff6d5]/0 via-[#fff6d5]/55 to-[#fff6d5]/0" />
+        <div className="absolute inset-0 animate-[pulse_2.6s_ease-in-out_infinite] bg-linear-to-b from-[#f9d882]/28 via-transparent to-[#c9862f]/18" />
+      </div>
 
       <header className="pointer-events-none sticky top-0 left-0 right-0 z-20 w-full px-2 pt-2 sm:px-4">
         <div className="pointer-events-auto flex w-full flex-col gap-2 p-1">

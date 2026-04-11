@@ -50,7 +50,7 @@ Cypress.Commands.add('login', (email: string, password: string) => {
 Cypress.Commands.add(
   'addUser',
   (name: string, email: string, password: string, roleType: string = 'superadmin') => {
-    cy.task('addUser', {
+    return cy.task('addUser', {
       name: name,
       email: email,
       password: password,
@@ -59,5 +59,28 @@ Cypress.Commands.add(
   }
 )
 Cypress.Commands.add('deleteUser', (email: string) => {
-  cy.task('deleteUser', { email })
+  return cy.task('deleteUser', { email })
+})
+
+Cypress.Commands.add(
+  'addBadge',
+  (
+    name: string,
+    description: string | null = null,
+    points: number = 10,
+    awardAtInterval: string = 'none',
+    createdByEmail?: string
+  ) => {
+    return cy.task('addBadge', {
+      name,
+      description,
+      points,
+      awardAtInterval,
+      createdByEmail,
+    })
+  }
+)
+
+Cypress.Commands.add('deleteBadge', (badgeId: string) => {
+  return cy.task('deleteBadge', { badgeId })
 })
