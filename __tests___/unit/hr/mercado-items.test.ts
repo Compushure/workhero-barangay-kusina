@@ -19,6 +19,8 @@ import {
 } from '@/actions/hr/rewards';
 import {
 	handleAddRewardAction,
+	handleDeleteRewardAction,
+	handleEditRewardAction,
 	handleGetRewardsAction,
 	handleHideRewardAction,
 	handleUploadRewardPicture,
@@ -383,6 +385,22 @@ describe('When HR adds and edits Mercado items', () => {
 		expect(rewardState.rewards.some((row) => row.name === 'Laundry Soap')).toBe(true);
 	});
 
+	test('Then handleAddRewardAction returns the new item and shows a success toast', async () => {
+		const result = await handleAddRewardAction({
+			name: 'Laundry Soap',
+			pointsCost: 20,
+			quantity: 12,
+			redeemingLimit: 2,
+			category: 'home',
+			isActive: true,
+			availableMonth: null,
+			availableDate: null,
+		});
+
+		expect(result?.name).toBe('Laundry Soap');
+		expect(toastSuccess).toHaveBeenCalledWith('Item added successfully to Mercado');
+	});
+
 	test('Then handleAddRewardAction returns null and shows a toast for invalid redeeming limit', async () => {
 		const result = await handleAddRewardAction({
 			name: 'Sugar Pack',
@@ -393,6 +411,35 @@ describe('When HR adds and edits Mercado items', () => {
 			isActive: true,
 			availableMonth: null,
 			availableDate: null,
+		});
+
+		expect(result).toBeNull();
+		expect(toastError).toHaveBeenCalled();
+	});
+
+	test('Then editRewardAction updates an existing item and preserves the reward record', async () => {
+		const result = await editRewardAction('reward-1', {
+			name: 'Updated Rice Pack',
+			quantity: 11,
+		});
+
+		expect(result.error).toBeNull();
+		expect(result.data?.name).toBe('Updated Rice Pack');
+		expect(rewardState.rewards.find((row) => row.id === 'reward-1')?.quantity).toBe(11);
+	});
+
+	test('Then handleEditRewardAction returns the updated item and shows a success toast', async () => {
+		const result = await handleEditRewardAction('reward-1', {
+			name: 'Updated Rice Pack',
+		});
+
+		expect(result?.name).toBe('Updated Rice Pack');
+		expect(toastSuccess).toHaveBeenCalledWith('Item updated successfully');
+	});
+
+	test('Then handleEditRewardAction returns null and shows a toast when validation fails', async () => {
+		const result = await handleEditRewardAction('reward-1', {
+			redeemingLimit: 999,
 		});
 
 		expect(result).toBeNull();
@@ -428,6 +475,22 @@ describe('When HR updates Mercado item visibility and lifecycle', () => {
 
 		expect(result.error).toBeNull();
 		expect(rewardState.rewards.find((row) => row.id === 'reward-1')).toBeUndefined();
+	});
+
+	test('Then handleDeleteRewardAction returns true and shows a success toast', async () => {
+		const result = await handleDeleteRewardAction('reward-2');
+
+		expect(result).toBe(true);
+		expect(toastSuccess).toHaveBeenCalledWith('Item deleted successfully');
+	});
+
+	test('Then handleDeleteRewardAction returns false and shows a toast when delete fails', async () => {
+		rewardState.failRewardDelete = true;
+
+		const result = await handleDeleteRewardAction('reward-2');
+
+		expect(result).toBe(false);
+		expect(toastError).toHaveBeenCalled();
 	});
 });
 
