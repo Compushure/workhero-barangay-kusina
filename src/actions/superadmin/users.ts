@@ -478,6 +478,7 @@ export async function uploadProfilePicture(
   }
 
   // Return the public URL with cache busting
+  // note that cache busting here is just to add extra sstuff at the end to force the program to treat it as new resource
   const publicUrl = getProfileImageUrl(supabase, userId);
   return { error: null, data: { publicUrl } };
 }
