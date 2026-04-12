@@ -10,6 +10,7 @@
 export type ActionResult<T> =
   | { success: true; data: T; error: null }
   | { success: false; data: null; error: string };
+  // JOSH STUFF 
 
 function sanitizeActionErrorMessage(message: string): string {
   const normalized = message.trim();
@@ -35,6 +36,10 @@ function sanitizeActionErrorMessage(message: string): string {
  * @param action - The async function to execute
  * @returns ActionResult with either success data or error message
  */
+// efocrse a generic type T for the data returned by the action,
+//  and the function returns a promise of ActionResult<
+// also for typesafe man actualy
+// basically wraps the whole thing in a tray catch wrapper so that indi na sagi liwat2 sulat
 export async function safeAction<T>(action: () => Promise<T>): Promise<ActionResult<T>> {
   try {
     const data = await action();

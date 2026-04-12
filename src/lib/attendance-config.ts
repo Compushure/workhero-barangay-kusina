@@ -1,4 +1,5 @@
 import type { AttendanceConfig } from '@/types';
+// stores all teh config for attendance stuff
 
 export const attendanceConfig: AttendanceConfig = {
   timeInAt: '07:00',

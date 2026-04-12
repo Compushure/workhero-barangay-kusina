@@ -16,6 +16,9 @@ function mapNotificationRow(row: any): NotificationItem {
   };
 }
 
+// see supabase documentation on how to set up REAL TIME FOR TABLES
+// this enables realtim fo the table Notifications
+// actually gin copy paste ko lng coe halin docs lode
 export function useRealtimeNotifications(userId: string | null) {
   const supabase = useMemo(() => createClient(), []);
   const [newNotification, setNewNotification] = useState<NotificationItem | null>(null);
