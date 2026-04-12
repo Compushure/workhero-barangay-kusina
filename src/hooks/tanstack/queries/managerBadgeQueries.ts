@@ -12,7 +12,14 @@ import {
   handleFetchBadgeTaskOptions,
   handleFetchBadges,
 } from '@/action-handlers/manager/badges';
+/*
+query kesys
 
+list() → all badges.
+taskOptions() → task-related badge options.
+attributeOptions() → attribute-related badge options.
+attendanceOptions() → attendance-related badge options.
+*/
 export const badgeKeys = {
   all: ['manager-badges'] as const,
   lists: () => [...badgeKeys.all, 'list'] as const,
@@ -28,6 +35,8 @@ export function useGetBadges(
   return useQuery({
     queryKey: badgeKeys.list(),
     queryFn: async () => handleFetchBadges(),
+    // if atomatic eamanble is  false, then the query will not run until
+    //  enabled is set to true
     enabled: queryOptions.enabled !== false,
     staleTime: 60 * 1000,
     gcTime: 5 * 60 * 1000,
