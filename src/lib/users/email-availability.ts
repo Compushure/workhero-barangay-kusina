@@ -72,7 +72,7 @@ export async function findExistingUserEmail(email: string): Promise<ExistingEmai
     };
   }
 
-  
+  // double check in both tables
   if (await emailExistsInPublicUsers(normalizedEmail)) {
     return {
       exists: true,
