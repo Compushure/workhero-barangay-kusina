@@ -4,6 +4,7 @@ import { useGetAvailableRewards } from '@/hooks/tanstack/queries/rewardQueries';
 import { useGetMyRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQueries';
 
 export function useMercadoPageData(options?: { includeRewards?: boolean }) {
+  // Toggle lets some screens load points/requests without reward cards.
   const includeRewards = options?.includeRewards ?? true;
 
   // Use employee-specific query that filters by isActive AND availableDate
@@ -16,7 +17,7 @@ export function useMercadoPageData(options?: { includeRewards?: boolean }) {
     useGetMyRedemptionRequests('pending');
   const { data: pointsData, isLoading: pointsLoading } = useGetEmployeePoints();
 
-  // No need to filter rewards anymore - useGetAvailableRewards handles all filtering
+  // Build final values consumed by Mercado UI components.
   const userPoints = pointsData?.points ?? 0;
   const deductedPoints = pointsData?.deductedPoints ?? 0;
   const isLoading = (includeRewards && rewardsLoading) || pointsLoading || requestsLoading;

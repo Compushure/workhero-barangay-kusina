@@ -1,7 +1,17 @@
 'use client';
 
+// HR form modal for creating and editing Mercado items.
+
 import { useState, useEffect, useMemo } from 'react';
-import { Pencil, Plus, X, Loader2, Camera, Calendar as CalendarIcon, ChevronDown } from 'lucide-react';
+import {
+  Pencil,
+  Plus,
+  X,
+  Loader2,
+  Camera,
+  Calendar as CalendarIcon,
+  ChevronDown,
+} from 'lucide-react';
 import {
   format,
   startOfWeek,
@@ -82,6 +92,7 @@ export function AddItemsModal({
   saveError = '',
   onErrorClear,
 }: AddItemsModalProps) {
+  // Form state mirrors add/edit fields shown to HR users.
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconPreview, setIconPreview] = useState<string>('');
   const [existingImageUrl, setExistingImageUrl] = useState<string>('');
@@ -97,6 +108,7 @@ export function AddItemsModal({
 
   // Derived disabled-date matcher based on chosen interval
   const disabledDateMatcher = useMemo((): ((date: Date) => boolean) | undefined => {
+    // Restrict date picker to the current interval window only.
     if (availabilityInterval === 'none') return undefined;
     const now = new Date();
     if (availabilityInterval === 'weekly') {
@@ -239,6 +251,7 @@ export function AddItemsModal({
   ]);
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Validate image type/size before preview and upload.
     const file = e.target.files?.[0];
     if (file) {
       if (!ALLOWED_REWARD_IMAGE_TYPES.includes(file.type)) {
@@ -272,6 +285,7 @@ export function AddItemsModal({
   };
 
   const handleSave = async () => {
+    // Final validation + submit payload to parent save handler.
     if (iconFile) {
       if (!ALLOWED_REWARD_IMAGE_TYPES.includes(iconFile.type)) {
         const message = 'Only JPEG, PNG, and WebP images are allowed';
@@ -314,6 +328,7 @@ export function AddItemsModal({
   };
 
   const handleClose = () => {
+    // Reset form state so reopening starts from clean values.
     if (isLoading) return; // Prevent closing while loading
     setIconFile(null);
     setIconPreview('');
@@ -607,7 +622,10 @@ export function AddItemsModal({
                       <ChevronDown className="h-4 w-4 text-foreground" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto rounded-xl border border-border bg-background p-0 shadow-sm/25" align="start">
+                  <PopoverContent
+                    className="w-auto rounded-xl border border-border bg-background p-0 shadow-sm/25"
+                    align="start"
+                  >
                     <Calendar
                       mode="single"
                       selected={availableDate}

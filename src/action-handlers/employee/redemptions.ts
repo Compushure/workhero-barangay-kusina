@@ -23,7 +23,7 @@ const TOAST_MESSAGES = {
 export async function handleGetMyRedemptionRequestsAction(
   status?: string
 ): Promise<RedemptionRequest[]> {
-  //logic for fetch my requests: wrap server action with safe error handling
+  // Used by employee UI to read their request history/status.
   const result = await safeAction(() => getMyRedemptionRequestsAction(status));
 
   if (!result.success || result.data?.error) {
@@ -37,7 +37,7 @@ export async function handleCreateRedemptionRequestAction(
   rewardId: string,
   quantity: number
 ): Promise<boolean> {
-  //logic for item request submit: create pending redemption
+  // Used by "Redeem" button to submit a new pending request.
   const result = await safeAction(() => createRedemptionRequestAction(rewardId, quantity));
 
   if (!result.success || result.data?.error) {
@@ -49,7 +49,7 @@ export async function handleCreateRedemptionRequestAction(
 }
 
 export async function handleCancelMyRedemptionRequestAction(requestId: string): Promise<boolean> {
-  //logic for cancel request submit: cancel pending redemption
+  // Used by employee cancel action on pending requests.
   const result = await safeAction(() => cancelMyRedemptionRequestAction(requestId));
 
   if (!result.success || result.data?.error) {

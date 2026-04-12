@@ -1,5 +1,7 @@
 'use client';
 
+// Employee Mercado modal flow: open a stall, load allowed items, and show pending requests.
+
 import { useEffect, useMemo } from 'react';
 import { useMercadoContext } from './mercado-context';
 import { useMercadoPageData } from '@/hooks/useMercadoPageData';
@@ -11,6 +13,7 @@ import {
 import { isIntervalClosed } from './mercado-stall-state';
 
 export function MercadoPageClient() {
+  // Tracks selected stall interval (weekly/monthly/yearly).
   // Selected interval.
   const { selectedInterval, setSelectedInterval } = useMercadoContext();
   //pending requests and current points.
@@ -59,6 +62,7 @@ export function MercadoPageClient() {
 
   //modal can disable rewards already requested by the user.
   const pendingRewardIds = useMemo(() => {
+    // Prevents duplicate pending requests for the same item.
     return new Set(pendingRequests.map((req) => req.rewardId));
   }, [pendingRequests]);
 

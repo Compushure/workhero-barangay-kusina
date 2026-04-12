@@ -1,5 +1,7 @@
 'use client';
 
+// Combined dropdown filters for stock, visibility, and interval.
+
 import { Clock3, Eye, EyeOff, Filter, Layers3, Package, PackageX, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,12 +45,14 @@ export function MercadoFilterToggle({
   onIntervalFilterChange,
   className,
 }: MercadoFilterToggleProps) {
+  // Badge number shows how many filters are currently active.
   const activeFilterCount =
     (stockFilter !== 'all' ? 1 : 0) +
     (visibilityFilter !== 'all' ? 1 : 0) +
     (intervalFilter !== 'all' ? 1 : 0);
 
   const clearFilters = () => {
+    // One-click reset to default "all" values.
     onStockFilterChange('all');
     onVisibilityFilterChange('all');
     onIntervalFilterChange('all');

@@ -25,8 +25,10 @@ import {
 
 const remoteContext = new RemoteSupabaseTestContext('employee-mercado');
 
+// Swapped per test to simulate requests from different authenticated users.
 let currentServerClient: typeof remoteContext.admin = remoteContext.admin;
 
+// Track created records so every test cleans up its own data.
 const createdRewardIds: string[] = [];
 const createdRequestIds: string[] = [];
 
@@ -43,6 +45,7 @@ async function seedReward(options: {
 	quantity: number;
 	isActive: boolean;
 }) {
+	// Inserts one reward item used by the test scenario.
 	const { data, error } = await remoteContext.admin
 		.from('Reward')
 		.insert({
@@ -70,6 +73,7 @@ async function seedRewardRequest(options: {
 	status: 'pending' | 'approved' | 'rejected';
 	remarks?: string | null;
 }) {
+	// Inserts one reward request row with selected status.
 	const { data, error } = await remoteContext.admin
 		.from('RewardRequest')
 		.insert({
@@ -92,10 +96,12 @@ async function seedRewardRequest(options: {
 }
 
 beforeEach(() => {
+	// Default to admin context before each test chooses its acting user.
 	currentServerClient = remoteContext.admin;
 });
 
 afterEach(async () => {
+	// Remove request rows first to avoid foreign-key conflicts.
 	if (createdRequestIds.length) {
 		await remoteContext.admin.from('RewardRequest').delete().in('id', [...createdRequestIds]);
 		createdRequestIds.length = 0;
@@ -111,6 +117,7 @@ afterEach(async () => {
 
 describe('When an employee loads Mercado rewards', () => {
 	test('Then getRewardsAction returns the seeded reward with approved redeemed count', async () => {
+		// Create users: one HR to create item, one employee to view item list.
 		const hr = await remoteContext.seedUser({
 			roleType: 'hr',
 			namePrefix: employeeMercadoIntegrationNames.hrCreator.namePrefix,
@@ -135,6 +142,7 @@ describe('When an employee loads Mercado rewards', () => {
 		await remoteContext.uploadStorageObject('reward', `${reward.id}/profile.png`);
 
 		await seedRewardRequest({
+			// Approved request contributes to redeemedCount.
 			userId: employee.id,
 			rewardId: reward.id,
 			quantity: employeeMercadoCreateRequestSeed.quantity,
@@ -155,6 +163,7 @@ describe('When an employee loads Mercado rewards', () => {
 
 describe('When an employee loads own Mercado redemption requests', () => {
 	test('Then getMyRedemptionRequestsAction returns only the current employee pending requests', async () => {
+		// Seed one target employee and one other employee to verify filtering.
 		const hr = await remoteContext.seedUser({
 			roleType: 'hr',
 			namePrefix: `${employeeMercadoIntegrationNames.hrCreator.namePrefix} Requests`,
@@ -193,6 +202,7 @@ describe('When an employee loads own Mercado redemption requests', () => {
 			remarks: employeeMercadoCreateRequestSeed.remarks,
 		});
 		await seedRewardRequest({
+			// This row must be excluded from the target employee result.
 			userId: otherEmployee.id,
 			rewardId: reward.id,
 			quantity: 1,
@@ -213,6 +223,7 @@ describe('When an employee loads own Mercado redemption requests', () => {
 
 describe('When an employee creates and cancels Mercado redemption requests', () => {
 	test('Then createRedemptionRequestAction deducts points and cancelMyRedemptionRequestAction restores them', async () => {
+		// Seed a redeemable item and run the full create->cancel lifecycle.
 		const hr = await remoteContext.seedUser({
 			roleType: 'hr',
 			namePrefix: `${employeeMercadoIntegrationNames.hrCreator.namePrefix} Lifecycle`,
@@ -242,6 +253,7 @@ describe('When an employee creates and cancels Mercado redemption requests', () 
 			employeeMercadoCancelRequestSeed.quantity
 		);
 
+		// Confirm request exists and points were deducted.
 		const { data: pendingRequest, error: pendingRequestError } = await remoteContext.admin
 			.from('RewardRequest')
 			.select('id, status, user_id, reward_id, quantity')
@@ -268,6 +280,7 @@ describe('When an employee creates and cancels Mercado redemption requests', () 
 
 		const cancelResult = await cancelMyRedemptionRequestAction(pendingRequest!.id);
 
+		// Confirm cancellation status and points refund.
 		const { data: requestAfterCancel, error: requestAfterCancelError } = await remoteContext.admin
 			.from('RewardRequest')
 			.select('status, remarks')

@@ -21,6 +21,7 @@ import { AddRewardInput, EditRewardInput, Reward } from '@/types';
 const MAX_REWARD_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
 export async function handleGetRewardsAction(): Promise<Reward[]> {
+  // Client-side call used by HR pages to load all Mercado items safely.
   const result = await safeAction(() => getRewardsAction());
 
   if (!result.success || result.data?.error) {
@@ -31,6 +32,7 @@ export async function handleGetRewardsAction(): Promise<Reward[]> {
 }
 
 export async function handleGetAvailableRewardsByMonthAction(month: number): Promise<Reward[]> {
+  // Loads month-assigned Mercado items for employee month view.
   const result = await safeAction(() => getAvailableRewardsByMonthAction(month));
 
   if (!result.success || result.data?.error) {
@@ -43,6 +45,7 @@ export async function handleGetAvailableRewardsByMonthAction(month: number): Pro
 export async function handleGetAvailableRewardsByIntervalAction(
   interval: 'weekly' | 'monthly' | 'yearly'
 ): Promise<Reward[]> {
+  // Loads weekly/monthly/yearly Mercado items for employee interval view.
   const result = await safeAction(() => getAvailableRewardsByIntervalAction(interval));
 
   if (!result.success || result.data?.error) {

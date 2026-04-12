@@ -1,5 +1,7 @@
 'use client';
 
+// HR table page that lets staff search, filter, and review employee requests.
+
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { HeaderSection, RewardRequestsControls } from './header';
@@ -12,6 +14,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { normalizeSearchQuery, sanitizeSearchInput } from '@/lib/utils/search-normalization';
 
 export function RewardRequestsContent() {
+  // Local UI state for controls and page navigation.
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState<string>('pending');
   const [sortBy, setSortBy] = useState<string>('date-desc');

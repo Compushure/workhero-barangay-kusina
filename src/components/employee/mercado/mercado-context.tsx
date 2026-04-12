@@ -1,5 +1,7 @@
 'use client';
 
+// Shared context for selected Mercado interval across layout and modal.
+
 import { createContext, useContext, useState, ReactNode } from 'react';
 
 export type MercadoInterval = 'weekly' | 'monthly' | 'yearly';
@@ -12,6 +14,7 @@ interface MercadoContextType {
 const MercadoContext = createContext<MercadoContextType | undefined>(undefined);
 
 export function MercadoProvider({ children }: { children: ReactNode }) {
+  // Stores which stall (weekly/monthly/yearly) the user selected.
   const [selectedInterval, setSelectedInterval] = useState<MercadoInterval | null>(null);
 
   return (
@@ -22,6 +25,7 @@ export function MercadoProvider({ children }: { children: ReactNode }) {
 }
 
 export function useMercadoContext() {
+  // Guard ensures context consumer is wrapped by provider.
   const context = useContext(MercadoContext);
   if (!context) {
     throw new Error('useMercadoContext must be used within MercadoProvider');

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+// Shared Mercado query hooks used by both HR and employee pages.
 import {
     handleGetAvailableRewardsByIntervalAction,
     handleGetAvailableRewardsByMonthAction,
@@ -25,6 +26,7 @@ export const rewardKeys = {
  * Used by HR to manage all rewards
  */
 export function useGetRewards() {
+    // Base list for management views and interval checks.
     return useQuery<Reward[], Error>({
         queryKey: rewardKeys.list(),
         queryFn: async () => {
@@ -47,6 +49,7 @@ export function useGetRewards() {
  * Used exclusively by employee pages to show only currently available items
  */
 export function useGetAvailableRewards(options?: { enabled?: boolean }) {
+    // Employee-facing list: only items currently allowed to appear.
     return useQuery<Reward[], Error>({
         queryKey: rewardKeys.available(),
         enabled: options?.enabled ?? true,
@@ -100,6 +103,7 @@ export function useGetAvailableRewards(options?: { enabled?: boolean }) {
  * Used by employee Mercado modal to fetch cards assigned to the selected month
  */
 export function useGetAvailableRewardsByMonth(month: number | null) {
+    // Loads cards for one month-specific stall.
     return useQuery<Reward[], Error>({
         queryKey: month ? rewardKeys.availableByMonth(month) : [...rewardKeys.available(), 'month', 'none'],
         enabled: typeof month === 'number' && month >= 1 && month <= 12,
@@ -120,6 +124,7 @@ export function useGetAvailableRewardsByMonth(month: number | null) {
 export function useGetAvailableRewardsByInterval(
     interval: 'weekly' | 'monthly' | 'yearly' | null
 ) {
+    // Loads cards for weekly/monthly/yearly stall view.
     return useQuery<Reward[], Error>({
         queryKey: interval
             ? rewardKeys.availableByInterval(interval)

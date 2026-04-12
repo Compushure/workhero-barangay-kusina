@@ -1,5 +1,7 @@
 'use client';
 
+// Sort dropdown for HR Mercado list ordering.
+
 import {
   ArrowDownAZ,
   ArrowUpAZ,
@@ -43,6 +45,7 @@ const sortLabels: Record<SortOption, string> = {
 };
 
 export function MercadoSortToggle({ value, onChange, className }: MercadoSortToggleProps) {
+  // Highlights currently selected sort option in the dropdown.
   const itemClassName = (isActive: boolean) =>
     `cursor-pointer transition-all duration-500 ease-in-out ${
       isActive

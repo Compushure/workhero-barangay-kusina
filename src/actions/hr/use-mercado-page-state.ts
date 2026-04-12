@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
+// Frontend state engine for the HR Mercado page (filters, modals, pagination, save flow).
 import type { Reward } from '@/types';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useGetRewards } from '@/hooks/tanstack/queries/rewardQueries';
@@ -93,6 +94,7 @@ const matchesIntervalFilter = (reward: Reward, intervalFilter: IntervalFilter): 
 };
 
 export function useMercadoPageState() {
+  // Keeps all HR page interactions in one place so UI components stay simple.
   // UI-only local state for filters, pagination, and modal visibility.
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

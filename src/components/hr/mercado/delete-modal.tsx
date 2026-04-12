@@ -1,5 +1,7 @@
 'use client';
 
+// Confirmation modal used before permanently deleting a Mercado item.
+
 import { useState } from 'react';
 import {
   Dialog,
@@ -22,6 +24,7 @@ export function DeleteModal({ open, onOpenChange, itemName, onConfirm }: DeleteM
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
+    // Runs parent delete action and locks UI while processing.
     setIsDeleting(true);
     try {
       await onConfirm();

@@ -1,5 +1,7 @@
-import type { Metadata } from 'next'; 
+import type { Metadata } from 'next';
 import { MercadoPageClient } from '@/components/employee/mercado/mercado-page-client';
+
+// Employee Mercado page entry.
 
 export const metadata: Metadata = {
   title: 'WorkHero | Mercado',

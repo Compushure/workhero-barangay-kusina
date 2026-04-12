@@ -1,5 +1,7 @@
 import { Loader2 } from 'lucide-react';
 
+// Generic Mercado loading panel used by child views.
+
 interface LoadingStateProps {
   message?: string;
 }

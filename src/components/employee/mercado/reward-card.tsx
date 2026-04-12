@@ -1,5 +1,7 @@
 'use client';
 
+// Employee reward card: quantity picker, eligibility checks, and redeem action.
+
 import { useState, useMemo, useEffect, memo } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -28,6 +30,7 @@ export const RewardCard = memo(function RewardCard({
   hasPendingRequest,
   onRedeemSuccess,
 }: RewardCardProps) {
+  // Local UI states for image fallback, quantity, and submit overlay.
   const [imageError, setImageError] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,6 +40,7 @@ export const RewardCard = memo(function RewardCard({
     return reward.quantity !== undefined && reward.quantity !== null && reward.quantity <= 0;
   }, [reward.quantity]);
 
+  // Quantity constraints from stock, per-user limit, and current points.
   const maxByLimit =
     reward.redeemingLimit && reward.redeemingLimit > 0 ? reward.redeemingLimit : Infinity;
   const maxByStock = reward.quantity && reward.quantity > 0 ? reward.quantity : Infinity;
@@ -90,6 +94,7 @@ export const RewardCard = memo(function RewardCard({
 
     setIsSubmitting(true);
 
+    // Submit redeem request and notify parent on success.
     try {
       const result = await redeemMutation.mutateAsync({
         rewardId: reward.id,
@@ -108,6 +113,7 @@ export const RewardCard = memo(function RewardCard({
 
   return (
     <Card className="p-1.5 sm:p-2 md:p-2.5 lg:p-3 group relative overflow-hidden bg-parchment border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full hover:shadow-xl min-h-auto min-w-0 flex flex-col rounded-lg hover:scale-105">
+      {/* Blocking overlay while request is being submitted. */}
       {isProcessing && (
         <div className="absolute inset-0 z-20 bg-[#f5e7d1]/85 backdrop-blur-[1px] flex flex-col items-center justify-center gap-2">
           <div className="h-5 w-5 border-2 border-[#6d472a] border-t-transparent rounded-full animate-spin" />
@@ -117,6 +123,7 @@ export const RewardCard = memo(function RewardCard({
 
       <CardContent className="p-0 flex-1 flex flex-col">
         <div className="relative h-20 sm:h-24 md:h-28 lg:h-32 w-full overflow-hidden bg-[#f0e6d2]">
+          {/* Reward image with icon fallback if image fails. */}
           {reward.imageUrl && !imageError ? (
             <Image
               src={reward.imageUrl}
@@ -134,6 +141,7 @@ export const RewardCard = memo(function RewardCard({
           )}
 
           <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 md:top-1.5 md:right-1.5 flex flex-col gap-0.5 sm:gap-1">
+            {/* Status badges: pending request and out-of-stock indicators. */}
             {hasPendingRequest && (
               <Badge className="bg-[#c68a2e] text-white hover:bg-[#c68a2e] text-[7px] sm:text-[8px] md:text-xs px-1 sm:px-1.5 md:px-2 py-0.5">
                 <Clock className="h-2 w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3 mr-0.5 sm:mr-1" />
@@ -188,6 +196,7 @@ export const RewardCard = memo(function RewardCard({
           </div>
 
           <div className="mt-1 flex items-center justify-center gap-1.5 pt-0.5 pb-0">
+            {/* Quantity stepper for selecting how many items to request. */}
             <Button
               type="button"
               size="icon"
@@ -216,6 +225,7 @@ export const RewardCard = memo(function RewardCard({
       </CardContent>
 
       <CardFooter className="px-2 sm:px-2.5 md:px-3 pb-1.5 sm:pb-2 md:pb-2.5 pt-0.5 min-w-0">
+        {/* Primary action button changes label by availability and points status. */}
         <Button
           onClick={handleRedeem}
           disabled={isDisabled}
