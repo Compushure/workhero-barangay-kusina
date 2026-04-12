@@ -1,5 +1,6 @@
 'use server';
 
+// (*/ω＼*)☆*: .｡. o(≧▽≦)o .｡.:*☆(❁´◡`❁)(●'◡'●)
 import { createClient } from '@/lib/supabase/server';
 import type { NotificationItem, ServerActionResponse } from '@/types';
 
