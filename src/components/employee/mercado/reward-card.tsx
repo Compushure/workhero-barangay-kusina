@@ -30,6 +30,7 @@ export const RewardCard = memo(function RewardCard({
 }: RewardCardProps) {
   const [imageError, setImageError] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const redeemMutation = useRedeemReward();
 
   const isOutOfStock = useMemo(() => {
@@ -69,13 +70,25 @@ export const RewardCard = memo(function RewardCard({
       !canAfford ||
       isOutOfStock ||
       hasPendingRequest ||
+      isSubmitting ||
       redeemMutation.isPending ||
       maxSelectable <= 0
     );
-  }, [canAfford, isOutOfStock, hasPendingRequest, redeemMutation.isPending, maxSelectable]);
+  }, [
+    canAfford,
+    isOutOfStock,
+    hasPendingRequest,
+    isSubmitting,
+    redeemMutation.isPending,
+    maxSelectable,
+  ]);
+
+  const isProcessing = isSubmitting || redeemMutation.isPending;
 
   const handleRedeem = async () => {
     if (isDisabled) return;
+
+    setIsSubmitting(true);
 
     try {
       const result = await redeemMutation.mutateAsync({
@@ -88,13 +101,22 @@ export const RewardCard = memo(function RewardCard({
       onRedeemSuccess?.(result);
     } catch (error) {
       console.error('Failed to redeem reward:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <Card className="p-1.5 sm:p-2 md:p-2.5 lg:p-3 group relative overflow-hidden bg-parchment border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full hover:shadow-xl min-h-auto min-w-0 flex flex-col rounded-lg hover:scale-105">
+      {isProcessing && (
+        <div className="absolute inset-0 z-20 bg-[#f5e7d1]/85 backdrop-blur-[1px] flex flex-col items-center justify-center gap-2">
+          <div className="h-5 w-5 border-2 border-[#6d472a] border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs sm:text-sm font-semibold text-[#4f3a26]">Submitting request...</p>
+        </div>
+      )}
+
       <CardContent className="p-0 flex-1 flex flex-col">
-        <div className="relative h-24 sm:h-28 md:h-32 lg:h-36 w-full overflow-hidden bg-[#f0e6d2]">
+        <div className="relative h-20 sm:h-24 md:h-28 lg:h-32 w-full overflow-hidden bg-[#f0e6d2]">
           {reward.imageUrl && !imageError ? (
             <Image
               src={reward.imageUrl}
@@ -204,10 +226,10 @@ export const RewardCard = memo(function RewardCard({
               : 'bg-gray-300 text-gray-500 cursor-not-allowed border-b-2 sm:border-b-2 md:border-b-3'
           )}
         >
-          {redeemMutation.isPending ? (
+          {isProcessing ? (
             <>
               <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-              Ordering...
+              Submitting...
             </>
           ) : hasPendingRequest ? (
             'Requested'

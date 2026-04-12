@@ -154,8 +154,6 @@ export function useCancelMyRedemptionRequest() {
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
       queryClient.invalidateQueries({ queryKey: employeeKeys.points() });
       queryClient.invalidateQueries({ queryKey: ['employeePoints'] });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.all });
-      queryClient.invalidateQueries({ queryKey: rewardKeys.available() });
     },
     onError: (_error, _variables, context) => {
       //logic for cancel rollback: restore previous cache snapshots
