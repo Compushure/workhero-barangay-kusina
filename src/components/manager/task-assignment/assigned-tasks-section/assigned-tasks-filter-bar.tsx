@@ -1,13 +1,13 @@
 'use client';
 
 import {
-  BadgeCheck,
   CircleAlert,
+  CircleCheck,
   CircleDashed,
-  Clock3,
   EyeOff,
   Filter,
   Layers3,
+  Target,
   XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,8 +37,8 @@ const overdueOptions = [
 
 const statusOptions = [
   { value: 'assigned', label: 'Assigned', icon: CircleDashed },
-  { value: 'in review', label: 'In Review', icon: Clock3 },
-  { value: 'approved', label: 'Approved', icon: BadgeCheck },
+  { value: 'in review', label: 'In Review', icon: Target },
+  { value: 'approved', label: 'Approved', icon: CircleCheck },
   { value: 'rejected', label: 'Rejected', icon: XCircle },
 ];
 

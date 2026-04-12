@@ -23,6 +23,7 @@ export interface Task {
 export interface AssignedEmployee {
   /** KPITask row id for this specific assignment */
   assignmentId?: string;
+  completedAt?: string | null;
   id: string;
   name: string;
   empId: string;

@@ -64,7 +64,7 @@ export async function fetchCurrentAssignedTasksPaginated(
   let query = supabase
     .from('task_info_view')
     .select(
-      'status, kpitask_id, category_id, category_name, category_description, category_points, category_xp, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
+      'status, kpitask_id, category_id, category_name, category_description, category_points, category_xp, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_completed_at, kpitask_created_at, k_deadline_date'
     );
   // .eq('status', 'assigned');
   // Only include currently assigned tasks
@@ -119,6 +119,7 @@ export async function fetchCurrentAssignedTasksPaginated(
   (allSortedData ?? []).forEach((row: any) => {
     const employee: AssignedEmployee = {
       assignmentId: row.kpitask_id,
+      completedAt: row.kpitask_completed_at,
       id: row.assigned_to ?? '',
       name: row.assigned_to_name ?? '',
       empId: row.assigned_to_employee_id ?? '',
@@ -252,7 +253,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   let query = supabase
     .from('task_info_view')
     .select(
-      'status, kpitask_id, category_id, category_name, category_description, category_points, category_xp, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
+      'status, kpitask_id, category_id, category_name, category_description, category_points, category_xp, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_completed_at, kpitask_created_at, k_deadline_date'
     )
     // Only include employees with currently assigned tasks
     .not('assigned_to', 'is', null);
@@ -415,6 +416,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
     return Array.from(taskGroups.values()).map((taskGroup) => {
       const employeeData: AssignedEmployee = {
         assignmentId: taskGroup.assignments[0]?.kpitask_id,
+        completedAt: taskGroup.assignments[0]?.kpitask_completed_at,
         id: employee.id,
         name: employee.name,
         empId: employee.empId,

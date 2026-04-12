@@ -6,10 +6,12 @@ import {
   CircleX,
   HandCoins,
   Target,
+  Utensils,
   X,
 } from 'lucide-react';
 import { RefObject, SetStateAction } from 'react';
 import { useMemo } from 'react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface TaskViewEmployeeBadgesProps {
   task: AssignedTask;
@@ -76,48 +78,83 @@ export default function TaskViewEmployeeBadges({
         ref={badgesContainerRef}
         className={`flex flex-wrap gap-2 transition-all duration-300 ${!expanded ? 'max-h-8 overflow-hidden' : ''}`}
       >
-        {uniqueDisplayedEmployees.map((emp) => (
-          <div
-            key={emp.id}
-            className="flex items-center gap-1 bg-card px-1.5 py-1 rounded-full border-2 border-accent/25 min-w-0 w-full sm:w-auto max-w-full sm:max-w-72 lg:max-w-80 2xl:max-w-96"
-          >
-            {emp.status === 'in review' ? (
-              <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400" />
-            ) : emp.status === 'approved' ? (
-              <StatusIcon icon={CircleCheck} className="bg-green-100 text-green-600" />
-            ) : emp.status === 'rejected' ? (
-              <StatusIcon icon={CircleX} className="bg-red-100 text-red-600" />
-            ) : (
-              <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" />
-            )}
+        {uniqueDisplayedEmployees.map((emp) => {
+          const completedOrders = emp.completedOrders ?? 0;
+          const isServed = completedOrders >= task.maxOrders && Boolean(emp.completedAt);
+          const hasClaimedPoints = emp.pendingOrders === 0 && emp.status === 'approved';
 
-            {emp.pendingOrders === 0 && emp.status === 'approved' && (
-              <span className="flex px-1 py-0.5 rounded-full items-center bg-green-100 text-green-600">
-                <HandCoins strokeWidth={2.5} className="size-3.5" />
-              </span>
-            )}
-            <span className="text-xs bg-background text-amber-700 px-1 py-2 leading-0 rounded-full">
-              {emp.completedOrders}
-            </span>
-
-            <span className="font-medium text-xs text-zinc-700 truncate min-w-0 flex-1 sm:flex-initial sm:max-w-28 lg:max-w-36 2xl:max-w-44">
-              {emp.name}
-            </span>
-            <span className="text-gray-500 font-normal text-xs truncate pl-1 min-w-0 max-w-18 sm:max-w-24 lg:max-w-30 2xl:max-w-36">
-              {emp.empId}
-            </span>
-            <button
-              onClick={() => {
-                if (!emp.assignmentId) return;
-                setShowRemoveConfirm({ assignmentId: emp.assignmentId, employeeId: emp.id });
-              }}
-              className="ml-1.5 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130 shrink-0"
-              title="Unassign Employee"
+          return (
+            <div
+              key={emp.id}
+              className="flex items-center gap-1 bg-card px-1.5 py-1 rounded-full border-2 border-accent/25 min-w-0 w-full sm:w-auto max-w-full sm:max-w-72 lg:max-w-80 2xl:max-w-96"
             >
-              <X className="size-3 text-foreground hover:text-red-500" />
-            </button>
-          </div>
-        ))}
+              {emp.status === 'in review' ? (
+                <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400" />
+              ) : emp.status === 'approved' ? (
+                <StatusIcon icon={CircleCheck} className="bg-green-100 text-green-600" />
+              ) : emp.status === 'rejected' ? (
+                <StatusIcon icon={CircleX} className="bg-red-100 text-red-600" />
+              ) : (
+                <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" />
+              )}
+
+              {isServed ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="flex px-1.5 py-0.5 rounded-full items-center bg-violet-200 text-violet-600">
+                      <Utensils strokeWidth={2.5} className="size-3.5" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    align="center"
+                    className="bg-violet-50 text-violet-700"
+                  >
+                    Dishes served
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                hasClaimedPoints && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex px-1 py-0.5 rounded-full items-center bg-green-100 text-green-600">
+                        <HandCoins strokeWidth={2.5} className="size-3.5" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="center"
+                      className="bg-green-100 text-green-600 border-green-200"
+                    >
+                      Points claimed
+                    </TooltipContent>
+                  </Tooltip>
+                )
+              )}
+
+              <span className="text-xs bg-background text-amber-700 px-1 py-2 leading-0 rounded-full">
+                {completedOrders}
+              </span>
+
+              <span className="font-medium text-xs text-zinc-700 truncate min-w-0 flex-1 sm:flex-initial sm:max-w-28 lg:max-w-36 2xl:max-w-44">
+                {emp.name}
+              </span>
+              <span className="text-gray-500 font-normal text-xs truncate pl-1 min-w-0 max-w-18 sm:max-w-24 lg:max-w-30 2xl:max-w-36">
+                {emp.empId}
+              </span>
+              <button
+                onClick={() => {
+                  if (!emp.assignmentId) return;
+                  setShowRemoveConfirm({ assignmentId: emp.assignmentId, employeeId: emp.id });
+                }}
+                className="ml-1.5 transition-all duration-500 ease-in-out cursor-pointer hover:scale-130 shrink-0"
+                title="Unassign Employee"
+              >
+                <X className="size-3 text-foreground hover:text-red-500" />
+              </button>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
