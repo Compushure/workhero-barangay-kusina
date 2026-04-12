@@ -6,6 +6,12 @@ import { getUserRole } from '@/actions/shared/auth';
 import type { EditPointsInput, EditXPInput, EditXPResult } from '@/types';
 
 /**
+ * 
+ // NOTR LNG NI PBTW  indi ni ako ang main author
+ // i've rechecked this file a coupee of times
+ /// i'm keeping most of the legacy code here, ALSO DU MEDYO na not understanding why the admin client was used here
+ // insead of just the regular server client? imm thinking' its an ai decison - ANTON
+
  * Edit (add) points for a specific user
  * Only accessible by managers
  * @param userId - The user ID to update points for
@@ -17,7 +23,8 @@ export async function editUserPoints({
   pointsToAdd,
 }: EditPointsInput): Promise<ActionResult<number>> {
   return safeAction(async () => {
-    // Verify manager role
+    // Verify manager role - i do not think this is needed tbh  since ga throw na daan error if qlaa session misom
+    // this is done in the layout.tsx
     const { role, error: roleError } = await getUserRole();
     if (roleError || !role) {
       throw new Error('Authentication required');
@@ -37,6 +44,8 @@ export async function editUserPoints({
       throw new Error('User ID is required');
     }
 
+    // no idea diri, i think this was also a legacy code that was kept since don't know if other functions are using it
+  // might be the source of incosisntetncy since ga bantayanay diri ang total point and current points
     // Fetch current points and total_points_earned so we can increment both
     const { data: userData, error: fetchUserError } = await supabaseAdmin
       .from('User')
@@ -84,6 +93,9 @@ export async function editUserPoints({
 /**
  * Edit (add) XP for a specific user
  * Only accessible by managers
+ * // Dunno if this is neededd again, i'm only choosing to keep it since i do not know 
+ * which front end components heavily rely on this. FOr my part I think it's obsolete since we have the
+ * stats.ts that handles most of these  - ANTON
  * Level/XP are calculated manually from Level thresholds (no DB trigger dependency)
  * @param userId - The user ID to update XP for
  * @param xpToAdd - Number of XP to add (must be non-negative)
