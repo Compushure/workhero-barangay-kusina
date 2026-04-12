@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
+// this just check email availabilty from the databi 
 
 const AUTH_USERS_PAGE_SIZE = 1000;
 
@@ -71,6 +72,7 @@ export async function findExistingUserEmail(email: string): Promise<ExistingEmai
     };
   }
 
+  
   if (await emailExistsInPublicUsers(normalizedEmail)) {
     return {
       exists: true,
