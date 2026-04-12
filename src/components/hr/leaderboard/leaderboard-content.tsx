@@ -32,8 +32,8 @@ export function LeaderboardContent({
     show,
   });
 
-  if ((isPending || isFetching) && !data) {
-    return <LeaderboardTableSkeleton />;
+  if (isPending || isFetching) {
+    return <LeaderboardTableSkeleton periodHeaderLabel={periodHeaderLabel} />;
   }
 
   if (!data) {

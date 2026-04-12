@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { UseQueryResult } from '@tanstack/react-query';
 import {
   getEnrichedLeaderboardByPeriod,
@@ -45,7 +45,6 @@ export function useLeaderboardRankingQuery(params: {
       return result.data ?? null;
     },
     enabled: show,
-    placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     retry: 1,

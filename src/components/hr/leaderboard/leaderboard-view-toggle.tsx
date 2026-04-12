@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { cn } from '@/lib/utils';
 
 interface LeaderboardViewToggleProps {
@@ -13,8 +13,16 @@ export function LeaderboardViewToggle({ currentView }: LeaderboardViewToggleProp
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
+  const [optimisticView, setOptimisticView] = useState<'generate' | 'past'>(currentView);
+
+  useEffect(() => {
+    setOptimisticView(currentView);
+  }, [currentView]);
 
   const handleSwitch = (view: 'generate' | 'past') => {
+    if (view === optimisticView) return;
+    setOptimisticView(view);
+
     const params = new URLSearchParams(searchParams.toString());
     if (view === 'generate') {
       params.delete('view');
@@ -36,7 +44,7 @@ export function LeaderboardViewToggle({ currentView }: LeaderboardViewToggleProp
         onClick={() => handleSwitch('generate')}
         className={cn(
           'flex flex-1 items-center justify-center gap-1 rounded-l-md px-2.5 py-2 text-xs font-semibold transition-all duration-500 ease-in-out sm:w-40 sm:flex-none sm:text-sm',
-          currentView === 'generate'
+          optimisticView === 'generate'
             ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
             : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25 hover:cursor-pointer'
         )}
@@ -47,7 +55,7 @@ export function LeaderboardViewToggle({ currentView }: LeaderboardViewToggleProp
         onClick={() => handleSwitch('past')}
         className={cn(
           'flex flex-1 items-center justify-center gap-1 rounded-r-md px-2.5 py-2 text-xs font-semibold transition-all duration-500 ease-in-out sm:w-40 sm:flex-none sm:text-sm',
-          currentView === 'past'
+          optimisticView === 'past'
             ? 'bg-linear-to-b from-accent-secondary to-accent text-zinc-50 shadow-sm/25'
             : 'text-secondary hover:bg-accent-secondary/25 inset-shadow-2xs/25 hover:cursor-pointer'
         )}
