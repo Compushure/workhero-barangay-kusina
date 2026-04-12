@@ -21,6 +21,9 @@ This repository powers a multi-role internal portal for:
 
 ## Contents
 
+<details open>
+<summary><strong>Jump Links</strong></summary>
+
 - [Project Summary](#project-summary)
 - [Core Features](#core-features)
 - [Role Surface Map](#role-surface-map)
@@ -42,7 +45,12 @@ This repository powers a multi-role internal portal for:
 - [Contribution Notes](#contribution-notes)
 - [License](#license)
 
+</details>
+
 ## Project Summary
+
+<details open>
+<summary><strong>View Section</strong></summary>
 
 WorkHero Barangay Kusina is structured around role-specific operational flows rather than one generic dashboard. The app uses the Next.js App Router, server-side Supabase access, typed server actions, React Query caching, and a small set of Zustand stores for optimistic UI state.
 
@@ -57,7 +65,12 @@ The codebase is not a thin CRUD shell. It includes actual operational logic for:
 - generated leaderboard periods with visibility controls
 - realtime employee notifications through Supabase channels
 
+</details>
+
 ## Core Features
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 - Role-based access control for `superadmin`, `manager`, `hr`, and `regular`
 - Superadmin user CRUD with search, filters, pagination, profile photos, and welcome email delivery
@@ -74,7 +87,12 @@ The codebase is not a thin CRUD shell. It includes actual operational logic for:
 - Realtime notifications using Supabase `postgres_changes`
 - Jest unit/integration coverage plus Cypress coverage for superadmin and manager flows
 
+</details>
+
 ## Role Surface Map
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 | Role         | Main Routes                                                                                                                            | Main Responsibilities                                                                                |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -83,7 +101,12 @@ The codebase is not a thin CRUD shell. It includes actual operational logic for:
 | `hr`         | `/hr/reward-requests`, `/hr/mercado`, `/hr/leaderboard`                                                                                | manage reward inventory, process redemption requests, generate and publish leaderboards              |
 | `regular`    | `/employee/dashboard`, `/employee/attendance`, `/employee/tasks`, `/employee/mercado`, `/employee/leaderboard`                         | track attendance, complete tasks, claim rewards, view rankings, manage profile                       |
 
+</details>
+
 ## Tech Stack
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 | Area                   | Tools in use                                                       |
 | ---------------------- | ------------------------------------------------------------------ |
@@ -101,7 +124,12 @@ The codebase is not a thin CRUD shell. It includes actual operational logic for:
 | E2E tests              | Cypress                                                            |
 | Tooling                | ESLint, Prettier, Husky, lint-staged                               |
 
+</details>
+
 ## Architecture Overview
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 At a high level, the repository is organized by product domain and then by execution layer.
 
@@ -128,7 +156,12 @@ That means the repo uses both of these server-side styles today:
 - direct server actions
 - server actions that still call internal route handlers for some superadmin work
 
+</details>
+
 ## Request Flow Patterns
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 ### 1. Standard flow used across most domains
 
@@ -200,7 +233,12 @@ The app intentionally uses different Supabase clients by runtime:
 | admin client            | `src/lib/supabase/admin.ts`                     | privileged server-only operations using service role      |
 | request/session refresh | `src/lib/supabase/proxy.ts` and root `proxy.ts` | session refresh and unauthenticated redirects             |
 
+</details>
+
 ## Repository Structure
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 The repository structure is documented visually below so the top-level nesting and feature boundaries are easy to scan.
 
@@ -300,7 +338,12 @@ src/
 `-- zod/schemas/
 ```
 
+</details>
+
 ## App Route Map
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 ### Public and auth routes
 
@@ -359,7 +402,12 @@ src/
 | ------------------- | -------------------------------------------------------------- |
 | `/profile/[userid]` | authenticated user profile view restricted to the session user |
 
+</details>
+
 ## Domain Model and Supabase Objects
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 ### Main tables present in the Supabase test schema
 
@@ -405,7 +453,12 @@ The app relies on several database-level helpers and views, including:
 | rankings        | `RankingPeriod` stores generated periods, `RankingEntry` stores per-user ranked results              |
 | notifications   | `Notification` rows are inserted server-side and consumed through queries plus realtime              |
 
+</details>
+
 ## Environment Variables
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 Variables referenced directly in code:
 
@@ -449,7 +502,12 @@ Notes:
 - `NEXT_PUBLIC_BASE_URL` matters in this repo because some server actions still call internal route handlers and because welcome emails generate absolute links.
 - SMTP is optional only if you are not exercising superadmin onboarding email flows.
 
+</details>
+
 ## Getting Started
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 ### Prerequisites
 
@@ -491,7 +549,12 @@ npm run build
 npm run start
 ```
 
+</details>
+
 ## Available Scripts
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 From `package.json`:
 
@@ -518,7 +581,12 @@ There is currently no `cypress:run` script in `package.json`. For headless Cypre
 npx cypress run
 ```
 
+</details>
+
 ## Testing Strategy
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 ### Jest
 
@@ -575,7 +643,12 @@ cypress/e2e/
 `-- superadmin/
 ```
 
+</details>
+
 ## Feature Module Guide
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 ### Superadmin
 
@@ -674,7 +747,12 @@ These modules cover:
 - welcome-email templating
 - duplicate-email detection across public user data and auth users
 
+</details>
+
 ## Storage and Media Conventions
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 The code expects these Supabase storage buckets:
 
@@ -691,7 +769,12 @@ Media-related conventions:
 - many public URLs add `?t=${Date.now()}` for cache-busting
 - `next.config.ts` derives an image remote pattern from `NEXT_PUBLIC_SUPABASE_URL`
 
+</details>
+
 ## Important Implementation Notes
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 ### Authentication and route protection
 
@@ -744,7 +827,12 @@ HR leaderboard generation:
 4. exposes results through `ranking_leaderboard_view`
 5. optionally notifies visible top-10 users when the ranking is published
 
+</details>
+
 ## Known Transitional Areas
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 These are worth knowing before refactoring:
 
@@ -754,7 +842,12 @@ These are worth knowing before refactoring:
 - The repository contains a few debug/test-only UI helpers under employee and attendance component trees.
 - The root session redirect logic in `proxy.ts` and the server role redirect helpers should be treated carefully because they affect every authenticated route.
 
+</details>
+
 ## Deployment Notes
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 ### Next.js configuration
 
@@ -780,7 +873,12 @@ The repo contains:
 
 This edge function calls the `evaluate_badges` RPC and is intended for scheduled or manual badge evaluation.
 
+</details>
+
 ## Contribution Notes
+
+<details>
+<summary><strong>View Section</strong></summary>
 
 When extending the codebase, these conventions match the current architecture best:
 
@@ -803,6 +901,13 @@ npm test
 
 If your change touches SMTP onboarding, reward flows, or task assignment/verification, also test the relevant UI path locally because those flows span several layers.
 
+</details>
+
 ## License
 
+<details>
+<summary><strong>View Section</strong></summary>
+
 This project is licensed under the MIT License. See [LICENSE](LICENSE).
+
+</details>
