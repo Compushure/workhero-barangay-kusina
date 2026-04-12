@@ -416,7 +416,7 @@ async function getLevelData(levelNumber: number): Promise<{
   };
 }
 
-/**
+/** 
  * Calculate total XP based on Level table data
  * @param level User's current level (capped at 10)
  * ANother legacy issues was the original dev assigned to this made multiple copiesand columns of 
