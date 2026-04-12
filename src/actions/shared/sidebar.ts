@@ -3,10 +3,14 @@
 import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse, UserWithExtras } from '@/types';
 
+// COLLAB SANG TANAN NA MEMBERS 
+
 /**
  * Fetches the current logged-in user's information including profile data
  * Used by the ProfilePic component to display user avatar and navigate
  */
+
+// ANTON STUFF
 export async function fetchInSessionUserInfo(): Promise<ServerActionResponse<UserWithExtras>> {
   try {
     const supabase = await createClient();
@@ -46,6 +50,8 @@ export async function fetchInSessionUserInfo(): Promise<ServerActionResponse<Use
     const { data: storageData } = supabase.storage
       .from('employees')
       .getPublicUrl(`${userId}/profile.png`);
+
+      // AGAIN KAY WALA COLUMN SA USERS HUHUH
 
     const profilePictureUrl = storageData?.publicUrl || '';
 
