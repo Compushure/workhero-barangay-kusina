@@ -12,6 +12,7 @@ import {
 
 import { NavLoadingState } from '@/components/employee/nav-loading-state';
 import { MercadoStallButton } from './mercado-stall-button';
+import { MercadoStallLoadingState } from './mercado-stall-loading-state';
 import { INTERVAL_STALLS } from './mercado-stall-config';
 import { buildClosedByInterval, buildIntervalCounts } from './mercado-stall-state';
 
@@ -52,10 +53,13 @@ function CarouselArrowButton({ direction, onClick }: CarouselArrowButtonProps) {
 function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
   const { setSelectedInterval } = useMercadoContext();
   // Load all rewards and interval-specific rewards to determine which stalls are open or closed.
-  const { data: allRewards = [] } = useGetRewards();
-  const { data: weeklyRewards = [] } = useGetAvailableRewardsByInterval('weekly');
-  const { data: monthlyRewards = [] } = useGetAvailableRewardsByInterval('monthly');
-  const { data: yearlyRewards = [] } = useGetAvailableRewardsByInterval('yearly');
+  const { data: allRewards = [], isLoading: allRewardsLoading } = useGetRewards();
+  const { data: weeklyRewards = [], isLoading: weeklyRewardsLoading } =
+    useGetAvailableRewardsByInterval('weekly');
+  const { data: monthlyRewards = [], isLoading: monthlyRewardsLoading } =
+    useGetAvailableRewardsByInterval('monthly');
+  const { data: yearlyRewards = [], isLoading: yearlyRewardsLoading } =
+    useGetAvailableRewardsByInterval('yearly');
   const [carouselIndex, setCarouselIndex] = useState(0);
 
   // Build quick counts for each interval so the stall-state helper can decide availability.
@@ -74,6 +78,8 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
     () => buildClosedByInterval(allRewards, availableCounts),
     [allRewards, availableCounts]
   );
+  const isStallsLoading =
+    allRewardsLoading || weeklyRewardsLoading || monthlyRewardsLoading || yearlyRewardsLoading;
 
   const handleStallClick = (interval: 'weekly' | 'monthly' | 'yearly') => {
     // Guard: do nothing when the selected stall is currently closed.
@@ -127,38 +133,44 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
 
       <main className="relative z-10 mx-auto flex w-full flex-1 min-w-0 items-end justify-center overflow-hidden px-2 pb-[max(env(safe-area-inset-bottom),3rem)] sm:px-3 sm:pb-[max(env(safe-area-inset-bottom),2.5rem)] md:px-4 md:pb-[max(env(safe-area-inset-bottom),2rem)] lg:px-4 lg:pb-4 xl:px-5 xl:pb-6">
         <div className="flex w-full flex-1 min-w-0 max-w-295 items-end justify-center">
-          {/* Desktop: 3 stalls grid (lg+) */}
-          <div className="hidden items-end justify-center gap-6 sm:gap-8 md:gap-10 lg:flex lg:gap-12 xl:gap-16">
-            {INTERVAL_STALLS.map((stall) => (
-              <MercadoStallButton
-                key={stall.interval}
-                stall={stall}
-                isClosed={closedByInterval[stall.interval]}
-                variant="desktop"
-                onSelect={handleStallClick}
-              />
-            ))}
-          </div>
-
-          {/* Mobile/tablet: single-stall carousel with arrows anchored near stall edges. */}
-          <div className="relative flex w-full min-w-0 max-w-lg items-center justify-center pb-1 sm:max-w-xl sm:pb-1 md:max-w-160 md:pb-1.5 lg:hidden">
-            <div className="relative inline-flex w-auto translate-y-0 items-center justify-center sm:translate-y-1 md:translate-y-2">
-              <MercadoStallButton
-                stall={activeCarouselStall}
-                isClosed={closedByInterval[activeCarouselStall.interval]}
-                variant="mobile"
-                onSelect={handleStallClick}
-              />
-
-              <div className="absolute top-[64%] left-0 z-20 -translate-x-7 -translate-y-1/2 max-[380px]:-translate-x-6 sm:top-[64%] sm:-translate-x-7 md:top-[62%] md:-translate-x-6">
-                <CarouselArrowButton direction="left" onClick={handlePreviousStall} />
+          {isStallsLoading ? (
+            <MercadoStallLoadingState />
+          ) : (
+            <>
+              {/* Desktop: 3 stalls grid (lg+) */}
+              <div className="hidden items-end justify-center gap-6 sm:gap-8 md:gap-10 lg:flex lg:gap-12 xl:gap-16">
+                {INTERVAL_STALLS.map((stall) => (
+                  <MercadoStallButton
+                    key={stall.interval}
+                    stall={stall}
+                    isClosed={closedByInterval[stall.interval]}
+                    variant="desktop"
+                    onSelect={handleStallClick}
+                  />
+                ))}
               </div>
 
-              <div className="absolute top-[64%] right-0 z-20 translate-x-7 -translate-y-1/2 max-[380px]:translate-x-6 sm:top-[64%] sm:translate-x-7 md:top-[62%] md:translate-x-6">
-                <CarouselArrowButton direction="right" onClick={handleNextStall} />
+              {/* Mobile/tablet: single-stall carousel with arrows anchored near stall edges. */}
+              <div className="relative flex w-full min-w-0 max-w-lg items-center justify-center pb-1 sm:max-w-xl sm:pb-1 md:max-w-160 md:pb-1.5 lg:hidden">
+                <div className="relative inline-flex w-auto translate-y-0 items-center justify-center sm:translate-y-1 md:translate-y-2">
+                  <MercadoStallButton
+                    stall={activeCarouselStall}
+                    isClosed={closedByInterval[activeCarouselStall.interval]}
+                    variant="mobile"
+                    onSelect={handleStallClick}
+                  />
+
+                  <div className="absolute top-[64%] left-0 z-20 -translate-x-7 -translate-y-1/2 max-[380px]:-translate-x-6 sm:top-[64%] sm:-translate-x-7 md:top-[62%] md:-translate-x-6">
+                    <CarouselArrowButton direction="left" onClick={handlePreviousStall} />
+                  </div>
+
+                  <div className="absolute top-[64%] right-0 z-20 translate-x-7 -translate-y-1/2 max-[380px]:translate-x-6 sm:top-[64%] sm:translate-x-7 md:top-[62%] md:translate-x-6">
+                    <CarouselArrowButton direction="right" onClick={handleNextStall} />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </main>
 

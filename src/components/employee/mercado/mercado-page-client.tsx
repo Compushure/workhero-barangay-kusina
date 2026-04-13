@@ -18,10 +18,17 @@ export function MercadoPageClient() {
     includeRewards: false,
   });
   // Load all rewards to validate interval availability rules.
-  const { data: allRewards = [], isLoading: allRewardsLoading } = useGetRewards();
+  const {
+    data: allRewards = [],
+    isLoading: allRewardsLoading,
+    isFetching: allRewardsFetching,
+  } = useGetRewards();
   // Load rewards only for the currently selected interval (weekly/monthly/yearly).
-  const { data: intervalRewards = [], isLoading: intervalRewardsLoading } =
-    useGetAvailableRewardsByInterval(selectedInterval);
+  const {
+    data: intervalRewards = [],
+    isLoading: intervalRewardsLoading,
+    isFetching: intervalRewardsFetching,
+  } = useGetAvailableRewardsByInterval(selectedInterval);
 
   // Re-check whether chosen interval is still open after data updates.
   const isSelectedIntervalClosed = useMemo(() => {
@@ -29,6 +36,10 @@ export function MercadoPageClient() {
 
     return isIntervalClosed(selectedInterval, allRewards, intervalRewards.length);
   }, [allRewards, intervalRewards.length, selectedInterval]);
+
+  const isStallOpeningLoading =
+    !!selectedInterval &&
+    (allRewardsLoading || allRewardsFetching || intervalRewardsLoading || intervalRewardsFetching);
 
   useEffect(() => {
     // Wait until data is ready before deciding to auto-close the modal.
@@ -53,13 +64,13 @@ export function MercadoPageClient() {
 
   return (
     <MonthlyRewardsModal
-      // Modal opens only when interval is selected and still valid/open.
-      open={!!selectedInterval && !isSelectedIntervalClosed}
+      // Open immediately on stall selection and show loading while rewards are being resolved.
+      open={!!selectedInterval && (isStallOpeningLoading || !isSelectedIntervalClosed)}
       // Closing modal clears selected interval so layout returns to neutral state.
       onOpenChange={(open) => !open && setSelectedInterval(null)}
       interval={selectedInterval}
       rewards={intervalRewards}
-      isLoading={intervalRewardsLoading}
+      isLoading={isStallOpeningLoading}
       userPoints={userPoints}
       pendingRewardIds={pendingRewardIds}
       pendingRequests={pendingRequests}
