@@ -266,6 +266,7 @@ export function RewardRequestsFeedbackModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
+        overlayClassName="z-[48]"
         className="kitchen-parchment-card w-[94vw] max-w-205 max-h-[82vh] rounded-3xl p-0 gap-0 overflow-hidden"
       >
         <DialogClose

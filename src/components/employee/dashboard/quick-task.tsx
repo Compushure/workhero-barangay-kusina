@@ -39,8 +39,8 @@ function WideDialogContent({ children, className, ...props }: DialogContentProps
   return (
     <DialogContent
       showCloseButton={false}
-      overlayClassName="z-[15]"
-      className={`kitchen-parchment-card z-15 w-[92vw] max-w-210 max-h-[82vh] gap-0 rounded-2xl font-pixel p-0 overflow-hidden ${className ?? ''}`}
+      overlayClassName="z-[48]"
+      className={`kitchen-parchment-card w-[92vw] max-w-210 max-h-[82vh] gap-0 rounded-2xl font-pixel p-0 overflow-hidden ${className ?? ''}`}
       {...props}
     >
       <DialogClose
