@@ -10,10 +10,12 @@
 
 import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals';
 import {
+  handleClearUnstartedTaskAssignments,
   handleClearUnstartedEmployeeTasks,
   handleDeleteTask,
   handleFetchCurrentAssignedEmployeesPaginated,
   handleFetchCurrentAssignedTasksPaginated,
+  handleUpdateTaskAssignment,
 } from '@/action-handlers/manager/assigned-tasks';
 import { RemoteSupabaseTestContext } from '../../utils/remoteSupabaseTestUtils';
 import { managerAssignedTasksIntegrationNames } from '../../mockData/managerAssignedTasksMockData';
@@ -211,6 +213,150 @@ describe('When the manager clears unstarted tasks for a specific employee', () =
     expect(remainingIds.has(inProgressTask.id)).toBe(true);
     expect(remainingIds.has(approvedTask.id)).toBe(true);
     expect(toastSuccess).toHaveBeenCalledWith('Cleared 1 unstarted task');
+  });
+
+  test('Then the clear-all handler removes only unstarted assigned rows across employees', async () => {
+    const manager = await remoteContext.seedUser({
+      roleType: 'manager',
+      namePrefix: `${managerAssignedTasksIntegrationNames.clear.managerNamePrefix} Global`,
+      emailPrefix: `${managerAssignedTasksIntegrationNames.clear.managerEmailPrefix}.global`,
+    });
+    const employeeOne = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: `${managerAssignedTasksIntegrationNames.clear.employeeNamePrefix} Global One`,
+      emailPrefix: `${managerAssignedTasksIntegrationNames.clear.employeeEmailPrefix}.global.one`,
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+    const employeeTwo = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: `${managerAssignedTasksIntegrationNames.clear.employeeNamePrefix} Global Two`,
+      emailPrefix: `${managerAssignedTasksIntegrationNames.clear.employeeEmailPrefix}.global.two`,
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+    const category = await remoteContext.seedCategory({
+      namePrefix: `${managerAssignedTasksIntegrationNames.clear.categoryNamePrefix} Global`,
+      points: 11,
+      xp: 3,
+    });
+
+    const removableTask = await remoteContext.seedTask({
+      assignedBy: manager.id,
+      assignedTo: employeeOne.id,
+      categoryId: category.id,
+      status: 'assigned',
+      pendingOrders: 0,
+      completedOrders: 0,
+      maxOrders: 2,
+      deadlineDate: '2099-12-31',
+    });
+    const retainedTask = await remoteContext.seedTask({
+      assignedBy: manager.id,
+      assignedTo: employeeTwo.id,
+      categoryId: category.id,
+      status: 'assigned',
+      pendingOrders: 1,
+      completedOrders: 0,
+      maxOrders: 2,
+      deadlineDate: '2099-12-31',
+    });
+
+    currentServerClient = remoteContext.createServerClientForUser(manager);
+
+    const cleared = await handleClearUnstartedTaskAssignments();
+    const { data: remainingRows, error: reloadError } = await remoteContext.admin
+      .from('KPITask')
+      .select('id')
+      .in('id', [removableTask.id, retainedTask.id]);
+
+    expect(cleared).toBe(true);
+    expect(reloadError).toBeNull();
+    const remainingIds = new Set((remainingRows ?? []).map((row) => row.id));
+    expect(remainingIds.has(removableTask.id)).toBe(false);
+    expect(remainingIds.has(retainedTask.id)).toBe(true);
+    expect(toastSuccess).toHaveBeenCalledWith('Unstarted assignments cleared');
+  });
+});
+
+describe('When the manager edits an assigned task group', () => {
+  test('Then the update handler updates max orders and due date, and adds newly selected employees', async () => {
+    const manager = await remoteContext.seedUser({
+      roleType: 'manager',
+      namePrefix: 'Update Assigned Manager',
+      emailPrefix: 'update.assigned.manager',
+    });
+    const employeeOne = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: 'Update Assigned Employee One',
+      emailPrefix: 'update.assigned.employee.one',
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+    const employeeTwo = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: 'Update Assigned Employee Two',
+      emailPrefix: 'update.assigned.employee.two',
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+    const category = await remoteContext.seedCategory({
+      namePrefix: 'Update Assigned Category',
+      points: 13,
+      xp: 4,
+    });
+
+    const seededTask = await remoteContext.seedTask({
+      assignedBy: manager.id,
+      assignedTo: employeeOne.id,
+      categoryId: category.id,
+      status: 'assigned',
+      pendingOrders: 0,
+      completedOrders: 0,
+      maxOrders: 2,
+      deadlineDate: '2099-12-31',
+    });
+
+    currentServerClient = remoteContext.createServerClientForUser(manager);
+
+    const updated = await handleUpdateTaskAssignment(seededTask.id, 5, '2099-11-30', [
+      employeeOne.id,
+      employeeTwo.id,
+    ]);
+
+    const { data: rows, error: reloadError } = await remoteContext.admin
+      .from('KPITask')
+      .select('id, assigned_to, max_orders, deadline_date')
+      .eq('category_id', category.id)
+      .order('assigned_to', { ascending: true });
+
+    expect(updated).toBe(true);
+    expect(reloadError).toBeNull();
+    expect(rows?.length).toBeGreaterThanOrEqual(2);
+    const assignedIds = (rows ?? []).map((row) => row.assigned_to);
+    expect(assignedIds).toEqual(expect.arrayContaining([employeeOne.id, employeeTwo.id]));
+    (rows ?? []).forEach((row) => {
+      expect(row.max_orders).toBe(5);
+      expect(String(row.deadline_date)).toContain('2099-11-30');
+    });
+
+    // The update flow may insert new assignments not tracked by the test context helper.
+    // Delete those rows here to avoid FK cleanup failures in afterEach.
+    const updatedRowIds = (rows ?? []).map((row) => row.id);
+    if (updatedRowIds.length > 0) {
+      const { error: cleanupError } = await remoteContext.admin
+        .from('KPITask')
+        .delete()
+        .in('id', updatedRowIds);
+
+      expect(cleanupError).toBeNull();
+    }
+
+    expect(toastSuccess).toHaveBeenCalledWith('Task updated successfully');
   });
 });
 
