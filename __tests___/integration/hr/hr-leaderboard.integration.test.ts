@@ -12,6 +12,7 @@ import {
   checkRankingExists,
   getAllRankingPeriods,
   getEnrichedLeaderboardByPeriod,
+  toggleRankingVisibility,
 } from '@/actions/hr/leaderboard';
 import { getPeriodStartEnd, toManilaDateString } from '@/lib/utils/time-period-utils';
 import { RemoteSupabaseTestContext } from '../../utils/remoteSupabaseTestUtils';
@@ -229,6 +230,93 @@ describe('When HR reads past ranking periods', () => {
         participant_count: 2,
       })
     );
+  });
+});
+
+describe('When HR validates and toggles seeded ranking periods', () => {
+  test('Then checkRankingExists returns false when no ranking period was generated for the selected week', async () => {
+    const hrUser = await remoteContext.seedUser({
+      roleType: 'hr',
+      namePrefix: 'HR Missing Ranking Check',
+      emailPrefix: 'hr.missing.ranking.check',
+    });
+
+    currentServerClient = remoteContext.createServerClientForUser(hrUser);
+
+    const existsResult = await checkRankingExists('weekly', 2098, undefined, 2);
+
+    expect(existsResult.success).toBe(true);
+    expect(existsResult.data).toBe(false);
+  });
+
+  test('Then toggleRankingVisibility updates seeded period visibility from hidden to visible', async () => {
+    const hrUser = await remoteContext.seedUser({
+      roleType: 'hr',
+      namePrefix: 'HR Toggle Visibility',
+      emailPrefix: 'hr.toggle.visibility',
+    });
+    const employeeOne = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: 'HR Toggle Employee One',
+      emailPrefix: 'hr.toggle.employee.one',
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+    const employeeTwo = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: 'HR Toggle Employee Two',
+      emailPrefix: 'hr.toggle.employee.two',
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+
+    await seedWeeklyRanking({
+      year: 2099,
+      week: 5,
+      isVisible: false,
+      rows: createHrLeaderboardSeedRows({
+        firstUserId: employeeOne.id,
+        secondUserId: employeeTwo.id,
+        firstScore: 330,
+        secondScore: 320,
+      }),
+    });
+
+    const { start } = getPeriodStartEnd('weekly', 2099, undefined, 5);
+    const periodStart = toManilaDateString(start);
+    const { data: rankingPeriod, error: rankingPeriodError } = await remoteContext.admin
+      .from('RankingPeriod')
+      .select('id, is_visible')
+      .eq('period_type', 'weekly')
+      .eq('period_start', periodStart)
+      .single();
+
+    if (rankingPeriodError || !rankingPeriod?.id) {
+      throw new Error(
+        `Failed to fetch seeded ranking period for visibility test: ${rankingPeriodError?.message ?? 'Unknown error'}`
+      );
+    }
+
+    currentServerClient = remoteContext.createServerClientForUser(hrUser);
+
+    const toggleResult = await toggleRankingVisibility(rankingPeriod.id, true);
+
+    expect(toggleResult.success).toBe(true);
+    expect(toggleResult.data).toEqual({ id: rankingPeriod.id, is_visible: true });
+
+    const { data: updatedPeriod, error: updatedPeriodError } = await remoteContext.admin
+      .from('RankingPeriod')
+      .select('is_visible')
+      .eq('id', rankingPeriod.id)
+      .single();
+
+    if (updatedPeriodError) {
+      throw new Error(`Failed to fetch updated ranking period: ${updatedPeriodError.message}`);
+    }
+
+    expect(updatedPeriod?.is_visible).toBe(true);
   });
 });
 

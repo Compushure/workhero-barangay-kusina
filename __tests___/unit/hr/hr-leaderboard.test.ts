@@ -34,7 +34,8 @@ type ToggleVisibilityAction = (
 
 const generateRankingByPeriodMock: jest.MockedFunction<GenerateRankingAction> = jest.fn();
 const toggleRankingVisibilityMock: jest.MockedFunction<ToggleVisibilityAction> = jest.fn();
-const safeActionMock = jest.fn();
+const safeActionMock: jest.MockedFunction<(...args: unknown[]) => Promise<ActionResult<unknown>>> =
+  jest.fn();
 
 jest.mock('@/actions/hr/leaderboard', () => ({
   generateRankingByPeriod: (
@@ -113,6 +114,23 @@ describe('When HR generates leaderboard rankings through the action handler', ()
       )
     ).rejects.toThrow('Not authenticated');
   });
+
+  test('Then the generate handler throws when safeAction fails before returning nested action data', async () => {
+    safeActionMock.mockResolvedValueOnce({
+      success: false,
+      data: null,
+      error: 'Safe action wrapper failed',
+    });
+
+    await expect(
+      handleGenerateRankingByPeriodAction(
+        hrLeaderboardUnitSelection.periodType,
+        hrLeaderboardUnitSelection.year,
+        undefined,
+        hrLeaderboardUnitSelection.week
+      )
+    ).rejects.toThrow('Safe action wrapper failed');
+  });
 });
 
 describe('When HR toggles leaderboard visibility through the action handler', () => {
@@ -138,6 +156,18 @@ describe('When HR toggles leaderboard visibility through the action handler', ()
 
     await expect(handleToggleRankingVisibilityAction('period-1', false)).rejects.toThrow(
       'Failed to update ranking visibility'
+    );
+  });
+
+  test('Then the visibility handler throws when the wrapped action result contains an explicit error', async () => {
+    toggleRankingVisibilityMock.mockResolvedValue({
+      success: false,
+      data: null,
+      error: 'Not authenticated',
+    });
+
+    await expect(handleToggleRankingVisibilityAction('period-1', true)).rejects.toThrow(
+      'Not authenticated'
     );
   });
 });
