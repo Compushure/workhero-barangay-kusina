@@ -1,1012 +1,913 @@
-# WorkHero Barangay Kusina - Employee Management System
+# WorkHero Barangay Kusina
 
-![Next.js](https://img.shields.io/badge/Next.js-16.1-black)
-![Supabase](https://img.shields.io/badge/Supabase-latest-green)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+![Next.js](https://img.shields.io/badge/Next.js-16.2.1-000000?logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-19.2.4-149ECA?logo=react&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Backend-3FCF8E?logo=supabase&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?logo=tailwindcss&logoColor=white)
+![TanStack Query](https://img.shields.io/badge/TanStack_Query-v5-FF4154?logo=reactquery&logoColor=white)
+![Zustand](https://img.shields.io/badge/Zustand-State-7A5432)
+![Jest](https://img.shields.io/badge/Jest-Testing-C21325?logo=jest&logoColor=white)
+![Cypress](https://img.shields.io/badge/Cypress-E2E-69D3A7?logo=cypress&logoColor=white)
 
-A comprehensive employee management and gamification system built with Next.js 16, Supabase, and modern UI components. Features role-based access control for superadmins, managers, HR professionals, and regular employees, with integrated task assignment, badge system, attendance tracking, and reward redemption.
+Role-based employee operations and gamification platform built with Next.js, Supabase, TypeScript, TanStack Query, Zustand, and Tailwind CSS.
 
----
+This repository powers a multi-role internal portal for:
 
-## 📚 Table of Contents
+- superadmin user management
+- manager task assignment, verification, badge editing, and badge awarding
+- HR reward inventory, redemption workflows, and leaderboard generation
+- employee attendance, tasks, notifications, rewards, rankings, and profile management
+
+## Contents
 
 <details open>
-<summary><strong>Quick Links</strong></summary>
+<summary><strong>Jump Links</strong></summary>
 
-- [🎯 Features](#features)
-- [📦 Tech Stack](#tech-stack)
-- [📋 Prerequisites](#prerequisites)
-- [📥 Installation](#installation)
-- [🔐 Environment Setup](#environment-setup)
-- [🚀 Running the Application](#running-the-application)
-- [📜 Available Scripts](#available-scripts)
-- [🧪 Testing](#testing)
-- [🏗️ Project Architecture](#architecture)
-- [🔧 Quirks & Special Configurations](#quirks--special-configurations)
-- [🎨 Styling & UI](#styling--ui)
-- [📥 Path Aliases](#path-aliases)
-- [📈 Deployment](#deployment)
-- [🔄 Pull Request Process](#pull-request-process)
-- [⚠️ Common Pitfalls](#common-pitfalls)
-- [📚 Key Technologies Deep Dive](#key-technologies-deep-dive)
-- [📖 Documentation & Resources](#documentation--resources)
-- [📄 License](#license)
-- [🤝 Contributing](#contributing)
-- [📞 Support](#support)
-
-</details>
-
----
-
-## 🎯 Features
-
-- **Role-Based Views**: Superadmin, Manager, HR, and Employee roles with tailored dashboards
-- **Employee Management**: Comprehensive user management system with advanced filtering and search
-- **Task Management**: Assign, track, and verify tasks with manager verification workflows
-- **Badge Gamification System**: Dynamic badge creation and assignment to recognize employee achievements
-- **Attendance Tracking**: Log and manage employee attendance with HR adjustment capabilities
-- **Reward System**: Employees earn points through achievements and redeem them for rewards
-- **Real-time Notifications**: Live notification system using Supabase real-time subscriptions
-- **Merchant Integration**: Built-in reward redemption marketplace (Mercado)
-- **Advanced Filtering & Search**: Search employees by name, ID, role, employment status
-- **Responsive UI**: Built with shadcn/ui components and Tailwind CSS 4
-- **Type-Safe Development**: Full TypeScript support with strict type checking
-- **Comprehensive Testing**: Jest unit tests and Cypress E2E tests
-
-<details>
-<summary><strong>📦 Tech Stack</strong></summary>
-
-### Frontend
-- **Framework**: [Next.js 16](https://nextjs.org) - React-based framework with SSR/ISR capabilities
-- **Language**: [TypeScript 5](https://www.typescriptlang.org) - Type-safe JavaScript
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com) - Utility-first CSS framework with CSS variables
-- **UI Components**: [shadcn/ui](https://ui.shadcn.com) + [Radix UI](https://www.radix-ui.com) - Accessible, unstyled component primitives
-- **Forms**: [React Hook Form](https://react-hook-form.com) - Performant form state management
-- **Validation**: [Zod](https://zod.dev) - TypeScript-first schema validation
-- **State Management**: [Zustand](https://zustand-demo.pmnd.rs) - Lightweight state management
-
-### Data & Server
-- **Backend**: [Supabase](https://supabase.com) - Open-source Firebase alternative
-  - PostgreSQL database
-  - Real-time subscriptions
-  - Authentication & Authorization
-  - Storage for file uploads
-  - Edge Functions for serverless compute
-- **Server Actions**: Next.js Server Actions with `'use server'` directive
-- **Data Fetching**: [TanStack Query (React Query) 5](https://tanstack.com/query) - Server state management, caching, and synchronization
-
-### Development & Testing
-- **Build Tool**: Turbopack (Next.js default)
-- **Testing**: [Jest 29](https://jestjs.io) - Unit and integration testing
-- **E2E Testing**: [Cypress 15](https://www.cypress.io) - End-to-end testing framework
-- **Linting**: [ESLint 4](https://eslint.org) - Code quality and consistency
-- **Code Formatting**: [Prettier 3](https://prettier.io) - Code formatter
-- **Git Hooks**: [Husky](https://typicode.github.io/husky) + [lint-staged](https://github.com/okonet/lint-staged) - Pre-commit hooks
-
-### Utilities
-- **Date Handling**: [date-fns](https://date-fns.org) + [date-fns-tz](https://github.com/marnusw/date-fns-tz) - Date manipulation with timezone support
-- **Animations**: [Framer Motion](https://www.framer.com/motion) + [GSAP](https://greensock.com/gsap) - Animation libraries
-- **Icons**: [Lucide React](https://lucide.dev) - Beautiful SVG icon library
-- **Notifications**: [Sonner](https://sonner.emilkowal.ski) - Toast notification system
-- **Analytics**: [Vercel Analytics](https://vercel.com/analytics) - Performance monitoring
-- **CLI**: [Cross-env](https://github.com/kentcdodds/cross-env) - Cross-platform environment variables
+- [Project Summary](#project-summary)
+- [Core Features](#core-features)
+- [Role Surface Map](#role-surface-map)
+- [Tech Stack](#tech-stack)
+- [Architecture Overview](#architecture-overview)
+- [Request Flow Patterns](#request-flow-patterns)
+- [Repository Structure](#repository-structure)
+- [App Route Map](#app-route-map)
+- [Domain Model and Supabase Objects](#domain-model-and-supabase-objects)
+- [Environment Variables](#environment-variables)
+- [Getting Started](#getting-started)
+- [Available Scripts](#available-scripts)
+- [Testing Strategy](#testing-strategy)
+- [Feature Module Guide](#feature-module-guide)
+- [Storage and Media Conventions](#storage-and-media-conventions)
+- [Important Implementation Notes](#important-implementation-notes)
+- [Known Transitional Areas](#known-transitional-areas)
+- [Deployment Notes](#deployment-notes)
+- [Contribution Notes](#contribution-notes)
+- [License](#license)
 
 </details>
 
-<details>
-<summary><strong>📋 Prerequisites</strong></summary>
+## Project Summary
 
-Before you begin, ensure you have the following installed:
+<details open>
+<summary><strong>View Section</strong></summary>
 
-- [**Node.js**](https://nodejs.org/) (v18.x or higher)
-- [**npm**](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/) or [pnpm](https://pnpm.io/) or [bun](https://bun.sh/)
-- [**Git**](https://git-scm.com/) - Version control
-- [**Supabase Account**](https://supabase.com/) - For backend services
-- [**Docker**](https://www.docker.com/) (optional) - For Supabase Edge Functions deployment
+WorkHero Barangay Kusina is structured around role-specific operational flows rather than one generic dashboard. The app uses the Next.js App Router, server-side Supabase access, typed server actions, React Query caching, and a small set of Zustand stores for optimistic UI state.
+
+The codebase is not a thin CRUD shell. It includes actual operational logic for:
+
+- session-aware role routing
+- welcome-email onboarding with first-login magic links
+- attendance time windows and auto-absent behavior
+- task lifecycle progression from assigned -> in review -> approved/rejected
+- badge requirements and manual badge awards
+- reward redemption inventory logic
+- generated leaderboard periods with visibility controls
+- realtime employee notifications through Supabase channels
 
 </details>
 
+## Core Features
+
 <details>
-<summary><strong>📥 Installation</strong></summary>
+<summary><strong>View Section</strong></summary>
 
-1. **Clone the repository**:
+- Role-based access control for `superadmin`, `manager`, `hr`, and `regular`
+- Superadmin user CRUD with search, filters, pagination, profile photos, and welcome email delivery
+- Manager task assignment with grouped task cards, per-employee views, optimistic updates, and notification inserts
+- Manager verification workflow for reviewing submitted employee work
+- Manager badge editor with badge conditions and image upload
+- Manager badge assignment for manual badge awards
+- HR Mercado inventory management with interval-based availability windows
+- HR reward request approval and decline workflow
+- HR leaderboard generation, visibility toggling, and top-10 notification fanout
+- Employee attendance actions for time in, time out, break start, and break end
+- Employee task board with review, redo, claim, and serving flow
+- Employee profile and profile media management
+- Realtime notifications using Supabase `postgres_changes`
+- Jest unit/integration coverage plus Cypress coverage for superadmin and manager flows
 
-```bash
-git clone https://github.com/yourusername/workhero-barangay-kusina.git
-cd workhero-barangay-kusina
+</details>
+
+## Role Surface Map
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+| Role         | Main Routes                                                                                                                            | Main Responsibilities                                                                                |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `superadmin` | `/admin/manage`                                                                                                                        | manage users, update roles and employment data, upload/remove profile photos, send onboarding emails |
+| `manager`    | `/manager/task-assignment`, `/manager/task-verification`, `/manager/task-editor`, `/manager/badge-assignment`, `/manager/badge-editor` | assign and update tasks, review work, manage KPI categories, manage badges                           |
+| `hr`         | `/hr/reward-requests`, `/hr/mercado`, `/hr/leaderboard`                                                                                | manage reward inventory, process redemption requests, generate and publish leaderboards              |
+| `regular`    | `/employee/dashboard`, `/employee/attendance`, `/employee/tasks`, `/employee/mercado`, `/employee/leaderboard`                         | track attendance, complete tasks, claim rewards, view rankings, manage profile                       |
+
+</details>
+
+## Tech Stack
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+| Area                   | Tools in use                                                       |
+| ---------------------- | ------------------------------------------------------------------ |
+| Framework              | Next.js `16.2.1`, React `19.2.4`, App Router                       |
+| Language               | TypeScript with strict mode                                        |
+| Backend platform       | Supabase Auth, Postgres, Storage, Realtime, Edge Functions         |
+| Client data layer      | TanStack Query v5                                                  |
+| Client state           | Zustand                                                            |
+| Validation             | Zod                                                                |
+| Forms                  | React Hook Form                                                    |
+| Styling                | Tailwind CSS v4, custom global CSS, shadcn/ui and Radix primitives |
+| Notifications          | Sonner toasts plus persisted Supabase `Notification` rows          |
+| Email                  | Nodemailer SMTP flow using Brevo-compatible credentials            |
+| Unit/integration tests | Jest + ts-jest                                                     |
+| E2E tests              | Cypress                                                            |
+| Tooling                | ESLint, Prettier, Husky, lint-staged                               |
+
+</details>
+
+## Architecture Overview
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+At a high level, the repository is organized by product domain and then by execution layer.
+
+```text
+UI components and route shells
+  -> TanStack query/mutation hooks
+  -> action handlers
+  -> server actions
+  -> Supabase tables/views/RPCs/storage
 ```
 
-2. **Install dependencies**:
+The codebase also contains one important variation:
+
+```text
+superadmin UI
+  -> action handlers
+  -> server actions
+  -> internal route handlers under src/app/admin/tools/*
+  -> Supabase admin/public operations
+```
+
+That means the repo uses both of these server-side styles today:
+
+- direct server actions
+- server actions that still call internal route handlers for some superadmin work
+
+</details>
+
+## Request Flow Patterns
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+### 1. Standard flow used across most domains
+
+This is the dominant pattern in `manager`, `hr`, `employee`, and shared profile/auth work.
+
+```text
+component
+  -> action-handler
+  -> safeAction(...)
+  -> server action
+  -> Supabase
+```
+
+Responsibilities by layer:
+
+| Layer                | Folder                          | Responsibility                                                                        |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------- |
+| UI                   | `src/components/*`, `src/app/*` | rendering, form interaction, route composition                                        |
+| Query/mutation hooks | `src/hooks/tanstack/*`          | cache keys, invalidation, background fetching, optimistic flow coordination           |
+| Action handlers      | `src/action-handlers/*`         | user-facing error handling, toast messages, shaping return values                     |
+| Server actions       | `src/actions/*`                 | auth checks, Supabase access, domain logic, validation                                |
+| Utilities            | `src/lib/*`, `src/utils/*`      | cross-cutting helpers such as notifications, date handling, role routing, safe-action |
+
+### 2. Superadmin user management flow
+
+Superadmin management is slightly different and still routes some work through internal route handlers:
+
+```text
+component
+  -> useAddUser / useEditUser / useDeleteUser
+  -> src/action-handlers/superadmin/users.ts
+  -> src/actions/superadmin/users.ts
+  -> src/app/admin/tools/*/route.ts
+  -> Supabase admin client and public tables
+```
+
+This is important when tracing bugs in:
+
+- user creation
+- password changes
+- user deletion
+- user filtering
+- welcome email and magic-link generation
+
+### 3. Client state strategy
+
+This repo uses both TanStack Query and Zustand, but for different jobs:
+
+- TanStack Query is the source of truth for server-backed cached data
+- Zustand is used for local UI state and optimistic updates
+
+Current optimistic stores include:
+
+- `src/store/adminUserStore.ts`
+- `src/store/managerAssignmentStore.ts`
+- `src/store/managerBadgeAssignmentStore.ts`
+- `src/store/managerBadgeEditorStore.ts`
+- `src/store/hrRedemptionRequestStore.ts`
+- `src/store/employee/employeeTasksStore.ts`
+
+### 4. Supabase client selection
+
+The app intentionally uses different Supabase clients by runtime:
+
+| Client                  | File                                            | Use case                                                  |
+| ----------------------- | ----------------------------------------------- | --------------------------------------------------------- |
+| server client           | `src/lib/supabase/server.ts`                    | server components and server actions with cookies/session |
+| browser client          | `src/lib/supabase/client.ts`                    | client components and realtime subscriptions              |
+| admin client            | `src/lib/supabase/admin.ts`                     | privileged server-only operations using service role      |
+| request/session refresh | `src/lib/supabase/proxy.ts` and root `proxy.ts` | session refresh and unauthenticated redirects             |
+
+</details>
+
+## Repository Structure
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+The repository structure is documented visually below so the top-level nesting and feature boundaries are easy to scan.
+
+Top-level layout:
+
+```text
+.
+|-- src/
+|   |-- app/                  # App Router routes, layouts, route handlers, error/loading boundaries
+|   |-- actions/              # Server actions grouped by domain
+|   |-- action-handlers/      # Client-side wrappers around server actions
+|   |-- components/           # Feature and shared UI
+|   |-- hooks/                # Reusable hooks, including TanStack hooks
+|   |-- lib/                  # Supabase helpers, providers, mail, shared utilities
+|   |-- store/                # Zustand stores for optimistic and UI state
+|   |-- types/                # Domain types
+|   |-- utils/                # Shared utility functions
+|   `-- zod/                  # Validation schemas
+|-- supabase/
+|   |-- migrations/           # database migrations
+|   |-- functions/            # edge function code
+|   `-- test/                 # SQL schema/roles/data for test environments
+|-- __tests___/               # Jest tests and mock data
+|-- cypress/                  # Cypress tests, tasks, fixtures, support
+|-- scripts/                  # small utility scripts
+|-- public/                   # static assets
+|-- next.config.ts
+|-- proxy.ts
+`-- README.md
+```
+
+Detailed source nesting:
+
+```text
+src/
+|-- app/
+|   |-- admin/
+|   |-- auth/
+|   |-- employee/
+|   |-- hr/
+|   |-- manager/
+|   |-- profile/[userid]/
+|   |-- error.tsx
+|   |-- error/page.tsx
+|   |-- not-found.tsx
+|   |-- layout.tsx
+|   `-- page.tsx
+|-- actions/
+|   |-- employee/
+|   |-- employees/
+|   |-- hr/
+|   |-- manager/
+|   |-- shared/
+|   `-- superadmin/
+|-- action-handlers/
+|   |-- employee/
+|   |-- hr/
+|   |-- manager/
+|   |-- shared/
+|   `-- superadmin/
+|-- hooks/
+|   |-- tanstack/
+|   |   |-- mutations/
+|   |   `-- queries/
+|   |-- hr/
+|   `-- shared utility hooks
+|-- components/
+|   |-- admin/
+|   |-- attendance/
+|   |-- auth/
+|   |-- employee/
+|   |-- error/
+|   |-- homepage/
+|   |-- hr/
+|   |-- manager/
+|   |-- notifications/
+|   |-- profile/
+|   |-- shared/
+|   |-- sidebar/
+|   |-- smtp/
+|   `-- ui/
+|-- lib/
+|   |-- providers/
+|   |-- smtp/
+|   |-- supabase/
+|   |-- users/
+|   `-- utils/
+|-- store/
+|   |-- employee/
+|   `-- root stores
+|-- types/
+|   |-- admin/
+|   |-- employee/
+|   |-- hr/
+|   |-- manager/
+|   `-- shared/
+`-- zod/schemas/
+```
+
+</details>
+
+## App Route Map
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+### Public and auth routes
+
+| Route              | Purpose                                    |
+| ------------------ | ------------------------------------------ |
+| `/`                | marketing/home landing page                |
+| `/auth/login`      | employee login page                        |
+| `/auth/adminlogin` | superadmin login page                      |
+| `/auth/confirm`    | Supabase OTP/magic-link confirmation route |
+| `/auth/welcome`    | welcome/registration placeholder page      |
+| `/error`           | query-string-driven error page             |
+
+### Superadmin routes
+
+| Route                   | Purpose                                       |
+| ----------------------- | --------------------------------------------- |
+| `/admin/manage`         | user management UI                            |
+| `/admin/tools/adduser`  | internal route handler used by server actions |
+| `/admin/tools/changepw` | internal route handler used by server actions |
+| `/admin/tools/deluser`  | internal route handler used by server actions |
+| `/admin/tools/filter`   | internal route handler used by server actions |
+
+### Manager routes
+
+| Route                        | Purpose                                  |
+| ---------------------------- | ---------------------------------------- |
+| `/manager/dashboard`         | lightweight manager landing page         |
+| `/manager/task-assignment`   | assign/update/unassign tasks             |
+| `/manager/task-verification` | approve or reject submitted tasks        |
+| `/manager/task-editor`       | manage KPI categories                    |
+| `/manager/badge-assignment`  | manually award badges                    |
+| `/manager/badge-editor`      | create/edit/delete badges and conditions |
+
+### HR routes
+
+| Route                 | Purpose                       |
+| --------------------- | ----------------------------- |
+| `/hr/reward-requests` | review redemption requests    |
+| `/hr/mercado`         | manage reward inventory       |
+| `/hr/leaderboard`     | generate and publish rankings |
+
+### Employee routes
+
+| Route                   | Purpose                          |
+| ----------------------- | -------------------------------- |
+| `/employee`             | employee surface entry point     |
+| `/employee/dashboard`   | gamified employee landing screen |
+| `/employee/attendance`  | attendance actions and timeline  |
+| `/employee/tasks`       | task board                       |
+| `/employee/mercado`     | reward marketplace               |
+| `/employee/leaderboard` | visible leaderboard view         |
+
+### Shared authenticated route
+
+| Route               | Purpose                                                        |
+| ------------------- | -------------------------------------------------------------- |
+| `/profile/[userid]` | authenticated user profile view restricted to the session user |
+
+</details>
+
+## Domain Model and Supabase Objects
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+### Main tables present in the Supabase test schema
+
+The SQL under `supabase/test/schema.sql` and the baseline migration shows these core tables:
+
+- `User`
+- `Role`
+- `AttendanceLog`
+- `KPICategory`
+- `KPITask`
+- `Badges`
+- `BadgeRequirements`
+- `UserBadges`
+- `Reward`
+- `RewardRequest`
+- `Notification`
+- `Level`
+- `Dishes`
+- `RankingPeriod`
+- `RankingEntry`
+
+### Important views and RPCs referenced by the application
+
+The app relies on several database-level helpers and views, including:
+
+- `user_attributes`
+- `task_info_view`
+- `badge_conditions_view`
+- `user_collected_badges_view`
+- `ranking_leaderboard_view`
+- `rpc_update_user_name_and_assign_role`
+- `get_leaderboard_as_of`
+- `evaluate_badges` RPC, also exposed through an edge function
+
+### Domain relationships in practice
+
+| Domain          | Key relationships used by the app                                                                    |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| users and roles | `User.role_id -> Role.id`, auth claims also carry `app_metadata.user_role`                           |
+| tasking         | `KPICategory` defines the task template, `KPITask` stores assignment instances                       |
+| badges          | `Badges` is the main badge record, `BadgeRequirements` stores conditions, `UserBadges` stores awards |
+| rewards         | `Reward` is an inventory item, `RewardRequest` stores redemption attempts and approvals              |
+| rankings        | `RankingPeriod` stores generated periods, `RankingEntry` stores per-user ranked results              |
+| notifications   | `Notification` rows are inserted server-side and consumed through queries plus realtime              |
+
+</details>
+
+## Environment Variables
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+Variables referenced directly in code:
+
+| Variable                               | Required                    | Used for                                                       |
+| -------------------------------------- | --------------------------- | -------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | yes                         | browser/server Supabase URL, image remote pattern construction |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | yes                         | browser and server session-based Supabase access               |
+| `SUPABASE_URL`                         | yes for admin flows         | service-role client base URL                                   |
+| `SUPABASE_SERVICE_ROLE_KEY`            | yes for admin flows         | privileged server-only operations                              |
+| `NEXT_PUBLIC_BASE_URL`                 | strongly recommended        | internal superadmin route calls and first-login magic links    |
+| `SMTP_HOST`                            | required for welcome emails | SMTP hostname                                                  |
+| `SMTP_PORT`                            | required for welcome emails | SMTP port                                                      |
+| `SMTP_USER`                            | required for welcome emails | SMTP username                                                  |
+| `SMTP_KEY`                             | required for welcome emails | SMTP password/key                                              |
+| `SMTP_FROM`                            | optional                    | sender identity                                                |
+| `SMTP_ALLOW_SELF_SIGNED`               | optional                    | allow self-signed TLS certificates for SMTP transport          |
+| `SUPPORT_EMAIL`                        | optional                    | contact address inserted into onboarding emails                |
+
+Example `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+NEXT_PUBLIC_BASE_URL=http://localhost:3008
+
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=587
+SMTP_USER=your_smtp_user
+SMTP_KEY=your_smtp_key
+SMTP_FROM="WorkHero <noreply@example.com>"
+SMTP_ALLOW_SELF_SIGNED=false
+SUPPORT_EMAIL=support@example.com
+```
+
+Notes:
+
+- `SUPABASE_SERVICE_ROLE_KEY` must remain server-only.
+- `NEXT_PUBLIC_BASE_URL` matters in this repo because some server actions still call internal route handlers and because welcome emails generate absolute links.
+- SMTP is optional only if you are not exercising superadmin onboarding email flows.
+
+</details>
+
+## Getting Started
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+### Prerequisites
+
+- Node.js 20 LTS recommended
+- npm
+- a Supabase project with matching schema/storage/RPCs
+- optional: Supabase CLI if you want to work with migrations or edge functions locally
+
+### Install
 
 ```bash
 npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
 ```
 
-</details>
-
-<details>
-<summary><strong>🔐 Environment Setup</strong></summary>
-
-Create a `.env.local` file in the root directory with your Supabase credentials:
-
-```env
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-
-# Application Configuration
-NEXT_PUBLIC_SITE_URL=http://localhost:3008
-
-# Email (Brevo SMTP)
-SMTP_HOST=smtp-relay.brevo.com
-SMTP_PORT=587
-SMTP_USER=your_brevo_smtp_login
-SMTP_KEY=your_brevo_smtp_key
-SMTP_ALLOW_SELF_SIGNED=true
-SMTP_FROM="Compushure <tonilegayada@gmail.com>"
-```
-
-> **⚠️ Important**: The `SUPABASE_SERVICE_ROLE_KEY` should NEVER be exposed to the client. It's only used in server-side code.
-
-### Environment Variables Explained
-
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL (public) |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase anonymous/public API key (public) |
-| `SUPABASE_URL` | Supabase URL for admin operations (server-side only) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key for elevated permissions (server-side only) |
-| `NEXT_PUBLIC_SITE_URL` | Application URL for callbacks and redirects |
-| `SMTP_HOST` | Brevo SMTP host (`smtp-relay.brevo.com`) |
-| `SMTP_PORT` | Brevo SMTP port (`587` recommended) |
-| `SMTP_USER` | Brevo SMTP login email (e.g., `a593f3001@smtp-brevo.com`) |
-| `SMTP_KEY` | Brevo SMTP key (not API key) |
-| `SMTP_ALLOW_SELF_SIGNED` | Set `true` only if TLS interception/self-signed certs block mail |
-| `SMTP_FROM` | From header, e.g., `"Compushure <tonilegayada@gmail.com>"` |
-
-</details>
-
-<details>
-<summary><strong>🚀 Running the Application</strong></summary>
-
-### Development Mode
+### Start development server
 
 ```bash
 npm run dev
 ```
 
-This starts the development server at [http://localhost:3008](http://localhost:3008) with hot-reload enabled.
+Default local URL:
 
-### Production Build
-
-```bash
-npm run build
-npm run start
+```text
+http://localhost:3008
 ```
 
-Builds the application for production and starts the server.
-
-### Type Checking
+### Type-check, lint, and format
 
 ```bash
 npm run typecheck
+npm run lint
+npm run format
 ```
 
-Validates TypeScript types without emitting files.
-
-### Linting & Formatting
-
-```bash
-npm run lint      # Run ESLint
-npm run format    # Format with Prettier
-npm run format:check  # Check formatting without changes
-```
-
-</details>
-
-<details>
-<summary><strong>📜 Available Scripts</strong></summary>
-
-```json
-{
-  "dev": "next dev -p 3008",                    // Start dev server on port 3008
-  "test": "cross-env NODE_ENV=test jest --runInBand",  // Run Jest tests
-  "test:watch": "jest --watch",                 // Run tests in watch mode
-  "build": "cross-env NODE_ENV=production next build",  // Production build
-  "start": "next start",                        // Start production server
-  "lint": "eslint .",                           // Run ESLint
-  "format": "prettier --write .",               // Format code
-  "format:check": "prettier --check .",         // Check formatting
-  "typecheck": "tsc --noEmit",                  // TypeScript validation
-  "smtp:verify": "node scripts/smtp-verify.js"  // Verify Brevo SMTP transport with .env.local
-}
-```
-
-</details>
-
-<details>
-<summary><strong>🧪 Testing</strong></summary>
-
-### Jest Unit & Integration Tests
-
-Jest is configured for testing server actions, utilities, and component logic. Tests run with `NODE_ENV=test`.
-
-```bash
-# Run all tests once
-npm test
-
-# Run tests in watch mode (re-run on file changes)
-npm run test:watch
-```
-
-**Jest Configuration**:
-- **Environment**: Node.js
-- **Transform**: ts-jest (TypeScript support)
-- **Module Paths**: Path aliases (@/* mapped to src/*)
-- **Setup**: jest.setup.ts for global test configuration
-
-**Test Files Location**: `__tests__/` directory at project root
-
-Example test files:
-- `__tests__/superadmin.test.ts` - Superadmin features
-- `__tests__/badge-editor.test.ts` - Badge creation and verification
-- `__tests__/badge-assignment.test.ts` - Badge assignment workflow
-- `__tests__/task-verification.test.ts` - Task verification logic
-
-### Cypress End-to-End Tests
-
-Cypress provides visual, interactive E2E testing for the user interface.
-
-```bash
-# Open Cypress Test Runner (interactive GUI)
-npm run cypress:open
-
-# Run Cypress tests headlessly
-npm run cypress:run
-```
-
-**Cypress Configuration**:
-- Located in `cypress.config.ts`
-- Supports TypeScript test files
-- Fixtures in `cypress/fixtures/`
-- Custom commands in `cypress/support/commands.ts`
-
-**Test Files Location**: `cypress/e2e/` directory
-
-</details>
-
-<details>
-<summary><strong>🏗️ Project Architecture</strong></summary>
-
-### Architectural Overview
-
-The application follows a **modular, role-based architecture** with clean separation of concerns:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         CLIENT BROWSER                           │
-│  (React Components → Components/Hooks → Action Handlers)        │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ HTTP Requests
-┌────────────────────────────▼────────────────────────────────────┐
-│                      NEXT.JS SERVER                              │
-│  (Server Components/Actions → Database Logic → Validation)      │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ Queries/Mutations
-┌────────────────────────────▼────────────────────────────────────┐
-│                    SUPABASE BACKEND                              │
-│  (PostgreSQL DB | Real-time | Auth | Storage | Edge Functions) │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 3-Layer Server Actions Pattern
-
-The application uses a consistent 3-layer pattern for all server-side operations:
-
-<details>
-<summary><strong>1. Actions Layer</strong></summary>
-
-Direct database operations
-   - Server Actions with `'use server'` directive
-   - Direct Supabase client calls
-   - Database validation and business logic
-   - Return `ServerActionResponse<T>` for type safety
-
-</details>
-
-<details>
-<summary><strong>2. Action Handlers Layer</strong></summary>
-
-Client-side wrappers
-   - Wrap actions with `safeAction()` helper
-   - Handle UI feedback (toast notifications via `sonner`)
-   - Error handling and user messaging
-   - Optional optimistic updates
-
-</details>
-
-<details>
-<summary><strong>3. TanStack Query Hooks Layer</strong></summary>
-
-React Query integration
-   - **Queries** (`queries/`) - Data fetching and caching
-   - **Mutations** (`mutations/`) - Data mutations with cache invalidation
-   - Automatic cache management
-   - Query key organization for invalidation
-
-</details>
-
-**Example Flow**:
-```
-User clicks "Add Employee" → Action Handler wraps addUser() → 
-Server Action validates & inserts → Query cache invalidated → 
-Component re-renders with new data → User sees toast notification
-```
-
-### Folder Structure & Documentation
-
-```
-workhero-barangay-kusina/
-│
-├── 📁 src/
-│   │
-│   ├── 📁 actions/                 # 🔷 Server Actions (Direct Supabase)
-│   │   ├── auth.ts                 # Authentication & authorization logic
-│   │   ├── hr.ts                   # HR-specific operations
-│   │   ├── employee/
-│   │   │   ├── attendance.ts       # Employee attendance logging
-│   │   │   ├── badges.ts           # Badge interactions
-│   │   │   ├── notifications.ts    # Notification fetching
-│   │   │   ├── redemptions.ts      # Reward redemptions
-│   │   │   ├── stats.ts            # Gamification stats
-│   │   │   └── tasks.ts            # Task operations
-│   │   ├── employees/              # Bulk employee operations
-│   │   ├── hr/                     # HR-specific actions
-│   │   ├── manager/                # Manager-specific actions
-│   │   ├── shared/                 # Shared actions across roles
-│   │   └── superadmin/             # Superadmin operations (user mgmt)
-│   │
-│   ├── 📁 action-handlers/         # 🔷 Client-side Action Wrappers
-│   │   ├── profile.ts              # Profile mutation handlers
-│   │   ├── sidebar.ts              # Sidebar data handlers
-│   │   ├── employee/
-│   │   │   ├── attendance.ts       # Attendance handlers with toast
-│   │   │   ├── badges.ts           # Badge action handlers
-│   │   │   ├── notifications.ts    # Notification handlers
-│   │   │   ├── redemptions.ts      # Redemption handlers
-│   │   │   ├── stats.ts            # Stats handlers
-│   │   │   └── tasks.ts            # Task handlers
-│   │   ├── hr/                     # HR handlers
-│   │   ├── manager/                # Manager handlers
-│   │   ├── shared/                 # Shared handlers
-│   │   └── superadmin/             # Superadmin handlers
-│   │
-│   ├── 📁 app/                     # 🔷 Next.js App Router
-│   │   ├── layout.tsx              # Root layout (providers, global setup)
-│   │   ├── page.tsx                # Landing page
-│   │   ├── globals.css             # Global Tailwind styles
-│   │   ├── error.tsx               # Global error boundary
-│   │   ├── not-found.tsx           # 404 page
-│   │   ├── admin/                  # Superadmin routes
-│   │   │   └── manage/             # User management dashboard
-│   │   ├── auth/                   # Authentication routes
-│   │   │   └── login/              # Login page
-│   │   ├── employee/               # Employee routes
-│   │   │   ├── dashboard/          # Employee dashboard
-│   │   │   ├── tasks/              # Task listing and details
-│   │   │   ├── badges/             # Badge showcase
-│   │   │   └── ...other routes
-│   │   ├── hr/                     # HR routes
-│   │   │   ├── dashboard/          # HR analytics dashboard
-│   │   │   └── ...hr-specific routes
-│   │   ├── manager/                # Manager routes
-│   │   │   ├── dashboard/          # Manager dashboard
-│   │   │   ├── assign-tasks/       # Task assignment
-│   │   │   └── ...manager routes
-│   │   ├── profile/                # Shared profile routes
-│   │   ├── error/                  # Error pages by code
-│   │   └── [role]/dashboard/       # Dynamic role-based dashboards
-│   │
-│   ├── 📁 components/              # 🔷 React Components (Role-Organized)
-│   │   ├── ui/                     # shadcn/ui base components
-│   │   │   ├── button.tsx          # Button component
-│   │   │   ├── dialog.tsx          # Modal/Dialog component
-│   │   │   ├── card.tsx            # Card component
-│   │   │   ├── badge.tsx           # Badge display component
-│   │   │   └── ...other Radix/shadcn components
-│   │   ├── admin/                  # Superadmin-specific components
-│   │   │   ├── user-management/
-│   │   │   ├── modals/
-│   │   │   └── ...admin components
-│   │   ├── employee/               # Employee-specific components
-│   │   │   ├── dashboard/
-│   │   │   ├── task-card/
-│   │   │   ├── achievements/
-│   │   │   └── ...employee components
-│   │   ├── manager/                # Manager-specific components
-│   │   │   ├── assignment-board/
-│   │   │   ├── verification/
-│   │   │   └── ...manager components
-│   │   ├── hr/                     # HR-specific components
-│   │   │   ├── analytics/
-│   │   │   └── ...hr components
-│   │   ├── shared/                 # Shared across roles
-│   │   │   ├── sidebar/            # Navigation sidebar
-│   │   │   ├── header/             # Top navigation
-│   │   │   └── ...shared components
-│   │   ├── auth/                   # Auth-related components
-│   │   ├── notifications/          # Notifications system
-│   │   ├── profile/                # Profile components
-│   │   └── login/                  # Login components
-│   │
-│   ├── 📁 hooks/                   # 🔷 Custom React Hooks
-│   │   ├── use-toast.ts            # Toast notifications hook
-│   │   ├── useAntiSpam.ts          # Anti-spam logic
-│   │   ├── useDebounce.ts          # Debounced values (300ms default)
-│   │   ├── useMercadoPageData.ts   # Reward marketplace data
-│   │   ├── useProfileImage.ts      # Profile image handling
-│   │   ├── useRealtimeNotifications.ts  # Supabase real-time
-│   │   ├── useSidebarContentArea.ts    # Sidebar state
-│   │   └── tanstack/               # React Query hooks
-│   │       ├── queries/            # Data fetching (useQuery)
-│   │       │   ├── useUserQuery.ts
-│   │       │   ├── useTasksQuery.ts
-│   │       │   ├── useBadgesQuery.ts
-│   │       │   └── ...other queries
-│   │       └── mutations/           # Data mutations (useMutation)
-│   │           ├── useAddUserMutation.ts
-│   │           ├── useUpdateTaskMutation.ts
-│   │           └── ...other mutations
-│   │
-│   ├── 📁 lib/                     # 🔷 Shared Utilities & Config
-│   │   ├── auth-context.tsx        # Auth context provider & hooks
-│   │   ├── utils.ts                # Utility helpers (cn, classmerge)
-│   │   ├── format.ts               # Formatting utilities
-│   │   ├── leaderboard-utils.ts    # Leaderboard calculations
-│   │   ├── notifications.ts        # Notification helpers
-│   │   ├── attendance-config.ts    # Attendance settings
-│   │   ├── supabase/               # Supabase client configuration
-│   │   │   ├── server.ts           # Server-side client (with cookies())
-│   │   │   ├── client.ts           # Client-side client (browser)
-│   │   │   └── admin.ts            # Admin client (service role)
-│   │   ├── providers/              # React context providers
-│   │   │   ├── query-provider.tsx  # TanStack Query provider
-│   │   │   └── ...other providers
-│   │   ├── types/                  # TypeScript type utilities
-│   │   ├── utils/                  # Helper functions
-│   │   │   └── safe-action.ts      # ServerActionResponse wrapper
-│   │   └── constants.ts            # App constants
-│   │
-│   ├── 📁 types/                   # 🔷 TypeScript Type Definitions
-│   │   ├── index.ts                # Main types (User, EmployeeType)
-│   │   ├── notification.ts         # Notification types
-│   │   ├── profile-image.ts        # Profile image types
-│   │   ├── attendance.ts           # Attendance-related types
-│   │   ├── admin/                  # Admin-specific types
-│   │   ├── employee/               # Employee-specific types
-│   │   ├── hr/                     # HR-specific types
-│   │   ├── manager/                # Manager-specific types
-│   │   └── shared/                 # Shared types
-│   │
-│   ├── 📁 zod/                     # 🔷 Validation Schemas (Zod)
-│   │   └── schemas/                # Schema definitions
-│   │       ├── auth.ts             # Auth validation schemas
-│   │       ├── user.ts             # User input validation
-│   │       ├── badge.ts            # Badge validation
-│   │       ├── search.ts           # Search filter validation
-│   │       ├── task.ts             # Task validation
-│   │       ├── reward.ts           # Reward validation
-│   │       └── index.ts            # Export all schemas
-│   │
-│   ├── 📁 store/                   # 🔷 Zustand State Management
-│   │   ├── navigationStore.ts      # Navigation UI state
-│   │   ├── taskStore.ts            # Task UI state
-│   │   ├── managerAssignmentStore.ts  # Manager assignment state
-│   │   └── attendanceTestStore.ts  # Attendance UI state
-│   │
-│   ├── 📁 utils/                   # 🔷 Utility Functions
-│   │   ├── date-utils.ts           # Date formatting & calculations
-│   │   └── ...other utilities
-│   │
-│   ├── 📁 mock-data/               # 🔷 Mock Data for Development
-│   │   └── employees.ts            # Sample employee data
-│   │
-│   └── 📁 test/                    # 🔷 Test Utilities
-│       └── ...test helpers
-│
-├── 📁 supabase/                    # 🔷 Supabase Configuration
-│   ├── config.toml                 # Supabase local setup config
-│   ├── migrations/                 # Database migrations
-│   │   └── 20260305162622_remote_baseline_updated.sql  # Initial schema
-│   ├── functions/                  # Edge Functions (Deno)
-│   │   └── evaluate-badges/        # Badge evaluation logic serverless
-│   └── seeds/                      # Database seed data (if exists)
-│
-├── 📁 __tests__/                   # 🔷 Jest Test Files
-│   ├── superadmin.test.ts          # Superadmin functionality tests
-│   ├── badge-editor.test.ts        # Badge creation/editing tests
-│   ├── badge-assignment.test.ts    # Badge assignment workflow tests
-│   ├── task-verification.test.ts   # Task verification tests
-│   ├── utils/
-│   │   └── seedTasks.ts            # Test data seeding utility
-│   └── ...other test files
-│
-├── 📁 cypress/                     # 🔷 Cypress E2E Tests
-│   ├── e2e/                        # End-to-end test scenarios
-│   ├── fixtures/                   # Test data fixtures
-│   ├── support/
-│   │   ├── commands.ts             # Custom Cypress commands
-│   │   └── e2e.ts                  # E2E support setup
-│   ├── tsconfig.json               # TypeScript config for tests
-│   └── cypress.config.ts           # Cypress configuration
-│
-├── 📁 public/                      # 🔷 Static Assets
-│   ├── assets/                     # Images, icons, etc.
-│   └── mercado/                    # Reward marketplace assets
-│
-├── 📁 .github/                     # 🔷 GitHub Configuration
-│   ├── copilot-instructions.md     # AI agent instructions
-│   └── ...GitHub workflows
-│
-├── 📄 next.config.ts               # Next.js configuration
-├── 📄 tsconfig.json                # TypeScript configuration
-├── 📄 tsconfig.test.json           # TypeScript config for tests
-├── 📄 jest.config.ts               # Jest configuration
-├── 📄 jest.setup.ts                # Jest global setup
-├── 📄 cypress.config.ts            # Cypress configuration
-├── 📄 package.json                 # Dependencies & scripts
-├── 📄 tailwind.config.mjs           # Tailwind CSS configuration
-├── 📄 postcss.config.mjs            # PostCSS configuration
-├── 📄 eslint.config.mjs             # ESLint configuration
-├── 📄 .env.local                   # Environment variables (local)
-├── 📄 .env.test                    # Environment variables (test)
-├── 📄 .env.production              # Environment variables (production)
-├── 📄 .gitignore                   # Git ignore rules
-├── 📄 components.json              # shadcn/ui configuration
-├── 📄 DATABASE_DUMP.sql            # Database schema export
-└── 📄 README.md                    # This file
-
-```
-
-### Architecture Patterns
-
-#### 1. Server Actions Pattern (3-Layer)
-
-All data mutations follow this consistent pattern:
-
-**Layer 1: Server Action** (`src/actions/superadmin/users.ts`)
-```typescript
-'use server';
-
-export async function addUser(input: AddUserInput): Promise<ServerActionResponse<User>> {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('users')
-      .insert([input])
-      .select();
-
-    if (error) return { error: error.message };
-    return { error: null, data: data[0] };
-  } catch (err) {
-    return { error: 'Failed to add user' };
-  }
-}
-```
-
-**Layer 2: Action Handler** (`src/action-handlers/superadmin/users.ts`)
-```typescript
-export async function handleAddUser(input: AddUserInput) {
-  const result = await safeAction(() => addUser(input));
-  
-  if (!result.success) {
-    toast.error(result.error);
-    return null;
-  }
-
-  toast.success('User added successfully');
-  return result.data;
-}
-```
-
-**Layer 3: React Hook** (`src/hooks/tanstack/mutations/useAddUserMutation.ts`)
-```typescript
-export function useAddUserMutation() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (input) => handleAddUser(input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-    },
-  });
-}
-```
-
-#### 2. Role-Based Authentication
-
-Users have four distinct roles with different permissions:
-
-| Role | Dashboard | Permissions |
-|------|-----------|-------------|
-| **superadmin** | `/admin/manage` | Add/edit/delete users, view all data |
-| **manager** | `/manager/dashboard` | Assign tasks, verify task completion, view team |
-| **hr** | `/hr/dashboard` | Attendance adjustment, generate reports, manage rewards |
-| **regular/employee** | `/employee/dashboard` | View tasks, submit task updates, redeem rewards |
-
-**Auth Helpers** (`src/actions/auth.ts`):
-- `getUserRole()` - Get current user's role
-- `protectAdminRoute()` - Verify superadmin access
-- `redirectToCorrectDashboardServer()` - Redirect based on role after login
-
-#### 3. Supabase Client Strategy
-
-**Critical Rule**: Use the correct client for each context
-
-```typescript
-// ✅ Server Components / Server Actions
-import { createClient } from '@/lib/supabase/server';
-const supabase = await createClient(); // async, uses cookies()
-
-// ✅ Client Components (hooks, callbacks)
-import { createClient } from '@/lib/supabase/client';
-const supabase = createClient(); // sync, browser-only
-
-// ❌ NEVER leave admin client unprotected
-import { supabaseAdmin } from '@/lib/supabase/admin';
-// Service role - use only in protected server code!
-```
-
-#### 4. Query Key Organization (TanStack Query)
-
-```typescript
-// Define query keys for consistent invalidation
-export const userKeys = {
-  all: ['users'] as const,
-  lists: () => [...userKeys.all, 'list'] as const,
-  list: (params: UserQueryParams) => 
-    [...userKeys.lists(), params] as const,
-};
-
-// Invalidation after mutations
-queryClient.invalidateQueries({ 
-  queryKey: userKeys.lists() 
-// This invalidates all user list queries at once
-});
-```
-
-#### 5. Zustand Workflow
-
-- Global/optimistic UI state lives in `src/store/*` (navigation, tasks, assignments, attendance, etc.).
-- Mutation flow: **Server Action → Action Handler (toasts/shape) → TanStack Mutation (cache) → Zustand optimistic helpers**.
-- Stores provide prepend/replace/delete helpers used in mutations before invalidating React Query caches.
-- Keep secrets/admin logic in server actions; Zustand is for client experience only.
-
-#### 6. Type Safety with Zod
-
-```typescript
-// Define schema in zod/schemas/user.ts
-export const addUserSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(2),
-  role: EmployeeType,
-});
-
-// Infer type
-export type AddUserInput = z.infer<typeof addUserSchema>;
-
-// Use in forms with React Hook Form
-const form = useForm<AddUserInput>({
-  resolver: zodResolver(addUserSchema),
-});
-```
-
-</details>
-
-<details>
-<summary><strong>🔧 Quirks & Special Configurations</strong></summary>
-
-### Email (Brevo SMTP)
-
-- Set SMTP vars in `.env.local`: `SMTP_HOST`, `SMTP_PORT=587`, `SMTP_USER`, `SMTP_KEY`, `SMTP_FROM="Compushure <tonilegayada@gmail.com>"`.
-- If your network uses TLS inspection/self-signed certs, set `SMTP_ALLOW_SELF_SIGNED=true` or provide the proxy CA via `NODE_EXTRA_CA_CERTS=/path/to/ca.crt`.
-- Verify connectivity without sending a real message: `npm run smtp:verify` (runs Nodemailer `transporter.verify()` with `.env.local`).
-
-### Database Migrations
-
-Supabase uses migration files for schema management in `supabase/migrations/`:
-
-```bash
-# Create a new migration
-supabase migration new add_column_to_users
-
-# Apply migrations to local database
-supabase db push
-
-# Pull latest migrations from remote
-supabase db pull
-```
-
-**Current Migrations**:
-- `20260305162622_remote_baseline_updated.sql` - Initial schema setup
-
-The baseline includes tables for: users, tasks, badges, achievements, attendance, rewards, notifications, etc.
-
-### Supabase Edge Functions
-
-Edge Functions in `supabase/functions/` run Deno (TypeScript runtime):
-
-```bash
-# Create a new edge function
-supabase functions new evaluate-badges
-
-# Deploy functions
-supabase functions deploy evaluate-badges
-
-# Set environment secrets
-supabase secrets set --env-file ./supabase/.env.local
-```
-
-**Example Edge Function** (`evaluate-badges/`):
-- Async badge evaluation logic
-- Triggered on task completion or schedule
-- Updates user gamification stats
-
-### Testing Configuration
-
-#### Jest Setup
-
-- **Config**: `jest.config.ts`
-- **Environment**: Node.js
-- **Transform**: ts-jest for TypeScript
-- **Module Paths**: Aliases configured (@/*)
-- **Global Setup**: `jest.setup.ts`
-
-Run with: `npm test` (runs in `NODE_ENV=test`)
-
-#### Cypress Setup
-
-- **Config**: `cypress.config.ts`
-- **Base URL**: Configurable in `cypress.config.ts`
-- **Support**: `cypress/support/commands.ts` for custom commands
-- **Fixtures**: `cypress/fixtures/` for test data
-
-Open Cypress GUI: `npm run cypress:open`
-
-</details>
-
-<details>
-<summary><strong>🎨 Styling & UI</strong></summary>
-
-### Tailwind CSS 4 with CSS Variables
-
-Global CSS variables defined in `src/app/globals.css`:
-
-```css
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.6%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.6%;
-    /* ...more variables */
-  }
-}
-```
-
-Used in components:
-```tsx
-<div className="bg-background text-foreground">
-  // Background and text colors automatically switch on theme change
-</div>
-```
-
-### shadcn/ui Component Usage
-
-Install components via CLI:
-
-```bash
-npx shadcn@latest add button
-npx shadcn@latest add dialog
-npx shadcn@latest add card
-```
-
-Components auto-install to `src/components/ui/` and use path aliases.
-
-</details>
-
-<details>
-<summary><strong>📥 Path Aliases</strong></summary>
-
-TypeScript path aliases defined in `tsconfig.json`:
-
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
-}
-```
-
-Usage:
-```typescript
-import { Button } from '@/components/ui/button';
-import { User } from '@/types';
-import { api } from '@/lib/api';
-```
-
-</details>
-
-<details>
-<summary><strong>📈 Deployment</strong></summary>
-
-### Production Build
+### Production build
 
 ```bash
 npm run build
 npm run start
 ```
 
-Server runs on default Next.js port (3000 or configurable).
+</details>
 
-### Environment for Production
+## Available Scripts
 
-Create `.env.production`:
+<details>
+<summary><strong>View Section</strong></summary>
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=prod_url
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=prod_key
-SUPABASE_URL=prod_url
-SUPABASE_SERVICE_ROLE_KEY=prod_service_role_key
-NEXT_PUBLIC_SITE_URL=https://yourdomain.com
+From `package.json`:
+
+| Script                     | Command                                              | Purpose                    |
+| -------------------------- | ---------------------------------------------------- | -------------------------- |
+| `npm run dev`              | `next dev -p 3008`                                   | start local dev server     |
+| `npm test`                 | `cross-env NODE_ENV=test jest --runInBand --verbose` | run all Jest tests         |
+| `npm run test:unit`        | `... __tests___/unit`                                | run unit tests only        |
+| `npm run test:integration` | `... __tests___/integration`                         | run integration tests only |
+| `npm run test:watch`       | `jest --watch --verbose`                             | watch mode                 |
+| `npm run build`            | `cross-env NODE_ENV=production next build`           | production build           |
+| `npm run start`            | `next start`                                         | start built app            |
+| `npm run lint`             | `eslint .`                                           | lint                       |
+| `npm run format`           | `prettier --write .`                                 | format                     |
+| `npm run format:check`     | `prettier --check .`                                 | format check               |
+| `npm run typecheck`        | `tsc --noEmit`                                       | TypeScript verification    |
+| `npm run prepare`          | `husky`                                              | install hooks              |
+| `npm run smtp:verify`      | `node scripts/smtp-verify.js`                        | verify SMTP transport      |
+| `npm run cypress:open`     | `cross-env NODE_ENV=test cypress open`               | launch Cypress UI          |
+
+There is currently no `cypress:run` script in `package.json`. For headless Cypress runs, use:
+
+```bash
+npx cypress run
 ```
 
-### Deploy on Vercel
-
-Easiest deployment method:
-
-1. Push to GitHub
-2. Connect repository to [Vercel](https://vercel.com)
-3. Vercel auto-builds and deploys on push
-4. Set environment variables in Vercel dashboard
-
 </details>
 
-<details>
-<summary><strong>🔄 Pull Request Process</strong></summary>
-
-1. **Create a feature branch**:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Make your changes** and follow code style:
-   ```bash
-   npm run format
-   npm run lint -- --fix
-   ```
-
-3. **Write/update tests**:
-   - Unit tests in `__tests__/`
-   - E2E tests in `cypress/e2e/`
-
-4. **Run all checks**:
-   ```bash
-   npm run typecheck
-   npm run lint
-   npm test
-   npm run cypress:open
-   ```
-
-5. **Commit with pre-commit hooks** (Husky + lint-staged):
-   ```bash
-   git add .
-   git commit -m "feat: add new badge system"
-   # Hooks auto-run: eslint --fix, prettier --write
-   ```
-
-6. **Push and create PR**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-7. **PR Template**: Fill out `.github/pull_request_template.md` with:
-   - Description of changes
-   - Related issues
-   - Screenshots (if UI changes)
-   - Testing steps
-
-</details>
+## Testing Strategy
 
 <details>
-<summary><strong>⚠️ Common Pitfalls</strong></summary>
+<summary><strong>View Section</strong></summary>
 
-| ❌ Don't | ✅ Do |
-|---------|-------|
-| Use `createClient()` (sync) in server code | Use `createClient()` (async) from `@/lib/supabase/server` |
-| Forget `'use server'` directive in actions | Add `'use server'` at top of server action files |
-| Expose `SUPABASE_SERVICE_ROLE_KEY` to client | Keep service role key server-side only |
-| Call actions directly in UI code | Wrap actions in handlers with `safeAction()` |
-| Import from `sonner` without checking setup | Verify `<Toaster />` in root layout |
-| Mutate query cache directly | Use `useMutation()` with `onSuccess` callback |
-| Skip TypeScript validation before PR | Run `npm run typecheck` first |
+### Jest
 
-</details>
+Jest is configured through:
 
-<details>
-<summary><strong>📚 Key Technologies Deep Dive</strong></summary>
+- `jest.config.ts`
+- `jest.setup.ts`
+- `tsconfig.test.json`
 
-### Next.js 16 Features Used
+Current characteristics:
 
-- **App Router**: File-based routing with dynamic segments
-- **Server Components**: Default; components render on server
-- **Server Actions**: Mutations via functions with `'use server'`
-- **Image Optimization**: Next.js Image component with Supabase remote patterns
-- **Font Optimization**: Google Fonts via `next/font`
-- **Turbopack**: Fast bundling in dev mode
+- Node test environment
+- `ts-jest` transform for `ts` and `tsx`
+- `@/*` path alias mapping to `src/*`
+- `.env.test` loading in setup
+- `next/navigation` redirect mocked in tests
 
-### Supabase Real-Time
+Current Jest folder layout:
 
-Real-time subscriptions in `useRealtimeNotifications` hook:
-
-```typescript
-const channel = supabase
-  .channel('notifications')
-  .on('postgres_changes', 
-    { event: '*', schema: 'public', table: 'notifications' },
-    (payload) => {
-      // Handle real-time updates
-    }
-  )
-  .subscribe();
+```text
+__tests___/
+|-- unit/
+|   |-- employee/
+|   |-- hr/
+|   |-- manager/
+|   |-- shared/
+|   `-- superadmin/
+|-- integration/
+|   |-- employee/
+|   |-- hr/
+|   |-- manager/
+|   |-- shared/
+|   `-- superadmin/
+|-- mockData/
+`-- utils/
 ```
 
-### TanStack Query (React Query) v5
+Important note: the repository test folder is named `__tests___` with three trailing underscores, not the more common `__tests__`.
 
-- **Query Cache**: Automatic deduplication and background refetching
-- **Mutation Options**: `onSuccess`, `onError`, `onSettled` callbacks
-- **Devtools**: React Query DevTools in development
-- **Stale Time**: Configurable staleness for each query
-- **Invalidation**: Selective query invalidation after mutations
+### Cypress
+
+Cypress is configured in `cypress.config.ts` and currently includes:
+
+- direct Supabase login tasks
+- direct service-role test helpers for creating/deleting users and badges
+- manager E2E specs
+- superadmin E2E specs
+
+Current E2E spec folders:
+
+```text
+cypress/e2e/
+|-- manager/
+`-- superadmin/
+```
 
 </details>
+
+## Feature Module Guide
 
 <details>
-<summary><strong>📖 Documentation & Resources</strong></summary>
+<summary><strong>View Section</strong></summary>
 
-- [Next.js Docs](https://nextjs.org/docs)
-- [Supabase Docs](https://supabase.com/docs)
-- [shadcn/ui Docs](https://ui.shadcn.com)
-- [TanStack Query Docs](https://tanstack.com/query/latest)
-- [Tailwind CSS Docs](https://tailwindcss.com/docs)
-- [TypeScript Docs](https://www.typescriptlang.org/docs)
+### Superadmin
+
+Key files:
+
+- `src/actions/superadmin/users.ts`
+- `src/action-handlers/superadmin/users.ts`
+- `src/hooks/tanstack/queries/userQueries.ts`
+- `src/hooks/tanstack/mutations/userMutations.ts`
+- `src/store/adminUserStore.ts`
+- `src/app/admin/manage/page.tsx`
+
+Highlights:
+
+- paginated user search/filter/sort
+- profile photo upload and delete
+- first-login magic link creation
+- welcome email delivery
+- internal route-handler bridge for add/filter/delete/password flows
+
+### Manager
+
+Key domains:
+
+- task assignment: `src/actions/manager/assignments.ts`, `src/actions/manager/assigned-tasks.ts`
+- task verification: `src/actions/manager/verification.ts`
+- task editor: `src/actions/manager/editor.ts`
+- badge editor: `src/actions/manager/badges.ts`
+- badge assignment: `src/actions/manager/badge-assignment.ts`
+
+Highlights:
+
+- grouped assigned-task views by task and by employee
+- optimistic assignment editing through Zustand + TanStack Query
+- verification approval/rejection flow
+- badge condition authoring with task, user, and attendance requirement types
+- manual badge awards with point updates and notifications
+
+### HR
+
+Key domains:
+
+- rewards: `src/actions/hr/rewards.ts`
+- redemptions: `src/actions/hr/redemptions.ts`
+- leaderboard: `src/actions/hr/leaderboard.ts`
+
+Highlights:
+
+- Mercado inventory management
+- interval-based reward availability windows
+- redemption approval/decline workflow
+- generated weekly/monthly/yearly ranking periods
+- visibility toggles for employee-facing leaderboards
+- top-10 notifications when a ranking becomes visible
+
+### Employee
+
+Key domains:
+
+- attendance: `src/actions/employee/attendance.ts`
+- tasks: `src/actions/employee/tasks.ts`
+- stats: `src/actions/employee/stats.ts`
+- redemptions: `src/actions/employee/redemptions.ts`
+- notifications: `src/actions/employee/notifications.ts`
+- badges: `src/actions/employee/badges.ts`
+
+Highlights:
+
+- attendance time windows using Manila timezone defaults
+- task lifecycle with submission, review, claim, redo, and continuation
+- XP and level progression
+- reward claiming and Mercado browsing
+- realtime notifications
+- leaderboard viewing and profile surfaces
+
+### Shared and cross-cutting modules
+
+Important shared files:
+
+- `src/actions/shared/auth.ts`
+- `src/actions/shared/profile.ts`
+- `src/actions/shared/sidebar.ts`
+- `src/lib/utils/safe-action.ts`
+- `src/lib/notifications.ts`
+- `src/lib/smtp/welcome-email.ts`
+- `src/lib/users/email-availability.ts`
+- `src/hooks/useRealtimeNotifications.ts`
+
+These modules cover:
+
+- server-side route protection
+- session-aware redirects
+- profile management
+- reusable server action wrapping
+- notification inserts
+- welcome-email templating
+- duplicate-email detection across public user data and auth users
 
 </details>
 
-## 📄 License
+## Storage and Media Conventions
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+<details>
+<summary><strong>View Section</strong></summary>
 
-## 🤝 Contributing
+The code expects these Supabase storage buckets:
 
-Contributions are welcome! Please follow the Pull Request Process above and ensure all tests pass before submitting.
+| Bucket       | Purpose                 | Example object path      |
+| ------------ | ----------------------- | ------------------------ |
+| `employees`  | user profile pictures   | `{userId}/profile.png`   |
+| `badges`     | badge images            | `{badgeId}/badge.png`    |
+| `reward`     | reward images           | `{rewardId}/profile.png` |
+| `user-files` | uploaded user documents | `{userId}/{filename}`    |
 
-## 📞 Support
+Media-related conventions:
 
-For issues, questions, or suggestions, please open a GitHub issue or contact the development team.
+- image uploads are validated in code to `5MB` max in several places
+- many public URLs add `?t=${Date.now()}` for cache-busting
+- `next.config.ts` derives an image remote pattern from `NEXT_PUBLIC_SUPABASE_URL`
 
----
+</details>
 
-**Built with ❤️ for seamless employee management and gamification**
+## Important Implementation Notes
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+### Authentication and route protection
+
+- Server-side protection lives in `src/actions/shared/auth.ts`.
+- Layouts for `admin`, `manager`, `hr`, and `employee` all protect routes on the server before rendering.
+- `proxy.ts` refreshes Supabase session state and redirects unauthenticated traffic.
+
+### Attendance logic
+
+Attendance defaults live in `src/lib/attendance-config.ts`:
+
+- time in: `07:00`
+- late after: `07:30`
+- time out: `17:30`
+- overtime after: `17:30`
+- auto timeout: `23:59`
+- break duration: `01:00`
+- timezone: `Asia/Manila`
+
+Attendance actions handle:
+
+- same-day log lookup
+- auto-absent insertion when no time-in happens by close
+- over-break detection
+- auto-timeout/auto-absent behavior
+- timeline generation for employee UI
+
+### Notification strategy
+
+- persisted notifications are inserted through `src/lib/notifications.ts`
+- employee UI reads them through TanStack queries
+- realtime toasts subscribe to `Notification` inserts with `useRealtimeNotifications`
+
+### Welcome-email onboarding
+
+When a superadmin creates a user:
+
+1. the app validates email availability across both public and auth records
+2. the auth user and public user row are created
+3. a first-login magic link is generated
+4. an SMTP welcome email is sent using `src/components/smtp/email.html`
+
+### Leaderboard generation
+
+HR leaderboard generation:
+
+1. computes a completed period
+2. calls the `get_leaderboard_as_of` RPC
+3. persists `RankingPeriod` and `RankingEntry`
+4. exposes results through `ranking_leaderboard_view`
+5. optionally notifies visible top-10 users when the ranking is published
+
+</details>
+
+## Known Transitional Areas
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+These are worth knowing before refactoring:
+
+- Superadmin server actions still call internal route handlers under `src/app/admin/tools/*`.
+- `src/lib/auth-context.tsx` is a lightweight client auth wrapper, but server-side auth protection is the real access-control source.
+- There are older compatibility-style files alongside more domain-scoped ones, for example `src/actions/hr.ts` vs `src/actions/hr/*` and `src/action-handlers/profile.ts` vs `src/action-handlers/shared/profile.ts`.
+- The repository contains a few debug/test-only UI helpers under employee and attendance component trees.
+- The root session redirect logic in `proxy.ts` and the server role redirect helpers should be treated carefully because they affect every authenticated route.
+
+</details>
+
+## Deployment Notes
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+### Next.js configuration
+
+`next.config.ts` currently does a few important things:
+
+- enables server action body size limit of `5mb`
+- sets the Turbopack root
+- configures remote image patterns from the Supabase host at runtime
+
+### Session proxy
+
+This repository uses `proxy.ts` rather than a traditional `middleware.ts` file. It:
+
+- refreshes Supabase auth state on requests
+- skips static assets and image optimization routes
+- redirects unauthenticated requests away from protected pages
+
+### Supabase edge function
+
+The repo contains:
+
+- `supabase/functions/evaluate-badges/index.ts`
+
+This edge function calls the `evaluate_badges` RPC and is intended for scheduled or manual badge evaluation.
+
+</details>
+
+## Contribution Notes
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+When extending the codebase, these conventions match the current architecture best:
+
+- put server-only domain logic in `src/actions/<domain>/`
+- wrap server actions in `src/action-handlers/<domain>/` for toasts and client-safe return shaping
+- expose React Query access from `src/hooks/tanstack/queries` and `src/hooks/tanstack/mutations`
+- use Zod schemas from `src/zod/schemas` for user input validation
+- keep service-role logic on the server only
+- prefer the appropriate Supabase client for the runtime context
+- use the existing query-key factories when invalidating data
+- use existing Zustand optimistic helpers instead of ad hoc local cache mutations
+
+Before opening a PR, the usual local checks are:
+
+```bash
+npm run typecheck
+npm run lint
+npm test
+```
+
+If your change touches SMTP onboarding, reward flows, or task assignment/verification, also test the relevant UI path locally because those flows span several layers.
+
+</details>
+
+## License
+
+<details>
+<summary><strong>View Section</strong></summary>
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
+
+</details>

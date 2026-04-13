@@ -1,7 +1,11 @@
 /**
- * Anti-Spam Hook
- * ===============
- * Prevents button spam clicking and provides debounced action execution
+ // honestly i made this hook because iw as thinking about people spamming acions
+ and i wanted to store a config where i can jsut edit cooldowns
+A cooldown between actions (minimum time between attempts).
+
+A maximum number of attempts allowed before blocking.
+
+A reset window after which attempts are cleared.
  */
 
 'use client';
@@ -16,9 +20,9 @@ interface UseAntiSpamOptions {
 
 export function useAntiSpam(options: UseAntiSpamOptions = {}) {
   const {
-    cooldown = 1000,
-    maxAttempts = 3,
-    resetTime = 10000,
+    cooldown = 1000, // 1000 ms
+    maxAttempts = 3, // 3 ttries only
+    resetTime = 10000, // reset time for the next is 10 seconds
   } = options;
 
   const [isBlocked, setIsBlocked] = useState(false);
@@ -27,6 +31,7 @@ export function useAntiSpam(options: UseAntiSpamOptions = {}) {
   const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const canExecute = useCallback(() => {
+    // this returns a value boolena when the canexecute is accessed through the hook
     const now = Date.now();
     const timeSinceLastAttempt = now - lastAttemptRef.current;
 
@@ -41,11 +46,22 @@ export function useAntiSpam(options: UseAntiSpamOptions = {}) {
     }
 
     return !isBlocked;
+    // note this is a dependency array so this is reconstructure when valus change
   }, [cooldown, maxAttempts, attemptCount, isBlocked]);
 
   const execute = useCallback(async <T,>(
     action: () => Promise<T>
   ): Promise<T | null> => {
+    // Action to run when allowed, REMEMBER UARE PASSING A FUNCTION 
+  // const handleClick = async () => {
+  //   await execute(async () => {
+  //     // Simulate an async action (like an API call)
+  //     console.log("Action executed!");
+  //     return "done";
+  //   });
+  // };
+    // generic  async T 
+    // returns an action that can be executed with anti-spam protection
     if (!canExecute()) {
       console.warn('[useAntiSpam] Action blocked - too many attempts');
       return null;
@@ -89,10 +105,10 @@ export function useAntiSpam(options: UseAntiSpamOptions = {}) {
   }, []);
 
   return {
-    execute,
-    canExecute: canExecute(),
-    isBlocked,
-    attemptCount,
-    reset,
+    execute, // function to execute an action with anti-spam protection
+    canExecute: canExecute(), // boolean indicating if action can currently be executed
+    isBlocked, // boolean indicating if user is currently blocked from executing actions
+    attemptCount, // number of attempts made in the current window
+    reset, // function to manually reset the anti-spam state
   };
 }

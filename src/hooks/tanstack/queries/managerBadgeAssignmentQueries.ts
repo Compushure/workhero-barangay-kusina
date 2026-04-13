@@ -20,6 +20,15 @@ export const badgeAssignmentKeys = {
   users: () => [...badgeAssignmentKeys.all, 'users'] as const,
   debug: () => [...badgeAssignmentKeys.all, 'debug'] as const,
 };
+/*
+query keys — unique identifiers for each type of badge assignment query.
+know which cached data belongs to which request pra hapus  i invalidate mostly 
+
+manualBadges() → manually assigned badges.
+allBadges() → all badges available.
+users() → users with badge assignments.
+debug() → debug entries for badge awards.
+*/
 
 export function useGetManualBadges(
   queryOptions: { enabled?: boolean } = {}
@@ -58,7 +67,9 @@ export function useGetBadgeAssignmentUsers(
     enabled: queryOptions.enabled !== false,
     staleTime: 30 * 1000,
     gcTime: 5 * 60 * 1000,
+    // will try 2 times
     retry: 2,
+    // do not manually refecth when switching window focus
     refetchOnWindowFocus: false,
   }) as UseQueryResult<BadgeAssignmentUser[], Error>;
 }

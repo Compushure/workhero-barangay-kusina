@@ -14,6 +14,7 @@ interface ManagerBadgeAssignmentState {
   optimisticAssignBadgeToUsers: (userIds: string[], badgeId: string) => void;
 }
 
+// same lng ni to avoid unencessary rehyrdation
 function areBadgeAssignmentUsersEquivalent(
   a: BadgeAssignmentUser[],
   b: BadgeAssignmentUser[]
@@ -45,12 +46,18 @@ function areBadgeAssignmentUsersEquivalent(
   return true;
 }
 
+
+//Takes a list of users, a set of target user IDs, and a badge ID.
+// Returns a new list where the target users get the badge appended to their badge_ids.
+
 function applyBadge(users: BadgeAssignmentUser[], userIds: Set<string>, badgeId: string) {
   return users.map((user) => {
     if (!userIds.has(user.id) || user.badge_ids.includes(badgeId)) {
       return user;
     }
 
+    // kay kung mag add ka it's the new badge plus ang existing badge na ka user
+    // uses spread operator
     return {
       ...user,
       badge_ids: [...user.badge_ids, badgeId],
@@ -58,6 +65,7 @@ function applyBadge(users: BadgeAssignmentUser[], userIds: Set<string>, badgeId:
   });
 }
 
+// same stuff lng ni sa admin nag different lnggamay
 export const useManagerBadgeAssignmentStore = create<ManagerBadgeAssignmentState>((set, get) => ({
   users: [],
   isOptimistic: false,

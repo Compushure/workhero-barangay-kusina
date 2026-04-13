@@ -10,13 +10,16 @@ import {
 /**
  * Internal API route used by the superadmin user-management server action.
  * Creates the auth user first, then inserts the matching public user row.
+ * NOtTE THAT HSI WAS A DEMONSTRATIN, i wouldn't use nextjs routes to ahandle by backgend and use server actions 
+ * yu can see supabase integration with nextjs docs instead. This adds a layer instead of directly accesisng using supabase js
  */
 
 export async function GET(req: NextRequest) {
+  // this requires you to have the service role in order to access this
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.SUPABASE_URL) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
+  // attempted get request if using backend api testing like postman
   return NextResponse.json({
     ok: true,
     message: 'add user route is working',
@@ -46,6 +49,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'email and password required' }, { status: 400 });
     }
 
+    // this part just handles more existing user stuff
     const existingEmail = await findExistingUserEmail(normalizedEmail);
     if (existingEmail.exists) {
       return NextResponse.json(
@@ -54,6 +58,9 @@ export async function POST(req: Request) {
       );
     }
 
+    // PAYLOAD TO INSERT TO THE AUTH.users table`
+    // i usually do a db trigger fr this, but with the new claims i needed to be able to ensure that it works
+    // so instead of doing a db trigger (that is hard to edit) chose to do it to frontend action logic
     const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: normalizedEmail,
       password,
@@ -107,6 +114,7 @@ export async function POST(req: Request) {
       }
     }
 
+    // payload to isner to the USER TABLE
     const insertPayload: any = {
       id: newUser.id,
       email: normalizedEmail,
@@ -137,6 +145,8 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: 'Failed to insert user row: ' + insertError.message },
         { status: 500 }
+        // need to make sure no hanging or orphan data so delete the auth user if the public user row fails to insert
+        // you need to make sure to take note of hte supabase Admin client here for elevated role accces
       );
     }
 

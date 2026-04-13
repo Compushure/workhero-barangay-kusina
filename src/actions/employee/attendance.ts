@@ -2,12 +2,17 @@
 
 import { formatInTimeZone, fromZonedTime } from 'date-fns-tz';
 import { createClient } from '@/lib/supabase/server';
+// typings 
 import type { ServerActionResponse } from '@/lib/utils/safe-action';
 import type { AttendanceConfig, AttendanceLog, AttendanceStatus, AttendanceTimelineEntry } from '@/types';
+// note that in the future we might have to migrate na gid sa remotely persisted instead of a file config
 import { attendanceConfig } from '@/lib/attendance-config';
 
+// timestamptz needed to override vercel Washington time
 const DEFAULT_TIMEZONE = attendanceConfig.timezone || 'Asia/Manila';
 
+// the config is stored in a specific format that must be normalized before use
+// this is also where we can apply any future overrides (e.g. from a database or admin settings page) without changing the core logic
 function normalizeConfig(config?: Partial<AttendanceConfig>): AttendanceConfig {
   return {
     timeInAt: config?.timeInAt ?? attendanceConfig.timeInAt,
@@ -29,6 +34,8 @@ function parseTimeOnDate(baseUtc: Date, time: string, timeZone: string): Date {
   return fromZonedTime(`${datePart} ${hour}:${minute}:00`, timeZone);
 }
 
+// na notice ko na budlay military time kung i display sa front end mas mayo if more natural
+// siya for example  no bozo wants to read 17:30 as time out time so i convert it to 12 hour format with am/pm for better readability
 function formatTo12Hour(time24: string): string {
   const [hoursRaw, minutesRaw] = time24.split(':').map((v) => Number(v));
   const period = hoursRaw >= 12 ? 'PM' : 'AM';
@@ -37,6 +44,8 @@ function formatTo12Hour(time24: string): string {
   return `${hours12}:${minutes} ${period}`;
 }
 
+// get the full range of the day in the configured timezone to query attendance logs for "today"
+// bisan di sa mag login remember to check the successful runs on the cron function in db level
 function getDayRange(base: Date, timeZone: string): { start: Date; end: Date } {
   const datePart = formatInTimeZone(base, timeZone, 'yyyy-MM-dd');
   const start = fromZonedTime(`${datePart} 00:00:00.000`, timeZone);
@@ -45,12 +54,21 @@ function getDayRange(base: Date, timeZone: string): { start: Date; end: Date } {
 }
 
 function isOpenLog(log: AttendanceLog): boolean {
+  // this is just date conversion to type DATE from the format
   const timeIn = new Date(log.timein_time).getTime();
   const timeOut = new Date(log.timeout_time).getTime();
+  // basically gina lantaw kung 
+  // 1. wala sa timeout
+  // 2. timein == timeouit (which means absent na na daan
+  // 3 may auto na di na daan if ma lagpas sa timein  automatic absent 
+  // this honestly just controls kung maka open log pa sa or indi 
+  // otherwise handled by backend cron if wala gid ever naka bukase si user
+  // so even if wla trigger (no page navigation) prevents gid mga unseen edge cases
   return (log.no_timeout ?? false) === false && timeOut === timeIn;
 }
 
 function isOnBreak(log: AttendanceLog): boolean {
+  // only WILL RETURN FALSE once na may record na for both start and end
   return !!log.breaktime_start && !log.breaktime_end;
 }
 
@@ -74,7 +92,10 @@ function buildTimelineFromLog(log: AttendanceLog | null): AttendanceTimelineEntr
   if (!log) {
     return [];
   }
-
+ // the only purpose of this is to actually show the logs
+ // the timeline shows the actions of the user in the logs (sano nag attendance, break etc)
+ // these are in chronological order
+ // kugn wla log will just return an empty string so empty display sa front end. 
   const entries: AttendanceTimelineEntry[] = [];
   const timeIn = toIsoString(log.timein_time);
   const breakStart = toIsoString(log.breaktime_start);
@@ -101,12 +122,22 @@ function buildTimelineFromLog(log: AttendanceLog | null): AttendanceTimelineEntr
     });
   }
 
+  // controls when the timeout button is available, du ang timein but opposite
+  //There is a timeout value, and
+// The user is marked absent, or
+// No time-in exists, or
+// Timeout is not equal to time-in (avoids placeholder timeout values).
   const shouldShowTimeout =
     !!timeOut &&
     (!!(log.is_absent ?? false) ||
       !timeIn ||
       new Date(timeOut).getTime() !== new Date(timeIn).getTime());
 
+  // basically the conditions to see if timeout from break not returned
+  // meaning wla sa nag balik halin break
+  // kung indi sa absent, kung  may ara break start pro wla break it and wla na katimeout
+  // the reason of !! is actually stricter boolean stuff because may tendency to return null or other values if written just as example a truth value of breakStaar
+  // strict boolean check here !! (bool value)
   if (shouldShowTimeout && timeOut) {
     const timedOutFromBreakWithoutReturn =
       !!(log.is_absent ?? false) && !!breakStart && !breakEnd && !!(log.no_timeout ?? false);
@@ -114,6 +145,7 @@ function buildTimelineFromLog(log: AttendanceLog | null): AttendanceTimelineEntr
     entries.push({
       action: 'timeout',
       time: timeOut,
+      // note are special display messages for elaboration puproses lng
       note: timedOutFromBreakWithoutReturn
         ? 'Did not return from break; system marked absent.'
         : log.is_absent
@@ -125,11 +157,13 @@ function buildTimelineFromLog(log: AttendanceLog | null): AttendanceTimelineEntr
               : undefined,
     });
   }
-
+ // this is a sorting method common in js to make sure that the timeline is always in chronological order regardless of the order of the logs in the database
+ // ascending ()
   return entries.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 }
 
 async function getTodayLog(employeeId: string, timeZone: string): Promise<AttendanceLog | null> {
+  // function getting logs today
   const supabase = await createClient();
   const now = new Date();
   const { start, end } = getDayRange(now, timeZone);
@@ -156,6 +190,7 @@ export async function getAttendanceConfigAction(): Promise<ServerActionResponse<
   return { error: null, data: attendanceConfig };
 }
 
+// # this just calls the getTodayLog function and builds the timeline for the front end display
 export async function getTodayAttendanceTimelineAction(): Promise<ServerActionResponse<AttendanceTimelineEntry[]>> {
   try {
     const supabase = await createClient();
@@ -174,10 +209,12 @@ export async function getTodayAttendanceTimelineAction(): Promise<ServerActionRe
   }
 }
 
+// STATUS ACTIONS gid mismo ag sa gilid 
 export async function getTodayAttendanceStatusAction(
   config?: Partial<AttendanceConfig>
 ): Promise<ServerActionResponse<AttendanceStatus>> {
   try {
+    // this just checks for in-session
     const supabase = await createClient();
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData.session?.user) {
@@ -299,6 +336,9 @@ export async function getTodayAttendanceStatusAction(
     const timeOutLabel = formatTo12Hour(normalized.timeOutAt);
     const autoTimeoutLabel = formatTo12Hour(normalized.autoTimeoutAt);
 
+    // messages na gina disaplay mismo sa logs
+    // do not confuse for notes, notes are put when that log is pushed (see entries.push)
+    // messages are dynamic based on the actual actions
     if (isAbsent) {
       if (log?.breaktime_start && !log?.breaktime_end) {
         message = `You did not return from break. The system marked you absent for today. Next time in is ${timeInLabel} tomorrow.`;
@@ -368,6 +408,7 @@ export async function getTodayAttendanceStatusAction(
   }
 }
 
+// ACTUAL ACTIONS NA MISMO NA GA TRIGGER
 export async function timeInAttendanceAction(
   config?: Partial<AttendanceConfig>
 ): Promise<ServerActionResponse<AttendanceStatus>> {
@@ -404,6 +445,7 @@ export async function timeInAttendanceAction(
 
     const isOnTime = now <= lateAfter;
 
+    // main insertion
     const { data: created, error } = await supabase
       .from('AttendanceLog')
       .insert({
@@ -442,6 +484,7 @@ export async function timeInAttendanceAction(
   }
 }
 
+
 export async function timeOutAttendanceAction(
   logId?: string,
   config?: Partial<AttendanceConfig>
@@ -460,8 +503,10 @@ export async function timeOutAttendanceAction(
     const timeOutAt = parseTimeOnDate(now, normalized.timeOutAt, normalized.timezone);
     const overtimeAfter = parseTimeOnDate(now, normalized.overtimeAfter, normalized.timezone);
 
+    // get information from helper function
     let log = logId ? null : await getTodayLog(employeeId, normalized.timezone);
 
+    // if may ara na log update na lng
     if (logId) {
       const { data, error } = await supabase
         .from('AttendanceLog')
@@ -474,7 +519,7 @@ export async function timeOutAttendanceAction(
       }
       log = data as AttendanceLog;
     }
-
+    // other statuses
     if (!log) {
       return { error: 'No active time in found for today' };
     }
@@ -493,7 +538,7 @@ export async function timeOutAttendanceAction(
 
     const isOvertime = now > overtimeAfter;
     const isUndertime = now < timeOutAt;
-
+   // this part checkshow which column to update, either nag undertimes or nag overtime
     const { data: updated, error: updateError } = await supabase
       .from('AttendanceLog')
       .update({
@@ -532,6 +577,7 @@ export async function timeOutAttendanceAction(
   }
 }
 
+// action for starting breaks
 export async function startBreakAction(
   config?: Partial<AttendanceConfig>
 ): Promise<ServerActionResponse<AttendanceStatus>> {
@@ -547,6 +593,9 @@ export async function startBreakAction(
     const normalized = normalizeConfig(config);
 
     const log = await getTodayLog(employeeId, normalized.timezone);
+    // similar sa babaw man gyapon ni 
+    // could have probebly refactored this to be a helper function 
+    // pro ahhh basi ma guba pa RIP
 
     if (!log) {
       return { error: 'No active time in found for today' };
@@ -603,6 +652,7 @@ export async function startBreakAction(
   }
 }
 
+// sama sa abaw po : --DDDDD
 export async function endBreakAction(
   logId?: string,
   config?: Partial<AttendanceConfig>

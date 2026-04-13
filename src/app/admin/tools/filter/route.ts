@@ -7,17 +7,18 @@ import { createClient } from '@/lib/supabase/server';
  * Still actively used by /src/actions/manage.ts fetchUsersAction()
  * This route provides filtered, sorted, and paginated user data
  * 
- * Performance Optimizations Applied:
- * - Uses user_attributes view for efficient queries
- * - Implements pagination to limit data transfer
- * - Escapes special characters to prevent SQL injection
- * - Single database query per request (except multi-field search)
+ * - uses user_attributes view for efficient queries
+ * - omplements pagination to limit data transfer
+ * - ecapes special characters to prevent SQL injecthn
+ * - single database query per request (except multi-field search)
  * 
  * Future Optimization Opportunities:
- * - Add Redis caching for frequently accessed pages
- * - Implement search debouncing on client side (already done via useDebounce)
+ * - add Redis caching for frequently accessed pages
+ * - implement search debouncing on client side (already done via useDebounce)
  * - Consider full-text search for better query performance
- * - Add query result caching with SWR revalidation
+ * - Point f this file ie just to build query params, honestly, i would just do this as a server action
+ * // mimics how it is usually doen before by sending a body with query params, accessing it using req.query
+ *  next js has serach params ig??
  */
 
 type SortOrder = 'asc' | 'desc';
@@ -59,10 +60,11 @@ export async function GET(req: Request) {
     // Sorting
     const orderParam = url.searchParams.get('order') ?? 'descending';
     const typeParam = url.searchParams.get('type') ?? 'dateadded';
+    // this is actually the filters pa gid kung ano ang order  and then how to sort it by type
     const order = normalizeOrder(orderParam);
     const sortColumn = mapSortKey(typeParam);
 
-    // Search
+    // Search ang sa sulod search box
     const query = url.searchParams.get('query')?.trim() ?? '';
     const queryby = url.searchParams.get('queryby') ?? ''; // e.g., 'name'
     const searchColumn = mapSearchKey(queryby);
@@ -71,7 +73,7 @@ export async function GET(req: Request) {
     const employeeType = (url.searchParams.get('employeeType') ?? 'all').toLowerCase();
     const employmentStatus = (url.searchParams.get('employmentStatus') ?? 'all').toLowerCase();
 
-    // Pagination (optional)
+    // Pagination (optional) i was thinking about also doing customized pagination pro indi NAAA HUHUH
     const page = Math.max(1, parseInt(url.searchParams.get('page') ?? '1', 10));
     const pageSize = Math.min(
       100,
@@ -137,7 +139,7 @@ export async function GET(req: Request) {
   }
 }
 
-// Helper to map DB rows to your User shape
+// Helper to map DB rows to User shape (esasy exttaction i dispaly na lng)
 function mapRowsToUsers(rows: any[]) {
   return rows.map((u: any) => {
     let date_added = new Date();
