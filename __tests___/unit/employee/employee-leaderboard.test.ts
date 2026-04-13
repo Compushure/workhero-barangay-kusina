@@ -297,6 +297,41 @@ describe('When the employee reads leaderboard snapshots', () => {
     expect(result.success).toBe(true);
     expect(result.data).toBeNull();
   });
+
+  test('Then the getEmployeeRank action returns fallback defaults when no visible weekly period exists', async () => {
+    leaderboardState.latestPeriod = null;
+
+    const result = await getEmployeeRank();
+
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({
+      rank: 1,
+      performanceScore: 0,
+      totalEmployees: 1,
+    });
+  });
+
+  test('Then the getEmployeeRank action returns fallback defaults when latest period has no entries', async () => {
+    leaderboardState.rankingEntries = [];
+
+    const result = await getEmployeeRank();
+
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({
+      rank: 1,
+      performanceScore: 0,
+      totalEmployees: 1,
+    });
+  });
+
+  test('Then the getEmployeeTopWeeklyRanks action returns null when no weekly period start is available', async () => {
+    leaderboardState.latestPeriod = null;
+
+    const result = await getEmployeeTopWeeklyRanks();
+
+    expect(result.success).toBe(true);
+    expect(result.data).toBeNull();
+  });
 });
 
 describe('When employee leaderboard handlers process action responses', () => {
@@ -327,6 +362,20 @@ describe('When employee leaderboard handlers process action responses', () => {
     expect(result).toBeNull();
     expect(toast.error).toHaveBeenCalledWith(
       'Failed to load rankings for selected period',
+      expect.objectContaining({
+        description: expect.stringContaining('User not authenticated'),
+      })
+    );
+  });
+
+  test('Then the weekly-top handler returns null and shows an error toast when the user is unauthenticated', async () => {
+    leaderboardState.sessionUser = null;
+
+    const result = await handleFetchEmployeeTopWeeklyRanks();
+
+    expect(result).toBeNull();
+    expect(toast.error).toHaveBeenCalledWith(
+      'Failed to load top weekly ranks',
       expect.objectContaining({
         description: expect.stringContaining('User not authenticated'),
       })
