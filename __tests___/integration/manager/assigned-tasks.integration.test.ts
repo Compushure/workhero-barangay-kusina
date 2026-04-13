@@ -144,6 +144,74 @@ describe('When the manager clears unstarted tasks for a specific employee', () =
     expect(deletedTaskRow).toBeNull();
     expect(toastSuccess).toHaveBeenCalledWith('Cleared 1 unstarted task');
   });
+
+  test('Then the clear handler deletes only assigned rows with zero pending and completed orders', async () => {
+    const manager = await remoteContext.seedUser({
+      roleType: 'manager',
+      namePrefix: `${managerAssignedTasksIntegrationNames.clear.managerNamePrefix} Selective`,
+      emailPrefix: `${managerAssignedTasksIntegrationNames.clear.managerEmailPrefix}.selective`,
+    });
+    const employee = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: `${managerAssignedTasksIntegrationNames.clear.employeeNamePrefix} Selective`,
+      emailPrefix: `${managerAssignedTasksIntegrationNames.clear.employeeEmailPrefix}.selective`,
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+    const category = await remoteContext.seedCategory({
+      namePrefix: `${managerAssignedTasksIntegrationNames.clear.categoryNamePrefix} Selective`,
+      points: 10,
+      xp: 3,
+    });
+
+    const unstartedTask = await remoteContext.seedTask({
+      assignedBy: manager.id,
+      assignedTo: employee.id,
+      categoryId: category.id,
+      status: 'assigned',
+      pendingOrders: 0,
+      completedOrders: 0,
+      maxOrders: 2,
+      deadlineDate: '2099-12-31',
+    });
+    const inProgressTask = await remoteContext.seedTask({
+      assignedBy: manager.id,
+      assignedTo: employee.id,
+      categoryId: category.id,
+      status: 'assigned',
+      pendingOrders: 1,
+      completedOrders: 0,
+      maxOrders: 2,
+      deadlineDate: '2099-12-31',
+    });
+    const approvedTask = await remoteContext.seedTask({
+      assignedBy: manager.id,
+      assignedTo: employee.id,
+      categoryId: category.id,
+      status: 'approved',
+      pendingOrders: 0,
+      completedOrders: 1,
+      maxOrders: 2,
+      deadlineDate: '2099-12-31',
+    });
+
+    currentServerClient = remoteContext.createServerClientForUser(manager);
+
+    const cleared = await handleClearUnstartedEmployeeTasks(employee.id);
+    const { data: remainingRows, error: reloadError } = await remoteContext.admin
+      .from('KPITask')
+      .select('id')
+      .in('id', [unstartedTask.id, inProgressTask.id, approvedTask.id]);
+
+    expect(cleared).toBe(1);
+    expect(reloadError).toBeNull();
+    const remainingIds = new Set((remainingRows ?? []).map((row) => row.id));
+    expect(remainingIds.has(unstartedTask.id)).toBe(false);
+    expect(remainingIds.has(inProgressTask.id)).toBe(true);
+    expect(remainingIds.has(approvedTask.id)).toBe(true);
+    expect(toastSuccess).toHaveBeenCalledWith('Cleared 1 unstarted task');
+  });
 });
 
 describe('When the manager deletes a specific assigned task', () => {

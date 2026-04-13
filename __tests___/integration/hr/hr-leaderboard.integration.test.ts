@@ -40,33 +40,6 @@ jest.mock('@/lib/supabase/admin', () => ({
   },
 }));
 
-jest.mock('@/lib/utils/enrich-ranking', () => ({
-  enrichRankingPlayers: jest.fn(
-    async (
-      rows: Array<{
-        user_id: string;
-        user_name: string;
-        performance_score: number | null;
-        completed_task_count: number | null;
-        total_kpi_points: number | null;
-        badge_points: number | null;
-        rank: number | null;
-      }>
-    ) =>
-      rows.map((row, index) => ({
-        id: row.user_id,
-        name: row.user_name,
-        performanceScore: Number(row.performance_score ?? 0),
-        totalCompletedTasks: Number(row.completed_task_count ?? 0),
-        taskPoints: Number(row.total_kpi_points ?? 0),
-        badgePoints: Number(row.badge_points ?? 0),
-        image: null,
-        badges: [],
-        rank: Number(row.rank ?? index + 1),
-      }))
-  ),
-}));
-
 async function seedWeeklyRanking(args: {
   year: number;
   week: number;
@@ -198,6 +171,9 @@ describe('When HR reads enriched leaderboard data for a generated period', () =>
       expect.objectContaining({
         name: expect.stringContaining('HR Leaderboard Employee One'),
         rank: 1,
+        taskPoints: hrLeaderboardIntegrationPeriodA.firstScore,
+        badgePoints: 0,
+        totalCompletedTasks: 0,
       })
     );
     expect(enrichedResult.data?.isVisible).toBe(true);

@@ -14,6 +14,7 @@ import {
   getEmployeeTopRanksByPeriod,
   getEmployeeTopWeeklyRanks,
 } from '@/actions/employee/stats';
+import { getPeriodStartEnd, toManilaDateString } from '@/lib/utils/time-period-utils';
 import {
   handleFetchEmployeeRank,
   handleFetchEmployeeTopRanksByPeriod,
@@ -43,6 +44,7 @@ type LeaderboardState = {
   latestPeriod: RankingPeriodRow;
   rankingEntries: RankingEntryRow[];
   leaderboardRows: LeaderboardViewRow[];
+  leaderboardViewEqCalls: Array<[string, unknown]>;
   rankingPeriodError?: QueryError;
   rankingEntriesError?: QueryError;
   leaderboardRowsError?: QueryError;
@@ -129,7 +131,10 @@ function createLeaderboardViewQuery(state: LeaderboardState) {
   return {
     select: jest.fn(() => {
       const query = {
-        eq: jest.fn(() => query),
+        eq: jest.fn((column: string, value: unknown) => {
+          state.leaderboardViewEqCalls.push([column, value]);
+          return query;
+        }),
         order: jest.fn(() => query),
         limit: jest.fn(async () => {
           if (state.leaderboardRowsError) {
@@ -194,6 +199,7 @@ beforeEach(() => {
     latestPeriod: { ...employeeLeaderboardLatestPeriod },
     rankingEntries: [...employeeLeaderboardRankingEntries],
     leaderboardRows: [...employeeLeaderboardRows],
+    leaderboardViewEqCalls: [],
   };
 
   createClientMock.mockReset();
@@ -246,6 +252,39 @@ describe('When the employee reads leaderboard snapshots', () => {
           isCurrentUser: true,
           profilePictureUrl: 'https://cdn.example.com/employee-1/profile.png',
         }),
+      ])
+    );
+    expect(leaderboardState.leaderboardViewEqCalls).toEqual(
+      expect.arrayContaining([
+        ['period_type', 'weekly'],
+        ['is_visible', true],
+        ['period_start', employeeLeaderboardLatestPeriod.period_start],
+      ])
+    );
+  });
+
+  test('Then the getEmployeeTopRanksByPeriod action queries only visible rows for the computed period start', async () => {
+    const { start } = getPeriodStartEnd(
+      employeeLeaderboardPeriodSelection.periodType,
+      employeeLeaderboardPeriodSelection.year,
+      undefined,
+      employeeLeaderboardPeriodSelection.week
+    );
+    const expectedPeriodStart = toManilaDateString(start);
+
+    const result = await getEmployeeTopRanksByPeriod(
+      employeeLeaderboardPeriodSelection.periodType,
+      employeeLeaderboardPeriodSelection.year,
+      undefined,
+      employeeLeaderboardPeriodSelection.week
+    );
+
+    expect(result.success).toBe(true);
+    expect(leaderboardState.leaderboardViewEqCalls).toEqual(
+      expect.arrayContaining([
+        ['period_type', employeeLeaderboardPeriodSelection.periodType],
+        ['is_visible', true],
+        ['period_start', expectedPeriodStart],
       ])
     );
   });

@@ -230,4 +230,16 @@ describe('When the manager clears or deletes assigned tasks through handlers', (
     expect(deleted).toBe(false);
     expect(toast.error).toHaveBeenCalledWith('Delete failed');
   });
+
+  test('Then delete-task handler returns true and shows success toast when action succeeds', async () => {
+    deleteTaskMock.mockResolvedValue({
+      error: null,
+      data: true,
+    } satisfies ServerActionResponse<boolean>);
+
+    const deleted = await handleDeleteTask('task-2');
+
+    expect(deleted).toBe(true);
+    expect(toast.success).toHaveBeenCalledWith('Task deleted');
+  });
 });

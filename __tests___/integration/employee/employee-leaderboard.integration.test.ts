@@ -191,6 +191,54 @@ describe('When the employee reads remote leaderboard period entries', () => {
     );
     expect(toast.error).not.toHaveBeenCalled();
   });
+
+  test('Then the top ranks by period handler returns null when the seeded period is not visible', async () => {
+    const employee = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: `${employeeLeaderboardIntegrationNames.employee.namePrefix} Hidden`,
+      emailPrefix: `${employeeLeaderboardIntegrationNames.employee.emailPrefix}.hidden`,
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+    const competitor = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: `${employeeLeaderboardIntegrationNames.competitor.namePrefix} Hidden`,
+      emailPrefix: `${employeeLeaderboardIntegrationNames.competitor.emailPrefix}.hidden`,
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+
+    await seedWeeklyRanking({
+      year: employeeLeaderboardIntegrationPeriodA.year,
+      week: employeeLeaderboardIntegrationPeriodA.week,
+      rows: [
+        {
+          userId: competitor.id,
+          rank: 1,
+          performanceScore: employeeLeaderboardIntegrationPeriodA.firstScore,
+        },
+        {
+          userId: employee.id,
+          rank: 2,
+          performanceScore: employeeLeaderboardIntegrationPeriodA.secondScore,
+        },
+      ],
+      isVisible: false,
+    });
+
+    currentServerClient = remoteContext.createServerClientForUser(employee);
+
+    const rows = await handleFetchEmployeeTopRanksByPeriod({
+      periodType: 'weekly',
+      year: employeeLeaderboardIntegrationPeriodA.year,
+      week: employeeLeaderboardIntegrationPeriodA.week,
+    });
+
+    expect(rows).toBeNull();
+    expect(toast.error).not.toHaveBeenCalled();
+  });
 });
 
 describe('When the employee reads the latest remote rank snapshot', () => {
