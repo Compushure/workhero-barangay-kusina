@@ -180,8 +180,8 @@ export default function TaskIcon() {
       </Tooltip>
 
       <WideDialogContent>
-        <DialogHeader className="space-y-2 border-b border-[#8a6844]/30 bg-[#e1d2b7] px-4 py-3 pr-16 text-left">
-          <DialogTitle className="text-[16px] text-center font-pixel text-[#3f2a1a] tracking-wider leading-relaxed">
+        <DialogHeader className="space-y-2 border-b border-[#8a6844]/30 bg-[#e1d2b7] px-4 py-3 text-left">
+          <DialogTitle className="pr-16 text-lg text-center font-pixel text-[#3f2a1a] tracking-wider leading-relaxed font-medium">
             Claimable Tasks
           </DialogTitle>
           <div className="mt-1 flex w-full flex-col gap-2 sm:flex-row sm:items-end sm:justify-end">
