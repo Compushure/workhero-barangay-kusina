@@ -89,15 +89,16 @@ export default function EmployeeDashboardClient() {
         <div className="absolute inset-0 animate-[pulse_2.6s_ease-in-out_infinite] bg-linear-to-b from-[#f9d882]/28 via-transparent to-[#c9862f]/18" />
       </div>
 
+      <div className="pointer-events-none absolute top-0 left-0 right-0 z-49 w-full px-2 pt-2 sm:px-4">
+        <HeaderHUD className="rounded-lg pointer-events-auto" />
+      </div>
+
       <div className="relative z-10 flex min-h-screen flex-col">
-        {/* Overlay top widgets (do not affect layout flow) */}
-        <div className="pointer-events-none absolute top-0 left-0 right-0 z-20 w-full px-2 pt-2 sm:px-4">
-          <div className="pointer-events-none flex w-full flex-col gap-2">
-            <HeaderHUD className="rounded-lg pointer-events-auto" />
-            <div className="flex w-full justify-end pr-0.5 sm:pr-1 lg:pr-2 pointer-events-none">
-              <div className="pointer-events-auto hidden lg:block">
-                <RankWidget />
-              </div>
+        {/* Keep rank in the main dashboard layer so dialogs can still dim it. */}
+        <div className="pointer-events-none absolute top-0 left-0 right-0 w-full px-2 pt-18 sm:px-4">
+          <div className="pointer-events-none flex w-full justify-end pr-0.5 sm:pr-1 lg:pr-2">
+            <div className="pointer-events-auto hidden lg:block">
+              <RankWidget />
             </div>
           </div>
         </div>

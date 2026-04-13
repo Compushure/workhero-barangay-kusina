@@ -346,7 +346,7 @@ export default function TasksTable({
 
   if (isLoading) {
     return (
-      <div className="p-5 text-center font-pixel text-[14px] text-[#f5e8d6] animate-pulse">
+      <div className="p-5 text-center font-pixel text-sm text-[#6d553d] animate-pulse">
         Loading tasks...
       </div>
     );

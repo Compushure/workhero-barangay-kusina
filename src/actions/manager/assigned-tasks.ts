@@ -64,7 +64,7 @@ export async function fetchCurrentAssignedTasksPaginated(
   let query = supabase
     .from('task_info_view')
     .select(
-      'status, kpitask_id, category_id, category_name, category_description, category_points, category_xp, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
+      'status, kpitask_id, category_id, category_name, category_description, category_points, category_xp, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_completed_at, kpitask_created_at, k_deadline_date'
     );
   // .eq('status', 'assigned');
   // Only include currently assigned tasks
@@ -125,6 +125,7 @@ export async function fetchCurrentAssignedTasksPaginated(
       assignedTasks: [],
       pendingOrders: row.pending_orders ?? 0,
       completedOrders: row.completed_orders ?? 0,
+      completedAt: row.kpitask_completed_at,
       status: row.status || 'assigned',
     };
 
@@ -252,7 +253,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   let query = supabase
     .from('task_info_view')
     .select(
-      'status, kpitask_id, category_id, category_name, category_description, category_points, category_xp, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_created_at, k_deadline_date'
+      'status, kpitask_id, category_id, category_name, category_description, category_points, category_xp, max_orders, pending_orders, assigned_to, assigned_to_name, assigned_to_employee_id, completed_orders, kpitask_completed_at, kpitask_created_at, k_deadline_date'
     )
     // Only include employees with currently assigned tasks
     .not('assigned_to', 'is', null);
@@ -421,6 +422,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
         assignedTasks: [],
         pendingOrders: taskGroup.assignments[0]?.pending_orders ?? 0,
         completedOrders: taskGroup.assignments[0]?.completed_orders ?? 0,
+        completedAt: taskGroup.assignments[0]?.kpitask_completed_at,
         status: taskGroup.status,
       };
 

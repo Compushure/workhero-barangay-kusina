@@ -42,6 +42,10 @@ const CONTROL_ITEM_CLASS =
 
 const EMPLOYEE_CANCELLED_REMARKS = ['cancelled by employee', 'canceled by employee'] as const;
 
+function isDashboardHudInteractionTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(target.closest('[data-dashboard-hud="true"]'));
+}
+
 function isEmployeeCancelledRequest(request: RedemptionRequest): boolean {
   const remarks = request.remarks?.trim().toLowerCase() || '';
   return EMPLOYEE_CANCELLED_REMARKS.some((phrase) => remarks.includes(phrase));
@@ -266,6 +270,12 @@ export function RewardRequestsFeedbackModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
+        overlayClassName="z-[48]"
+        onInteractOutside={(event) => {
+          if (isDashboardHudInteractionTarget(event.target)) {
+            event.preventDefault();
+          }
+        }}
         className="kitchen-parchment-card w-[94vw] max-w-205 max-h-[82vh] rounded-3xl p-0 gap-0 overflow-hidden"
       >
         <DialogClose
@@ -276,7 +286,7 @@ export function RewardRequestsFeedbackModal({
         </DialogClose>
 
         <DialogHeader className="space-y-0.5 border-b-2 border-[#8a6844]/30 bg-[#e1d2b7] px-5 py-3 text-left">
-          <DialogTitle className="pr-14 font-pixel text-base leading-2 text-[#3f2a1a] pt-2">
+          <DialogTitle className="pr-14 font-pixel text-base leading-2 text-[#3f2a1a] pt-2 tracking-wide font-medium">
             Reward Request Feedbacks
           </DialogTitle>
           <DialogDescription className="pr-14 font-pixel text-[14px] leading-1 text-[#6b5038] pb-4">
