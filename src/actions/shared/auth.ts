@@ -1,5 +1,6 @@
 'use server';
 
+// by anton mostye huhihihihihih : ))))))
 import type { ServerActionResponse } from '@/lib/utils/safe-action';
 import { loginSchema } from '@/zod/schemas';
 import { createClient } from '@/lib/supabase/server';
@@ -12,6 +13,9 @@ type AuthenticatedClaimsResult =
     }
   | null;
 
+  // helper functions to read the jwt claims (mostly ang sa app_metadata)
+  // this is to get ang role, take note htat supabase now recommends using custom claims for role-based authentication
+  // DEAR FUTURE DEVS: DO NOT ATTEMPT TO IMPLEMEENT USING USER_METADSATA AS IT IS NOT ENCCYPRTED AND COULD ESASILIY BE INJECTED
 async function getAuthenticatedClaims(): Promise<AuthenticatedClaimsResult> {
   const supabase = await createClient();
 
@@ -33,11 +37,13 @@ async function getAuthenticatedClaims(): Promise<AuthenticatedClaimsResult> {
   const role = claimsData.claims.app_metadata?.user_role;
   return {
     userId: user.id,
+    // if weird role then i null
     role: typeof role === 'string' ? role : null,
   };
 }
 
 export async function getUserRole() {
+  // get in session role
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
   if (error || !data?.claims) {
@@ -55,6 +61,8 @@ export async function redirectifSessionExists() {
   }
 }
 
+
+// REDIRECT STUFF SHOULD"VE PROBABLY  MADE ANOTHER WRAPPER FUNCION SIGH 💔
 export async function redirectToCorrectDashboardServer() {
   const { role, error } = await getUserRole();
   if (error || !role) {
@@ -80,6 +88,9 @@ export async function redirectToCorrectDashboardServer() {
       return;
     default:
       console.log('unknwon role');
+      // lol gin hardcode, i feel like---- pwede gid ni i dynamic, but brain not workign rip
+      // this is just so tna kung ay ara gid app breakag like nag crash ang fornt end maka attempt mag redirect 
+      // to one of the safe error pages 
       //localhost:3008/error?status=404&cause=Page%20not%20found&recommendation=Check%20the%20URL%20or%20go%20back.
       redirect('/error?status=403&cause=Access%20Denied&recommendation=Contact%20your%20administrator.');
       return;
@@ -199,12 +210,8 @@ export async function protectEmployeeRoute() {
   console.log('✓ Employee access granted');
 }
 
-/**
- * Protects routes that require any authenticated session (all roles)
- * Used for routes like /profile/* that should be accessible to any logged-in user
- * 
- * @param restrictToUserId - Optional user ID to restrict access to (user can only access their own profile)
- */
+// this one is ACTUALLY ONLY A SPECIAL CASE WHICH IS USD IN the DYNAMIC PROFIL ROUTE
+// honestly also should migrate to server side  protection using RLS 
 export async function protectSessionRoute(restrictToUserId?: string) {
   const auth = await getAuthenticatedClaims();
 
@@ -228,8 +235,10 @@ export async function protectSessionRoute(restrictToUserId?: string) {
   console.log('✓ Session access granted');
 }
 
+// straight forwards
 export async function signOutAction(): Promise<ServerActionResponse> {
   const supabase = await createClient();
+  // tries to get in session user , there's been a deabate abt using auth.sesions and auth user tbh
   const {
     data: { user },
     error: userError,

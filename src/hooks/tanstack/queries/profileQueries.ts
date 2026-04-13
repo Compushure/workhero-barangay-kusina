@@ -10,7 +10,10 @@ import type { UserWithExtras } from '@/types';
 
 /**
  * Query key factory for profile-related queries
+ * all → base key for all profile queries.
+detail(userId) → key for a specific user’s profile, e.g. ['profile','123']
  */
+
 export const profileKeys = {
   all: ['profile'] as const,
   detail: (userId: string) => [...profileKeys.all, userId] as const,

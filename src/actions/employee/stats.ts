@@ -1,5 +1,8 @@
 /**
  * Employee Statistics Actions
+ * NOTE LNG NA BASI MAY KULANAGAN KO DI
+ * this was refactored and reedited when this task was reassigned
+ * 
  * 
  * This file contains all employee stat getter functions:
  * - getEmployeeLevel: Fetches the current employee's level
@@ -27,6 +30,9 @@ export interface EmployeePointsData {
   deductedPoints: number;
 }
 
+// legacy code indi ko pag tandugun basi maguaba ang elsewehre na basi
+// ginamit ni. Honsetly I DO NOT THINK this is needed because  it's checking for a gaetway error
+// should've just handle this using a supabase helper and zod validations
 function isSupabaseGatewayError(message: string | undefined): boolean {
   if (!message) {
     return false;
@@ -43,6 +49,7 @@ export async function getEmployeeLevel(): Promise<ActionResult<number>> {
   return safeAction(async () => {
     const supabase = await createClient();
 
+    // only sincewe need date for in-session
     const {
       data: { user },
       error: userError,
@@ -52,11 +59,14 @@ export async function getEmployeeLevel(): Promise<ActionResult<number>> {
       throw new Error('User not authenticated');
     }
 
+    // this is actually fetching from a view called user-attributes 
+    // the user-attribtues view is a view that joins roles, users, and other deeper level with strong conenction their user
     const { data, error } = await supabase
       .from('user_attributes')
       .select('user_level')
       .eq('user_id', user.id)
       .single();
+      // honestly pwede man kuhaon sa users table ni
 
     if (error) {
       throw new Error(`Failed to fetch user level: ${error.message}`);
@@ -66,6 +76,7 @@ export async function getEmployeeLevel(): Promise<ActionResult<number>> {
       throw new Error('User level data not found');
     }
 
+    // defaults to 1 ang nakaset na daan diri- ig for display purposes since ga expect integer ang frontend
     return data.user_level ?? 1;
   });
 }
@@ -83,6 +94,11 @@ export async function getEmployeePoints(): Promise<ActionResult<EmployeePointsDa
       throw new Error('User not authenticated');
     }
 
+    // honestly the way gin strucutre ang point and deducted points is messy
+    // legacy code is a little unreliable, but a full on refactor would call for BIG data base changes
+    /// knowing this is a REAL TECHNICAL DEBT WE'VE decided to take and not fix considering time feasibility
+    // deducted points refers to point that have been deducted to the mercado and is a way for the db to persist lost points and then 
+    // give them back if the mercado request is denied
     const { data, error } = await supabaseAdmin
       .from('User')
       .select('points, deducted_points')
@@ -93,6 +109,7 @@ export async function getEmployeePoints(): Promise<ActionResult<EmployeePointsDa
       throw new Error(`Failed to fetch user points: ${error.message}`);
     }
 
+    
     if (!data) {
       throw new Error('User points data not found');
     }
@@ -105,6 +122,7 @@ export async function getEmployeePoints(): Promise<ActionResult<EmployeePointsDa
 }
 
 /**
+ * # remedied by josh around mga later na, before this was not working but was a backend eissues instad ofa  fetch issue
  * Fetches the current employee's performance score from user_attributes.
  * performance_score = (total KPI task points × completed tasks) + badge points (used for leaderboard ranking).
  */
@@ -361,6 +379,13 @@ export async function getEmployeeTopRanksByPeriod(
  * Get level data from the Level table
  * @param levelNumber The level to fetch (1-10)
  * @returns Level data with xp requirement and other details
+ * 
+ * ANTON- AKO ni actually do nag refactor gid, medyo ga struggle gid ako
+ *  note: some legacy code is retaied JUST BECAUS I DO NOT KNOW IF THEY DO SOMETHING ELSE
+ * note again: damo2 ni ga conflict sa triggers related to the leves
+ *  note: gin refactor ko na ang triggers will be dissbale and migrate all functionality to the front end
+ *  NOTE NOTE NOTE: i may have missed some functionality as i was not assigned to this fucntion before, and idk ang behavior pa gid na gin implemtn
+ * 
  */
 async function getLevelData(levelNumber: number): Promise<{
   xp: number;
@@ -369,6 +394,9 @@ async function getLevelData(levelNumber: number): Promise<{
   bg_img_link?: string;
 } | null> {
   const supabase = await createClient();
+
+  // the bg img is actually tied to the level, amo to ang kitchen cosmetic chuhu2
+
 
   const { data, error } = await supabase
     .from('Level')
@@ -388,9 +416,12 @@ async function getLevelData(levelNumber: number): Promise<{
   };
 }
 
-/**
+/** 
  * Calculate total XP based on Level table data
  * @param level User's current level (capped at 10)
+ * ANother legacy issues was the original dev assigned to this made multiple copiesand columns of 
+ * xp, current xp and total xp, which the values did not synchronize, due to this had to do hard reset with sql sa db
+ * NOTE: may have unsavory or hard to see bugs, indi na madiagnose kay basi DB Level na ang guba
  * @param currentXP User's current XP within the level (0-99)
  * @returns Total cumulative XP (Level threshold + currentXP within level)
  */
@@ -402,6 +433,8 @@ async function calculateTotalXP(level: number, currentXP: number): Promise<numbe
     const requirementLevel = targetLevel <= 1 ? 2 : targetLevel;
     const levelData = await getLevelData(requirementLevel);
     const fallback = requirementLevel * 100;
+    // the fallback does note affect anything just a placeholder kung wla or well edge case in general
+
     return Math.max(1, levelData?.xp ?? fallback);
   };
 
@@ -465,6 +498,10 @@ export async function getEmployeeXP(): Promise<ActionResult<EmployeeXP>> {
  * @returns XP required to reach nextLevel (or 100 as default fallback)
  */
 export async function getXPRequiredForNextLevel(currentLevel: number): Promise<ActionResult<number>> {
+  // actually naka hungod cap sa level 10, mostly because of client conflict
+  // the client does not have a set plan for the levelling function yet
+  // that being said the developers are also pretty lost regarding diri. 
+  // with the agreed date coming due, we are force to do "DUMMY DEMO NUMBERS"
   return safeAction(async () => {
     const cappedLevel = Math.min(currentLevel, 10);
 
@@ -513,6 +550,11 @@ export async function getAllLevelMetadata(): Promise<ActionResult<LevelMetadata[
     }
 
     if (!data || data.length === 0) {
+      // this is actually a fallback in case the level table is empty, which should not happen since it's seeded,
+      //  but just in case, we return default levels with hardcoded XP requirements and descriptions
+      //  THIS SPECIFIC ROWS ARE  are what's persisted and inserted in the migration file you can reference
+      // 20260321_add_level_xp_and_dish_appearance.sql
+      // basic gist parehos ni sila sang insert statement until level 10 ONLY
       // Return default levels if table is empty
       return [
         { level: 1, xp: 0, description: 'Level 1 - Trainee' },
@@ -541,13 +583,17 @@ function deriveLevelAndCurrentXPFromTotalXP(totalXP: number, levelRows: LevelMet
   level: number;
   xp: number;
 } {
+  // note the that truc is only there to force INTEGER RETURNS
   const safeTotalXP = Math.max(0, Math.trunc(totalXP));
 
   const thresholds = new Map<number, number>();
   for (const row of levelRows) {
     thresholds.set(row.level, row.xp ?? 100);
   }
-
+// gets the requirement level for 2 if it's less than equal to 1
+// in the legacy data ang deafult was actually 0 idk ngaa amo na pag implement
+// safe to say i tried to make sure that the default will not be 1 for safety measures indi na lng
+// ma explicit === to 1 otherwise might have unsavory or unexpected behavior
   const getRequiredXpForLevel = (level: number): number => {
     const requirementLevel = level <= 1 ? 2 : level;
     return Math.max(1, thresholds.get(requirementLevel) ?? requirementLevel * 100);
@@ -562,7 +608,8 @@ function deriveLevelAndCurrentXPFromTotalXP(totalXP: number, levelRows: LevelMet
     if (remaining < required) {
       break;
     }
-
+// basically lopped to check if the total xp is enough to level up, 
+// if it is then we consume the xp and move on to the next level until we reach the max level or we run out of xp to consume
     remaining -= required;
     level += 1;
   }
@@ -571,6 +618,9 @@ function deriveLevelAndCurrentXPFromTotalXP(totalXP: number, levelRows: LevelMet
 }
 
 /**
+ * HELLO DEBUG LNG NI NI ANTON TI KAY ANO BI need ko i tset if gagana and natamad na ko sagi balik db
+ * NOTE TO FUTURE DEVS: 😃😃😃😃WALA NI GA AFFECT SANG FUNCTIONALITY AND WILL ONLY SHOW ON THE TEST AND LOCAL BUILDS
+ * HIDDEN ANG COMPONENT DURING PROD BUILDS SO YOU DONT" HAVE TO WORRYA BOTU REMOVING THE DEBUG
  * Debug-only action to increase/decrease XP of the authenticated active employee.
  * Disabled in production.
  */

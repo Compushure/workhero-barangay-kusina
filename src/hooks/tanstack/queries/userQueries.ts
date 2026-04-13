@@ -22,6 +22,32 @@ import { sanitizeSearchInput } from '@/lib/utils/search-normalization';
  *
  * // Invalidate filtered list
  * queryClient.invalidateQueries({ queryKey: userKeys.list(filters) })
+ * userKeys.all → ['users']  
+Base key for all user-related queries. Used when you want to invalidate or refetch everything related to users.
+
+userKeys.lists → ['users','list']  
+Group key for user lists. Acts as a parent for all list queries.
+
+userKeys.list(filters) → ['users','list', filters]  
+Key for a filtered list of users. Includes search, filter, and sorting parameters.
+Example: userKeys.list({ searchQuery: 'Alice', sortBy: 'date-desc' }).
+
+userKeys.paginatedLists → ['users','paginated']  
+Group key for paginated user lists. Used to invalidate all paginated queries at once.
+
+userKeys.paginatedList(filters, page) → ['users','paginated', filters, page]  
+Key for a specific paginated user list. Includes filters and page number.
+Example: userKeys.paginatedList({ employeeTypeFilter: 'all' }, 2) → page 2 of filtered results.
+
+userKeys.details → ['users','detail']  
+Group key for user detail queries. Used to invalidate all detail queries at once.
+
+userKeys.detail(id) → ['users','detail', id]  
+Key for a specific user’s detail by ID.
+Example: userKeys.detail('123') → fetches user with ID 123.
+
+userKeys.session → ['users','session']  
+Key for the currently logged-in user’s session data. Used for fetching the active user profile (e.g., avatar, name, permissions)
  */
 export const userKeys = {
   all: ['users'] as const,

@@ -13,6 +13,8 @@ type HandleRoleOptions = {
   getUserRole: () => Promise<UserRoleResult>;
 };
 
+// actually this was used sa mga pages sa auth kay liwat2 ang code
+// so i just edecided i butang diri
 export async function handleUserRole({ router, setError, getUserRole }: HandleRoleOptions) {
   const { role, error } = await getUserRole();
 

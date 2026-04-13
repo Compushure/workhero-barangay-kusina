@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Badge, BadgeCondition } from '@/types/manager/badge-editor';
 import type { AddBadgeInput, EditBadgeInput } from '@/zod/schemas/badge';
 
+// medgy same manag graypon sa admin user store honestly
 interface ManagerBadgeEditorState {
   badges: Badge[];
   isOptimistic: boolean;
@@ -15,6 +16,8 @@ interface ManagerBadgeEditorState {
   optimisticUpdateBadge: (id: string, input: EditBadgeInput) => void;
   optimisticDeleteBadge: (id: string) => void;
 }
+// 👺👺
+// STARTING TO THINK I SHOULD MAKE THIS A HELPERF CUNTION AND PUT SA UTILS GRRR
 
 function areBadgesEquivalent(a: Badge[], b: Badge[]): boolean {
   if (a === b) return true;
@@ -40,8 +43,13 @@ function areBadgesEquivalent(a: Badge[], b: Badge[]): boolean {
   return true;
 }
 
+// converts input conditions into BadgeCondition objects.
+// f a condition doesn’t have an id, generates a temporary optimistic ID.
+// ensures every condition has a consistent shape for immediate UI rendering.
+
 function toConditions(conditions: AddBadgeInput['conditions']): BadgeCondition[] {
   return conditions.map((condition, index) => ({
+    // same temp id generation wla lang galing temp
     id: condition.id ?? `optimistic-condition-${Date.now()}-${index}`,
     requirement_type: condition.requirement_type,
     requirement_operator: condition.requirement_operator,

@@ -11,6 +11,11 @@ import {
 export function useTimeInAttendance(config?: Partial<AttendanceConfig>) {
   const queryClient = useQueryClient();
 
+  // mutation function that calls the time-in handler 
+  // and throws an error if it fails.
+  // this invalidates queries based on the keys to force a refetch from the db
+  // not that mutation means a change 
+
   return useMutation({
     mutationFn: async () => {
       const result = await handleTimeInAttendance(config);

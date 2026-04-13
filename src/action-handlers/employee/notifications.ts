@@ -8,6 +8,9 @@ import {
 import { safeAction } from '@/lib/utils/safe-action';
 import type { NotificationItem } from '@/types';
 
+
+// MOST OF THIS IS JUST VERIFICATION
+
 export async function handleFetchNotifications(
   unreadOnly: boolean = false
 ): Promise<{ error: string | null; data?: NotificationItem[] }> {

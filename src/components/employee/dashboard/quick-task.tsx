@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogContent,
   DialogClose,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -35,12 +36,21 @@ import { type CookingLaunchPayload, useCookingStore } from '@/store/cookingStore
 
 type DialogContentProps = ComponentProps<typeof DialogContent>;
 
+function isDashboardHudInteractionTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(target.closest('[data-dashboard-hud="true"]'));
+}
+
 function WideDialogContent({ children, className, ...props }: DialogContentProps) {
   return (
     <DialogContent
       showCloseButton={false}
-      overlayClassName="z-[15]"
-      className={`kitchen-parchment-card z-15 w-[92vw] max-w-210 max-h-[82vh] gap-0 rounded-2xl font-pixel p-0 overflow-hidden ${className ?? ''}`}
+      overlayClassName="z-[48]"
+      onInteractOutside={(event) => {
+        if (isDashboardHudInteractionTarget(event.target)) {
+          event.preventDefault();
+        }
+      }}
+      className={`kitchen-parchment-card w-[92vw] max-w-210 max-h-[82vh] gap-0 rounded-2xl font-pixel p-0 overflow-hidden ${className ?? ''}`}
       {...props}
     >
       <DialogClose
@@ -171,11 +181,14 @@ export default function TaskIcon() {
       </Tooltip>
 
       <WideDialogContent>
-        <DialogHeader className="space-y-2 border-b border-[#8a6844]/30 bg-[#e1d2b7] px-4 py-3 pr-16 text-left">
-          <DialogTitle className="text-[16px] text-center font-pixel text-[#3f2a1a] tracking-wider leading-relaxed">
+        <DialogHeader className="gap-0 border-b border-[#8a6844]/30 bg-[#e1d2b7] px-4 py-3 text-left">
+          <DialogTitle className="pr-16 pt-1 text-left font-pixel text-base leading-1 text-[#3f2a1a] font-medium">
             Claimable Tasks
           </DialogTitle>
-          <div className="mt-1 flex w-full flex-col gap-2 sm:flex-row sm:items-end sm:justify-end">
+          <DialogDescription className="pr-16 font-pixel text-[14px] leading-5 text-[#6b5038]">
+            Claim fiesta points and xp from approved tasks and serve dishes for tasks when all its orders are performed.
+          </DialogDescription>
+          <div className="mt-2 flex w-full flex-col gap-2 sm:flex-row sm:items-end sm:justify-end">
             <Select
               value={sortOrder}
               onValueChange={(value) => {
@@ -184,11 +197,11 @@ export default function TaskIcon() {
                 }
               }}
             >
-              <SelectTrigger className="h-9 w-full rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-52">
+              <SelectTrigger className="h-9 w-full rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] font-jersey text-[14px] tracking-[0.05em] text-[#4b3522] shadow-none outline-none transition-colors duration-200 cursor-pointer hover:bg-[#f7efdf] hover:text-[#4b3522] focus:ring-0 focus-visible:border-[#F4B925] focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:border-[#F4B925] data-[state=open]:shadow-none data-[state=open]:ring-0 sm:w-36">
                 <ArrowUpDown className="size-4 text-[#8a6039]" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 text-[#4b3522] sm:w-64">
+              <SelectContent className="w-56 border-[#9b7a56] bg-[#f6eddd] p-1 text-[#4b3522] sm:w-36">
                 <SelectItem
                   value="newest"
                   className="cursor-pointer rounded-md py-1.5 font-jersey text-[14px] tracking-[0.04em] text-[#4b3522] transition-colors duration-200 data-[state=checked]:bg-transparent data-[state=checked]:text-[#4b3522] focus:bg-[#8a6039] focus:text-[#fff6e5] data-highlighted:bg-[#8a6039] data-highlighted:text-[#fff6e5]"
@@ -221,7 +234,7 @@ export default function TaskIcon() {
                 align="end"
                 sideOffset={8}
                 collisionPadding={12}
-                className="w-64 border-[#9b7a56] bg-[#f6eddd] p-1"
+                className="w-48 border-[#9b7a56] bg-[#f6eddd] p-1"
               >
                 <DropdownMenuLabel className="px-2 py-1 font-jersey text-[14px] tracking-[0.04em] text-[#8a6039]">
                   Quick Task Filter

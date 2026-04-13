@@ -2,6 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import { handleGetAttendanceConfig, handleGetTodayAttendanceStatus, handleGetTodayAttendanceTimeline } from '@/action-handlers/employee/attendance';
 import type { AttendanceConfig, AttendanceStatus, AttendanceTimelineEntry } from '@/types';
 
+/*
+query keys — unique identifiers for each type of attendance query.
+pra mag hapus ang invalidation 
+
+all → base key for all attendance queries.
+
+config() → key for attendance configuration.
+
+timeline() → key for today’s attendance timeline.
+today(config) → key for today’s attendance status, optionally parameterized by config.
+*/
 export const attendanceKeys = {
   all: ['attendance'] as const,
   config: () => [...attendanceKeys.all, 'config'] as const,
@@ -12,6 +23,7 @@ export const attendanceKeys = {
 
 export function useGetAttendanceConfig() {
   return useQuery<AttendanceConfig, Error>({
+    // query key unique identifier for htis set 
     queryKey: attendanceKeys.config(),
     queryFn: async () => {
       const result = await handleGetAttendanceConfig();
@@ -20,11 +32,17 @@ export function useGetAttendanceConfig() {
       }
       return result.data as AttendanceConfig;
     },
+    // stale time date considtion 
+
     staleTime: 10 * 60 * 1000,
+    // cache garbage collectied
     gcTime: 30 * 60 * 1000,
   });
 }
 
+// medyo same lng ni sila ang querykey lng gid ang big deal, maybe
+// MAYBE SHOULD PROABBLY MAKE CONts FOR THE STATE TIME AND GC TIME TO PREVENT MAGIC NUMBERS??
+// galing it'll be hard when gusto ta i iban ang mga valid data time frame ??
 export function useGetTodayAttendanceStatus(config?: Partial<AttendanceConfig>) {
   return useQuery<AttendanceStatus, Error>({
     queryKey: attendanceKeys.today(config),

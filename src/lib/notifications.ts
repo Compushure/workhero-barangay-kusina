@@ -1,6 +1,9 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import type { NotificationType } from '@/types';
 
+// this is just to be able to actually insert ht notificaoitn. THinking abuot it 
+// this is USED ACROSS ALL THE APPLICATION. I THINK I THOULS be in the shared folder but also
+// transferrrrr
 interface NotificationPayload {
   userId: string;
   type: NotificationType;

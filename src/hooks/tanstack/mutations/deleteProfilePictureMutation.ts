@@ -10,7 +10,7 @@ import { userKeys } from '../queries/userQueries';
 
 /**
  * Hook for deleting user profile pictures
- * Automatically invalidates user queries on success
+ * Automatically invalidates user queries on success// forces a refetch
  */
 export function useDeleteProfilePicture(): UseMutationResult<
   boolean,

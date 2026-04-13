@@ -1,10 +1,14 @@
 'use server';
 
+// Mostly by ANTON 🚲🚲🚲🚲
 import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse } from '@/types';
 import type { Badge, BadgeCondition, BadgeOption } from '@/types/manager/badge-editor';
 import { addBadgeSchema, editBadgeSchema } from '@/zod/schemas/badge';
 
+// this is actually derived from the enums in the backend
+// i think i did this mostly because ga error esp if i hardcode ko bala
+// ang spacing dyun di mag santo i reject na sang db
 const ATTRIBUTE_OPTIONS: BadgeOption[] = [
   { id: 'user_level', name: 'User Level' },
   { id: 'total_xp', name: 'Total XP' },
@@ -18,6 +22,12 @@ const ATTENDANCE_OPTIONS: BadgeOption[] = [
   { id: 'over_breaktime', name: 'Over Breaktime' },
 ];
 
+// for the cdn lnink this is actually a contruction
+// honestly shove' just put a column with img-link, but then du later on na lng
+// na na pinsaran na i image ang badge kay tani may ara lng na du random na icon
+// in order to preserve and not break anythign sa db, as well as knowing badges have a linking table
+// di na lng i add a column construct it dynamically by useing the cdn lng
+// the t flag in the query params notify when the datait was called
 function getBadgeImageUrl(supabase: any, badgeId: string): string {
   const baseUrl = supabase.storage.from('badges').getPublicUrl(`${badgeId}/badge.png`)
     .data.publicUrl;
@@ -26,6 +36,7 @@ function getBadgeImageUrl(supabase: any, badgeId: string): string {
 
 function normalizeConditions(raw: unknown): BadgeCondition[] {
   if (!Array.isArray(raw)) return [];
+  // formatting purposes kung indi ma parase kay indi array just reutnr empty
   return raw.map((condition: any) => ({
     id: String(condition.id ?? ''),
     requirement_type: condition.requirement_type,
@@ -37,6 +48,10 @@ function normalizeConditions(raw: unknown): BadgeCondition[] {
   }));
 }
 
+// this is a view that basically list the badges condtions by BADGE NAME
+// there are multiple conditions in a badge so BADGE CONDITION AND BAGES HAVE A ONE o MANY relationship
+// per row is for the badge nae like and the conditions are coalased into jsonb pra easier to test and track if a badge
+// has a certain condition 
 export async function fetchBadges(): Promise<ServerActionResponse<Badge[]>> {
   const supabase = await createClient();
 
@@ -51,23 +66,31 @@ export async function fetchBadges(): Promise<ServerActionResponse<Badge[]>> {
 
   const badgeIds = (data || []).map((row: any) => row.badge_id).filter(Boolean);
 
+  // placeholder always gid typesafe just reutnr empty array otherwise display issues
+  // best practice to explicity put null instead of undefined
   if (badgeIds.length === 0) {
     return { error: null, data: [] };
   }
+
+  // the metadata is fetch from the acual table instead of the view 
 
   const { data: badgeMeta, error: badgeMetaError } = await supabase
     .from('Badges')
     .select('id, date_created, created_by')
     .in('id', badgeIds);
 
+
   if (badgeMetaError) {
     return { error: `Failed to fetch badge metadata: ${badgeMetaError.message}` };
   }
 
+  // more type safety, empty array or badge meta if may ara
+  // just maps an object element in a map and names it metaMap
   const metaMap = new Map(
     (badgeMeta || []).map((row: any) => [row.id, { date_created: row.date_created, created_by: row.created_by }])
   );
 
+  // creates array from a set of users. NOTE USING SET REMOVES DUPLICATE IDS by default. 
   const creatorIds = Array.from(new Set((badgeMeta || []).map((row: any) => row.created_by).filter(Boolean)));
 
   const { data: creators, error: creatorsError } = await supabase
@@ -79,8 +102,10 @@ export async function fetchBadges(): Promise<ServerActionResponse<Badge[]>> {
     return { error: `Failed to fetch badge creators: ${creatorsError.message}` };
   }
 
+  // fetches crate name and id
   const creatorMap = new Map((creators || []).map((row: any) => [row.id, row.name]));
 
+  // finally make an array for display with all the data recoevered
   const badges: Badge[] = (data || []).map((row: any) => ({
     id: row.badge_id,
     name: row.badge_name,
@@ -100,9 +125,13 @@ export async function fetchBadges(): Promise<ServerActionResponse<Badge[]>> {
   return { error: null, data: badges };
 }
 
+// this is actually for setting task condtiions, bale
+// may ara sang conditions for task, attendance or user attributes
+// this is for task- medyo budlay i test, dapat i run using the edge function manually on db level
 export async function fetchBadgeTaskOptions(): Promise<ServerActionResponse<BadgeOption[]>> {
   const supabase = await createClient();
 
+  // gets the categories that are in the db so always dynamic ang selection
   const { data, error } = await supabase
     .from('KPICategory')
     .select('id, name')
@@ -120,18 +149,21 @@ export async function fetchBadgeTaskOptions(): Promise<ServerActionResponse<Badg
   return { error: null, data: options };
 }
 
+// helper attribtute
 export async function fetchBadgeAttributeOptions(): Promise<ServerActionResponse<BadgeOption[]>> {
   return { error: null, data: ATTRIBUTE_OPTIONS };
 }
-
+// helper attendance  i SHOULD really make a wrapper function nalang GRRR 😡😡😡👺
 export async function fetchBadgeAttendanceOptions(): Promise<ServerActionResponse<BadgeOption[]>> {
   return { error: null, data: ATTENDANCE_OPTIONS };
 }
 
+// this is for uploading the badge image
 export async function uploadBadgeImage(
   badgeId: string,
   file: File
 ): Promise<ServerActionResponse<{ path: string | null; publicUrl: string }>> {
+  // i acctually also put a SIZE LIMIT AND MIME Type didto sa storage bucklet
   try {
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
@@ -176,6 +208,7 @@ export async function uploadBadgeImage(
   }
 }
 
+// delete badge image
 export async function deleteBadgeImage(
   badgeId: string
 ): Promise<ServerActionResponse<void>> {
@@ -208,10 +241,13 @@ export async function deleteBadgeImage(
   }
 }
 
+
+// this runs the zod validations and if g na then go
 export async function addBadge(input: unknown): Promise<ServerActionResponse<Badge>> {
   const parsed = addBadgeSchema.parse(input);
   const supabase = await createClient();
 
+  // need the in sessio userfor the created by
   const { data: userData } = await supabase.auth.getUser();
   const createdBy = userData?.user?.id ?? null;
 
@@ -232,6 +268,9 @@ export async function addBadge(input: unknown): Promise<ServerActionResponse<Bad
     return { error: `Failed to add badge: ${badgeError?.message || 'Unknown error'}` };
   }
 
+  // these are the conditions, not that it's an array because upon creating allows multiple conditions
+  // to be made for a badge, also conditions are optional so if wala gid ni siya then empty array lng
+  // parased refers to the passed zod object btw not the raw input
   let conditions: BadgeCondition[] = [];
   if (parsed.conditions.length > 0) {
     const requirements = parsed.conditions.map((condition) => ({
@@ -277,6 +316,9 @@ export async function addBadge(input: unknown): Promise<ServerActionResponse<Bad
     },
   };
 }
+
+// similar startyle man gyapon sa babaw may gin lang ang action sa table to UPDATE instead of insert
+// maybe make another wrapper or di na pra explicittt?
 
 export async function editBadge(id: string, input: unknown): Promise<ServerActionResponse<Badge>> {
   const parsed = editBadgeSchema.parse(input);
@@ -354,6 +396,7 @@ export async function editBadge(id: string, input: unknown): Promise<ServerActio
   };
 }
 
+// straightfoward na ni 🫡
 export async function deleteBadge(id: string): Promise<ServerActionResponse<boolean>> {
   const supabase = await createClient();
 

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse } from '@/types';
 
+// 🚲🚲🚲🚲🚲🚲🚲🚲🚲 BISIKLETAAAA
 export interface UserBadge {
   badge_id: string;
   badge_name: string;
@@ -16,6 +17,9 @@ export interface UserBadge {
   date_acquired: string;
 }
 
+// ensure na kung may ara or wla
+// actually nullable sa db ang img_lik , if we don't consider and just enter ang cdn lin
+// it's going to show up a weird picture thing instead ofa placeholder
 function normalizeBadgeImageLink(badge: UserBadge): UserBadge {
   const imgLink = badge.img_link ?? badge.badge_img_link ?? null;
   const points = badge.points ?? badge.badge_points;
@@ -50,7 +54,10 @@ export async function fetchUserBadges(userId: string): Promise<ServerActionRespo
   const supabase = await createClient();
 
   try {
-    // Query the user_collected_badges_view which returns badges in a jsonb array
+    // query the user_collected_badges_view which returns badges in a jsonb array
+    // actually gin json b ko ni hungod kay ang relationship ka user and badges is many to many
+    // in order to make a relationship user -> badgeds that user already has (based on id)
+    // i wanted one row per unique user than the multiple user row badges that the linking table has : p 
     const { data, error } = await supabase
       .from('user_collected_badges_view')
       .select('collected_badges')
@@ -69,6 +76,8 @@ export async function fetchUserBadges(userId: string): Promise<ServerActionRespo
     const badges = (data?.collected_badges || []) as UserBadge[];
     let normalizedBadges = badges.map(normalizeBadgeImageLink);
 
+    // just gets the badges without the images becuz amo na b di takabalo koung wla or may ara
+    // thes are all just normallization processes to check if may ara gid man or wla
     const missingImageIds = normalizedBadges
       .filter((badge) => !badge.img_link && badge.badge_id)
       .map((badge) => badge.badge_id);
@@ -88,6 +97,7 @@ export async function fetchUserBadges(userId: string): Promise<ServerActionRespo
           if (badge.img_link) return badge;
           return {
             ...badge,
+            // spread operation labove to concat both array with the ones without images
             img_link: badgeImageMap.get(badge.badge_id) ?? null,
           };
         });

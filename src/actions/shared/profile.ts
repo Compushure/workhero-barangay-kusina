@@ -3,15 +3,18 @@
 import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse, UserWithExtras } from '@/types';
 
-/**
- * Fetches user profile information by user ID from user_attributes view
- * Used by the full profile page to display comprehensive user data
- */
+
+//  Fetches user profile information by user ID from user_attributes view
+//  Used by the full profile page to display comprehensive user data
+ 
 export async function fetchUserProfileById(
   userId: string
 ): Promise<ServerActionResponse<UserWithExtras>> {
   try {
     const supabase = await createClient();
+    // this is just all the information in eed to stick to the profil ngl 
+    // note that userattributes is a VIEW not the table
+    // this is bcuz joined ang mga other data pra hapus kuhaon
 
     // Fetch user details from the user_attributes view
     const { data: userData, error: userError } = await supabase
@@ -107,10 +110,13 @@ export async function fetchUserProfileById(
   }
 }
 
-/**
- * Updates current user's profile information
- * Reuses editUserAction from manage.ts but restricted to current user
- */
+
+ // i dot hink this is not needed tbh BUT IN CASO LNG
+ // i think sir francis wanted man na ang user maka edit, medyo confused lng ko?
+ // i'll levae it here lng in case pra indi na mag balik2
+
+ // aslod di ko pag comment out kay adaan may damo dependenices na ga rely sa export ya ni
+ // so meaning i comment out tanan2 huhuh uti
 export async function updateOwnProfile(
   profileData: {
     name?: string;
@@ -163,10 +169,8 @@ export async function updateOwnProfile(
   }
 }
 
-/**
- * Uploads profile picture for current user
- * Reuses uploadProfilePicture from manage.ts
- */
+// ari lng ang acually gin aallow for now
+// basically like ang sa management but only for self so authencticated onlinely self na
 export async function uploadOwnProfilePicture(
   file: File
 ): Promise<ServerActionResponse> {

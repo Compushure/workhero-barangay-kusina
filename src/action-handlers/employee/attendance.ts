@@ -11,6 +11,7 @@ import {
 } from '@/actions/employee/attendance';
 import type { AttendanceConfig, AttendanceStatus, AttendanceTimelineEntry } from '@/types';
 
+// MOST OF THIS IS JUST VERIFICATION
 export async function handleGetAttendanceConfig(): Promise<{
   error: string | null;
   data?: AttendanceConfig;

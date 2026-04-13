@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 import type { AttendanceConfig, AttendanceStatus } from '@/types';
 import { attendanceConfig } from '@/lib/attendance-config';
 
+
+// FEEL FREE TO IGNORE THIS IS JSUT FOR THE DEBUG TESTING 
 interface AttendanceTestState {
   // Config overrides for testing
   configOverrides: Partial<AttendanceConfig>;

@@ -7,15 +7,17 @@ import type { BadgeAssignmentUser, BadgeSummary, CollectedBadge, BadgeAwardDebug
 import { getUserRole } from '@/actions/shared/auth';
 import { insertNotification } from '@/lib/notifications';
 
+// more anton stuff 
+
+// this just a heplper that removes weird id validues kay indi ni sa sa badge editor
+// always get the valid truthy value for the badge-idsmake sure its VALID and makita sa DB
 function buildBadgeIds(collected: CollectedBadge[]): string[] {
   return collected.map((badge) => badge.badge_id).filter(Boolean);
 }
 
+//fetch an manual badges
+// may ara sang badges na may inteval and may ara na i mannually assign
 export async function fetchManualBadges(): Promise<ServerActionResponse<BadgeSummary[]>> {
-  const { role, error: roleError } = await getUserRole();
-  if (roleError || !role || role.trim().toLowerCase() !== 'manager') {
-    return { error: 'Unauthorized: Only managers can view manual badges' };
-  }
 
   const { data, error } = await supabaseAdmin
     .from('Badges')
@@ -31,10 +33,7 @@ export async function fetchManualBadges(): Promise<ServerActionResponse<BadgeSum
 }
 
 export async function fetchAllBadges(): Promise<ServerActionResponse<BadgeSummary[]>> {
-  const { role, error: roleError } = await getUserRole();
-  if (roleError || !role || role.trim().toLowerCase() !== 'manager') {
-    return { error: 'Unauthorized: Only managers can view badges' };
-  }
+//fetch ALL
 
   const { data, error } = await supabaseAdmin
     .from('Badges')
@@ -49,11 +48,7 @@ export async function fetchAllBadges(): Promise<ServerActionResponse<BadgeSummar
 }
 
 export async function fetchBadgeAssignmentUsers(): Promise<ServerActionResponse<BadgeAssignmentUser[]>> {
-  const { role, error: roleError } = await getUserRole();
-  if (roleError || !role || role.trim().toLowerCase() !== 'manager') {
-    return { error: 'Unauthorized: Only managers can view users' };
-  }
-
+ // for the employees view need to fetch all valid users sa db and listdown ang badges nila
   const { data: users, error: usersError } = await supabaseAdmin
     .from('User')
     .select('id, name, email, employee_id')
@@ -66,17 +61,25 @@ export async function fetchBadgeAssignmentUsers(): Promise<ServerActionResponse<
   const { data: collectedRows, error: collectedError } = await supabaseAdmin
     .from('user_collected_badges_view')
     .select('awarded_to_id, collected_badges');
+    // diri mo makuha sa awarted_ id, this is actually a coaleased dat nanaman
+    // basedsa id na gin providewill get the row of the user and then ang json b collected badges nila
+
 
   if (collectedError) {
     return { error: `Failed to fetch user badges: ${collectedError.message}` };
   }
 
   const collectedByUser = new Map<string, CollectedBadge[]>();
+  // ari na di gin unwrap  if wla badges empty ang array
   (collectedRows || []).forEach((row: any) => {
     collectedByUser.set(row.awarded_to_id, (row.collected_badges || []) as CollectedBadge[]);
   });
 
+  // note this iis a MAPPE DARRAY
   const usersWithBadges: BadgeAssignmentUser[] = (users || []).map((user: any) => {
+    // gets users with badges and then constructs an path for their picture
+    // note the users table never had a profile image link colun so dynamically constructed ang cdn link
+    // again mostly because of changing req the user profile was originally going to just be ar andomized icon
     const collected = collectedByUser.get(user.id) ?? [];
     const { data: storageData } = supabaseAdmin.storage
       .from('employees')
@@ -93,17 +96,17 @@ export async function fetchBadgeAssignmentUsers(): Promise<ServerActionResponse<
     };
   });
 
+  // userswithBAdges include the ones wtih mpty arrays btw 
   return { error: null, data: usersWithBadges };
 }
 
+
+//assigns a manual manual badge to a user
 export async function assignManualBadgeToUser(
   badgeId: string,
   userId: string
 ): Promise<ServerActionResponse<boolean>> {
-  const { role, error: roleError } = await getUserRole();
-  if (roleError || !role || role.trim().toLowerCase() !== 'manager') {
-    return { error: 'Unauthorized: Only managers can award badges' };
-  }
+ 
 
   if (!badgeId || !userId) {
     return { error: 'Badge and user are required' };
@@ -171,6 +174,8 @@ export async function assignManualBadgeToUser(
     }
   }
 
+  // this is actually a trigger for a notificatoin
+  // since realtime is enaled will show as a pop up on employee view
   await insertNotification({
     userId,
     type: 'badge',
@@ -186,11 +191,12 @@ export async function assignManualBadgeToUser(
   return { error: null, data: true };
 }
 
+// DEBUG PART NO NEED TO CARE ABOUT THIS 
+// 👺👺👺 DEBUGLNG NI PRA MAKITA KUNG GAGANA TLDR FOR FUTERE DEVS 
+// jus tliek the other debugs whenenv is prod di makita na
+// though if you remove it man sa local oks man
 export async function fetchBadgeAwardDebugEntries(): Promise<ServerActionResponse<BadgeAwardDebugEntry[]>> {
-  const { role, error: roleError } = await getUserRole();
-  if (roleError || !role || role.trim().toLowerCase() !== 'manager') {
-    return { error: 'Unauthorized: Only managers can view badge debug logs' };
-  }
+ 
 
   const { data: awardRows, error: awardError } = await supabaseAdmin
     .from('UserBadges')
@@ -255,6 +261,8 @@ export async function fetchBadgeAwardDebugEntries(): Promise<ServerActionRespons
   return { error: null, data: entries };
 }
 
+
+// this will never happen in prod, removing a badge SHOULD NOt BE A FUNCTION
 export async function removeBadgeAward(awardId: string): Promise<ServerActionResponse<boolean>> {
   const { role, error: roleError } = await getUserRole();
   if (roleError || !role || role.trim().toLowerCase() !== 'manager') {
