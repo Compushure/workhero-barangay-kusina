@@ -8,6 +8,7 @@ import {
   HandCoins,
   Soup,
   Target,
+  Utensils,
   X,
 } from 'lucide-react';
 import { Dispatch, SetStateAction } from 'react';
@@ -63,6 +64,8 @@ export default function EmployeeViewTaskBadges({
         {displayedTasks.map((task: AssignedTask) => {
           const taskEmployee = task.assignedEmployees?.find((emp) => emp.id === employee.id);
           const completedOrders = taskEmployee?.completedOrders || 0;
+          const isServed = completedOrders >= task.maxOrders && Boolean(taskEmployee?.completedAt);
+          const hasClaimedPoints = taskEmployee?.pendingOrders === 0 && task.status === 'approved';
 
           const StatusIcon = ({
             icon: Icon,
@@ -104,9 +107,9 @@ export default function EmployeeViewTaskBadges({
                   </p>
 
                   {task.status === 'assigned' ? (
-                    <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-500" />
+                    <StatusIcon icon={CircleDashed} className="bg-zinc-200 text-zinc-600" />
                   ) : task.status === 'in review' ? (
-                    <StatusIcon icon={Target} className="bg-yellow-100 text-amber-400" />
+                    <StatusIcon icon={Target} className="bg-yellow-100 text-amber-600" />
                   ) : task.status === 'approved' ? (
                     <StatusIcon icon={CircleCheck} className="bg-green-100 text-green-600" />
                   ) : (
@@ -118,21 +121,38 @@ export default function EmployeeViewTaskBadges({
               <div className="flex w-full md:w-auto items-start md:items-end justify-between md:justify-start gap-0 md:gap-0.5 shrink-0">
                 <div className="flex md:flex-col items-center md:items-end gap-2 md:gap-1">
                   <div className="flex gap-0.5 flex-nowrap items-center">
-                    {taskEmployee?.pendingOrders === 0 && task.status === 'approved' && (
+                    {isServed ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="flex px-1 py-0.5 rounded-full items-center bg-green-100 text-green-600">
-                            <HandCoins strokeWidth={2.5} className="size-3.5" />
+                          <span className="flex px-1 py-0.5 rounded-full items-center bg-purple-100 text-purple-600">
+                            <Utensils strokeWidth={2.5} className="size-4" />
                           </span>
                         </TooltipTrigger>
                         <TooltipContent
                           side="top"
                           align="center"
-                          className="bg-green-100 text-green-600 border-green-200"
+                          className="border-purple-200 max-w-xs text-center"
                         >
-                          Points claimed
+                          Full Task Completion : Employee has performed all orders of task and completed the full task cycle
                         </TooltipContent>
                       </Tooltip>
+                    ) : (
+                      hasClaimedPoints && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex px-1 py-0.5 rounded-full items-center bg-green-100 text-green-600">
+                              <HandCoins strokeWidth={2.5} className="size-4" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="top"
+                            align="center"
+                            className="border-green-200 max-w-xs text-center"
+                          >
+                            Employee has claimed points
+                          </TooltipContent>
+                        </Tooltip>
+                      )
                     )}
 
                     <span
