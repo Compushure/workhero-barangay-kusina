@@ -23,6 +23,7 @@ export default function HeaderHUD({
 }: HeaderHUDProps) {
   return (
     <div
+      data-dashboard-hud="true"
       className={cn(
         'sticky flex min-h-15 w-full items-center justify-start gap-2 overflow-x-hidden px-0.5 sm:gap-2.5 sm:pl-2 lg:pr-20',
         className
@@ -40,33 +41,33 @@ export default function HeaderHUD({
 
       <div className="pointer-events-auto fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
         <div className="flex items-center gap-5 rounded-lg border-2 border-[#47331F]/50 bg-[#eadbc1]/75 shadow-md/25 px-3 py-1.5 backdrop-blur-[1px]">
-            <div className="shrink-0">
-              <Dialog>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="inline-flex">
-                      <DialogTrigger asChild>
-                        <button
-                          type="button"
-                          aria-label="View weekly rank"
-                          className="inline-flex size-10 items-center justify-center rounded-full wood-panel text-card shadow-md transition-colors hover:text-accent-secondary"
-                        >
-                          <Trophy className="size-5 text-yellow-500" />
-                        </button>
-                      </DialogTrigger>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" sideOffset={8}>
-                    Weekly Rank
-                  </TooltipContent>
-                </Tooltip>
+          <div className="shrink-0">
+            <Dialog>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="inline-flex">
+                    <DialogTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="View weekly rank"
+                        className="inline-flex size-10 items-center justify-center rounded-full wood-panel text-card shadow-md transition-colors hover:text-accent-secondary"
+                      >
+                        <Trophy className="size-5 text-yellow-500" />
+                      </button>
+                    </DialogTrigger>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={8}>
+                  Weekly Rank
+                </TooltipContent>
+              </Tooltip>
 
-                <DialogContent className="w-[92vw] max-w-sm border-none bg-transparent p-0 shadow-none [&>button]:text-white">
-                  <DialogTitle className='hidden'>Rank Widget</DialogTitle>
-                  <RankWidget className="mb-0! ml-0! w-full!" />
-                </DialogContent>
-              </Dialog>
-            </div>
+              <DialogContent className="w-[92vw] max-w-sm border-none bg-transparent p-0 shadow-none [&>button]:text-white">
+                <DialogTitle className="hidden">Rank Widget</DialogTitle>
+                <RankWidget className="mb-0! ml-0! w-full!" />
+              </DialogContent>
+            </Dialog>
+          </div>
 
           <div className="shrink-0">
             <Tooltip>

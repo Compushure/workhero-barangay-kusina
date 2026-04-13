@@ -42,6 +42,10 @@ const CONTROL_ITEM_CLASS =
 
 const EMPLOYEE_CANCELLED_REMARKS = ['cancelled by employee', 'canceled by employee'] as const;
 
+function isDashboardHudInteractionTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(target.closest('[data-dashboard-hud="true"]'));
+}
+
 function isEmployeeCancelledRequest(request: RedemptionRequest): boolean {
   const remarks = request.remarks?.trim().toLowerCase() || '';
   return EMPLOYEE_CANCELLED_REMARKS.some((phrase) => remarks.includes(phrase));
@@ -267,6 +271,11 @@ export function RewardRequestsFeedbackModal({
       <DialogContent
         showCloseButton={false}
         overlayClassName="z-[48]"
+        onInteractOutside={(event) => {
+          if (isDashboardHudInteractionTarget(event.target)) {
+            event.preventDefault();
+          }
+        }}
         className="kitchen-parchment-card w-[94vw] max-w-205 max-h-[82vh] rounded-3xl p-0 gap-0 overflow-hidden"
       >
         <DialogClose

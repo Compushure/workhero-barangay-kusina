@@ -35,11 +35,20 @@ import { type CookingLaunchPayload, useCookingStore } from '@/store/cookingStore
 
 type DialogContentProps = ComponentProps<typeof DialogContent>;
 
+function isDashboardHudInteractionTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(target.closest('[data-dashboard-hud="true"]'));
+}
+
 function WideDialogContent({ children, className, ...props }: DialogContentProps) {
   return (
     <DialogContent
       showCloseButton={false}
       overlayClassName="z-[48]"
+      onInteractOutside={(event) => {
+        if (isDashboardHudInteractionTarget(event.target)) {
+          event.preventDefault();
+        }
+      }}
       className={`kitchen-parchment-card w-[92vw] max-w-210 max-h-[82vh] gap-0 rounded-2xl font-pixel p-0 overflow-hidden ${className ?? ''}`}
       {...props}
     >
