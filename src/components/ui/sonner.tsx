@@ -68,14 +68,13 @@ const TOAST_VIEW_STYLES: Record<ToastView, Record<ToastVariant, VariantColors>> 
   },
 };
 
-const ToastViewContext = createContext<ToastViewContextValue | undefined>(undefined);
+const ToastViewContext = createContext<ToastViewContextValue>({
+  view: DEFAULT_TOAST_VIEW,
+  setView: () => {},
+});
 
 function useToastViewContext() {
-  const context = useContext(ToastViewContext);
-  if (!context) {
-    throw new Error('ToastViewContext is missing. Wrap the app with ToastViewRootProvider.');
-  }
-  return context;
+  return useContext(ToastViewContext);
 }
 
 function getPalette(view: ToastView) {

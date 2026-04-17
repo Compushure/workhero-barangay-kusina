@@ -31,7 +31,6 @@ import type {
   RankingPeriodWithTop,
 } from '@/types';
 import type { LatestPeriods } from '@/components/employee/leaderboard/period-nav';
-import { useHrRedemptionRequestStore } from '@/store/hrRedemptionRequestStore';
 
 interface RedemptionRequestParams {
   id: string;
@@ -41,6 +40,7 @@ interface RedemptionRequestParams {
 interface OptimisticRedemptionContext {
   previousListQueries: Array<[QueryKey, RedemptionRequest[] | undefined]>;
   previousMyRequestQueries: Array<[QueryKey, RedemptionRequest[] | undefined]>;
+  previousRewardQueries: Array<[QueryKey, Reward[] | undefined]>;
 }
 
 interface GenerateRankingParams {
@@ -91,13 +91,105 @@ function updateRedemptionStatus(
   );
 }
 
+function getStatusFilterFromQueryKey(queryKey: QueryKey): string | undefined {
+  const maybeFilter = queryKey.at(-1);
+
+  if (!maybeFilter || typeof maybeFilter !== 'object' || Array.isArray(maybeFilter)) {
+    return undefined;
+  }
+
+  if (!('status' in maybeFilter)) {
+    return undefined;
+  }
+
+  const status = (maybeFilter as { status?: unknown }).status;
+  return typeof status === 'string' ? status : undefined;
+}
+
+function updateRedemptionStatusForQuery(
+  list: RedemptionRequest[] | undefined,
+  queryKey: QueryKey,
+  params: RedemptionRequestParams,
+  status: RedemptionRequest['status']
+): RedemptionRequest[] | undefined {
+  if (!list) return list;
+
+  const filterStatus = getStatusFilterFromQueryKey(queryKey);
+
+  // Pending-filtered lists should remove the row immediately after HR decision.
+  if (filterStatus === 'pending') {
+    return list.filter((item) => item.id !== params.id);
+  }
+
+  return updateRedemptionStatus(list, params, status);
+}
+
+function findRequestById(
+  queryDataSets: Array<[QueryKey, RedemptionRequest[] | undefined]>,
+  requestId: string
+): RedemptionRequest | undefined {
+  for (const [, requests] of queryDataSets) {
+    const foundRequest = requests?.find((request) => request.id === requestId);
+    if (foundRequest) {
+      return foundRequest;
+    }
+  }
+
+  return undefined;
+}
+
+function isRewardAvailableQuery(queryKey: QueryKey): boolean {
+  return queryKey[0] === rewardKeys.all[0] && queryKey[1] === 'available';
+}
+
+function updateRewardStockAfterApproval(
+  rewards: Reward[] | undefined,
+  rewardId: string,
+  requestedQuantity: number,
+  queryKey: QueryKey,
+  options?: { reactivateWhenInStock?: boolean; stockDeltaMultiplier?: number }
+): Reward[] | undefined {
+  if (!rewards) return rewards;
+
+  const stockDeltaMultiplier = options?.stockDeltaMultiplier ?? -1;
+  const reactivateWhenInStock = options?.reactivateWhenInStock ?? false;
+
+  const updatedRewards = rewards.map((reward) => {
+    if (reward.id !== rewardId) {
+      return reward;
+    }
+
+    if (reward.quantity === null || reward.quantity === undefined) {
+      return reward;
+    }
+
+    const nextQuantity = Math.max(0, reward.quantity + requestedQuantity * stockDeltaMultiplier);
+    const isOutOfStock = nextQuantity <= 0;
+
+    return {
+      ...reward,
+      quantity: nextQuantity,
+      isOutOfStock,
+      isActive: isOutOfStock ? false : reactivateWhenInStock ? true : reward.isActive,
+    };
+  });
+
+  if (!isRewardAvailableQuery(queryKey)) {
+    return updatedRewards;
+  }
+
+  return updatedRewards.filter((reward) => reward.isActive !== false);
+}
+
 async function optimisticUpdateRedemptionStatus(
   queryClient: ReturnType<typeof useQueryClient>,
   params: RedemptionRequestParams,
-  status: RedemptionRequest['status']
+  status: RedemptionRequest['status'],
+  options?: { applyRewardStockAdjustment?: boolean }
 ): Promise<OptimisticRedemptionContext> {
   await queryClient.cancelQueries({ queryKey: redemptionKeys.lists() });
   await queryClient.cancelQueries({ queryKey: redemptionKeys.myRequests() });
+  await queryClient.cancelQueries({ queryKey: rewardKeys.all });
 
   const previousListQueries = queryClient.getQueriesData<RedemptionRequest[]>({
     queryKey: redemptionKeys.lists(),
@@ -105,20 +197,50 @@ async function optimisticUpdateRedemptionStatus(
   const previousMyRequestQueries = queryClient.getQueriesData<RedemptionRequest[]>({
     queryKey: redemptionKeys.myRequests(),
   });
+  const previousRewardQueries = queryClient.getQueriesData<Reward[]>({
+    queryKey: rewardKeys.all,
+  });
 
   for (const [queryKey] of previousListQueries) {
     queryClient.setQueryData<RedemptionRequest[]>(queryKey, (existing) =>
-      updateRedemptionStatus(existing, params, status)
+      updateRedemptionStatusForQuery(existing, queryKey, params, status)
     );
   }
 
   for (const [queryKey] of previousMyRequestQueries) {
     queryClient.setQueryData<RedemptionRequest[]>(queryKey, (existing) =>
-      updateRedemptionStatus(existing, params, status)
+      updateRedemptionStatusForQuery(existing, queryKey, params, status)
     );
   }
 
-  return { previousListQueries, previousMyRequestQueries };
+  if (options?.applyRewardStockAdjustment) {
+    const matchedRequest =
+      findRequestById(previousMyRequestQueries, params.id) ??
+      findRequestById(previousListQueries, params.id);
+
+    if (matchedRequest) {
+      const requestedQuantity = matchedRequest.quantity || 1;
+      const stockDeltaMultiplier = status === 'approved' ? -1 : 1;
+      const reactivateWhenInStock = status === 'rejected';
+
+      for (const [queryKey] of previousRewardQueries) {
+        queryClient.setQueryData<Reward[]>(queryKey, (existing) =>
+          updateRewardStockAfterApproval(
+            existing,
+            matchedRequest.rewardId,
+            requestedQuantity,
+            queryKey,
+            {
+              reactivateWhenInStock,
+              stockDeltaMultiplier,
+            }
+          )
+        );
+      }
+    }
+  }
+
+  return { previousListQueries, previousMyRequestQueries, previousRewardQueries };
 }
 
 function rollbackOptimisticRedemptionUpdate(
@@ -132,6 +254,10 @@ function rollbackOptimisticRedemptionUpdate(
   }
 
   for (const [queryKey, data] of context.previousMyRequestQueries) {
+    queryClient.setQueryData(queryKey, data);
+  }
+
+  for (const [queryKey, data] of context.previousRewardQueries) {
     queryClient.setQueryData(queryKey, data);
   }
 }
@@ -224,7 +350,6 @@ function toPeriodKey(params: GenerateRankingParams): readonly unknown[] {
 
 export function useDeclineRedemptionRequest() {
   const queryClient = useQueryClient();
-  const { startOptimistic, optimisticRemoveRequest, rollback, commit } = useHrRedemptionRequestStore();
 
   return useMutation({
     mutationKey: ['hr-redemption', 'decline'],
@@ -232,7 +357,9 @@ export function useDeclineRedemptionRequest() {
       await handleDeclineRedemptionRequestAction(params);
     },
     onMutate: async (params) => {
-      return await optimisticUpdateRedemptionStatus(queryClient, params, 'rejected');
+      return await optimisticUpdateRedemptionStatus(queryClient, params, 'rejected', {
+        applyRewardStockAdjustment: true,
+      });
     },
     onError: (_error, _params, context) => {
       rollbackOptimisticRedemptionUpdate(queryClient, context);
@@ -249,7 +376,6 @@ export function useDeclineRedemptionRequest() {
 
 export function useAcceptRedemptionRequest() {
   const queryClient = useQueryClient();
-  const { startOptimistic, optimisticRemoveRequest, rollback, commit } = useHrRedemptionRequestStore();
 
   return useMutation({
     mutationKey: ['hr-redemption', 'accept'],
@@ -257,7 +383,9 @@ export function useAcceptRedemptionRequest() {
       await handleAcceptRedemptionRequestAction(params);
     },
     onMutate: async (params) => {
-      return await optimisticUpdateRedemptionStatus(queryClient, params, 'approved');
+      return await optimisticUpdateRedemptionStatus(queryClient, params, 'approved', {
+        applyRewardStockAdjustment: true,
+      });
     },
     onError: (_error, _params, context) => {
       rollbackOptimisticRedemptionUpdate(queryClient, context);

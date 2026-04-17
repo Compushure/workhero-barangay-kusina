@@ -133,6 +133,8 @@ export function useGetAvailableRewardsByInterval(
         queryFn: async () => {
             return await handleGetAvailableRewardsByIntervalAction(interval as 'weekly' | 'monthly' | 'yearly');
         },
+        // Keep previously rendered cards visible while switching intervals/refetching.
+        placeholderData: (previousData) => previousData ?? [],
         staleTime: 10 * 1000,
         gcTime: 5 * 60 * 1000,
         refetchOnWindowFocus: true,

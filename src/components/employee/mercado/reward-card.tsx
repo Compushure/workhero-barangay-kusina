@@ -10,6 +10,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Coins, Package, CheckCircle2, Clock, XCircle, Minus, Plus } from 'lucide-react';
 import { useRedeemReward } from '@/hooks/tanstack/mutations/redemptionMutations';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import type { Reward } from '@/types';
 
 interface RewardCardProps {
@@ -33,7 +34,6 @@ export const RewardCard = memo(function RewardCard({
   // Local UI states for image fallback, quantity, and submit overlay.
   const [imageError, setImageError] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const redeemMutation = useRedeemReward();
 
   const isOutOfStock = useMemo(() => {
@@ -70,57 +70,38 @@ export const RewardCard = memo(function RewardCard({
   const pointLabel = (value: number) => (value === 1 ? 'pt' : 'pts');
 
   const isDisabled = useMemo(() => {
-    return (
-      !canAfford ||
-      isOutOfStock ||
-      hasPendingRequest ||
-      isSubmitting ||
-      redeemMutation.isPending ||
-      maxSelectable <= 0
-    );
-  }, [
-    canAfford,
-    isOutOfStock,
-    hasPendingRequest,
-    isSubmitting,
-    redeemMutation.isPending,
-    maxSelectable,
-  ]);
-
-  const isProcessing = isSubmitting || redeemMutation.isPending;
+    return !canAfford || isOutOfStock || hasPendingRequest || maxSelectable <= 0;
+  }, [canAfford, isOutOfStock, hasPendingRequest, maxSelectable]);
 
   const handleRedeem = async () => {
     if (isDisabled) return;
 
-    setIsSubmitting(true);
-
-    // Submit redeem request and notify parent on success.
-    try {
-      const result = await redeemMutation.mutateAsync({
+    // Fire optimistic mutation immediately without showing local loading state.
+    redeemMutation.mutate(
+      {
         rewardId: reward.id,
         quantity,
         rewardName: reward.name,
         pointsCost: reward.pointsCost,
-      });
-
-      onRedeemSuccess?.(result);
-    } catch (error) {
-      console.error('Failed to redeem reward:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+      },
+      {
+        onSuccess: (result) => {
+          onRedeemSuccess?.(result);
+        },
+        onError: (error: unknown) => {
+          if (error instanceof Error) {
+            toast.error(error.message);
+          } else {
+            toast.error('Failed to redeem reward. Please try again.');
+          }
+          console.error('Failed to redeem reward:', error);
+        },
+      }
+    );
   };
 
   return (
     <Card className="p-1.5 sm:p-2 md:p-2.5 lg:p-3 group relative overflow-hidden bg-parchment border border-[#8a6844] hover:border-[#6f4f31] transition-all duration-200 shadow-md h-full hover:shadow-xl min-h-auto min-w-0 flex flex-col rounded-lg hover:scale-105">
-      {/* Blocking overlay while request is being submitted. */}
-      {isProcessing && (
-        <div className="absolute inset-0 z-20 bg-[#f5e7d1]/85 backdrop-blur-[1px] flex flex-col items-center justify-center gap-2">
-          <div className="h-5 w-5 border-2 border-[#6d472a] border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs sm:text-sm font-semibold text-[#4f3a26]">Submitting request...</p>
-        </div>
-      )}
-
       <CardContent className="p-0 flex-1 flex flex-col">
         <div className="relative h-20 sm:h-24 md:h-28 lg:h-32 w-full overflow-hidden bg-[#f0e6d2]">
           {/* Reward image with icon fallback if image fails. */}
@@ -236,12 +217,7 @@ export const RewardCard = memo(function RewardCard({
               : 'bg-gray-300 text-gray-500 cursor-not-allowed border-b-2 sm:border-b-2 md:border-b-3'
           )}
         >
-          {isProcessing ? (
-            <>
-              <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-              Submitting...
-            </>
-          ) : hasPendingRequest ? (
+          {hasPendingRequest ? (
             'Requested'
           ) : isOutOfStock ? (
             'Out Stock'

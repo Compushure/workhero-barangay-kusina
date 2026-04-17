@@ -41,6 +41,7 @@ type AvailabilityInterval = 'weekly' | 'monthly' | 'yearly';
 
 const MAX_REWARD_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_REWARD_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const SAVE_LOADING_CAP_MS = 3000;
 const mercadoSelectItemClassName =
   'cursor-pointer transition-all duration-500 ease-in-out hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground data-[state=checked]:bg-accent/15 data-[state=checked]:text-foreground';
 
@@ -306,6 +307,11 @@ export function AddItemsModal({
 
     if (itemName && itemCost && hasChanges) {
       setIsLoading(true);
+      // Cap spinner time so the UI never feels stuck, while request continues.
+      const loadingTimeoutId = window.setTimeout(() => {
+        setIsLoading(false);
+      }, SAVE_LOADING_CAP_MS);
+
       try {
         await onSave?.({
           id: editingItem?.id,
@@ -317,19 +323,26 @@ export function AddItemsModal({
           availableDate: availableDate || null,
           availableMonth: availabilityInterval === 'none' ? null : availabilityInterval,
         });
+
         // Close modal on successful save
-        handleClose();
-      } catch (error) {
+        handleClose(true);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('Error saving item. Please try again.');
+        }
         console.error('Error saving item:', error);
       } finally {
+        window.clearTimeout(loadingTimeoutId);
         setIsLoading(false);
       }
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (force = false) => {
     // Reset form state so reopening starts from clean values.
-    if (isLoading) return; // Prevent closing while loading
+    if (isLoading && !force) return; // Prevent closing while loading
     setIconFile(null);
     setIconPreview('');
     setExistingImageUrl('');
@@ -401,7 +414,7 @@ export function AddItemsModal({
               {editingItem ? 'Edit Item Reward' : 'Add Item Reward'}
             </DialogTitle>
             <button
-              onClick={handleClose}
+              onClick={() => handleClose()}
               className="text-muted-foreground hover:text-title transition-colors h-5 w-5"
             ></button>
           </div>
@@ -697,7 +710,7 @@ export function AddItemsModal({
           </Button>
           <Button
             variant="outline"
-            onClick={handleClose}
+            onClick={() => handleClose()}
             disabled={isLoading}
             className="h-10 rounded-lg border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-gray-200 hover:text-foreground transition-all duration-400 ease-in-out px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
