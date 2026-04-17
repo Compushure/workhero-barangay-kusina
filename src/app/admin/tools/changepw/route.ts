@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
   const { user_id, new_password } = body;
-
+  // i think i could've used a zd validation here but then using a zod for one stirng is such an overkill
   if (!new_password || typeof new_password !== 'string' || new_password.length < 6) {
     return NextResponse.json(
       { error: 'Invalid password, must at least be 6 characters' },
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
   try {
     let result;
     if (user_id) {
+      // you need elevated access to upabade user password so admi is used
       result = await supabaseAdmin.auth.admin.updateUserById(user_id, {
         password: new_password,
       });

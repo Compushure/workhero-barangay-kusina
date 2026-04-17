@@ -4,12 +4,14 @@ import type { XPDebugUpdateResult } from '@/actions/employee/stats';
 import { employeeKeys } from '../queries/employeeQueries';
 import { profileKeys } from '../queries/profileQueries';
 
+// this was for the testing, but basically forces a refetch so changes are reflcted
 export function useAdjustActiveUserXPByDelta(): UseMutationResult<
   XPDebugUpdateResult | null,
   Error,
   number
 > {
   const queryClient = useQueryClient();
+  
 
   return useMutation({
     mutationFn: async (delta: number) => {

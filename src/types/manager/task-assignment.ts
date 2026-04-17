@@ -31,6 +31,7 @@ export interface AssignedEmployee {
   completedOrders: number;
   status?: string;
   pendingOrders?: number;
+  completedAt?: string | null;
 }
 
 /**

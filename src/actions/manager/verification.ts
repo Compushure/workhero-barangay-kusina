@@ -1,15 +1,21 @@
 'use server';
 
+// THIS FILE IS A COLLABORATION OF MOSTLY JOSH AND ANTON and partially JP
+// 🚲😃
+
 import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse, VerificationRequest, PaginatedResponse } from '@/types';
 import { insertNotification } from '@/lib/notifications';
 
+// fetches from the VIEW TASK-INFO_VIEW, this is actually because kpi task and kpi category as well as the users table
+// so like gin join mo na lng pra hapus maka kuha sang related data
 export async function fetchTasksToReview(): Promise<ServerActionResponse<VerificationRequest[]>> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from('task_info_view')
     .select('*')
+    // take note na ang in-reviw lng ang kuhaon kay amo lang na ang need verification actually
     .eq('status', 'in review');
 
   if (error) {
@@ -21,6 +27,9 @@ export async function fetchTasksToReview(): Promise<ServerActionResponse<Verific
 
 type VerificationSort = 'date-desc' | 'date-asc' | 'employee-asc' | 'employee-desc';
 
+// ah, this is actually a supbase query line
+// ilike meaning case insersensitive search, the % is for wildcard search so it will match any string that contains the search term
+// this is because we're looking in between substrings not only matching the start or end of the string
 function applySearchAndSort(query: any, searchTerm: string, sort: VerificationSort): any {
   const normalizedSearch = searchTerm.trim();
   if (normalizedSearch) {
@@ -46,6 +55,7 @@ function applySearchAndSort(query: any, searchTerm: string, sort: VerificationSo
   }
 }
 
+// JOSH STUFF
 export async function fetchTasksToReviewPaginated(
   page: number = 1,
   pageSize: number = 10,
@@ -76,6 +86,7 @@ export async function fetchTasksToReviewPaginated(
   };
 }
 
+// this is for the filter na approved lang ang kuahon
 export async function fetchApprovedTasks(): Promise<ServerActionResponse<VerificationRequest[]>> {
   const supabase = await createClient();
 
@@ -91,6 +102,8 @@ export async function fetchApprovedTasks(): Promise<ServerActionResponse<Verific
   return { error: null, data: data as VerificationRequest[] };
 }
 
+// FEEL KO LNG pwede gid ni i helper function na butangan praram approved, deny etc
+// to make it fully reusable proo ahhhhhhhhhhhhhhh base maguba rip
 export async function fetchApprovedTasksPaginated(
   page: number = 1,
   pageSize: number = 10,
@@ -121,6 +134,7 @@ export async function fetchApprovedTasksPaginated(
   };
 }
 
+// same man actually sa babaw
 export async function fetchDeniedTasks(): Promise<ServerActionResponse<VerificationRequest[]>> {
   const supabase = await createClient();
 
@@ -166,6 +180,7 @@ export async function fetchDeniedTasksPaginated(
   };
 }
 
+// JOSH STUF
 export async function approveTaskAction(
   kpitask_id: string,
   reqmark: string
@@ -198,6 +213,7 @@ export async function approveTaskAction(
     return { error: 'Failed to approve task: ' + updateError.message, data: undefined };
   }
 
+  // JP STUFF
   // if ((taskData.max_orders >= taskData.completed_orders + 1) && (taskData.pending_orders <= taskData.max_orders - taskData.completed_orders)) {
   //   const { error: updateError } = await supabase
   //     .from('KPITask')

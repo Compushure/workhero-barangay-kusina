@@ -9,6 +9,11 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { handleFetchNotifications } from '@/action-handlers/employee/notifications';
 import type { NotificationItem } from '@/types';
 
+/*
+all → base key for all notifications.
+list(unreadOnly) → returns either ['notifications','unread'] or ['notifications','all'].
+ caching unread notifications or all notifications.
+*/
 export const notificationKeys = {
   all: ['notifications'] as const,
   list: (unreadOnly: boolean = false) => [...notificationKeys.all, unreadOnly ? 'unread' : 'all'] as const,

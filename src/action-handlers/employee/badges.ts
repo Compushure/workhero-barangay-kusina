@@ -5,6 +5,8 @@ import type { UserBadge } from '@/actions/employee/badges';
 import { fetchUserBadges as fetchUserBadgesAction } from '@/actions/employee/badges';
 
 /**
+ * 
+// MOST OF THIS IS JUST VERIFICATION
  * Wraps fetchUserBadges server action with error handling and toast notifications
  */
 export async function fetchUserBadgesHandler(

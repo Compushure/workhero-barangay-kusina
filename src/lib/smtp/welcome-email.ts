@@ -3,6 +3,11 @@ import path from 'node:path';
 
 import nodemailer from 'nodemailer';
 
+//fs/promises → to read the HTML email template file.
+
+// path → to build the template file path.
+
+// nodemailer → to send emails via SMTP.
 import type { EmployeeTypeValue } from '@/types';
 
 type WelcomeEmailParams = {
@@ -26,6 +31,8 @@ const defaultSupportEmail = 'tonilegayada@gmail.com';
 
 let cachedWelcomeEmailTemplate: string | null = null;
 
+// sanitizes strings to prevent HTML injection (replaces <, >, &, etc.).
+// safe strings that won’t break HTML or allow malicious scripts.
 function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -34,6 +41,7 @@ function escapeHtml(value: string): string {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
 }
+//Ensures required SMTP environment variables (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_KEY) are present, otherwise throws an error
 
 function getRequiredEnv(name: 'SMTP_HOST' | 'SMTP_PORT' | 'SMTP_USER' | 'SMTP_KEY'): string {
   const value = process.env[name]?.trim();
@@ -44,15 +52,20 @@ function getRequiredEnv(name: 'SMTP_HOST' | 'SMTP_PORT' | 'SMTP_USER' | 'SMTP_KE
 
   return value;
 }
-
+// Replaces placeholders like {{USER_NAME}} in the HTML template with actual values.
 function interpolateTemplate(template: string, values: Record<string, string>): string {
+  // terates over that array, accumulating a single result string.
+//   For each key/value pair:
+// Finds all occurrences of {{KEY}} in the template.
+// Replaces them with the corresponding value
   return Object.entries(values).reduce(
     (result, [key, value]) => result.replaceAll(`{{${key}}}`, value),
     template
   );
 }
-
+// Reads and caches the HTML template file (email.html) so it’s only loaded once.
 async function loadWelcomeEmailTemplate(): Promise<string> {
+  // dynamically creates a email.html in the specified path
   if (cachedWelcomeEmailTemplate) {
     return cachedWelcomeEmailTemplate;
   }
@@ -60,7 +73,7 @@ async function loadWelcomeEmailTemplate(): Promise<string> {
   cachedWelcomeEmailTemplate = await readFile(welcomeEmailTemplatePath, 'utf8');
   return cachedWelcomeEmailTemplate;
 }
-
+// Maps internal role values (superadmin, manager, hr, regular) to human‑friendly labels.
 export function getRoleLabel(role: EmployeeTypeValue): string {
   switch (role) {
     case 'superadmin':
@@ -75,6 +88,7 @@ export function getRoleLabel(role: EmployeeTypeValue): string {
   }
 }
 
+//eturns the URL path the user should be redirected to after login, based on role.
 export function getPostLoginPath(role: EmployeeTypeValue): string {
   switch (role) {
     case 'superadmin':
@@ -88,7 +102,7 @@ export function getPostLoginPath(role: EmployeeTypeValue): string {
       return '/employee/dashboard';
   }
 }
-
+//  Provides a descriptive label for the destination page (e.g., “the manager task board”).
 function getNextDestinationLabel(role: EmployeeTypeValue): string {
   switch (role) {
     case 'superadmin':
@@ -103,6 +117,12 @@ function getNextDestinationLabel(role: EmployeeTypeValue): string {
   }
 }
 
+/*
+Loads the HTML template.
+Interpolates placeholders with escaped values:
+Preview text, user name, role label, magic link, destination, support email, current year.
+Produces the HTML version of the welcome email.
+*/
 async function renderWelcomeEmailTemplate({
   name,
   role,
@@ -124,7 +144,7 @@ async function renderWelcomeEmailTemplate({
     YEAR: String(new Date().getFullYear()),
   });
 }
-
+// Constructs a plain‑text fallback email body
 function buildWelcomeEmailText({ name, role, magicLink }: WelcomeEmailParams): string {
   const roleLabel = getRoleLabel(role);
   const nextDestination = getNextDestinationLabel(role);
@@ -144,7 +164,8 @@ function buildWelcomeEmailText({ name, role, magicLink }: WelcomeEmailParams): s
     "Let's get cooking, KusinHero!",
   ].join('\n');
 }
-
+// send mail using selected smtp provider
+// check DOCUMENTTION OF USING BREOVO  with nodemailer 
 export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<void> {
   const smtpPort = Number(getRequiredEnv('SMTP_PORT'));
 

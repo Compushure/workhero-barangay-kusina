@@ -19,6 +19,7 @@ import { badgeAssignmentKeys } from '../queries/managerBadgeAssignmentQueries';
 import { employeeKeys } from '../queries/employeeQueries';
 import { useManagerBadgeEditorStore } from '@/store/managerBadgeEditorStore';
 
+// this is a helper to invalidate caches, should've just done it with the others as well
 function invalidateBadgeCaches(queryClient: ReturnType<typeof useQueryClient>) {
   queryClient.invalidateQueries({ queryKey: badgeKeys.lists() });
   // refetchType: 'all' forces a background refetch even when badge-assignment is not

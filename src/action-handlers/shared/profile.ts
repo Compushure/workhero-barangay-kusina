@@ -4,6 +4,7 @@ import { fetchUserProfileById, updateOwnProfile, uploadOwnProfilePicture, delete
 import type { UserWithExtras } from '@/types';
 
 /**
+// MOST OF THIS IS JUST VERIFICATION
  * Fetches user profile with toast notifications
  */
 export async function fetchUserProfileByIdHandler(userId: string): Promise<UserWithExtras | null> {

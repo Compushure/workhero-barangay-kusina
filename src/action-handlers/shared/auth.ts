@@ -1,6 +1,7 @@
 import { safeAction } from '@/lib/utils/safe-action';
 import { signinAction, signOutAction } from '@/actions/shared/auth';
 
+// MOST OF THIS IS JUST VERIFICATION
 export async function handleLoginSubmit(formData: FormData): Promise<{ error: string | null }> {
   const result = await safeAction(() => signinAction(formData));
 

@@ -36,6 +36,7 @@ function getProfileImageUrl(supabase: any, userId: string): string {
 // Route helpers
 // ============================================
 
+// sala logic diri
 async function changeuserPassword(userId: string, newPassword: string) {
   // const { role } = await getUserRole()
   // if (!role) {
@@ -149,6 +150,7 @@ async function createFirstLoginMagicLink(
   return confirmUrl.toString();
 }
 
+// mo na ni ang bago o to na check foremail kay last time ga redirect lng sa error page
 export async function checkUserEmailAvailabilityAction(
   email: string
 ): Promise<ServerActionResponse<EmailAvailabilityCheck>> {
@@ -476,6 +478,7 @@ export async function uploadProfilePicture(
   }
 
   // Return the public URL with cache busting
+  // note that cache busting here is just to add extra sstuff at the end to force the program to treat it as new resource
   const publicUrl = getProfileImageUrl(supabase, userId);
   return { error: null, data: { publicUrl } };
 }
