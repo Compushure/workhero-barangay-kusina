@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowUpDown, Filter } from 'lucide-react';
+import { ArrowUpDown, ClipboardList, Filter, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,6 +24,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getTaskSectionStatusChipMeta, isTaskStatusItemOverdue } from './task-status-utils';
 import { TaskCard } from './task-card';
 import { TaskStatusSection } from './task-status-section';
@@ -107,16 +108,22 @@ function getSectionHelperText(status: TaskStatusKind): string {
 
 function MobileTaskCardSkeleton() {
   return (
-    <div className="rounded-xl border-2 border-[#d4c5a8] bg-[#fdf5e8] p-3">
+    <div className="rounded-lg border-2 border-[#d4c5a8] bg-[#fdf5e8] px-2.5 py-2.5 sm:px-3">
       <div className="space-y-2">
-        <Skeleton className="h-5 w-40 bg-[#eadbc1]" />
-        <Skeleton className="h-4 w-36 bg-[#eadbc1]" />
-        <div className="flex flex-wrap gap-1">
-          <Skeleton className="h-6 w-18 rounded-md bg-[#d7e3f4]" />
-          <Skeleton className="h-6 w-16 rounded-md bg-[#eadbc1]" />
-          <Skeleton className="h-6 w-14 rounded-md bg-[#d7e3f4]" />
-          <Skeleton className="h-6 w-16 rounded-md bg-[#f4d6ce]" />
-          <Skeleton className="h-6 w-16 rounded-md bg-[#efe2ca]" />
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <Skeleton className="h-5 w-40 bg-[#eadbc1]" />
+            <div className="flex items-center gap-1.5">
+              <Skeleton className="h-4 w-4 rounded-sm bg-[#eadbc1]" />
+              <Skeleton className="h-4 w-30 bg-[#eadbc1]" />
+            </div>
+          </div>
+          <Skeleton className="h-8 w-14 rounded-full border-2 border-[#d4c5a8] bg-[#f3e4c9]" />
+        </div>
+
+        <div className="mt-0.5 flex flex-wrap items-center gap-1">
+          <Skeleton className="h-6 w-12 rounded-md border-2 border-[#e5d08a] bg-amber-100" />
+          <Skeleton className="h-6 w-12 rounded-md border-2 border-[#87a9bc]/35 bg-[#e0eef5]" />
         </div>
       </div>
     </div>
@@ -219,6 +226,11 @@ export function TaskStatusBoard({
     [sections]
   );
 
+  const totalTaskCount = useMemo(
+    () => sections.reduce((sum, section) => sum + section.tasks.length, 0),
+    [sections]
+  );
+
   const sectionsByMdColumns = useMemo(() => groupSectionsByColumn(sections, 2), [sections]);
   const sectionsByLgColumns = useMemo(() => groupSectionsByColumn(sections, 3), [sections]);
 
@@ -266,50 +278,31 @@ export function TaskStatusBoard({
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           {isLoading ? (
             <>
-              <div className="flex w-full gap-2 overflow-hidden">
-                <Skeleton className="h-9 w-28 rounded-full bg-[#dcc8aa]" />
-                <Skeleton className="h-9 w-32 rounded-full bg-[#dcc8aa]" />
-                <Skeleton className="h-9 w-30 rounded-full bg-[#dcc8aa]" />
-                <Skeleton className="h-9 w-30 rounded-full bg-[#dcc8aa]" />
+              <div className="flex w-full items-center lg:flex-1">
+                <div className="inline-flex items-center gap-2 rounded-lg border-2 border-[#d4c5a8] bg-[#f7efdf] px-2.5 py-1.5">
+                  <Skeleton className="h-5 w-5 rounded-sm bg-[#dcc8aa]" />
+                  <Skeleton className="h-6 w-28 bg-[#dcc8aa]" />
+                  <Skeleton className="h-6 w-10 rounded-md bg-[#dcc8aa]" />
+                </div>
               </div>
-              <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto lg:items-end">
-                <div className="w-full space-y-1 sm:w-auto">
-                  <Skeleton className="h-5 w-20 bg-[#dcc8aa]" />
-                  <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-52" />
-                </div>
-                <div className="w-full space-y-1 sm:w-auto">
-                  <Skeleton className="h-5 w-24 bg-[#dcc8aa]" />
-                  <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-56" />
-                </div>
-                <div className="flex w-full items-center gap-2 self-start sm:w-auto lg:self-end">
+              <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-end lg:w-auto lg:items-end">
+                <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-52" />
+                <div className="flex w-full items-center gap-2 sm:w-auto">
                   <Skeleton className="h-9 w-full rounded-lg bg-[#f7efdf] sm:w-32" />
+                  <Skeleton className="h-9 w-9 shrink-0 rounded-lg bg-[#f7efdf]" />
                 </div>
               </div>
             </>
           ) : (
             <>
-              <div className="hidden sm:flex min-w-0 w-full lg:w-auto">
-                <div className="flex min-w-0 w-full gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                  {sectionSummaries.map(({ status, count }) => {
-                    const statusChipMeta = getTaskSectionStatusChipMeta(status);
-                    const StatusIcon = statusChipMeta.icon;
-
-                    return (
-                      <div
-                        key={status}
-                        className="inline-flex shrink-0 items-center gap-2 rounded-full border-2 border-[#d4c5a8] bg-[#f7efdf] px-2.5 py-1.5 text-[12px] leading-none text-[#6b5038]"
-                      >
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full border-2 px-2 py-0.5 tracking-[0.08em] ${statusChipMeta.className}`}
-                        >
-                          <StatusIcon className="size-3.5 shrink-0" />
-                          <span>{status}</span>
-                        </span>
-                        <span className="text-[13px] text-[#3f2a1a]">{count}</span>
-                      </div>
-                    );
-                  })}
-                </div>
+              <div className="flex min-w-0 w-full items-center lg:flex-1">
+                <h5 className="inline-flex items-center gap-2 rounded-lg border-2 border-[#d4c5a8] bg-[#f7efdf] px-2.5 py-1.5 text-[13px] text-[#4b3522] sm:text-[14px]">
+                  <ClipboardList className="size-5 text-[#8a6039]" />
+                  <span className="leading-none text-xl sm:text-2xl">Task Board</span>
+                  <span className="rounded-md border-2 border-[#d4c5a8] bg-[#fff8ec] px-1.5 py-0.5 text-[0.9rem] sm:text-[1rem] leading-none text-[#6b5038]">
+                    {totalTaskCount}
+                  </span>
+                </h5>
               </div>
 
               <div className="flex w-full min-w-0 flex-col gap-2 lg:w-auto sm:flex-row lg:items-end">
@@ -391,6 +384,23 @@ export function TaskStatusBoard({
                         </DropdownMenuCheckboxItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="outline"
+                          className="h-9 w-9 rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] text-[#6b5038] transition-colors duration-200 hover:bg-[#efe2ca] hover:text-[#4b3522]"
+                          aria-label="Task deadline policy"
+                        >
+                          <Info strokeWidth={2.5} className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="center" className="max-w-64 text-center">
+                        all tasks deadline are set to 11:59PM on that displayed day
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
               </div>
