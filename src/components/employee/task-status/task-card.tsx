@@ -113,7 +113,7 @@ export function TaskCard({ task }: TaskCardProps) {
               </span>
             ) : null}
 
-            {lifecycle.showOverdueChip ? (
+            {lifecycle.showOverdueChip && (lifecycle.isAssignedTask || lifecycle.isRejectedTask) ? (
               <span
                 className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 px-2 py-0.5 leading-none ${overdueChip.className}`}
                 title="Task is overdue"

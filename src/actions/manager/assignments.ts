@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse, Task, AssignedEmployee, AssignedTask } from '@/types';
 import { insertNotification } from '@/lib/notifications';
+import { toManilaDeadlineISOString } from '@/utils/date-utils';
 
 /**
  * Fetch all available tasks for assignment
@@ -149,13 +150,18 @@ export async function addTaskAssignmentAction(
     const user = (await supabase.auth.getUser()).data.user;
     if (!user) return { error: 'Unauthorized', data: undefined };
 
+    const normalizedDeadline = toManilaDeadlineISOString(endDate);
+    if (!normalizedDeadline) {
+      return { error: 'Invalid deadline date', data: undefined };
+    }
+
     const assignments = validEmployeeIds.map((empId) => ({
       assigned_by: user.id,
       assigned_to: empId,
       category_id: taskId,
       status: 'assigned',
       created_at: startDate,
-      deadline_date: endDate,
+      deadline_date: normalizedDeadline,
       max_orders: maxOrders || 1,
     }));
 

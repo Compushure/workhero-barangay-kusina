@@ -1,5 +1,7 @@
 'use client';
 
+// Reusable clickable stall card (weekly/monthly/yearly) for desktop and mobile views.
+
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import type { MercadoInterval } from './mercado-context';
@@ -14,6 +16,7 @@ interface MercadoStallButtonProps {
 }
 
 const STALL_VARIANT_CLASS = {
+  // Layout sizes per viewport mode.
   desktop:
     'h-[clamp(255px,38vw,430px)] w-[clamp(235px,34vw,380px)] md:h-auto md:w-auto lg:h-[22.5rem] lg:w-[18.5rem] xl:h-[28rem] xl:w-[23.5rem]',
   mobile:
@@ -71,6 +74,7 @@ export function MercadoStallButton({
       aria-label={isClosed ? `${stall.label} market is closed` : `View ${stall.label} market`}
       aria-disabled={isClosed}
     >
+      {/* Hover glow sits behind the stall art for visual feedback. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -78,6 +82,7 @@ export function MercadoStallButton({
         <div className={STALL_HOVER_GLOW_CLASS} />
       </div>
 
+      {/* Stall artwork for the selected interval card. */}
       <Image
         src={stall.image}
         alt={`${stall.label} market stall`}
@@ -94,6 +99,7 @@ export function MercadoStallButton({
         }
       />
 
+      {/* Closed overlay shown when interval has no currently available items. */}
       {isClosed ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div
@@ -105,6 +111,7 @@ export function MercadoStallButton({
         </div>
       ) : null}
 
+      {/* Label badge with interval title and short description. */}
       <div className={LABEL_WRAPPER_CLASS[variant]}>
         <div className={LABEL_CLASS[variant]} style={{ fontFamily: '"Jersey 10", sans-serif' }}>
           <div className="flex flex-col items-center">

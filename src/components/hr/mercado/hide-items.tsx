@@ -1,5 +1,7 @@
 'use client';
 
+// Confirm dialog for toggling item visibility without deleting data.
+
 import {
   Dialog,
   DialogContent,
@@ -62,6 +64,7 @@ export function HideRewardDialog({
         </DialogHeader>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
+          {/* Primary action toggles hidden/visible state. */}
           <Button
             onClick={() => {
               onConfirm();

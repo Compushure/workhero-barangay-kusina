@@ -7,6 +7,27 @@ import { formatInTimeZone, fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 const MANILA_TIMEZONE = 'Asia/Manila';
 
+function isDateOnlyString(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+export function toManilaDeadlineISOString(date: string | Date | null | undefined): string | null {
+  if (!date) return null;
+
+  const parsedDate = typeof date === 'string' ? new Date(date) : date;
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  const manilaDate =
+    typeof date === 'string' && isDateOnlyString(date)
+      ? date
+      : formatInTimeZone(parsedDate, MANILA_TIMEZONE, 'yyyy-MM-dd');
+
+  return fromZonedTime(`${manilaDate} 23:59:59.999`, MANILA_TIMEZONE).toISOString();
+}
+
 function getManilaStartOfDay(date: Date): Date {
   return fromZonedTime(
     `${formatInTimeZone(date, MANILA_TIMEZONE, 'yyyy-MM-dd')} 00:00:00.000`,
@@ -42,22 +63,6 @@ function getDatePartsInTimeZone(date: Date, timeZone: string) {
   };
 }
 
-export function getCurrentManilaDateString(): string {
-  const { year, month, day } = getDatePartsInTimeZone(new Date(), MANILA_TIMEZONE);
-  return `${year}-${month}-${day}`;
-}
-
-export function getDateStringInManila(date: string | Date): string {
-  const parsedDate = typeof date === 'string' ? new Date(date) : date;
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '';
-  }
-
-  const { year, month, day } = getDatePartsInTimeZone(parsedDate, MANILA_TIMEZONE);
-  return `${year}-${month}-${day}`;
-}
-
 /**
  * Formats a date-like value into a short readable string.
  * @param date - Date value (string/date/null)
@@ -72,11 +77,7 @@ export function formatDate(date: string | Date | null | undefined): string {
     return 'Invalid date';
   }
 
-  return parsedDate.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  return formatInTimeZone(parsedDate, MANILA_TIMEZONE, 'MMM d, yyyy');
 }
 
 /**
@@ -86,12 +87,11 @@ export function formatDate(date: string | Date | null | undefined): string {
  */
 export function isTaskOverdue(endDate: string | null): boolean {
   if (!endDate) return false;
-  const taskEndDate = getDateStringInManila(endDate);
-  const todayDate = getCurrentManilaDateString();
+  const normalizedDeadline = toManilaDeadlineISOString(endDate);
 
-  if (!taskEndDate) return false;
+  if (!normalizedDeadline) return false;
 
-  return taskEndDate < todayDate;
+  return Date.now() > new Date(normalizedDeadline).getTime();
 }
 
 /**

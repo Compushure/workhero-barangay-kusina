@@ -1,5 +1,7 @@
 'use server';
 
+// HR backend flow for Mercado items from form input to database updates.
+
 import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import {
@@ -170,6 +172,7 @@ function getRewardImageUrl(supabase: any, rewardId: string): string {
  */
 export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>> {
   try {
+    // Builds the item list HR sees, including how many were already redeemed.
     // Get Supabase client
     const supabase = await createClient();
 
@@ -250,6 +253,7 @@ export async function getAvailableRewardsByMonthAction(
   month: number
 ): Promise<ServerActionResponse<Reward[]>> {
   try {
+    // Feeds month-based employee stalls with active items only.
     if (!Number.isInteger(month) || month < 1 || month > 12) {
       return { error: 'Invalid month. Must be a number from 1 to 12.' };
     }
@@ -331,6 +335,7 @@ export async function getAvailableRewardsByIntervalAction(
   interval: 'weekly' | 'monthly' | 'yearly'
 ): Promise<ServerActionResponse<Reward[]>> {
   try {
+    // Feeds weekly/monthly/yearly employee stalls.
     if (!['weekly', 'monthly', 'yearly'].includes(interval)) {
       return { error: 'Invalid interval. Must be weekly, monthly, or yearly.' };
     }
@@ -416,6 +421,7 @@ export async function addRewardAction(
   input: AddRewardInput
 ): Promise<ServerActionResponse<Reward>> {
   try {
+    // Saves a brand-new Mercado item from the HR add form.
     // Validate input
     const validatedData = addRewardSchema.parse(input);
 
@@ -510,6 +516,7 @@ export async function editRewardAction(
   input: EditRewardInput
 ): Promise<ServerActionResponse<Reward>> {
   try {
+    // Applies changes from the HR edit form to one item.
     // Validate input
     const validatedData = editRewardSchema.parse(input);
 
@@ -643,6 +650,7 @@ export async function editRewardAction(
  */
 export async function deleteRewardAction(id: string): Promise<ServerActionResponse<void>> {
   try {
+    // Fully removes an item and its stored image.
     // Get Supabase client
     const supabase = await createClient();
 
@@ -684,6 +692,7 @@ export async function hideRewardAction(
   isActive: boolean = false
 ): Promise<ServerActionResponse<void>> {
   try {
+    // Simple visibility switch: hidden items stay in DB but disappear for employees.
     // Get Supabase client
     const supabase = await createClient();
 
@@ -719,6 +728,7 @@ export async function uploadRewardPicture(
   file: File
 ): Promise<ServerActionResponse<{ path: string | null; publicUrl: string }>> {
   try {
+    // Updates the item image shown on Mercado cards.
     // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB in bytes
     if (file.size > maxSize) {

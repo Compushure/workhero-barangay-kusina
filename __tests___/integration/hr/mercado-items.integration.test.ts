@@ -21,7 +21,9 @@ import {
 
 const remoteContext = new RemoteSupabaseTestContext('hr-mercado-items');
 
+// Updated per test to simulate the authenticated actor.
 let currentServerClient: any = remoteContext.admin;
+// Track created rows so teardown removes only test-owned data.
 const createdRewardIds: string[] = [];
 const createdRewardRequestIds: string[] = [];
 
@@ -32,11 +34,13 @@ jest.mock('@/lib/supabase/server', () => ({
 }));
 
 function stripUnsupportedRewardFields(payload: Record<string, unknown>) {
+	// Removes columns not present in certain test schemas.
 	const { category: _category, redeeming_limit: _redeemingLimit, ...rest } = payload;
 	return rest;
 }
 
 function createSchemaCompatibleClient(client: any) {
+	// Wraps client writes so action payloads stay compatible with remote schema.
 	return new Proxy(client, {
 		get(target, property, receiver) {
 			if (property !== 'from') {
@@ -79,6 +83,7 @@ async function seedReward(options: {
 	isActive?: boolean;
 	createdBy?: string | null;
 }) {
+	// Inserts one reward row used by the current test.
 	const { data, error } = await remoteContext.admin
 		.from('Reward')
 		.insert({
@@ -106,6 +111,7 @@ async function seedRewardRequest(options: {
 	status?: 'pending' | 'approved' | 'rejected';
 	remarks?: string | null;
 }) {
+	// Inserts one reward request row used for redeemed-count assertions.
 	const { data, error } = await remoteContext.admin
 		.from('RewardRequest')
 		.insert({
@@ -128,10 +134,12 @@ async function seedRewardRequest(options: {
 }
 
 beforeEach(() => {
+	// Default to admin before each test selects its user context.
 	currentServerClient = remoteContext.admin;
 });
 
 afterEach(async () => {
+	// Delete dependent request rows first, then reward rows.
 	if (createdRewardRequestIds.length) {
 		await remoteContext.admin.from('RewardRequest').delete().in('id', [...createdRewardRequestIds]);
 		createdRewardRequestIds.length = 0;
@@ -147,6 +155,7 @@ afterEach(async () => {
 
 describe('When HR loads Mercado items in the remote database', () => {
 	test('Then getRewardsAction returns redeemed counts from approved reward requests', async () => {
+		// Setup users and rewards for read-path verification.
 		const hrUser = await remoteContext.seedUser({
 			roleType: 'hr',
 			namePrefix: 'HR Mercado Reader',
@@ -180,6 +189,7 @@ describe('When HR loads Mercado items in the remote database', () => {
 		await remoteContext.uploadStorageObject('reward', `${emptyReward.id}/profile.png`);
 
 		await seedRewardRequest({
+			// This approved request should increase redeemedCount.
 			userId: employee.id,
 			rewardId: activeReward.id,
 			quantity: hrMercadoRewardRequestMockData.quantity,
@@ -203,6 +213,7 @@ describe('When HR loads Mercado items in the remote database', () => {
 
 describe('When HR manages Mercado items in the remote database', () => {
 	test('Then addRewardAction, editRewardAction, and deleteRewardAction persist the expected changes', async () => {
+		// Setup one existing item, then test add/edit/delete lifecycle.
 		const hrUser = await remoteContext.seedUser({
 			roleType: 'hr',
 			namePrefix: 'HR Mercado Manager',

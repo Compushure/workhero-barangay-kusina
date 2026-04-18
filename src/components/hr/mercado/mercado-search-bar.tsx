@@ -1,5 +1,7 @@
 'use client';
 
+// Search input used to filter HR Mercado items by name.
+
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { sanitizeSearchInput } from '@/lib/utils/search-normalization';

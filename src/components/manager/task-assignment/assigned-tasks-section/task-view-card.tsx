@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, memo } from 'react';
-import { parseISO, format } from 'date-fns';
+import { parseISO } from 'date-fns';
 import type { AssignedTask, AssignedEmployee } from '@/types';
 import { Coins, Soup } from 'lucide-react';
 import TaskViewCardMenu from './dialogs/task-view/task-view-card-menu';
@@ -12,7 +12,7 @@ import { useTaskAssignment } from '../task-assignment-page-context';
 import { useUpdateTaskAssignmentMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import TaskViewEmployeeBadges from './task-view-employee-badges';
-import { isTaskOverdue } from '@/utils/date-utils';
+import { isTaskOverdue, toManilaDeadlineISOString } from '@/utils/date-utils';
 
 interface TaskViewCardProps {
   task: AssignedTask;
@@ -91,6 +91,11 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   };
 
   const handleEditTask = async () => {
+    const normalizedDueDate = toManilaDeadlineISOString(editDueDate);
+    if (!normalizedDueDate) {
+      return;
+    }
+
     const newEmployees = editAssignedEmployees.map((empId) => {
       const existingEmp = (task.assignedEmployees ?? []).find((e) => e.id === empId);
       if (existingEmp) return existingEmp;
@@ -110,12 +115,12 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
       {
         taskId: task.id,
         maxOrders: editMaxOrders,
-        newDueDate: format(editDueDate, 'yyyy-MM-dd'),
+        newDueDate: normalizedDueDate,
         employeeIds: editAssignedEmployees,
       },
       {
         onSuccess: () => {
-          editTask(task.id, editMaxOrders, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
+          editTask(task.id, editMaxOrders, normalizedDueDate, newEmployees);
           setShowEditDialog(false);
         },
       }

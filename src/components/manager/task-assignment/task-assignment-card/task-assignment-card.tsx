@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
 import { SelectTasksDialog } from './dialogs/select-task-dialog';
@@ -12,10 +13,9 @@ import {
   handleFetchTaskList,
   handleFetchEmployeeList,
 } from '@/action-handlers/manager/assignments';
-import {
-  useGetCurrentAssignedTasksPaginated,
-} from '@/hooks/tanstack/queries/managerAssignmentQueries';
+import { useGetCurrentAssignedTasksPaginated } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { TaskAssignmentCardSkeleton } from './task-assignment-card-skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Shadcn UI Dialog imports
 import {
@@ -126,14 +126,17 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
     if (selectedEmployees.length > 0 && selectedTask.length > 0 && selectedDeadline) {
       setIsAssigning(true);
 
-      await assignTasks({
-        employees: selectedEmployees,
-        tasks: selectedTask.map((id) => ({
-          id,
-          maxOrders: taskMaxRepeats[id] || 1,
-        })),
-        deadline: selectedDeadline,
-      }, { availableTasks });
+      await assignTasks(
+        {
+          employees: selectedEmployees,
+          tasks: selectedTask.map((id) => ({
+            id,
+            maxOrders: taskMaxRepeats[id] || 1,
+          })),
+          deadline: selectedDeadline,
+        },
+        { availableTasks }
+      );
 
       // Call clear logic directly instead of through closure
       setSelectedEmployees([]);
@@ -143,7 +146,14 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
       setShowAssignConfirm(false);
       setIsAssigning(false);
     }
-  }, [selectedEmployees, selectedTask, selectedDeadline, taskMaxRepeats, assignTasks, availableTasks]);
+  }, [
+    selectedEmployees,
+    selectedTask,
+    selectedDeadline,
+    taskMaxRepeats,
+    assignTasks,
+    availableTasks,
+  ]);
 
   const handleEmployeesDialogAttempt = useCallback(() => {
     if (selectedTask.length === 0) {
@@ -163,7 +173,26 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
 
   return (
     <div className="rounded-2xl bg-background-soft p-3 sm:p-4 md:px-7 py-5 shadow-sm/25 max-w-230">
-      <h2 className="text-h2 mb-4 text-primary">Assign Employees for Task</h2>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <h2 className="text-h2 text-primary">Assign Employees for Task</h2>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="control-h size-9 shrink-0 border-zinc-200 bg-card text-accent hover:bg-card hover:text-accent hover:brightness-95"
+              aria-label="Task deadline policy"
+            >
+              <Info className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top" align="center" className="max-w-64 text-center">
+            all tasks deadline are set to 11:59PM on that displayed day
+          </TooltipContent>
+        </Tooltip>
+      </div>
 
       <div className="flex flex-wrap gap-2 sm:gap-3">
         <div className="w-full sm:w-auto sm:min-w-44">

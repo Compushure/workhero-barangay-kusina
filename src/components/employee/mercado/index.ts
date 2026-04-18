@@ -1,4 +1,4 @@
-// Reusable mercado components
+// Barrel exports for employee Mercado feature modules.
 // export { MercadoHeader } from './mercado-header';
 export { PointsDisplay } from './points-display';
 export { LoadingState } from './loading-state';

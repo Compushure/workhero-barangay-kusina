@@ -1,6 +1,8 @@
 import { formatNumber } from '@/lib/format';
 import { Coins, AlertCircle } from 'lucide-react';
 
+// Compact points widget showing available and pending points.
+
 interface PointsDisplayProps {
   availablePoints: number;
   pendingPoints?: number;
@@ -14,6 +16,7 @@ export function PointsDisplay({
   showIcon = true,
   size = 'md',
 }: PointsDisplayProps) {
+  // Size presets keep the same component reusable in multiple layouts.
   const sizeClasses = {
     sm: {
       container: 'h-8 px-3',

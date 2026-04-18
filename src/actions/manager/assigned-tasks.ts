@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { ServerActionResponse } from '@/types';
 import type { AssignedTask, AssignedEmployee } from '@/types';
 import { insertNotification } from '@/lib/notifications';
-import { getCurrentManilaDateString } from '@/utils/date-utils';
+import { toManilaDeadlineISOString } from '@/utils/date-utils';
 
 /**
  * Fetch paginated current assigned tasks
@@ -80,11 +80,11 @@ export async function fetchCurrentAssignedTasksPaginated(
   }
 
   // Apply overdue filter
-  const today = getCurrentManilaDateString();
+  const nowIso = new Date().toISOString();
   if (overdueFilter === 'hide-overdue') {
-    query = query.gte('k_deadline_date', today);
+    query = query.gte('k_deadline_date', nowIso);
   } else if (overdueFilter === 'only-overdue') {
-    query = query.lt('k_deadline_date', today);
+    query = query.lt('k_deadline_date', nowIso);
   }
 
   const { data: allSortedData, error: allError } = await query.order(orderByColumn, { ascending });
@@ -273,11 +273,11 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   }
 
   // Apply overdue filter
-  const today = getCurrentManilaDateString();
+  const nowIso = new Date().toISOString();
   if (overdueFilter === 'hide-overdue') {
-    query = query.gte('k_deadline_date', today);
+    query = query.gte('k_deadline_date', nowIso);
   } else if (overdueFilter === 'only-overdue') {
-    query = query.lt('k_deadline_date', today);
+    query = query.lt('k_deadline_date', nowIso);
   }
 
   const { data: allSortedData, error } = await query.order(orderByColumn, { ascending });
@@ -582,6 +582,12 @@ export async function updateTaskAssignment(
     if (maxOrders > 99) {
       return { error: 'Maximum orders cannot exceed 99', data: undefined };
     }
+
+    const normalizedDueDate = toManilaDeadlineISOString(newDueDate);
+    if (!normalizedDueDate) {
+      return { error: 'Invalid deadline date', data: undefined };
+    }
+
     // Get the current task to find all related assignments
     const { data: currentTask, error: fetchError } = await supabase
       .from('KPITask')
@@ -649,7 +655,7 @@ export async function updateTaskAssignment(
         .from('KPITask')
         .update({
           max_orders: maxOrders,
-          deadline_date: newDueDate,
+          deadline_date: normalizedDueDate,
         })
         .in('id', employeesToKeep);
 
@@ -668,7 +674,7 @@ export async function updateTaskAssignment(
         category_id: currentTask.category_id,
         status: 'assigned',
         created_at: currentTask.created_at,
-        deadline_date: newDueDate,
+        deadline_date: normalizedDueDate,
         max_orders: maxOrders,
       }));
 

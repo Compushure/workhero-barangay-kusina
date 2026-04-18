@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import { RewardRequestsContent } from '@/components/hr/requests/reward-requests-content';
 import { MarketSuspense } from '@/components/shared/market-suspense';
 
+// HR page entry for reviewing employee redemption requests.
+
 export const metadata: Metadata = {
   title: 'WorkHero | Reward Requests',
   icons: {

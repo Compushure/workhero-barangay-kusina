@@ -34,7 +34,6 @@ import {
   Package,
   Sparkles,
   AlertCircle,
-  Loader2,
   Coins,
   Clock,
   XCircle,
@@ -50,7 +49,6 @@ interface MonthlyRewardsModalProps {
   onOpenChange: (open: boolean) => void;
   interval: RewardInterval | null;
   rewards: Reward[];
-  isLoading?: boolean;
   userPoints: number;
   pendingRewardIds: Set<string>;
   pendingRequests: RedemptionRequest[];
@@ -97,7 +95,6 @@ export function MonthlyRewardsModal({
   onOpenChange,
   interval,
   rewards,
-  isLoading = false,
   userPoints,
   pendingRewardIds,
   pendingRequests,
@@ -106,15 +103,12 @@ export function MonthlyRewardsModal({
   const [pendingSearchTerm, setPendingSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [activeView, setActiveView] = useState<'items' | 'pending'>('items');
-  const [postRedeemLoading, setPostRedeemLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
   const intervalName = interval ? INTERVAL_LABELS[interval] : '';
 
   const switchViewWithLoading = (nextView: 'items' | 'pending') => {
     if (nextView === activeView) return;
-
-    setPostRedeemLoading(true);
     setActiveView(nextView);
   };
 
@@ -157,19 +151,7 @@ export function MonthlyRewardsModal({
     setPendingSearchTerm('');
     setSortOrder('newest');
     setActiveView('items');
-    setPostRedeemLoading(false);
   }, [interval, open]);
-
-  useEffect(() => {
-    if (!postRedeemLoading) return;
-
-    // Keep a short transition loader after redeem so stock state changes don't flash.
-    const timeout = setTimeout(() => {
-      setPostRedeemLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [postRedeemLoading]);
 
   useEffect(() => {
     if (!open) return;
@@ -177,8 +159,6 @@ export function MonthlyRewardsModal({
   }, [open, interval, activeView, searchTerm, pendingSearchTerm, sortOrder]);
 
   if (!interval) return null;
-
-  const shouldShowLoading = isLoading || postRedeemLoading;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -338,15 +318,7 @@ export function MonthlyRewardsModal({
           ref={scrollAreaRef}
           className="min-h-0 flex-1 overflow-y-auto p-0 sm:p-0 md:p-2 lg:p-2 bg-[#e6d7bf]"
         >
-          {shouldShowLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Loader2 className="h-10 w-10 text-[#6a4a2d] animate-spin mx-auto mb-3" />
-              <p className="text-[#4b3522] font-semibold">Loading rewards...</p>
-              <p className="text-[#6b5038] text-sm mt-1">
-                Fetching available items for {intervalName}
-              </p>
-            </div>
-          ) : activeView === 'pending' ? (
+          {activeView === 'pending' ? (
             <PendingRequestsView
               requests={filteredPendingRequests}
               intervalName={intervalName}
@@ -484,15 +456,10 @@ function PendingRequestsView({
           <CardFooter className="px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 pt-0.5 min-w-0">
             <Button
               onClick={() => cancelMutation.mutate({ requestId: request.id })}
-              disabled={cancelMutation.isPending || request.id.startsWith('optimistic-')}
+              disabled={request.id.startsWith('optimistic-')}
               className="w-full h-7 sm:h-8 md:h-9 lg:h-10 text-xs sm:text-sm md:text-base font-bold transition-all duration-200 border-b-2 sm:border-b-3 md:border-b-3 border-[#7f2e21] min-w-0 bg-[#b8473e] hover:bg-[#9f3a33] text-white disabled:bg-gray-300 disabled:text-gray-500 disabled:border-b-2 sm:disabled:border-b-3"
             >
-              {cancelMutation.isPending ? (
-                <>
-                  <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-                  Cancel...
-                </>
-              ) : request.id.startsWith('optimistic-') ? (
+              {request.id.startsWith('optimistic-') ? (
                 <span className="inline-flex items-center gap-1 text-xs sm:text-sm">
                   Sync <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 </span>
