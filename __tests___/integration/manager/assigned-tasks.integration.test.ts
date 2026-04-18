@@ -231,7 +231,7 @@ describe('When the manager clears unstarted tasks for a specific employee', () =
     expect(cleared).toBe(1);
     expect(reloadError).toBeNull();
     expect(deletedTaskRow).toBeNull();
-    expect(toastSuccess).toHaveBeenCalledWith('Cleared 1 unstarted task');
+    expect(toastSuccess).toHaveBeenCalledWith('1 unstarted task was deleted');
   });
 
   test('Then the clear handler deletes only assigned rows with zero pending and completed orders', async () => {
@@ -299,7 +299,7 @@ describe('When the manager clears unstarted tasks for a specific employee', () =
     expect(remainingIds.has(unstartedTask.id)).toBe(false);
     expect(remainingIds.has(inProgressTask.id)).toBe(true);
     expect(remainingIds.has(approvedTask.id)).toBe(true);
-    expect(toastSuccess).toHaveBeenCalledWith('Cleared 1 unstarted task');
+    expect(toastSuccess).toHaveBeenCalledWith('1 unstarted task was deleted');
   });
 
   test('Then the clear-all handler removes only unstarted assigned rows across employees', async () => {
@@ -359,12 +359,12 @@ describe('When the manager clears unstarted tasks for a specific employee', () =
       .select('id')
       .in('id', [removableTask.id, retainedTask.id]);
 
-    expect(cleared).toBe(true);
+    expect(cleared).toBe(1);
     expect(reloadError).toBeNull();
     const remainingIds = new Set((remainingRows ?? []).map((row) => row.id));
     expect(remainingIds.has(removableTask.id)).toBe(false);
     expect(remainingIds.has(retainedTask.id)).toBe(true);
-    expect(toastSuccess).toHaveBeenCalledWith('Unstarted assignments cleared');
+    expect(toastSuccess).toHaveBeenCalledWith('1 unstarted task assignment was deleted');
   });
 });
 
@@ -490,6 +490,6 @@ describe('When the manager deletes a specific assigned task', () => {
     expect(deleted).toBe(true);
     expect(reloadError).toBeNull();
     expect(deletedTaskRow).toBeNull();
-    expect(toastSuccess).toHaveBeenCalledWith('Task deleted');
+    expect(toastSuccess).toHaveBeenCalledWith('Employee Unnassigned successfully');
   });
 });

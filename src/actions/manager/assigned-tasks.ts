@@ -457,7 +457,7 @@ export async function fetchCurrentAssignedEmployeesPaginated(
   };
 }
 
-export async function clearUnstartedTaskAssignments(): Promise<ServerActionResponse<boolean>> {
+export async function clearUnstartedTaskAssignments(): Promise<ServerActionResponse<number>> {
   const supabase = await createClient();
 
   // We resolve eligible rows first so "unstarted" also covers records whose
@@ -484,7 +484,7 @@ export async function clearUnstartedTaskAssignments(): Promise<ServerActionRespo
       .map((assignment) => assignment.id) ?? [];
 
   if (assignmentIdsToDelete.length === 0) {
-    return { error: null, data: true };
+    return { error: null, data: 0 };
   }
 
   const { error: deleteError } = await supabase
@@ -493,7 +493,7 @@ export async function clearUnstartedTaskAssignments(): Promise<ServerActionRespo
     .in('id', assignmentIdsToDelete);
 
   if (deleteError) return { error: deleteError.message, data: undefined };
-  return { error: null, data: true };
+  return { error: null, data: assignmentIdsToDelete.length };
 }
 
 export async function clearUnstartedEmployeeTasks(
