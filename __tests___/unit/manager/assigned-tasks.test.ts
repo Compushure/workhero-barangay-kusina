@@ -9,10 +9,13 @@
 
 import { beforeEach, describe, expect, jest, test } from '@jest/globals';
 import {
+  handleClearUnstartedTaskAssignments,
   handleClearUnstartedEmployeeTasks,
   handleDeleteTask,
+  handleDeleteTaskForAllEmployees,
   handleFetchCurrentAssignedEmployeesPaginated,
   handleFetchCurrentAssignedTasksPaginated,
+  handleUpdateTaskAssignment,
 } from '@/action-handlers/manager/assigned-tasks';
 import type { AssignedTask } from '@/types';
 import type { ServerActionResponse } from '@/types';
@@ -55,7 +58,20 @@ type FetchCurrentAssignedEmployeesFn = (
 ) => Promise<AssignedEmployeePaginatedResponse>;
 
 type ClearUnstartedEmployeeTasksFn = (employeeId: string) => Promise<ServerActionResponse<number>>;
+type ClearUnstartedTaskAssignmentsFn = () => Promise<ServerActionResponse<boolean>>;
 type DeleteTaskFn = (taskId: string) => Promise<ServerActionResponse<boolean>>;
+type DeleteTaskForAllEmployeesFn = (
+  categoryId: string,
+  deadlineDate: string,
+  maxOrders: number,
+  createdAt: string
+) => Promise<ServerActionResponse<boolean>>;
+type UpdateTaskAssignmentFn = (
+  taskId: string,
+  maxOrders: number,
+  newDueDate: string,
+  employeeIds: string[]
+) => Promise<ServerActionResponse<boolean>>;
 
 const fetchCurrentAssignedTasksPaginatedMock: jest.MockedFunction<FetchCurrentAssignedTasksFn> =
   jest.fn();
@@ -63,7 +79,11 @@ const fetchCurrentAssignedEmployeesPaginatedMock: jest.MockedFunction<FetchCurre
   jest.fn();
 const clearUnstartedEmployeeTasksMock: jest.MockedFunction<ClearUnstartedEmployeeTasksFn> =
   jest.fn();
+const clearUnstartedTaskAssignmentsMock: jest.MockedFunction<ClearUnstartedTaskAssignmentsFn> =
+  jest.fn();
 const deleteTaskMock: jest.MockedFunction<DeleteTaskFn> = jest.fn();
+const deleteTaskForAllEmployeesMock: jest.MockedFunction<DeleteTaskForAllEmployeesFn> = jest.fn();
+const updateTaskAssignmentMock: jest.MockedFunction<UpdateTaskAssignmentFn> = jest.fn();
 const safeActionMock = jest.fn();
 
 jest.mock('@/actions/manager/assigned-tasks', () => ({
@@ -100,10 +120,20 @@ jest.mock('@/actions/manager/assigned-tasks', () => ({
       overdueFilter
     ),
   clearUnstartedEmployeeTasks: (employeeId: string) => clearUnstartedEmployeeTasksMock(employeeId),
-  clearUnstartedTaskAssignments: jest.fn(),
+  clearUnstartedTaskAssignments: () => clearUnstartedTaskAssignmentsMock(),
   deleteTask: (taskId: string) => deleteTaskMock(taskId),
-  deleteTaskForAllEmployees: jest.fn(),
-  updateTaskAssignment: jest.fn(),
+  deleteTaskForAllEmployees: (
+    categoryId: string,
+    deadlineDate: string,
+    maxOrders: number,
+    createdAt: string
+  ) => deleteTaskForAllEmployeesMock(categoryId, deadlineDate, maxOrders, createdAt),
+  updateTaskAssignment: (
+    taskId: string,
+    maxOrders: number,
+    newDueDate: string,
+    employeeIds: string[]
+  ) => updateTaskAssignmentMock(taskId, maxOrders, newDueDate, employeeIds),
 }));
 
 jest.mock('@/lib/utils/safe-action', () => ({
@@ -130,7 +160,10 @@ beforeEach(() => {
   fetchCurrentAssignedTasksPaginatedMock.mockReset();
   fetchCurrentAssignedEmployeesPaginatedMock.mockReset();
   clearUnstartedEmployeeTasksMock.mockReset();
+  clearUnstartedTaskAssignmentsMock.mockReset();
   deleteTaskMock.mockReset();
+  deleteTaskForAllEmployeesMock.mockReset();
+  updateTaskAssignmentMock.mockReset();
   safeActionMock.mockReset();
 
   toast.success.mockReset();
@@ -207,6 +240,18 @@ describe('When the manager loads assigned-task data through handlers', () => {
 });
 
 describe('When the manager clears or deletes assigned tasks through handlers', () => {
+  test('Then clear-unstarted-all handler returns true and shows success toast when action succeeds', async () => {
+    clearUnstartedTaskAssignmentsMock.mockResolvedValue({
+      error: null,
+      data: true,
+    } satisfies ServerActionResponse<boolean>);
+
+    const cleared = await handleClearUnstartedTaskAssignments();
+
+    expect(cleared).toBe(true);
+    expect(toast.success).toHaveBeenCalledWith('Unstarted assignments cleared');
+  });
+
   test('Then clear-unstarted-by-employee handler returns cleared count and shows success toast', async () => {
     clearUnstartedEmployeeTasksMock.mockResolvedValue({
       error: null,
@@ -229,5 +274,59 @@ describe('When the manager clears or deletes assigned tasks through handlers', (
 
     expect(deleted).toBe(false);
     expect(toast.error).toHaveBeenCalledWith('Delete failed');
+  });
+
+  test('Then delete-task handler returns true and shows success toast when action succeeds', async () => {
+    deleteTaskMock.mockResolvedValue({
+      error: null,
+      data: true,
+    } satisfies ServerActionResponse<boolean>);
+
+    const deleted = await handleDeleteTask('task-2');
+
+    expect(deleted).toBe(true);
+    expect(toast.success).toHaveBeenCalledWith('Task deleted');
+  });
+
+  test('Then delete-task-group handler returns true and shows success toast when action succeeds', async () => {
+    deleteTaskForAllEmployeesMock.mockResolvedValue({
+      error: null,
+      data: true,
+    } satisfies ServerActionResponse<boolean>);
+
+    const deleted = await handleDeleteTaskForAllEmployees(
+      'category-1',
+      '2099-12-31',
+      3,
+      '2026-04-01T00:00:00.000Z'
+    );
+
+    expect(deleted).toBe(true);
+    expect(deleteTaskForAllEmployeesMock).toHaveBeenCalledWith(
+      'category-1',
+      '2099-12-31',
+      3,
+      '2026-04-01T00:00:00.000Z'
+    );
+    expect(toast.success).toHaveBeenCalledWith('Task deleted');
+  });
+
+  test('Then update-task handler returns true and shows success toast when action succeeds', async () => {
+    updateTaskAssignmentMock.mockResolvedValue({
+      error: null,
+      data: true,
+    } satisfies ServerActionResponse<boolean>);
+
+    const updated = await handleUpdateTaskAssignment('task-1', 5, '2099-12-20', [
+      'employee-1',
+      'employee-2',
+    ]);
+
+    expect(updated).toBe(true);
+    expect(updateTaskAssignmentMock).toHaveBeenCalledWith('task-1', 5, '2099-12-20', [
+      'employee-1',
+      'employee-2',
+    ]);
+    expect(toast.success).toHaveBeenCalledWith('Task updated successfully');
   });
 });
