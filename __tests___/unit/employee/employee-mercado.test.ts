@@ -16,11 +16,13 @@ import {
 } from '@/action-handlers/employee/redemptions';
 import { useMercadoPageData } from '@/hooks/useMercadoPageData';
 
+// Keep useMemo synchronous in tests to simplify hook assertions.
 jest.mock('react', () => ({
 	...((jest.requireActual('react') as typeof import('react'))),
 	useMemo: (factory: () => unknown) => factory(),
 }));
 
+// Query/action mocks used to simulate Mercado backend and cache hooks.
 const mockUseGetEmployeePoints = jest.fn();
 const mockUseGetAvailableRewards = jest.fn();
 const mockUseGetMyRedemptionRequests = jest.fn();
@@ -30,6 +32,7 @@ const mockFetchMyRedemptionRequestsAction = jest.fn();
 
 const toastError = jest.fn();
 
+// Capture toast calls so tests can verify user-facing error feedback.
 jest.mock('sonner', () => ({
 	toast: {
 		error: (...args: unknown[]) => toastError(...args),
@@ -55,6 +58,7 @@ jest.mock('@/hooks/tanstack/queries/redemptionQueries', () => ({
 	useGetMyRedemptionRequests: (status?: string) => mockUseGetMyRedemptionRequests(status),
 }));
 
+// Minimal shapes needed for this suite's assertions.
 type MockReward = {
 	id: string;
 	name: string;
@@ -73,6 +77,7 @@ let activeRewards: MockReward[];
 let pendingRequests: MockRequest[];
 
 beforeEach(() => {
+	// Seed default Mercado data for the happy path.
 	activeRewards = [
 		{ id: 'reward-1', name: 'Rice Pack', pointsCost: 25, isActive: true },
 		{ id: 'reward-2', name: 'Cooking Oil', pointsCost: 15, isActive: true },
@@ -103,10 +108,12 @@ beforeEach(() => {
 	mockFetchMyRedemptionRequestsAction.mockImplementation(
 		async () => ({ error: null, data: pendingRequests })
 	);
+	// Start each test with no error toast calls recorded.
 	toastError.mockReset();
 });
 
 afterEach(() => {
+	// Reset all mocks so tests remain isolated from one another.
 	mockUseGetEmployeePoints.mockReset();
 	mockUseGetAvailableRewards.mockReset();
 	mockUseGetMyRedemptionRequests.mockReset();
@@ -118,6 +125,7 @@ afterEach(() => {
 
 describe('When the employee loads Mercado page data', () => {
 	test('Then useMercadoPageData returns available rewards, pending requests, and points', () => {
+		// Verifies the composed hook returns merged data from all dependent queries.
 		const result = useMercadoPageData();
 
 		expect(result.activeRewards).toEqual(activeRewards);
@@ -132,6 +140,7 @@ describe('When the employee loads Mercado page data', () => {
 	});
 
 	test('Then useMercadoPageData disables reward loading when includeRewards is false', () => {
+		// Verifies optional behavior when reward cards are intentionally skipped.
 		const result = useMercadoPageData({ includeRewards: false });
 
 		expect(result.activeRewards).toEqual(activeRewards);
@@ -140,6 +149,7 @@ describe('When the employee loads Mercado page data', () => {
 	});
 
 	test('Then useMercadoPageData surfaces loading when any underlying query is loading', () => {
+		// Verifies top-level loading state bubbles up from dependencies.
 		mockUseGetAvailableRewards.mockReturnValue({
 			data: [],
 			isLoading: true,
@@ -152,6 +162,7 @@ describe('When the employee loads Mercado page data', () => {
 	});
 
 	test('Then useMercadoPageData preserves reward query errors only when rewards are included', () => {
+		// Verifies includeRewards controls whether reward errors should be shown.
 		mockUseGetAvailableRewards.mockReturnValue({
 			data: [],
 			isLoading: false,
@@ -168,6 +179,7 @@ describe('When the employee loads Mercado page data', () => {
 
 describe('When the employee orders and cancels Mercado items', () => {
 	test('Then handleCreateRedemptionRequestAction returns true when the order request succeeds', async () => {
+		// Success path for creating a pending redemption request.
 		const result = await handleCreateRedemptionRequestAction('reward-1', 2);
 
 		expect(result).toBe(true);
@@ -176,6 +188,7 @@ describe('When the employee orders and cancels Mercado items', () => {
 	});
 
 	test('Then handleCreateRedemptionRequestAction returns false and shows an error toast when ordering fails', async () => {
+		// Failure path should return false and surface an error message to the user.
 		mockCreateRedemptionRequestAction.mockImplementationOnce(async () => ({
 			error: 'Insufficient points',
 		}));
@@ -189,6 +202,7 @@ describe('When the employee orders and cancels Mercado items', () => {
 	});
 
 	test('Then handleCancelMyRedemptionRequestAction returns true when cancellation succeeds', async () => {
+		// Success path for employee cancellation of a pending request.
 		const result = await handleCancelMyRedemptionRequestAction('request-1');
 
 		expect(result).toBe(true);
@@ -197,6 +211,7 @@ describe('When the employee orders and cancels Mercado items', () => {
 	});
 
 	test('Then handleCancelMyRedemptionRequestAction returns false and shows an error toast when cancellation fails', async () => {
+		// Failure path should keep return false and show cancellation error.
 		mockCancelMyRedemptionRequestAction.mockImplementationOnce(async () => ({
 			error: 'Only pending requests can be cancelled',
 		}));

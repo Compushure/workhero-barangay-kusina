@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+// Employee Mercado mutation hooks for redeem and cancel flows.
 import {
   handleCancelMyRedemptionRequestAction,
   handleCreateRedemptionRequestAction,
@@ -13,7 +14,7 @@ export function useRedeemReward() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    //logic for item request action: send redeem payload to server
+    // Sends employee redeem request to backend.
     mutationFn: async ({
       rewardId,
       quantity,
@@ -34,7 +35,8 @@ export function useRedeemReward() {
       return { rewardId, rewardName, quantity, pointsCost };
     },
     onMutate: async (variables) => {
-      // Apply optimistic updates immediately so Mercado feels instant on redeem.
+      // Instantly updates UI so users feel the request happened right away.
+      // Pause related queries and snapshot current cache.
       await Promise.all([
         queryClient.cancelQueries({ queryKey: redemptionKeys.myRequests() }),
         queryClient.cancelQueries({ queryKey: employeeKeys.points() }),
@@ -48,6 +50,7 @@ export function useRedeemReward() {
       );
       const previousPoints = queryClient.getQueryData<EmployeePointsData | null>(employeeKeys.points());
 
+      // Insert optimistic pending request + temporary points deduction.
       const totalCost = variables.pointsCost * variables.quantity;
       const optimisticRequest: RedemptionRequest = {
         id: `optimistic-${variables.rewardId}-${Date.now()}`,
@@ -84,7 +87,7 @@ export function useRedeemReward() {
       return { previousPending, previousAll, previousPoints };
     },
     onSuccess: () => {
-      // Revalidate in background so optimistic cache converges to server truth.
+      // Refetch to sync optimistic cache with real server state.
       queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
       queryClient.invalidateQueries({ queryKey: employeeKeys.points() });
       queryClient.invalidateQueries({ queryKey: ['employeePoints'] });
@@ -111,7 +114,7 @@ export function useCancelMyRedemptionRequest() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    //logic for cancel request action: call cancel endpoint
+    // Sends employee cancellation request to backend.
     mutationFn: async ({ requestId }: { requestId: string }) => {
       const result = await handleCancelMyRedemptionRequestAction(requestId);
 
@@ -122,7 +125,8 @@ export function useCancelMyRedemptionRequest() {
       return { requestId };
     },
     onMutate: async ({ requestId }) => {
-      //logic for optimistic cancel state: remove pending item immediately
+      // Removes pending item from UI first, then confirms with server.
+      // Snapshot pending/all request lists.
       await queryClient.cancelQueries({ queryKey: redemptionKeys.myRequests() });
 
       const previousPending = queryClient.getQueryData<RedemptionRequest[]>(
@@ -132,6 +136,7 @@ export function useCancelMyRedemptionRequest() {
         redemptionKeys.myRequestsByStatus(undefined)
       );
 
+      // Remove the pending row optimistically from list UI.
       queryClient.setQueryData<RedemptionRequest[]>(
         redemptionKeys.myRequestsByStatus('pending'),
         (existing = []) => existing.filter((request) => request.id !== requestId)
@@ -148,7 +153,7 @@ export function useCancelMyRedemptionRequest() {
       return { previousPending, previousAll };
     },
     onSuccess: () => {
-      //logic for cancel item points: refresh points and request state
+      // Refetch points and request lists after confirmed cancel.
       queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: redemptionKeys.all });
@@ -156,7 +161,7 @@ export function useCancelMyRedemptionRequest() {
       queryClient.invalidateQueries({ queryKey: ['employeePoints'] });
     },
     onError: (_error, _variables, context) => {
-      //logic for cancel rollback: restore previous cache snapshots
+      // Rollback cache if server cancellation fails.
       if (context?.previousPending) {
         queryClient.setQueryData(redemptionKeys.myRequestsByStatus('pending'), context.previousPending);
       }

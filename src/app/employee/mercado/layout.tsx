@@ -1,5 +1,7 @@
 import { MercadoLayoutClient } from '@/components/employee/mercado/mercado-layout-client';
 
+// Shared shell for employee Mercado screens.
+
 interface MercadoLayoutProps {
   children: React.ReactNode;
 }

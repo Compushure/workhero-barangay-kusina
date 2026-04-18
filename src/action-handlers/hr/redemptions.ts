@@ -21,6 +21,7 @@ interface RedemptionRequestParams {
 export async function handleGetRedemptionRequestsAction(
   status?: string
 ): Promise<RedemptionRequest[]> {
+  // Gets request rows used in the HR redemption table.
   const result = await safeAction(() => getRedemptionRequestsAction(status));
 
   if (!result.success || result.data?.error) {
@@ -34,6 +35,7 @@ export async function handleGetRedemptionRequestsAction(
 export async function handleDeclineRedemptionRequestAction(
   params: RedemptionRequestParams
 ): Promise<{ error: string | null }> {
+  // HR decline button path.
   const result = await safeAction(() =>
     declineRedemptionRequestAction(params.id, params.remarks)
   );
@@ -55,6 +57,7 @@ export async function handleDeclineRedemptionRequestAction(
 export async function handleAcceptRedemptionRequestAction(
   params: RedemptionRequestParams
 ): Promise<{ error: string | null }> {
+  // HR approve button path.
   const result = await safeAction(() =>
     acceptRedemptionRequestAction(params.id, params.remarks)
   );

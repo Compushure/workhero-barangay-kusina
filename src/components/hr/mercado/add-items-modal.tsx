@@ -1,7 +1,17 @@
 'use client';
 
+// HR form modal for creating and editing Mercado items.
+
 import { useState, useEffect, useMemo } from 'react';
-import { Pencil, Plus, X, Loader2, Camera, Calendar as CalendarIcon, ChevronDown } from 'lucide-react';
+import {
+  Pencil,
+  Plus,
+  X,
+  Loader2,
+  Camera,
+  Calendar as CalendarIcon,
+  ChevronDown,
+} from 'lucide-react';
 import {
   format,
   startOfWeek,
@@ -31,6 +41,7 @@ type AvailabilityInterval = 'weekly' | 'monthly' | 'yearly';
 
 const MAX_REWARD_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_REWARD_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const SAVE_LOADING_CAP_MS = 3000;
 const mercadoSelectItemClassName =
   'cursor-pointer transition-all duration-500 ease-in-out hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground data-[state=checked]:bg-accent/15 data-[state=checked]:text-foreground';
 
@@ -82,6 +93,7 @@ export function AddItemsModal({
   saveError = '',
   onErrorClear,
 }: AddItemsModalProps) {
+  // Form state mirrors add/edit fields shown to HR users.
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconPreview, setIconPreview] = useState<string>('');
   const [existingImageUrl, setExistingImageUrl] = useState<string>('');
@@ -97,6 +109,7 @@ export function AddItemsModal({
 
   // Derived disabled-date matcher based on chosen interval
   const disabledDateMatcher = useMemo((): ((date: Date) => boolean) | undefined => {
+    // Restrict date picker to the current interval window only.
     if (availabilityInterval === 'none') return undefined;
     const now = new Date();
     if (availabilityInterval === 'weekly') {
@@ -239,6 +252,7 @@ export function AddItemsModal({
   ]);
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Validate image type/size before preview and upload.
     const file = e.target.files?.[0];
     if (file) {
       if (!ALLOWED_REWARD_IMAGE_TYPES.includes(file.type)) {
@@ -272,6 +286,7 @@ export function AddItemsModal({
   };
 
   const handleSave = async () => {
+    // Final validation + submit payload to parent save handler.
     if (iconFile) {
       if (!ALLOWED_REWARD_IMAGE_TYPES.includes(iconFile.type)) {
         const message = 'Only JPEG, PNG, and WebP images are allowed';
@@ -292,6 +307,11 @@ export function AddItemsModal({
 
     if (itemName && itemCost && hasChanges) {
       setIsLoading(true);
+      // Cap spinner time so the UI never feels stuck, while request continues.
+      const loadingTimeoutId = window.setTimeout(() => {
+        setIsLoading(false);
+      }, SAVE_LOADING_CAP_MS);
+
       try {
         await onSave?.({
           id: editingItem?.id,
@@ -303,18 +323,26 @@ export function AddItemsModal({
           availableDate: availableDate || null,
           availableMonth: availabilityInterval === 'none' ? null : availabilityInterval,
         });
+
         // Close modal on successful save
-        handleClose();
-      } catch (error) {
+        handleClose(true);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('Error saving item. Please try again.');
+        }
         console.error('Error saving item:', error);
       } finally {
+        window.clearTimeout(loadingTimeoutId);
         setIsLoading(false);
       }
     }
   };
 
-  const handleClose = () => {
-    if (isLoading) return; // Prevent closing while loading
+  const handleClose = (force = false) => {
+    // Reset form state so reopening starts from clean values.
+    if (isLoading && !force) return; // Prevent closing while loading
     setIconFile(null);
     setIconPreview('');
     setExistingImageUrl('');
@@ -386,7 +414,7 @@ export function AddItemsModal({
               {editingItem ? 'Edit Item Reward' : 'Add Item Reward'}
             </DialogTitle>
             <button
-              onClick={handleClose}
+              onClick={() => handleClose()}
               className="text-muted-foreground hover:text-title transition-colors h-5 w-5"
             ></button>
           </div>
@@ -607,7 +635,10 @@ export function AddItemsModal({
                       <ChevronDown className="h-4 w-4 text-foreground" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto rounded-xl border border-border bg-background p-0 shadow-sm/25" align="start">
+                  <PopoverContent
+                    className="w-auto rounded-xl border border-border bg-background p-0 shadow-sm/25"
+                    align="start"
+                  >
                     <Calendar
                       mode="single"
                       selected={availableDate}
@@ -679,7 +710,7 @@ export function AddItemsModal({
           </Button>
           <Button
             variant="outline"
-            onClick={handleClose}
+            onClick={() => handleClose()}
             disabled={isLoading}
             className="h-10 rounded-lg border border-gray-300 bg-card text-foreground shadow-sm/25 hover:bg-gray-200 hover:text-foreground transition-all duration-400 ease-in-out px-6 sm:px-8 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >

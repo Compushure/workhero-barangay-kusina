@@ -2,6 +2,7 @@ interface ErrorStateProps {
   message: string;
 }
 
+// Generic Mercado error panel for user-facing failures.
 export function ErrorState({ message }: ErrorStateProps) {
   return (
     <div className="min-h-screen bg-linear-to-b from-[#e8c4b0] via-[#d4a59a] to-[#b8a395] p-8 flex items-center justify-center">

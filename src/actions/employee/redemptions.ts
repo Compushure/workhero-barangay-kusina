@@ -1,5 +1,7 @@
 'use server';
 
+// Employee Mercado backend flow: browse items, request item, cancel request.
+
 import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import {
@@ -10,6 +12,8 @@ import {
 import { insertNotification } from '@/lib/notifications';
 
 async function adjustUserPointsByDelta(userId: string, delta: number): Promise<ServerActionResponse<number>> {
+  // Shared helper to update employee spendable points.
+  // Read current points.
   const { data: userData, error: userDataError } = await supabaseAdmin
     .from('User')
     .select('points')
@@ -27,6 +31,7 @@ async function adjustUserPointsByDelta(userId: string, delta: number): Promise<S
     return { error: `Insufficient points. You need ${Math.abs(delta)} points but have ${currentPoints}` };
   }
 
+  // Save updated points balance.
   const { error: updatePointsError } = await supabaseAdmin
     .from('User')
     .update({
@@ -42,12 +47,14 @@ async function adjustUserPointsByDelta(userId: string, delta: number): Promise<S
 }
 
 function getRewardImageUrl(supabase: any, rewardId: string): string {
+  // Build public image URL for reward cards.
   const baseUrl = supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`)
     .data.publicUrl;
   return `${baseUrl}?t=${Date.now()}`;
 }
 export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>> {
   try {
+    // Returns items employee can browse, with redeemed totals.
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -60,6 +67,7 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
       return { error: `Failed to fetch items: ${error.message}` };
     }
 
+    // Count approved redemptions so each reward shows redeemed totals.
     const { data: redemptionData } = await supabase
       .from('RewardRequest')
       .select('reward_id, quantity')
@@ -73,6 +81,7 @@ export async function getRewardsAction(): Promise<ServerActionResponse<Reward[]>
       });
     }
 
+    // Convert DB rows into app-friendly Reward objects.
     const rewards: Reward[] = (data || []).map((item) => {
       const redeemedCount = redeemedCounts.get(item.id) || 0;
       const hasQuantityLimit = item.quantity !== null && item.quantity !== undefined;
@@ -108,6 +117,8 @@ export async function getMyRedemptionRequestsAction(
   status?: string
 ): Promise<ServerActionResponse<RedemptionRequest[]>> {
   try {
+    // Returns only the signed-in employee's requests.
+    // Identify current user.
     const supabase = await createClient();
 
     const {
@@ -119,6 +130,7 @@ export async function getMyRedemptionRequestsAction(
       return { error: 'Unauthorized: User not authenticated' };
     }
 
+    // Load request rows, optionally filtered by status.
     let query = supabase
       .from('RewardRequest')
       .select(
@@ -155,6 +167,7 @@ export async function getMyRedemptionRequestsAction(
       return { error: `Failed to fetch your redemption requests: ${error.message}` };
     }
 
+    // Shape DB data into UI request records.
     const requests: RedemptionRequest[] = (data || []).map((item: any) => ({
       id: item.id,
       userId: item.user_id,
@@ -186,6 +199,8 @@ export async function createRedemptionRequestAction(
   quantity: number = 1
 ): Promise<ServerActionResponse<void>> {
   try {
+    // Creates one pending request and deducts points immediately.
+    // Validate user and reward.
     const supabase = await createClient();
 
     const {
@@ -219,6 +234,7 @@ export async function createRedemptionRequestAction(
       return { error: 'Quantity must be at least 1' };
     }
 
+    // Validate points and quantity limits.
     const { data: userData, error: userDataError } = await supabaseAdmin
       .from('User')
       .select('points')
@@ -236,6 +252,7 @@ export async function createRedemptionRequestAction(
       return { error: `Insufficient points. You need ${totalCost} points but have ${userPoints}` };
     }
 
+    // Deduct points before writing pending request.
     // Deduct total cost from current balance only (does not affect total_points_earned).
     const deductionResult = await adjustUserPointsByDelta(user.id, -totalCost);
     if (deductionResult.error) {
@@ -243,6 +260,7 @@ export async function createRedemptionRequestAction(
       return { error: deductionResult.error };
     }
 
+    // Create pending request row.
     const { error: insertError } = await supabase.from('RewardRequest').insert({
       user_id: user.id,
       reward_id: rewardId,
@@ -258,6 +276,7 @@ export async function createRedemptionRequestAction(
       return { error: `Failed to create redemption request: ${insertError.message}` };
     }
 
+    // Notify employee that request is pending review.
     await insertNotification({
       userId: user.id,
       type: 'reward',
@@ -284,6 +303,8 @@ export async function cancelMyRedemptionRequestAction(
   requestId: string
 ): Promise<ServerActionResponse<void>> {
   try {
+    // Cancels a pending request and restores spent points.
+    // Validate current user and request ownership.
     const supabase = await createClient();
 
     const {
@@ -338,6 +359,7 @@ export async function cancelMyRedemptionRequestAction(
       return { error: 'Failed to fetch user data' };
     }
 
+    // Mark request as cancelled (stored as rejected + remark).
     const { error: cancelRequestError } = await supabase
       .from('RewardRequest')
       .update({
@@ -352,6 +374,7 @@ export async function cancelMyRedemptionRequestAction(
       return { error: `Failed to cancel request: ${cancelRequestError.message}` };
     }
 
+    // Refund deducted points.
     // Refund full item cost to spendable points only.
     const restoreResult = await adjustUserPointsByDelta(user.id, pointsToRestore);
     if (restoreResult.error) {
@@ -364,6 +387,7 @@ export async function cancelMyRedemptionRequestAction(
       return { error: 'Failed to restore points. Cancellation reverted.' };
     }
 
+    // Send confirmation notification.
     await insertNotification({
       userId: user.id,
       type: 'reward',

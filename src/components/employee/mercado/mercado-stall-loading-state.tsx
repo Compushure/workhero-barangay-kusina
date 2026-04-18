@@ -1,5 +1,7 @@
 'use client';
 
+// Full-screen loading placeholder used while stall availability is still being computed.
+
 interface MercadoStallLoadingStateProps {
   message?: string;
 }

@@ -1,5 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Loading placeholder for HR Mercado header + controls.
+
 export function MercadoHeaderSkeleton() {
   return (
     <div className="space-y-4 sm:space-y-6">
