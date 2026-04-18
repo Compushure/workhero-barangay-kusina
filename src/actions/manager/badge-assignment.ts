@@ -20,16 +20,32 @@ function buildBadgeIds(collected: CollectedBadge[]): string[] {
 export async function fetchManualBadges(): Promise<ServerActionResponse<BadgeSummary[]>> {
 
   const { data, error } = await supabaseAdmin
-    .from('Badges')
-    .select('id, name, description, points, img_link, award_at_interval')
-    .eq('award_at_interval', 'none')
-    .order('name', { ascending: true });
+    .from('badge_conditions_view')
+    .select(
+      'badge_id, badge_name, badge_description, badge_points, badge_img_link, badge_award_at_interval, conditions'
+    )
+    .order('badge_name', { ascending: true });
 
   if (error) {
     return { error: `Failed to fetch manual badges: ${error.message}` };
   }
 
-  return { error: null, data: (data || []) as BadgeSummary[] };
+  const manualBadges = (data || []).filter((badge: any) => {
+    const conditions = Array.isArray(badge.conditions) ? badge.conditions : [];
+    return badge.badge_award_at_interval === 'none' || conditions.length === 0;
+  });
+
+  return {
+    error: null,
+    data: manualBadges.map((badge: any) => ({
+      id: badge.badge_id,
+      name: badge.badge_name,
+      description: badge.badge_description,
+      points: badge.badge_points ?? 0,
+      img_link: badge.badge_img_link ?? null,
+      award_at_interval: badge.badge_award_at_interval ?? 'none',
+    })) as BadgeSummary[],
+  };
 }
 
 export async function fetchAllBadges(): Promise<ServerActionResponse<BadgeSummary[]>> {
@@ -122,7 +138,18 @@ export async function assignManualBadgeToUser(
     return { error: `Failed to verify badge: ${badgeError?.message || 'Badge not found'}` };
   }
 
-  if (badgeRow.award_at_interval !== 'none') {
+  const { count: requirementCount, error: requirementError } = await supabaseAdmin
+    .from('BadgeRequirements')
+    .select('id', { count: 'exact', head: true })
+    .eq('badge_id', badgeId);
+
+  if (requirementError) {
+    return { error: `Failed to verify badge requirements: ${requirementError.message}` };
+  }
+
+  const hasConditions = (requirementCount ?? 0) > 0;
+
+  if (badgeRow.award_at_interval !== 'none' && hasConditions) {
     return { error: 'Only manual badges can be awarded by a manager' };
   }
 
