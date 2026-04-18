@@ -114,7 +114,7 @@ export function TaskStatusSection({
                   <Info className="size-4.5" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs border-[#9b7a56] bg-[#FFF2CC] text-center font-jersey text-[14px] leading-snug tracking-[0.04em] text-[#3B2A1A]">
+              <TooltipContent className="max-w-48 border-[#9b7a56] bg-[#FFF2CC] text-center font-jersey text-[14px] leading-snug tracking-[0.04em] text-[#3B2A1A]">
                 {getStatusDescription(status)}
               </TooltipContent>
             </Tooltip>

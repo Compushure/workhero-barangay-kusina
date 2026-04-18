@@ -397,8 +397,8 @@ export function TaskStatusBoard({
                           <Info strokeWidth={2.5} className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent side="top" align="center" className="max-w-64 text-center">
-                        all tasks deadline are set to 11:59PM on that displayed day
+                      <TooltipContent side="top" align="center" className="max-w-48 text-center lg:mr-4">
+                        Deadline of all tasks are set to 11:59PM on their respective due date
                       </TooltipContent>
                     </Tooltip>
                   </div>
