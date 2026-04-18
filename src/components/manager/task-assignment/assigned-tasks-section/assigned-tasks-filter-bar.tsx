@@ -6,7 +6,6 @@ import {
   CircleDashed,
   EyeOff,
   Filter,
-  Info,
   Layers3,
   Target,
   XCircle,
@@ -22,7 +21,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface AssignedTasksFilterBarProps {
   statusFilters: string[];
@@ -110,23 +108,6 @@ export function AssignedTasksFilterBar({
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="control-h size-9 border-zinc-200 bg-card text-accent hover:bg-card hover:brightness-90"
-            aria-label="Task deadline policy"
-          >
-            <Info className="size-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="top" align="center" className="max-w-64 text-center">
-          all tasks deadline are set to 11:59PM on that displayed day
-        </TooltipContent>
-      </Tooltip>
     </div>
   );
 }
