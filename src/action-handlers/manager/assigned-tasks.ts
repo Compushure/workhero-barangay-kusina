@@ -11,6 +11,18 @@ import {
 import { toast } from 'sonner';
 import type { AssignedTask, ServerActionResponse } from '@/types';
 
+function formatUnstartedAssignmentsToastMessage(count: number): string {
+  const assignmentLabel = count === 1 ? 'task assignment' : 'task assignments';
+  const verb = count === 1 ? 'was' : 'were';
+  return `${count} unstarted ${assignmentLabel} ${verb} deleted`;
+}
+
+function formatUnstartedTasksToastMessage(count: number): string {
+  const taskLabel = count === 1 ? 'task' : 'tasks';
+  const verb = count === 1 ? 'was' : 'were';
+  return `${count} unstarted ${taskLabel} ${verb} deleted`;
+}
+
 /**
  * ✅ Handler for paginated fetch of current assigned tasks
  */
@@ -100,18 +112,26 @@ export async function handleFetchCurrentAssignedEmployeesPaginated(
 /**
  * Clear unstarted (no progress) assigned tasks
  */
-export async function handleClearUnstartedTaskAssignments(): Promise<boolean> {
-  const result = await safeAction<ServerActionResponse<boolean>>(() =>
+export async function handleClearUnstartedTaskAssignments(): Promise<number> {
+  const result = await safeAction<ServerActionResponse<number>>(() =>
     clearUnstartedTaskAssignments()
   );
 
   if (!result.success || result.data?.error) {
     toast.error(result.error || result.data?.error);
-    return false;
+    return 0;
   }
 
-  toast.success('Unstarted assignments cleared');
-  return true;
+  const clearedCount = result.data?.data ?? 0;
+  const toastMessage = formatUnstartedAssignmentsToastMessage(clearedCount);
+
+  if (clearedCount === 0) {
+    toast.info(toastMessage);
+    return 0;
+  }
+
+  toast.success(toastMessage);
+  return clearedCount;
 }
 
 /**
@@ -128,13 +148,14 @@ export async function handleClearUnstartedEmployeeTasks(employeeId: string): Pro
   }
 
   const clearedCount = result.data?.data ?? 0;
+  const toastMessage = formatUnstartedTasksToastMessage(clearedCount);
 
   if (clearedCount === 0) {
-    toast.info('No unstarted tasks to clear for this employee');
+    toast.info(toastMessage);
     return 0;
   }
 
-  toast.success(`Cleared ${clearedCount} unstarted task${clearedCount === 1 ? '' : 's'}`);
+  toast.success(toastMessage);
   return clearedCount;
 }
 
@@ -149,7 +170,7 @@ export async function handleDeleteTask(taskId: string): Promise<boolean> {
     return false;
   }
 
-  toast.success('Task deleted');
+  toast.success('Employee Unnassigned successfully');
   return true;
 }
 

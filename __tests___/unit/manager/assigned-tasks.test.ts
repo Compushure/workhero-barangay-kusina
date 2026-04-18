@@ -58,7 +58,7 @@ type FetchCurrentAssignedEmployeesFn = (
 ) => Promise<AssignedEmployeePaginatedResponse>;
 
 type ClearUnstartedEmployeeTasksFn = (employeeId: string) => Promise<ServerActionResponse<number>>;
-type ClearUnstartedTaskAssignmentsFn = () => Promise<ServerActionResponse<boolean>>;
+type ClearUnstartedTaskAssignmentsFn = () => Promise<ServerActionResponse<number>>;
 type DeleteTaskFn = (taskId: string) => Promise<ServerActionResponse<boolean>>;
 type DeleteTaskForAllEmployeesFn = (
   categoryId: string,
@@ -240,16 +240,16 @@ describe('When the manager loads assigned-task data through handlers', () => {
 });
 
 describe('When the manager clears or deletes assigned tasks through handlers', () => {
-  test('Then clear-unstarted-all handler returns true and shows success toast when action succeeds', async () => {
+  test('Then clear-unstarted-all handler returns count and shows success toast when action succeeds', async () => {
     clearUnstartedTaskAssignmentsMock.mockResolvedValue({
       error: null,
-      data: true,
-    } satisfies ServerActionResponse<boolean>);
+      data: 15,
+    } satisfies ServerActionResponse<number>);
 
     const cleared = await handleClearUnstartedTaskAssignments();
 
-    expect(cleared).toBe(true);
-    expect(toast.success).toHaveBeenCalledWith('Unstarted assignments cleared');
+    expect(cleared).toBe(15);
+    expect(toast.success).toHaveBeenCalledWith('15 unstarted task assignments were deleted');
   });
 
   test('Then clear-unstarted-by-employee handler returns cleared count and shows success toast', async () => {
@@ -261,7 +261,31 @@ describe('When the manager clears or deletes assigned tasks through handlers', (
     const clearedCount = await handleClearUnstartedEmployeeTasks('employee-1');
 
     expect(clearedCount).toBe(2);
-    expect(toast.success).toHaveBeenCalledWith('Cleared 2 unstarted tasks');
+    expect(toast.success).toHaveBeenCalledWith('2 unstarted tasks were deleted');
+  });
+
+  test('Then clear-unstarted-all handler shows info toast with zero count', async () => {
+    clearUnstartedTaskAssignmentsMock.mockResolvedValue({
+      error: null,
+      data: 0,
+    } satisfies ServerActionResponse<number>);
+
+    const cleared = await handleClearUnstartedTaskAssignments();
+
+    expect(cleared).toBe(0);
+    expect(toast.info).toHaveBeenCalledWith('0 unstarted task assignments were deleted');
+  });
+
+  test('Then clear-unstarted-by-employee handler shows info toast with zero count', async () => {
+    clearUnstartedEmployeeTasksMock.mockResolvedValue({
+      error: null,
+      data: 0,
+    } satisfies ServerActionResponse<number>);
+
+    const clearedCount = await handleClearUnstartedEmployeeTasks('employee-1');
+
+    expect(clearedCount).toBe(0);
+    expect(toast.info).toHaveBeenCalledWith('0 unstarted tasks were deleted');
   });
 
   test('Then delete-task handler returns false and shows an error toast when action fails', async () => {
@@ -285,7 +309,7 @@ describe('When the manager clears or deletes assigned tasks through handlers', (
     const deleted = await handleDeleteTask('task-2');
 
     expect(deleted).toBe(true);
-    expect(toast.success).toHaveBeenCalledWith('Task deleted');
+    expect(toast.success).toHaveBeenCalledWith('Employee Unnassigned successfully');
   });
 
   test('Then delete-task-group handler returns true and shows success toast when action succeeds', async () => {
