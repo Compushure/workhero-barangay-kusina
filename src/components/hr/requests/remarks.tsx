@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -47,6 +47,21 @@ export function RemarksDialog({
   const [isConfirming, setIsConfirming] = useState(false);
   const isSubmittingRef = useRef(false);
 
+  const resetDialogState = useCallback(() => {
+    setRemarks('');
+    setError('');
+    setIsConfirming(false);
+    isSubmittingRef.current = false;
+  }, []);
+
+  useEffect(() => {
+    // Parent can close this controlled dialog directly, bypassing Dialog's onOpenChange callback.
+    // Reset internal submit state whenever it transitions to closed.
+    if (!open) {
+      resetDialogState();
+    }
+  }, [open, resetDialogState]);
+
   // Disable if either the modal's internal state OR the parent's processing state is true
   const isDisabled = isConfirming || isProcessing;
 
@@ -77,17 +92,13 @@ export function RemarksDialog({
   };
 
   const handleCancel = () => {
-    setRemarks('');
-    setError('');
+    resetDialogState();
     onOpenChange(false);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      setRemarks('');
-      setError('');
-      setIsConfirming(false); // Reset confirming state when dialog closes
-      isSubmittingRef.current = false; // Reset ref when dialog closes
+      resetDialogState();
     }
     onOpenChange(newOpen);
   };
