@@ -244,6 +244,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
           <Button
             variant="outline"
             onClick={() => setShowClearConfirm(true)}
+            disabled={isAssigning}
             className="text-button flex-1 sm:flex-initial sm:w-auto bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground px-4 sm:px-10 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25 h-9"
           >
             Clear
@@ -259,8 +260,34 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
       />
 
       {/* Assign Confirmation Dialog */}
-      <Dialog open={showAssignConfirm} onOpenChange={setShowAssignConfirm}>
-        <DialogContent className="max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl transition-all duration-500 ease-in-out bg-card">
+      <Dialog
+        open={showAssignConfirm}
+        onOpenChange={(open) => {
+          if (isAssigning && !open) {
+            return;
+          }
+          setShowAssignConfirm(open);
+        }}
+      >
+        <DialogContent
+          showCloseButton={!isAssigning}
+          onEscapeKeyDown={(event) => {
+            if (isAssigning) {
+              event.preventDefault();
+            }
+          }}
+          onInteractOutside={(event) => {
+            if (isAssigning) {
+              event.preventDefault();
+            }
+          }}
+          onPointerDownOutside={(event) => {
+            if (isAssigning) {
+              event.preventDefault();
+            }
+          }}
+          className="max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl transition-all duration-500 ease-in-out bg-card"
+        >
           <DialogHeader>
             <DialogTitle className="text-h2 text-foreground">Confirm Assignment</DialogTitle>
             <DialogDescription className="text-meta">
@@ -278,6 +305,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
             <Button
               variant="outline"
               onClick={() => setShowAssignConfirm(false)}
+              disabled={isAssigning}
               className="border-zinc-400 bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground px-8 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
             >
               Cancel
