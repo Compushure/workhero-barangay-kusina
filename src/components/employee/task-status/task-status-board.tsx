@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowUpDown, Filter } from 'lucide-react';
+import { ArrowUpDown, Filter, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,6 +24,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getTaskSectionStatusChipMeta, isTaskStatusItemOverdue } from './task-status-utils';
 import { TaskCard } from './task-card';
 import { TaskStatusSection } from './task-status-section';
@@ -391,6 +392,23 @@ export function TaskStatusBoard({
                         </DropdownMenuCheckboxItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="outline"
+                          className="h-9 w-9 rounded-lg border-2 border-[#9b7a56] bg-[#f7efdf] text-[#6b5038] transition-colors duration-200 hover:bg-[#efe2ca] hover:text-[#4b3522]"
+                          aria-label="Task deadline policy"
+                        >
+                          <Info strokeWidth={2.5} className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="center" className="max-w-64 text-center">
+                        all tasks deadline are set to 11:59PM on that displayed day
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
               </div>

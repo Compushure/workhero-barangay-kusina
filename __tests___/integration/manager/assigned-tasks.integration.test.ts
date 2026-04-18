@@ -97,6 +97,93 @@ describe('When the manager loads remote assigned tasks', () => {
     expect(employeeView.taskCount).toBeGreaterThanOrEqual(1);
     expect(toastError).not.toHaveBeenCalled();
   });
+
+  test('Then seeded deadline values align to 11:59PM Asia/Manila and overdue filters classify correctly', async () => {
+    const manager = await remoteContext.seedUser({
+      roleType: 'manager',
+      namePrefix: 'Manager Deadline Window',
+      emailPrefix: 'manager.deadline.window',
+    });
+    const employee = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: 'Employee Deadline Window',
+      emailPrefix: 'employee.deadline.window',
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+    const category = await remoteContext.seedCategory({
+      namePrefix: 'Deadline Window Category',
+      points: 8,
+      xp: 3,
+    });
+
+    const futureTask = await remoteContext.seedTask({
+      assignedBy: manager.id,
+      assignedTo: employee.id,
+      categoryId: category.id,
+      status: 'assigned',
+      pendingOrders: 0,
+      completedOrders: 0,
+      maxOrders: 1,
+      deadlineDate: '2099-12-31T15:59:59.999Z',
+    });
+
+    const overdueTask = await remoteContext.seedTask({
+      assignedBy: manager.id,
+      assignedTo: employee.id,
+      categoryId: category.id,
+      status: 'assigned',
+      pendingOrders: 0,
+      completedOrders: 0,
+      maxOrders: 1,
+      deadlineDate: '2000-01-01T15:59:59.999Z',
+    });
+
+    currentServerClient = remoteContext.createServerClientForUser(manager);
+
+    const { data: futureTaskRow, error: futureTaskError } = await remoteContext.admin
+      .from('KPITask')
+      .select('deadline_date')
+      .eq('id', futureTask.id)
+      .single();
+
+    expect(futureTaskError).toBeNull();
+    const normalizedFutureDeadline = new Date((futureTaskRow as { deadline_date: string }).deadline_date);
+    expect(
+      normalizedFutureDeadline.toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
+    ).toBe('2099-12-31');
+    expect(
+      normalizedFutureDeadline.toLocaleTimeString('en-GB', {
+        timeZone: 'Asia/Manila',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      })
+    ).toBe('23:59:59');
+
+    const nonOverdueView = await handleFetchCurrentAssignedTasksPaginated(
+      1,
+      20,
+      'recently added',
+      '',
+      [],
+      'hide-overdue'
+    );
+    expect(nonOverdueView.tasks.some((row) => row.id === futureTask.id)).toBe(true);
+    expect(nonOverdueView.tasks.some((row) => row.id === overdueTask.id)).toBe(false);
+
+    const overdueOnlyView = await handleFetchCurrentAssignedTasksPaginated(
+      1,
+      20,
+      'recently added',
+      '',
+      [],
+      'only-overdue'
+    );
+    expect(overdueOnlyView.tasks.some((row) => row.id === overdueTask.id)).toBe(true);
+  });
 });
 
 describe('When the manager clears unstarted tasks for a specific employee', () => {

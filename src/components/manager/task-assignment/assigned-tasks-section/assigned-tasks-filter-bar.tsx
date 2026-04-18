@@ -6,6 +6,7 @@ import {
   CircleDashed,
   EyeOff,
   Filter,
+  Info,
   Layers3,
   Target,
   XCircle,
@@ -21,6 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface AssignedTasksFilterBarProps {
   statusFilters: string[];
@@ -52,60 +54,79 @@ export function AssignedTasksFilterBar({
     statusFilters.length !== statusOptions.length || overdueFilter !== 'hide-overdue';
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="default"
-          size="default"
-          className={`text-button control-h shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer w-10 sm:w-26 justify-around px-2 ${
-            isActive
-              ? 'bg-primary-gradient text-primary-foreground hover:brightness-90'
-              : 'bg-card text-foreground hover:bg-card hover:brightness-90'
-          }`}
-        >
-          <Filter
-            size={12}
-            className={`shrink-0 ${isActive ? 'text-primary-foreground' : 'text-accent'}`}
-          />
-          <span className="truncate hidden sm:inline">Filters</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="manager-dropdown-content min-w-44">
-        <DropdownMenuLabel className="text-xs font-semibold text-secondary uppercase tracking-wide px-2 py-1">
-          Overdue
-        </DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={overdueFilter} onValueChange={onOverdueFilterChange}>
-          {overdueOptions.map((opt) => (
-            <DropdownMenuRadioItem
+    <div className="flex items-center gap-1.5">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="default"
+            size="default"
+            className={`text-button control-h shadow-sm/25 transition-all duration-400 ease-in-out cursor-pointer w-10 sm:w-26 justify-around px-2 ${
+              isActive
+                ? 'bg-primary-gradient text-primary-foreground hover:brightness-90'
+                : 'bg-card text-foreground hover:bg-card hover:brightness-90'
+            }`}
+          >
+            <Filter
+              size={12}
+              className={`shrink-0 ${isActive ? 'text-primary-foreground' : 'text-accent'}`}
+            />
+            <span className="truncate hidden sm:inline">Filters</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="manager-dropdown-content min-w-44">
+          <DropdownMenuLabel className="text-xs font-semibold text-secondary uppercase tracking-wide px-2 py-1">
+            Overdue
+          </DropdownMenuLabel>
+          <DropdownMenuRadioGroup value={overdueFilter} onValueChange={onOverdueFilterChange}>
+            {overdueOptions.map((opt) => (
+              <DropdownMenuRadioItem
+                key={opt.value}
+                value={opt.value}
+                className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out pl-2 [&_span.absolute]:hidden ${
+                  overdueFilter === opt.value ? 'bg-accent/15 text-foreground font-medium' : ''
+                }`}
+              >
+                <opt.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
+                <span className="truncate">{opt.label}</span>
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel className="text-xs font-semibold text-secondary uppercase tracking-wide px-2 py-1">
+            Status
+          </DropdownMenuLabel>
+          {statusOptions.map((opt) => (
+            <DropdownMenuCheckboxItem
               key={opt.value}
-              value={opt.value}
-              className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out pl-2 [&_span.absolute]:hidden ${
-                overdueFilter === opt.value ? 'bg-accent/15 text-foreground font-medium' : ''
+              checked={statusFilters.includes(opt.value)}
+              onCheckedChange={() => onStatusFilterToggle(opt.value)}
+              className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out my-1 ${
+                statusFilters.includes(opt.value) ? 'bg-accent/15 text-foreground font-medium' : ''
               }`}
             >
               <opt.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
               <span className="truncate">{opt.label}</span>
-            </DropdownMenuRadioItem>
+            </DropdownMenuCheckboxItem>
           ))}
-        </DropdownMenuRadioGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuLabel className="text-xs font-semibold text-secondary uppercase tracking-wide px-2 py-1">
-          Status
-        </DropdownMenuLabel>
-        {statusOptions.map((opt) => (
-          <DropdownMenuCheckboxItem
-            key={opt.value}
-            checked={statusFilters.includes(opt.value)}
-            onCheckedChange={() => onStatusFilterToggle(opt.value)}
-            className={`manager-dropdown-item text-meta cursor-pointer transition-all duration-400 ease-in-out my-1 ${
-              statusFilters.includes(opt.value) ? 'bg-accent/15 text-foreground font-medium' : ''
-            }`}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="control-h size-9 border-zinc-200 bg-card text-accent hover:bg-card hover:brightness-90"
+            aria-label="Task deadline policy"
           >
-            <opt.icon className="mr-2.5 size-3.5 shrink-0 text-accent" />
-            <span className="truncate">{opt.label}</span>
-          </DropdownMenuCheckboxItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <Info className="size-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="top" align="center" className="max-w-64 text-center">
+          all tasks deadline are set to 11:59PM on that displayed day
+        </TooltipContent>
+      </Tooltip>
+    </div>
   );
 }

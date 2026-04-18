@@ -21,10 +21,11 @@ export function DatePickerPopover({
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date && !disabled) {
-      // Adjust for Manila timezone (UTC+8) to prevent showing previous day
-      const manilaOffset = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
-      const adjustedDate = new Date(date.getTime() + manilaOffset);
-      onDeadlineChange(adjustedDate);
+      // Store selected day as a stable timestamp so timezone conversion keeps the same calendar date.
+      const stableDate = new Date(
+        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0, 0)
+      );
+      onDeadlineChange(stableDate);
     }
   };
 
@@ -48,9 +49,7 @@ export function DatePickerPopover({
             mode="single"
             selected={deadline || undefined}
             onSelect={handleDateSelect}
-            disabled={(date) =>
-              disabled || date < new Date(new Date().setHours(0, 0, 0, 0))
-            }
+            disabled={(date) => disabled || date < new Date(new Date().setHours(0, 0, 0, 0))}
           />
         </div>
       </PopoverContent>
