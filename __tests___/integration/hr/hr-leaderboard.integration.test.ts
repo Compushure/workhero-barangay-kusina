@@ -249,6 +249,46 @@ describe('When HR validates and toggles seeded ranking periods', () => {
     expect(existsResult.data).toBe(false);
   });
 
+  test('Then checkRankingExists returns false when a ranking period exists without ranking entries', async () => {
+    const hrUser = await remoteContext.seedUser({
+      roleType: 'hr',
+      namePrefix: 'HR Orphan Ranking Period',
+      emailPrefix: 'hr.orphan.ranking.period',
+    });
+
+    const orphanYear = 2099;
+    const orphanWeek = 6;
+    const { start, end } = getPeriodStartEnd('weekly', orphanYear, undefined, orphanWeek);
+    const orphanPeriodStart = toManilaDateString(start);
+    const orphanPeriodEnd = toManilaDateString(end);
+
+    const { data: orphanPeriod, error: orphanPeriodError } = await remoteContext.admin
+      .from('RankingPeriod')
+      .insert({
+        period_type: 'weekly',
+        period_start: orphanPeriodStart,
+        period_end: orphanPeriodEnd,
+        is_visible: false,
+      })
+      .select('id')
+      .single();
+
+    if (orphanPeriodError || !orphanPeriod?.id) {
+      throw new Error(
+        `Failed to seed orphan ranking period: ${orphanPeriodError?.message ?? 'Unknown error'}`
+      );
+    }
+
+    createdRankingPeriodIds.push(orphanPeriod.id);
+
+    currentServerClient = remoteContext.createServerClientForUser(hrUser);
+
+    const existsResult = await checkRankingExists('weekly', orphanYear, undefined, orphanWeek);
+
+    expect(existsResult.success).toBe(true);
+    expect(existsResult.data).toBe(false);
+  });
+
   test('Then toggleRankingVisibility updates seeded period visibility from hidden to visible', async () => {
     const hrUser = await remoteContext.seedUser({
       roleType: 'hr',
