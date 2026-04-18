@@ -63,22 +63,6 @@ function getDatePartsInTimeZone(date: Date, timeZone: string) {
   };
 }
 
-export function getCurrentManilaDateString(): string {
-  const { year, month, day } = getDatePartsInTimeZone(new Date(), MANILA_TIMEZONE);
-  return `${year}-${month}-${day}`;
-}
-
-export function getDateStringInManila(date: string | Date): string {
-  const parsedDate = typeof date === 'string' ? new Date(date) : date;
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '';
-  }
-
-  const { year, month, day } = getDatePartsInTimeZone(parsedDate, MANILA_TIMEZONE);
-  return `${year}-${month}-${day}`;
-}
-
 /**
  * Formats a date-like value into a short readable string.
  * @param date - Date value (string/date/null)
