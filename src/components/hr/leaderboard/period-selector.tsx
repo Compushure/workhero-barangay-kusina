@@ -124,6 +124,11 @@ export function PeriodSelector({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [optimisticallyGeneratedKey, setOptimisticallyGeneratedKey] = useState<string | null>(null);
+  const [generatedRankingMeta, setGeneratedRankingMeta] = useState<{
+    periodKey: string;
+    rankingPeriodId: string;
+    isVisible: boolean;
+  } | null>(null);
   const generateRankingMutation = useGenerateRankingByPeriod();
   const latestWeek = getPreviousWeek();
   const latestMonth = getPreviousMonth();
@@ -152,7 +157,12 @@ export function PeriodSelector({
       : currentType === 'monthly'
         ? currentYear === latestMonth.year && currentMonth === latestMonth.month
         : currentYear === latestYear;
-  const hasRankingMetadata = !!rankingPeriodId && typeof isVisible === 'boolean';
+  const activeGeneratedMeta =
+    generatedRankingMeta?.periodKey === currentPeriodKey ? generatedRankingMeta : null;
+  const resolvedRankingPeriodId = activeGeneratedMeta?.rankingPeriodId ?? rankingPeriodId;
+  const resolvedIsVisible = activeGeneratedMeta?.isVisible ?? isVisible;
+
+  const hasRankingMetadata = !!resolvedRankingPeriodId && typeof resolvedIsVisible === 'boolean';
   const hasInconsistentRankingState = currentPeriodRankingExists && !hasRankingMetadata;
   const hasRanking = hasRankingMetadata || optimisticallyGeneratedKey === currentPeriodKey;
   const isGenerating = generateRankingMutation.isPending;
@@ -212,13 +222,21 @@ export function PeriodSelector({
       {
         onSuccess: (data) => {
           if (data && data.length > 0) {
+            const firstRow = data[0];
             setOptimisticallyGeneratedKey(currentPeriodKey);
+            setGeneratedRankingMeta({
+              periodKey: currentPeriodKey,
+              rankingPeriodId: firstRow.ranking_period_id,
+              isVisible: firstRow.is_visible,
+            });
           } else {
             setOptimisticallyGeneratedKey(null);
+            setGeneratedRankingMeta(null);
           }
         },
         onError: () => {
           setOptimisticallyGeneratedKey(null);
+          setGeneratedRankingMeta(null);
         },
       }
     );
@@ -304,9 +322,9 @@ export function PeriodSelector({
 
             {hasRankingMetadata ? (
               <VisibilityToggle
-                rankingPeriodId={rankingPeriodId}
-                isVisible={isVisible}
-                disabled={rankingPeriodId.startsWith('optimistic-')}
+                rankingPeriodId={resolvedRankingPeriodId}
+                isVisible={resolvedIsVisible}
+                disabled={resolvedRankingPeriodId.startsWith('optimistic-')}
                 className="w-full xl:max-w-[186px]"
               />
             ) : hasInconsistentRankingState ? (
