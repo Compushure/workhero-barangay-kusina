@@ -12,12 +12,14 @@ import TaskIcon from './quick-task';
 import RewardIcon from './reward-icon';
 import { Card, CardContent } from '@/components/ui/card';
 import { useGetAllLevelMetadata, useGetEmployeeXP } from '@/hooks/tanstack/queries/employeeQueries';
+import { useCookingStore } from '@/store/cookingStore';
 
 export default function EmployeeDashboardClient() {
   const [isRewardFeedbackModalOpen, setIsRewardFeedbackModalOpen] = useState(false);
   const [isBackgroundReady, setIsBackgroundReady] = useState(false);
   const { data: xpData, isLoading: isXpLoading } = useGetEmployeeXP();
   const { data: levelMetadata, isLoading: isLevelMetadataLoading } = useGetAllLevelMetadata();
+  const isCookingSequenceActive = useCookingStore((state) => Boolean(state.trigger));
 
   const kitchenBackgroundUrl = useMemo(() => {
     const currentLevel = xpData?.level;
@@ -133,8 +135,11 @@ export default function EmployeeDashboardClient() {
         {/* Row 3: Tasks and reward feedback triggers */}
         <section className="flex justify-center px-4 pb-4 pt-10">
           <div className="flex items-center gap-6">
-            <TaskIcon />
-            <RewardIcon onOpen={() => setIsRewardFeedbackModalOpen(true)} />
+            <TaskIcon disabled={isCookingSequenceActive} />
+            <RewardIcon
+              disabled={isCookingSequenceActive}
+              onOpen={() => setIsRewardFeedbackModalOpen(true)}
+            />
           </div>
         </section>
 
