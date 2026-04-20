@@ -309,7 +309,7 @@ describe('When the manager clears or deletes assigned tasks through handlers', (
     const deleted = await handleDeleteTask('task-2');
 
     expect(deleted).toBe(true);
-    expect(toast.success).toHaveBeenCalledWith('Employee Unnassigned successfully');
+    expect(toast.success).toHaveBeenCalledWith('Employee unassigned from Task');
   });
 
   test('Then delete-task-group handler returns true and shows success toast when action succeeds', async () => {
@@ -351,6 +351,6 @@ describe('When the manager clears or deletes assigned tasks through handlers', (
       'employee-1',
       'employee-2',
     ]);
-    expect(toast.success).toHaveBeenCalledWith('Task updated successfully');
+    expect(toast.success).toHaveBeenCalledWith('Task updated');
   });
 });

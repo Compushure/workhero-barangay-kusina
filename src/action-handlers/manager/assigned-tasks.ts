@@ -170,7 +170,7 @@ export async function handleDeleteTask(taskId: string): Promise<boolean> {
     return false;
   }
 
-  toast.success('Employee removed from Task successfully');
+  toast.success('Employee unassigned from Task');
   return true;
 }
 
@@ -214,6 +214,6 @@ export async function handleUpdateTaskAssignment(
     return false;
   }
 
-  toast.success('Task updated successfully');
+  toast.success('Task updated');
   return true;
 }

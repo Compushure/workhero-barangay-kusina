@@ -3,7 +3,7 @@
 import { useEffect, useState, memo } from 'react';
 import type { AssignedTask, AssignedEmployee } from '@/types';
 import EmployeeViewCardMenu from './dialogs/employee-view/employee-view-card-menu';
-import ClearAllTasksDialog from './dialogs/employee-view/clear-all-tasks-dialog';
+import ClearUnstartedEmployeeTasksDialog from './dialogs/employee-view/clear-unstarted-employee-tasks-dialog';
 import ClearTaskDialog from './dialogs/employee-view/clear-task-dialog';
 import EmployeeViewTaskBadges from './employee-view-task-badges';
 
@@ -164,7 +164,7 @@ export function EmployeeViewCard({ tasks, searchTerm = '', sortBy }: EmployeeVie
         }
       />
 
-      <ClearAllTasksDialog
+      <ClearUnstartedEmployeeTasksDialog
         showClearConfirm={showClearConfirm}
         setShowClearConfirm={setShowClearConfirm}
         employee={

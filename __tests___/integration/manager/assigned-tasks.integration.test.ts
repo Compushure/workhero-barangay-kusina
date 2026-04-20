@@ -443,7 +443,7 @@ describe('When the manager edits an assigned task group', () => {
       expect(cleanupError).toBeNull();
     }
 
-    expect(toastSuccess).toHaveBeenCalledWith('Task updated successfully');
+    expect(toastSuccess).toHaveBeenCalledWith('Task updated');
   });
 });
 
@@ -490,6 +490,6 @@ describe('When the manager deletes a specific assigned task', () => {
     expect(deleted).toBe(true);
     expect(reloadError).toBeNull();
     expect(deletedTaskRow).toBeNull();
-    expect(toastSuccess).toHaveBeenCalledWith('Employee Unnassigned successfully');
+    expect(toastSuccess).toHaveBeenCalledWith('Employee unassigned from Task');
   });
 });
