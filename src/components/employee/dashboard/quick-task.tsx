@@ -64,7 +64,11 @@ function WideDialogContent({ children, className, ...props }: DialogContentProps
   );
 }
 
-export default function TaskIcon() {
+interface TaskIconProps {
+  disabled?: boolean;
+}
+
+export default function TaskIcon({ disabled = false }: TaskIconProps) {
   const [open, setOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [filterBy, setFilterBy] = useState<QuickTaskFilter>('all');
@@ -139,17 +143,26 @@ export default function TaskIcon() {
         : 'text-[#4b3522] hover:bg-[#8a6039] hover:text-[#fff6e5] data-[highlighted]:bg-[#8a6039] data-[highlighted]:text-[#fff6e5]'
     }`;
 
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    if (disabled && nextOpen) {
+      return;
+    }
+
+    setOpen(nextOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center font-pixel">
             <DialogTrigger asChild>
               <Button
                 type="button"
+                disabled={disabled}
                 aria-label="Open tasks to claim rewards"
-                className={`relative size-18 rounded-full border-3 border-[#47331F] bg-[#8A6039] shadow-[5px_5px_0px_#000] shadow-[#47331F]/55 transition-transform hover:bg-[#9A6E45] cursor-pointer hover:scale-105 focus-visible:ring-4 focus-visible:ring-[#F4B925]/60 ${
-                  hasRewards ? 'animate-pulse ring-4 ring-[#F4B925]' : ''
+                className={`relative size-18 rounded-full border-3 border-[#47331F] bg-[#8A6039] shadow-[5px_5px_0px_#000] shadow-[#47331F]/55 transition-transform hover:bg-[#9A6E45] cursor-pointer hover:scale-105 focus-visible:ring-4 focus-visible:ring-[#F4B925]/60 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100 ${
+                  hasRewards && !disabled ? 'animate-pulse ring-4 ring-[#F4B925]' : ''
                 }`}
               >
                 <Image
@@ -186,7 +199,8 @@ export default function TaskIcon() {
             Claimable Tasks
           </DialogTitle>
           <DialogDescription className="pr-16 font-pixel text-[14px] leading-5 text-[#6b5038]">
-            Claim fiesta points and xp from approved tasks and serve dishes for tasks when all its orders are performed.
+            Claim fiesta points and xp from approved tasks and serve dishes for tasks when all its
+            orders are performed.
           </DialogDescription>
           <div className="mt-2 flex w-full flex-col gap-2 sm:flex-row sm:items-end sm:justify-end">
             <Select

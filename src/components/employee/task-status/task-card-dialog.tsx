@@ -321,7 +321,7 @@ export default function TaskCardDialog({ task, modalOpen, setModalOpen }: TaskCa
                     DUE DATE
                   </span>
                   <p
-                    className={`flex items-center gap-1 text-[12px] sm:gap-2 sm:text-[17px] ${isOverdue ? 'text-[#8b2e22]' : 'text-[#4b3522]'}`}
+                    className={`flex items-center gap-1 text-[12px] sm:gap-2 sm:text-[17px] ${(lifecycle.showOverdueChip && (lifecycle.isAssignedTask || lifecycle.isRejectedTask)) ? 'text-[#8b2e22]' : 'text-[#4b3522]'}`}
                   >
                     <Calendar strokeWidth={2.5} className="size-3.5 sm:size-5" />
                     {formatDate(task.dueDate)}
