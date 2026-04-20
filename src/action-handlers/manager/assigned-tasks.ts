@@ -170,7 +170,7 @@ export async function handleDeleteTask(taskId: string): Promise<boolean> {
     return false;
   }
 
-  toast.success('Employee Unnassigned successfully');
+  toast.success('Employee removed from Task successfully');
   return true;
 }
 
