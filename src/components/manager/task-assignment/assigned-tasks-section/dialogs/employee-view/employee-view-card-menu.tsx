@@ -28,7 +28,7 @@ function EmployeeViewCardMenu({
           <MoreVertical className="size-5" />
         </button>
       </PopoverTrigger>
-      <PopoverContent portalled={false} className="w-32 p-1.5 bg-card" align="end">
+      <PopoverContent portalled={false} className="w-34 p-1.5 bg-card" align="end">
         <div className="flex flex-col gap-1.5">
           <Button
             onClick={() => {
@@ -36,7 +36,7 @@ function EmployeeViewCardMenu({
               setOpenPopoverId(null);
             }}
             variant="ghost"
-            className="justify-start text-red-600 hover:text-red-600 hover:bg-accent-secondary/25 cursor-pointer hover:transition-all duration-500 ease-in-out px-2"
+            className="justify-start text-red-600 hover:text-red-600 hover:bg-accent-secondary/25 cursor-pointer hover:transition-all duration-500 ease-in-out pl-2 pr-4"
           >
             Clear Unstarted
           </Button>

@@ -127,7 +127,7 @@ function MercadoLayoutContent({ children }: MercadoLayoutClientProps) {
         }}
       >
         <div className="pointer-events-auto flex w-full flex-col gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
-          <HeaderHUD className="rounded-lg" hideNotificationsOnMercado={false} />
+          <HeaderHUD className="rounded-lg" />
         </div>
       </div>
 
