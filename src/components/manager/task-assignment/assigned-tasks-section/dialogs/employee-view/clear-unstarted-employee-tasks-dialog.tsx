@@ -10,20 +10,20 @@ import {
 import { AssignedEmployee } from '@/types';
 import { useClearUnstartedEmployeeTasksMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 
-interface ClearAllTasksDialogProps {
+interface ClearUnstartedEmployeeTasksDialogProps {
   showClearConfirm: string | null;
   setShowClearConfirm: (show: string | null) => void;
   employee: AssignedEmployee;
 }
 
-function ClearAllTasksDialog({
+function ClearUnstartedEmployeeTasksDialog({
   showClearConfirm,
   setShowClearConfirm,
   employee,
-}: ClearAllTasksDialogProps) {
+}: ClearUnstartedEmployeeTasksDialogProps) {
   const clearUnstartedEmployeeTasksMutation = useClearUnstartedEmployeeTasksMutation();
 
-  const handleClearAllTasks = async () => {
+  const handleClearUnstartedEmployeeTasks = async () => {
     if (!showClearConfirm) return;
 
     clearUnstartedEmployeeTasksMutation.mutate(
@@ -47,12 +47,13 @@ function ClearAllTasksDialog({
             Clear Unstarted Tasks For {employee.name}?
           </DialogTitle>
           <DialogDescription className="text-sm">
-            This only clears tasks with no progress yet. Tasks with completed orders, or tasks that are in review, approved, or rejected status will stay untouched.
+            This only clears tasks with no progress yet. Tasks with completed orders, or tasks that
+            are in review, approved, or rejected status will stay untouched.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex gap-3 justify-end">
           <Button
-            onClick={handleClearAllTasks}
+            onClick={handleClearUnstartedEmployeeTasks}
             disabled={clearUnstartedEmployeeTasksMutation.isPending}
             className="bg-red-700 hover:bg-red-500 text-white cursor-pointer transition-all duration-400 ease-in-out"
           >
@@ -72,4 +73,4 @@ function ClearAllTasksDialog({
   );
 }
 
-export default ClearAllTasksDialog;
+export default ClearUnstartedEmployeeTasksDialog;

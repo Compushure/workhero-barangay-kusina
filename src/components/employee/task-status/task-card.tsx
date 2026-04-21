@@ -57,7 +57,7 @@ export function TaskCard({ task }: TaskCardProps) {
 
               <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.85rem] leading-none sm:text-[13px]">
                 <span
-                  className={`flex items-center gap-1.5 ${lifecycle.showOverdueChip ? 'text-[#8b2e22]' : 'text-[#6b5038]'}`}
+                  className={`flex items-center gap-1.5 ${(lifecycle.showOverdueChip && (lifecycle.isAssignedTask || lifecycle.isRejectedTask)) ? 'text-[#8b2e22]' : 'text-[#6b5038]'}`}
                 >
                   <Calendar strokeWidth={2.5} className="size-4.5 shrink-0" />
                   Due {formatDate(task.dueDate)}
@@ -113,7 +113,7 @@ export function TaskCard({ task }: TaskCardProps) {
               </span>
             ) : null}
 
-            {lifecycle.showOverdueChip ? (
+            {lifecycle.showOverdueChip && (lifecycle.isAssignedTask || lifecycle.isRejectedTask) ? (
               <span
                 className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-md border-2 px-2 py-0.5 leading-none ${overdueChip.className}`}
                 title="Task is overdue"

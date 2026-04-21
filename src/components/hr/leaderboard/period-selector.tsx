@@ -124,6 +124,11 @@ export function PeriodSelector({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [optimisticallyGeneratedKey, setOptimisticallyGeneratedKey] = useState<string | null>(null);
+  const [generatedRankingMeta, setGeneratedRankingMeta] = useState<{
+    periodKey: string;
+    rankingPeriodId: string;
+    isVisible: boolean;
+  } | null>(null);
   const generateRankingMutation = useGenerateRankingByPeriod();
   const latestWeek = getPreviousWeek();
   const latestMonth = getPreviousMonth();
@@ -152,8 +157,14 @@ export function PeriodSelector({
       : currentType === 'monthly'
         ? currentYear === latestMonth.year && currentMonth === latestMonth.month
         : currentYear === latestYear;
-  const hasRanking =
-    currentPeriodRankingExists || optimisticallyGeneratedKey === currentPeriodKey;
+  const activeGeneratedMeta =
+    generatedRankingMeta?.periodKey === currentPeriodKey ? generatedRankingMeta : null;
+  const resolvedRankingPeriodId = activeGeneratedMeta?.rankingPeriodId ?? rankingPeriodId;
+  const resolvedIsVisible = activeGeneratedMeta?.isVisible ?? isVisible;
+
+  const hasRankingMetadata = !!resolvedRankingPeriodId && typeof resolvedIsVisible === 'boolean';
+  const hasInconsistentRankingState = currentPeriodRankingExists && !hasRankingMetadata;
+  const hasRanking = hasRankingMetadata || optimisticallyGeneratedKey === currentPeriodKey;
   const isGenerating = generateRankingMutation.isPending;
   const isGenerateDisabled = hasRanking || isPending || isGenerating || !isLatestSelected;
   const generateStatus = hasRanking
@@ -161,20 +172,23 @@ export function PeriodSelector({
         icon: CheckCircle2,
         text: 'Already generated',
         tone: 'text-emerald-600',
-        textClassName: 'text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground',
+        textClassName:
+          'text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground',
       }
     : isLatestSelected
       ? {
           icon: AlertCircle,
           text: 'Generation available',
           tone: 'text-amber-600',
-          textClassName: 'text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground',
+          textClassName:
+            'text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground',
         }
       : {
           icon: AlertCircle,
           text: 'Generation unavailable',
           tone: 'text-muted-foreground',
-          textClassName: 'text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground',
+          textClassName:
+            'text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground',
         };
 
   const handleWeeklyPeriodChange = (value: string) => {
@@ -208,20 +222,29 @@ export function PeriodSelector({
       {
         onSuccess: (data) => {
           if (data && data.length > 0) {
+            const firstRow = data[0];
             setOptimisticallyGeneratedKey(currentPeriodKey);
+            setGeneratedRankingMeta({
+              periodKey: currentPeriodKey,
+              rankingPeriodId: firstRow.ranking_period_id,
+              isVisible: firstRow.is_visible,
+            });
           } else {
             setOptimisticallyGeneratedKey(null);
+            setGeneratedRankingMeta(null);
           }
         },
         onError: () => {
           setOptimisticallyGeneratedKey(null);
+          setGeneratedRankingMeta(null);
         },
       }
     );
   };
 
   const GenerateStatusIcon = generateStatus.icon;
-  const selectContentClassName = 'manager-dropdown-content rounded-lg bg-popover text-popover-foreground';
+  const selectContentClassName =
+    'manager-dropdown-content rounded-lg bg-popover text-popover-foreground';
   const selectItemClassName =
     'cursor-pointer transition-all duration-300 ease-in-out hover:bg-accent/15 hover:text-foreground data-[highlighted]:bg-accent/15 data-[highlighted]:text-foreground data-[state=checked]:bg-accent/15 data-[state=checked]:text-foreground';
 
@@ -286,9 +309,7 @@ export function PeriodSelector({
             <div className="flex w-full flex-col items-start gap-1.5 xl:max-w-[176px]">
               <div className="flex min-h-4 items-center gap-1.5">
                 <GenerateStatusIcon className={cn('h-3.5 w-3.5 shrink-0', generateStatus.tone)} />
-                <span className={generateStatus.textClassName}>
-                  {generateStatus.text}
-                </span>
+                <span className={generateStatus.textClassName}>{generateStatus.text}</span>
               </div>
               <Button
                 onClick={handleGenerateRank}
@@ -299,13 +320,22 @@ export function PeriodSelector({
               </Button>
             </div>
 
-            {hasRanking && rankingPeriodId && typeof isVisible === 'boolean' ? (
+            {hasRankingMetadata ? (
               <VisibilityToggle
-                rankingPeriodId={rankingPeriodId}
-                isVisible={isVisible}
-                disabled={rankingPeriodId.startsWith('optimistic-')}
+                rankingPeriodId={resolvedRankingPeriodId}
+                isVisible={resolvedIsVisible}
+                disabled={resolvedRankingPeriodId.startsWith('optimistic-')}
                 className="w-full xl:max-w-[186px]"
               />
+            ) : hasInconsistentRankingState ? (
+              <div className="inline-flex w-full flex-col items-start gap-1.5 rounded-md border border-amber-300 bg-amber-50/80 px-3 py-2 xl:max-w-46.5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-700">
+                  Visibility unavailable
+                </p>
+                <p className="text-[11px] leading-4 text-amber-800">
+                  Ranking data is incomplete. Generate again to restore visibility controls.
+                </p>
+              </div>
             ) : null}
           </div>
         </div>

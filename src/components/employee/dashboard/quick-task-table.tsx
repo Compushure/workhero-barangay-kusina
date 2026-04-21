@@ -71,6 +71,14 @@ export default function TasksTable({
   const claimFeedbackTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const activeCookingTaskId = useCookingStore((state) => state.trigger?.taskId ?? null);
+  const isQuickTaskActionLocked = useMemo(
+    () =>
+      claimMutation.isPending ||
+      Object.values(claimingTaskIds).some(Boolean) ||
+      preparingTaskId !== null ||
+      activeCookingTaskId !== null,
+    [claimMutation.isPending, claimingTaskIds, preparingTaskId, activeCookingTaskId]
+  );
 
   const approvedTasks = useMemo(() => {
     const source = data?.verifiedTasks ?? fallbackTasks;
@@ -217,7 +225,7 @@ export default function TasksTable({
       Boolean(cookReadyByTaskId[task.id]?.canPrepareFood) || Boolean(retainedClaimTasks[task.id]);
     const isClaimedForCurrentBatch =
       Boolean(claimedTaskIds[task.id]) && (claimableOrderCount === 0 || hasLocalFinalClaimReady);
-    if (claimMutation.isPending || isClaimedForCurrentBatch) return;
+    if (isQuickTaskActionLocked || isClaimedForCurrentBatch) return;
 
     claimStartTimesRef.current[task.id] = Date.now();
     setClaimingTaskIds((previous) => ({
@@ -286,6 +294,8 @@ export default function TasksTable({
   };
 
   const handlePrepareFood = (task: TaskStatusItem) => {
+    if (isQuickTaskActionLocked) return;
+
     const cookOutcome = cookReadyByTaskId[task.id];
     const isTaskBeingClaimed = claimMutation.isPending && activeClaimId === task.id;
     const isTaskClaimingFeedbackActive = Boolean(claimingTaskIds[task.id]);
@@ -444,7 +454,7 @@ export default function TasksTable({
                     size="sm"
                     onClick={() => handleClaim(task)}
                     disabled={
-                      claimMutation.isPending ||
+                      isQuickTaskActionLocked ||
                       isPreparingTask ||
                       isClaimedTask ||
                       isServerPrepareEligible ||
@@ -458,7 +468,7 @@ export default function TasksTable({
                       'Claimed'
                     ) : (
                       <span className="inline-flex items-center gap-1">
-                        <span className='pr-0.5'>CLAIM</span>
+                        <span className="pr-0.5">CLAIM</span>
                         <Coins className="h-3.5 w-3.5 shrink-0" />
                         <span>{totalPoints}</span>
                         <span>|</span>
@@ -471,7 +481,7 @@ export default function TasksTable({
                     <Button
                       size="sm"
                       onClick={() => handlePrepareFood(task)}
-                      disabled={!canPrepareFood}
+                      disabled={isQuickTaskActionLocked || !canPrepareFood}
                       className="h-10 px-4 font-pixel text-[0.9rem] border-2 border-[#47331F] bg-[#4d6d3a] text-[#f8edd8] shadow-[3px_3px_0px_#2e421f] hover:bg-[#5a7e45] disabled:cursor-not-allowed disabled:opacity-55"
                     >
                       {isPreparingTask
@@ -496,7 +506,7 @@ export default function TasksTable({
           <button
             type="button"
             onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))}
-            disabled={currentPage === 1}
+            disabled={isQuickTaskActionLocked || currentPage === 1}
             className="h-10 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-4 font-pixel text-[14px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Prev
@@ -507,7 +517,7 @@ export default function TasksTable({
           <button
             type="button"
             onClick={() => setCurrentPage((previous) => Math.min(totalPages, previous + 1))}
-            disabled={currentPage === totalPages}
+            disabled={isQuickTaskActionLocked || currentPage === totalPages}
             className="h-10 rounded-md border border-[#9b7a56] bg-[#f7efdf] px-4 font-pixel text-[14px] text-[#4b3522] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Next

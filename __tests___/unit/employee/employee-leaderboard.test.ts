@@ -14,6 +14,7 @@ import {
   getEmployeeTopRanksByPeriod,
   getEmployeeTopWeeklyRanks,
 } from '@/actions/employee/stats';
+import { getPeriodStartEnd, toManilaDateString } from '@/lib/utils/time-period-utils';
 import {
   handleFetchEmployeeRank,
   handleFetchEmployeeTopRanksByPeriod,
@@ -43,6 +44,7 @@ type LeaderboardState = {
   latestPeriod: RankingPeriodRow;
   rankingEntries: RankingEntryRow[];
   leaderboardRows: LeaderboardViewRow[];
+  leaderboardViewEqCalls: Array<[string, unknown]>;
   rankingPeriodError?: QueryError;
   rankingEntriesError?: QueryError;
   leaderboardRowsError?: QueryError;
@@ -129,7 +131,10 @@ function createLeaderboardViewQuery(state: LeaderboardState) {
   return {
     select: jest.fn(() => {
       const query = {
-        eq: jest.fn(() => query),
+        eq: jest.fn((column: string, value: unknown) => {
+          state.leaderboardViewEqCalls.push([column, value]);
+          return query;
+        }),
         order: jest.fn(() => query),
         limit: jest.fn(async () => {
           if (state.leaderboardRowsError) {
@@ -194,6 +199,7 @@ beforeEach(() => {
     latestPeriod: { ...employeeLeaderboardLatestPeriod },
     rankingEntries: [...employeeLeaderboardRankingEntries],
     leaderboardRows: [...employeeLeaderboardRows],
+    leaderboardViewEqCalls: [],
   };
 
   createClientMock.mockReset();
@@ -248,12 +254,80 @@ describe('When the employee reads leaderboard snapshots', () => {
         }),
       ])
     );
+    expect(leaderboardState.leaderboardViewEqCalls).toEqual(
+      expect.arrayContaining([
+        ['period_type', 'weekly'],
+        ['is_visible', true],
+        ['period_start', employeeLeaderboardLatestPeriod.period_start],
+      ])
+    );
+  });
+
+  test('Then the getEmployeeTopRanksByPeriod action queries only visible rows for the computed period start', async () => {
+    const { start } = getPeriodStartEnd(
+      employeeLeaderboardPeriodSelection.periodType,
+      employeeLeaderboardPeriodSelection.year,
+      undefined,
+      employeeLeaderboardPeriodSelection.week
+    );
+    const expectedPeriodStart = toManilaDateString(start);
+
+    const result = await getEmployeeTopRanksByPeriod(
+      employeeLeaderboardPeriodSelection.periodType,
+      employeeLeaderboardPeriodSelection.year,
+      undefined,
+      employeeLeaderboardPeriodSelection.week
+    );
+
+    expect(result.success).toBe(true);
+    expect(leaderboardState.leaderboardViewEqCalls).toEqual(
+      expect.arrayContaining([
+        ['period_type', employeeLeaderboardPeriodSelection.periodType],
+        ['is_visible', true],
+        ['period_start', expectedPeriodStart],
+      ])
+    );
   });
 
   test('Then the getEmployeeTopRanksByPeriod action returns null when no visible rows exist for the period', async () => {
     leaderboardState.leaderboardRows = [];
 
     const result = await getEmployeeTopRanksByPeriod('monthly', 2026, 3);
+
+    expect(result.success).toBe(true);
+    expect(result.data).toBeNull();
+  });
+
+  test('Then the getEmployeeRank action returns fallback defaults when no visible weekly period exists', async () => {
+    leaderboardState.latestPeriod = null;
+
+    const result = await getEmployeeRank();
+
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({
+      rank: 1,
+      performanceScore: 0,
+      totalEmployees: 1,
+    });
+  });
+
+  test('Then the getEmployeeRank action returns fallback defaults when latest period has no entries', async () => {
+    leaderboardState.rankingEntries = [];
+
+    const result = await getEmployeeRank();
+
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({
+      rank: 1,
+      performanceScore: 0,
+      totalEmployees: 1,
+    });
+  });
+
+  test('Then the getEmployeeTopWeeklyRanks action returns null when no weekly period start is available', async () => {
+    leaderboardState.latestPeriod = null;
+
+    const result = await getEmployeeTopWeeklyRanks();
 
     expect(result.success).toBe(true);
     expect(result.data).toBeNull();
@@ -288,6 +362,20 @@ describe('When employee leaderboard handlers process action responses', () => {
     expect(result).toBeNull();
     expect(toast.error).toHaveBeenCalledWith(
       'Failed to load rankings for selected period',
+      expect.objectContaining({
+        description: expect.stringContaining('User not authenticated'),
+      })
+    );
+  });
+
+  test('Then the weekly-top handler returns null and shows an error toast when the user is unauthenticated', async () => {
+    leaderboardState.sessionUser = null;
+
+    const result = await handleFetchEmployeeTopWeeklyRanks();
+
+    expect(result).toBeNull();
+    expect(toast.error).toHaveBeenCalledWith(
+      'Failed to load top weekly ranks',
       expect.objectContaining({
         description: expect.stringContaining('User not authenticated'),
       })

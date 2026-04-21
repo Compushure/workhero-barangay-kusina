@@ -14,7 +14,7 @@ export function RedemptionTableSkeleton({ rows = 6 }: { rows?: number }) {
       <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <Table>
           <TableHeader className="bg-background [&_tr]:border-0">
-            <TableRow className="border-0">
+            <TableRow className="bg-background border-0 hover:bg-background">
               <TableHead className="px-2 sm:px-4">
                 <Skeleton className="h-4 w-20 rounded bg-gray-300" />
               </TableHead>

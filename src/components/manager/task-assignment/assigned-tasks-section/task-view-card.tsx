@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef, memo } from 'react';
-import { parseISO, format } from 'date-fns';
+import { parseISO } from 'date-fns';
 import type { AssignedTask, AssignedEmployee } from '@/types';
-import { Coins, Soup } from 'lucide-react';
+import { Calendar, Coins, Soup } from 'lucide-react';
 import TaskViewCardMenu from './dialogs/task-view/task-view-card-menu';
 import EditTaskDialog from './dialogs/task-view/edit-task-dialog';
 import DeleteTaskDialog from './dialogs/task-view/delete-task-dialog';
@@ -12,7 +12,7 @@ import { useTaskAssignment } from '../task-assignment-page-context';
 import { useUpdateTaskAssignmentMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
 import { handleFetchEmployeeList } from '@/action-handlers/manager/assignments';
 import TaskViewEmployeeBadges from './task-view-employee-badges';
-import { isTaskOverdue } from '@/utils/date-utils';
+import { isTaskOverdue, toManilaDeadlineISOString } from '@/utils/date-utils';
 
 interface TaskViewCardProps {
   task: AssignedTask;
@@ -91,6 +91,11 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
   };
 
   const handleEditTask = async () => {
+    const normalizedDueDate = toManilaDeadlineISOString(editDueDate);
+    if (!normalizedDueDate) {
+      return;
+    }
+
     const newEmployees = editAssignedEmployees.map((empId) => {
       const existingEmp = (task.assignedEmployees ?? []).find((e) => e.id === empId);
       if (existingEmp) return existingEmp;
@@ -110,12 +115,12 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
       {
         taskId: task.id,
         maxOrders: editMaxOrders,
-        newDueDate: format(editDueDate, 'yyyy-MM-dd'),
+        newDueDate: normalizedDueDate,
         employeeIds: editAssignedEmployees,
       },
       {
         onSuccess: () => {
-          editTask(task.id, editMaxOrders, format(editDueDate, 'yyyy-MM-dd'), newEmployees);
+          editTask(task.id, editMaxOrders, normalizedDueDate, newEmployees);
           setShowEditDialog(false);
         },
       }
@@ -161,13 +166,14 @@ export function TaskViewCard({ task }: TaskViewCardProps) {
               </p>
             </div>
 
-            <p className="text-meta flex items-center text-secondary flex-wrap gap-0.5 sm:gap-1">
-              <span className="bg-accent-secondary/20 w-fit rounded-md px-2 py-0.5">
+            <p className="text-meta flex items-center text-primary/75 flex-wrap gap-0.5 sm:gap-1">
+              <span className={`${isOverdue ? 'bg-red-100 text-red-700 border border-red-300' : 'bg-accent-secondary/20 border border-accent-secondary/50'} flex items-center w-fit rounded-md px-2 py-0.5`}>
+                <Calendar className='h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 mr-0.5 sm:mr-1 mb-0.5'/> 
                 {formatDate(task.dateRange.start)} - {formatDate(task.dateRange.end)}
               </span>
               {isOverdue && (
-                <span className="bg-red-100 text-red-500 text-[13px] px-1.5 sm:px-2 py-0.5 rounded-md">
-                  Task is Overdue
+                <span className="bg-red-100 text-red-700 border border-red-300 text-[13px] px-1.5 sm:px-2 py-px sm:py-0.5 rounded-md">
+                  Overdue
                 </span>
               )}
             </p>

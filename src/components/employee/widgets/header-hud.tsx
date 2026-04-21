@@ -1,7 +1,6 @@
 'use client';
 
 import { Trophy } from 'lucide-react';
-import { ConditionalNotifications } from '../conditional-notifications';
 import XPProgress from './xp-level-widget';
 import PointsCardWidget from './points-card-widget';
 import { cn } from '@/lib/utils';
@@ -10,17 +9,14 @@ import { MapLauncher } from '../minimap/map-launcher';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { RankWidget } from '../dashboard/rank-panel';
+import { NotificationsPopover } from '@/components/notifications/notifications';
 import { DialogTitle } from '@radix-ui/react-dialog';
 
 interface HeaderHUDProps {
   className?: string;
-  hideNotificationsOnMercado?: boolean;
 }
 
-export default function HeaderHUD({
-  className,
-  hideNotificationsOnMercado = true,
-}: HeaderHUDProps) {
+export default function HeaderHUD({ className }: HeaderHUDProps) {
   return (
     <div
       data-dashboard-hud="true"
@@ -73,8 +69,7 @@ export default function HeaderHUD({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="inline-flex">
-                  <ConditionalNotifications
-                    hideOnMercado={hideNotificationsOnMercado}
+                  <NotificationsPopover
                     triggerClassName="size-10"
                     popoverSide="top"
                     popoverAlign="center"
@@ -127,8 +122,7 @@ export default function HeaderHUD({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="inline-flex">
-                <ConditionalNotifications
-                  hideOnMercado={hideNotificationsOnMercado}
+                <NotificationsPopover
                   triggerClassName="size-12"
                   popoverSide="bottom"
                   popoverAlign="end"
