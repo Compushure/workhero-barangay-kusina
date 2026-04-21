@@ -77,10 +77,33 @@ export function AssignEmployeesDialog({
     );
   }, [employees, searchTerm]);
 
+  useEffect(() => {
+    // Keep selection valid when task changes: remove employees now marked as unavailable.
+    if (selectedEmployees.length === 0 || disabledEmployeeIds.size === 0) {
+      return;
+    }
+
+    const nextSelectedEmployees = selectedEmployees.filter(
+      (employee) => !disabledEmployeeIds.has(employee.id)
+    );
+
+    if (nextSelectedEmployees.length !== selectedEmployees.length) {
+      onEmployeesChange(nextSelectedEmployees);
+    }
+  }, [disabledEmployeeIds, onEmployeesChange, selectedEmployees]);
+
+  // Select-all and checkbox state should only consider rows that are still selectable.
+  const selectableFilteredEmployees = useMemo(
+    () => filteredEmployees.filter((employee) => !disabledEmployeeIds.has(employee.id)),
+    [disabledEmployeeIds, filteredEmployees]
+  );
+
   const allFilteredSelected = useMemo(() => {
-    if (filteredEmployees.length === 0) return false;
-    return filteredEmployees.every((emp) => selectedEmployees.find((e) => e.id === emp.id));
-  }, [filteredEmployees, selectedEmployees]);
+    if (selectableFilteredEmployees.length === 0) return false;
+    return selectableFilteredEmployees.every((employee) =>
+      selectedEmployees.find((selected) => selected.id === employee.id)
+    );
+  }, [selectableFilteredEmployees, selectedEmployees]);
 
   const toggleEmployee = (employee: AssignedEmployee) => {
     const isSelected = selectedEmployees.find((e) => e.id === employee.id);
@@ -93,13 +116,13 @@ export function AssignEmployeesDialog({
 
   const handleSelectAll = () => {
     if (allFilteredSelected) {
-      // Deselect all filtered employees
-      const filteredIds = new Set(filteredEmployees.map((e) => e.id));
+      // Deselect only currently selectable filtered rows.
+      const filteredIds = new Set(selectableFilteredEmployees.map((employee) => employee.id));
       onEmployeesChange(selectedEmployees.filter((emp) => !filteredIds.has(emp.id)));
     } else {
-      // Select all filtered employees (excluding disabled ones)
-      const newSelections = filteredEmployees.filter(
-        (emp) => !selectedEmployees.find((e) => e.id === emp.id) && !disabledEmployeeIds.has(emp.id)
+      // Select only currently selectable filtered rows.
+      const newSelections = selectableFilteredEmployees.filter(
+        (employee) => !selectedEmployees.find((selected) => selected.id === employee.id)
       );
       onEmployeesChange([...selectedEmployees, ...newSelections]);
     }
