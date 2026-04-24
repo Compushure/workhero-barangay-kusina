@@ -1,4 +1,10 @@
+<img width="1906" height="605" alt="image" src="https://github.com/user-attachments/assets/86d39c0a-c1ba-4701-af36-e94de4cdb58c" />
+
+
 # WorkHero Barangay Kusina
+
+
+
 
 ![Next.js](https://img.shields.io/badge/Next.js-16.2.1-000000?logo=next.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-19.2.4-149ECA?logo=react&logoColor=white)
@@ -9,6 +15,9 @@
 ![Zustand](https://img.shields.io/badge/Zustand-State-7A5432)
 ![Jest](https://img.shields.io/badge/Jest-Testing-C21325?logo=jest&logoColor=white)
 ![Cypress](https://img.shields.io/badge/Cypress-E2E-69D3A7?logo=cypress&logoColor=white)
+
+
+
 
 Role-based employee operations and gamification platform built with Next.js, Supabase, TypeScript, TanStack Query, Zustand, and Tailwind CSS.
 
