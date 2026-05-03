@@ -3,8 +3,10 @@
 
 # WorkHero Barangay Kusina
 
-
-
+Test Coverage Summaries:
+- [__tests___/unit/summary_of_unit_test_coverage.md](__tests___/unit/summary_of_unit_test_coverage.md)
+- [__tests___/integration/summary_of_integration_test_coverage.md](__tests___/integration/summary_of_integration_test_coverage.md)
+- [cypress/summary_of_e2e_test.md](cypress/summary_of_e2e_test.md)
 
 ![Next.js](https://img.shields.io/badge/Next.js-16.2.1-000000?logo=next.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-19.2.4-149ECA?logo=react&logoColor=white)
