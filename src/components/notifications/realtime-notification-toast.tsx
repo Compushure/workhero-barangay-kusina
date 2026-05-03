@@ -8,7 +8,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
 import { notificationKeys } from '@/hooks/tanstack/queries/notificationQueries';
-import type { NotificationItem } from '@/types';
+import { redemptionKeys } from '@/hooks/tanstack/queries/redemptionQueries';
+import { rewardKeys } from '@/hooks/tanstack/queries/rewardQueries';
+import { employeeKeys } from '@/hooks/tanstack/queries/employeeQueries';
+import type { NotificationItem, RedemptionRequest, Reward } from '@/types';
+import type { QueryKey } from '@tanstack/react-query';
 
 interface RealtimeNotificationToastClientProps {
   userId: string;
@@ -35,6 +39,134 @@ const ICON_BY_COLOR = {
   user: 'text-fuchsia-300',
 } as const;
 
+type RewardNotificationMetadata = {
+  requestId?: string;
+  rewardId?: string;
+  quantity?: number;
+  status?: 'approved' | 'rejected' | string;
+};
+
+function isRewardAvailableQuery(queryKey: QueryKey): boolean {
+  return queryKey[0] === rewardKeys.all[0] && queryKey[1] === 'available';
+}
+
+function getStatusFilterFromQueryKey(queryKey: QueryKey): string | undefined {
+  const maybeFilter = queryKey.at(-1);
+
+  if (!maybeFilter || typeof maybeFilter !== 'object' || Array.isArray(maybeFilter)) {
+    return undefined;
+  }
+
+  if (!('status' in maybeFilter)) {
+    return undefined;
+  }
+
+  const status = (maybeFilter as { status?: unknown }).status;
+  return typeof status === 'string' ? status : undefined;
+}
+
+function updateRequestsForDecision(
+  requests: RedemptionRequest[] | undefined,
+  queryKey: QueryKey,
+  requestId: string,
+  nextStatus: 'approved' | 'rejected'
+): RedemptionRequest[] | undefined {
+  if (!requests) return requests;
+
+  const filterStatus = getStatusFilterFromQueryKey(queryKey);
+
+  if (filterStatus === 'pending') {
+    return requests.filter((request) => request.id !== requestId);
+  }
+
+  return requests.map((request) =>
+    request.id === requestId
+      ? {
+          ...request,
+          status: nextStatus,
+        }
+      : request
+  );
+}
+
+function updateRewardsForDecision(
+  rewards: Reward[] | undefined,
+  rewardId: string,
+  quantity: number,
+  nextStatus: 'approved' | 'rejected',
+  queryKey: QueryKey
+): Reward[] | undefined {
+  if (!rewards) return rewards;
+
+  const stockDelta = nextStatus === 'approved' ? -quantity : quantity;
+
+  const updatedRewards = rewards.map((reward) => {
+    if (reward.id !== rewardId) {
+      return reward;
+    }
+
+    if (reward.quantity === null || reward.quantity === undefined) {
+      return reward;
+    }
+
+    const nextQuantity = Math.max(0, reward.quantity + stockDelta);
+    const isOutOfStock = nextQuantity <= 0;
+
+    return {
+      ...reward,
+      quantity: nextQuantity,
+      isOutOfStock,
+      // Keep out-of-stock items hidden from employees; restore visibility when stock returns.
+      isActive: isOutOfStock ? false : true,
+    };
+  });
+
+  if (!isRewardAvailableQuery(queryKey)) {
+    return updatedRewards;
+  }
+
+  return updatedRewards.filter((reward) => reward.isActive !== false);
+}
+
+function applyOptimisticRewardDecision(
+  queryClient: ReturnType<typeof useQueryClient>,
+  notification: NotificationItem
+) {
+  const metadata = (notification.metadata ?? null) as RewardNotificationMetadata | null;
+  if (notification.type !== 'reward' || !metadata) return;
+
+  const requestId = metadata.requestId;
+  const rewardId = metadata.rewardId;
+  const nextStatus = metadata.status;
+  const quantity = Number(metadata.quantity ?? 1);
+
+  if (!requestId || !rewardId) return;
+  if (nextStatus !== 'approved' && nextStatus !== 'rejected') return;
+  if (!Number.isFinite(quantity) || quantity <= 0) return;
+
+  const myRequestQueries = queryClient.getQueriesData<RedemptionRequest[]>({
+    queryKey: redemptionKeys.myRequests(),
+  });
+
+  for (const [queryKey] of myRequestQueries) {
+    queryClient.setQueryData<RedemptionRequest[]>(queryKey, (existing) =>
+      updateRequestsForDecision(existing, queryKey, requestId, nextStatus)
+    );
+  }
+
+  const rewardQueries = queryClient.getQueriesData<Reward[]>({
+    queryKey: rewardKeys.all,
+  });
+
+  for (const [queryKey] of rewardQueries) {
+    queryClient.setQueryData<Reward[]>(queryKey, (existing) =>
+      updateRewardsForDecision(existing, rewardId, quantity, nextStatus, queryKey)
+    );
+  }
+
+  queryClient.invalidateQueries({ queryKey: employeeKeys.points() });
+}
+
 export function RealtimeNotificationToastClient({ userId }: RealtimeNotificationToastClientProps) {
   const queryClient = useQueryClient();
   const { newNotification, clearNotification } = useRealtimeNotifications(userId);
@@ -48,7 +180,11 @@ export function RealtimeNotificationToastClient({ userId }: RealtimeNotification
     setCurrent(newNotification);
     setVisible(true);
 
+    applyOptimisticRewardDecision(queryClient, newNotification);
+
     queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+    queryClient.invalidateQueries({ queryKey: redemptionKeys.myRequests() });
+    queryClient.invalidateQueries({ queryKey: rewardKeys.all });
 
     const timer = setTimeout(() => {
       setVisible(false);

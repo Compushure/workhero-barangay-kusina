@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+// Request-list queries for HR review table and employee self-service table.
 import { handleGetRedemptionRequestsAction } from '@/action-handlers/hr/redemptions';
 import { handleGetMyRedemptionRequestsAction } from '@/action-handlers/employee/redemptions';
 import { RedemptionRequest } from '@/types';
@@ -19,6 +20,7 @@ export const redemptionKeys = {
  * @param status - Optional filter by status ('pending' | 'approved' | 'rejected' | 'all')
  */
 export function useGetRedemptionRequests(status?: string) {
+  // HR table data source with optional status filter.
   return useQuery<RedemptionRequest[], Error>({
     queryKey: redemptionKeys.list(status),
     queryFn: async () => {
@@ -36,6 +38,7 @@ export function useGetRedemptionRequests(status?: string) {
  * @param status - Optional filter by status ('pending' | 'approved' | 'rejected' | 'all')
  */
 export function useGetMyRedemptionRequests(status?: string) {
+  // Employee-only request history/pending list.
   return useQuery<RedemptionRequest[], Error>({
     queryKey: redemptionKeys.myRequestsByStatus(status),
     queryFn: async () => {

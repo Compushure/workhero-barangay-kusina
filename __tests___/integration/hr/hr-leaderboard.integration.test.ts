@@ -12,6 +12,7 @@ import {
   checkRankingExists,
   getAllRankingPeriods,
   getEnrichedLeaderboardByPeriod,
+  toggleRankingVisibility,
 } from '@/actions/hr/leaderboard';
 import { getPeriodStartEnd, toManilaDateString } from '@/lib/utils/time-period-utils';
 import { RemoteSupabaseTestContext } from '../../utils/remoteSupabaseTestUtils';
@@ -38,33 +39,6 @@ jest.mock('@/lib/supabase/admin', () => ({
   get supabaseAdmin() {
     return currentAdminClient;
   },
-}));
-
-jest.mock('@/lib/utils/enrich-ranking', () => ({
-  enrichRankingPlayers: jest.fn(
-    async (
-      rows: Array<{
-        user_id: string;
-        user_name: string;
-        performance_score: number | null;
-        completed_task_count: number | null;
-        total_kpi_points: number | null;
-        badge_points: number | null;
-        rank: number | null;
-      }>
-    ) =>
-      rows.map((row, index) => ({
-        id: row.user_id,
-        name: row.user_name,
-        performanceScore: Number(row.performance_score ?? 0),
-        totalCompletedTasks: Number(row.completed_task_count ?? 0),
-        taskPoints: Number(row.total_kpi_points ?? 0),
-        badgePoints: Number(row.badge_points ?? 0),
-        image: null,
-        badges: [],
-        rank: Number(row.rank ?? index + 1),
-      }))
-  ),
 }));
 
 async function seedWeeklyRanking(args: {
@@ -198,6 +172,9 @@ describe('When HR reads enriched leaderboard data for a generated period', () =>
       expect.objectContaining({
         name: expect.stringContaining('HR Leaderboard Employee One'),
         rank: 1,
+        taskPoints: hrLeaderboardIntegrationPeriodA.firstScore,
+        badgePoints: 0,
+        totalCompletedTasks: 0,
       })
     );
     expect(enrichedResult.data?.isVisible).toBe(true);
@@ -253,6 +230,133 @@ describe('When HR reads past ranking periods', () => {
         participant_count: 2,
       })
     );
+  });
+});
+
+describe('When HR validates and toggles seeded ranking periods', () => {
+  test('Then checkRankingExists returns false when no ranking period was generated for the selected week', async () => {
+    const hrUser = await remoteContext.seedUser({
+      roleType: 'hr',
+      namePrefix: 'HR Missing Ranking Check',
+      emailPrefix: 'hr.missing.ranking.check',
+    });
+
+    currentServerClient = remoteContext.createServerClientForUser(hrUser);
+
+    const existsResult = await checkRankingExists('weekly', 2098, undefined, 2);
+
+    expect(existsResult.success).toBe(true);
+    expect(existsResult.data).toBe(false);
+  });
+
+  test('Then checkRankingExists returns false when a ranking period exists without ranking entries', async () => {
+    const hrUser = await remoteContext.seedUser({
+      roleType: 'hr',
+      namePrefix: 'HR Orphan Ranking Period',
+      emailPrefix: 'hr.orphan.ranking.period',
+    });
+
+    const orphanYear = 2099;
+    const orphanWeek = 6;
+    const { start, end } = getPeriodStartEnd('weekly', orphanYear, undefined, orphanWeek);
+    const orphanPeriodStart = toManilaDateString(start);
+    const orphanPeriodEnd = toManilaDateString(end);
+
+    const { data: orphanPeriod, error: orphanPeriodError } = await remoteContext.admin
+      .from('RankingPeriod')
+      .insert({
+        period_type: 'weekly',
+        period_start: orphanPeriodStart,
+        period_end: orphanPeriodEnd,
+        is_visible: false,
+      })
+      .select('id')
+      .single();
+
+    if (orphanPeriodError || !orphanPeriod?.id) {
+      throw new Error(
+        `Failed to seed orphan ranking period: ${orphanPeriodError?.message ?? 'Unknown error'}`
+      );
+    }
+
+    createdRankingPeriodIds.push(orphanPeriod.id);
+
+    currentServerClient = remoteContext.createServerClientForUser(hrUser);
+
+    const existsResult = await checkRankingExists('weekly', orphanYear, undefined, orphanWeek);
+
+    expect(existsResult.success).toBe(true);
+    expect(existsResult.data).toBe(false);
+  });
+
+  test('Then toggleRankingVisibility updates seeded period visibility from hidden to visible', async () => {
+    const hrUser = await remoteContext.seedUser({
+      roleType: 'hr',
+      namePrefix: 'HR Toggle Visibility',
+      emailPrefix: 'hr.toggle.visibility',
+    });
+    const employeeOne = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: 'HR Toggle Employee One',
+      emailPrefix: 'hr.toggle.employee.one',
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+    const employeeTwo = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: 'HR Toggle Employee Two',
+      emailPrefix: 'hr.toggle.employee.two',
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+
+    await seedWeeklyRanking({
+      year: 2099,
+      week: 5,
+      isVisible: false,
+      rows: createHrLeaderboardSeedRows({
+        firstUserId: employeeOne.id,
+        secondUserId: employeeTwo.id,
+        firstScore: 330,
+        secondScore: 320,
+      }),
+    });
+
+    const { start } = getPeriodStartEnd('weekly', 2099, undefined, 5);
+    const periodStart = toManilaDateString(start);
+    const { data: rankingPeriod, error: rankingPeriodError } = await remoteContext.admin
+      .from('RankingPeriod')
+      .select('id, is_visible')
+      .eq('period_type', 'weekly')
+      .eq('period_start', periodStart)
+      .single();
+
+    if (rankingPeriodError || !rankingPeriod?.id) {
+      throw new Error(
+        `Failed to fetch seeded ranking period for visibility test: ${rankingPeriodError?.message ?? 'Unknown error'}`
+      );
+    }
+
+    currentServerClient = remoteContext.createServerClientForUser(hrUser);
+
+    const toggleResult = await toggleRankingVisibility(rankingPeriod.id, true);
+
+    expect(toggleResult.success).toBe(true);
+    expect(toggleResult.data).toEqual({ id: rankingPeriod.id, is_visible: true });
+
+    const { data: updatedPeriod, error: updatedPeriodError } = await remoteContext.admin
+      .from('RankingPeriod')
+      .select('is_visible')
+      .eq('id', rankingPeriod.id)
+      .single();
+
+    if (updatedPeriodError) {
+      throw new Error(`Failed to fetch updated ranking period: ${updatedPeriodError.message}`);
+    }
+
+    expect(updatedPeriod?.is_visible).toBe(true);
   });
 });
 

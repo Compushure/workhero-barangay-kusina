@@ -33,7 +33,7 @@ export default function LeaderboardTableSkeleton({
         <div className="w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <Table className="min-w-248">
             <TableHeader>
-              <TableRow className="border-0 bg-gray-100">
+              <TableRow className="border-0 bg-gray-100 hover:bg-gray-100">
                 <TableHead className="w-10 px-2 text-center sm:w-16 sm:px-4">
                   <Skeleton className="mx-auto h-3.5 w-10 rounded bg-gray-200" />
                 </TableHead>

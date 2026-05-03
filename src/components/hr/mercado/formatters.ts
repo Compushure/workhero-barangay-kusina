@@ -1,3 +1,4 @@
+// Shared display-format helpers for HR Mercado cards and modals.
 export type AvailabilityInterval = 'weekly' | 'monthly' | 'yearly';
 
 export type AvailabilityValue = AvailabilityInterval | number | null | undefined;

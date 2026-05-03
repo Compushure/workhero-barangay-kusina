@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import { MercadoPageContent } from '@/components/hr/mercado/mercado-page-content';
 import { MarketSuspense } from '@/components/shared/market-suspense';
 
+// HR Mercado page entry: loads inventory manager UI.
+
 export const metadata: Metadata = {
   title: 'WorkHero | Mercado',
   icons: {

@@ -148,7 +148,7 @@ export function useDeleteTaskGroupMutation(): UseMutationResult<
  * Mutation for clearing unstarted (no progress) 'assigned' task assignments
  * Only removes assignments with status='assigned', completed_orders=0, pending_orders=0
  */
-export function useClearUnstartedTaskAssignmentsMutation(): UseMutationResult<boolean, Error, void> {
+export function useClearUnstartedTaskAssignmentsMutation(): UseMutationResult<number, Error, void> {
   const queryClient = useQueryClient();
   const { startOptimistic, optimisticClearUnstartedAssigned, rollback, commit } =
     useManagerAssignmentStore();

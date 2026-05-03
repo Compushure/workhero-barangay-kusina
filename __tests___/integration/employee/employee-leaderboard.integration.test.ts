@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globa
 
 import {
   handleFetchEmployeeRank,
+  handleFetchEmployeeTopWeeklyRanks,
   handleFetchEmployeeTopRanksByPeriod,
 } from '@/action-handlers/employee/stats';
 import { getPeriodStartEnd, toManilaDateString } from '@/lib/utils/time-period-utils';
@@ -191,6 +192,98 @@ describe('When the employee reads remote leaderboard period entries', () => {
     );
     expect(toast.error).not.toHaveBeenCalled();
   });
+
+  test('Then the top ranks by period handler returns null when the seeded period is not visible', async () => {
+    const employee = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: `${employeeLeaderboardIntegrationNames.employee.namePrefix} Hidden`,
+      emailPrefix: `${employeeLeaderboardIntegrationNames.employee.emailPrefix}.hidden`,
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+    const competitor = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: `${employeeLeaderboardIntegrationNames.competitor.namePrefix} Hidden`,
+      emailPrefix: `${employeeLeaderboardIntegrationNames.competitor.emailPrefix}.hidden`,
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+
+    await seedWeeklyRanking({
+      year: employeeLeaderboardIntegrationPeriodA.year,
+      week: employeeLeaderboardIntegrationPeriodA.week,
+      rows: [
+        {
+          userId: competitor.id,
+          rank: 1,
+          performanceScore: employeeLeaderboardIntegrationPeriodA.firstScore,
+        },
+        {
+          userId: employee.id,
+          rank: 2,
+          performanceScore: employeeLeaderboardIntegrationPeriodA.secondScore,
+        },
+      ],
+      isVisible: false,
+    });
+
+    currentServerClient = remoteContext.createServerClientForUser(employee);
+
+    const rows = await handleFetchEmployeeTopRanksByPeriod({
+      periodType: 'weekly',
+      year: employeeLeaderboardIntegrationPeriodA.year,
+      week: employeeLeaderboardIntegrationPeriodA.week,
+    });
+
+    expect(rows).toBeNull();
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  test('Then the top weekly handler returns null when the latest generated weekly period is hidden', async () => {
+    const employee = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: `${employeeLeaderboardIntegrationNames.employee.namePrefix} Weekly Hidden`,
+      emailPrefix: `${employeeLeaderboardIntegrationNames.employee.emailPrefix}.weekly.hidden`,
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+    const competitor = await remoteContext.seedUser({
+      roleType: 'regular',
+      namePrefix: `${employeeLeaderboardIntegrationNames.competitor.namePrefix} Weekly Hidden`,
+      emailPrefix: `${employeeLeaderboardIntegrationNames.competitor.emailPrefix}.weekly.hidden`,
+      points: 0,
+      xp: 0,
+      totalPointsEarned: 0,
+    });
+
+    await seedWeeklyRanking({
+      year: employeeLeaderboardIntegrationPeriodA.year,
+      week: employeeLeaderboardIntegrationPeriodA.week,
+      rows: [
+        {
+          userId: competitor.id,
+          rank: 1,
+          performanceScore: employeeLeaderboardIntegrationPeriodA.firstScore,
+        },
+        {
+          userId: employee.id,
+          rank: 2,
+          performanceScore: employeeLeaderboardIntegrationPeriodA.secondScore,
+        },
+      ],
+      isVisible: false,
+    });
+
+    currentServerClient = remoteContext.createServerClientForUser(employee);
+
+    const rows = await handleFetchEmployeeTopWeeklyRanks();
+
+    expect(rows).toBeNull();
+    expect(toast.error).not.toHaveBeenCalled();
+  });
 });
 
 describe('When the employee reads the latest remote rank snapshot', () => {
@@ -256,6 +349,20 @@ describe('When leaderboard handlers run without an authenticated employee', () =
     expect(rows).toBeNull();
     expect(toast.error).toHaveBeenCalledWith(
       'Failed to load rankings for selected period',
+      expect.objectContaining({
+        description: expect.stringContaining('User not authenticated'),
+      })
+    );
+  });
+
+  test('Then the top weekly handler returns null and shows an error toast', async () => {
+    currentServerClient = remoteContext.createServerClientForUser(null);
+
+    const rows = await handleFetchEmployeeTopWeeklyRanks();
+
+    expect(rows).toBeNull();
+    expect(toast.error).toHaveBeenCalledWith(
+      'Failed to load top weekly ranks',
       expect.objectContaining({
         description: expect.stringContaining('User not authenticated'),
       })

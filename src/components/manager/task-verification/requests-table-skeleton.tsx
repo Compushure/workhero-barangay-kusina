@@ -13,7 +13,7 @@ export function RequestsTableSkeleton({ rows = 5 }: { rows?: number }) {
     <div className="overflow-x-auto rounded-lg shadow-sm/25 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <Table>
         <TableHeader className="bg-background">
-          <TableRow className="bg-background border-b border-border/10">
+          <TableRow className="bg-background border-b border-border/10 hover:bg-background">
             <TableHead className="hidden sm:table-cell px-2 sm:px-4 w-24 sm:w-40">
               <Skeleton className="h-3 w-20 sm:w-24 bg-gray-300" />
             </TableHead>

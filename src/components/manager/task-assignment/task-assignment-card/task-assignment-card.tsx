@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AssignEmployeesDialog } from './dialogs/assign-employees-dialog';
 import { SelectTasksDialog } from './dialogs/select-task-dialog';
@@ -12,10 +13,9 @@ import {
   handleFetchTaskList,
   handleFetchEmployeeList,
 } from '@/action-handlers/manager/assignments';
-import {
-  useGetCurrentAssignedTasksPaginated,
-} from '@/hooks/tanstack/queries/managerAssignmentQueries';
+import { useGetCurrentAssignedTasksPaginated } from '@/hooks/tanstack/queries/managerAssignmentQueries';
 import { TaskAssignmentCardSkeleton } from './task-assignment-card-skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Shadcn UI Dialog imports
 import {
@@ -126,14 +126,17 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
     if (selectedEmployees.length > 0 && selectedTask.length > 0 && selectedDeadline) {
       setIsAssigning(true);
 
-      await assignTasks({
-        employees: selectedEmployees,
-        tasks: selectedTask.map((id) => ({
-          id,
-          maxOrders: taskMaxRepeats[id] || 1,
-        })),
-        deadline: selectedDeadline,
-      }, { availableTasks });
+      await assignTasks(
+        {
+          employees: selectedEmployees,
+          tasks: selectedTask.map((id) => ({
+            id,
+            maxOrders: taskMaxRepeats[id] || 1,
+          })),
+          deadline: selectedDeadline,
+        },
+        { availableTasks }
+      );
 
       // Call clear logic directly instead of through closure
       setSelectedEmployees([]);
@@ -143,7 +146,14 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
       setShowAssignConfirm(false);
       setIsAssigning(false);
     }
-  }, [selectedEmployees, selectedTask, selectedDeadline, taskMaxRepeats, assignTasks, availableTasks]);
+  }, [
+    selectedEmployees,
+    selectedTask,
+    selectedDeadline,
+    taskMaxRepeats,
+    assignTasks,
+    availableTasks,
+  ]);
 
   const handleEmployeesDialogAttempt = useCallback(() => {
     if (selectedTask.length === 0) {
@@ -163,7 +173,26 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
 
   return (
     <div className="rounded-2xl bg-background-soft p-3 sm:p-4 md:px-7 py-5 shadow-sm/25 max-w-230">
-      <h2 className="text-h2 mb-4 text-primary">Assign Employees for Task</h2>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <h2 className="text-h2 text-primary">Assign Employees for Task</h2>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="control-h size-9 shrink-0 border-zinc-200 bg-card text-accent hover:bg-card hover:text-accent hover:brightness-95"
+              aria-label="Task deadline policy"
+            >
+              <Info className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top" align="center" className="max-w-48 text-center lg:mr-4">
+            Deadline of all tasks are set to 11:59PM on their respective due date
+          </TooltipContent>
+        </Tooltip>
+      </div>
 
       <div className="flex flex-wrap gap-2 sm:gap-3">
         <div className="w-full sm:w-auto sm:min-w-44">
@@ -215,6 +244,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
           <Button
             variant="outline"
             onClick={() => setShowClearConfirm(true)}
+            disabled={isAssigning}
             className="text-button flex-1 sm:flex-initial sm:w-auto bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground px-4 sm:px-10 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25 h-9"
           >
             Clear
@@ -230,8 +260,34 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
       />
 
       {/* Assign Confirmation Dialog */}
-      <Dialog open={showAssignConfirm} onOpenChange={setShowAssignConfirm}>
-        <DialogContent className="max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl transition-all duration-500 ease-in-out bg-card">
+      <Dialog
+        open={showAssignConfirm}
+        onOpenChange={(open) => {
+          if (isAssigning && !open) {
+            return;
+          }
+          setShowAssignConfirm(open);
+        }}
+      >
+        <DialogContent
+          showCloseButton={!isAssigning}
+          onEscapeKeyDown={(event) => {
+            if (isAssigning) {
+              event.preventDefault();
+            }
+          }}
+          onInteractOutside={(event) => {
+            if (isAssigning) {
+              event.preventDefault();
+            }
+          }}
+          onPointerDownOutside={(event) => {
+            if (isAssigning) {
+              event.preventDefault();
+            }
+          }}
+          className="max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl transition-all duration-500 ease-in-out bg-card"
+        >
           <DialogHeader>
             <DialogTitle className="text-h2 text-foreground">Confirm Assignment</DialogTitle>
             <DialogDescription className="text-meta">
@@ -249,6 +305,7 @@ export function TaskAssignmentCard({}: TaskAssignmentCardProps) {
             <Button
               variant="outline"
               onClick={() => setShowAssignConfirm(false)}
+              disabled={isAssigning}
               className="border-zinc-400 bg-card text-foreground hover:bg-[#fafafa] hover:brightness-90 hover:text-foreground px-8 cursor-pointer transition-all duration-500 ease-in-out shadow-sm/25"
             >
               Cancel

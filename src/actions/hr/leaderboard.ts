@@ -33,8 +33,10 @@ function isSupabaseGatewayError(message: string | undefined): boolean {
 
   const normalized = message.toLowerCase();
   return (
-    (normalized.includes('502') || normalized.includes('bad gateway'))
-    && (normalized.includes('<!doctype html') || normalized.includes('<html') || normalized.includes('cloudflare'))
+    (normalized.includes('502') || normalized.includes('bad gateway')) &&
+    (normalized.includes('<!doctype html') ||
+      normalized.includes('<html') ||
+      normalized.includes('cloudflare'))
   );
 }
 
@@ -99,10 +101,7 @@ export async function getEnrichedLeaderboardByPeriod(
     const periodInfo = rows[0];
     const enrichedPlayers = await enrichRankingPlayers(rows, supabase);
 
-    const periodLabel =
-      periodType === 'weekly'
-        ? 'Week'
-        : periodInfo.period_label;
+    const periodLabel = periodType === 'weekly' ? 'Week' : periodInfo.period_label;
 
     return {
       players: enrichedPlayers,
@@ -113,8 +112,6 @@ export async function getEnrichedLeaderboardByPeriod(
     };
   });
 }
-
-
 
 // ---------------------------------------------------------------------------
 // Ranking Actions (normalized schema: RankingPeriod + RankingEntry)
@@ -302,7 +299,6 @@ function isLatestCompletedPeriod(
   return latest.year === year;
 }
 
-
 /**
  * Generate ranking for a specific period.
  * Computes via RPC `get_leaderboard_as_of`, persists RankingPeriod + RankingEntry, returns view rows.
@@ -360,7 +356,9 @@ export async function generateRankingByPeriod(
       return null;
     }
 
-    const leaderboardRowsWithRank = leaderboardRows as (LeaderboardAsOfRow & { rank?: number | null })[];
+    const leaderboardRowsWithRank = leaderboardRows as (LeaderboardAsOfRow & {
+      rank?: number | null;
+    })[];
     const getRpcRank = (row: LeaderboardAsOfRow & { rank?: number | null }, idx: number) =>
       Number(row.rank ?? idx + 1);
     const toEntryInsert = (
@@ -397,7 +395,9 @@ export async function generateRankingByPeriod(
           .eq('period_start', periodStart)
           .single();
         if (raceError || !raceWinner) {
-          throw new Error(`Failed to fetch existing ranking period: ${raceError?.message ?? 'Unknown error'}`);
+          throw new Error(
+            `Failed to fetch existing ranking period: ${raceError?.message ?? 'Unknown error'}`
+          );
         }
         const { data: winnerRows, error: winnerRowsError } = await supabase
           .from('ranking_leaderboard_view')
@@ -412,7 +412,9 @@ export async function generateRankingByPeriod(
         // Recovery path: if the period exists but has no entries (for example, after a previous failed insert),
         // backfill entries so the generated ranking can still be loaded in HR UI.
         if (!winnerRows || winnerRows.length === 0) {
-          const recoveryEntries = leaderboardRowsWithRank.map((row, idx) => toEntryInsert(raceWinner.id, row, idx));
+          const recoveryEntries = leaderboardRowsWithRank.map((row, idx) =>
+            toEntryInsert(raceWinner.id, row, idx)
+          );
 
           const { error: recoveryError } = await supabase
             .from('RankingEntry')
@@ -430,7 +432,9 @@ export async function generateRankingByPeriod(
             .order('rank');
 
           if (recoveredRowsError) {
-            throw new Error(`Failed to fetch recovered ranking rows: ${recoveredRowsError.message}`);
+            throw new Error(
+              `Failed to fetch recovered ranking rows: ${recoveredRowsError.message}`
+            );
           }
 
           return (recoveredRows ?? []) as RankingLeaderboardViewRow[];
@@ -441,12 +445,16 @@ export async function generateRankingByPeriod(
       throw new Error(`Failed to save ranking period: ${periodError.message}`);
     }
 
-    const entriesToInsert = leaderboardRowsWithRank.map((row, idx) => toEntryInsert(period.id, row, idx));
+    const entriesToInsert = leaderboardRowsWithRank.map((row, idx) =>
+      toEntryInsert(period.id, row, idx)
+    );
 
     const { data: insertedEntries, error: entriesError } = await supabase
       .from('RankingEntry')
       .insert(entriesToInsert)
-      .select('id, user_id, rank, performance_score, total_kpi_points, badge_points, completed_task_count');
+      .select(
+        'id, user_id, rank, performance_score, total_kpi_points, badge_points, completed_task_count'
+      );
 
     if (entriesError) {
       throw new Error(`Failed to save ranking entries: ${entriesError.message}`);
@@ -535,7 +543,24 @@ export async function checkRankingExists(
       throw new Error(`Failed to check ranking: ${error.message}`);
     }
 
-    return !!data;
+    if (!data) {
+      return false;
+    }
+
+    // Safeguard: a period without entries is considered incomplete/corrupted.
+    // Treat it as non-existent so HR can regenerate and trigger recovery flow.
+    const { data: entry, error: entryError } = await supabase
+      .from('RankingEntry')
+      .select('id')
+      .eq('ranking_period_id', data.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (entryError) {
+      throw new Error(`Failed to verify ranking entries: ${entryError.message}`);
+    }
+
+    return !!entry;
   });
 }
 
@@ -564,7 +589,9 @@ export async function toggleRankingVisibility(
       .single();
 
     if (rankingPeriodError || !rankingPeriod) {
-      throw new Error(`Failed to fetch ranking period: ${rankingPeriodError?.message ?? 'Not found'}`);
+      throw new Error(
+        `Failed to fetch ranking period: ${rankingPeriodError?.message ?? 'Not found'}`
+      );
     }
 
     const shouldNotifyTopTen = !rankingPeriod.is_visible && isVisible;
@@ -592,7 +619,6 @@ export async function toggleRankingVisibility(
   });
 }
 
-
 /**
  * Returns the latest generated weekly period (year + ISO week) for default leaderboard view.
  * Uses admin client to bypass RLS so non-visible periods are included.
@@ -612,7 +638,9 @@ export async function getLatestWeeklyPeriod(): Promise<
 
     if (error) {
       if (isSupabaseGatewayError(error.message)) {
-        console.warn('Supabase returned a transient 502 while fetching the latest weekly ranking period.');
+        console.warn(
+          'Supabase returned a transient 502 while fetching the latest weekly ranking period.'
+        );
         return null;
       }
 
@@ -651,7 +679,9 @@ export async function getLatestMonthlyPeriod(): Promise<
 
     if (error) {
       if (isSupabaseGatewayError(error.message)) {
-        console.warn('Supabase returned a transient 502 while fetching the latest monthly ranking period.');
+        console.warn(
+          'Supabase returned a transient 502 while fetching the latest monthly ranking period.'
+        );
         return null;
       }
 
@@ -690,7 +720,9 @@ export async function getLatestYearlyPeriod(): Promise<
 
     if (error) {
       if (isSupabaseGatewayError(error.message)) {
-        console.warn('Supabase returned a transient 502 while fetching the latest yearly ranking period.');
+        console.warn(
+          'Supabase returned a transient 502 while fetching the latest yearly ranking period.'
+        );
         return null;
       }
 
@@ -711,7 +743,9 @@ export async function getLatestYearlyPeriod(): Promise<
  * with the top performer's name (rank 1) for each period.
  * Used by the HR "View Past Ranks" list.
  */
-export async function getAllRankingPeriods(): Promise<ActionResult<import('@/types').RankingPeriodWithTop[]>> {
+export async function getAllRankingPeriods(): Promise<
+  ActionResult<import('@/types').RankingPeriodWithTop[]>
+> {
   return safeAction(async () => {
     const supabase = await createClient();
 
@@ -732,9 +766,7 @@ export async function getAllRankingPeriods(): Promise<ActionResult<import('@/typ
         .from('ranking_leaderboard_view')
         .select('ranking_period_id, user_name, rank')
         .eq('rank', 1),
-      supabase
-        .from('RankingEntry')
-        .select('ranking_period_id'),
+      supabase.from('RankingEntry').select('ranking_period_id'),
     ]);
 
     if (periodsRes.error) {
@@ -770,7 +802,9 @@ export async function getAllRankingPeriods(): Promise<ActionResult<import('@/typ
  * newest first, with the top performer's name and participant count.
  * Used by the employee leaderboard "Past Rankings" history list.
  */
-export async function getVisibleRankingPeriods(): Promise<ActionResult<import('@/types').RankingPeriodWithTop[]>> {
+export async function getVisibleRankingPeriods(): Promise<
+  ActionResult<import('@/types').RankingPeriodWithTop[]>
+> {
   return safeAction(async () => {
     const supabase = await createClient();
 
@@ -792,9 +826,7 @@ export async function getVisibleRankingPeriods(): Promise<ActionResult<import('@
         .from('ranking_leaderboard_view')
         .select('ranking_period_id, user_name, rank')
         .eq('rank', 1),
-      supabase
-        .from('RankingEntry')
-        .select('ranking_period_id'),
+      supabase.from('RankingEntry').select('ranking_period_id'),
     ]);
 
     if (periodsRes.error) {
@@ -850,4 +882,3 @@ export async function getLatestLeaderboardPeriods(): Promise<
     };
   });
 }
-

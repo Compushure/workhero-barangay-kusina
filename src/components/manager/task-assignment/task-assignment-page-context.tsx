@@ -11,6 +11,7 @@ import { AssignedTask, AssignedEmployee, SelectedFilters, Task } from '@/types';
 // import { handleDeleteTask, handleClearAssignedTasks } from '@/action-handlers/manager/assigned-tasks';
 import { useManagerAssignmentStore } from '@/store/managerAssignmentStore';
 import { useAddTaskAssignmentMutation } from '@/hooks/tanstack/mutations/managerAssignmentMutations';
+import { toManilaDeadlineISOString } from '@/utils/date-utils';
 
 interface TaskAssignmentContextType {
   assignedTasks: AssignedTask[];
@@ -54,7 +55,8 @@ export function TaskAssignmentProvider({ children }: { children: React.ReactNode
 
     try {
       const startDate = new Date().toISOString();
-      const endDate = filters.deadline ? filters.deadline.toISOString() : new Date().toISOString();
+      const endDate =
+        toManilaDeadlineISOString(filters.deadline ?? new Date()) ?? new Date().toISOString();
 
       for (const taskSelection of filters.tasks) {
         const selectedTask = options?.availableTasks?.find((task) => task.id === taskSelection.id);

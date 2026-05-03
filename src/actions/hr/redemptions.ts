@@ -1,5 +1,7 @@
 'use server';
 
+// HR side processing for employee Mercado requests (view, approve, decline).
+
 import { createClient } from '@/lib/supabase/server';
 import {
   ServerActionResponse,
@@ -8,6 +10,7 @@ import {
 import { insertNotification } from '@/lib/notifications';
 
 async function getSupabaseAdminClient() {
+  // Uses admin access for secure cross-user updates.
   const { supabaseAdmin } = await import('@/lib/supabase/admin');
   return supabaseAdmin;
 }
@@ -17,6 +20,7 @@ function getRewardImageUrl(supabase: any, rewardId: string): string {
 }
 
 async function adjustUserPointsByDelta(userId: string, delta: number): Promise<ServerActionResponse<number>> {
+  // Adds or removes points from one employee in a safe way.
   const supabaseAdmin = await getSupabaseAdminClient();
 
   const { data: userData, error: userDataError } = await supabaseAdmin
@@ -142,6 +146,7 @@ export async function getRedemptionRequestsAction(
   status?: string
 ): Promise<ServerActionResponse<RedemptionRequest[]>> {
   try {
+    // Loads request list for HR table with optional status filtering.
     const supabase = await createClient();
     const cancelledByEmployeeRemarks = ['Cancelled by employee', 'Canceled by employee'];
 
@@ -225,6 +230,7 @@ export async function acceptRedemptionRequestAction(
   remarks?: string
 ): Promise<ServerActionResponse<void>> {
   try {
+    // Approves one request, updates stock, and sends employee notice.
     const supabase = await createClient();
     const supabaseAdmin = await getSupabaseAdminClient();
 
@@ -408,6 +414,7 @@ export async function declineRedemptionRequestAction(
   remarks?: string
 ): Promise<ServerActionResponse<void>> {
   try {
+    // Rejects one request and gives points back to the employee.
     const supabase = await createClient();
     const supabaseAdmin = await getSupabaseAdminClient();
 

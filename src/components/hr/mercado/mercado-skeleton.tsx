@@ -1,5 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Card-grid loading placeholder while Mercado items are being fetched.
+
 export function MercadoSkeleton() {
   return (
     <div className="grid auto-rows-fr grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">

@@ -1,5 +1,7 @@
 'use client';
 
+// HR item card with quick actions: view, hide/unhide, edit, and delete.
+
 import { useState, useMemo, memo, useCallback, useEffect } from 'react';
 import { Pencil, ImageIcon, EyeOff, Eye, Calendar, Trash2, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,6 +50,7 @@ export const MercadoCard = memo(function MercadoCard({
   onHide,
   onUnhide,
 }: MercadoCardProps) {
+  // Local UI states for dialogs/menu and image fallback.
   const [hideDialogOpen, setHideDialogOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -70,6 +73,7 @@ export const MercadoCard = memo(function MercadoCard({
   );
 
   const handleHideConfirm = useCallback(() => {
+    // Routes confirmation to hide or unhide callback based on current state.
     if (isHidden) {
       onUnhide?.(item.id);
     } else {
@@ -104,6 +108,7 @@ export const MercadoCard = memo(function MercadoCard({
       }}
     >
       <div className="flex h-24 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-accent/20 bg-background">
+        {/* Item preview image with icon fallback. */}
         {item.imageUrl && !imageError ? (
           <img
             src={item.imageUrl}
@@ -124,6 +129,7 @@ export const MercadoCard = memo(function MercadoCard({
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 pr-10">
+        {/* Main item metadata block shown on card. */}
         <h3 className="text-base sm:text-lg font-semibold text-primary truncate leading-tight">
           {item.name}
         </h3>
@@ -185,6 +191,7 @@ export const MercadoCard = memo(function MercadoCard({
         )}
 
         <div className="absolute right-3.5 top-3.5 z-10" onClick={(e) => e.stopPropagation()}>
+          {/* Context menu for HR management actions. */}
           <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button

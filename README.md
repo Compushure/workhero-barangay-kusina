@@ -1,3 +1,6 @@
+<img width="1906" height="605" alt="image" src="https://github.com/user-attachments/assets/86d39c0a-c1ba-4701-af36-e94de4cdb58c" />
+
+
 # WorkHero Barangay Kusina
 
 Test Coverage Summaries:
@@ -14,6 +17,9 @@ Test Coverage Summaries:
 ![Zustand](https://img.shields.io/badge/Zustand-State-7A5432)
 ![Jest](https://img.shields.io/badge/Jest-Testing-C21325?logo=jest&logoColor=white)
 ![Cypress](https://img.shields.io/badge/Cypress-E2E-69D3A7?logo=cypress&logoColor=white)
+
+
+
 
 Role-based employee operations and gamification platform built with Next.js, Supabase, TypeScript, TanStack Query, Zustand, and Tailwind CSS.
 

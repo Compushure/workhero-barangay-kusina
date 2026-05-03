@@ -1,5 +1,7 @@
 'use client';
 
+// Reusable heading row for HR Mercado pages.
+
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/shared/page-header';

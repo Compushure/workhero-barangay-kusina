@@ -26,6 +26,8 @@ import {
 	handleUploadRewardPicture,
 } from '@/action-handlers/hr/rewards';
 
+// Utility typing for mocked dependencies used across the file.
+
 type CreateClientFn = () => Promise<unknown>;
 type ToastFn = (message?: unknown) => unknown;
 
@@ -63,6 +65,7 @@ let rewardState: {
 	failUpload?: boolean;
 };
 
+// Mock server client factory consumed by HR actions.
 jest.mock('@/lib/supabase/server', () => ({
 	createClient: jest.fn(),
 }));
@@ -108,10 +111,12 @@ const toastSuccess = toast.success;
 const toastError = toast.error;
 
 beforeEach(() => {
+	// Silence console error noise and reset toast history for each test.
 	consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
 	toastSuccess.mockReset();
 	toastError.mockReset();
 
+	// In-memory DB fixtures used by mocked Supabase queries.
 	rewardState = {
 		rewards: [
 			{
@@ -148,6 +153,7 @@ beforeEach(() => {
 		],
 	};
 
+	// Build a per-test mocked Supabase client with table behaviors.
 	createClientMock.mockResolvedValue({
 		auth: {
 			getUser: jest.fn(async () => ({
@@ -177,6 +183,7 @@ beforeEach(() => {
 			})),
 		},
 		from: jest.fn((table: string) => {
+			// Reward table mock: select/insert/update/delete flows.
 			if (table === 'Reward') {
 				return {
 					select: jest.fn((columns?: string) => {
@@ -304,6 +311,7 @@ beforeEach(() => {
 			}
 
 			if (table === 'RewardRequest') {
+				// RewardRequest table mock: used for redeemed-count aggregation.
 				return {
 					select: jest.fn(() => {
 						const filterState: { status?: string; rewardIds?: string[] } = {};
@@ -345,11 +353,13 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+	// Restore console after each test case.
 	consoleErrorSpy.mockRestore();
 });
 
 describe('When HR loads Mercado items', () => {
 	test('Then getRewardsAction returns transformed items with redeemed counts and stock flags', async () => {
+		// Verifies mapping logic + redeemedCount + out-of-stock flag.
 		const result = await getRewardsAction();
 
 		expect(result.error).toBeNull();

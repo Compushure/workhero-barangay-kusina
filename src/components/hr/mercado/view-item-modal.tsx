@@ -1,5 +1,7 @@
 'use client';
 
+// Read-only item detail modal with quick transition to edit action.
+
 import { useEffect, useState } from 'react';
 import { ImageIcon, X, Calendar } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
