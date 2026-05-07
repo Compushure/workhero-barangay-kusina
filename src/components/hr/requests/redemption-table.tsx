@@ -189,14 +189,10 @@ export function RedemptionTable({ data, status = 'pending' }: RedemptionTablePro
                                   event.stopPropagation();
                                   handleAcceptClick(request.id);
                                 }}
-                                disabled={
-                                  declineMutation.isPending ||
-                                  acceptMutation.isPending ||
-                                  hasInsufficientPoints
-                                }
+                                disabled={declineMutation.isPending || acceptMutation.isPending}
                                 title={
                                   hasInsufficientPoints
-                                    ? `Insufficient points: User has ${userPoints} but needs ${totalCost}`
+                                    ? `Warning: User has ${userPoints} points but this request costs ${totalCost}. You can still accept the request.`
                                     : 'Accept request'
                                 }
                               >
