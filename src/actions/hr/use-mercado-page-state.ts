@@ -1,5 +1,9 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 // Frontend state engine for the HR Mercado page (filters, modals, pagination, save flow).
+
+// - This hook keeps all UI state (search, filters, modals) and exposes handlers.
+// - When saving/creating/editing items it calls mutation hooks like `useAddReward`.
+//   Those mutation hooks call action-handlers which call the server actions.
 import type { Reward } from '@/types';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useGetRewards } from '@/hooks/tanstack/queries/rewardQueries';

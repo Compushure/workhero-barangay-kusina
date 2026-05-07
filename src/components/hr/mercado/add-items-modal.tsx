@@ -287,6 +287,10 @@ export function AddItemsModal({
 
   const handleSave = async () => {
     // Final validation + submit payload to parent save handler.
+    
+    // - The modal prepares the form payload and calls `onSave` (provided by
+    //   the page state hook). `onSave` uses mutation hooks that call server
+    //   actions to add/edit rewards, then uploads images if present.
     if (iconFile) {
       if (!ALLOWED_REWARD_IMAGE_TYPES.includes(iconFile.type)) {
         const message = 'Only JPEG, PNG, and WebP images are allowed';

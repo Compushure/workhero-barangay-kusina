@@ -5,6 +5,9 @@ import { useGetMyRedemptionRequests } from '@/hooks/tanstack/queries/redemptionQ
 
 export function useMercadoPageData(options?: { includeRewards?: boolean }) {
   // Toggle lets some screens load points/requests without reward cards.
+
+  // - Combines three queries (rewards, pending requests, points) into one
+  //   small object the UI can read from. This keeps the components simpler.
   const includeRewards = options?.includeRewards ?? true;
 
   // Use employee-specific query that filters by isActive AND availableDate

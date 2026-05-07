@@ -46,6 +46,22 @@ async function adjustUserPointsByDelta(userId: string, delta: number): Promise<S
   return { error: null, data: nextPoints };
 }
 
+/*
+  Employee Mercado notes (backend)
+
+  - Employee pages call these actions to show rewards and manage redemption requests.
+  - `getRewardsAction` returns items employees can browse.
+  - `createRedemptionRequestAction`:
+      - checks reward and user points
+      - deducts spendable points immediately (so points are reserved)
+      - creates a `pending` RewardRequest for HR review
+  - `cancelMyRedemptionRequestAction` lets an employee cancel a pending request
+    and refunds the reserved points.
+
+  The UI uses mutation hooks that call these functions and then refresh
+  the visible lists/point widgets after success.
+*/
+
 function getRewardImageUrl(supabase: any, rewardId: string): string {
   // Build public image URL for reward cards.
   const baseUrl = supabase.storage.from('reward').getPublicUrl(`${rewardId}/profile.png`)
