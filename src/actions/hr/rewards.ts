@@ -161,9 +161,20 @@ function getRewardImageUrl(supabase: any, rewardId: string): string {
   return `${baseUrl}?t=${Date.now()}`;
 }
 
-// ============================================
-// HR Reward Management Actions
-// ============================================
+/*
+  HR Reward management 
+
+  - These functions are server actions called from HR UI code.
+  - `getRewardsAction`, `getAvailableRewardsByMonthAction`,
+    `getAvailableRewardsByIntervalAction` return reward lists and include
+    simple redeemed-count calculations so the UI can show stock/usage.
+  - `addRewardAction`, `editRewardAction`, `deleteRewardAction` change
+    the Reward rows in the DB and return shapes the frontend expects.
+  - Image upload uses Supabase storage and returns a public URL used by cards.
+
+  Flow: UI -> action-handlers / mutations -> these server actions -> DB.
+*/
+
 
 /**
  * Get all reward/mercado items

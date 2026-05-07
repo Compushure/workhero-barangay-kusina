@@ -377,6 +377,10 @@ export function useDeclineRedemptionRequest() {
 export function useAcceptRedemptionRequest() {
   const queryClient = useQueryClient();
 
+  // Note: This hook performs an optimistic update so the table looks
+  //       responsive. The mutation calls `handleAcceptRedemptionRequestAction`
+  //       (server-side) which does the final work (approve + adjust points).
+
   return useMutation({
     mutationKey: ['hr-redemption', 'accept'],
     mutationFn: async (params: RedemptionRequestParams): Promise<void> => {

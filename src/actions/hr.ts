@@ -19,6 +19,27 @@ function getRewardImageUrl(supabase: any, rewardId: string): string {
   return `${baseUrl}?t=${Date.now()}`;
 }
 
+/*
+  Overview (HR / Redemption backend)
+
+  - Frontend (HR UI) calls the exported functions below.
+  - `getRedemptionRequestsAction` returns joined rows for the HR list view.
+  - `createRedemptionRequestAction` is called by employees (frontend). It:
+      1) validates reward and user
+      2) deducts points from the employee (creates a reserved state)
+      3) inserts a `RewardRequest` row with status `pending`
+  - `acceptRedemptionRequestAction` is called by HR to approve a pending request. It:
+      1) updates the request to `approved`
+      2) finalizes deducted points (adjusts `deducted_points` on the user)
+  - `declineRedemptionRequestAction` rejects and refunds reserved points.
+
+  - `getRewardsAction` returns all rewards for HR management screens.
+  - `addRewardAction` creates a new reward.
+  - `editRewardAction` updates reward details.
+  - `deleteRewardAction` removes a reward and its image.
+  - `hideRewardAction` toggles a reward's active state to hide/unhide it from the employee catalog.
+*/
+
 // Redemption request actions (approve, reject, list, and create requests).
 
 /**

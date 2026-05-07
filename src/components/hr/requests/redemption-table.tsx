@@ -19,6 +19,17 @@ import {
 import { RemarksDialog } from './remarks';
 import type { RedemptionRequest } from '@/types';
 
+/*
+  HR Redemption table (frontend)
+
+  - This component renders the list of redemption requests HR sees.
+  - Buttons call TanStack mutation hooks (`useAcceptRedemptionRequest` / `useDeclineRedemptionRequest`).
+  - Mutations perform optimistic updates (so the UI feels fast), then
+    the hooks invalidate queries so the latest server data is fetched.
+  - Accepting a request triggers a server action that finalizes points.
+    The UI only sends the intent; the server does the real checks/updates.
+*/
+
 interface RedemptionTableProps {
   data: RedemptionRequest[];
   status?: string;
